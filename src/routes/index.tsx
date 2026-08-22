@@ -219,9 +219,15 @@ function Header({
   return (
     <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 px-5 py-3 backdrop-blur-xl md:px-8 md:py-4 lg:px-12">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
-        <button onClick={onHome} className="shrink-0" aria-label="Wickentra home">
-          <img src={logo.url} alt="Wickentra" className="h-9 w-auto md:h-11" width={192} height={68} />
+        <button onClick={onHome} className="flex shrink-0 items-center gap-2.5" aria-label="Wickentra home">
+          <span className="flex items-center justify-center rounded-lg bg-foreground/95 p-1.5">
+            <img src={logo.url} alt="" className="h-7 w-auto md:h-8" width={192} height={68} />
+          </span>
+          <span className="font-display text-xl leading-none tracking-[0.04em] text-foreground md:text-2xl">
+            Wickentra
+          </span>
         </button>
+
 
         {/* Desktop / tablet nav */}
         <nav className="hidden md:flex md:items-center md:gap-1">
