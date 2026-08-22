@@ -1,24 +1,474 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import {
+  Activity,
+  ChevronDown,
+  Video,
+  BarChart3,
+  Smartphone,
+  Users,
+  Shield,
+  Zap,
+  Home,
+  Layers,
+  Images,
+  HelpCircle,
+  Lock,
+  ArrowRight,
+  Check,
+} from "lucide-react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+import logo from "@/assets/wickentra-logo.png.asset.json";
+import shotDashboard from "@/assets/shot-dashboard.jpg";
+import shotScoreboard from "@/assets/shot-scoreboard.jpg";
+import shotMobile from "@/assets/shot-mobile.jpg";
+import shotReview from "@/assets/shot-review.jpg";
+
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Wickentra — Cricket Scoring, Cameras & Coaching Review" },
+      {
+        name: "description",
+        content:
+          "Wickentra is ball-by-ball cricket scoring with multi-angle camera rooms, live scoreboards and coaching review. Explore features, screens and FAQs, then sign in.",
+      },
+      { property: "og:title", content: "Wickentra — Every ball. Every angle. Every advantage." },
+      {
+        property: "og:description",
+        content:
+          "Ball-by-ball scoring, multi-phone camera rooms, live scoreboards and slow-motion coaching review for clubs and academies.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Promo,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+type TabId = "home" | "features" | "screens" | "faq" | "login";
+
+const tabs: { id: TabId; label: string; icon: typeof Home }[] = [
+  { id: "home", label: "Home", icon: Home },
+  { id: "features", label: "Features", icon: Layers },
+  { id: "screens", label: "Screens", icon: Images },
+  { id: "faq", label: "FAQs", icon: HelpCircle },
+  { id: "login", label: "Sign in", icon: Lock },
+];
+
+const features = [
+  {
+    icon: Zap,
+    title: "Fast ball-by-ball scoring",
+    body: "Runs, dots, wides, no-balls, byes, leg-byes, penalties and every dismissal type — with undo and timestamps on every delivery.",
+  },
+  {
+    icon: Video,
+    title: "Multi-phone camera room",
+    body: "Pair phones at both ends and side-on. One tap starts the room, angles stay linked to the ball they captured.",
+  },
+  {
+    icon: Activity,
+    title: "Coaching review",
+    body: "Slow motion, frame stepping, angle switching, zoom, drawing tools and voice notes for post-match feedback.",
+  },
+  {
+    icon: BarChart3,
+    title: "Live scoreboards",
+    body: "Broadcast-quality scoreboards with run rate, partnerships, fall of wickets and a rolling delivery timeline.",
+  },
+  {
+    icon: Smartphone,
+    title: "Desktop and mobile",
+    body: "Score from a phone on the boundary or a laptop in the clubhouse — the same match, in sync.",
+  },
+  {
+    icon: Users,
+    title: "Clubs, teams and players",
+    body: "Organisations, competitions, teams, players and grounds modelled from the ground up for season-long history.",
+  },
+];
+
+const screens = [
+  {
+    src: shotDashboard,
+    w: 1600,
+    h: 1008,
+    label: "Club dashboard",
+    caption: "Desktop • live, upcoming and completed matches with run-rate and wagon-wheel analytics",
+  },
+  {
+    src: shotScoreboard,
+    w: 1600,
+    h: 1008,
+    label: "Live scoreboard",
+    caption: "Broadcast view • score, batters, bowlers, over timeline and fall of wickets",
+  },
+  {
+    src: shotMobile,
+    w: 768,
+    h: 1408,
+    label: "Mobile scoring",
+    caption: "Phone • thumb-first scoring pad with extras, dismissals and recent deliveries",
+  },
+  {
+    src: shotReview,
+    w: 1600,
+    h: 1008,
+    label: "Coaching review",
+    caption: "Desktop • four synced angles, frame-by-frame scrubbing and drawing tools",
+  },
+];
+
+const faqs = [
+  {
+    q: "Who is Wickentra for?",
+    a: "Clubs, leagues, schools and academies that want proper ball-by-ball records and video they can actually coach from — without a broadcast budget.",
+  },
+  {
+    q: "Do I need special cameras?",
+    a: "No. The camera room pairs ordinary phones. Point one at each end and one side-on, and every angle is tied back to the delivery it recorded.",
+  },
+  {
+    q: "Can I score without signal?",
+    a: "Scoring is built to keep working through patchy ground coverage and sync back up when the connection returns.",
+  },
+  {
+    q: "Does it handle rain rules?",
+    a: "Match data includes rain-method fields as an architectural foundation. Certified calculations arrive once the licensed resources are in place — we will not present unverified numbers as official.",
+  },
+  {
+    q: "Where is video stored?",
+    a: "Clips and annotations are stored against the match in your organisation's own space, with consent and privacy controls part of the launch roadmap.",
+  },
+  {
+    q: "How do I get access?",
+    a: "Wickentra is invite-only while clubs onboard in waves. Sign in below if you already have an account, or request access and we will place you in the next wave.",
+  },
+];
+
+function Promo() {
+  const [tab, setTab] = useState<TabId>("home");
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-border/60">
+        <Header />
+        <main className="flex-1 overflow-y-auto px-5 pb-32 pt-4">
+          {tab === "home" && <HomeTab onNavigate={setTab} />}
+          {tab === "features" && <FeaturesTab />}
+          {tab === "screens" && <ScreensTab />}
+          {tab === "faq" && <FaqTab />}
+          {tab === "login" && <LoginTab />}
+        </main>
+        <BottomNav tab={tab} onChange={setTab} />
+      </div>
     </div>
+  );
+}
+
+function Header() {
+  return (
+    <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 px-5 py-3 backdrop-blur-xl">
+      <img src={logo.url} alt="Wickentra" className="h-9 w-auto" width={192} height={68} />
+    </header>
+  );
+}
+
+function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
+  return (
+    <div className="space-y-7">
+      <section className="space-y-4">
+        <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-secondary/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">
+          <span className="size-1.5 animate-pulse rounded-full bg-primary" />
+          Invite-only beta
+        </span>
+        <h1 className="text-[2.6rem] font-bold uppercase leading-[0.95]">
+          Every ball.
+          <br />
+          Every angle.
+          <br />
+          <span className="bg-gradient-to-r from-primary to-gold bg-clip-text text-transparent">
+            Every advantage.
+          </span>
+        </h1>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Wickentra turns a club match into a full record: ball-by-ball scoring, synced phone
+          cameras at every angle, live scoreboards and a coaching review room the whole squad can
+          learn from.
+        </p>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => onNavigate("login")}
+            className="brand-gradient glow inline-flex h-12 items-center justify-center gap-2 rounded-full text-sm font-bold uppercase tracking-wider text-primary-foreground active:scale-[0.98]"
+          >
+            Sign in to Wickentra <ArrowRight className="size-4" />
+          </button>
+          <button
+            onClick={() => onNavigate("screens")}
+            className="inline-flex h-12 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold text-foreground active:scale-[0.98]"
+          >
+            See the screens
+          </button>
+        </div>
+      </section>
+
+      <section className="surface-card overflow-hidden">
+        <img
+          src={shotScoreboard}
+          alt="Wickentra live scoreboard showing score, batters, bowlers and over timeline"
+          width={1600}
+          height={1008}
+          className="w-full"
+        />
+      </section>
+
+      <section className="grid grid-cols-3 gap-2 text-center">
+        {[
+          { k: "4", v: "camera angles per ball" },
+          { k: "<1s", v: "to log a delivery" },
+          { k: "100%", v: "match history kept" },
+        ].map((s) => (
+          <div key={s.v} className="surface-card px-2 py-4">
+            <p className="font-display text-2xl font-bold text-gold">{s.k}</p>
+            <p className="mt-1 text-[11px] leading-tight text-muted-foreground">{s.v}</p>
+          </div>
+        ))}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xl font-bold uppercase">Built for match day</h2>
+        {features.slice(0, 3).map((f) => (
+          <FeatureRow key={f.title} {...f} />
+        ))}
+        <button
+          onClick={() => onNavigate("features")}
+          className="inline-flex items-center gap-1 text-sm font-semibold text-gold"
+        >
+          All features <ArrowRight className="size-4" />
+        </button>
+      </section>
+    </div>
+  );
+}
+
+function FeatureRow({
+  icon: Icon,
+  title,
+  body,
+}: {
+  icon: typeof Home;
+  title: string;
+  body: string;
+}) {
+  return (
+    <article className="surface-card flex gap-3 p-4">
+      <span className="brand-gradient flex size-10 shrink-0 items-center justify-center rounded-xl text-primary-foreground">
+        <Icon className="size-5" />
+      </span>
+      <div>
+        <h3 className="text-base font-semibold">{title}</h3>
+        <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{body}</p>
+      </div>
+    </article>
+  );
+}
+
+function FeaturesTab() {
+  return (
+    <div className="space-y-4">
+      <h2 className="text-3xl font-bold uppercase">Features</h2>
+      <p className="text-sm text-muted-foreground">
+        Everything that ships in the current Wickentra build.
+      </p>
+      <div className="space-y-3">
+        {features.map((f) => (
+          <FeatureRow key={f.title} {...f} />
+        ))}
+      </div>
+      <div className="surface-card space-y-3 p-4">
+        <div className="flex items-center gap-2 text-gold">
+          <Shield className="size-5" />
+          <h3 className="text-base font-semibold">Also included</h3>
+        </div>
+        <ul className="space-y-2">
+          {[
+            "Field zones, fielder selection and delivery timeline",
+            "Undo on any ball, with a full audit of edits",
+            "Voice notes and AI-audit presentation in review",
+            "Competitions, innings and deliveries stored per club",
+            "Demo match data so you can trial before onboarding",
+          ].map((i) => (
+            <li key={i} className="flex gap-2 text-[13px] text-muted-foreground">
+              <Check className="mt-0.5 size-4 shrink-0 text-gold" />
+              {i}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function ScreensTab() {
+  return (
+    <div className="space-y-5">
+      <h2 className="text-3xl font-bold uppercase">Screens</h2>
+      <p className="text-sm text-muted-foreground">
+        Dashboards, scoreboards, mobile scoring and the review room.
+      </p>
+      {screens.map((s) => (
+        <figure key={s.label} className="surface-card overflow-hidden">
+          <div className="overflow-x-auto no-scrollbar">
+            <img
+              src={s.src}
+              alt={`${s.label} — ${s.caption}`}
+              width={s.w}
+              height={s.h}
+              loading="lazy"
+              className={s.w > s.h ? "h-auto w-[160%] max-w-none" : "h-auto w-full"}
+            />
+          </div>
+          <figcaption className="space-y-1 p-4">
+            <p className="font-display text-lg font-bold uppercase text-gold">{s.label}</p>
+            <p className="text-[13px] leading-relaxed text-muted-foreground">{s.caption}</p>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  );
+}
+
+function FaqTab() {
+  const [open, setOpen] = useState<number | null>(0);
+  return (
+    <div className="space-y-4">
+      <h2 className="text-3xl font-bold uppercase">FAQs</h2>
+      <div className="space-y-2">
+        {faqs.map((f, i) => {
+          const isOpen = open === i;
+          return (
+            <div key={f.q} className="surface-card overflow-hidden">
+              <button
+                onClick={() => setOpen(isOpen ? null : i)}
+                className="flex w-full items-center justify-between gap-3 p-4 text-left"
+                aria-expanded={isOpen}
+              >
+                <span className="text-[15px] font-semibold">{f.q}</span>
+                <ChevronDown
+                  className={`size-4 shrink-0 text-gold transition-transform ${isOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {isOpen && (
+                <p className="px-4 pb-4 text-[13px] leading-relaxed text-muted-foreground">{f.a}</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function LoginTab() {
+  const [sent, setSent] = useState(false);
+
+  return (
+    <div className="space-y-5">
+      <div className="space-y-2">
+        <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">
+          <Lock className="size-3" /> Gated access
+        </span>
+        <h2 className="text-3xl font-bold uppercase">Sign in</h2>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Wickentra is invite-only. Sign in to open the scoring platform, or request access for your
+          club.
+        </p>
+      </div>
+
+      <form
+        className="surface-card space-y-3 p-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          setSent(true);
+        }}
+      >
+        <label className="block space-y-1.5">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Club email
+          </span>
+          <input
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="you@club.com"
+            className="h-12 w-full rounded-xl border border-input bg-background px-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-gold"
+          />
+        </label>
+        <label className="block space-y-1.5">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Password
+          </span>
+          <input
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="••••••••"
+            className="h-12 w-full rounded-xl border border-input bg-background px-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-gold"
+          />
+        </label>
+        <button
+          type="submit"
+          className="brand-gradient glow h-12 w-full rounded-full text-sm font-bold uppercase tracking-wider text-primary-foreground active:scale-[0.98]"
+        >
+          Enter the platform
+        </button>
+        {sent && (
+          <p className="text-center text-[13px] text-gold">
+            Access is invite-only right now — we have logged your request and will be in touch.
+          </p>
+        )}
+        <p className="text-center text-[12px] text-muted-foreground">
+          No account yet?{" "}
+          <span className="font-semibold text-gold">Request an invite for your club.</span>
+        </p>
+      </form>
+
+      <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
+        © {new Date().getFullYear()} Wickentra. Every ball. Every angle. Every advantage.
+      </p>
+    </div>
+  );
+}
+
+function BottomNav({ tab, onChange }: { tab: TabId; onChange: (t: TabId) => void }) {
+  return (
+    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
+      <ul className="grid grid-cols-5">
+        {tabs.map(({ id, label, icon: Icon }) => {
+          const active = tab === id;
+          return (
+            <li key={id}>
+              <button
+                onClick={() => onChange(id)}
+                aria-current={active ? "page" : undefined}
+                className={`flex w-full flex-col items-center gap-1 py-2.5 text-[10px] font-semibold uppercase tracking-wide transition-colors ${
+                  active ? "text-gold" : "text-muted-foreground"
+                }`}
+              >
+                <span
+                  className={`flex size-9 items-center justify-center rounded-xl transition-all ${
+                    active ? "brand-gradient text-primary-foreground" : ""
+                  }`}
+                >
+                  <Icon className="size-[18px]" />
+                </span>
+                {label}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }
