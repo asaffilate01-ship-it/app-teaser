@@ -172,7 +172,7 @@ const faqs = [
   },
   {
     q: "Is there a free option?",
-    a: "Yes. Starter is free for a single team with ball-by-ball scoring, a live scoreboard and one camera angle per delivery. You only pay when you want more angles, longer video retention and club-wide analysis.",
+    a: "Yes. Starter is free for a single team with ball-by-ball scoring, a live scoreboard and one camera angle per delivery. It is supported by light advertising on scoreboard and review pages. You only pay when you want more angles, longer video retention and club-wide analysis.",
   },
   {
     q: "How do I get access?",
@@ -327,12 +327,6 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
     <div className="space-y-10 md:space-y-16">
       <div className="grid gap-7 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-12">
         <section className="space-y-4 md:space-y-6">
-          <span className="skew-tag inline-flex items-center px-4 py-1.5 text-primary-foreground">
-            <span className="text-xs font-bold uppercase tracking-[0.12em]">
-              Request an invite
-            </span>
-          </span>
-
           <h1 className="text-[2.8rem] font-bold leading-[1.05] tracking-tight md:text-6xl lg:text-[5.2rem]">
             Every ball.
             <br />
@@ -756,6 +750,7 @@ const plans = [
       "1 camera angle per delivery",
       "7-day video retention",
       "Basic batting & bowling stats",
+      "Light advertising on scoreboard and review pages",
     ],
     cta: "Start free",
   },
