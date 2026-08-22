@@ -190,7 +190,7 @@ function Ticker() {
             {tickerItems.map((t) => (
               <span
                 key={t}
-                className="flex items-center gap-3 px-5 text-[11px] font-semibold uppercase tracking-[0.18em]"
+                className="flex items-center gap-3 px-5 text-xs font-semibold uppercase tracking-[0.1em]"
               >
                 <span className="size-1.5 rounded-full bg-gold" />
                 {t}
@@ -292,7 +292,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
       <div className="grid gap-7 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-12">
         <section className="space-y-4 md:space-y-6">
           <span className="skew-tag inline-flex items-center px-4 py-1.5 text-primary-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em]">
+            <span className="text-xs font-bold uppercase tracking-[0.12em]">
               Invite-only beta
             </span>
           </span>
@@ -328,10 +328,10 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
 
         <section className="surface-card overflow-hidden">
           <div className="flex items-center justify-between gap-3 border-b border-border/60 px-4 py-2.5">
-            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-gold">
+            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-gold">
               <span className="size-1.5 animate-pulse rounded-full bg-primary" /> Live now
             </span>
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Riverside CC 148/4
             </span>
           </div>
@@ -355,7 +355,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
             <p className="font-display text-2xl font-bold leading-none bg-gradient-to-br from-primary to-gold bg-clip-text text-transparent md:text-5xl">
               {s.k}
             </p>
-            <p className="mt-1.5 text-[11px] leading-tight text-muted-foreground md:mt-3 md:text-sm">
+            <p className="mt-1.5 text-xs leading-tight text-muted-foreground md:mt-3 md:text-sm">
               {s.v}
             </p>
           </div>
@@ -384,18 +384,18 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
                 className="surface-card lift-card grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 p-4"
               >
                 <div className="min-w-0">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
+                  <span className="text-xs font-bold uppercase tracking-[0.12em] text-gold">
                     {f.tag}
                   </span>
                   <h3 className="truncate font-display text-lg font-bold uppercase leading-tight md:text-xl">
                     {f.home} <span className="text-muted-foreground">vs</span> {f.away}
                   </h3>
-                  <p className="text-[12px] text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {f.date} • {f.time}
                   </p>
                 </div>
                 <span className="skew-tag shrink-0 px-3 py-1.5 text-primary-foreground">
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Scoring</span>
+                  <span className="text-xs font-bold uppercase tracking-widest">Scoring</span>
                 </span>
               </article>
             ))}
@@ -405,9 +405,9 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         <div className="space-y-4">
           <SectionHeader kicker="Season">Club standings</SectionHeader>
           <div className="surface-card overflow-hidden">
-            <table className="w-full text-left text-[13px]">
+            <table className="w-full text-left text-sm">
               <thead className="dark-band">
-                <tr className="text-[10px] uppercase tracking-[0.18em]">
+                <tr className="text-xs uppercase tracking-[0.1em]">
                   <th className="px-4 py-2.5 font-bold">Pos</th>
                   <th className="px-2 py-2.5 font-bold">Club</th>
                   <th className="px-2 py-2.5 font-bold">P</th>
@@ -430,7 +430,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
               </tbody>
             </table>
           </div>
-          <p className="text-[12px] text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Standings, run rates and player records build themselves from every ball you score.
           </p>
         </div>
@@ -440,7 +440,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
       <section className="dark-band relative overflow-hidden rounded-2xl px-6 py-8 md:px-12 md:py-14">
         <div className="relative grid gap-5 md:grid-cols-[1fr_auto] md:items-center">
           <div className="space-y-3">
-            <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-gold">
+            <span className="text-xs font-bold uppercase tracking-[0.12em] text-gold">
               Review room
             </span>
             <h2 className="font-display text-3xl font-bold uppercase leading-none md:text-5xl">
@@ -496,7 +496,7 @@ function SectionHeader({
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 border-b border-border/70 pb-3">
       <div className="min-w-0 space-y-1">
         {kicker && (
-          <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-gold">
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-gold">
             {kicker}
           </span>
         )}
@@ -507,7 +507,7 @@ function SectionHeader({
       {action && onAction && (
         <button
           onClick={onAction}
-          className="inline-flex shrink-0 items-center gap-1 text-[11px] font-bold uppercase tracking-[0.16em] text-gold hover:opacity-80"
+          className="inline-flex shrink-0 items-center gap-1 text-xs font-bold uppercase tracking-[0.1em] text-gold hover:opacity-80"
         >
           {action} <ArrowRight className="size-3.5" />
         </button>
@@ -522,36 +522,36 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
       <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-[1.2fr_1fr_1fr]">
         <div className="space-y-3">
           <p className="font-display text-2xl font-bold uppercase leading-none">Wickentra</p>
-          <p className="max-w-sm text-[13px] leading-relaxed opacity-75">
+          <p className="max-w-sm text-sm leading-relaxed opacity-75">
             Ball-by-ball scoring, multi-angle camera rooms, live scoreboards and coaching review for
             clubs, leagues and academies.
           </p>
         </div>
         <div className="space-y-2">
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold">Explore</p>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-gold">Explore</p>
           {tabs.map((t) => (
             <button
               key={t.id}
               onClick={() => onNavigate(t.id)}
-              className="block text-[13px] opacity-75 hover:opacity-100"
+              className="block text-sm opacity-75 hover:opacity-100"
             >
               {t.label}
             </button>
           ))}
         </div>
         <div className="space-y-2">
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold">Access</p>
-          <p className="text-[13px] opacity-75">Invite-only beta</p>
-          <p className="text-[13px] opacity-75">Clubs onboarding in waves</p>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-gold">Access</p>
+          <p className="text-sm opacity-75">Invite-only beta</p>
+          <p className="text-sm opacity-75">Clubs onboarding in waves</p>
           <button
             onClick={() => onNavigate("login")}
-            className="brand-gradient mt-2 inline-flex h-10 items-center gap-2 rounded-full px-5 text-[12px] font-bold uppercase tracking-wider text-primary-foreground"
+            className="brand-gradient mt-2 inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-bold uppercase tracking-wider text-primary-foreground"
           >
             Request an invite <ArrowRight className="size-3.5" />
           </button>
         </div>
       </div>
-      <div className="mx-auto mt-8 w-full max-w-6xl border-t border-white/15 pt-5 text-[11px] uppercase tracking-wide opacity-60">
+      <div className="mx-auto mt-8 w-full max-w-6xl border-t border-white/15 pt-5 text-xs uppercase tracking-wide opacity-60">
         © {new Date().getFullYear()} Wickentra — Every ball. Every angle. Every advantage.
       </div>
     </footer>
@@ -575,7 +575,7 @@ function FeatureRow({
       </span>
       <div className="min-w-0">
         <h3 className="text-[15px] font-semibold tracking-tight md:text-lg">{title}</h3>
-        <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground md:mt-2 md:text-sm">
+        <p className="mt-1 text-sm leading-relaxed text-muted-foreground md:mt-2 md:text-sm">
           {body}
         </p>
       </div>
@@ -613,7 +613,7 @@ function FeaturesTab() {
             "Competitions, innings and deliveries stored per club",
             "Demo match data so you can trial before onboarding",
           ].map((i) => (
-            <li key={i} className="flex items-start gap-2.5 text-[13px] text-muted-foreground">
+            <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
               <span className="mt-0.5 flex size-4.5 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
                 <Check className="size-3" strokeWidth={3} />
               </span>
@@ -654,7 +654,7 @@ function ScreensTab() {
               <p className="font-display text-lg font-bold uppercase leading-none text-gold md:text-2xl">
                 {s.label}
               </p>
-              <p className="text-[13px] leading-relaxed text-muted-foreground md:text-sm">
+              <p className="text-sm leading-relaxed text-muted-foreground md:text-sm">
                 {s.caption}
               </p>
             </figcaption>
@@ -693,7 +693,7 @@ function FaqTab() {
                 </span>
               </button>
               {isOpen && (
-                <p className="px-4 pb-4 text-[13px] leading-relaxed text-muted-foreground">{f.a}</p>
+                <p className="px-4 pb-4 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
               )}
             </div>
           );
@@ -710,7 +710,7 @@ function LoginTab() {
   return (
     <div className="space-y-5 md:mx-auto md:max-w-md">
       <div className="space-y-2.5">
-        <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">
+        <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-gold">
           <Lock className="size-3" /> Gated access
         </span>
         <h2 className="text-3xl font-bold uppercase leading-none">Sign in</h2>
@@ -760,17 +760,17 @@ function LoginTab() {
           Enter the platform
         </button>
         {sent && (
-          <p className="text-center text-[13px] text-gold">
+          <p className="text-center text-sm text-gold">
             Access is invite-only right now — we have logged your request and will be in touch.
           </p>
         )}
-        <p className="text-center text-[12px] text-muted-foreground">
+        <p className="text-center text-sm text-muted-foreground">
           No account yet?{" "}
           <span className="font-semibold text-gold">Request an invite for your club.</span>
         </p>
       </form>
 
-      <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
+      <p className="text-center text-xs leading-relaxed text-muted-foreground">
         © {new Date().getFullYear()} Wickentra. Every ball. Every angle. Every advantage.
       </p>
     </div>
@@ -788,7 +788,7 @@ function BottomNav({ tab, onChange }: { tab: TabId; onChange: (t: TabId) => void
               <button
                 onClick={() => onChange(id)}
                 aria-current={active ? "page" : undefined}
-                className={`flex w-full flex-col items-center gap-1 py-2.5 text-[10px] font-semibold uppercase tracking-wide transition-colors ${
+                className={`flex w-full flex-col items-center gap-1 py-2.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
                   active ? "text-gold" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
