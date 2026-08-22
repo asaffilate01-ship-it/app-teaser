@@ -77,7 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CricLume" },
+      { title: "CricLume — See every ball. Shape every game." },
       { name: "description", content: "Ball-by-ball cricket scoring, multi-angle camera rooms, live scoreboards and coaching review." },
       { name: "author", content: "CricLume" },
       { property: "og:title", content: "CricLume — See every ball. Shape every game." },
