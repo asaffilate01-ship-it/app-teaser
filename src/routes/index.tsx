@@ -254,15 +254,18 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           { k: "<1s", v: "to log a delivery" },
           { k: "100%", v: "match history kept" },
         ].map((s) => (
-          <div key={s.v} className="surface-card px-2 py-4">
-            <p className="font-display text-2xl font-bold text-gold">{s.k}</p>
-            <p className="mt-1 text-[11px] leading-tight text-muted-foreground">{s.v}</p>
+          <div key={s.v} className="surface-card lift-card px-2 py-4">
+            <p className="font-display text-2xl font-bold leading-none bg-gradient-to-br from-primary to-gold bg-clip-text text-transparent">
+              {s.k}
+            </p>
+            <p className="mt-1.5 text-[11px] leading-tight text-muted-foreground">{s.v}</p>
           </div>
         ))}
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-xl font-bold uppercase">Built for match day</h2>
+        <SectionTitle kicker="Match day">Built for match day</SectionTitle>
+
         {features.slice(0, 3).map((f) => (
           <FeatureRow key={f.title} {...f} />
         ))}
@@ -277,6 +280,20 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
   );
 }
 
+function SectionTitle({ children, kicker }: { children: React.ReactNode; kicker?: string }) {
+  return (
+    <div className="space-y-2">
+      {kicker && (
+        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">
+          {kicker}
+        </span>
+      )}
+      <h2 className="text-3xl font-bold uppercase leading-none">{children}</h2>
+      <div className="hairline h-px w-16" />
+    </div>
+  );
+}
+
 function FeatureRow({
   icon: Icon,
   title,
@@ -287,22 +304,23 @@ function FeatureRow({
   body: string;
 }) {
   return (
-    <article className="surface-card flex gap-3 p-4">
-      <span className="brand-gradient flex size-10 shrink-0 items-center justify-center rounded-xl text-primary-foreground">
-        <Icon className="size-5" />
+    <article className="surface-card lift-card group relative flex gap-3.5 p-4">
+      <span className="icon-tile flex size-11 shrink-0 items-center justify-center rounded-2xl text-primary-foreground">
+        <Icon className="size-5" strokeWidth={2.2} />
       </span>
-      <div>
-        <h3 className="text-base font-semibold">{title}</h3>
+      <div className="min-w-0">
+        <h3 className="text-[15px] font-semibold tracking-tight">{title}</h3>
         <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{body}</p>
       </div>
     </article>
   );
 }
 
+
 function FeaturesTab() {
   return (
-    <div className="space-y-4">
-      <h2 className="text-3xl font-bold uppercase">Features</h2>
+    <div className="space-y-5">
+      <SectionTitle kicker="Platform">Features</SectionTitle>
       <p className="text-sm text-muted-foreground">
         Everything that ships in the current Wickentra build.
       </p>
@@ -312,11 +330,13 @@ function FeaturesTab() {
         ))}
       </div>
       <div className="surface-card space-y-3 p-4">
-        <div className="flex items-center gap-2 text-gold">
-          <Shield className="size-5" />
-          <h3 className="text-base font-semibold">Also included</h3>
+        <div className="flex items-center gap-2.5">
+          <span className="icon-tile flex size-9 items-center justify-center rounded-xl text-primary-foreground">
+            <Shield className="size-4.5" strokeWidth={2.2} />
+          </span>
+          <h3 className="text-[15px] font-semibold tracking-tight">Also included</h3>
         </div>
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {[
             "Field zones, fielder selection and delivery timeline",
             "Undo on any ball, with a full audit of edits",
@@ -324,8 +344,10 @@ function FeaturesTab() {
             "Competitions, innings and deliveries stored per club",
             "Demo match data so you can trial before onboarding",
           ].map((i) => (
-            <li key={i} className="flex gap-2 text-[13px] text-muted-foreground">
-              <Check className="mt-0.5 size-4 shrink-0 text-gold" />
+            <li key={i} className="flex items-start gap-2.5 text-[13px] text-muted-foreground">
+              <span className="mt-0.5 flex size-4.5 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
+                <Check className="size-3" strokeWidth={3} />
+              </span>
               {i}
             </li>
           ))}
@@ -338,13 +360,13 @@ function FeaturesTab() {
 function ScreensTab() {
   return (
     <div className="space-y-5">
-      <h2 className="text-3xl font-bold uppercase">Screens</h2>
+      <SectionTitle kicker="Product tour">Screens</SectionTitle>
       <p className="text-sm text-muted-foreground">
         Dashboards, scoreboards, mobile scoring and the review room.
       </p>
       {screens.map((s) => (
-        <figure key={s.label} className="surface-card overflow-hidden">
-          <div className="overflow-x-auto no-scrollbar">
+        <figure key={s.label} className="surface-card lift-card overflow-hidden">
+          <div className="overflow-x-auto no-scrollbar border-b border-border/60 bg-secondary/40">
             <img
               src={s.src}
               alt={`${s.label} — ${s.caption}`}
@@ -354,8 +376,10 @@ function ScreensTab() {
               className={s.w > s.h ? "h-auto w-[160%] max-w-none" : "h-auto w-full"}
             />
           </div>
-          <figcaption className="space-y-1 p-4">
-            <p className="font-display text-lg font-bold uppercase text-gold">{s.label}</p>
+          <figcaption className="space-y-1.5 p-4">
+            <p className="font-display text-lg font-bold uppercase leading-none text-gold">
+              {s.label}
+            </p>
             <p className="text-[13px] leading-relaxed text-muted-foreground">{s.caption}</p>
           </figcaption>
         </figure>
@@ -367,22 +391,27 @@ function ScreensTab() {
 function FaqTab() {
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <div className="space-y-4">
-      <h2 className="text-3xl font-bold uppercase">FAQs</h2>
-      <div className="space-y-2">
+    <div className="space-y-5">
+      <SectionTitle kicker="Answers">FAQs</SectionTitle>
+      <div className="space-y-2.5">
         {faqs.map((f, i) => {
           const isOpen = open === i;
           return (
-            <div key={f.q} className="surface-card overflow-hidden">
+            <div
+              key={f.q}
+              className={`surface-card overflow-hidden transition-colors ${isOpen ? "border-gold/45" : ""}`}
+            >
               <button
                 onClick={() => setOpen(isOpen ? null : i)}
                 className="flex w-full items-center justify-between gap-3 p-4 text-left"
                 aria-expanded={isOpen}
               >
-                <span className="text-[15px] font-semibold">{f.q}</span>
-                <ChevronDown
-                  className={`size-4 shrink-0 text-gold transition-transform ${isOpen ? "rotate-180" : ""}`}
-                />
+                <span className="text-[15px] font-semibold tracking-tight">{f.q}</span>
+                <span
+                  className={`flex size-7 shrink-0 items-center justify-center rounded-full transition-all ${isOpen ? "bg-gold/15 text-gold rotate-180" : "bg-secondary text-muted-foreground"}`}
+                >
+                  <ChevronDown className="size-4" />
+                </span>
               </button>
               {isOpen && (
                 <p className="px-4 pb-4 text-[13px] leading-relaxed text-muted-foreground">{f.a}</p>
@@ -392,6 +421,7 @@ function FaqTab() {
         })}
       </div>
     </div>
+
   );
 }
 
@@ -400,11 +430,12 @@ function LoginTab() {
 
   return (
     <div className="space-y-5">
-      <div className="space-y-2">
-        <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">
+      <div className="space-y-2.5">
+        <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">
           <Lock className="size-3" /> Gated access
         </span>
-        <h2 className="text-3xl font-bold uppercase">Sign in</h2>
+        <h2 className="text-3xl font-bold uppercase leading-none">Sign in</h2>
+        <div className="hairline h-px w-16" />
         <p className="text-sm leading-relaxed text-muted-foreground">
           Wickentra is invite-only. Sign in to open the scoring platform, or request access for your
           club.
@@ -412,7 +443,8 @@ function LoginTab() {
       </div>
 
       <form
-        className="surface-card space-y-3 p-4"
+        className="surface-card space-y-3.5 p-5"
+
         onSubmit={(e) => {
           e.preventDefault();
           setSent(true);
