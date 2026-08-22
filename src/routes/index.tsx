@@ -430,11 +430,12 @@ function LoginTab() {
 
   return (
     <div className="space-y-5">
-      <div className="space-y-2">
-        <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">
+      <div className="space-y-2.5">
+        <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">
           <Lock className="size-3" /> Gated access
         </span>
-        <h2 className="text-3xl font-bold uppercase">Sign in</h2>
+        <h2 className="text-3xl font-bold uppercase leading-none">Sign in</h2>
+        <div className="hairline h-px w-16" />
         <p className="text-sm leading-relaxed text-muted-foreground">
           Wickentra is invite-only. Sign in to open the scoring platform, or request access for your
           club.
@@ -442,7 +443,8 @@ function LoginTab() {
       </div>
 
       <form
-        className="surface-card space-y-3 p-4"
+        className="surface-card space-y-3.5 p-5"
+
         onSubmit={(e) => {
           e.preventDefault();
           setSent(true);
