@@ -271,7 +271,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           </div>
           <img
             src={shotScoreboard}
-            alt={t.screensTab.items[1].caption}
+            alt={t.screensTab.items[1]!.caption}
             width={1600}
             height={1008}
             className="w-full"
@@ -302,7 +302,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         </SectionHeader>
         <div className="space-y-3 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 lg:grid-cols-3">
           {highlights.map((i) => (
-            <FeatureRow key={i} icon={featureIcons[i]} title={t.features[i].title} body={t.features[i].body} />
+            <FeatureRow key={i} icon={featureIcons[i]!} title={t.features[i]!.title} body={t.features[i]!.body} />
           ))}
         </div>
       </section>
@@ -522,7 +522,7 @@ function FeaturesTab() {
       <p className="text-sm text-muted-foreground md:text-base">{t.featuresTab.intro}</p>
       <div className="space-y-3 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 lg:grid-cols-3">
         {t.features.map((f, i) => (
-          <FeatureRow key={f.title} icon={featureIcons[i]} title={f.title} body={f.body} />
+          <FeatureRow key={f.title} icon={featureIcons[i]!} title={f.title} body={f.body} />
         ))}
       </div>
       <div className="surface-card space-y-4 p-4 md:p-7">
@@ -580,7 +580,7 @@ function ScreensTab() {
       <p className="text-sm text-muted-foreground md:text-base">{t.screensTab.intro}</p>
       <div className="space-y-5 md:grid md:grid-cols-2 md:gap-6 md:space-y-0">
         {t.screensTab.items.map((s, i) => {
-          const img = screenImages[i];
+          const img = screenImages[i]!;
           return (
             <figure key={s.label} className="surface-card lift-card overflow-hidden">
               <div className="overflow-x-auto no-scrollbar border-b border-border/60 bg-secondary/40 md:overflow-hidden">
@@ -631,7 +631,7 @@ function PricingTab() {
 
   const priceFor = (i: number) =>
     i === 0 ? t.pricing.free : i === 1 ? region.clubPrice : t.pricing.custom;
-  const periodFor = (i: number) => (i === 1 ? region.period : t.pricing.plans[i].period);
+  const periodFor = (i: number) => (i === 1 ? region.period : t.pricing.plans[i]!.period);
 
   return (
     <div className="space-y-8 md:space-y-12">
@@ -660,7 +660,7 @@ function PricingTab() {
 
       <div className="grid gap-4 md:grid-cols-3 md:gap-6">
         {t.pricing.plans.map((p, i) => {
-          const Icon = planIcons[i];
+          const Icon = planIcons[i]!;
           const featured = i === 1;
           return (
             <div
@@ -708,7 +708,7 @@ function PricingTab() {
         <SectionHeader kicker={t.pricing.revenueKicker}>{t.pricing.revenueTitle}</SectionHeader>
         <div className="grid gap-3 md:grid-cols-2 md:gap-5">
           {t.pricing.revenue.map((r, i) => {
-            const Icon = revenueIcons[i];
+            const Icon = revenueIcons[i]!;
             return (
               <div key={r.title} className="surface-card flex gap-3 p-4 md:p-5">
                 <div className="icon-tile flex size-10 shrink-0 items-center justify-center">
