@@ -155,8 +155,9 @@ function Promo() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-border/60 md:max-w-none md:border-x-0">
+        <Ticker />
         <Header tab={tab} label={activeTab.label} onHome={() => setTab("home")} onChange={setTab} />
-        <main className="flex-1 overflow-y-auto px-5 pb-32 pt-4 md:mx-auto md:w-full md:max-w-6xl md:px-8 md:pb-20 md:pt-10 lg:px-12">
+        <main className="flex-1 overflow-y-auto px-5 pb-10 pt-5 md:mx-auto md:w-full md:max-w-6xl md:px-8 md:pb-16 md:pt-12 lg:px-12">
           <TabPanel key={tab}>
             {tab === "home" && <HomeTab onNavigate={setTab} />}
             {tab === "features" && <FeaturesTab />}
@@ -165,11 +166,43 @@ function Promo() {
             {tab === "login" && <LoginTab />}
           </TabPanel>
         </main>
+        <SiteFooter onNavigate={setTab} />
         <BottomNav tab={tab} onChange={setTab} />
       </div>
     </div>
   );
 }
+
+const tickerItems = [
+  "Live • Riverside CC 148/4 (18.2)",
+  "4+ camera angles per delivery",
+  "Coaching review • frame-by-frame",
+  "Invite-only beta — clubs onboarding in waves",
+  "Scoreboards ready for stream overlay",
+];
+
+function Ticker() {
+  return (
+    <div className="dark-band overflow-hidden py-2">
+      <div className="ticker-track">
+        {[0, 1].map((dup) => (
+          <div key={dup} className="flex shrink-0 items-center">
+            {tickerItems.map((t) => (
+              <span
+                key={t}
+                className="flex items-center gap-3 px-5 text-[11px] font-semibold uppercase tracking-[0.18em]"
+              >
+                <span className="size-1.5 rounded-full bg-gold" />
+                {t}
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 
 function Header({
   tab,
@@ -240,16 +273,30 @@ function TabPanel({ children }: { children: React.ReactNode }) {
 }
 
 
+const fixtures = [
+  { date: "Sat 12 Sep", time: "13:00", home: "Riverside CC", away: "Northgate CC", tag: "League" },
+  { date: "Sun 13 Sep", time: "11:30", home: "Ashford Academy", away: "Kings XI", tag: "Academy" },
+  { date: "Wed 16 Sep", time: "18:00", home: "Old Mill CC", away: "Harbour CC", tag: "T20 Cup" },
+];
+
+const leaderboard = [
+  { pos: 1, name: "Riverside CC", played: 11, won: 9, pts: 36 },
+  { pos: 2, name: "Northgate CC", played: 11, won: 7, pts: 30 },
+  { pos: 3, name: "Old Mill CC", played: 10, won: 6, pts: 26 },
+  { pos: 4, name: "Harbour CC", played: 11, won: 4, pts: 18 },
+];
+
 function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
   return (
-    <div className="space-y-7 md:space-y-14">
-      <div className="grid gap-7 lg:grid-cols-2 lg:items-center lg:gap-12">
+    <div className="space-y-10 md:space-y-16">
+      <div className="grid gap-7 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-12">
         <section className="space-y-4 md:space-y-6">
-          <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-secondary/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">
-            <span className="size-1.5 animate-pulse rounded-full bg-primary" />
-            Invite-only beta
+          <span className="skew-tag inline-flex items-center px-4 py-1.5 text-primary-foreground">
+            <span className="text-[11px] font-bold uppercase tracking-[0.2em]">
+              Invite-only beta
+            </span>
           </span>
-          <h1 className="text-[2.6rem] font-bold uppercase leading-[0.95] md:text-6xl lg:text-7xl">
+          <h1 className="text-[2.8rem] font-bold uppercase leading-[0.88] md:text-6xl lg:text-[5.2rem]">
             Every ball.
             <br />
             Every angle.
@@ -280,6 +327,14 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         </section>
 
         <section className="surface-card overflow-hidden">
+          <div className="flex items-center justify-between gap-3 border-b border-border/60 px-4 py-2.5">
+            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-gold">
+              <span className="size-1.5 animate-pulse rounded-full bg-primary" /> Live now
+            </span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Riverside CC 148/4
+            </span>
+          </div>
           <img
             src={shotScoreboard}
             alt="Wickentra live scoreboard showing score, batters, bowlers and over timeline"
@@ -307,39 +362,202 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         ))}
       </section>
 
-      <section className="space-y-3 md:space-y-6">
-        <SectionTitle kicker="Match day">Built for match day</SectionTitle>
-
+      <section className="space-y-4 md:space-y-6">
+        <SectionHeader kicker="Match day" action="All features" onAction={() => onNavigate("features")}>
+          Built for match day
+        </SectionHeader>
         <div className="space-y-3 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 lg:grid-cols-3">
           {features.slice(0, 3).map((f) => (
             <FeatureRow key={f.title} {...f} />
           ))}
         </div>
-        <button
-          onClick={() => onNavigate("features")}
-          className="inline-flex items-center gap-1 text-sm font-semibold text-gold"
-        >
-          All features <ArrowRight className="size-4" />
-        </button>
       </section>
 
+      {/* Fixtures + league table, Kester-style two-column board */}
+      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="space-y-4">
+          <SectionHeader kicker="Fixtures">Upcoming matches</SectionHeader>
+          <div className="space-y-3">
+            {fixtures.map((f) => (
+              <article
+                key={f.home + f.away}
+                className="surface-card lift-card grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 p-4"
+              >
+                <div className="min-w-0">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
+                    {f.tag}
+                  </span>
+                  <h3 className="truncate font-display text-lg font-bold uppercase leading-tight md:text-xl">
+                    {f.home} <span className="text-muted-foreground">vs</span> {f.away}
+                  </h3>
+                  <p className="text-[12px] text-muted-foreground">
+                    {f.date} • {f.time}
+                  </p>
+                </div>
+                <span className="skew-tag shrink-0 px-3 py-1.5 text-primary-foreground">
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Scoring</span>
+                </span>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <SectionHeader kicker="Season">Club standings</SectionHeader>
+          <div className="surface-card overflow-hidden">
+            <table className="w-full text-left text-[13px]">
+              <thead className="dark-band">
+                <tr className="text-[10px] uppercase tracking-[0.18em]">
+                  <th className="px-4 py-2.5 font-bold">Pos</th>
+                  <th className="px-2 py-2.5 font-bold">Club</th>
+                  <th className="px-2 py-2.5 font-bold">P</th>
+                  <th className="px-2 py-2.5 font-bold">W</th>
+                  <th className="px-4 py-2.5 text-right font-bold">Pts</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leaderboard.map((r) => (
+                  <tr key={r.name} className="border-t border-border/60">
+                    <td className="px-4 py-3 font-display font-bold text-gold">{r.pos}</td>
+                    <td className="px-2 py-3 font-semibold">{r.name}</td>
+                    <td className="px-2 py-3 text-muted-foreground">{r.played}</td>
+                    <td className="px-2 py-3 text-muted-foreground">{r.won}</td>
+                    <td className="px-4 py-3 text-right font-display text-base font-bold">
+                      {r.pts}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-[12px] text-muted-foreground">
+            Standings, run rates and player records build themselves from every ball you score.
+          </p>
+        </div>
+      </section>
+
+      {/* Dark call-to-action band */}
+      <section className="dark-band relative overflow-hidden rounded-2xl px-6 py-8 md:px-12 md:py-14">
+        <div className="relative grid gap-5 md:grid-cols-[1fr_auto] md:items-center">
+          <div className="space-y-3">
+            <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-gold">
+              Review room
+            </span>
+            <h2 className="font-display text-3xl font-bold uppercase leading-none md:text-5xl">
+              Watch the match back,
+              <br />
+              ball by ball
+            </h2>
+            <p className="max-w-xl text-sm opacity-80 md:text-base">
+              Every delivery links to its own synced angles — slow it down, step frames, draw on it
+              and send voice notes to the squad before the next session.
+            </p>
+          </div>
+          <button
+            onClick={() => onNavigate("login")}
+            className="brand-gradient glow inline-flex h-12 items-center justify-center gap-2 rounded-full px-7 text-sm font-bold uppercase tracking-wider text-primary-foreground"
+          >
+            Get access <ArrowRight className="size-4" />
+          </button>
+        </div>
+      </section>
+
+      {/* Trust strip */}
+      <section className="space-y-4">
+        <SectionHeader kicker="Built with">Clubs, leagues and academies</SectionHeader>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {["Riverside CC", "Northgate CC", "Ashford Academy", "Harbour CC"].map((c) => (
+            <div
+              key={c}
+              className="surface-card flex items-center justify-center px-3 py-5 text-center font-display text-sm font-bold uppercase tracking-wide text-muted-foreground"
+            >
+              {c}
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+
+}
+
+function SectionHeader({
+  children,
+  kicker,
+  action,
+  onAction,
+}: {
+  children: React.ReactNode;
+  kicker?: string;
+  action?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 border-b border-border/70 pb-3">
+      <div className="min-w-0 space-y-1">
+        {kicker && (
+          <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-gold">
+            {kicker}
+          </span>
+        )}
+        <h2 className="rule-heading text-2xl font-bold uppercase leading-none md:text-4xl">
+          {children}
+        </h2>
+      </div>
+      {action && onAction && (
+        <button
+          onClick={onAction}
+          className="inline-flex shrink-0 items-center gap-1 text-[11px] font-bold uppercase tracking-[0.16em] text-gold hover:opacity-80"
+        >
+          {action} <ArrowRight className="size-3.5" />
+        </button>
+      )}
     </div>
   );
 }
 
-function SectionTitle({ children, kicker }: { children: React.ReactNode; kicker?: string }) {
+function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
   return (
-    <div className="space-y-2">
-      {kicker && (
-        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">
-          {kicker}
-        </span>
-      )}
-      <h2 className="text-3xl font-bold uppercase leading-none md:text-5xl">{children}</h2>
-      <div className="hairline h-px w-16" />
-    </div>
+    <footer className="dark-band mt-10 px-5 pb-28 pt-10 md:mt-16 md:px-8 md:pb-12 lg:px-12">
+      <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-[1.2fr_1fr_1fr]">
+        <div className="space-y-3">
+          <p className="font-display text-2xl font-bold uppercase leading-none">Wickentra</p>
+          <p className="max-w-sm text-[13px] leading-relaxed opacity-75">
+            Ball-by-ball scoring, multi-angle camera rooms, live scoreboards and coaching review for
+            clubs, leagues and academies.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold">Explore</p>
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => onNavigate(t.id)}
+              className="block text-[13px] opacity-75 hover:opacity-100"
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div className="space-y-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold">Access</p>
+          <p className="text-[13px] opacity-75">Invite-only beta</p>
+          <p className="text-[13px] opacity-75">Clubs onboarding in waves</p>
+          <button
+            onClick={() => onNavigate("login")}
+            className="brand-gradient mt-2 inline-flex h-10 items-center gap-2 rounded-full px-5 text-[12px] font-bold uppercase tracking-wider text-primary-foreground"
+          >
+            Request an invite <ArrowRight className="size-3.5" />
+          </button>
+        </div>
+      </div>
+      <div className="mx-auto mt-8 w-full max-w-6xl border-t border-white/15 pt-5 text-[11px] uppercase tracking-wide opacity-60">
+        © {new Date().getFullYear()} Wickentra — Every ball. Every angle. Every advantage.
+      </div>
+    </footer>
   );
 }
+
 
 function FeatureRow({
   icon: Icon,
@@ -370,7 +588,7 @@ function FeatureRow({
 function FeaturesTab() {
   return (
     <div className="space-y-5 md:space-y-8">
-      <SectionTitle kicker="Platform">Features</SectionTitle>
+      <SectionHeader kicker="Platform">Features</SectionHeader>
       <p className="text-sm text-muted-foreground md:text-base">
         Everything that ships in the current Wickentra build.
       </p>
@@ -411,7 +629,7 @@ function FeaturesTab() {
 function ScreensTab() {
   return (
     <div className="space-y-5 md:space-y-8">
-      <SectionTitle kicker="Product tour">Screens</SectionTitle>
+      <SectionHeader kicker="Product tour">Screens</SectionHeader>
       <p className="text-sm text-muted-foreground md:text-base">
         Dashboards, scoreboards, mobile scoring and the review room.
       </p>
@@ -452,7 +670,7 @@ function FaqTab() {
   const [open, setOpen] = useState<number | null>(0);
   return (
     <div className="space-y-5 md:mx-auto md:max-w-3xl md:space-y-8">
-      <SectionTitle kicker="Answers">FAQs</SectionTitle>
+      <SectionHeader kicker="Answers">FAQs</SectionHeader>
       <div className="space-y-2.5 md:space-y-3">
 
         {faqs.map((f, i) => {
