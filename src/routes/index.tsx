@@ -410,34 +410,43 @@ function FeaturesTab() {
 
 function ScreensTab() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 md:space-y-8">
       <SectionTitle kicker="Product tour">Screens</SectionTitle>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground md:text-base">
         Dashboards, scoreboards, mobile scoring and the review room.
       </p>
-      {screens.map((s) => (
-        <figure key={s.label} className="surface-card lift-card overflow-hidden">
-          <div className="overflow-x-auto no-scrollbar border-b border-border/60 bg-secondary/40">
-            <img
-              src={s.src}
-              alt={`${s.label} — ${s.caption}`}
-              width={s.w}
-              height={s.h}
-              loading="lazy"
-              className={s.w > s.h ? "h-auto w-[160%] max-w-none" : "h-auto w-full"}
-            />
-          </div>
-          <figcaption className="space-y-1.5 p-4">
-            <p className="font-display text-lg font-bold uppercase leading-none text-gold">
-              {s.label}
-            </p>
-            <p className="text-[13px] leading-relaxed text-muted-foreground">{s.caption}</p>
-          </figcaption>
-        </figure>
-      ))}
+      <div className="space-y-5 md:grid md:grid-cols-2 md:gap-6 md:space-y-0">
+        {screens.map((s) => (
+          <figure key={s.label} className="surface-card lift-card overflow-hidden">
+            <div className="overflow-x-auto no-scrollbar border-b border-border/60 bg-secondary/40 md:overflow-hidden">
+              <img
+                src={s.src}
+                alt={`${s.label} — ${s.caption}`}
+                width={s.w}
+                height={s.h}
+                loading="lazy"
+                className={
+                  s.w > s.h
+                    ? "h-auto w-[160%] max-w-none md:w-full"
+                    : "h-auto w-full md:mx-auto md:max-w-xs"
+                }
+              />
+            </div>
+            <figcaption className="space-y-1.5 p-4 md:p-6">
+              <p className="font-display text-lg font-bold uppercase leading-none text-gold md:text-2xl">
+                {s.label}
+              </p>
+              <p className="text-[13px] leading-relaxed text-muted-foreground md:text-sm">
+                {s.caption}
+              </p>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
     </div>
   );
 }
+
 
 function FaqTab() {
   const [open, setOpen] = useState<number | null>(0);
