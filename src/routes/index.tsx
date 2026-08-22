@@ -172,7 +172,7 @@ const faqs = [
   },
   {
     q: "Is there a free option?",
-    a: "Yes. Starter is free for a single team with ball-by-ball scoring, a live scoreboard and one camera angle per delivery. You only pay when you want more angles, longer video retention and club-wide analysis.",
+    a: "Yes. Starter is free for a single team with ball-by-ball scoring, a live scoreboard and one camera angle per delivery. It is supported by light advertising on scoreboard and review pages. You only pay when you want more angles, longer video retention and club-wide analysis.",
   },
   {
     q: "How do I get access?",
