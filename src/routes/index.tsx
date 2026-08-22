@@ -791,7 +791,7 @@ function LoginTab() {
 
 function BottomNav({ tab, onChange }: { tab: TabId; onChange: (t: TabId) => void }) {
   return (
-    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] nav-shadow backdrop-blur-xl md:hidden">
+    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.08)] backdrop-blur-xl md:hidden">
       <ul className="grid grid-cols-5">
         {tabs.map(({ id, label, icon: Icon }) => {
           const active = tab === id;
@@ -801,7 +801,7 @@ function BottomNav({ tab, onChange }: { tab: TabId; onChange: (t: TabId) => void
                 onClick={() => onChange(id)}
                 aria-current={active ? "page" : undefined}
                 className={`flex w-full flex-col items-center gap-1 py-2.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
-                  active ? "text-gold" : "text-muted-foreground hover:text-foreground"
+                  active ? "text-primary" : "text-slate-500 hover:text-slate-900"
                 }`}
               >
                 <span
