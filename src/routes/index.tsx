@@ -750,6 +750,7 @@ const plans = [
       "1 camera angle per delivery",
       "7-day video retention",
       "Basic batting & bowling stats",
+      "Light advertising on scoreboard and review pages",
     ],
     cta: "Start free",
   },
