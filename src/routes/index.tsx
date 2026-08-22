@@ -19,8 +19,8 @@ import {
   Check,
 } from "lucide-react";
 
-import logoUrl from "@/assets/wickentra-logo-header.png";
-import fullLogoUrl from "@/assets/wickentra-logo-full.png";
+import logoAsset from "@/assets/wickentra-logo-header.png.asset.json";
+import fullLogoAsset from "@/assets/wickentra-logo-full.png.asset.json";
 import shotDashboard from "@/assets/shot-dashboard.jpg";
 import shotScoreboard from "@/assets/shot-scoreboard.jpg";
 import shotMobile from "@/assets/shot-mobile.jpg";
@@ -224,7 +224,7 @@ function Header({
     <header className="sticky top-0 z-20 border-b border-border/15 bg-white px-5 py-3 shadow-sm backdrop-blur-xl md:px-8 md:py-4 lg:px-12">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
         <button onClick={onHome} className="flex shrink-0 items-center gap-2.5" aria-label="Wickentra home">
-          <img src={logoUrl} alt="Wickentra" className="h-10 w-auto md:h-12" width={1600} height={600} />
+          <img src={logoAsset.url} alt="Wickentra" className="h-10 w-auto md:h-12" width={1600} height={600} />
         </button>
 
         {/* Desktop / tablet nav */}
@@ -530,7 +530,7 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
     <footer className="mt-10 border-t border-border/15 bg-white px-5 pb-28 pt-10 md:mt-16 md:px-8 md:pb-12 lg:px-12">
       <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-[1.2fr_1fr_1fr]">
         <div className="space-y-3">
-          <img src={fullLogoUrl} alt="Wickentra" className="h-16 w-auto md:h-20" width={1600} height={640} />
+          <img src={fullLogoAsset.url} alt="Wickentra" className="h-16 w-auto md:h-20" width={1600} height={640} />
 
 
 
