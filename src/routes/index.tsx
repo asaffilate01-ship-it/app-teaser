@@ -157,7 +157,7 @@ function Promo() {
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-border/60 md:max-w-none md:border-x-0">
         <Ticker />
         <Header tab={tab} label={activeTab.label} onHome={() => setTab("home")} onChange={setTab} />
-        <main className="flex-1 overflow-y-auto px-5 pb-32 pt-4 md:mx-auto md:w-full md:max-w-6xl md:px-8 md:pb-20 md:pt-10 lg:px-12">
+        <main className="flex-1 overflow-y-auto px-5 pb-10 pt-5 md:mx-auto md:w-full md:max-w-6xl md:px-8 md:pb-16 md:pt-12 lg:px-12">
           <TabPanel key={tab}>
             {tab === "home" && <HomeTab onNavigate={setTab} />}
             {tab === "features" && <FeaturesTab />}
@@ -602,7 +602,7 @@ function FeatureRow({
 function FeaturesTab() {
   return (
     <div className="space-y-5 md:space-y-8">
-      <SectionTitle kicker="Platform">Features</SectionTitle>
+      <SectionHeader kicker="Platform">Features</SectionHeader>
       <p className="text-sm text-muted-foreground md:text-base">
         Everything that ships in the current Wickentra build.
       </p>
@@ -643,7 +643,7 @@ function FeaturesTab() {
 function ScreensTab() {
   return (
     <div className="space-y-5 md:space-y-8">
-      <SectionTitle kicker="Product tour">Screens</SectionTitle>
+      <SectionHeader kicker="Product tour">Screens</SectionHeader>
       <p className="text-sm text-muted-foreground md:text-base">
         Dashboards, scoreboards, mobile scoring and the review room.
       </p>
@@ -684,7 +684,7 @@ function FaqTab() {
   const [open, setOpen] = useState<number | null>(0);
   return (
     <div className="space-y-5 md:mx-auto md:max-w-3xl md:space-y-8">
-      <SectionTitle kicker="Answers">FAQs</SectionTitle>
+      <SectionHeader kicker="Answers">FAQs</SectionHeader>
       <div className="space-y-2.5 md:space-y-3">
 
         {faqs.map((f, i) => {
