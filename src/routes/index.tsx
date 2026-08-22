@@ -66,7 +66,7 @@ const features = [
   {
     icon: Video,
     title: "Multi-phone camera room",
-    body: "Pair phones at both ends and side-on. One tap starts the room, angles stay linked to the ball they captured.",
+    body: "Pair phones at both ends and side-on — or add as many angles as the situation needs. One tap starts the room, angles stay linked to the ball they captured.",
   },
   {
     icon: Activity,
