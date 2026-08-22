@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { regions, defaultRegion, findRegion, detectCountry, type Region } from "@/lib/pricing";
 import {
   Activity,
   ChevronDown,
