@@ -189,6 +189,10 @@
   box-shadow: var(--shadow-glow);
 }
 
+@utility nav-shadow {
+  box-shadow: var(--shadow-nav);
+}
+
 @utility no-scrollbar {
   scrollbar-width: none;
   &::-webkit-scrollbar {

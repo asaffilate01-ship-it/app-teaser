@@ -468,7 +468,7 @@ function LoginTab() {
 
 function BottomNav({ tab, onChange }: { tab: TabId; onChange: (t: TabId) => void }) {
   return (
-    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.08)] backdrop-blur-xl">
+    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] nav-shadow backdrop-blur-xl">
       <ul className="grid grid-cols-5">
         {tabs.map(({ id, label, icon: Icon }) => {
           const active = tab === id;
