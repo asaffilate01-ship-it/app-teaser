@@ -154,11 +154,16 @@ const faqs = [
     a: "Clips and annotations are stored against the match in your organisation's own space, with consent and privacy controls part of the launch roadmap.",
   },
   {
+    q: "Can other clubs and the league watch our scoring live?",
+    a: "Yes. Each match has a visibility setting: private to your club, shared with the opposition club, open to your league, or a public link anyone can follow. Leagues can also set a default for every fixture in a competition.",
+  },
+  {
     q: "How do I get access?",
     a: "Sign in if your club already has an account, or request an invite and we will get your club set up.",
   },
 
 ];
+
 
 function Promo() {
   const [tab, setTab] = useState<TabId>("home");
