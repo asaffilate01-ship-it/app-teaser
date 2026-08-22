@@ -250,7 +250,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
 
       <section className="grid grid-cols-3 gap-2 text-center">
         {[
-          { k: "4", v: "camera angles per ball" },
+          { k: "4+", v: "camera angles per ball" },
           { k: "<1s", v: "to log a delivery" },
           { k: "100%", v: "match history kept" },
         ].map((s) => (
