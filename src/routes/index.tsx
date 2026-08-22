@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 
 import logoAsset from "@/assets/wickentra-logo-header.png.asset.json";
+import fullLogoAsset from "@/assets/wickentra-logo-full.png.asset.json";
 import shotDashboard from "@/assets/shot-dashboard.jpg";
 import shotScoreboard from "@/assets/shot-scoreboard.jpg";
 import shotMobile from "@/assets/shot-mobile.jpg";
@@ -529,7 +530,8 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
     <footer className="mt-10 border-t border-border/15 bg-white px-5 pb-28 pt-10 md:mt-16 md:px-8 md:pb-12 lg:px-12">
       <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-[1.2fr_1fr_1fr]">
         <div className="space-y-3">
-          <img src={logoAsset.url} alt="Wickentra" className="h-10 w-auto md:h-12" width={1600} height={600} />
+          <img src={fullLogoAsset.url} alt="Wickentra" className="h-16 w-auto md:h-20" width={1600} height={640} />
+
 
 
           <p className="max-w-sm text-sm leading-relaxed text-slate-600">
