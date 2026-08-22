@@ -387,10 +387,11 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           Built for match day
         </SectionHeader>
         <div className="space-y-3 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 lg:grid-cols-3">
-          {features.slice(0, 3).map((f) => (
+          {features.filter((f) => f.title !== "Coaching review").slice(0, 2).concat(features.filter((f) => f.title === "Share live scoring")).map((f) => (
             <FeatureRow key={f.title} {...f} />
           ))}
         </div>
+
       </section>
 
       {/* Fixtures + league table, Kester-style two-column board */}
