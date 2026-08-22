@@ -173,8 +173,11 @@
   }
   h1, h2, h3, .font-display {
     font-family: var(--font-display);
-    letter-spacing: 0.01em;
+    letter-spacing: 0.005em;
+    font-weight: 400;
+    text-transform: uppercase;
   }
+
 }
 
 @utility brand-gradient {
