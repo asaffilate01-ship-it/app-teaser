@@ -155,6 +155,7 @@ function Promo() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-border/60 md:max-w-none md:border-x-0">
+        <Ticker />
         <Header tab={tab} label={activeTab.label} onHome={() => setTab("home")} onChange={setTab} />
         <main className="flex-1 overflow-y-auto px-5 pb-32 pt-4 md:mx-auto md:w-full md:max-w-6xl md:px-8 md:pb-20 md:pt-10 lg:px-12">
           <TabPanel key={tab}>
@@ -165,11 +166,43 @@ function Promo() {
             {tab === "login" && <LoginTab />}
           </TabPanel>
         </main>
+        <SiteFooter onNavigate={setTab} />
         <BottomNav tab={tab} onChange={setTab} />
       </div>
     </div>
   );
 }
+
+const tickerItems = [
+  "Live • Riverside CC 148/4 (18.2)",
+  "4+ camera angles per delivery",
+  "Coaching review • frame-by-frame",
+  "Invite-only beta — clubs onboarding in waves",
+  "Scoreboards ready for stream overlay",
+];
+
+function Ticker() {
+  return (
+    <div className="dark-band overflow-hidden py-2">
+      <div className="ticker-track">
+        {[0, 1].map((dup) => (
+          <div key={dup} className="flex shrink-0 items-center">
+            {tickerItems.map((t) => (
+              <span
+                key={t}
+                className="flex items-center gap-3 px-5 text-[11px] font-semibold uppercase tracking-[0.18em]"
+              >
+                <span className="size-1.5 rounded-full bg-gold" />
+                {t}
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 
 function Header({
   tab,
