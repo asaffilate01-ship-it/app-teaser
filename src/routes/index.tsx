@@ -495,6 +495,84 @@ function SectionTitle({ children, kicker }: { children: React.ReactNode; kicker?
   );
 }
 
+function SectionHeader({
+  children,
+  kicker,
+  action,
+  onAction,
+}: {
+  children: React.ReactNode;
+  kicker?: string;
+  action?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 border-b border-border/70 pb-3">
+      <div className="min-w-0 space-y-1">
+        {kicker && (
+          <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-gold">
+            {kicker}
+          </span>
+        )}
+        <h2 className="rule-heading text-2xl font-bold uppercase leading-none md:text-4xl">
+          {children}
+        </h2>
+      </div>
+      {action && onAction && (
+        <button
+          onClick={onAction}
+          className="inline-flex shrink-0 items-center gap-1 text-[11px] font-bold uppercase tracking-[0.16em] text-gold hover:opacity-80"
+        >
+          {action} <ArrowRight className="size-3.5" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
+  return (
+    <footer className="dark-band mt-10 px-5 pb-28 pt-10 md:mt-16 md:px-8 md:pb-12 lg:px-12">
+      <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-[1.2fr_1fr_1fr]">
+        <div className="space-y-3">
+          <p className="font-display text-2xl font-bold uppercase leading-none">Wickentra</p>
+          <p className="max-w-sm text-[13px] leading-relaxed opacity-75">
+            Ball-by-ball scoring, multi-angle camera rooms, live scoreboards and coaching review for
+            clubs, leagues and academies.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold">Explore</p>
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => onNavigate(t.id)}
+              className="block text-[13px] opacity-75 hover:opacity-100"
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div className="space-y-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold">Access</p>
+          <p className="text-[13px] opacity-75">Invite-only beta</p>
+          <p className="text-[13px] opacity-75">Clubs onboarding in waves</p>
+          <button
+            onClick={() => onNavigate("login")}
+            className="brand-gradient mt-2 inline-flex h-10 items-center gap-2 rounded-full px-5 text-[12px] font-bold uppercase tracking-wider text-primary-foreground"
+          >
+            Request an invite <ArrowRight className="size-3.5" />
+          </button>
+        </div>
+      </div>
+      <div className="mx-auto mt-8 w-full max-w-6xl border-t border-white/15 pt-5 text-[11px] uppercase tracking-wide opacity-60">
+        © {new Date().getFullYear()} Wickentra — Every ball. Every angle. Every advantage.
+      </div>
+    </footer>
+  );
+}
+
+
 function FeatureRow({
   icon: Icon,
   title,
