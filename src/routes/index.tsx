@@ -449,11 +449,12 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
             <span className="text-xs font-bold uppercase tracking-[0.12em] text-gold">
               Review room
             </span>
-            <h2 className="font-display text-3xl font-bold uppercase leading-none md:text-5xl">
+            <h2 className="font-display text-3xl font-bold leading-tight tracking-tight md:text-5xl">
               Watch the match back,
               <br />
               ball by ball
             </h2>
+
             <p className="max-w-xl text-sm opacity-80 md:text-base">
               Every delivery links to its own synced angles — slow it down, step frames, draw on it
               and send voice notes to the squad before the next session.
@@ -506,9 +507,10 @@ function SectionHeader({
             {kicker}
           </span>
         )}
-        <h2 className="rule-heading text-2xl font-bold uppercase leading-none md:text-4xl">
+        <h2 className="rule-heading text-2xl font-bold leading-tight tracking-tight md:text-4xl">
           {children}
         </h2>
+
       </div>
       {action && onAction && (
         <button
@@ -527,7 +529,8 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
     <footer className="dark-band mt-10 px-5 pb-28 pt-10 md:mt-16 md:px-8 md:pb-12 lg:px-12">
       <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-[1.2fr_1fr_1fr]">
         <div className="space-y-3">
-          <p className="font-display text-2xl font-bold uppercase leading-none">Wickentra</p>
+          <p className="font-display text-2xl font-bold leading-none tracking-tight">Wickentra</p>
+
           <p className="max-w-sm text-sm leading-relaxed opacity-75">
             Ball-by-ball scoring, multi-angle camera rooms, live scoreboards and coaching review for
             clubs, leagues and academies.
@@ -719,7 +722,8 @@ function LoginTab() {
         <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-gold">
           <Lock className="size-3" /> Gated access
         </span>
-        <h2 className="text-3xl font-bold uppercase leading-none">Sign in</h2>
+        <h2 className="text-3xl font-bold leading-tight tracking-tight">Sign in</h2>
+
         <div className="hairline h-px w-16" />
         <p className="text-sm leading-relaxed text-muted-foreground">
           Wickentra is invite-only. Sign in to open the scoring platform, or request access for your
