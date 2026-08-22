@@ -181,8 +181,46 @@
 
 @utility surface-card {
   background-image: var(--gradient-surface);
-  border: 1px solid var(--border);
+  border: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
   border-radius: var(--radius);
+  box-shadow:
+    0 1px 0 0 color-mix(in oklab, var(--card) 90%, white) inset,
+    0 1px 2px -1px color-mix(in oklab, var(--foreground) 10%, transparent),
+    0 12px 28px -20px color-mix(in oklab, var(--foreground) 30%, transparent);
+}
+
+@utility lift-card {
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+  &:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--gold) 45%, transparent);
+    box-shadow:
+      0 1px 0 0 color-mix(in oklab, var(--card) 90%, white) inset,
+      0 18px 40px -24px color-mix(in oklab, var(--foreground) 45%, transparent);
+  }
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@utility icon-tile {
+  background-image: var(--gradient-brand);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--gold) 30%, transparent),
+    0 1px 0 0 color-mix(in oklab, white 40%, transparent) inset,
+    0 8px 18px -10px color-mix(in oklab, var(--primary) 70%, transparent);
+}
+
+@utility hairline {
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--gold) 60%, transparent),
+    transparent
+  );
 }
 
 @utility glow {
@@ -192,6 +230,7 @@
 @utility nav-shadow {
   box-shadow: var(--shadow-nav);
 }
+
 
 @utility no-scrollbar {
   scrollbar-width: none;
