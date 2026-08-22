@@ -89,7 +89,13 @@ const features = [
     title: "Clubs, teams and players",
     body: "Organisations, competitions, teams, players and grounds modelled from the ground up for season-long history.",
   },
+  {
+    icon: Eye,
+    title: "Share live scoring",
+    body: "Leagues and clubs choose who watches a match unfold in real time — the opposition club, followers, the league office, or a public link for supporters.",
+  },
 ];
+
 
 const screens = [
   {
