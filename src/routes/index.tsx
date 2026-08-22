@@ -15,6 +15,7 @@ import {
   HelpCircle,
   Lock,
   ArrowRight,
+  ArrowLeft,
   Check,
 } from "lucide-react";
 
@@ -149,17 +150,20 @@ const faqs = [
 
 function Promo() {
   const [tab, setTab] = useState<TabId>("home");
+  const activeTab = tabs.find((t) => t.id === tab)!;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-border/60">
-        <Header />
+        <Header tab={tab} label={activeTab.label} onHome={() => setTab("home")} />
         <main className="flex-1 overflow-y-auto px-5 pb-32 pt-4">
-          {tab === "home" && <HomeTab onNavigate={setTab} />}
-          {tab === "features" && <FeaturesTab />}
-          {tab === "screens" && <ScreensTab />}
-          {tab === "faq" && <FaqTab />}
-          {tab === "login" && <LoginTab />}
+          <TabPanel key={tab}>
+            {tab === "home" && <HomeTab onNavigate={setTab} />}
+            {tab === "features" && <FeaturesTab />}
+            {tab === "screens" && <ScreensTab />}
+            {tab === "faq" && <FaqTab />}
+            {tab === "login" && <LoginTab />}
+          </TabPanel>
         </main>
         <BottomNav tab={tab} onChange={setTab} />
       </div>
@@ -167,12 +171,33 @@ function Promo() {
   );
 }
 
-function Header() {
+function Header({ tab, label, onHome }: { tab: TabId; label: string; onHome: () => void }) {
+  const isHome = tab === "home";
   return (
     <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 px-5 py-3 backdrop-blur-xl">
-      <img src={logo.url} alt="Wickentra" className="h-9 w-auto" width={192} height={68} />
+      <div className="flex items-center justify-between gap-3">
+        <img src={logo.url} alt="Wickentra" className="h-9 w-auto" width={192} height={68} />
+        {!isHome && (
+          <div className="flex items-center gap-2">
+            <span className="font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">
+              {label}
+            </span>
+            <button
+              onClick={onHome}
+              className="flex size-8 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
+              aria-label="Back to home"
+            >
+              <ArrowLeft className="size-4" />
+            </button>
+          </div>
+        )}
+      </div>
     </header>
   );
+}
+
+function TabPanel({ children }: { children: React.ReactNode }) {
+  return <div className="tab-enter">{children}</div>;
 }
 
 function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
@@ -443,7 +468,7 @@ function LoginTab() {
 
 function BottomNav({ tab, onChange }: { tab: TabId; onChange: (t: TabId) => void }) {
   return (
-    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
+    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] nav-shadow backdrop-blur-xl">
       <ul className="grid grid-cols-5">
         {tabs.map(({ id, label, icon: Icon }) => {
           const active = tab === id;
@@ -453,12 +478,12 @@ function BottomNav({ tab, onChange }: { tab: TabId; onChange: (t: TabId) => void
                 onClick={() => onChange(id)}
                 aria-current={active ? "page" : undefined}
                 className={`flex w-full flex-col items-center gap-1 py-2.5 text-[10px] font-semibold uppercase tracking-wide transition-colors ${
-                  active ? "text-gold" : "text-muted-foreground"
+                  active ? "text-gold" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <span
                   className={`flex size-9 items-center justify-center rounded-xl transition-all ${
-                    active ? "brand-gradient text-primary-foreground" : ""
+                    active ? "brand-gradient text-primary-foreground shadow-md" : "bg-transparent"
                   }`}
                 >
                   <Icon className="size-[18px]" />
