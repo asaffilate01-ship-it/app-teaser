@@ -529,7 +529,8 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
     <footer className="mt-10 border-t border-border/15 bg-white px-5 pb-28 pt-10 md:mt-16 md:px-8 md:pb-12 lg:px-12">
       <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-[1.2fr_1fr_1fr]">
         <div className="space-y-3">
-          <p className="font-display text-2xl font-bold leading-none tracking-tight text-slate-900">Wickentra</p>
+          <img src={logoAsset.url} alt="Wickentra" className="h-10 w-auto md:h-12" width={1600} height={600} />
+
 
           <p className="max-w-sm text-sm leading-relaxed text-slate-600">
             Ball-by-ball scoring, multi-angle camera rooms, live scoreboards and coaching review for
