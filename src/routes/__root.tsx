@@ -77,14 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Wickentra" },
+      { title: "CricLume" },
       { name: "description", content: "Ball-by-ball cricket scoring, multi-angle camera rooms, live scoreboards and coaching review." },
-      { name: "author", content: "Wickentra" },
-      { property: "og:title", content: "Wickentra — Every ball. Every angle. Every advantage." },
+      { name: "author", content: "CricLume" },
+      { property: "og:title", content: "CricLume — See every ball. Shape every game." },
       { property: "og:description", content: "Ball-by-ball cricket scoring, multi-angle camera rooms, live scoreboards and coaching review for clubs and academies." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@wickentra" },
+      { name: "twitter:site", content: "@criclume" },
     ],
     links: [
       {
