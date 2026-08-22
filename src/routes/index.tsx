@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { regions, defaultRegion, findRegion, detectCountry, type Region } from "@/lib/pricing";
 import {
   Activity,
   ChevronDown,
@@ -797,13 +798,52 @@ const revenueLines = [
 ];
 
 function PricingTab() {
+  const [region, setRegion] = useState<Region>(defaultRegion);
+  const [detected, setDetected] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    detectCountry().then((code) => {
+      if (!active) return;
+      const match = findRegion(code);
+      if (match) setRegion(match);
+      setDetected(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const localPlans = plans.map((p) =>
+    p.name === "Club" ? { ...p, price: region.clubPrice, period: region.period } : p,
+  );
+
   return (
     <div className="space-y-8 md:space-y-12">
       <SectionHeader kicker="Plans">Pricing & subscriptions</SectionHeader>
       <p className="-mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
         Start free with one team. Move to a club or league subscription when you want more angles,
-        longer video retention and competition-wide control. Prices exclude VAT.
+        longer video retention and competition-wide control. {region.note}
       </p>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+          {detected ? "Showing prices for" : "Detecting your region…"}
+        </span>
+        <select
+          value={region.code}
+          onChange={(e) => setRegion(findRegion(e.target.value) ?? defaultRegion)}
+          className="h-10 rounded-full border border-border bg-secondary px-4 text-sm font-semibold text-foreground"
+          aria-label="Select your country"
+        >
+          {regions.map((r) => (
+            <option key={r.code} value={r.code}>
+              {r.country} ({r.currency})
+            </option>
+          ))}
+        </select>
+      </div>
+
 
       <div className="grid gap-4 md:grid-cols-3 md:gap-6">
         {plans.map((p) => (
