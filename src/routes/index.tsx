@@ -481,20 +481,6 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
 
 }
 
-function SectionTitle({ children, kicker }: { children: React.ReactNode; kicker?: string }) {
-  return (
-    <div className="space-y-2">
-      {kicker && (
-        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">
-          {kicker}
-        </span>
-      )}
-      <h2 className="text-3xl font-bold uppercase leading-none md:text-5xl">{children}</h2>
-      <div className="hairline h-px w-16" />
-    </div>
-  );
-}
-
 function SectionHeader({
   children,
   kicker,
