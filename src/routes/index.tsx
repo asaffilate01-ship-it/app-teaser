@@ -242,73 +242,79 @@ function TabPanel({ children }: { children: React.ReactNode }) {
 
 function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
   return (
-    <div className="space-y-7">
-      <section className="space-y-4">
-        <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-secondary/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">
-          <span className="size-1.5 animate-pulse rounded-full bg-primary" />
-          Invite-only beta
-        </span>
-        <h1 className="text-[2.6rem] font-bold uppercase leading-[0.95]">
-          Every ball.
-          <br />
-          Every angle.
-          <br />
-          <span className="bg-gradient-to-r from-primary to-gold bg-clip-text text-transparent">
-            Every advantage.
+    <div className="space-y-7 md:space-y-14">
+      <div className="grid gap-7 lg:grid-cols-2 lg:items-center lg:gap-12">
+        <section className="space-y-4 md:space-y-6">
+          <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-secondary/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">
+            <span className="size-1.5 animate-pulse rounded-full bg-primary" />
+            Invite-only beta
           </span>
-        </h1>
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          Wickentra turns a club match into a full record: ball-by-ball scoring, synced phone
-          cameras at every angle, live scoreboards and a coaching review room the whole squad can
-          learn from.
-        </p>
-        <div className="flex flex-col gap-2">
-          <button
-            onClick={() => onNavigate("login")}
-            className="brand-gradient glow inline-flex h-12 items-center justify-center gap-2 rounded-full text-sm font-bold uppercase tracking-wider text-primary-foreground active:scale-[0.98]"
-          >
-            Sign in to Wickentra <ArrowRight className="size-4" />
-          </button>
-          <button
-            onClick={() => onNavigate("screens")}
-            className="inline-flex h-12 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold text-foreground active:scale-[0.98]"
-          >
-            See the screens
-          </button>
-        </div>
-      </section>
+          <h1 className="text-[2.6rem] font-bold uppercase leading-[0.95] md:text-6xl lg:text-7xl">
+            Every ball.
+            <br />
+            Every angle.
+            <br />
+            <span className="bg-gradient-to-r from-primary to-gold bg-clip-text text-transparent">
+              Every advantage.
+            </span>
+          </h1>
+          <p className="text-sm leading-relaxed text-muted-foreground md:max-w-xl md:text-base">
+            Wickentra turns a club match into a full record: ball-by-ball scoring, synced phone
+            cameras at every angle, live scoreboards and a coaching review room the whole squad can
+            learn from.
+          </p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+            <button
+              onClick={() => onNavigate("login")}
+              className="brand-gradient glow inline-flex h-12 items-center justify-center gap-2 rounded-full px-7 text-sm font-bold uppercase tracking-wider text-primary-foreground active:scale-[0.98]"
+            >
+              Sign in to Wickentra <ArrowRight className="size-4" />
+            </button>
+            <button
+              onClick={() => onNavigate("screens")}
+              className="inline-flex h-12 items-center justify-center rounded-full border border-border bg-card px-7 text-sm font-semibold text-foreground active:scale-[0.98]"
+            >
+              See the screens
+            </button>
+          </div>
+        </section>
 
-      <section className="surface-card overflow-hidden">
-        <img
-          src={shotScoreboard}
-          alt="Wickentra live scoreboard showing score, batters, bowlers and over timeline"
-          width={1600}
-          height={1008}
-          className="w-full"
-        />
-      </section>
+        <section className="surface-card overflow-hidden">
+          <img
+            src={shotScoreboard}
+            alt="Wickentra live scoreboard showing score, batters, bowlers and over timeline"
+            width={1600}
+            height={1008}
+            className="w-full"
+          />
+        </section>
+      </div>
 
-      <section className="grid grid-cols-3 gap-2 text-center">
+      <section className="grid grid-cols-3 gap-2 text-center md:gap-5">
         {[
           { k: "4+", v: "camera angles per ball" },
           { k: "<1s", v: "to log a delivery" },
           { k: "100%", v: "match history kept" },
         ].map((s) => (
-          <div key={s.v} className="surface-card lift-card px-2 py-4">
-            <p className="font-display text-2xl font-bold leading-none bg-gradient-to-br from-primary to-gold bg-clip-text text-transparent">
+          <div key={s.v} className="surface-card lift-card px-2 py-4 md:px-6 md:py-8">
+            <p className="font-display text-2xl font-bold leading-none bg-gradient-to-br from-primary to-gold bg-clip-text text-transparent md:text-5xl">
               {s.k}
             </p>
-            <p className="mt-1.5 text-[11px] leading-tight text-muted-foreground">{s.v}</p>
+            <p className="mt-1.5 text-[11px] leading-tight text-muted-foreground md:mt-3 md:text-sm">
+              {s.v}
+            </p>
           </div>
         ))}
       </section>
 
-      <section className="space-y-3">
+      <section className="space-y-3 md:space-y-6">
         <SectionTitle kicker="Match day">Built for match day</SectionTitle>
 
-        {features.slice(0, 3).map((f) => (
-          <FeatureRow key={f.title} {...f} />
-        ))}
+        <div className="space-y-3 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 lg:grid-cols-3">
+          {features.slice(0, 3).map((f) => (
+            <FeatureRow key={f.title} {...f} />
+          ))}
+        </div>
         <button
           onClick={() => onNavigate("features")}
           className="inline-flex items-center gap-1 text-sm font-semibold text-gold"
@@ -316,6 +322,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           All features <ArrowRight className="size-4" />
         </button>
       </section>
+
     </div>
   );
 }
