@@ -154,9 +154,9 @@ function Promo() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-border/60">
-        <Header tab={tab} label={activeTab.label} onHome={() => setTab("home")} />
-        <main className="flex-1 overflow-y-auto px-5 pb-32 pt-4">
+      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-border/60 md:max-w-none md:border-x-0">
+        <Header tab={tab} label={activeTab.label} onHome={() => setTab("home")} onChange={setTab} />
+        <main className="flex-1 overflow-y-auto px-5 pb-32 pt-4 md:mx-auto md:w-full md:max-w-6xl md:px-8 md:pb-20 md:pt-10 lg:px-12">
           <TabPanel key={tab}>
             {tab === "home" && <HomeTab onNavigate={setTab} />}
             {tab === "features" && <FeaturesTab />}
@@ -171,14 +171,53 @@ function Promo() {
   );
 }
 
-function Header({ tab, label, onHome }: { tab: TabId; label: string; onHome: () => void }) {
+function Header({
+  tab,
+  label,
+  onHome,
+  onChange,
+}: {
+  tab: TabId;
+  label: string;
+  onHome: () => void;
+  onChange: (t: TabId) => void;
+}) {
   const isHome = tab === "home";
   return (
-    <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 px-5 py-3 backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-3">
-        <img src={logo.url} alt="Wickentra" className="h-9 w-auto" width={192} height={68} />
+    <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 px-5 py-3 backdrop-blur-xl md:px-8 md:py-4 lg:px-12">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
+        <button onClick={onHome} className="shrink-0" aria-label="Wickentra home">
+          <img src={logo.url} alt="Wickentra" className="h-9 w-auto md:h-11" width={192} height={68} />
+        </button>
+
+        {/* Desktop / tablet nav */}
+        <nav className="hidden md:flex md:items-center md:gap-1">
+          {tabs
+            .filter((t) => t.id !== "login")
+            .map((t) => (
+              <button
+                key={t.id}
+                onClick={() => onChange(t.id)}
+                aria-current={tab === t.id ? "page" : undefined}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                  tab === t.id
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          <button
+            onClick={() => onChange("login")}
+            className="brand-gradient glow ml-2 inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-bold uppercase tracking-wider text-primary-foreground"
+          >
+            <Lock className="size-3.5" /> Sign in
+          </button>
+        </nav>
+
         {!isHome && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 md:hidden">
             <span className="font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">
               {label}
             </span>
@@ -199,6 +238,7 @@ function Header({ tab, label, onHome }: { tab: TabId; label: string; onHome: () 
 function TabPanel({ children }: { children: React.ReactNode }) {
   return <div className="tab-enter">{children}</div>;
 }
+
 
 function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
   return (
