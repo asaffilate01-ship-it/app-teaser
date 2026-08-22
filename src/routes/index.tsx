@@ -19,7 +19,7 @@ import {
   Check,
 } from "lucide-react";
 
-import logo from "@/assets/wickentra-logo.png.asset.json";
+import logoMark from "@/assets/wickentra-mark.png";
 import shotDashboard from "@/assets/shot-dashboard.jpg";
 import shotScoreboard from "@/assets/shot-scoreboard.jpg";
 import shotMobile from "@/assets/shot-mobile.jpg";
@@ -220,9 +220,7 @@ function Header({
     <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 px-5 py-3 backdrop-blur-xl md:px-8 md:py-4 lg:px-12">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
         <button onClick={onHome} className="flex shrink-0 items-center gap-2.5" aria-label="Wickentra home">
-          <span className="flex items-center justify-center rounded-lg bg-foreground/95 p-1.5">
-            <img src={logo.url} alt="" className="h-7 w-auto md:h-8" width={192} height={68} />
-          </span>
+          <img src={logoMark} alt="" className="h-9 w-auto md:h-10" width={681} height={581} />
           <span className="font-display text-xl leading-none tracking-[0.04em] text-foreground md:text-2xl">
             Wickentra
           </span>
