@@ -22,8 +22,8 @@ import {
 
 } from "lucide-react";
 
-import logoAsset from "@/assets/wickentra-logo-header.png.asset.json";
-import fullLogoAsset from "@/assets/wickentra-logo-full.png.asset.json";
+import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
+import fullLogoAsset from "@/assets/criclume-logo-full.png.asset.json";
 import shotDashboard from "@/assets/shot-dashboard.jpg";
 import shotScoreboard from "@/assets/shot-scoreboard.jpg";
 import shotMobile from "@/assets/shot-mobile.jpg";
@@ -32,21 +32,26 @@ import shotReview from "@/assets/shot-review.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Wickentra — Cricket Scoring, Cameras & Coaching Review" },
+      { title: "CricLume — See every ball. Shape every game." },
       {
         name: "description",
         content:
-          "Wickentra is ball-by-ball cricket scoring with multi-angle camera rooms, live scoreboards and coaching review. Explore features, screens and FAQs, then sign in.",
+          "CricLume is ball-by-ball cricket scoring with multi-angle camera rooms, live scoreboards and coaching review. Explore features, screens and FAQs, then sign in.",
       },
-      { property: "og:title", content: "Wickentra — Every ball. Every angle. Every advantage." },
+      { property: "og:title", content: "CricLume — See every ball. Shape every game." },
       {
         property: "og:description",
         content:
           "Ball-by-ball scoring, multi-phone camera rooms, live scoreboards and slow-motion coaching review for clubs and academies.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "/" },
+      { property: "og:image", content: "https://criclume.com/images/promo-hero.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://criclume.com/images/promo-hero.jpg" },
     ],
+    links: [{ rel: "canonical", href: "/" }],
+
   }),
   component: Promo,
 });
@@ -133,7 +138,7 @@ const screens = [
 
 const faqs = [
   {
-    q: "Who is Wickentra for?",
+    q: "Who is CricLume for?",
     a: "Clubs, leagues, schools and academies that want proper ball-by-ball records and video they can actually coach from — without a broadcast budget.",
   },
   {
@@ -146,7 +151,7 @@ const faqs = [
   },
   {
     q: "Does it handle rain rules?",
-    a: "Yes. Wickentra applies standard rain rules to adjust targets and results when a match is interrupted.",
+    a: "Yes. CricLume applies standard rain rules to adjust targets and results when a match is interrupted.",
   },
 
   {
@@ -237,8 +242,8 @@ function Header({
   return (
     <header className="sticky top-0 z-20 border-b border-border/15 bg-white px-5 py-3 shadow-sm backdrop-blur-xl md:px-8 md:py-4 lg:px-12">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
-        <button onClick={onHome} className="flex shrink-0 items-center gap-2.5" aria-label="Wickentra home">
-          <img src={logoAsset.url} alt="Wickentra" className="h-10 w-auto md:h-12" width={1600} height={600} />
+        <button onClick={onHome} className="flex shrink-0 items-center gap-2.5" aria-label="CricLume home">
+          <img src={logoAsset.url} alt="CricLume" className="h-10 w-auto md:h-12" width={1600} height={600} />
         </button>
 
         {/* Desktop / tablet nav */}
@@ -326,7 +331,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           </h1>
 
           <p className="text-sm leading-relaxed text-muted-foreground md:max-w-xl md:text-base">
-            Wickentra turns a club match into a full record: ball-by-ball scoring, synced phone
+            CricLume turns a club match into a full record: ball-by-ball scoring, synced phone
             cameras at every angle, live scoreboards and a coaching review room the whole squad can
             learn from.
           </p>
@@ -335,7 +340,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
               onClick={() => onNavigate("login")}
               className="brand-gradient glow inline-flex h-12 items-center justify-center gap-2 rounded-full px-7 text-sm font-bold uppercase tracking-wider text-primary-foreground active:scale-[0.98]"
             >
-              Sign in to Wickentra <ArrowRight className="size-4" />
+              Sign in to CricLume <ArrowRight className="size-4" />
             </button>
             <button
               onClick={() => onNavigate("screens")}
@@ -357,7 +362,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           </div>
           <img
             src={shotScoreboard}
-            alt="Wickentra live scoreboard showing score, batters, bowlers and over timeline"
+            alt="CricLume live scoreboard showing score, batters, bowlers and over timeline"
             width={1600}
             height={1008}
             className="w-full"
@@ -545,7 +550,7 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
     <footer className="mt-10 border-t border-border/15 bg-white px-5 pb-28 pt-10 md:mt-16 md:px-8 md:pb-12 lg:px-12">
       <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-[1.2fr_1fr_1fr]">
         <div className="space-y-3">
-          <img src={fullLogoAsset.url} alt="Wickentra" className="h-16 w-auto md:h-20" width={1600} height={640} />
+          <img src={fullLogoAsset.url} alt="CricLume" className="h-16 w-auto md:h-20" width={1600} height={640} />
 
 
 
@@ -579,8 +584,8 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         </div>
       </div>
       <div className="mx-auto mt-8 w-full max-w-6xl border-t border-slate-200 pt-5 text-xs uppercase tracking-wide text-slate-500">
-        <p>© {new Date().getFullYear()} Wickentra — Every ball. Every angle. Every advantage.</p>
-        <p className="mt-1 text-[11px] normal-case tracking-normal text-slate-400">Wickentra is a trading name of iTechLounge Ltd.</p>
+        <p>© {new Date().getFullYear()} CricLume — See every ball. Shape every game.</p>
+        <p className="mt-1 text-[11px] normal-case tracking-normal text-slate-400">CricLume is a trading name of iTechLounge Ltd.</p>
       </div>
     </footer>
   );
@@ -618,7 +623,7 @@ function FeaturesTab() {
     <div className="space-y-5 md:space-y-8">
       <SectionHeader kicker="Platform">Features</SectionHeader>
       <p className="text-sm text-muted-foreground md:text-base">
-        Everything that ships in the current Wickentra build.
+        Everything that ships in the current CricLume build.
       </p>
       <div className="space-y-3 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 lg:grid-cols-3">
         {features.map((f) => (
@@ -830,7 +835,7 @@ function LoginTab() {
       </form>
 
       <p className="text-center text-xs leading-relaxed text-muted-foreground">
-        © {new Date().getFullYear()} Wickentra. Every ball. Every angle. Every advantage.
+        © {new Date().getFullYear()} CricLume. See every ball. Shape every game.
       </p>
     </div>
   );
