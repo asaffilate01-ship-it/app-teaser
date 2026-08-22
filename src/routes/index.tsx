@@ -490,7 +490,7 @@ function LoginTab() {
   const [sent, setSent] = useState(false);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 md:mx-auto md:max-w-md">
       <div className="space-y-2.5">
         <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">
           <Lock className="size-3" /> Gated access
