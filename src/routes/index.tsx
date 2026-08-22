@@ -19,6 +19,9 @@ import {
   Check,
   Eye,
   Globe,
+  Tag,
+  Building2,
+  Trophy,
 
 } from "lucide-react";
 
@@ -56,12 +59,13 @@ export const Route = createFileRoute("/")({
   component: Promo,
 });
 
-type TabId = "home" | "features" | "screens" | "faq" | "login";
+type TabId = "home" | "features" | "screens" | "pricing" | "faq" | "login";
 
 const tabs: { id: TabId; label: string; icon: typeof Home }[] = [
   { id: "home", label: "Home", icon: Home },
   { id: "features", label: "Features", icon: Layers },
   { id: "screens", label: "Screens", icon: Images },
+  { id: "pricing", label: "Pricing", icon: Tag },
   { id: "faq", label: "FAQs", icon: HelpCircle },
   { id: "login", label: "Sign in", icon: Lock },
 ];
@@ -163,6 +167,14 @@ const faqs = [
     a: "Yes. Each match has a visibility setting: private to your club, shared with the opposition club, open to your league, or a public link anyone can follow. Leagues can also set a default for every fixture in a competition.",
   },
   {
+    q: "How does CricLume make money?",
+    a: "Clubs and leagues pay an annual subscription per team or competition, billed on the tier that matches how much scoring, video and analysis they use. Extra video storage, league-wide packages and sponsor-branded streams are paid add-ons.",
+  },
+  {
+    q: "Is there a free option?",
+    a: "Yes. Starter is free for a single team with ball-by-ball scoring, a live scoreboard and one camera angle per delivery. You only pay when you want more angles, longer video retention and club-wide analysis.",
+  },
+  {
     q: "How do I get access?",
     a: "Sign in if your club already has an account, or request an invite and we will get your club set up.",
   },
@@ -184,6 +196,7 @@ function Promo() {
             {tab === "home" && <HomeTab onNavigate={setTab} />}
             {tab === "features" && <FeaturesTab />}
             {tab === "screens" && <ScreensTab />}
+            {tab === "pricing" && <PricingTab />}
             {tab === "faq" && <FaqTab />}
             {tab === "login" && <LoginTab />}
           </TabPanel>
@@ -728,6 +741,141 @@ function ScreensTab() {
 }
 
 
+
+const plans = [
+  {
+    name: "Starter",
+    price: "Free",
+    period: "one team",
+    blurb: "Get a side scoring properly and sharing a live scoreboard.",
+    icon: Zap,
+    featured: false,
+    perks: [
+      "Ball-by-ball scoring for 1 team",
+      "Live scoreboard + public match link",
+      "1 camera angle per delivery",
+      "7-day video retention",
+      "Basic batting & bowling stats",
+    ],
+    cta: "Start free",
+  },
+  {
+    name: "Club",
+    price: "£29",
+    period: "per team / month",
+    blurb: "The full match-day kit for clubs running several sides.",
+    icon: Building2,
+    featured: true,
+    perks: [
+      "Unlimited teams and fixtures",
+      "Unlimited camera angles per delivery",
+      "90-day video retention + clip export",
+      "Coaching review with slow-motion tagging",
+      "Share live scoring with opposition clubs",
+      "Season-long club analytics",
+    ],
+    cta: "Request an invite",
+  },
+  {
+    name: "League",
+    price: "Custom",
+    period: "per competition / season",
+    blurb: "Competition-wide scoring, standings and governance.",
+    icon: Trophy,
+    featured: false,
+    perks: [
+      "Every club in the competition included",
+      "League standings, results and admin console",
+      "Default visibility rules across fixtures",
+      "12-month video retention",
+      "Sponsor branding on live streams",
+      "Data export and priority support",
+    ],
+    cta: "Talk to us",
+  },
+];
+
+const revenueLines = [
+  { icon: Tag, title: "Subscriptions", body: "Recurring club and league plans are the core of the business — billed monthly or annually per team, with two months free on annual." },
+  { icon: Video, title: "Video & storage add-ons", body: "Extra retention, 4K clips and bulk season archives are priced on top of the base tier." },
+  { icon: Globe, title: "Sponsorship & streams", body: "Leagues can sell branded overlays and sponsored public match links; CricLume takes a share of the placement." },
+  { icon: Users, title: "Services", body: "Onboarding, historic data migration and bespoke reporting for larger leagues and academies." },
+];
+
+function PricingTab() {
+  return (
+    <div className="space-y-8 md:space-y-12">
+      <SectionHeader kicker="Plans">Pricing & subscriptions</SectionHeader>
+      <p className="-mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
+        Start free with one team. Move to a club or league subscription when you want more angles,
+        longer video retention and competition-wide control. Prices exclude VAT.
+      </p>
+
+      <div className="grid gap-4 md:grid-cols-3 md:gap-6">
+        {plans.map((p) => (
+          <div
+            key={p.name}
+            className={`surface-card lift-card relative flex flex-col gap-4 p-5 md:p-6 ${p.featured ? "border-gold/50 ring-1 ring-gold/30" : ""}`}
+          >
+            {p.featured && (
+              <span className="brand-gradient absolute -top-3 left-5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-primary-foreground">
+                Most popular
+              </span>
+            )}
+            <div className="icon-tile flex size-11 items-center justify-center">
+              <p.icon className="size-5 text-gold" />
+            </div>
+            <div className="space-y-1">
+              <p className="font-display text-xl font-bold tracking-tight">{p.name}</p>
+              <p className="text-sm leading-relaxed text-muted-foreground">{p.blurb}</p>
+            </div>
+            <div className="flex items-end gap-2">
+              <span className="font-display text-4xl font-bold leading-none">{p.price}</span>
+              <span className="pb-1 text-xs uppercase tracking-wide text-muted-foreground">{p.period}</span>
+            </div>
+            <div className="hairline h-px w-full" />
+            <ul className="space-y-2">
+              {p.perks.map((perk) => (
+                <li key={perk} className="flex items-start gap-2 text-sm leading-relaxed">
+                  <Check className="mt-0.5 size-4 shrink-0 text-gold" />
+                  <span className="text-muted-foreground">{perk}</span>
+                </li>
+              ))}
+            </ul>
+            <button
+              className={`mt-auto h-11 w-full rounded-full text-sm font-bold uppercase tracking-wider transition-transform active:scale-[0.98] ${p.featured ? "brand-gradient glow text-primary-foreground" : "border border-border bg-secondary text-foreground"}`}
+            >
+              {p.cta}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-4 md:space-y-6">
+        <SectionHeader kicker="Business model">How CricLume makes money</SectionHeader>
+        <div className="grid gap-3 md:grid-cols-2 md:gap-5">
+          {revenueLines.map((r) => (
+            <div key={r.title} className="surface-card flex gap-3 p-4 md:p-5">
+              <div className="icon-tile flex size-10 shrink-0 items-center justify-center">
+                <r.icon className="size-4.5 text-gold" />
+              </div>
+              <div className="space-y-1">
+                <p className="font-semibold tracking-tight">{r.title}</p>
+                <p className="text-sm leading-relaxed text-muted-foreground">{r.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <p className="text-xs leading-relaxed text-muted-foreground">
+        Annual billing saves two months on every paid tier. Schools and junior sections get 50% off the
+        Club plan.
+      </p>
+    </div>
+  );
+}
+
 function FaqTab() {
   const [open, setOpen] = useState<number | null>(0);
   return (
@@ -844,7 +992,7 @@ function LoginTab() {
 function BottomNav({ tab, onChange }: { tab: TabId; onChange: (t: TabId) => void }) {
   return (
     <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.08)] backdrop-blur-xl md:hidden">
-      <ul className="grid grid-cols-5">
+      <ul className="grid grid-cols-6">
         {tabs.map(({ id, label, icon: Icon }) => {
           const active = tab === id;
           return (
