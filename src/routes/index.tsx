@@ -747,8 +747,7 @@ const plans = [
     perks: [
       "Ball-by-ball scoring for 1 team",
       "Live scoreboard + public match link",
-      "1 camera angle per delivery",
-      "7-day video retention",
+      "No camera room — upgrade to add angles",
       "Basic batting & bowling stats",
       "Light advertising on scoreboard and review pages",
     ],
