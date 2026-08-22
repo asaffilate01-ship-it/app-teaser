@@ -277,6 +277,20 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
   );
 }
 
+function SectionTitle({ children, kicker }: { children: React.ReactNode; kicker?: string }) {
+  return (
+    <div className="space-y-2">
+      {kicker && (
+        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold">
+          {kicker}
+        </span>
+      )}
+      <h2 className="text-3xl font-bold uppercase leading-none">{children}</h2>
+      <div className="hairline h-px w-16" />
+    </div>
+  );
+}
+
 function FeatureRow({
   icon: Icon,
   title,
@@ -287,17 +301,18 @@ function FeatureRow({
   body: string;
 }) {
   return (
-    <article className="surface-card flex gap-3 p-4">
-      <span className="brand-gradient flex size-10 shrink-0 items-center justify-center rounded-xl text-primary-foreground">
-        <Icon className="size-5" />
+    <article className="surface-card lift-card group relative flex gap-3.5 p-4">
+      <span className="icon-tile flex size-11 shrink-0 items-center justify-center rounded-2xl text-primary-foreground">
+        <Icon className="size-5" strokeWidth={2.2} />
       </span>
-      <div>
-        <h3 className="text-base font-semibold">{title}</h3>
+      <div className="min-w-0">
+        <h3 className="text-[15px] font-semibold tracking-tight">{title}</h3>
         <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{body}</p>
       </div>
     </article>
   );
 }
+
 
 function FeaturesTab() {
   return (
