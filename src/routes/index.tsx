@@ -66,7 +66,7 @@ const features = [
   {
     icon: Video,
     title: "Multi-phone camera room",
-    body: "Pair phones at both ends and side-on. One tap starts the room, angles stay linked to the ball they captured.",
+    body: "Pair phones at both ends and side-on — or add as many angles as the situation needs. One tap starts the room, angles stay linked to the ball they captured.",
   },
   {
     icon: Activity,
@@ -128,7 +128,7 @@ const faqs = [
   },
   {
     q: "Do I need special cameras?",
-    a: "No. The camera room pairs ordinary phones. Point one at each end and one side-on, and every angle is tied back to the delivery it recorded.",
+    a: "No. The camera room pairs ordinary phones. Start with one at each end and one side-on, then add as many extra angles as you need — every recording is tied back to the delivery it captured.",
   },
   {
     q: "Can I score without signal?",
@@ -250,7 +250,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
 
       <section className="grid grid-cols-3 gap-2 text-center">
         {[
-          { k: "4", v: "camera angles per ball" },
+          { k: "4+", v: "camera angles per ball" },
           { k: "<1s", v: "to log a delivery" },
           { k: "100%", v: "match history kept" },
         ].map((s) => (
