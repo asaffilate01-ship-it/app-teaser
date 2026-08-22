@@ -660,9 +660,10 @@ function ScreensTab() {
               />
             </div>
             <figcaption className="space-y-1.5 p-4 md:p-6">
-              <p className="font-display text-lg font-bold uppercase leading-none text-gold md:text-2xl">
+              <p className="font-display text-lg font-bold leading-tight text-gold md:text-2xl">
                 {s.label}
               </p>
+
               <p className="text-sm leading-relaxed text-muted-foreground md:text-sm">
                 {s.caption}
               </p>
