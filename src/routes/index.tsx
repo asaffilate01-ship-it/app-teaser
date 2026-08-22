@@ -220,15 +220,11 @@ function Header({
 }) {
   const isHome = tab === "home";
   return (
-    <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 px-5 py-3 backdrop-blur-xl md:px-8 md:py-4 lg:px-12">
+    <header className="sticky top-0 z-20 border-b border-border/15 bg-white px-5 py-3 shadow-sm backdrop-blur-xl md:px-8 md:py-4 lg:px-12">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
         <button onClick={onHome} className="flex shrink-0 items-center gap-2.5" aria-label="Wickentra home">
-          <img src={logoMark} alt="" className="h-9 w-auto md:h-10" width={681} height={581} />
-          <span className="font-display text-xl leading-none tracking-[0.04em] text-foreground md:text-2xl">
-            Wickentra
-          </span>
+          <img src={logoAsset.url} alt="Wickentra" className="h-10 w-auto md:h-12" width={1600} height={600} />
         </button>
-
 
         {/* Desktop / tablet nav */}
         <nav className="hidden md:flex md:items-center md:gap-1">
@@ -241,8 +237,8 @@ function Header({
                 aria-current={tab === t.id ? "page" : undefined}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                   tab === t.id
-                    ? "bg-secondary text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-primary/10 text-primary"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 {t.label}
@@ -258,12 +254,12 @@ function Header({
 
         {!isHome && (
           <div className="flex items-center gap-2 md:hidden">
-            <span className="font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">
+            <span className="font-display text-sm font-bold uppercase tracking-wide text-slate-500">
               {label}
             </span>
             <button
               onClick={onHome}
-              className="flex size-8 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
+              className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-slate-800 transition-colors hover:bg-slate-200"
               aria-label="Back to home"
             >
               <ArrowLeft className="size-4" />
