@@ -451,9 +451,10 @@ function ScreensTab() {
 function FaqTab() {
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 md:mx-auto md:max-w-3xl md:space-y-8">
       <SectionTitle kicker="Answers">FAQs</SectionTitle>
-      <div className="space-y-2.5">
+      <div className="space-y-2.5 md:space-y-3">
+
         {faqs.map((f, i) => {
           const isOpen = open === i;
           return (
