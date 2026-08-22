@@ -32,7 +32,7 @@ import shotReview from "@/assets/shot-review.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CricLume — Cricket Scoring, Cameras & Coaching Review" },
+      { title: "CricLume — See every ball. Shape every game." },
       {
         name: "description",
         content:
@@ -45,8 +45,13 @@ export const Route = createFileRoute("/")({
           "Ball-by-ball scoring, multi-phone camera rooms, live scoreboards and slow-motion coaching review for clubs and academies.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "/" },
+      { property: "og:image", content: "https://criclume.com/images/promo-hero.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://criclume.com/images/promo-hero.jpg" },
     ],
+    links: [{ rel: "canonical", href: "/" }],
+
   }),
   component: Promo,
 });
