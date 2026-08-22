@@ -279,9 +279,13 @@
 }
 
 @utility dark-band {
-  background-color: color-mix(in oklab, var(--foreground) 94%, var(--primary));
-  color: var(--background);
+  background-color: oklch(0.1 0.012 285);
+  background-image:
+    radial-gradient(120% 90% at 15% 0%, color-mix(in oklab, var(--primary) 35%, transparent), transparent 60%),
+    repeating-linear-gradient(115deg, color-mix(in oklab, white 3%, transparent) 0 2px, transparent 2px 14px);
+  color: oklch(0.97 0.006 85);
 }
+
 
 @utility rule-heading {
   position: relative;
