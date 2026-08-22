@@ -351,15 +351,18 @@ function FeatureRow({
   body: string;
 }) {
   return (
-    <article className="surface-card lift-card group relative flex gap-3.5 p-4">
-      <span className="icon-tile flex size-11 shrink-0 items-center justify-center rounded-2xl text-primary-foreground">
-        <Icon className="size-5" strokeWidth={2.2} />
+    <article className="surface-card lift-card group relative flex gap-3.5 p-4 md:flex-col md:gap-4 md:p-6">
+      <span className="icon-tile flex size-11 shrink-0 items-center justify-center rounded-2xl text-primary-foreground md:size-12">
+        <Icon className="size-5 md:size-6" strokeWidth={2.2} />
       </span>
       <div className="min-w-0">
-        <h3 className="text-[15px] font-semibold tracking-tight">{title}</h3>
-        <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{body}</p>
+        <h3 className="text-[15px] font-semibold tracking-tight md:text-lg">{title}</h3>
+        <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground md:mt-2 md:text-sm">
+          {body}
+        </p>
       </div>
     </article>
+
   );
 }
 
