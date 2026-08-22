@@ -172,7 +172,7 @@ const faqs = [
   },
   {
     q: "Is there a free option?",
-    a: "Yes. Starter is free for a single team with ball-by-ball scoring, a live scoreboard and one camera angle per delivery. It is supported by light advertising on scoreboard and review pages. You only pay when you want more angles, longer video retention and club-wide analysis.",
+    a: "Yes. Starter is free for a single team with ball-by-ball scoring and a live scoreboard. The camera room is not included — you add angles once you move to the Club plan. It is supported by light advertising on scoreboard and review pages.",
   },
   {
     q: "How do I get access?",
@@ -747,8 +747,7 @@ const plans = [
     perks: [
       "Ball-by-ball scoring for 1 team",
       "Live scoreboard + public match link",
-      "1 camera angle per delivery",
-      "7-day video retention",
+      "No camera room — upgrade to add angles",
       "Basic batting & bowling stats",
       "Light advertising on scoreboard and review pages",
     ],
