@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 
 import logoAsset from "@/assets/wickentra-logo-header.png.asset.json";
+import fullLogoAsset from "@/assets/wickentra-logo-full.png.asset.json";
 import shotDashboard from "@/assets/shot-dashboard.jpg";
 import shotScoreboard from "@/assets/shot-scoreboard.jpg";
 import shotMobile from "@/assets/shot-mobile.jpg";
