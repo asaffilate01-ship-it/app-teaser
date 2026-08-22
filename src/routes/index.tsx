@@ -144,8 +144,9 @@ const faqs = [
   },
   {
     q: "How do I get access?",
-    a: "Wickentra is invite-only while clubs onboard in waves. Sign in below if you already have an account, or request access and we will place you in the next wave.",
+    a: "Sign in if your club already has an account, or request an invite and we will get your club set up.",
   },
+
 ];
 
 function Promo() {
@@ -177,9 +178,10 @@ const tickerItems = [
   "Live • Riverside CC 148/4 (18.2)",
   "4+ camera angles per delivery",
   "Coaching review • frame-by-frame",
-  "Invite-only beta — clubs onboarding in waves",
+  "Request an invite for your club",
   "Scoreboards ready for stream overlay",
 ];
+
 
 function Ticker() {
   return (
@@ -297,9 +299,10 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         <section className="space-y-4 md:space-y-6">
           <span className="skew-tag inline-flex items-center px-4 py-1.5 text-primary-foreground">
             <span className="text-xs font-bold uppercase tracking-[0.12em]">
-              Invite-only beta
+              Request an invite
             </span>
           </span>
+
           <h1 className="text-[2.8rem] font-bold leading-[1.05] tracking-tight md:text-6xl lg:text-[5.2rem]">
             Every ball.
             <br />
@@ -550,9 +553,10 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         </div>
         <div className="space-y-2">
           <p className="text-xs font-bold uppercase tracking-[0.12em] text-gold">Access</p>
-          <p className="text-sm opacity-75">Invite-only beta</p>
-          <p className="text-sm opacity-75">Clubs onboarding in waves</p>
+          <p className="text-sm opacity-75">By invitation for clubs</p>
+          <p className="text-sm opacity-75">Request access for your team</p>
           <button
+
             onClick={() => onNavigate("login")}
             className="brand-gradient mt-2 inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-bold uppercase tracking-wider text-primary-foreground"
           >
@@ -727,9 +731,9 @@ function LoginTab() {
 
         <div className="hairline h-px w-16" />
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Wickentra is invite-only. Sign in to open the scoring platform, or request access for your
-          club.
+          Sign in to open the scoring platform, or request an invite for your club.
         </p>
+
       </div>
 
       <form
@@ -772,9 +776,10 @@ function LoginTab() {
         </button>
         {sent && (
           <p className="text-center text-sm text-gold">
-            Access is invite-only right now — we have logged your request and will be in touch.
+            Thanks — we have logged your request and will be in touch.
           </p>
         )}
+
         <p className="text-center text-sm text-muted-foreground">
           No account yet?{" "}
           <span className="font-semibold text-gold">Request an invite for your club.</span>
