@@ -17,6 +17,9 @@ import {
   ArrowRight,
   ArrowLeft,
   Check,
+  Eye,
+  Globe,
+
 } from "lucide-react";
 
 import logoAsset from "@/assets/wickentra-logo-header.png.asset.json";
