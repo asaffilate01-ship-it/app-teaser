@@ -254,15 +254,18 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           { k: "<1s", v: "to log a delivery" },
           { k: "100%", v: "match history kept" },
         ].map((s) => (
-          <div key={s.v} className="surface-card px-2 py-4">
-            <p className="font-display text-2xl font-bold text-gold">{s.k}</p>
-            <p className="mt-1 text-[11px] leading-tight text-muted-foreground">{s.v}</p>
+          <div key={s.v} className="surface-card lift-card px-2 py-4">
+            <p className="font-display text-2xl font-bold leading-none bg-gradient-to-br from-primary to-gold bg-clip-text text-transparent">
+              {s.k}
+            </p>
+            <p className="mt-1.5 text-[11px] leading-tight text-muted-foreground">{s.v}</p>
           </div>
         ))}
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-xl font-bold uppercase">Built for match day</h2>
+        <SectionTitle kicker="Match day">Built for match day</SectionTitle>
+
         {features.slice(0, 3).map((f) => (
           <FeatureRow key={f.title} {...f} />
         ))}
