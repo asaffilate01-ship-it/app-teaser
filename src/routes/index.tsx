@@ -624,6 +624,34 @@ function FeaturesTab() {
           <FeatureRow key={f.title} {...f} />
         ))}
       </div>
+      <div className="surface-card space-y-4 p-4 md:p-7">
+        <div className="flex items-center gap-2.5">
+          <span className="icon-tile flex size-9 items-center justify-center rounded-xl text-primary-foreground">
+            <Globe className="size-4.5" strokeWidth={2.2} />
+          </span>
+          <h3 className="text-[15px] font-semibold tracking-tight md:text-lg">Who can watch live</h3>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Leagues set a default for a competition, clubs can override it per match — and change it mid-innings.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {[
+            { t: "Club only", d: "Scorers, coaches and members of your own club." },
+            { t: "Opposition club", d: "The other team's staff and players follow the same live feed." },
+            { t: "League office", d: "Competition admins see every fixture live for results and compliance." },
+            { t: "Public link", d: "Supporters and family follow the scoreboard in a browser — no account needed." },
+          ].map((o) => (
+            <div key={o.t} className="rounded-lg border border-border/60 p-3.5">
+              <div className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+                <Eye className="size-4 text-gold" strokeWidth={2.2} />
+                {o.t}
+              </div>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{o.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="surface-card space-y-3 p-4 md:p-7">
         <div className="flex items-center gap-2.5">
           <span className="icon-tile flex size-9 items-center justify-center rounded-xl text-primary-foreground">
