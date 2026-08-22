@@ -526,34 +526,33 @@ function SectionHeader({
 
 function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
   return (
-    <footer className="dark-band mt-10 px-5 pb-28 pt-10 md:mt-16 md:px-8 md:pb-12 lg:px-12">
+    <footer className="mt-10 border-t border-border/15 bg-white px-5 pb-28 pt-10 md:mt-16 md:px-8 md:pb-12 lg:px-12">
       <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-[1.2fr_1fr_1fr]">
         <div className="space-y-3">
-          <p className="font-display text-2xl font-bold leading-none tracking-tight">Wickentra</p>
+          <p className="font-display text-2xl font-bold leading-none tracking-tight text-slate-900">Wickentra</p>
 
-          <p className="max-w-sm text-sm leading-relaxed opacity-75">
+          <p className="max-w-sm text-sm leading-relaxed text-slate-600">
             Ball-by-ball scoring, multi-angle camera rooms, live scoreboards and coaching review for
             clubs, leagues and academies.
           </p>
         </div>
         <div className="space-y-2">
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-gold">Explore</p>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">Explore</p>
           {tabs.map((t) => (
             <button
               key={t.id}
               onClick={() => onNavigate(t.id)}
-              className="block text-sm opacity-75 hover:opacity-100"
+              className="block text-sm text-slate-600 hover:text-slate-900"
             >
               {t.label}
             </button>
           ))}
         </div>
         <div className="space-y-2">
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-gold">Access</p>
-          <p className="text-sm opacity-75">By invitation for clubs</p>
-          <p className="text-sm opacity-75">Request access for your team</p>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">Access</p>
+          <p className="text-sm text-slate-600">By invitation for clubs</p>
+          <p className="text-sm text-slate-600">Request access for your team</p>
           <button
-
             onClick={() => onNavigate("login")}
             className="brand-gradient mt-2 inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-bold uppercase tracking-wider text-primary-foreground"
           >
@@ -561,7 +560,7 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           </button>
         </div>
       </div>
-      <div className="mx-auto mt-8 w-full max-w-6xl border-t border-white/15 pt-5 text-xs uppercase tracking-wide opacity-60">
+      <div className="mx-auto mt-8 w-full max-w-6xl border-t border-slate-200 pt-5 text-xs uppercase tracking-wide text-slate-500">
         © {new Date().getFullYear()} Wickentra — Every ball. Every angle. Every advantage.
       </div>
     </footer>
