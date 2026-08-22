@@ -128,7 +128,7 @@ const faqs = [
   },
   {
     q: "Do I need special cameras?",
-    a: "No. The camera room pairs ordinary phones. Point one at each end and one side-on, and every angle is tied back to the delivery it recorded.",
+    a: "No. The camera room pairs ordinary phones. Start with one at each end and one side-on, then add as many extra angles as you need — every recording is tied back to the delivery it captured.",
   },
   {
     q: "Can I score without signal?",
