@@ -19,7 +19,7 @@ import {
   Check,
 } from "lucide-react";
 
-import logoMark from "@/assets/wickentra-mark.png";
+import logoAsset from "@/assets/wickentra-logo-header.png.asset.json";
 import shotDashboard from "@/assets/shot-dashboard.jpg";
 import shotScoreboard from "@/assets/shot-scoreboard.jpg";
 import shotMobile from "@/assets/shot-mobile.jpg";
@@ -220,15 +220,11 @@ function Header({
 }) {
   const isHome = tab === "home";
   return (
-    <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 px-5 py-3 backdrop-blur-xl md:px-8 md:py-4 lg:px-12">
+    <header className="sticky top-0 z-20 border-b border-border/15 bg-white px-5 py-3 shadow-sm backdrop-blur-xl md:px-8 md:py-4 lg:px-12">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
         <button onClick={onHome} className="flex shrink-0 items-center gap-2.5" aria-label="Wickentra home">
-          <img src={logoMark} alt="" className="h-9 w-auto md:h-10" width={681} height={581} />
-          <span className="font-display text-xl leading-none tracking-[0.04em] text-foreground md:text-2xl">
-            Wickentra
-          </span>
+          <img src={logoAsset.url} alt="Wickentra" className="h-10 w-auto md:h-12" width={1600} height={600} />
         </button>
-
 
         {/* Desktop / tablet nav */}
         <nav className="hidden md:flex md:items-center md:gap-1">
@@ -241,8 +237,8 @@ function Header({
                 aria-current={tab === t.id ? "page" : undefined}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                   tab === t.id
-                    ? "bg-secondary text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-primary/10 text-primary"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 {t.label}
@@ -258,12 +254,12 @@ function Header({
 
         {!isHome && (
           <div className="flex items-center gap-2 md:hidden">
-            <span className="font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">
+            <span className="font-display text-sm font-bold uppercase tracking-wide text-slate-500">
               {label}
             </span>
             <button
               onClick={onHome}
-              className="flex size-8 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
+              className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-slate-800 transition-colors hover:bg-slate-200"
               aria-label="Back to home"
             >
               <ArrowLeft className="size-4" />
@@ -530,34 +526,33 @@ function SectionHeader({
 
 function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
   return (
-    <footer className="dark-band mt-10 px-5 pb-28 pt-10 md:mt-16 md:px-8 md:pb-12 lg:px-12">
+    <footer className="mt-10 border-t border-border/15 bg-white px-5 pb-28 pt-10 md:mt-16 md:px-8 md:pb-12 lg:px-12">
       <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-[1.2fr_1fr_1fr]">
         <div className="space-y-3">
-          <p className="font-display text-2xl font-bold leading-none tracking-tight">Wickentra</p>
+          <p className="font-display text-2xl font-bold leading-none tracking-tight text-slate-900">Wickentra</p>
 
-          <p className="max-w-sm text-sm leading-relaxed opacity-75">
+          <p className="max-w-sm text-sm leading-relaxed text-slate-600">
             Ball-by-ball scoring, multi-angle camera rooms, live scoreboards and coaching review for
             clubs, leagues and academies.
           </p>
         </div>
         <div className="space-y-2">
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-gold">Explore</p>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">Explore</p>
           {tabs.map((t) => (
             <button
               key={t.id}
               onClick={() => onNavigate(t.id)}
-              className="block text-sm opacity-75 hover:opacity-100"
+              className="block text-sm text-slate-600 hover:text-slate-900"
             >
               {t.label}
             </button>
           ))}
         </div>
         <div className="space-y-2">
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-gold">Access</p>
-          <p className="text-sm opacity-75">By invitation for clubs</p>
-          <p className="text-sm opacity-75">Request access for your team</p>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">Access</p>
+          <p className="text-sm text-slate-600">By invitation for clubs</p>
+          <p className="text-sm text-slate-600">Request access for your team</p>
           <button
-
             onClick={() => onNavigate("login")}
             className="brand-gradient mt-2 inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-bold uppercase tracking-wider text-primary-foreground"
           >
@@ -565,7 +560,7 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           </button>
         </div>
       </div>
-      <div className="mx-auto mt-8 w-full max-w-6xl border-t border-white/15 pt-5 text-xs uppercase tracking-wide opacity-60">
+      <div className="mx-auto mt-8 w-full max-w-6xl border-t border-slate-200 pt-5 text-xs uppercase tracking-wide text-slate-500">
         © {new Date().getFullYear()} Wickentra — Every ball. Every angle. Every advantage.
       </div>
     </footer>
@@ -796,7 +791,7 @@ function LoginTab() {
 
 function BottomNav({ tab, onChange }: { tab: TabId; onChange: (t: TabId) => void }) {
   return (
-    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] nav-shadow backdrop-blur-xl md:hidden">
+    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.08)] backdrop-blur-xl md:hidden">
       <ul className="grid grid-cols-5">
         {tabs.map(({ id, label, icon: Icon }) => {
           const active = tab === id;
@@ -806,7 +801,7 @@ function BottomNav({ tab, onChange }: { tab: TabId; onChange: (t: TabId) => void
                 onClick={() => onChange(id)}
                 aria-current={active ? "page" : undefined}
                 className={`flex w-full flex-col items-center gap-1 py-2.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
-                  active ? "text-gold" : "text-muted-foreground hover:text-foreground"
+                  active ? "text-primary" : "text-slate-500 hover:text-slate-900"
                 }`}
               >
                 <span
