@@ -300,7 +300,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
               Invite-only beta
             </span>
           </span>
-          <h1 className="text-[2.8rem] font-bold uppercase leading-[0.88] md:text-6xl lg:text-[5.2rem]">
+          <h1 className="text-[2.8rem] font-bold leading-[1.05] tracking-tight md:text-6xl lg:text-[5.2rem]">
             Every ball.
             <br />
             Every angle.
@@ -309,6 +309,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
               Every advantage.
             </span>
           </h1>
+
           <p className="text-sm leading-relaxed text-muted-foreground md:max-w-xl md:text-base">
             Wickentra turns a club match into a full record: ball-by-ball scoring, synced phone
             cameras at every angle, live scoreboards and a coaching review room the whole squad can
@@ -391,9 +392,10 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
                   <span className="text-xs font-bold uppercase tracking-[0.12em] text-gold">
                     {f.tag}
                   </span>
-                  <h3 className="truncate font-display text-lg font-bold uppercase leading-tight md:text-xl">
+                  <h3 className="truncate font-display text-lg font-bold leading-tight md:text-xl">
                     {f.home} <span className="text-muted-foreground">vs</span> {f.away}
                   </h3>
+
                   <p className="text-sm text-muted-foreground">
                     {f.date} • {f.time}
                   </p>
