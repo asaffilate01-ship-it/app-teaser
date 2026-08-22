@@ -564,7 +564,8 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         </div>
       </div>
       <div className="mx-auto mt-8 w-full max-w-6xl border-t border-slate-200 pt-5 text-xs uppercase tracking-wide text-slate-500">
-        © {new Date().getFullYear()} Wickentra — Every ball. Every angle. Every advantage.
+        <p>© {new Date().getFullYear()} Wickentra — Every ball. Every angle. Every advantage.</p>
+        <p className="mt-1 text-[11px] normal-case tracking-normal text-slate-400">Wickentra is a trading name of iTechLounge Ltd.</p>
       </div>
     </footer>
   );
