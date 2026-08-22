@@ -387,10 +387,11 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           Built for match day
         </SectionHeader>
         <div className="space-y-3 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 lg:grid-cols-3">
-          {features.slice(0, 3).map((f) => (
+          {[features[0], features[1], features[features.length - 1]].map((f) => (
             <FeatureRow key={f.title} {...f} />
           ))}
         </div>
+
       </section>
 
       {/* Fixtures + league table, Kester-style two-column board */}
