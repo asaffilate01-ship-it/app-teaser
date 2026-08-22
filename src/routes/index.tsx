@@ -19,8 +19,8 @@ import {
   Check,
 } from "lucide-react";
 
-import logoAsset from "@/assets/wickentra-logo-header.png.asset.json";
-import fullLogoAsset from "@/assets/wickentra-logo-full.png.asset.json";
+import logoUrl from "@/assets/wickentra-logo-header.png";
+import fullLogoUrl from "@/assets/wickentra-logo-full.png";
 import shotDashboard from "@/assets/shot-dashboard.jpg";
 import shotScoreboard from "@/assets/shot-scoreboard.jpg";
 import shotMobile from "@/assets/shot-mobile.jpg";
