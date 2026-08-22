@@ -136,8 +136,9 @@ const faqs = [
   },
   {
     q: "Does it handle rain rules?",
-    a: "Match data includes rain-method fields as an architectural foundation. Certified calculations arrive once the licensed resources are in place — we will not present unverified numbers as official.",
+    a: "Yes. Wickentra applies standard rain rules to adjust targets and results when a match is interrupted.",
   },
+
   {
     q: "Where is video stored?",
     a: "Clips and annotations are stored against the match in your organisation's own space, with consent and privacy controls part of the launch roadmap.",
