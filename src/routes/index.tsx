@@ -369,24 +369,25 @@ function FeatureRow({
 
 function FeaturesTab() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 md:space-y-8">
       <SectionTitle kicker="Platform">Features</SectionTitle>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground md:text-base">
         Everything that ships in the current Wickentra build.
       </p>
-      <div className="space-y-3">
+      <div className="space-y-3 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 lg:grid-cols-3">
         {features.map((f) => (
           <FeatureRow key={f.title} {...f} />
         ))}
       </div>
-      <div className="surface-card space-y-3 p-4">
+      <div className="surface-card space-y-3 p-4 md:p-7">
         <div className="flex items-center gap-2.5">
           <span className="icon-tile flex size-9 items-center justify-center rounded-xl text-primary-foreground">
             <Shield className="size-4.5" strokeWidth={2.2} />
           </span>
-          <h3 className="text-[15px] font-semibold tracking-tight">Also included</h3>
+          <h3 className="text-[15px] font-semibold tracking-tight md:text-lg">Also included</h3>
         </div>
-        <ul className="space-y-2.5">
+        <ul className="space-y-2.5 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-3 md:space-y-0">
+
           {[
             "Field zones, fielder selection and delivery timeline",
             "Undo on any ball, with a full audit of edits",
