@@ -335,7 +335,7 @@ function SectionTitle({ children, kicker }: { children: React.ReactNode; kicker?
           {kicker}
         </span>
       )}
-      <h2 className="text-3xl font-bold uppercase leading-none">{children}</h2>
+      <h2 className="text-3xl font-bold uppercase leading-none md:text-5xl">{children}</h2>
       <div className="hairline h-px w-16" />
     </div>
   );
