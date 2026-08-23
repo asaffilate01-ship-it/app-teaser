@@ -152,7 +152,7 @@ export const en = {
           "Share live scoring with opposition clubs",
           "Season-long club analytics",
         ],
-        cta: "Request an invite",
+        cta: "Get started",
       },
       {
         name: "League",
@@ -212,7 +212,7 @@ export const en = {
     access: "Access",
     accessLine1: "By invitation for clubs",
     accessLine2: "Request access for your team",
-    cta: "Request an invite",
+    cta: "Sign in",
     copyright: "CricLume — See every ball. Shape every game.",
     legal: "CricLume is a trading name of iTechLounge Ltd.",
   },
