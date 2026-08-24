@@ -78,10 +78,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "CricLume — See every ball. Shape every game." },
-      { name: "description", content: "Ball-by-ball cricket scoring, multi-angle camera rooms, live scoreboards and coaching review." },
+      {
+        name: "description",
+        content:
+          "Ball-by-ball cricket scoring, multi-angle camera rooms, live scoreboards and coaching review.",
+      },
       { name: "author", content: "CricLume" },
       { property: "og:title", content: "CricLume — See every ball. Shape every game." },
-      { property: "og:description", content: "Ball-by-ball cricket scoring, multi-angle camera rooms, live scoreboards and coaching review for clubs and academies." },
+      {
+        property: "og:description",
+        content:
+          "Ball-by-ball cricket scoring, multi-angle camera rooms, live scoreboards and coaching review for clubs and academies.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@criclume" },
@@ -98,7 +106,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Manrope:wght@400;500;700&display=swap",
       },
-
     ],
   }),
   shellComponent: RootShell,

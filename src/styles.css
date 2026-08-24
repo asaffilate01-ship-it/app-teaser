@@ -84,13 +84,17 @@
   --ring: oklch(0.8 0.15 84);
   --gold: oklch(0.8 0.15 84);
   --gold-foreground: oklch(0.18 0.03 30);
-  --gradient-brand: linear-gradient(115deg, oklch(0.32 0.12 20), oklch(0.52 0.19 22) 55%, oklch(0.8 0.15 84));
+  --gradient-brand: linear-gradient(
+    115deg,
+    oklch(0.32 0.12 20),
+    oklch(0.52 0.19 22) 55%,
+    oklch(0.8 0.15 84)
+  );
   --gradient-surface: linear-gradient(180deg, oklch(0.24 0.017 285), oklch(0.18 0.013 285));
   --shadow-glow: 0 22px 60px -22px oklch(0.52 0.19 22 / 0.6);
   --shadow-nav: 0 -8px 30px -10px color-mix(in oklab, oklch(0 0 0) 60%, transparent);
   --font-display: "Oswald", ui-sans-serif, system-ui;
   --font-body: "Manrope", ui-sans-serif, system-ui;
-
 
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -129,7 +133,12 @@
   --ring: oklch(0.82 0.15 84);
   --gold: oklch(0.82 0.15 84);
   --gold-foreground: oklch(0.18 0.03 30);
-  --gradient-brand: linear-gradient(115deg, oklch(0.3 0.12 20), oklch(0.55 0.2 22) 55%, oklch(0.82 0.15 84));
+  --gradient-brand: linear-gradient(
+    115deg,
+    oklch(0.3 0.12 20),
+    oklch(0.55 0.2 22) 55%,
+    oklch(0.82 0.15 84)
+  );
   --gradient-surface: linear-gradient(180deg, oklch(0.22 0.017 285), oklch(0.16 0.013 285));
   --shadow-glow: 0 22px 60px -22px oklch(0.55 0.2 22 / 0.6);
   --shadow-nav: 0 -8px 30px -10px color-mix(in oklab, oklch(0 0 0) 60%, transparent);
@@ -172,7 +181,10 @@
     font-family: var(--font-body);
     -webkit-tap-highlight-color: transparent;
   }
-  h1, h2, h3, .font-display {
+  h1,
+  h2,
+  h3,
+  .font-display {
     font-family: var(--font-display);
     font-weight: 700;
     line-height: 1.1;
@@ -183,7 +195,6 @@
     line-height: 1.05;
   }
 }
-
 
 @utility brand-gradient {
   background-image: var(--gradient-brand);
@@ -241,11 +252,62 @@
   box-shadow: var(--shadow-nav);
 }
 
-
 @utility no-scrollbar {
   scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@utility scorer-input {
+  width: 100%;
+  height: 3rem;
+  border-radius: 0.85rem;
+  border: 1px solid color-mix(in oklab, white 12%, transparent);
+  background: color-mix(in oklab, white 5%, transparent);
+  padding-inline: 0.85rem;
+  color: oklch(0.96 0.01 85);
+  font-size: 0.875rem;
+  outline: none;
+  &:focus {
+    border-color: oklch(0.82 0.15 84 / 70%);
+    box-shadow: 0 0 0 3px oklch(0.82 0.15 84 / 10%);
+  }
+  & option {
+    background: oklch(0.18 0.015 285);
+    color: oklch(0.96 0.01 85);
+  }
+}
+
+@utility video-control {
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, white 12%, transparent);
+  background: color-mix(in oklab, white 5%, transparent);
+  color: oklch(0.93 0.01 85);
+}
+
+@utility legal-copy {
+  color: oklch(0.8 0.012 85);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  & h2 {
+    padding-top: 1rem;
+    color: oklch(0.96 0.01 85);
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  & a {
+    color: oklch(0.82 0.15 84);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 }
 
@@ -267,8 +329,12 @@
 /* --- Kester-inspired sports-editorial utilities --- */
 
 @keyframes ticker-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 @utility ticker-track {
@@ -289,11 +355,18 @@
 @utility dark-band {
   background-color: oklch(0.1 0.012 285);
   background-image:
-    radial-gradient(120% 90% at 15% 0%, color-mix(in oklab, var(--primary) 35%, transparent), transparent 60%),
-    repeating-linear-gradient(115deg, color-mix(in oklab, white 3%, transparent) 0 2px, transparent 2px 14px);
+    radial-gradient(
+      120% 90% at 15% 0%,
+      color-mix(in oklab, var(--primary) 35%, transparent),
+      transparent 60%
+    ),
+    repeating-linear-gradient(
+      115deg,
+      color-mix(in oklab, white 3%, transparent) 0 2px,
+      transparent 2px 14px
+    );
   color: oklch(0.97 0.006 85);
 }
-
 
 @utility rule-heading {
   position: relative;

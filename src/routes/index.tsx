@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { regions, defaultRegion, findRegion, detectCountry, type Region } from "@/lib/pricing";
 import { I18nProvider, useI18n, LanguageSelect } from "@/lib/i18n";
@@ -50,12 +50,18 @@ export const Route = createFileRoute("/")({
           "Ball-by-ball scoring, multi-phone camera rooms, live scoreboards and slow-motion coaching review for clubs and academies.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/" },
-      { property: "og:image", content: "https://criclume.com/images/promo-hero.jpg" },
+      { property: "og:url", content: "https://app-teaser.lovable.app/" },
+      {
+        property: "og:image",
+        content: `https://app-teaser.lovable.app${fullLogoAsset.url}`,
+      },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "https://criclume.com/images/promo-hero.jpg" },
+      {
+        name: "twitter:image",
+        content: `https://app-teaser.lovable.app${fullLogoAsset.url}`,
+      },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: "https://app-teaser.lovable.app/" }],
   }),
   component: PromoRoot,
 });
@@ -98,7 +104,12 @@ function Promo() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-border/60 md:max-w-none md:border-x-0">
         <Ticker />
-        <Header tab={tab} label={t.nav[active.key]} onHome={() => setTab("home")} onChange={setTab} />
+        <Header
+          tab={tab}
+          label={t.nav[active.key]}
+          onHome={() => setTab("home")}
+          onChange={setTab}
+        />
         <main className="flex-1 overflow-y-auto px-5 pb-10 pt-5 md:mx-auto md:w-full md:max-w-6xl md:px-8 md:pb-16 md:pt-12 lg:px-12">
           <TabPanel key={tab}>
             {tab === "home" && <HomeTab onNavigate={setTab} />}
@@ -155,8 +166,18 @@ function Header({
   return (
     <header className="sticky top-0 z-20 border-b border-border/15 bg-white px-5 py-3 shadow-sm backdrop-blur-xl md:px-8 md:py-4 lg:px-12">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
-        <button onClick={onHome} className="flex shrink-0 items-center gap-2.5" aria-label="CricLume">
-          <img src={logoAsset.url} alt="CricLume" className="h-10 w-auto md:h-12" width={1600} height={600} />
+        <button
+          onClick={onHome}
+          className="flex shrink-0 items-center gap-2.5"
+          aria-label="CricLume"
+        >
+          <img
+            src={logoAsset.url}
+            alt="CricLume"
+            className="h-10 w-auto md:h-12"
+            width={1600}
+            height={600}
+          />
         </button>
 
         {/* Desktop / tablet nav */}
@@ -169,7 +190,9 @@ function Header({
                 onClick={() => onChange(m.id)}
                 aria-current={tab === m.id ? "page" : undefined}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                  tab === m.id ? "bg-primary/10 text-primary" : "text-slate-600 hover:text-slate-900"
+                  tab === m.id
+                    ? "bg-primary/10 text-primary"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 {t.nav[m.key]}
@@ -211,9 +234,27 @@ function TabPanel({ children }: { children: React.ReactNode }) {
 }
 
 const fixtures = [
-  { date: "Sat 12 Sep", time: "13:00", home: "Riverside CC", away: "Northgate CC", tag: "league" as const },
-  { date: "Sun 13 Sep", time: "11:30", home: "Ashford Academy", away: "Kings XI", tag: "academy" as const },
-  { date: "Wed 16 Sep", time: "18:00", home: "Old Mill CC", away: "Harbour CC", tag: "cup" as const },
+  {
+    date: "Sat 12 Sep",
+    time: "13:00",
+    home: "Riverside CC",
+    away: "Northgate CC",
+    tag: "league" as const,
+  },
+  {
+    date: "Sun 13 Sep",
+    time: "11:30",
+    home: "Ashford Academy",
+    away: "Kings XI",
+    tag: "academy" as const,
+  },
+  {
+    date: "Wed 16 Sep",
+    time: "18:00",
+    home: "Old Mill CC",
+    away: "Harbour CC",
+    tag: "cup" as const,
+  },
 ];
 
 const leaderboard = [
@@ -246,7 +287,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           </p>
           <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
             <button
-              onClick={() => onNavigate("login")}
+              onClick={() => window.location.assign("/app")}
               className="brand-gradient glow inline-flex h-12 items-center justify-center gap-2 rounded-full px-7 text-sm font-bold uppercase tracking-wider text-primary-foreground active:scale-[0.98]"
             >
               {t.hero.ctaPrimary} <ArrowRight className="size-4" />
@@ -302,7 +343,12 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         </SectionHeader>
         <div className="space-y-3 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 lg:grid-cols-3">
           {highlights.map((i) => (
-            <FeatureRow key={i} icon={featureIcons[i]!} title={t.features[i]!.title} body={t.features[i]!.body} />
+            <FeatureRow
+              key={i}
+              icon={featureIcons[i]!}
+              title={t.features[i]!.title}
+              body={t.features[i]!.body}
+            />
           ))}
         </div>
       </section>
@@ -330,7 +376,9 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
                   </p>
                 </div>
                 <span className="skew-tag shrink-0 px-3 py-1.5 text-primary-foreground">
-                  <span className="text-xs font-bold uppercase tracking-widest">{t.home.scoring}</span>
+                  <span className="text-xs font-bold uppercase tracking-widest">
+                    {t.home.scoring}
+                  </span>
                 </span>
               </article>
             ))}
@@ -357,7 +405,9 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
                     <td className="px-2 py-3 font-semibold">{r.name}</td>
                     <td className="px-2 py-3 text-muted-foreground">{r.played}</td>
                     <td className="px-2 py-3 text-muted-foreground">{r.won}</td>
-                    <td className="px-4 py-3 text-right font-display text-base font-bold">{r.pts}</td>
+                    <td className="px-4 py-3 text-right font-display text-base font-bold">
+                      {r.pts}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -383,7 +433,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
             <p className="max-w-xl text-sm opacity-80 md:text-base">{t.home.ctaBody}</p>
           </div>
           <button
-            onClick={() => onNavigate("login")}
+            onClick={() => window.location.assign("/app")}
             className="brand-gradient glow inline-flex h-12 items-center justify-center gap-2 rounded-full px-7 text-sm font-bold uppercase tracking-wider text-primary-foreground"
           >
             {t.home.ctaButton} <ArrowRight className="size-4" />
@@ -459,7 +509,9 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           <LanguageSelect />
         </div>
         <div className="space-y-2">
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">{t.footer.explore}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">
+            {t.footer.explore}
+          </p>
           {tabMeta.map((m) => (
             <button
               key={m.id}
@@ -471,7 +523,9 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           ))}
         </div>
         <div className="space-y-2">
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">{t.footer.access}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">
+            {t.footer.access}
+          </p>
           <p className="text-sm text-slate-600">{t.footer.accessLine1}</p>
           <p className="text-sm text-slate-600">{t.footer.accessLine2}</p>
           <button
@@ -486,7 +540,17 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         <p>
           © {new Date().getFullYear()} {t.footer.copyright}
         </p>
-        <p className="mt-1 text-[11px] normal-case tracking-normal text-slate-400">{t.footer.legal}</p>
+        <p className="mt-1 text-[11px] normal-case tracking-normal text-slate-400">
+          {t.footer.legal}
+        </p>
+        <div className="mt-3 flex gap-4 text-[11px] font-semibold normal-case tracking-normal">
+          <Link to="/privacy" className="hover:text-slate-800">
+            Privacy
+          </Link>
+          <Link to="/terms" className="hover:text-slate-800">
+            Terms
+          </Link>
+        </div>
       </div>
     </footer>
   );
@@ -508,7 +572,9 @@ function FeatureRow({
       </span>
       <div className="min-w-0">
         <h3 className="text-[15px] font-semibold tracking-tight md:text-lg">{title}</h3>
-        <p className="mt-1 text-sm leading-relaxed text-muted-foreground md:mt-2 md:text-sm">{body}</p>
+        <p className="mt-1 text-sm leading-relaxed text-muted-foreground md:mt-2 md:text-sm">
+          {body}
+        </p>
       </div>
     </article>
   );
@@ -520,6 +586,12 @@ function FeaturesTab() {
     <div className="space-y-5 md:space-y-8">
       <SectionHeader kicker={t.featuresTab.kicker}>{t.featuresTab.title}</SectionHeader>
       <p className="text-sm text-muted-foreground md:text-base">{t.featuresTab.intro}</p>
+      <div className="rounded-2xl border border-gold/30 bg-gold/10 p-4 text-sm leading-relaxed text-muted-foreground">
+        <strong className="text-foreground">Available in the preview:</strong> match setup, offline
+        ball-by-ball scoring, scorecards, audit timeline, JSON export and on-device multi-angle
+        video review. Cloud sync, public live scoring, model-assisted AI and official rain-rule
+        calculations are in development.
+      </div>
       <div className="space-y-3 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 lg:grid-cols-3">
         {t.features.map((f, i) => (
           <FeatureRow key={f.title} icon={featureIcons[i]!} title={f.title} body={f.body} />
@@ -601,7 +673,9 @@ function ScreensTab() {
                 <p className="font-display text-lg font-bold leading-tight text-gold md:text-2xl">
                   {s.label}
                 </p>
-                <p className="text-sm leading-relaxed text-muted-foreground md:text-sm">{s.caption}</p>
+                <p className="text-sm leading-relaxed text-muted-foreground md:text-sm">
+                  {s.caption}
+                </p>
               </figcaption>
             </figure>
           );
@@ -638,6 +712,10 @@ function PricingTab() {
       <SectionHeader kicker={t.pricing.kicker}>{t.pricing.title}</SectionHeader>
       <p className="-mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
         {t.pricing.intro} {region.note}
+      </p>
+      <p className="rounded-2xl border border-gold/30 bg-gold/10 p-4 text-sm leading-relaxed text-muted-foreground">
+        These are pilot-plan targets, not an active checkout. The scoring preview is free to use
+        now; paid Club and League plans open after the cloud pilot.
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -695,6 +773,13 @@ function PricingTab() {
                 ))}
               </ul>
               <button
+                onClick={() =>
+                  i === 2
+                    ? window.location.assign(
+                        "mailto:hello@criclume.com?subject=CricLume%20league%20pilot",
+                      )
+                    : window.location.assign("/app")
+                }
                 className={`mt-auto h-11 w-full rounded-full text-sm font-bold uppercase tracking-wider transition-transform active:scale-[0.98] ${featured ? "brand-gradient glow text-primary-foreground" : "border border-border bg-secondary text-foreground"}`}
               >
                 {p.cta}
@@ -768,7 +853,6 @@ function FaqTab() {
 
 function LoginTab() {
   const { t } = useI18n();
-  const [sent, setSent] = useState(false);
 
   return (
     <div className="space-y-5 md:mx-auto md:max-w-md">
@@ -782,50 +866,30 @@ function LoginTab() {
         <p className="text-sm leading-relaxed text-muted-foreground">{t.login.body}</p>
       </div>
 
-      <form
-        className="surface-card space-y-3.5 p-5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          setSent(true);
-        }}
-      >
-        <label className="block space-y-1.5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {t.login.email}
-          </span>
-          <input
-            type="email"
-            required
-            autoComplete="email"
-            placeholder="you@club.com"
-            className="h-12 w-full rounded-xl border border-input bg-background px-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-gold"
-          />
-        </label>
-        <label className="block space-y-1.5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {t.login.password}
-          </span>
-          <input
-            type="password"
-            required
-            autoComplete="current-password"
-            placeholder="••••••••"
-            className="h-12 w-full rounded-xl border border-input bg-background px-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-gold"
-          />
-        </label>
-        <button
-          type="submit"
-          className="brand-gradient glow h-12 w-full rounded-full text-sm font-bold uppercase tracking-wider text-primary-foreground active:scale-[0.98]"
+      <div className="surface-card space-y-3.5 p-5">
+        <div className="rounded-2xl border border-gold/25 bg-gold/10 p-4">
+          <p className="text-sm font-semibold text-foreground">Scoring preview available now</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            Create a match and score ball by ball without an account. Match data stays on this
+            device during the preview.
+          </p>
+        </div>
+        <Link
+          to="/app"
+          className="brand-gradient glow flex h-12 w-full items-center justify-center rounded-full text-sm font-bold uppercase tracking-wider text-primary-foreground active:scale-[0.98]"
         >
           {t.login.submit}
-        </button>
-        {sent && <p className="text-center text-sm text-gold">{t.login.sent}</p>}
-
+        </Link>
         <p className="text-center text-sm text-muted-foreground">
           {t.login.noAccount}{" "}
-          <span className="font-semibold text-gold">{t.login.requestInvite}</span>
+          <a
+            href="mailto:hello@criclume.com?subject=CricLume%20club%20pilot"
+            className="font-semibold text-gold"
+          >
+            {t.login.requestInvite}
+          </a>
         </p>
-      </form>
+      </div>
 
       <p className="text-center text-xs leading-relaxed text-muted-foreground">
         © {new Date().getFullYear()} {t.login.copyright}

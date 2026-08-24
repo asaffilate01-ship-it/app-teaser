@@ -19,8 +19,8 @@ export const en = {
     l1: "Every ball.",
     l2: "Every angle.",
     l3: "Every advantage.",
-    body: "CricLume turns a club match into a full record: ball-by-ball scoring, synced phone cameras at every angle, live scoreboards and a coaching review room the whole squad can learn from.",
-    ctaPrimary: "Sign in to CricLume",
+    body: "CricLume is building the complete club-match record: ball-by-ball scoring today, with synced phone cameras, live scoreboards and AI-assisted coaching review following through the cloud pilot.",
+    ctaPrimary: "Open scoring preview",
     ctaSecondary: "See the screens",
     liveNow: "Live now",
   },
@@ -39,7 +39,8 @@ export const en = {
     vs: "vs",
     seasonKicker: "Season",
     seasonTitle: "Club standings",
-    standingsNote: "Standings, run rates and player records build themselves from every ball you score.",
+    standingsNote:
+      "Standings, run rates and player records build themselves from every ball you score.",
     tablePos: "Pos",
     tableClub: "Club",
     tableP: "P",
@@ -48,10 +49,11 @@ export const en = {
     ctaKicker: "Review room",
     ctaTitle1: "Watch the match back,",
     ctaTitle2: "ball by ball",
-    ctaBody: "Every delivery links to its own synced angles — slow it down, step frames, draw on it and send voice notes to the squad before the next session.",
+    ctaBody:
+      "Every delivery links to its own synced angles — slow it down, step frames, draw on it and send voice notes to the squad before the next session.",
     ctaButton: "Get access",
-    trustKicker: "Built with",
-    trustTitle: "Clubs, leagues and academies",
+    trustKicker: "Preview data",
+    trustTitle: "Example clubs, leagues and academies",
     tags: { league: "League", academy: "Academy", cup: "T20 Cup" },
   },
   features: [
@@ -61,19 +63,19 @@ export const en = {
     },
     {
       title: "Multi-phone camera room",
-      body: "Pair phones at both ends and side-on — or add as many angles as the situation needs. One tap starts the room, angles stay linked to the ball they captured.",
+      body: "Cloud pilot: pair phones at both ends and side-on, then keep every angle linked to the delivery it captured.",
     },
     {
       title: "Coaching review",
-      body: "Slow motion, frame stepping, angle switching, zoom, drawing tools and voice notes for post-match feedback.",
+      body: "Preview available: load multiple local angles, use slow motion, frame stepping, angle switching, zoom and drawing tools.",
     },
     {
       title: "Live scoreboards",
-      body: "Broadcast-quality scoreboards with run rate, partnerships, fall of wickets and a rolling delivery timeline.",
+      body: "Cloud roadmap: share a live scoreboard with run rate, partnerships, fall of wickets and a rolling delivery timeline.",
     },
     {
       title: "Desktop and mobile",
-      body: "Score from a phone on the boundary or a laptop in the clubhouse — the same match, in sync.",
+      body: "Preview available on phone or laptop, with device-to-device cloud sync following in the pilot.",
     },
     {
       title: "Clubs, teams and players",
@@ -81,20 +83,27 @@ export const en = {
     },
     {
       title: "Share live scoring",
-      body: "Leagues and clubs choose who watches a match unfold in real time — the opposition club, followers, the league office, or a public link for supporters.",
+      body: "Cloud roadmap: leagues and clubs choose whether live scoring is private, shared with the opposition or league, or public for supporters.",
     },
   ],
   featuresTab: {
     kicker: "Platform",
     title: "Features",
-    intro: "Everything that ships in the current CricLume build.",
+    intro: "The working scoring preview and the cloud capabilities now being built around it.",
     watchTitle: "Who can watch live",
-    watchBody: "Leagues set a default for a competition, clubs can override it per match — and change it mid-innings.",
+    watchBody:
+      "Leagues set a default for a competition, clubs can override it per match — and change it mid-innings.",
     watchOptions: [
       { t: "Club only", d: "Scorers, coaches and members of your own club." },
       { t: "Opposition club", d: "The other team's staff and players follow the same live feed." },
-      { t: "League office", d: "Competition admins see every fixture live for results and compliance." },
-      { t: "Public link", d: "Supporters and family follow the scoreboard in a browser — no account needed." },
+      {
+        t: "League office",
+        d: "Competition admins see every fixture live for results and compliance.",
+      },
+      {
+        t: "Public link",
+        d: "Supporters and family follow the scoreboard in a browser — no account needed.",
+      },
     ],
     alsoTitle: "Also included",
     alsoItems: [
@@ -110,16 +119,30 @@ export const en = {
     title: "Screens",
     intro: "Dashboards, scoreboards, mobile scoring and the review room.",
     items: [
-      { label: "Club dashboard", caption: "Desktop • live, upcoming and completed matches with run-rate and wagon-wheel analytics" },
-      { label: "Live scoreboard", caption: "Broadcast view • score, batters, bowlers, over timeline and fall of wickets" },
-      { label: "Mobile scoring", caption: "Phone • thumb-first scoring pad with extras, dismissals and recent deliveries" },
-      { label: "Coaching review", caption: "Desktop • four synced angles, frame-by-frame scrubbing and drawing tools" },
+      {
+        label: "Club dashboard",
+        caption:
+          "Desktop • live, upcoming and completed matches with run-rate and wagon-wheel analytics",
+      },
+      {
+        label: "Live scoreboard",
+        caption: "Broadcast view • score, batters, bowlers, over timeline and fall of wickets",
+      },
+      {
+        label: "Mobile scoring",
+        caption: "Phone • thumb-first scoring pad with extras, dismissals and recent deliveries",
+      },
+      {
+        label: "Coaching review",
+        caption: "Desktop • four synced angles, frame-by-frame scrubbing and drawing tools",
+      },
     ],
   },
   pricing: {
     kicker: "Plans",
     title: "Pricing & subscriptions",
-    intro: "Start free with one team. Move to a club or league subscription when you want more angles, longer video retention and competition-wide control.",
+    intro:
+      "Start free with one team. Move to a club or league subscription when you want more angles, longer video retention and competition-wide control.",
     showing: "Showing prices for",
     detecting: "Detecting your region…",
     selectLabel: "Select your country",
@@ -172,26 +195,66 @@ export const en = {
     revenueKicker: "Business model",
     revenueTitle: "How CricLume makes money",
     revenue: [
-      { title: "Subscriptions", body: "Recurring club and league plans are the core of the business — billed monthly or annually per team, with two months free on annual." },
-      { title: "Video & storage add-ons", body: "Extra retention, 4K clips and bulk season archives are priced on top of the base tier." },
-      { title: "Sponsorship & streams", body: "Leagues can sell branded overlays and sponsored public match links; CricLume takes a share of the placement." },
-      { title: "Services", body: "Onboarding, historic data migration and bespoke reporting for larger leagues and academies." },
+      {
+        title: "Subscriptions",
+        body: "Recurring club and league plans are the core of the business — billed monthly or annually per team, with two months free on annual.",
+      },
+      {
+        title: "Video & storage add-ons",
+        body: "Extra retention, 4K clips and bulk season archives are priced on top of the base tier.",
+      },
+      {
+        title: "Sponsorship & streams",
+        body: "Leagues can sell branded overlays and sponsored public match links; CricLume takes a share of the placement.",
+      },
+      {
+        title: "Services",
+        body: "Onboarding, historic data migration and bespoke reporting for larger leagues and academies.",
+      },
     ],
-    footnote: "Annual billing saves two months on every paid tier. Schools and junior sections get 50% off the Club plan.",
+    footnote:
+      "Annual billing saves two months on every paid tier. Schools and junior sections get 50% off the Club plan.",
   },
   faq: {
     kicker: "Answers",
     title: "FAQs",
     items: [
-      { q: "Who is CricLume for?", a: "Clubs, leagues, schools and academies that want proper ball-by-ball records and video they can actually coach from — without a broadcast budget." },
-      { q: "Do I need special cameras?", a: "No. The camera room pairs ordinary phones. Start with one at each end and one side-on, then add as many extra angles as you need — every recording is tied back to the delivery it captured." },
-      { q: "Can I score without signal?", a: "Scoring is built to keep working through patchy ground coverage and sync back up when the connection returns." },
-      { q: "Does it handle rain rules?", a: "Yes. CricLume applies standard rain rules to adjust targets and results when a match is interrupted." },
-      { q: "Where is video stored?", a: "Clips and annotations are stored against the match in your organisation's own space, with consent and privacy controls part of the launch roadmap." },
-      { q: "Can other clubs and the league watch our scoring live?", a: "Yes. Each match has a visibility setting: private to your club, shared with the opposition club, open to your league, or a public link anyone can follow. Leagues can also set a default for every fixture in a competition." },
-      { q: "How does CricLume make money?", a: "Clubs and leagues pay an annual subscription per team or competition, billed on the tier that matches how much scoring, video and analysis they use. Extra video storage, league-wide packages and sponsor-branded streams are paid add-ons." },
-      { q: "Is there a free option?", a: "Yes. Starter is free for a single team with ball-by-ball scoring and a live scoreboard. The camera room is not included — you add angles once you move to the Club plan. It is supported by light advertising on scoreboard and review pages." },
-      { q: "How do I get access?", a: "Sign in if your club already has an account, or request an invite and we will get your club set up." },
+      {
+        q: "Who is CricLume for?",
+        a: "Clubs, leagues, schools and academies that want proper ball-by-ball records and video they can actually coach from — without a broadcast budget.",
+      },
+      {
+        q: "Do I need special cameras?",
+        a: "No. The preview accepts videos recorded by ordinary phones and lets you change angles during review. Synchronized remote-phone capture is part of the cloud pilot.",
+      },
+      {
+        q: "Can I score without signal?",
+        a: "Yes. The preview keeps match data on the scoring device, so patchy ground coverage does not stop scoring. Cross-device synchronization is not active yet.",
+      },
+      {
+        q: "Does it handle rain rules?",
+        a: "Not yet. Official rain-target calculations will only be released after the current method and required licence have been verified; the preview does not calculate an adjusted target.",
+      },
+      {
+        q: "Where is video stored?",
+        a: "In the preview, chosen videos remain on the device and are not uploaded by CricLume. Organisation storage, retention, consent and privacy controls are cloud-pilot work.",
+      },
+      {
+        q: "Can other clubs and the league watch our scoring live?",
+        a: "Not in the device-only preview. Private, opposition, league and public visibility controls are specified for the cloud pilot.",
+      },
+      {
+        q: "How does CricLume make money?",
+        a: "Clubs and leagues pay an annual subscription per team or competition, billed on the tier that matches how much scoring, video and analysis they use. Extra video storage, league-wide packages and sponsor-branded streams are paid add-ons.",
+      },
+      {
+        q: "Is there a free option?",
+        a: "Yes. Starter is free for a single team with ball-by-ball scoring and a live scoreboard. The camera room is not included — you add angles once you move to the Club plan. It is supported by light advertising on scoreboard and review pages.",
+      },
+      {
+        q: "How do I get access?",
+        a: "Sign in if your club already has an account, or request an invite and we will get your club set up.",
+      },
     ],
   },
   login: {
@@ -223,7 +286,14 @@ export type Content = typeof en;
 
 export const de: Content = {
   langName: "Deutsch",
-  nav: { home: "Start", features: "Funktionen", screens: "Ansichten", pricing: "Preise", faq: "FAQ", login: "Anmelden" },
+  nav: {
+    home: "Start",
+    features: "Funktionen",
+    screens: "Ansichten",
+    pricing: "Preise",
+    faq: "FAQ",
+    login: "Anmelden",
+  },
   ticker: [
     "Live • Riverside CC 148/4 (18.2)",
     "4+ Kamerawinkel pro Ball",
@@ -255,7 +325,8 @@ export const de: Content = {
     vs: "gegen",
     seasonKicker: "Saison",
     seasonTitle: "Tabelle",
-    standingsNote: "Tabellen, Run Rates und Spielerstatistiken entstehen automatisch aus jedem erfassten Ball.",
+    standingsNote:
+      "Tabellen, Run Rates und Spielerstatistiken entstehen automatisch aus jedem erfassten Ball.",
     tablePos: "Pl.",
     tableClub: "Club",
     tableP: "Sp",
@@ -264,32 +335,64 @@ export const de: Content = {
     ctaKicker: "Analyseraum",
     ctaTitle1: "Sieh das Spiel erneut,",
     ctaTitle2: "Ball für Ball",
-    ctaBody: "Jeder Ball ist mit seinen synchronisierten Winkeln verknüpft — verlangsamen, Bild für Bild springen, einzeichnen und Sprachnotizen ans Team schicken.",
+    ctaBody:
+      "Jeder Ball ist mit seinen synchronisierten Winkeln verknüpft — verlangsamen, Bild für Bild springen, einzeichnen und Sprachnotizen ans Team schicken.",
     ctaButton: "Zugang erhalten",
     trustKicker: "Entwickelt mit",
     trustTitle: "Clubs, Ligen und Akademien",
     tags: { league: "Liga", academy: "Akademie", cup: "T20-Pokal" },
   },
   features: [
-    { title: "Schnelles Scoring Ball für Ball", body: "Runs, Dots, Wides, No-Balls, Byes, Leg-Byes, Strafen und jede Art von Dismissal — mit Rückgängig-Funktion und Zeitstempel für jeden Ball." },
-    { title: "Kameraraum mit mehreren Handys", body: "Handys an beiden Enden und seitlich koppeln — oder so viele Winkel hinzufügen, wie nötig. Ein Tipp startet den Raum, jeder Winkel bleibt mit seinem Ball verknüpft." },
-    { title: "Trainingsanalyse", body: "Zeitlupe, Einzelbildschritte, Winkelwechsel, Zoom, Zeichenwerkzeuge und Sprachnotizen für das Feedback nach dem Spiel." },
-    { title: "Live-Anzeigetafeln", body: "Anzeigetafeln in Broadcast-Qualität mit Run Rate, Partnerschaften, Wicket-Verlauf und rollender Ball-Timeline." },
-    { title: "Desktop und Mobil", body: "Scoring per Handy am Spielfeldrand oder per Laptop im Clubhaus — dasselbe Spiel, synchron." },
-    { title: "Clubs, Teams und Spieler", body: "Organisationen, Wettbewerbe, Teams, Spieler und Plätze — von Grund auf für eine ganze Saison modelliert." },
-    { title: "Live-Scoring teilen", body: "Ligen und Clubs entscheiden, wer ein Spiel in Echtzeit verfolgt — der Gegner, Fans, die Ligaverwaltung oder ein öffentlicher Link." },
+    {
+      title: "Schnelles Scoring Ball für Ball",
+      body: "Runs, Dots, Wides, No-Balls, Byes, Leg-Byes, Strafen und jede Art von Dismissal — mit Rückgängig-Funktion und Zeitstempel für jeden Ball.",
+    },
+    {
+      title: "Kameraraum mit mehreren Handys",
+      body: "Handys an beiden Enden und seitlich koppeln — oder so viele Winkel hinzufügen, wie nötig. Ein Tipp startet den Raum, jeder Winkel bleibt mit seinem Ball verknüpft.",
+    },
+    {
+      title: "Trainingsanalyse",
+      body: "Zeitlupe, Einzelbildschritte, Winkelwechsel, Zoom, Zeichenwerkzeuge und Sprachnotizen für das Feedback nach dem Spiel.",
+    },
+    {
+      title: "Live-Anzeigetafeln",
+      body: "Anzeigetafeln in Broadcast-Qualität mit Run Rate, Partnerschaften, Wicket-Verlauf und rollender Ball-Timeline.",
+    },
+    {
+      title: "Desktop und Mobil",
+      body: "Scoring per Handy am Spielfeldrand oder per Laptop im Clubhaus — dasselbe Spiel, synchron.",
+    },
+    {
+      title: "Clubs, Teams und Spieler",
+      body: "Organisationen, Wettbewerbe, Teams, Spieler und Plätze — von Grund auf für eine ganze Saison modelliert.",
+    },
+    {
+      title: "Live-Scoring teilen",
+      body: "Ligen und Clubs entscheiden, wer ein Spiel in Echtzeit verfolgt — der Gegner, Fans, die Ligaverwaltung oder ein öffentlicher Link.",
+    },
   ],
   featuresTab: {
     kicker: "Plattform",
     title: "Funktionen",
     intro: "Alles, was im aktuellen CricLume-Build enthalten ist.",
     watchTitle: "Wer live zuschauen darf",
-    watchBody: "Ligen legen eine Voreinstellung fest, Clubs können sie pro Spiel überschreiben — auch während des Innings.",
+    watchBody:
+      "Ligen legen eine Voreinstellung fest, Clubs können sie pro Spiel überschreiben — auch während des Innings.",
     watchOptions: [
       { t: "Nur Club", d: "Scorer, Trainer und Mitglieder des eigenen Clubs." },
-      { t: "Gegnerischer Club", d: "Staff und Spieler des anderen Teams sehen denselben Live-Feed." },
-      { t: "Ligaverwaltung", d: "Wettbewerbs-Admins sehen jedes Spiel live für Ergebnisse und Compliance." },
-      { t: "Öffentlicher Link", d: "Fans und Familie folgen der Anzeigetafel im Browser — ohne Konto." },
+      {
+        t: "Gegnerischer Club",
+        d: "Staff und Spieler des anderen Teams sehen denselben Live-Feed.",
+      },
+      {
+        t: "Ligaverwaltung",
+        d: "Wettbewerbs-Admins sehen jedes Spiel live für Ergebnisse und Compliance.",
+      },
+      {
+        t: "Öffentlicher Link",
+        d: "Fans und Familie folgen der Anzeigetafel im Browser — ohne Konto.",
+      },
     ],
     alsoTitle: "Ebenfalls enthalten",
     alsoItems: [
@@ -305,16 +408,31 @@ export const de: Content = {
     title: "Ansichten",
     intro: "Dashboards, Anzeigetafeln, mobiles Scoring und der Analyseraum.",
     items: [
-      { label: "Club-Dashboard", caption: "Desktop • laufende, kommende und beendete Spiele mit Run-Rate- und Wagon-Wheel-Analysen" },
-      { label: "Live-Anzeigetafel", caption: "Broadcast-Ansicht • Punktestand, Batter, Bowler, Over-Timeline und Wicket-Verlauf" },
-      { label: "Mobiles Scoring", caption: "Handy • daumenfreundliches Scoring-Pad mit Extras, Dismissals und letzten Bällen" },
-      { label: "Trainingsanalyse", caption: "Desktop • vier synchrone Winkel, Einzelbild-Navigation und Zeichenwerkzeuge" },
+      {
+        label: "Club-Dashboard",
+        caption:
+          "Desktop • laufende, kommende und beendete Spiele mit Run-Rate- und Wagon-Wheel-Analysen",
+      },
+      {
+        label: "Live-Anzeigetafel",
+        caption:
+          "Broadcast-Ansicht • Punktestand, Batter, Bowler, Over-Timeline und Wicket-Verlauf",
+      },
+      {
+        label: "Mobiles Scoring",
+        caption: "Handy • daumenfreundliches Scoring-Pad mit Extras, Dismissals und letzten Bällen",
+      },
+      {
+        label: "Trainingsanalyse",
+        caption: "Desktop • vier synchrone Winkel, Einzelbild-Navigation und Zeichenwerkzeuge",
+      },
     ],
   },
   pricing: {
     kicker: "Tarife",
     title: "Preise & Abos",
-    intro: "Starte kostenlos mit einem Team. Wechsle zu einem Club- oder Liga-Abo, wenn du mehr Winkel, längere Videospeicherung und wettbewerbsweite Kontrolle willst.",
+    intro:
+      "Starte kostenlos mit einem Team. Wechsle zu einem Club- oder Liga-Abo, wenn du mehr Winkel, längere Videospeicherung und wettbewerbsweite Kontrolle willst.",
     showing: "Preise für",
     detecting: "Region wird erkannt…",
     selectLabel: "Land auswählen",
@@ -367,26 +485,66 @@ export const de: Content = {
     revenueKicker: "Geschäftsmodell",
     revenueTitle: "Wie CricLume Geld verdient",
     revenue: [
-      { title: "Abonnements", body: "Wiederkehrende Club- und Liga-Tarife sind der Kern des Geschäfts — monatlich oder jährlich pro Team, mit zwei Freimonaten bei Jahreszahlung." },
-      { title: "Video- & Speicher-Add-ons", body: "Längere Speicherung, 4K-Clips und komplette Saisonarchive werden zusätzlich berechnet." },
-      { title: "Sponsoring & Streams", body: "Ligen können gebrandete Overlays und gesponserte Spiel-Links verkaufen; CricLume erhält einen Anteil." },
-      { title: "Services", body: "Onboarding, Migration historischer Daten und individuelle Auswertungen für größere Ligen und Akademien." },
+      {
+        title: "Abonnements",
+        body: "Wiederkehrende Club- und Liga-Tarife sind der Kern des Geschäfts — monatlich oder jährlich pro Team, mit zwei Freimonaten bei Jahreszahlung.",
+      },
+      {
+        title: "Video- & Speicher-Add-ons",
+        body: "Längere Speicherung, 4K-Clips und komplette Saisonarchive werden zusätzlich berechnet.",
+      },
+      {
+        title: "Sponsoring & Streams",
+        body: "Ligen können gebrandete Overlays und gesponserte Spiel-Links verkaufen; CricLume erhält einen Anteil.",
+      },
+      {
+        title: "Services",
+        body: "Onboarding, Migration historischer Daten und individuelle Auswertungen für größere Ligen und Akademien.",
+      },
     ],
-    footnote: "Jahreszahlung spart zwei Monate in jedem bezahlten Tarif. Schulen und Jugendabteilungen erhalten 50 % Rabatt auf den Club-Tarif.",
+    footnote:
+      "Jahreszahlung spart zwei Monate in jedem bezahlten Tarif. Schulen und Jugendabteilungen erhalten 50 % Rabatt auf den Club-Tarif.",
   },
   faq: {
     kicker: "Antworten",
     title: "FAQ",
     items: [
-      { q: "Für wen ist CricLume?", a: "Für Clubs, Ligen, Schulen und Akademien, die saubere Ball-für-Ball-Daten und Videos wollen, mit denen man wirklich trainieren kann — ohne Broadcast-Budget." },
-      { q: "Brauche ich spezielle Kameras?", a: "Nein. Der Kameraraum koppelt normale Handys. Starte mit je einem an beiden Enden und einem seitlich und füge beliebig viele Winkel hinzu — jede Aufnahme bleibt mit ihrem Ball verknüpft." },
-      { q: "Kann ich ohne Empfang scoren?", a: "Das Scoring funktioniert auch bei schlechter Abdeckung weiter und synchronisiert sich, sobald die Verbindung zurück ist." },
-      { q: "Werden Regenregeln unterstützt?", a: "Ja. CricLume wendet die üblichen Regenregeln an, um Ziele und Ergebnisse bei Unterbrechungen anzupassen." },
-      { q: "Wo werden Videos gespeichert?", a: "Clips und Anmerkungen werden beim Spiel im eigenen Bereich deiner Organisation gespeichert; Einwilligungs- und Datenschutzkontrollen sind Teil der Roadmap." },
-      { q: "Können andere Clubs und die Liga unser Scoring live sehen?", a: "Ja. Jedes Spiel hat eine Sichtbarkeitseinstellung: privat, mit dem Gegner geteilt, für die Liga offen oder als öffentlicher Link. Ligen können auch eine Voreinstellung für alle Spiele festlegen." },
-      { q: "Wie verdient CricLume Geld?", a: "Clubs und Ligen zahlen ein Abo pro Team oder Wettbewerb, passend zum Umfang von Scoring, Video und Analyse. Zusätzlicher Videospeicher, Liga-Pakete und gesponserte Streams sind kostenpflichtige Add-ons." },
-      { q: "Gibt es eine kostenlose Option?", a: "Ja. Starter ist kostenlos für ein Team mit Scoring Ball für Ball und Live-Anzeigetafel. Der Kameraraum ist nicht enthalten — Winkel gibt es ab dem Club-Tarif. Finanziert wird das über leichte Werbung." },
-      { q: "Wie bekomme ich Zugang?", a: "Melde dich an, wenn dein Club bereits ein Konto hat, oder frage eine Einladung an — wir richten deinen Club ein." },
+      {
+        q: "Für wen ist CricLume?",
+        a: "Für Clubs, Ligen, Schulen und Akademien, die saubere Ball-für-Ball-Daten und Videos wollen, mit denen man wirklich trainieren kann — ohne Broadcast-Budget.",
+      },
+      {
+        q: "Brauche ich spezielle Kameras?",
+        a: "Nein. Der Kameraraum koppelt normale Handys. Starte mit je einem an beiden Enden und einem seitlich und füge beliebig viele Winkel hinzu — jede Aufnahme bleibt mit ihrem Ball verknüpft.",
+      },
+      {
+        q: "Kann ich ohne Empfang scoren?",
+        a: "Das Scoring funktioniert auch bei schlechter Abdeckung weiter und synchronisiert sich, sobald die Verbindung zurück ist.",
+      },
+      {
+        q: "Werden Regenregeln unterstützt?",
+        a: "Ja. CricLume wendet die üblichen Regenregeln an, um Ziele und Ergebnisse bei Unterbrechungen anzupassen.",
+      },
+      {
+        q: "Wo werden Videos gespeichert?",
+        a: "Clips und Anmerkungen werden beim Spiel im eigenen Bereich deiner Organisation gespeichert; Einwilligungs- und Datenschutzkontrollen sind Teil der Roadmap.",
+      },
+      {
+        q: "Können andere Clubs und die Liga unser Scoring live sehen?",
+        a: "Ja. Jedes Spiel hat eine Sichtbarkeitseinstellung: privat, mit dem Gegner geteilt, für die Liga offen oder als öffentlicher Link. Ligen können auch eine Voreinstellung für alle Spiele festlegen.",
+      },
+      {
+        q: "Wie verdient CricLume Geld?",
+        a: "Clubs und Ligen zahlen ein Abo pro Team oder Wettbewerb, passend zum Umfang von Scoring, Video und Analyse. Zusätzlicher Videospeicher, Liga-Pakete und gesponserte Streams sind kostenpflichtige Add-ons.",
+      },
+      {
+        q: "Gibt es eine kostenlose Option?",
+        a: "Ja. Starter ist kostenlos für ein Team mit Scoring Ball für Ball und Live-Anzeigetafel. Der Kameraraum ist nicht enthalten — Winkel gibt es ab dem Club-Tarif. Finanziert wird das über leichte Werbung.",
+      },
+      {
+        q: "Wie bekomme ich Zugang?",
+        a: "Melde dich an, wenn dein Club bereits ein Konto hat, oder frage eine Einladung an — wir richten deinen Club ein.",
+      },
     ],
   },
   login: {
@@ -416,7 +574,14 @@ export const de: Content = {
 
 export const nl: Content = {
   langName: "Nederlands",
-  nav: { home: "Home", features: "Functies", screens: "Schermen", pricing: "Prijzen", faq: "FAQ", login: "Inloggen" },
+  nav: {
+    home: "Home",
+    features: "Functies",
+    screens: "Schermen",
+    pricing: "Prijzen",
+    faq: "FAQ",
+    login: "Inloggen",
+  },
   ticker: [
     "Live • Riverside CC 148/4 (18.2)",
     "4+ camerahoeken per bal",
@@ -448,7 +613,8 @@ export const nl: Content = {
     vs: "tegen",
     seasonKicker: "Seizoen",
     seasonTitle: "Clubstand",
-    standingsNote: "Standen, run rates en spelersstatistieken ontstaan automatisch uit elke bal die je scoort.",
+    standingsNote:
+      "Standen, run rates en spelersstatistieken ontstaan automatisch uit elke bal die je scoort.",
     tablePos: "Pos",
     tableClub: "Club",
     tableP: "G",
@@ -457,32 +623,61 @@ export const nl: Content = {
     ctaKicker: "Analysekamer",
     ctaTitle1: "Kijk de wedstrijd terug,",
     ctaTitle2: "bal voor bal",
-    ctaBody: "Elke bal is gekoppeld aan zijn eigen gesynchroniseerde hoeken — vertraag, stap door beelden, teken erop en stuur spraaknotities naar het team.",
+    ctaBody:
+      "Elke bal is gekoppeld aan zijn eigen gesynchroniseerde hoeken — vertraag, stap door beelden, teken erop en stuur spraaknotities naar het team.",
     ctaButton: "Toegang krijgen",
     trustKicker: "Gebouwd met",
     trustTitle: "Clubs, competities en academies",
     tags: { league: "Competitie", academy: "Academie", cup: "T20-beker" },
   },
   features: [
-    { title: "Snel scoren bal voor bal", body: "Runs, dots, wides, no-balls, byes, leg-byes, straffen en elk type dismissal — met ongedaan maken en tijdstempels op elke bal." },
-    { title: "Camerakamer met meerdere telefoons", body: "Koppel telefoons aan beide kanten en van opzij — of voeg zoveel hoeken toe als nodig. Eén tik start de kamer en elke hoek blijft aan zijn bal gekoppeld." },
-    { title: "Coachingsanalyse", body: "Slow motion, beeld-voor-beeld, hoeken wisselen, zoomen, tekengereedschap en spraaknotities voor feedback na de wedstrijd." },
-    { title: "Live scoreborden", body: "Scoreborden van uitzendkwaliteit met run rate, partnerships, wicketverloop en een doorlopende baltijdlijn." },
-    { title: "Desktop en mobiel", body: "Scoor met een telefoon langs de lijn of met een laptop in het clubhuis — dezelfde wedstrijd, synchroon." },
-    { title: "Clubs, teams en spelers", body: "Organisaties, competities, teams, spelers en velden, van de grond af opgezet voor een heel seizoen." },
-    { title: "Live scoren delen", body: "Competities en clubs bepalen wie een wedstrijd live volgt — de tegenstander, supporters, het competitiebureau of een openbare link." },
+    {
+      title: "Snel scoren bal voor bal",
+      body: "Runs, dots, wides, no-balls, byes, leg-byes, straffen en elk type dismissal — met ongedaan maken en tijdstempels op elke bal.",
+    },
+    {
+      title: "Camerakamer met meerdere telefoons",
+      body: "Koppel telefoons aan beide kanten en van opzij — of voeg zoveel hoeken toe als nodig. Eén tik start de kamer en elke hoek blijft aan zijn bal gekoppeld.",
+    },
+    {
+      title: "Coachingsanalyse",
+      body: "Slow motion, beeld-voor-beeld, hoeken wisselen, zoomen, tekengereedschap en spraaknotities voor feedback na de wedstrijd.",
+    },
+    {
+      title: "Live scoreborden",
+      body: "Scoreborden van uitzendkwaliteit met run rate, partnerships, wicketverloop en een doorlopende baltijdlijn.",
+    },
+    {
+      title: "Desktop en mobiel",
+      body: "Scoor met een telefoon langs de lijn of met een laptop in het clubhuis — dezelfde wedstrijd, synchroon.",
+    },
+    {
+      title: "Clubs, teams en spelers",
+      body: "Organisaties, competities, teams, spelers en velden, van de grond af opgezet voor een heel seizoen.",
+    },
+    {
+      title: "Live scoren delen",
+      body: "Competities en clubs bepalen wie een wedstrijd live volgt — de tegenstander, supporters, het competitiebureau of een openbare link.",
+    },
   ],
   featuresTab: {
     kicker: "Platform",
     title: "Functies",
     intro: "Alles wat in de huidige CricLume-build zit.",
     watchTitle: "Wie mag live meekijken",
-    watchBody: "Competities stellen een standaard in, clubs kunnen die per wedstrijd aanpassen — zelfs tijdens een innings.",
+    watchBody:
+      "Competities stellen een standaard in, clubs kunnen die per wedstrijd aanpassen — zelfs tijdens een innings.",
     watchOptions: [
       { t: "Alleen club", d: "Scorers, coaches en leden van je eigen club." },
       { t: "Tegenstander", d: "Staf en spelers van het andere team volgen dezelfde live feed." },
-      { t: "Competitiebureau", d: "Beheerders zien elke wedstrijd live voor uitslagen en naleving." },
-      { t: "Openbare link", d: "Supporters en familie volgen het scorebord in een browser — geen account nodig." },
+      {
+        t: "Competitiebureau",
+        d: "Beheerders zien elke wedstrijd live voor uitslagen en naleving.",
+      },
+      {
+        t: "Openbare link",
+        d: "Supporters en familie volgen het scorebord in een browser — geen account nodig.",
+      },
     ],
     alsoTitle: "Ook inbegrepen",
     alsoItems: [
@@ -498,16 +693,31 @@ export const nl: Content = {
     title: "Schermen",
     intro: "Dashboards, scoreborden, mobiel scoren en de analysekamer.",
     items: [
-      { label: "Clubdashboard", caption: "Desktop • live, komende en afgeronde wedstrijden met run-rate- en wagon-wheel-analyses" },
-      { label: "Live scorebord", caption: "Uitzendweergave • score, batters, bowlers, overtijdlijn en wicketverloop" },
-      { label: "Mobiel scoren", caption: "Telefoon • scorepad voor de duim met extras, dismissals en recente ballen" },
-      { label: "Coachingsanalyse", caption: "Desktop • vier gesynchroniseerde hoeken, beeld-voor-beeld scrubben en tekengereedschap" },
+      {
+        label: "Clubdashboard",
+        caption:
+          "Desktop • live, komende en afgeronde wedstrijden met run-rate- en wagon-wheel-analyses",
+      },
+      {
+        label: "Live scorebord",
+        caption: "Uitzendweergave • score, batters, bowlers, overtijdlijn en wicketverloop",
+      },
+      {
+        label: "Mobiel scoren",
+        caption: "Telefoon • scorepad voor de duim met extras, dismissals en recente ballen",
+      },
+      {
+        label: "Coachingsanalyse",
+        caption:
+          "Desktop • vier gesynchroniseerde hoeken, beeld-voor-beeld scrubben en tekengereedschap",
+      },
     ],
   },
   pricing: {
     kicker: "Abonnementen",
     title: "Prijzen & abonnementen",
-    intro: "Begin gratis met één team. Stap over op een club- of competitieabonnement voor meer hoeken, langere videobewaring en controle over de hele competitie.",
+    intro:
+      "Begin gratis met één team. Stap over op een club- of competitieabonnement voor meer hoeken, langere videobewaring en controle over de hele competitie.",
     showing: "Prijzen voor",
     detecting: "Regio detecteren…",
     selectLabel: "Kies je land",
@@ -560,26 +770,66 @@ export const nl: Content = {
     revenueKicker: "Verdienmodel",
     revenueTitle: "Hoe CricLume geld verdient",
     revenue: [
-      { title: "Abonnementen", body: "Terugkerende club- en competitieabonnementen vormen de kern — maandelijks of jaarlijks per team, met twee maanden gratis bij jaarbetaling." },
-      { title: "Video- & opslagextra's", body: "Langere bewaring, 4K-clips en volledige seizoensarchieven worden bovenop het basistarief berekend." },
-      { title: "Sponsoring & streams", body: "Competities kunnen gebrande overlays en gesponsorde wedstrijdlinks verkopen; CricLume krijgt een deel." },
-      { title: "Diensten", body: "Onboarding, migratie van historische data en rapportage op maat voor grotere competities en academies." },
+      {
+        title: "Abonnementen",
+        body: "Terugkerende club- en competitieabonnementen vormen de kern — maandelijks of jaarlijks per team, met twee maanden gratis bij jaarbetaling.",
+      },
+      {
+        title: "Video- & opslagextra's",
+        body: "Langere bewaring, 4K-clips en volledige seizoensarchieven worden bovenop het basistarief berekend.",
+      },
+      {
+        title: "Sponsoring & streams",
+        body: "Competities kunnen gebrande overlays en gesponsorde wedstrijdlinks verkopen; CricLume krijgt een deel.",
+      },
+      {
+        title: "Diensten",
+        body: "Onboarding, migratie van historische data en rapportage op maat voor grotere competities en academies.",
+      },
     ],
-    footnote: "Jaarbetaling bespaart twee maanden op elk betaald abonnement. Scholen en jeugdafdelingen krijgen 50% korting op het Club-abonnement.",
+    footnote:
+      "Jaarbetaling bespaart twee maanden op elk betaald abonnement. Scholen en jeugdafdelingen krijgen 50% korting op het Club-abonnement.",
   },
   faq: {
     kicker: "Antwoorden",
     title: "FAQ",
     items: [
-      { q: "Voor wie is CricLume?", a: "Voor clubs, competities, scholen en academies die goede bal-voor-bal-data en video willen waarmee je echt kunt coachen — zonder uitzendbudget." },
-      { q: "Heb ik speciale camera's nodig?", a: "Nee. De camerakamer koppelt gewone telefoons. Begin met één aan beide kanten en één van opzij en voeg zoveel hoeken toe als je wilt — elke opname blijft aan zijn bal gekoppeld." },
-      { q: "Kan ik scoren zonder bereik?", a: "Scoren blijft werken bij slechte dekking en synchroniseert zodra de verbinding terug is." },
-      { q: "Ondersteunt het regenregels?", a: "Ja. CricLume past standaard regenregels toe om doelen en uitslagen aan te passen bij onderbrekingen." },
-      { q: "Waar wordt video opgeslagen?", a: "Clips en annotaties worden bij de wedstrijd opgeslagen in de eigen ruimte van je organisatie, met toestemmings- en privacycontroles op de roadmap." },
-      { q: "Kunnen andere clubs en de competitie ons live volgen?", a: "Ja. Elke wedstrijd heeft een zichtbaarheidsinstelling: privé, gedeeld met de tegenstander, open voor de competitie of een openbare link. Competities kunnen ook een standaard instellen." },
-      { q: "Hoe verdient CricLume geld?", a: "Clubs en competities betalen een abonnement per team of competitie, passend bij hoeveel scoren, video en analyse ze gebruiken. Extra opslag, competitiepakketten en gesponsorde streams zijn betaalde extra's." },
-      { q: "Is er een gratis optie?", a: "Ja. Starter is gratis voor één team met bal-voor-bal scoren en een live scorebord. De camerakamer zit er niet bij — hoeken krijg je vanaf het Club-abonnement. Het wordt ondersteund door lichte advertenties." },
-      { q: "Hoe krijg ik toegang?", a: "Log in als je club al een account heeft, of vraag een uitnodiging aan — dan zetten wij je club klaar." },
+      {
+        q: "Voor wie is CricLume?",
+        a: "Voor clubs, competities, scholen en academies die goede bal-voor-bal-data en video willen waarmee je echt kunt coachen — zonder uitzendbudget.",
+      },
+      {
+        q: "Heb ik speciale camera's nodig?",
+        a: "Nee. De camerakamer koppelt gewone telefoons. Begin met één aan beide kanten en één van opzij en voeg zoveel hoeken toe als je wilt — elke opname blijft aan zijn bal gekoppeld.",
+      },
+      {
+        q: "Kan ik scoren zonder bereik?",
+        a: "Scoren blijft werken bij slechte dekking en synchroniseert zodra de verbinding terug is.",
+      },
+      {
+        q: "Ondersteunt het regenregels?",
+        a: "Ja. CricLume past standaard regenregels toe om doelen en uitslagen aan te passen bij onderbrekingen.",
+      },
+      {
+        q: "Waar wordt video opgeslagen?",
+        a: "Clips en annotaties worden bij de wedstrijd opgeslagen in de eigen ruimte van je organisatie, met toestemmings- en privacycontroles op de roadmap.",
+      },
+      {
+        q: "Kunnen andere clubs en de competitie ons live volgen?",
+        a: "Ja. Elke wedstrijd heeft een zichtbaarheidsinstelling: privé, gedeeld met de tegenstander, open voor de competitie of een openbare link. Competities kunnen ook een standaard instellen.",
+      },
+      {
+        q: "Hoe verdient CricLume geld?",
+        a: "Clubs en competities betalen een abonnement per team of competitie, passend bij hoeveel scoren, video en analyse ze gebruiken. Extra opslag, competitiepakketten en gesponsorde streams zijn betaalde extra's.",
+      },
+      {
+        q: "Is er een gratis optie?",
+        a: "Ja. Starter is gratis voor één team met bal-voor-bal scoren en een live scorebord. De camerakamer zit er niet bij — hoeken krijg je vanaf het Club-abonnement. Het wordt ondersteund door lichte advertenties.",
+      },
+      {
+        q: "Hoe krijg ik toegang?",
+        a: "Log in als je club al een account heeft, of vraag een uitnodiging aan — dan zetten wij je club klaar.",
+      },
     ],
   },
   login: {
@@ -609,7 +859,14 @@ export const nl: Content = {
 
 export const af: Content = {
   langName: "Afrikaans",
-  nav: { home: "Tuis", features: "Kenmerke", screens: "Skerms", pricing: "Pryse", faq: "Vrae", login: "Teken in" },
+  nav: {
+    home: "Tuis",
+    features: "Kenmerke",
+    screens: "Skerms",
+    pricing: "Pryse",
+    faq: "Vrae",
+    login: "Teken in",
+  },
   ticker: [
     "Regstreeks • Riverside CC 148/4 (18.2)",
     "4+ kamerahoeke per bal",
@@ -641,7 +898,8 @@ export const af: Content = {
     vs: "teen",
     seasonKicker: "Seisoen",
     seasonTitle: "Klubranglys",
-    standingsNote: "Ranglyste, lopietempo's en spelerrekords bou hulself uit elke bal wat jy aanteken.",
+    standingsNote:
+      "Ranglyste, lopietempo's en spelerrekords bou hulself uit elke bal wat jy aanteken.",
     tablePos: "Pos",
     tableClub: "Klub",
     tableP: "G",
@@ -650,32 +908,64 @@ export const af: Content = {
     ctaKicker: "Ontledingskamer",
     ctaTitle1: "Kyk die wedstryd weer,",
     ctaTitle2: "bal vir bal",
-    ctaBody: "Elke bal skakel na sy eie gesinchroniseerde hoeke — vertraag dit, stap deur raampies, teken daarop en stuur stemnotas aan die span.",
+    ctaBody:
+      "Elke bal skakel na sy eie gesinchroniseerde hoeke — vertraag dit, stap deur raampies, teken daarop en stuur stemnotas aan die span.",
     ctaButton: "Kry toegang",
     trustKicker: "Gebou saam met",
     trustTitle: "Klubs, ligas en akademies",
     tags: { league: "Liga", academy: "Akademie", cup: "T20-beker" },
   },
   features: [
-    { title: "Vinnige bal-vir-bal aantekening", body: "Lopies, dots, wides, no-balls, byes, leg-byes, strafpunte en elke uitboortipe — met ontdoen en tydstempels op elke bal." },
-    { title: "Kamerakamer met verskeie fone", body: "Koppel fone aan albei kante en van die sykant — of voeg soveel hoeke by as wat nodig is. Een tik begin die kamer en elke hoek bly aan sy bal gekoppel." },
-    { title: "Afrigtersontleding", body: "Stadige aksie, raampie-vir-raampie, hoekwisseling, zoem, tekengereedskap en stemnotas vir terugvoer ná die wedstryd." },
-    { title: "Regstreekse telborde", body: "Uitsaaikwaliteit telborde met lopietempo, vennootskappe, paaltjieverlies en 'n rollende baltydlyn." },
-    { title: "Rekenaar en selfoon", body: "Teken aan met 'n foon langs die kantlyn of 'n skootrekenaar in die klubhuis — dieselfde wedstryd, in sinchronisasie." },
-    { title: "Klubs, spanne en spelers", body: "Organisasies, kompetisies, spanne, spelers en velde — van die grond af gebou vir 'n hele seisoen se geskiedenis." },
-    { title: "Deel regstreekse aantekening", body: "Ligas en klubs kies wie 'n wedstryd regstreeks volg — die teenstander, ondersteuners, die ligakantoor, of 'n openbare skakel." },
+    {
+      title: "Vinnige bal-vir-bal aantekening",
+      body: "Lopies, dots, wides, no-balls, byes, leg-byes, strafpunte en elke uitboortipe — met ontdoen en tydstempels op elke bal.",
+    },
+    {
+      title: "Kamerakamer met verskeie fone",
+      body: "Koppel fone aan albei kante en van die sykant — of voeg soveel hoeke by as wat nodig is. Een tik begin die kamer en elke hoek bly aan sy bal gekoppel.",
+    },
+    {
+      title: "Afrigtersontleding",
+      body: "Stadige aksie, raampie-vir-raampie, hoekwisseling, zoem, tekengereedskap en stemnotas vir terugvoer ná die wedstryd.",
+    },
+    {
+      title: "Regstreekse telborde",
+      body: "Uitsaaikwaliteit telborde met lopietempo, vennootskappe, paaltjieverlies en 'n rollende baltydlyn.",
+    },
+    {
+      title: "Rekenaar en selfoon",
+      body: "Teken aan met 'n foon langs die kantlyn of 'n skootrekenaar in die klubhuis — dieselfde wedstryd, in sinchronisasie.",
+    },
+    {
+      title: "Klubs, spanne en spelers",
+      body: "Organisasies, kompetisies, spanne, spelers en velde — van die grond af gebou vir 'n hele seisoen se geskiedenis.",
+    },
+    {
+      title: "Deel regstreekse aantekening",
+      body: "Ligas en klubs kies wie 'n wedstryd regstreeks volg — die teenstander, ondersteuners, die ligakantoor, of 'n openbare skakel.",
+    },
   ],
   featuresTab: {
     kicker: "Platform",
     title: "Kenmerke",
     intro: "Alles wat in die huidige CricLume-weergawe beskikbaar is.",
     watchTitle: "Wie mag regstreeks kyk",
-    watchBody: "Ligas stel 'n verstek vir 'n kompetisie; klubs kan dit per wedstryd verander — selfs tydens 'n beurt.",
+    watchBody:
+      "Ligas stel 'n verstek vir 'n kompetisie; klubs kan dit per wedstryd verander — selfs tydens 'n beurt.",
     watchOptions: [
       { t: "Slegs klub", d: "Aantekenaars, afrigters en lede van jou eie klub." },
-      { t: "Teenstanderklub", d: "Die ander span se personeel en spelers volg dieselfde regstreekse voer." },
-      { t: "Ligakantoor", d: "Kompetisie-administrateurs sien elke wedstryd regstreeks vir uitslae en nakoming." },
-      { t: "Openbare skakel", d: "Ondersteuners en familie volg die telbord in 'n blaaier — geen rekening nodig nie." },
+      {
+        t: "Teenstanderklub",
+        d: "Die ander span se personeel en spelers volg dieselfde regstreekse voer.",
+      },
+      {
+        t: "Ligakantoor",
+        d: "Kompetisie-administrateurs sien elke wedstryd regstreeks vir uitslae en nakoming.",
+      },
+      {
+        t: "Openbare skakel",
+        d: "Ondersteuners en familie volg die telbord in 'n blaaier — geen rekening nodig nie.",
+      },
     ],
     alsoTitle: "Ook ingesluit",
     alsoItems: [
@@ -691,16 +981,31 @@ export const af: Content = {
     title: "Skerms",
     intro: "Paneelborde, telborde, mobiele aantekening en die ontledingskamer.",
     items: [
-      { label: "Klubpaneelbord", caption: "Rekenaar • regstreekse, komende en voltooide wedstryde met lopietempo- en wawiel-ontledings" },
-      { label: "Regstreekse telbord", caption: "Uitsaai-aansig • telling, kolwers, bouliers, boulbeurt-tydlyn en paaltjieverlies" },
-      { label: "Mobiele aantekening", caption: "Foon • duimvriendelike aantekenblad met ekstras, uitboorte en onlangse balle" },
-      { label: "Afrigtersontleding", caption: "Rekenaar • vier gesinchroniseerde hoeke, raampie-vir-raampie navigasie en tekengereedskap" },
+      {
+        label: "Klubpaneelbord",
+        caption:
+          "Rekenaar • regstreekse, komende en voltooide wedstryde met lopietempo- en wawiel-ontledings",
+      },
+      {
+        label: "Regstreekse telbord",
+        caption: "Uitsaai-aansig • telling, kolwers, bouliers, boulbeurt-tydlyn en paaltjieverlies",
+      },
+      {
+        label: "Mobiele aantekening",
+        caption: "Foon • duimvriendelike aantekenblad met ekstras, uitboorte en onlangse balle",
+      },
+      {
+        label: "Afrigtersontleding",
+        caption:
+          "Rekenaar • vier gesinchroniseerde hoeke, raampie-vir-raampie navigasie en tekengereedskap",
+      },
     ],
   },
   pricing: {
     kicker: "Planne",
     title: "Pryse en intekening",
-    intro: "Begin gratis met een span. Gaan oor na 'n klub- of ligaplan wanneer jy meer hoeke, langer videoberging en kompetisiewye beheer wil hê.",
+    intro:
+      "Begin gratis met een span. Gaan oor na 'n klub- of ligaplan wanneer jy meer hoeke, langer videoberging en kompetisiewye beheer wil hê.",
     showing: "Pryse vir",
     detecting: "Streek word bepaal…",
     selectLabel: "Kies jou land",
@@ -753,26 +1058,66 @@ export const af: Content = {
     revenueKicker: "Sakemodel",
     revenueTitle: "Hoe CricLume geld maak",
     revenue: [
-      { title: "Intekening", body: "Herhalende klub- en ligaplanne is die kern van die besigheid — maandeliks of jaarliks per span, met twee maande gratis op jaarlikse betaling." },
-      { title: "Video- en bergingbyvoegings", body: "Langer berging, 4K-knipsels en volledige seisoenargiewe word bo-op die basisplan gehef." },
-      { title: "Borgskap en strome", body: "Ligas kan gemerkte oorlegings en geborgde wedstrydskakels verkoop; CricLume kry 'n deel." },
-      { title: "Dienste", body: "Aanboord, migrasie van historiese data en pasgemaakte verslae vir groter ligas en akademies." },
+      {
+        title: "Intekening",
+        body: "Herhalende klub- en ligaplanne is die kern van die besigheid — maandeliks of jaarliks per span, met twee maande gratis op jaarlikse betaling.",
+      },
+      {
+        title: "Video- en bergingbyvoegings",
+        body: "Langer berging, 4K-knipsels en volledige seisoenargiewe word bo-op die basisplan gehef.",
+      },
+      {
+        title: "Borgskap en strome",
+        body: "Ligas kan gemerkte oorlegings en geborgde wedstrydskakels verkoop; CricLume kry 'n deel.",
+      },
+      {
+        title: "Dienste",
+        body: "Aanboord, migrasie van historiese data en pasgemaakte verslae vir groter ligas en akademies.",
+      },
     ],
-    footnote: "Jaarlikse betaling spaar twee maande op elke betaalde plan. Skole en juniorafdelings kry 50% afslag op die Klub-plan.",
+    footnote:
+      "Jaarlikse betaling spaar twee maande op elke betaalde plan. Skole en juniorafdelings kry 50% afslag op die Klub-plan.",
   },
   faq: {
     kicker: "Antwoorde",
     title: "Vrae",
     items: [
-      { q: "Vir wie is CricLume?", a: "Vir klubs, ligas, skole en akademies wat behoorlike bal-vir-bal rekords en video wil hê waarmee jy werklik kan afrig — sonder 'n uitsaaibegroting." },
-      { q: "Het ek spesiale kameras nodig?", a: "Nee. Die kamerakamer koppel gewone fone. Begin met een aan elke kant en een van die sykant, en voeg soveel hoeke by as wat jy wil — elke opname bly aan sy bal gekoppel." },
-      { q: "Kan ek sonder sein aanteken?", a: "Aantekening werk aan deur swak dekking en sinchroniseer weer sodra die verbinding terug is." },
-      { q: "Hanteer dit reënreëls?", a: "Ja. CricLume pas standaard reënreëls toe om teikens en uitslae aan te pas wanneer 'n wedstryd onderbreek word." },
-      { q: "Waar word video gestoor?", a: "Knipsels en aantekeninge word by die wedstryd in jou organisasie se eie ruimte gestoor, met toestemmings- en privaatheidskontroles op die padkaart." },
-      { q: "Kan ander klubs en die liga ons regstreeks volg?", a: "Ja. Elke wedstryd het 'n sigbaarheidsinstelling: privaat, gedeel met die teenstander, oop vir die liga, of 'n openbare skakel. Ligas kan ook 'n verstek vir elke wedstryd stel." },
-      { q: "Hoe maak CricLume geld?", a: "Klubs en ligas betaal 'n intekening per span of kompetisie, op die vlak wat pas by hoeveel aantekening, video en ontleding hulle gebruik. Ekstra berging, ligapakkette en geborgde strome is betaalde byvoegings." },
-      { q: "Is daar 'n gratis opsie?", a: "Ja. Starter is gratis vir een span met bal-vir-bal aantekening en 'n regstreekse telbord. Die kamerakamer is nie ingesluit nie — hoeke kom by die Klub-plan. Dit word deur ligte advertensies ondersteun." },
-      { q: "Hoe kry ek toegang?", a: "Teken in as jou klub reeds 'n rekening het, of vra 'n uitnodiging aan en ons sal jou klub opstel." },
+      {
+        q: "Vir wie is CricLume?",
+        a: "Vir klubs, ligas, skole en akademies wat behoorlike bal-vir-bal rekords en video wil hê waarmee jy werklik kan afrig — sonder 'n uitsaaibegroting.",
+      },
+      {
+        q: "Het ek spesiale kameras nodig?",
+        a: "Nee. Die kamerakamer koppel gewone fone. Begin met een aan elke kant en een van die sykant, en voeg soveel hoeke by as wat jy wil — elke opname bly aan sy bal gekoppel.",
+      },
+      {
+        q: "Kan ek sonder sein aanteken?",
+        a: "Aantekening werk aan deur swak dekking en sinchroniseer weer sodra die verbinding terug is.",
+      },
+      {
+        q: "Hanteer dit reënreëls?",
+        a: "Ja. CricLume pas standaard reënreëls toe om teikens en uitslae aan te pas wanneer 'n wedstryd onderbreek word.",
+      },
+      {
+        q: "Waar word video gestoor?",
+        a: "Knipsels en aantekeninge word by die wedstryd in jou organisasie se eie ruimte gestoor, met toestemmings- en privaatheidskontroles op die padkaart.",
+      },
+      {
+        q: "Kan ander klubs en die liga ons regstreeks volg?",
+        a: "Ja. Elke wedstryd het 'n sigbaarheidsinstelling: privaat, gedeel met die teenstander, oop vir die liga, of 'n openbare skakel. Ligas kan ook 'n verstek vir elke wedstryd stel.",
+      },
+      {
+        q: "Hoe maak CricLume geld?",
+        a: "Klubs en ligas betaal 'n intekening per span of kompetisie, op die vlak wat pas by hoeveel aantekening, video en ontleding hulle gebruik. Ekstra berging, ligapakkette en geborgde strome is betaalde byvoegings.",
+      },
+      {
+        q: "Is daar 'n gratis opsie?",
+        a: "Ja. Starter is gratis vir een span met bal-vir-bal aantekening en 'n regstreekse telbord. Die kamerakamer is nie ingesluit nie — hoeke kom by die Klub-plan. Dit word deur ligte advertensies ondersteun.",
+      },
+      {
+        q: "Hoe kry ek toegang?",
+        a: "Teken in as jou klub reeds 'n rekening het, of vra 'n uitnodiging aan en ons sal jou klub opstel.",
+      },
     ],
   },
   login: {
@@ -802,7 +1147,14 @@ export const af: Content = {
 
 export const fr: Content = {
   langName: "Français",
-  nav: { home: "Accueil", features: "Fonctions", screens: "Écrans", pricing: "Tarifs", faq: "FAQ", login: "Connexion" },
+  nav: {
+    home: "Accueil",
+    features: "Fonctions",
+    screens: "Écrans",
+    pricing: "Tarifs",
+    faq: "FAQ",
+    login: "Connexion",
+  },
   ticker: [
     "En direct • Riverside CC 148/4 (18.2)",
     "4+ angles de caméra par balle",
@@ -834,7 +1186,8 @@ export const fr: Content = {
     vs: "contre",
     seasonKicker: "Saison",
     seasonTitle: "Classement des clubs",
-    standingsNote: "Classements, run rates et statistiques des joueurs se construisent à partir de chaque balle enregistrée.",
+    standingsNote:
+      "Classements, run rates et statistiques des joueurs se construisent à partir de chaque balle enregistrée.",
     tablePos: "Pos",
     tableClub: "Club",
     tableP: "J",
@@ -843,32 +1196,61 @@ export const fr: Content = {
     ctaKicker: "Salle d'analyse",
     ctaTitle1: "Revoyez le match,",
     ctaTitle2: "balle par balle",
-    ctaBody: "Chaque balle est liée à ses angles synchronisés — ralentissez, avancez image par image, dessinez dessus et envoyez des notes vocales à l'équipe.",
+    ctaBody:
+      "Chaque balle est liée à ses angles synchronisés — ralentissez, avancez image par image, dessinez dessus et envoyez des notes vocales à l'équipe.",
     ctaButton: "Obtenir l'accès",
     trustKicker: "Construit avec",
     trustTitle: "Clubs, ligues et académies",
     tags: { league: "Ligue", academy: "Académie", cup: "Coupe T20" },
   },
   features: [
-    { title: "Marquage rapide balle par balle", body: "Runs, dots, wides, no-balls, byes, leg-byes, pénalités et tous les types d'élimination — avec annulation et horodatage sur chaque balle." },
-    { title: "Salle caméra multi-téléphones", body: "Associez des téléphones aux deux extrémités et de côté — ou ajoutez autant d'angles que nécessaire. Un appui lance la salle et chaque angle reste lié à sa balle." },
-    { title: "Analyse d'entraînement", body: "Ralenti, image par image, changement d'angle, zoom, outils de dessin et notes vocales pour le retour d'après-match." },
-    { title: "Tableaux de score en direct", body: "Tableaux de qualité broadcast avec run rate, partenariats, chute des guichets et chronologie des balles." },
-    { title: "Ordinateur et mobile", body: "Marquez depuis un téléphone au bord du terrain ou un portable au club — le même match, synchronisé." },
-    { title: "Clubs, équipes et joueurs", body: "Organisations, compétitions, équipes, joueurs et terrains modélisés pour toute une saison." },
-    { title: "Partager le direct", body: "Ligues et clubs choisissent qui suit un match en temps réel — le club adverse, les supporters, la ligue ou un lien public." },
+    {
+      title: "Marquage rapide balle par balle",
+      body: "Runs, dots, wides, no-balls, byes, leg-byes, pénalités et tous les types d'élimination — avec annulation et horodatage sur chaque balle.",
+    },
+    {
+      title: "Salle caméra multi-téléphones",
+      body: "Associez des téléphones aux deux extrémités et de côté — ou ajoutez autant d'angles que nécessaire. Un appui lance la salle et chaque angle reste lié à sa balle.",
+    },
+    {
+      title: "Analyse d'entraînement",
+      body: "Ralenti, image par image, changement d'angle, zoom, outils de dessin et notes vocales pour le retour d'après-match.",
+    },
+    {
+      title: "Tableaux de score en direct",
+      body: "Tableaux de qualité broadcast avec run rate, partenariats, chute des guichets et chronologie des balles.",
+    },
+    {
+      title: "Ordinateur et mobile",
+      body: "Marquez depuis un téléphone au bord du terrain ou un portable au club — le même match, synchronisé.",
+    },
+    {
+      title: "Clubs, équipes et joueurs",
+      body: "Organisations, compétitions, équipes, joueurs et terrains modélisés pour toute une saison.",
+    },
+    {
+      title: "Partager le direct",
+      body: "Ligues et clubs choisissent qui suit un match en temps réel — le club adverse, les supporters, la ligue ou un lien public.",
+    },
   ],
   featuresTab: {
     kicker: "Plateforme",
     title: "Fonctions",
     intro: "Tout ce que contient la version actuelle de CricLume.",
     watchTitle: "Qui peut regarder en direct",
-    watchBody: "Les ligues définissent une valeur par défaut, les clubs peuvent la modifier match par match — même en cours de manche.",
+    watchBody:
+      "Les ligues définissent une valeur par défaut, les clubs peuvent la modifier match par match — même en cours de manche.",
     watchOptions: [
       { t: "Club uniquement", d: "Marqueurs, entraîneurs et membres de votre club." },
       { t: "Club adverse", d: "Le staff et les joueurs adverses suivent le même flux en direct." },
-      { t: "Bureau de la ligue", d: "Les administrateurs voient chaque match en direct pour les résultats et la conformité." },
-      { t: "Lien public", d: "Supporters et familles suivent le tableau dans un navigateur — sans compte." },
+      {
+        t: "Bureau de la ligue",
+        d: "Les administrateurs voient chaque match en direct pour les résultats et la conformité.",
+      },
+      {
+        t: "Lien public",
+        d: "Supporters et familles suivent le tableau dans un navigateur — sans compte.",
+      },
     ],
     alsoTitle: "Également inclus",
     alsoItems: [
@@ -884,16 +1266,33 @@ export const fr: Content = {
     title: "Écrans",
     intro: "Tableaux de bord, tableaux de score, marquage mobile et salle d'analyse.",
     items: [
-      { label: "Tableau de bord du club", caption: "Bureau • matchs en direct, à venir et terminés avec analyses de run rate et wagon wheel" },
-      { label: "Tableau de score en direct", caption: "Vue broadcast • score, batteurs, lanceurs, chronologie des overs et chute des guichets" },
-      { label: "Marquage mobile", caption: "Téléphone • pavé de marquage au pouce avec extras, éliminations et balles récentes" },
-      { label: "Analyse d'entraînement", caption: "Bureau • quatre angles synchronisés, navigation image par image et outils de dessin" },
+      {
+        label: "Tableau de bord du club",
+        caption:
+          "Bureau • matchs en direct, à venir et terminés avec analyses de run rate et wagon wheel",
+      },
+      {
+        label: "Tableau de score en direct",
+        caption:
+          "Vue broadcast • score, batteurs, lanceurs, chronologie des overs et chute des guichets",
+      },
+      {
+        label: "Marquage mobile",
+        caption:
+          "Téléphone • pavé de marquage au pouce avec extras, éliminations et balles récentes",
+      },
+      {
+        label: "Analyse d'entraînement",
+        caption:
+          "Bureau • quatre angles synchronisés, navigation image par image et outils de dessin",
+      },
     ],
   },
   pricing: {
     kicker: "Formules",
     title: "Tarifs et abonnements",
-    intro: "Commencez gratuitement avec une équipe. Passez à un abonnement club ou ligue pour plus d'angles, une conservation vidéo plus longue et un contrôle sur toute la compétition.",
+    intro:
+      "Commencez gratuitement avec une équipe. Passez à un abonnement club ou ligue pour plus d'angles, une conservation vidéo plus longue et un contrôle sur toute la compétition.",
     showing: "Tarifs pour",
     detecting: "Détection de votre région…",
     selectLabel: "Choisissez votre pays",
@@ -946,26 +1345,66 @@ export const fr: Content = {
     revenueKicker: "Modèle économique",
     revenueTitle: "Comment CricLume gagne de l'argent",
     revenue: [
-      { title: "Abonnements", body: "Les abonnements récurrents des clubs et ligues sont le cœur du modèle — mensuels ou annuels par équipe, avec deux mois offerts à l'année." },
-      { title: "Options vidéo et stockage", body: "Conservation prolongée, clips 4K et archives de saison sont facturés en plus de la formule de base." },
-      { title: "Sponsoring et diffusions", body: "Les ligues peuvent vendre des overlays sponsorisés et des liens de match parrainés ; CricLume perçoit une part." },
-      { title: "Services", body: "Intégration, migration des données historiques et rapports sur mesure pour les grandes ligues et académies." },
+      {
+        title: "Abonnements",
+        body: "Les abonnements récurrents des clubs et ligues sont le cœur du modèle — mensuels ou annuels par équipe, avec deux mois offerts à l'année.",
+      },
+      {
+        title: "Options vidéo et stockage",
+        body: "Conservation prolongée, clips 4K et archives de saison sont facturés en plus de la formule de base.",
+      },
+      {
+        title: "Sponsoring et diffusions",
+        body: "Les ligues peuvent vendre des overlays sponsorisés et des liens de match parrainés ; CricLume perçoit une part.",
+      },
+      {
+        title: "Services",
+        body: "Intégration, migration des données historiques et rapports sur mesure pour les grandes ligues et académies.",
+      },
     ],
-    footnote: "Le paiement annuel offre deux mois sur chaque formule payante. Écoles et sections jeunes bénéficient de 50 % de remise sur la formule Club.",
+    footnote:
+      "Le paiement annuel offre deux mois sur chaque formule payante. Écoles et sections jeunes bénéficient de 50 % de remise sur la formule Club.",
   },
   faq: {
     kicker: "Réponses",
     title: "FAQ",
     items: [
-      { q: "À qui s'adresse CricLume ?", a: "Aux clubs, ligues, écoles et académies qui veulent de vraies données balle par balle et des vidéos exploitables à l'entraînement — sans budget broadcast." },
-      { q: "Faut-il des caméras spéciales ?", a: "Non. La salle caméra associe des téléphones ordinaires. Commencez avec un à chaque extrémité et un de côté, puis ajoutez autant d'angles que nécessaire — chaque enregistrement reste lié à sa balle." },
-      { q: "Puis-je marquer sans réseau ?", a: "Le marquage continue de fonctionner avec une couverture faible et se synchronise dès le retour de la connexion." },
-      { q: "Les règles de pluie sont-elles gérées ?", a: "Oui. CricLume applique les règles de pluie standard pour ajuster objectifs et résultats en cas d'interruption." },
-      { q: "Où sont stockées les vidéos ?", a: "Clips et annotations sont stockés avec le match dans l'espace propre à votre organisation ; les contrôles de consentement et de confidentialité sont à la feuille de route." },
-      { q: "Les autres clubs et la ligue peuvent-ils suivre en direct ?", a: "Oui. Chaque match a un réglage de visibilité : privé, partagé avec l'adversaire, ouvert à la ligue, ou lien public. Les ligues peuvent aussi définir une valeur par défaut." },
-      { q: "Comment CricLume gagne-t-il de l'argent ?", a: "Clubs et ligues paient un abonnement par équipe ou compétition, selon leur usage du marquage, de la vidéo et de l'analyse. Stockage supplémentaire, packs de ligue et diffusions sponsorisées sont des options payantes." },
-      { q: "Existe-t-il une offre gratuite ?", a: "Oui. Starter est gratuit pour une équipe avec marquage balle par balle et tableau en direct. La salle caméra n'est pas incluse — les angles arrivent avec la formule Club. Elle est financée par une publicité légère." },
-      { q: "Comment obtenir un accès ?", a: "Connectez-vous si votre club a déjà un compte, ou demandez une invitation et nous préparerons votre club." },
+      {
+        q: "À qui s'adresse CricLume ?",
+        a: "Aux clubs, ligues, écoles et académies qui veulent de vraies données balle par balle et des vidéos exploitables à l'entraînement — sans budget broadcast.",
+      },
+      {
+        q: "Faut-il des caméras spéciales ?",
+        a: "Non. La salle caméra associe des téléphones ordinaires. Commencez avec un à chaque extrémité et un de côté, puis ajoutez autant d'angles que nécessaire — chaque enregistrement reste lié à sa balle.",
+      },
+      {
+        q: "Puis-je marquer sans réseau ?",
+        a: "Le marquage continue de fonctionner avec une couverture faible et se synchronise dès le retour de la connexion.",
+      },
+      {
+        q: "Les règles de pluie sont-elles gérées ?",
+        a: "Oui. CricLume applique les règles de pluie standard pour ajuster objectifs et résultats en cas d'interruption.",
+      },
+      {
+        q: "Où sont stockées les vidéos ?",
+        a: "Clips et annotations sont stockés avec le match dans l'espace propre à votre organisation ; les contrôles de consentement et de confidentialité sont à la feuille de route.",
+      },
+      {
+        q: "Les autres clubs et la ligue peuvent-ils suivre en direct ?",
+        a: "Oui. Chaque match a un réglage de visibilité : privé, partagé avec l'adversaire, ouvert à la ligue, ou lien public. Les ligues peuvent aussi définir une valeur par défaut.",
+      },
+      {
+        q: "Comment CricLume gagne-t-il de l'argent ?",
+        a: "Clubs et ligues paient un abonnement par équipe ou compétition, selon leur usage du marquage, de la vidéo et de l'analyse. Stockage supplémentaire, packs de ligue et diffusions sponsorisées sont des options payantes.",
+      },
+      {
+        q: "Existe-t-il une offre gratuite ?",
+        a: "Oui. Starter est gratuit pour une équipe avec marquage balle par balle et tableau en direct. La salle caméra n'est pas incluse — les angles arrivent avec la formule Club. Elle est financée par une publicité légère.",
+      },
+      {
+        q: "Comment obtenir un accès ?",
+        a: "Connectez-vous si votre club a déjà un compte, ou demandez une invitation et nous préparerons votre club.",
+      },
     ],
   },
   login: {
