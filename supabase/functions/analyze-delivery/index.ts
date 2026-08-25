@@ -1,10 +1,18 @@
-import { errorResponse, handleOptions, json } from "../_shared/http.ts";
+import {
+  errorResponse,
+  handleOptions,
+  json,
+  requirePost,
+  requireTrustedOrigin,
+} from "../_shared/http.ts";
 import { requireOrganisationRole, requireUser } from "../_shared/supabase.ts";
 
 Deno.serve(async (request) => {
   const options = handleOptions(request);
   if (options) return options;
   try {
+    requirePost(request);
+    requireTrustedOrigin(request);
     const endpoint = Deno.env.get("AI_ANALYSIS_ENDPOINT");
     const apiKey = Deno.env.get("AI_ANALYSIS_API_KEY");
     if (!endpoint || !apiKey) throw new Error("The AI analysis service is not configured.");

@@ -15,15 +15,15 @@ link the correct project and apply the migration:
 
 ```sh
 supabase link --project-ref YOUR_PROJECT_REF
-supabase db push
-supabase functions deploy invite-member
-supabase functions deploy create-checkout-session
-supabase functions deploy rain-calculate
-supabase functions deploy analyze-delivery
-supabase functions deploy transcode-video
-supabase functions deploy send-notifications
-supabase functions deploy cleanup-media
+supabase db push --dry-run --include-all
+supabase db push --include-all
+supabase functions deploy --project-ref YOUR_PROJECT_REF
 ```
+
+The safer production route is the manually approved `Deploy production backend` GitHub Action. Add
+`SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` and `SUPABASE_PROJECT_REF` to the protected
+`production` environment, run the workflow and tick its production confirmation input. Never commit
+these credentials.
 
 Copy `.env.example` to `.env.local` for local development. Only the Supabase URL and publishable key
 and non-secret Stripe Price ID belong in the browser. Store all secret values with
@@ -65,7 +65,7 @@ Configure a transcoding provider behind `VIDEO_TRANSCODE_ENDPOINT`. The adapter 
 thumbnail and optional blurred variants. Use a provider that supports signed input URLs, verified
 callbacks, regional processing and deletion. Do not make the bucket public.
 
-Schedule `cleanup-media` daily using a secret header. It permanently removes expired objects unless a
+Schedule `cleanup-media` daily using a high-entropy `x-cron-secret` header. It permanently removes expired objects unless a
 legal hold is present. Source video should also be copied to an independent backup store if the club's
 retention policy requires recoverability; Supabase database backups do not include Storage objects.
 
@@ -81,11 +81,21 @@ Subscription state is webhook-driven and idempotent; never grant an entitlement 
 redirect alone.
 
 Auth invites use Supabase's admin API. Application notifications use a provider-neutral HTTPS adapter.
-Set the provider endpoint and schedule `send-notifications` with a Supabase service-role JWT and
-`CRON_SECRET`. Use the same two checks for `cleanup-media`; neither scheduled function allows browser
-CORS or bypasses the Supabase JWT gateway.
+Set the provider endpoint and schedule `send-notifications` with the same high-entropy
+`x-cron-secret` value stored as `CRON_SECRET`. Use the same check for `cleanup-media`. Their gateway
+JWT check is deliberately disabled in `config.toml` so schedulers do not transmit a service-role key;
+the functions accept only POST and compare the dedicated cron secret using a timing-safe digest.
 
-## 6. Rain rules and AI
+## 6. Custom domain
+
+In Lovable, open Project → Settings → Domains and copy the exact A and TXT records shown for both the
+apex and `www` host. At the authoritative DNS provider, keep only Lovable's required web A record,
+remove competing web A records and remove any AAAA record. Leave mail MX/SPF/DKIM records untouched.
+Keep the Lovable ownership TXT record until the status is Live, then use Check status/Retry so the SSL
+certificate is provisioned. Do not proxy the record unless the domain was connected using Lovable's
+advanced proxy option.
+
+## 7. Rain rules and AI
 
 Rain calculation fails closed unless the competition rule version names a provider, method and
 edition and a licensed provider endpoint is configured. Every request, result, provider reference and
@@ -95,7 +105,7 @@ AI analysis is advisory. It cannot mutate a score. Jobs retain provider/model ve
 snapshot, evidence timestamps, confidence and the human review decision. Junior biometric
 identification is disabled even when general coaching analysis is permitted.
 
-## 7. Release gates
+## 8. Release gates
 
 - Complete the privacy impact assessment, junior safeguarding review and data-processing agreements.
 - Run the migration/RLS test workflow and an independent penetration test.

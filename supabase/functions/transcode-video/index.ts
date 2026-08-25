@@ -1,10 +1,18 @@
-import { errorResponse, handleOptions, json } from "../_shared/http.ts";
+import {
+  errorResponse,
+  handleOptions,
+  json,
+  requirePost,
+  requireTrustedOrigin,
+} from "../_shared/http.ts";
 import { requireOrganisationRole, requireUser } from "../_shared/supabase.ts";
 
 Deno.serve(async (request) => {
   const options = handleOptions(request);
   if (options) return options;
   try {
+    requirePost(request);
+    requireTrustedOrigin(request);
     const endpoint = Deno.env.get("VIDEO_TRANSCODE_ENDPOINT");
     const apiKey = Deno.env.get("VIDEO_TRANSCODE_API_KEY");
     const callbackSecret = Deno.env.get("VIDEO_CALLBACK_SECRET");

@@ -1,10 +1,20 @@
-import { errorResponse, handleOptions, json, sha256 } from "../_shared/http.ts";
+import {
+  allowedRedirect,
+  errorResponse,
+  handleOptions,
+  json,
+  requirePost,
+  requireTrustedOrigin,
+  sha256,
+} from "../_shared/http.ts";
 import { requireOrganisationRole, requireUser } from "../_shared/supabase.ts";
 
 Deno.serve(async (request) => {
   const options = handleOptions(request);
   if (options) return options;
   try {
+    requirePost(request);
+    requireTrustedOrigin(request);
     const { client, user } = await requireUser(request);
     const body = (await request.json()) as {
       organisationId?: string;
@@ -32,8 +42,9 @@ Deno.serve(async (request) => {
     ]);
 
     const email = body.email.trim().toLowerCase();
+    const redirectTo = allowedRedirect(body.redirectTo, "Invitation redirect URL");
     const { data: invite, error: inviteError } = await client.auth.admin.inviteUserByEmail(email, {
-      redirectTo: body.redirectTo,
+      redirectTo,
       data: { organisation_id: body.organisationId, organisation_role: body.role },
     });
     if (inviteError) throw inviteError;

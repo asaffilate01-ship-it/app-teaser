@@ -1,11 +1,10 @@
-import { errorResponse, json } from "../_shared/http.ts";
+import { errorResponse, json, requireEnvironmentSecret, requirePost } from "../_shared/http.ts";
 import { adminClient } from "../_shared/supabase.ts";
 
 Deno.serve(async (request) => {
   try {
-    const cronSecret = Deno.env.get("CRON_SECRET");
-    if (!cronSecret || request.headers.get("x-cron-secret") !== cronSecret)
-      throw new Error("Scheduled-job authentication failed.");
+    requirePost(request);
+    await requireEnvironmentSecret(request, "x-cron-secret", "CRON_SECRET");
     const client = adminClient();
     const { data: expired, error } = await client
       .from("video_assets")

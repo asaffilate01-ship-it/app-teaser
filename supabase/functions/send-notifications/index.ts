@@ -1,11 +1,10 @@
-import { errorResponse, json } from "../_shared/http.ts";
+import { errorResponse, json, requireEnvironmentSecret, requirePost } from "../_shared/http.ts";
 import { adminClient } from "../_shared/supabase.ts";
 
 Deno.serve(async (request) => {
   try {
-    const cronSecret = Deno.env.get("CRON_SECRET");
-    if (!cronSecret || request.headers.get("x-cron-secret") !== cronSecret)
-      throw new Error("Scheduled-job authentication failed.");
+    requirePost(request);
+    await requireEnvironmentSecret(request, "x-cron-secret", "CRON_SECRET");
     const endpoint = Deno.env.get("EMAIL_PROVIDER_ENDPOINT");
     const apiKey = Deno.env.get("EMAIL_PROVIDER_API_KEY");
     if (!endpoint || !apiKey) throw new Error("Email delivery is not configured.");

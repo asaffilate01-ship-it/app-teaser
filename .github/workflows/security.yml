@@ -43,6 +43,8 @@ jobs:
         run: supabase start -x studio,imgproxy,inbucket,logflare,vector,supavisor
       - name: Lint database functions and policies
         run: supabase db lint --local --level warning
+      - name: Run database and RLS tests
+        run: supabase test db
       - name: Stop isolated stack
         if: always()
         run: supabase stop --no-backup

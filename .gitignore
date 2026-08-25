@@ -18,6 +18,11 @@ dist-ssr
 .nitro
 *.local
 
+# Environment files. Keep only the documented template in Git.
+.env
+.env.*
+!.env.example
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

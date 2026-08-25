@@ -1,12 +1,22 @@
-import { errorResponse, handleOptions, json } from "../_shared/http.ts";
+import {
+  allowedRedirect,
+  errorResponse,
+  handleOptions,
+  json,
+  requirePost,
+  requireTrustedOrigin,
+} from "../_shared/http.ts";
 import { requireOrganisationRole, requireUser } from "../_shared/supabase.ts";
 
 Deno.serve(async (request) => {
   const options = handleOptions(request);
   if (options) return options;
   try {
+    requirePost(request);
+    requireTrustedOrigin(request);
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("Stripe is not configured.");
+    const configuredPriceId = Deno.env.get("STRIPE_PRICE_CLUB");
+    if (!stripeKey || !configuredPriceId) throw new Error("Stripe is not configured.");
     const { client, user } = await requireUser(request);
     const body = (await request.json()) as {
       organisationId?: string;
@@ -16,6 +26,9 @@ Deno.serve(async (request) => {
     };
     if (!body.organisationId || !body.priceId || !body.successUrl || !body.cancelUrl)
       throw new Error("Organisation, price and return URLs are required.");
+    if (body.priceId !== configuredPriceId) throw new Error("The selected plan is not available.");
+    const successUrl = allowedRedirect(body.successUrl, "Checkout success URL");
+    const cancelUrl = allowedRedirect(body.cancelUrl, "Checkout cancellation URL");
     await requireOrganisationRole(client, user.id, body.organisationId, [
       "owner",
       "league_admin",
@@ -29,10 +42,10 @@ Deno.serve(async (request) => {
       .maybeSingle();
     const parameters = new URLSearchParams({
       mode: "subscription",
-      "line_items[0][price]": body.priceId,
+      "line_items[0][price]": configuredPriceId,
       "line_items[0][quantity]": "1",
-      success_url: body.successUrl,
-      cancel_url: body.cancelUrl,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       "subscription_data[metadata][organisation_id]": body.organisationId,
       "metadata[organisation_id]": body.organisationId,
       client_reference_id: body.organisationId,

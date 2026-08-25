@@ -1,10 +1,19 @@
-import { errorResponse, handleOptions, json, sha256 } from "../_shared/http.ts";
-import { requireUser } from "../_shared/supabase.ts";
+import {
+  errorResponse,
+  handleOptions,
+  json,
+  requirePost,
+  requireTrustedOrigin,
+  sha256,
+} from "../_shared/http.ts";
+import { requireOrganisationRole, requireUser } from "../_shared/supabase.ts";
 
 Deno.serve(async (request) => {
   const options = handleOptions(request);
   if (options) return options;
   try {
+    requirePost(request);
+    requireTrustedOrigin(request);
     const providerUrl = Deno.env.get("RAIN_RULE_PROVIDER_URL");
     const providerKey = Deno.env.get("RAIN_RULE_PROVIDER_KEY");
     if (!providerUrl || !providerKey)
@@ -15,11 +24,17 @@ Deno.serve(async (request) => {
     const { data: match, error: matchError } = await client
       .from("matches")
       .select(
-        "id, rule_version_id, competition_rule_versions!inner(id, rain_provider, rain_method, rain_edition, rain_parameters)",
+        "id, owner_organisation_id, rule_version_id, competition_rule_versions!inner(id, rain_provider, rain_method, rain_edition, rain_parameters)",
       )
       .eq("id", body.matchId)
       .single();
     if (matchError) throw matchError;
+    await requireOrganisationRole(client, user.id, match.owner_organisation_id, [
+      "owner",
+      "league_admin",
+      "club_admin",
+      "scorer",
+    ]);
     const rule = match.competition_rule_versions as {
       id: string;
       rain_provider: string | null;
