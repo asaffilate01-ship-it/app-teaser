@@ -3,7 +3,8 @@
 **See every ball. Shape every game.**
 
 CricLume is a cricket scoring and coaching platform in active development. This repository contains
-the public product site and the first working scorer preview at `/app`.
+the public product site, the working scorer at `/app`, the cloud control centre at `/platform`, public
+scoreboards and the production Supabase backend definition.
 
 The preview currently includes:
 
@@ -15,9 +16,20 @@ The preview currently includes:
 - on-device video review with multiple angles, slow motion, frame stepping, zoom and drawing;
 - deterministic data-quality checks ready for later model-assisted analysis.
 
-The preview deliberately does not claim cloud accounts, live multi-phone synchronization, public
-scoreboards, official rain-rule calculations, payments or cloud AI as finished. Those services need
-the production backend, storage, licensing and privacy controls.
+The production layer now includes:
+
+- Supabase Auth/Postgres tenancy for clubs, schools, academies and leagues, with role-based RLS;
+- idempotent append-only scoring events, offline queueing and realtime synchronization between phones;
+- private multi-phone camera rooms and resumable video uploads with retention, consent and blur policy;
+- live public scoreboard RPC/routes, fixtures, round-robin/knockout generation and versioned rule packs;
+- batter, bowler and fielder career aggregation;
+- server-side adapters for Stripe, email, licensed rain rules, video processing and advisory AI review;
+- PWA installation, security headers, CodeQL/dependency/database checks and managed-backup monitoring.
+
+External integrations remain disabled until the owner's Supabase, Stripe, email, video, AI,
+monitoring and authorised rain-rule credentials are configured. Native app-store binaries still need
+native capture work, signing identities and store accounts; see `docs/PRODUCTION_SETUP.md` and
+`docs/RELEASE_CHECKLIST.md`.
 
 This project was built with [Lovable](https://lovable.dev).
 
@@ -40,6 +52,7 @@ engine test command.
 git clone https://github.com/asaffilate01-ship-it/app-teaser.git
 cd app-teaser
 bun install
+cp .env.example .env.local
 bun run dev
 ```
 

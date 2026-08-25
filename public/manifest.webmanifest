@@ -1,0 +1,16 @@
+{
+  "name": "CricLume Cricket Scoring",
+  "short_name": "CricLume",
+  "description": "Live cricket scoring, multi-phone capture and coaching review.",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f0d17",
+  "theme_color": "#e11d48",
+  "categories": ["sports", "productivity"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

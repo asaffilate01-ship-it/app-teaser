@@ -587,10 +587,11 @@ function FeaturesTab() {
       <SectionHeader kicker={t.featuresTab.kicker}>{t.featuresTab.title}</SectionHeader>
       <p className="text-sm text-muted-foreground md:text-base">{t.featuresTab.intro}</p>
       <div className="rounded-2xl border border-gold/30 bg-gold/10 p-4 text-sm leading-relaxed text-muted-foreground">
-        <strong className="text-foreground">Available in the preview:</strong> match setup, offline
-        ball-by-ball scoring, scorecards, audit timeline, JSON export and on-device multi-angle
-        video review. Cloud sync, public live scoring, model-assisted AI and official rain-rule
-        calculations are in development.
+        <strong className="text-foreground">Built into this release:</strong> offline and
+        cloud-ready ball-by-ball scoring, role-based club and league administration, realtime event
+        sync, public scoreboards, camera-room capture, career history, competition tools and
+        on-device coaching review. Paid, AI, video-processing and rain-rule services activate only
+        after their secure providers are configured.
       </div>
       <div className="space-y-3 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 lg:grid-cols-3">
         {t.features.map((f, i) => (
@@ -714,8 +715,9 @@ function PricingTab() {
         {t.pricing.intro} {region.note}
       </p>
       <p className="rounded-2xl border border-gold/30 bg-gold/10 p-4 text-sm leading-relaxed text-muted-foreground">
-        These are pilot-plan targets, not an active checkout. The scoring preview is free to use
-        now; paid Club and League plans open after the cloud pilot.
+        These are pilot-plan targets, not an active public checkout. Stripe subscription and webhook
+        support is built, but paid Club and League plans open only after the production account and
+        pilot terms are activated.
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -879,6 +881,12 @@ function LoginTab() {
           className="brand-gradient glow flex h-12 w-full items-center justify-center rounded-full text-sm font-bold uppercase tracking-wider text-primary-foreground active:scale-[0.98]"
         >
           {t.login.submit}
+        </Link>
+        <Link
+          to="/platform"
+          className="flex h-11 w-full items-center justify-center rounded-full border border-border text-sm font-bold text-foreground transition hover:border-gold/50"
+        >
+          Open cloud control centre
         </Link>
         <p className="text-center text-sm text-muted-foreground">
           {t.login.noAccount}{" "}

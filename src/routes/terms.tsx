@@ -4,10 +4,10 @@ import { LegalPage } from "./privacy";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Preview terms — CricLume" },
+      { title: "Platform terms — CricLume" },
       {
         name: "description",
-        content: "Terms for using the CricLume cricket scoring and coaching preview.",
+        content: "Terms for using the CricLume cricket scoring, competition and coaching platform.",
       },
     ],
     links: [{ rel: "canonical", href: "https://app-teaser.lovable.app/terms" }],
@@ -17,11 +17,12 @@ export const Route = createFileRoute("/terms")({
 
 function TermsPage() {
   return (
-    <LegalPage title="Preview terms" subtitle="Effective 24 August 2026">
+    <LegalPage title="Platform terms" subtitle="Effective 25 August 2026">
       <p>
-        These terms apply to the free CricLume website and device-only product preview provided by
-        iTechLounge Ltd. By using the preview, you agree to these terms. Paid subscriptions, cloud
-        accounts and league services will have separate terms before they launch.
+        These terms apply to the free CricLume website, device scoring preview and any cloud pilot
+        service provided by iTechLounge Ltd. By using CricLume, you agree to these terms. A paid or
+        organisation-wide service may also have an order form and data-processing agreement; those
+        documents take priority where they expressly differ.
       </p>
 
       <h2>Preview status</h2>
@@ -29,14 +30,33 @@ function TermsPage() {
         CricLume is under active development. The preview is provided for evaluation and pilot
         scoring. Features may change, and local browser data may be lost because of device failure,
         browser settings, cleared storage or product updates. Export important matches and maintain
-        any official scorebook or backup required by your competition.
+        any official scorebook or backup required by your competition. Cloud features are available
+        only when the relevant organisation and service integrations have been activated.
       </p>
 
       <h2>Scoring responsibility</h2>
       <p>
         The scorer remains responsible for checking players, runs, extras, wickets, overs, results
-        and competition rules. The preview does not currently calculate rain-adjusted targets and
-        must not be treated as an official DLS or other licensed rain-rule calculator.
+        and competition rules. A rain-adjusted target may be used only when the competition has
+        selected an authorised, versioned provider. CricLume must not be treated as an official DLS
+        or other licensed calculator when that provider is not configured.
+      </p>
+
+      <h2>Accounts, roles and subscriptions</h2>
+      <p>
+        Keep sign-in links and devices secure and use only the role assigned to you. Organisation
+        owners control member invitations, permissions and public match visibility. Paid plans renew
+        according to the checkout terms shown by Stripe until cancelled. Store-platform billing may
+        apply separately to a future native app. Loss of an entitlement must not remove an
+        organisation&apos;s lawful access to export its records.
+      </p>
+
+      <h2>AI and coaching suggestions</h2>
+      <p>
+        Automated findings are suggestions, not official decisions. A human must review evidence,
+        confidence and the original delivery before changing a score, coaching a player or taking
+        safeguarding action. Do not use CricLume for prohibited biometric identification or to make
+        solely automated decisions with legal or similarly significant effects.
       </p>
 
       <h2>Video, consent and safeguarding</h2>
@@ -58,8 +78,9 @@ function TermsPage() {
       <h2>Intellectual property</h2>
       <p>
         CricLume&apos;s software, design, brand and original content belong to iTechLounge Ltd or
-        its licensors. You retain rights in match information and video you lawfully provide. Using
-        the local preview does not transfer that user material to CricLume.
+        its licensors. You retain rights in match information and video you lawfully provide and
+        grant the limited permission needed to host, synchronize, process and return material for
+        the service you select.
       </p>
 
       <h2>Availability and liability</h2>
@@ -73,9 +94,9 @@ function TermsPage() {
 
       <h2>Changes and contact</h2>
       <p>
-        We may update the preview and these terms as the product develops. Material terms for cloud
-        accounts or paid services will be presented before those services are activated. Questions
-        can be sent to <a href="mailto:hello@criclume.com">hello@criclume.com</a>.
+        We may update the platform and these terms as the product develops. Material commercial
+        changes will be presented before they take effect. Questions can be sent to{" "}
+        <a href="mailto:hello@criclume.com">hello@criclume.com</a>.
       </p>
     </LegalPage>
   );

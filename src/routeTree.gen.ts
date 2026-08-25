@@ -11,8 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as CameraRoomIdRouteImport } from './routes/camera.$roomId'
+import { Route as ScoreboardSlugRouteImport } from './routes/scoreboard.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformRoute = PlatformRouteImport.update({
+  id: '/platform',
+  path: '/platform',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -34,39 +42,83 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CameraRoomIdRoute = CameraRoomIdRouteImport.update({
+  id: '/camera/$roomId',
+  path: '/camera/$roomId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScoreboardSlugRoute = ScoreboardSlugRouteImport.update({
+  id: '/scoreboard/$slug',
+  path: '/scoreboard/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
+  '/platform': typeof PlatformRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/camera/$roomId': typeof CameraRoomIdRoute
+  '/scoreboard/$slug': typeof ScoreboardSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
+  '/platform': typeof PlatformRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/camera/$roomId': typeof CameraRoomIdRoute
+  '/scoreboard/$slug': typeof ScoreboardSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRoute
+  '/platform': typeof PlatformRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/camera/$roomId': typeof CameraRoomIdRoute
+  '/scoreboard/$slug': typeof ScoreboardSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/privacy' | '/terms'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/platform'
+    | '/privacy'
+    | '/terms'
+    | '/camera/$roomId'
+    | '/scoreboard/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/privacy' | '/terms'
-  id: '__root__' | '/' | '/app' | '/privacy' | '/terms'
+  to:
+    | '/'
+    | '/app'
+    | '/platform'
+    | '/privacy'
+    | '/terms'
+    | '/camera/$roomId'
+    | '/scoreboard/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/platform'
+    | '/privacy'
+    | '/terms'
+    | '/camera/$roomId'
+    | '/scoreboard/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRoute
+  PlatformRoute: typeof PlatformRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  CameraRoomIdRoute: typeof CameraRoomIdRoute
+  ScoreboardSlugRoute: typeof ScoreboardSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -85,6 +137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform': {
+      id: '/platform'
+      path: '/platform'
+      fullPath: '/platform'
+      preLoaderRoute: typeof PlatformRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -99,14 +158,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/camera/$roomId': {
+      id: '/camera/$roomId'
+      path: '/camera/$roomId'
+      fullPath: '/camera/$roomId'
+      preLoaderRoute: typeof CameraRoomIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scoreboard/$slug': {
+      id: '/scoreboard/$slug'
+      path: '/scoreboard/$slug'
+      fullPath: '/scoreboard/$slug'
+      preLoaderRoute: typeof ScoreboardSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRoute,
+  PlatformRoute: PlatformRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  CameraRoomIdRoute: CameraRoomIdRoute,
+  ScoreboardSlugRoute: ScoreboardSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

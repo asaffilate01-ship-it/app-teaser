@@ -1,0 +1,46 @@
+name: Managed backup monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "43 2 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-managed-backup:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+    steps:
+      - name: Require backup-monitor credentials
+        shell: bash
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$SUPABASE_PROJECT_REF" ]; then
+            echo "::error::Set a fine-grained Supabase token with backups_read and the production project ref."
+            exit 1
+          fi
+      - name: Verify PITR or a recent completed managed backup
+        shell: bash
+        run: |
+          response="$(curl --fail --silent --show-error \
+            --header "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/database/backups")"
+          if [ "$(jq -r '.pitr_enabled // false' <<< "$response")" = "true" ]; then
+            echo "Point-in-time recovery is enabled."
+            exit 0
+          fi
+          latest="$(jq -r '[.backups[]? | select(.status == "COMPLETED") | .inserted_at] | sort | last // empty' <<< "$response")"
+          if [ -z "$latest" ]; then
+            echo "::error::No completed managed database backup was reported."
+            exit 1
+          fi
+          latest_epoch="$(date --date="$latest" +%s)"
+          current_epoch="$(date -u +%s)"
+          if [ $((current_epoch - latest_epoch)) -gt 129600 ]; then
+            echo "::error::The most recent completed managed backup is more than 36 hours old."
+            exit 1
+          fi
+          echo "A recent completed managed database backup was verified."

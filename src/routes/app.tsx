@@ -1,5 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type PointerEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type PointerEvent,
+} from "react";
 import {
   Activity,
   ArrowLeft,
@@ -9,6 +17,7 @@ import {
   ChevronRight,
   CircleDot,
   ClipboardCheck,
+  Cloud,
   CloudOff,
   Download,
   FileVideo,
@@ -34,6 +43,7 @@ import {
   X,
 } from "lucide-react";
 import { useCricketStore } from "@/hooks/use-cricket-store";
+import { useMatchCloudSync } from "@/hooks/use-match-cloud-sync";
 import {
   battingCard,
   bowlingCard,
@@ -146,6 +156,8 @@ function CricketApp() {
   const [screen, setScreen] = useState<AppScreen>("dashboard");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedMatch = matches.find((match) => match.id === selectedId);
+  const cloudLinked =
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).has("cloudMatch");
 
   const openMatch = (id: string) => {
     setSelectedId(id);
@@ -174,9 +186,23 @@ function CricketApp() {
               Scorer preview
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <CloudOff className="size-3.5 text-amber-300" />
-            <span className="hidden sm:inline">Saved on this device</span>
+          <div className="flex items-center gap-3 text-xs text-slate-400">
+            <Link
+              to="/platform"
+              className="hidden font-bold text-slate-300 hover:text-white md:inline"
+            >
+              Cloud control centre
+            </Link>
+            <span className="flex items-center gap-2">
+              {cloudLinked ? (
+                <Cloud className="size-3.5 text-amber-300" />
+              ) : (
+                <CloudOff className="size-3.5 text-amber-300" />
+              )}
+              <span className="hidden sm:inline">
+                {cloudLinked ? "Cloud match linked" : "Saved on this device"}
+              </span>
+            </span>
           </div>
         </div>
       </header>
@@ -589,6 +615,21 @@ function LiveMatch({
   onExit: () => void;
 }) {
   const [tab, setTab] = useState<MatchTab>("score");
+  const cloudMatchId = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    return new URLSearchParams(window.location.search).get("cloudMatch");
+  }, []);
+  const acceptRemoteMatch = useCallback(
+    (remote: CricketMatch) => {
+      if (remote.id === match.id) onSave(remote);
+    },
+    [match.id, onSave],
+  );
+  const cloudSync = useMatchCloudSync(cloudMatchId, acceptRemoteMatch);
+  const saveAndSync = (next: CricketMatch) => {
+    onSave(next);
+    void cloudSync.publish(next, "match.snapshot");
+  };
   const innings = currentInnings(match);
   const summary = summarizeInnings(innings, match.settings.ballsPerOver);
   const battingTeam = findTeam(match, innings.battingTeamId);
@@ -619,6 +660,12 @@ function LiveMatch({
               <span>Innings {innings.number}</span>
               <span>•</span>
               <span>{match.settings.format}</span>
+              {cloudSync.enabled && (
+                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-slate-300">
+                  Cloud {cloudSync.status}
+                  {cloudSync.lastSequence ? ` · #${cloudSync.lastSequence}` : ""}
+                </span>
+              )}
             </div>
             <h1 className="mt-2 font-display text-2xl font-bold md:text-4xl">
               {battingTeam.name} <span className="text-slate-500">v</span> {bowlingTeam.name}
@@ -671,7 +718,7 @@ function LiveMatch({
       </nav>
 
       <div className="px-4 py-5 md:px-0">
-        {tab === "score" && <ScoringPad match={match} onSave={onSave} onExit={onExit} />}
+        {tab === "score" && <ScoringPad match={match} onSave={saveAndSync} onExit={onExit} />}
         {tab === "timeline" && <Timeline match={match} />}
         {tab === "scorecard" && <Scorecard match={match} />}
         {tab === "analysis" && <Analysis match={match} />}

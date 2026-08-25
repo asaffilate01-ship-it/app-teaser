@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { reportMonitoringEvent } from "../lib/monitoring";
 
 function NotFoundComponent() {
   return (
@@ -39,6 +40,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    reportMonitoringEvent({
+      level: "error",
+      name: error.name,
+      message: error.message,
+      context: { boundary: "tanstack_root_error_component" },
+    });
   }, [error]);
 
   return (
@@ -100,6 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -130,6 +138,12 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator && import.meta.env.PROD) {
+      void navigator.serviceWorker.register("/sw.js");
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -8,7 +8,7 @@ export const Route = createFileRoute("/privacy")({
       { title: "Privacy notice — CricLume" },
       {
         name: "description",
-        content: "How the CricLume scoring preview handles match, video and device data.",
+        content: "How CricLume handles account, match, video, coaching and device data.",
       },
     ],
     links: [{ rel: "canonical", href: "https://app-teaser.lovable.app/privacy" }],
@@ -18,11 +18,12 @@ export const Route = createFileRoute("/privacy")({
 
 function PrivacyPage() {
   return (
-    <LegalPage title="Privacy notice" subtitle="Effective 24 August 2026">
+    <LegalPage title="Privacy notice" subtitle="Effective 25 August 2026">
       <p>
-        CricLume is a product of iTechLounge Ltd. This notice explains how the public website and
-        device-only scoring preview handle information. The preview does not yet provide accounts,
-        cloud match storage or synchronized remote-camera rooms.
+        CricLume is a product of iTechLounge Ltd. This notice explains how the public website,
+        device scoring preview and cloud services for enrolled clubs, schools, academies and leagues
+        handle information. A participating organisation may also give you its own notice explaining
+        its responsibilities for player and member information.
       </p>
 
       <h2>Information handled by the scoring preview</h2>
@@ -33,8 +34,27 @@ function PrivacyPage() {
       </p>
       <p>
         Videos selected in the coaching lab are opened locally through your browser. The preview
-        does not upload or retain those videos. Closing or refreshing the page ends that temporary
-        review session.
+        does not upload those videos unless you deliberately join a cloud camera room and confirm an
+        upload. Closing or refreshing a local-only review ends that temporary session.
+      </p>
+
+      <h2>Accounts and cloud matches</h2>
+      <p>
+        When cloud access is enabled, we process your email address, display name, organisation,
+        membership role, invitations, authentication and security records. Cloud match records can
+        include teams, players, fixtures, grounds, weather, ball-by-ball events, scorer edits,
+        device identifiers, timestamps and audit history. Access is restricted by organisation and
+        match roles. A narrow public scoreboard can be enabled by an authorised match administrator.
+      </p>
+
+      <h2>Camera rooms, video and AI review</h2>
+      <p>
+        A cloud camera room can process device health, camera position, time offset, recordings,
+        upload status, annotations and links between clips and deliveries. Each video has a consent
+        state, retention date and optional face or full-person blur setting. AI analysis is
+        advisory, confidence-scored and subject to human review; it does not change the score
+        automatically. Junior identity recognition is disabled and junior media requires additional
+        safeguarding controls.
       </p>
 
       <h2>Website and regional pricing data</h2>
@@ -55,9 +75,22 @@ function PrivacyPage() {
 
       <h2>Cookies and analytics</h2>
       <p>
-        The current preview does not set advertising or analytics cookies. Browser local storage is
-        used to keep matches that you deliberately create. You can erase those matches inside the
-        app or clear site data in your browser.
+        CricLume does not use advertising cookies. Browser local storage is used for matches you
+        create, authentication where cloud access is enabled, offline event queues, device pairing
+        and installable-app files. You can erase local matches inside the app or clear site data in
+        your browser. Operational monitoring may record errors, route, release, browser type and
+        request time, with unnecessary personal data excluded.
+      </p>
+
+      <h2>Payments, providers and retention</h2>
+      <p>
+        Stripe processes subscription and payment details; CricLume stores customer, subscription,
+        plan and entitlement references rather than full card details. Hosting, database, storage,
+        email, video processing, monitoring, authorised rain-rule and AI providers process data only
+        for their configured service. Retention depends on the record and organisation policy.
+        Junior recordings default to a shorter period, and expired cloud media is deleted unless a
+        documented legal hold applies. Database and security records may be kept longer where needed
+        for integrity, legal obligations or disputes.
       </p>
 
       <h2>Children and player information</h2>
@@ -78,9 +111,9 @@ function PrivacyPage() {
 
       <h2>Contact</h2>
       <p>
-        Email <a href="mailto:hello@criclume.com">hello@criclume.com</a>. This notice will be
-        updated before accounts, cloud storage, payments, AI processing or live multi-device capture
-        are released.
+        Email <a href="mailto:hello@criclume.com">hello@criclume.com</a>. This notice and the
+        organisation&apos;s own player notice should be reviewed before a club or league activates
+        cloud video, AI analysis, payments or public scoreboards.
       </p>
     </LegalPage>
   );
