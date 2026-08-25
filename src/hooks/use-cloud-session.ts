@@ -36,7 +36,13 @@ export function useCloudSession() {
 
   const requestLink = useCallback(async (email: string, redirectTo?: string) => {
     setError(null);
-    await requestSignInLink(email, redirectTo ?? `${window.location.origin}/platform`);
+    try {
+      await requestSignInLink(email, redirectTo ?? `${window.location.origin}/platform`);
+    } catch (reason) {
+      const message = reason instanceof Error ? reason.message : "Could not send the sign-in link.";
+      setError(message);
+      throw reason;
+    }
   }, []);
 
   const signOut = useCallback(async () => {

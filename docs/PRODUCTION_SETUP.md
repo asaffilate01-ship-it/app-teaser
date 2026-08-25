@@ -26,7 +26,8 @@ supabase functions deploy cleanup-media
 ```
 
 Copy `.env.example` to `.env.local` for local development. Only the Supabase URL and publishable key
-belong in the browser. Store all other values with `supabase secrets set`.
+and non-secret Stripe Price ID belong in the browser. Store all secret values with
+`supabase secrets set`.
 
 For the scheduled managed-backup monitor, add `SUPABASE_PROJECT_REF` and a fine-grained
 `SUPABASE_ACCESS_TOKEN` with only `backups_read` permission as GitHub repository secrets. The workflow
@@ -70,7 +71,8 @@ retention policy requires recoverability; Supabase database backups do not inclu
 
 ## 5. Billing and email
 
-Create Stripe Products and recurring Prices, then set `STRIPE_SECRET_KEY`. Register
+Create Stripe Products and recurring Prices, set `VITE_STRIPE_PRICE_CLUB` to the public recurring
+Price ID, then set `STRIPE_SECRET_KEY` in the server environment. Register
 `https://YOUR_APP_DOMAIN/api/stripe-webhook` for Checkout and subscription lifecycle events and store
 its signing secret alongside `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in the web runtime. That server
 route verifies the raw Stripe signature before it uses the Supabase secret key; there is no

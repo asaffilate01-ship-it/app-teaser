@@ -24,6 +24,10 @@ const rules: CompetitionRules = {
 test("role matrix keeps safeguarding and billing permissions restricted", () => {
   assert.equal(can("owner", "billing.manage"), true);
   assert.equal(can("scorer", "match.score"), true);
+  assert.equal(can("scorer", "match.manage"), true);
+  assert.equal(can("club_admin", "team.manage"), true);
+  assert.equal(can("coach", "player.manage"), true);
+  assert.equal(can("viewer", "match.manage"), false);
   assert.equal(can("scorer", "player.private_data"), false);
   assert.equal(can("safeguarding_officer", "player.private_data"), true);
 });

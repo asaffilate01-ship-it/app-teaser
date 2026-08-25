@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { CricketMatch } from "@/lib/cricket";
 import {
+  battingCard,
+  bowlingCard,
   currentInnings,
   findPlayer,
   findTeam,
@@ -29,10 +31,15 @@ function getDeviceId(): string {
 
 function publicLiveState(match: CricketMatch): Record<string, unknown> {
   const innings = currentInnings(match);
-  const summary = summarizeInnings(innings);
+  const summary = summarizeInnings(innings, match.settings.ballsPerOver);
   const striker = findPlayer(match, innings.strikerId);
   const nonStriker = findPlayer(match, innings.nonStrikerId);
   const bowler = findPlayer(match, innings.bowlerId);
+  const batters = battingCard(match, innings);
+  const bowlers = bowlingCard(match, innings);
+  const strikerFigures = batters.find((row) => row.playerId === striker?.id);
+  const nonStrikerFigures = batters.find((row) => row.playerId === nonStriker?.id);
+  const bowlerFigures = bowlers.find((row) => row.playerId === bowler?.id);
   const batting = findTeam(match, innings.battingTeamId);
   const target = targetForCurrentInnings(match);
   return {
@@ -41,9 +48,24 @@ function publicLiveState(match: CricketMatch): Record<string, unknown> {
     wickets: summary.wickets,
     overs: summary.overs,
     target,
-    striker: striker ? { name: striker.name, runs: 0, balls: 0 } : null,
-    nonStriker: nonStriker ? { name: nonStriker.name, runs: 0, balls: 0 } : null,
-    bowler: bowler ? { name: bowler.name, wickets: 0, runs: 0, overs: "0.0" } : null,
+    striker: striker
+      ? { name: striker.name, runs: strikerFigures?.runs ?? 0, balls: strikerFigures?.balls ?? 0 }
+      : null,
+    nonStriker: nonStriker
+      ? {
+          name: nonStriker.name,
+          runs: nonStrikerFigures?.runs ?? 0,
+          balls: nonStrikerFigures?.balls ?? 0,
+        }
+      : null,
+    bowler: bowler
+      ? {
+          name: bowler.name,
+          wickets: bowlerFigures?.wickets ?? 0,
+          runs: bowlerFigures?.runs ?? 0,
+          overs: bowlerFigures?.overs ?? "0.0",
+        }
+      : null,
     recent: innings.deliveries.slice(-6).map((delivery) => ({
       label: delivery.dismissal
         ? "W"
@@ -102,12 +124,21 @@ export function useMatchCloudSync(
   const publish = useCallback(
     async (match: CricketMatch, eventType: string) => {
       if (!enabled || !cloudMatchId) return;
+      const innings = currentInnings(match);
+      const delivery = eventType === "delivery.recorded" ? innings.deliveries.at(-1) : null;
+      const canonicalInningsEvent = ["delivery.recorded", "delivery.voided"].includes(eventType);
+      const liveState = publicLiveState(match);
       const event: PendingMatchEvent = {
         matchId: cloudMatchId,
         clientEventId: crypto.randomUUID(),
         deviceId,
         eventType,
-        payload: { matchSnapshot: match, liveState: publicLiveState(match) },
+        payload: {
+          matchSnapshot: match,
+          liveState,
+          ...(canonicalInningsEvent ? { inningsId: innings.id } : {}),
+          ...(delivery ? { delivery } : {}),
+        },
         occurredAt: new Date().toISOString(),
       };
       if (!navigator.onLine) {

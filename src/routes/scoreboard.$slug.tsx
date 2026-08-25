@@ -42,46 +42,14 @@ interface ScoreboardData {
   sponsor?: { name?: string };
 }
 
-const demo: ScoreboardData = {
-  matchId: "demo",
-  status: "live",
-  startedAt: new Date().toISOString(),
-  weather: { summary: "Dry · light cloud · 18°C" },
-  homeTeam: { id: "riverside", name: "Riverside Cricket Club", shortName: "RIV" },
-  awayTeam: { id: "northfield", name: "Northfield Cricket Club", shortName: "NOR" },
-  ground: { id: "meadow", name: "Meadow Ground" },
-  liveState: {
-    battingTeamId: "riverside",
-    runs: 128,
-    wickets: 4,
-    overs: "14.3",
-    target: 176,
-    striker: { name: "A. Morgan", runs: 44, balls: 31 },
-    nonStriker: { name: "J. Patel", runs: 18, balls: 14 },
-    bowler: { name: "R. Singh", wickets: 2, runs: 24, overs: "3.3" },
-    recent: [
-      { label: "1" },
-      { label: "·" },
-      { label: "4", kind: "boundary" },
-      { label: "W", kind: "wicket" },
-      { label: "2" },
-      { label: "1" },
-    ],
-    message: "Riverside CC need 48 from 33 balls",
-  },
-  updatedAt: new Date().toISOString(),
-};
-
 function PublicScoreboard() {
   const { slug } = Route.useParams();
-  const [scoreboard, setScoreboard] = useState<ScoreboardData | null>(
-    slug === "demo" ? demo : null,
-  );
-  const [loading, setLoading] = useState(slug !== "demo" && isCloudConfigured());
+  const [scoreboard, setScoreboard] = useState<ScoreboardData | null>(null);
+  const [loading, setLoading] = useState(isCloudConfigured());
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (slug === "demo" || !isCloudConfigured()) return;
+    if (!isCloudConfigured()) return;
     let active = true;
     const load = async () => {
       const { data, error: requestError } = await getCloudClient().rpc("get_public_scoreboard", {
@@ -104,7 +72,7 @@ function PublicScoreboard() {
     };
   }, [slug]);
 
-  if (!isCloudConfigured() && slug !== "demo") {
+  if (!isCloudConfigured()) {
     return (
       <ScoreboardMessage
         title="Cloud scoreboard not configured"

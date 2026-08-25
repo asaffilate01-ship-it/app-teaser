@@ -43,6 +43,7 @@ import {
   X,
 } from "lucide-react";
 import { useCricketStore } from "@/hooks/use-cricket-store";
+import { useCloudSession } from "@/hooks/use-cloud-session";
 import { useMatchCloudSync } from "@/hooks/use-match-cloud-sync";
 import {
   battingCard,
@@ -69,6 +70,7 @@ import {
   type RecordDeliveryInput,
   type ShotOutcome,
 } from "@/lib/cricket";
+import { loadCloudMatchSnapshot, startCloudInnings } from "@/lib/cloud";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 
 export const Route = createFileRoute("/app")({
@@ -153,11 +155,70 @@ const dismissalTypes: { value: DismissalType; label: string }[] = [
 
 function CricketApp() {
   const { matches, loaded, upsertMatch, removeMatch } = useCricketStore();
+  const cloudSession = useCloudSession();
   const [screen, setScreen] = useState<AppScreen>("dashboard");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [cloudBootstrap, setCloudBootstrap] = useState<{
+    status: "idle" | "loading" | "ready" | "error";
+    message?: string;
+  }>({ status: "idle" });
   const selectedMatch = matches.find((match) => match.id === selectedId);
-  const cloudLinked =
-    typeof window !== "undefined" && new URLSearchParams(window.location.search).has("cloudMatch");
+  const cloudMatchId = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    return new URLSearchParams(window.location.search).get("cloudMatch");
+  }, []);
+  const cloudLinked = Boolean(cloudMatchId);
+
+  useEffect(() => {
+    if (!cloudMatchId || !loaded || cloudSession.loading || cloudBootstrap.status !== "idle") {
+      return;
+    }
+    if (!cloudSession.configured) {
+      setCloudBootstrap({
+        status: "error",
+        message: "CricLume Cloud has not been configured for this deployment.",
+      });
+      return;
+    }
+    if (!cloudSession.session) {
+      setCloudBootstrap({
+        status: "error",
+        message: "Sign in through the cloud control centre before opening this match.",
+      });
+      return;
+    }
+    const local = matches.find((match) => match.id === cloudMatchId);
+    setCloudBootstrap({ status: "loading" });
+    void loadCloudMatchSnapshot(cloudMatchId)
+      .then((match) => {
+        upsertMatch(match);
+        setSelectedId(match.id);
+        setScreen("match");
+        setCloudBootstrap({ status: "ready" });
+      })
+      .catch((reason: unknown) => {
+        if (local) {
+          setSelectedId(local.id);
+          setScreen("match");
+          setCloudBootstrap({ status: "ready" });
+          return;
+        }
+        setCloudBootstrap({
+          status: "error",
+          message:
+            reason instanceof Error ? reason.message : "The cloud match could not be loaded.",
+        });
+      });
+  }, [
+    cloudBootstrap.status,
+    cloudMatchId,
+    cloudSession.configured,
+    cloudSession.loading,
+    cloudSession.session,
+    loaded,
+    matches,
+    upsertMatch,
+  ]);
 
   const openMatch = (id: string) => {
     setSelectedId(id);
@@ -207,10 +268,24 @@ function CricketApp() {
         </div>
       </header>
 
-      {!loaded ? (
+      {!loaded || (cloudLinked && ["idle", "loading"].includes(cloudBootstrap.status)) ? (
         <div className="flex min-h-[70vh] items-center justify-center text-sm text-slate-400">
-          Loading scorer…
+          {cloudLinked ? "Loading cloud match…" : "Loading scorer…"}
         </div>
+      ) : cloudLinked && cloudBootstrap.status === "error" ? (
+        <main className="mx-auto flex min-h-[70vh] max-w-xl items-center px-4 py-12 text-center">
+          <section className="w-full rounded-3xl border border-rose-400/20 bg-white/[0.04] p-7">
+            <CloudOff className="mx-auto size-10 text-rose-300" />
+            <h1 className="mt-4 text-2xl font-bold">Cloud match unavailable</h1>
+            <p className="mt-2 text-sm leading-6 text-slate-400">{cloudBootstrap.message}</p>
+            <Link
+              to="/platform"
+              className="mt-6 inline-flex h-11 items-center rounded-full bg-amber-300 px-6 text-sm font-extrabold text-[#1d1520]"
+            >
+              Open cloud control centre
+            </Link>
+          </section>
+        </main>
       ) : screen === "setup" ? (
         <MatchSetup
           onCancel={() => setScreen("dashboard")}
@@ -615,6 +690,7 @@ function LiveMatch({
   onExit: () => void;
 }) {
   const [tab, setTab] = useState<MatchTab>("score");
+  const [cloudActionError, setCloudActionError] = useState<string | null>(null);
   const cloudMatchId = useMemo(() => {
     if (typeof window === "undefined") return null;
     return new URLSearchParams(window.location.search).get("cloudMatch");
@@ -626,9 +702,35 @@ function LiveMatch({
     [match.id, onSave],
   );
   const cloudSync = useMatchCloudSync(cloudMatchId, acceptRemoteMatch);
-  const saveAndSync = (next: CricketMatch) => {
+  const saveAndSync = (next: CricketMatch, eventType = "match.snapshot") => {
     onSave(next);
-    void cloudSync.publish(next, "match.snapshot");
+    void cloudSync.publish(next, eventType);
+  };
+  const advanceInnings = async () => {
+    setCloudActionError(null);
+    let next = startNextInnings(match);
+    if (next.innings.length === match.innings.length || !cloudMatchId) {
+      saveAndSync(next, next.status === "completed" ? "match.completed" : "innings.started");
+      return;
+    }
+    const nextInnings = currentInnings(next);
+    try {
+      const inningsId = await startCloudInnings({
+        matchId: cloudMatchId,
+        inningsNumber: nextInnings.number,
+        battingTeamId: nextInnings.battingTeamId,
+        bowlingTeamId: nextInnings.bowlingTeamId,
+      });
+      next = {
+        ...next,
+        innings: [...next.innings.slice(0, -1), { ...nextInnings, id: inningsId }],
+      };
+      saveAndSync(next, "innings.started");
+    } catch (reason) {
+      setCloudActionError(
+        reason instanceof Error ? reason.message : "The next cloud innings could not be started.",
+      );
+    }
   };
   const innings = currentInnings(match);
   const summary = summarizeInnings(innings, match.settings.ballsPerOver);
@@ -718,7 +820,19 @@ function LiveMatch({
       </nav>
 
       <div className="px-4 py-5 md:px-0">
-        {tab === "score" && <ScoringPad match={match} onSave={saveAndSync} onExit={onExit} />}
+        {cloudActionError && (
+          <p className="mb-4 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-200">
+            {cloudActionError}
+          </p>
+        )}
+        {tab === "score" && (
+          <ScoringPad
+            match={match}
+            onSave={saveAndSync}
+            onAdvanceInnings={() => void advanceInnings()}
+            onExit={onExit}
+          />
+        )}
         {tab === "timeline" && <Timeline match={match} />}
         {tab === "scorecard" && <Scorecard match={match} />}
         {tab === "analysis" && <Analysis match={match} />}
@@ -731,10 +845,12 @@ function LiveMatch({
 function ScoringPad({
   match,
   onSave,
+  onAdvanceInnings,
   onExit,
 }: {
   match: CricketMatch;
-  onSave: (match: CricketMatch) => void;
+  onSave: (match: CricketMatch, eventType?: string) => void;
+  onAdvanceInnings: () => void;
   onExit: () => void;
 }) {
   const innings = currentInnings(match);
@@ -794,7 +910,7 @@ function ScoringPad({
       note,
       ...partial,
     };
-    onSave(recordDelivery(match, input));
+    onSave(recordDelivery(match, input), "delivery.recorded");
     setNote("");
   };
 
@@ -825,7 +941,7 @@ function ScoringPad({
         </p>
         <button
           type="button"
-          onClick={() => onSave(startNextInnings(match))}
+          onClick={onAdvanceInnings}
           className="h-12 rounded-full bg-amber-300 px-7 text-sm font-extrabold uppercase tracking-wider text-[#1d1520]"
         >
           {finished ? "Complete match" : "Start next innings"}
@@ -1011,7 +1127,7 @@ function ScoringPad({
           <button
             type="button"
             disabled={!innings.deliveries.length}
-            onClick={() => onSave(undoLastDelivery(match))}
+            onClick={() => onSave(undoLastDelivery(match), "delivery.voided")}
             className="inline-flex h-10 items-center gap-2 rounded-full border border-white/10 px-4 text-xs font-bold disabled:opacity-30"
           >
             <Undo2 className="size-4" /> Undo last ball
@@ -1103,6 +1219,7 @@ function ScoringPad({
                   outcome: "wicket",
                   batterRuns: detailBatterRuns,
                   extras: detailExtras,
+                  fielderId: dismissalFielderId || undefined,
                   dismissal: {
                     type: dismissalType,
                     batterId: dismissedBatterId,
