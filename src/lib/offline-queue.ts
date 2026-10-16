@@ -9,7 +9,5 @@ export function reconcilePendingEvents<T extends { clientEventId: string }>(
   latestQueue: T[],
   acknowledgedClientEventIds: ReadonlySet<string>,
 ): T[] {
-  return latestQueue.filter(
-    (event) => !acknowledgedClientEventIds.has(event.clientEventId),
-  );
+  return latestQueue.filter((event) => !acknowledgedClientEventIds.has(event.clientEventId));
 }
