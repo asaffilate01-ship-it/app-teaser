@@ -15,9 +15,12 @@
     "check": "npm run typecheck && npm run test && npm run lint && npm run build"
   },
   "overrides": {
-    "js-yaml": "^4.3.1",
+    "js-yaml": "^4.3.2",
     "nanoid": "^3.3.18",
-    "rolldown": "1.2.1"
+    "rolldown": "1.2.1",
+    "seroval": "^1.6.3",
+    "source-map-js": "^1.2.2",
+    "@tanstack/start-server-core": "1.169.39"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -50,9 +53,9 @@
     "@supabase/supabase-js": "^2.112.3",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.101.1",
-    "@tanstack/react-router": "1.170.18",
-    "@tanstack/react-start": "1.168.32",
-    "@tanstack/router-plugin": "1.168.23",
+    "@tanstack/react-router": "1.170.41",
+    "@tanstack/react-start": "1.168.60",
+    "@tanstack/router-plugin": "1.168.42",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

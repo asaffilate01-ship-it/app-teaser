@@ -37,4 +37,13 @@ export default tseslint.config(
     },
   },
   eslintPluginPrettier,
+  // Lovable and Supabase rewrite these generated sources outside our Prettier settings.
+  // Keep all other lint rules (including security checks) enabled for these files.
+  {
+    files: [
+      "src/integrations/supabase/previewAuthStorage.ts",
+      "src/integrations/supabase/types.ts",
+    ],
+    rules: { "prettier/prettier": "off" },
+  },
 );
