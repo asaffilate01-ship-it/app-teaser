@@ -9,24 +9,13 @@ import { requireOrganisationRole, requireUser } from "../_shared/supabase.ts";
 import {
   isUuid,
   omniqoraEndpoint,
-  omniqoraStartPayload,
   parseCricketIntelligenceRequest,
   safeRunView,
+  sameScoreRevision,
 } from "../_shared/omniqora-contract.ts";
 
 type RecordData = Record<string, unknown>;
 type LinkedTenant = { omniqora_tenant_id: string; enabled: boolean };
-type LocalRun = {
-  id: string;
-  organisation_id: string;
-  match_id: string;
-  omniqora_run_id: string | null;
-  omniqora_tenant_id: string;
-  task: string;
-  source_version: string;
-  status: string;
-  requested_at: string;
-};
 
 const permittedRoles = ["owner", "league_admin", "club_admin", "coach", "safeguarding_officer"];
 
@@ -116,7 +105,7 @@ Deno.serve(async (request) => {
     if (command.operation === "run.list") {
       const { data, error } = await client
         .from("criclume_omniqora_runs")
-        .select("id,task,status,requested_at")
+        .select("id,task,status,requested_at,source_version")
         .eq("organisation_id", command.organisationId)
         .eq("match_id", command.matchId)
         .order("requested_at", { ascending: false })
@@ -127,7 +116,7 @@ Deno.serve(async (request) => {
           requests: (data ?? []).map((row) => ({
             requestId: row.id,
             task: row.task,
-            status: row.status,
+            status: sameScoreRevision(row.source_version, match.updated_at) ? row.status : "stale",
             requestedAt: row.requested_at,
           })),
         },
@@ -153,6 +142,35 @@ Deno.serve(async (request) => {
       return fail("Omniqora integration is not enabled in Lovable Cloud.", 503, request);
     }
 
+    if (command.operation === "connection.verify") {
+      // A verified connection only proves the scoped service credential and
+      // Omniqora entitlement. It is NOT a funded model or available worker.
+      const proof = await sendToOmniqora({
+        operation: "connection.verify",
+        tenantId,
+        productKey: "criclume",
+      });
+      if (
+        proof.ok !== true ||
+        proof.connection !== "verified" ||
+        proof.productKey !== "criclume" ||
+        proof.entitlementActive !== true ||
+        proof.modelExecutionReady !== false
+      ) {
+        return fail("Omniqora could not verify this scoped connection.", 503, request);
+      }
+      return json(
+        {
+          connection: "verified",
+          entitlementActive: true,
+          modelExecutionReady: false,
+          budgetedAdmissionRequired: true,
+        },
+        200,
+        request,
+      );
+    }
+
     if (command.operation === "run.get") {
       const { data: local, error } = await client
         .from("criclume_omniqora_runs")
@@ -166,6 +184,22 @@ Deno.serve(async (request) => {
       if (error) throw error;
       if (!local || local.omniqora_tenant_id !== tenantId)
         return fail("Intelligence request not found.", 404, request);
+      if (!sameScoreRevision(local.source_version, match.updated_at)) {
+        if (local.status !== "stale") await setRunStatus(client, local.id, "stale");
+        return json(
+          {
+            requestId: local.id,
+            task: local.task,
+            status: "stale",
+            summary: null,
+            recommendations: [],
+            humanReviewRequired: true,
+            reason: "The match has changed since this report was requested.",
+          },
+          200,
+          request,
+        );
+      }
       if (!local.omniqora_run_id) {
         return json(
           {
@@ -190,85 +224,15 @@ Deno.serve(async (request) => {
       return json({ requestId: local.id, task: local.task, ...view }, 200, request);
     }
 
-    // Rate limit upstream model costs; dedupe concurrent requests for the same
-    // match score revision. Omniqora itself also requires entitlement and scope.
-    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { count, error: countError } = await client
-      .from("criclume_omniqora_runs")
-      .select("id", { count: "exact", head: true })
-      .eq("organisation_id", command.organisationId)
-      .gte("requested_at", since);
-    if (countError) throw countError;
-    if ((count ?? 0) >= 12) {
-      return fail("This club has reached the hourly AI request limit.", 429, request);
-    }
-
-    const version = String(match.updated_at);
-    const { data: created, error: createdError } = await client
-      .from("criclume_omniqora_runs")
-      .insert({
-        organisation_id: command.organisationId,
-        match_id: command.matchId,
-        omniqora_tenant_id: tenantId,
-        requested_by: user.id,
-        task: command.task,
-        source_version: version,
-      })
-      .select("id,status")
-      .single();
-    if (createdError?.code === "23505") {
-      const { data: previous, error: previousError } = await client
-        .from("criclume_omniqora_runs")
-        .select("id,status")
-        .eq("organisation_id", command.organisationId)
-        .eq("match_id", command.matchId)
-        .eq("task", command.task)
-        .eq("source_version", version)
-        .single();
-      if (previousError) throw previousError;
-      return json(
-        {
-          requestId: previous.id,
-          status: previous.status,
-          reused: true,
-          humanReviewRequired: true,
-        },
-        200,
-        request,
-      );
-    }
-    if (createdError || !created) throw createdError ?? new Error("Request not saved.");
-
-    try {
-      const upstream = await sendToOmniqora(
-        omniqoraStartPayload({
-          tenantId,
-          task: command.task,
-          matchId: command.matchId,
-          status: match.status,
-          liveState: match.live_state,
-        }),
-      );
-      if (!isUuid(upstream.runId) || upstream.status !== "queued") {
-        throw new Error("invalid_response");
-      }
-      await setRunStatus(client, created.id, "queued", upstream.runId);
-      return json(
-        {
-          requestId: created.id,
-          task: command.task,
-          status: "queued",
-          humanReviewRequired: true,
-        },
-        202,
-        request,
-      );
-    } catch (error) {
-      // Mark failed; do not automatically retry an ambiguous upstream timeout,
-      // which could create a duplicate paid agent run.
-      await setRunStatus(client, created.id, "failed");
-      throw error;
-    }
+    // Never call generic Omniqora run.start for CricLume. That route queues
+    // workers without the Agent Factory's atomic budget reservation.
+    // The free, rules-based report is already available in the dashboard.
+    // A separately verified budgeted service API will replace this gate.
+    return fail(
+      "Paid GenAI is awaiting Omniqora budgeted Agent Factory admission. The free match preview remains available.",
+      409,
+      request,
+    );
   } catch (error) {
     if (error instanceof Error) {
       if (

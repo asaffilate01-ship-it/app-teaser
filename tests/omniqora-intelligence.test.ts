@@ -7,6 +7,7 @@ import {
   parseCricketIntelligenceRequest,
   privacySafeMatchContext,
   safeRunView,
+  sameScoreRevision,
 } from "../supabase/functions/_shared/omniqora-contract.ts";
 
 const orgId = "11111111-1111-4111-8111-111111111111";
@@ -139,4 +140,20 @@ test("responses expose bounded advisory text only, not privileged tool actions",
   assert.equal(view.summary, "Coach review only.");
   assert.deepEqual(view.recommendations, ["Review wides", "Train safely"]);
   assert.doesNotMatch(JSON.stringify(view), /write_score|publish_final_score|rm -rf/);
+});
+
+test("no-cost scoped connection verification is a restricted operation", () => {
+  assert.deepEqual(
+    parseCricketIntelligenceRequest({
+      operation: "connection.verify",
+      organisationId: orgId,
+      matchId,
+      model: "attacker-supplied",
+      providerKey: "attacker-supplied",
+    }),
+    { operation: "connection.verify", organisationId: orgId, matchId },
+  );
+  assert.equal(sameScoreRevision("2026-10-16T14:01:00Z", "2026-10-16T14:01:00Z"), true);
+  assert.equal(sameScoreRevision("2026-10-16T14:01:00Z", "2026-10-16T14:02:00Z"), false);
+  assert.equal(sameScoreRevision(null, "2026-10-16T14:01:00Z"), false);
 });

@@ -30,6 +30,18 @@ This checklist separates code committed to GitHub from verified production servi
 - [ ] Confirm the public scoreboard exposes only approved player and match fields.
 - [ ] Approve privacy impact, junior safeguarding, retention and incident response.
 
+## Omniqora Phase 2 safety and training preview
+
+- [x] Add six rules-based score and coaching discussion previews; no inference tokens, junior-identifiable data or video.
+- [x] Fail closed on unbudgeted generic `run.start` in CricLume and Omniqora source.
+- [x] Add authenticated, cost-free `connection.verify` with per-tenant entitlement and precise scope.
+- [x] Mark historical AI results stale after a match score revision changes.
+- [x] Add backend-only, per-club atomic request reservation RPC with 12/hour cap (preparatory; not model activation).
+- [ ] Deploy Phase 2 migrations and `omniqora-intelligence` via the **existing** Lovable-connected CricLume Supabase project.
+- [ ] Provision at least one reviewed club-to-Omniqora tenant mapping and a scoped connection.verify credential.
+- [ ] Run real, no-charge, cross-club and revoked-credential handshake/negative tests.
+- [ ] Implement budgeted **service-authenticated** Omniqora admission, model evaluation, provider receipts and worker verification before any paid model call.
+
 ## Omniqora Intelligence activation
 
 - [ ] Verify and apply the CricLume AI bridge migration only to the existing Lovable-bound project.

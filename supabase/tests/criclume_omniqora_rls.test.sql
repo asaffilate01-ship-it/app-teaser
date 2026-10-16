@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(12);
+select plan(16);
 
 select has_table('public', 'criclume_omniqora_links', 'CricLume tenant binding is present');
 select has_table('public', 'criclume_omniqora_runs', 'CricLume AI run ledger is present');
@@ -44,6 +44,38 @@ select ok(
 select ok(
   has_table_privilege('service_role', 'public.criclume_omniqora_runs', 'INSERT'),
   'the server-side service role can record an approved AI request'
+);
+
+select ok(
+  not has_function_privilege(
+    'anon',
+    'public.claim_criclume_omniqora_run(uuid,uuid,uuid,text,timestamptz,uuid)',
+    'EXECUTE'
+  ),
+  'anonymous users cannot reserve Omniqora AI requests'
+);
+select ok(
+  not has_function_privilege(
+    'authenticated',
+    'public.claim_criclume_omniqora_run(uuid,uuid,uuid,text,timestamptz,uuid)',
+    'EXECUTE'
+  ),
+  'browser sessions cannot bypass the role-gated Edge Function'
+);
+select ok(
+  has_function_privilege(
+    'service_role',
+    'public.claim_criclume_omniqora_run(uuid,uuid,uuid,text,timestamptz,uuid)',
+    'EXECUTE'
+  ),
+  'the reviewed service-role caller can claim the atomic request'
+);
+select ok(
+  (select not prosecdef from pg_proc
+   where oid = to_regprocedure(
+     'public.claim_criclume_omniqora_run(uuid,uuid,uuid,text,timestamptz,uuid)'
+   )),
+  'the quota and dedupe RPC runs with invoker permissions'
 );
 
 select * from finish();

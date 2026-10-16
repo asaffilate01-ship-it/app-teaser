@@ -28,17 +28,20 @@ CricLume club operator (Supabase Auth, role-checked)
      -> checks club membership and match ownership in CricLume
      -> reads backend-only criclume_omniqora_links + runs
      -> strips all player names/IDs, notes, DOB, video/biometrics
-     -> fixed task, aggregate score values, source version, max 3-5 steps
-     -> server-to-server /api/platform/intelligence on Omniqora
-        -> Omniqora tenant/product-scoped credential & entitlement
-        -> budget/policy/provider-approved work queue and agent runtime
-     <- queued run ID, later advisory result
-  <- reviewed draft, never a score mutation
+     -> cost-free scoped connection.verify on Omniqora
+        -> approved service credential & tenant/product entitlement
+     <- verified binding only; modelExecutionReady remains false
+  -> local deterministic match preview (no tokens/charges)
+  -> paid run.start is explicitly blocked pending budgeted admission
+  -> existing run.get results remain read-only and become stale on score edits
 ```
 
-The Omniqora source API currently implements **async** `run.start` and `run.get`
-and responds with a queued run ID; it does not guarantee a deployed worker, an
-available LLM provider, an executed MCP tool, or completed GenAI results.
+The source and Omniqora **both block** CricLume generic `run.start`: the
+generic queue does not reserve an approved spend budget. Source `run.list` and
+`run.get` remain for historical runs, and the separate, cost-free
+`connection.verify` checks actual service-credential scope and entitlement.
+The result deliberately reports `modelExecutionReady:false`; even a verified
+handshake does **not** mean a model/worker is live.
 
 Allowed tasks: match insights, batting coach, bowling coach, fielding review,
 training plan and a bounded read-only match analyst. No arbitrary user prompt,
@@ -51,32 +54,39 @@ separately approved.
 
 1. Verify the actual Lovable-connected CricLume project matches the declared
    project reference, current Auth settings, SQL migrations and Edge Functions.
-2. Review and apply `20261016153000_criclume_omniqora_intelligence.sql` through
-   the existing Lovable-managed Supabase release process. It adds two isolated,
-   RLS-enabled, backend-only tables. It does not provision any customer or tenant.
+2. Review and apply both `20261016153000_criclume_omniqora_intelligence.sql`
+   and `20261016180000_criclume_omniqora_atomic_requests.sql` through the
+   **existing** Lovable-managed Supabase release process, after checking actual
+   migration history. They create two RLS-protected tables and a restricted,
+   invoker-security atomic claim RPC. They do **not** provision tenants or
+   create billable AI runs. The RPC is preparatory for a future budgeted caller.
 3. Review the Omniqora tenancy and authorise a **different, existing Omniqora
    tenant UUID per CricLume club**. Have a trusted operator insert
    `criclume_omniqora_links` mappings, with independent `approved_by` and
    `approved_at` verification; leave `enabled=false` pending pilot.
-4. In Omniqora, issue a server-to-server platform service credential (format
-   `<keyId>.<secret>`) with only `intelligence.run.start` and
-   `intelligence.run.read` for productKey `criclume` and precisely the
-   approved tenant UUIDs. Provision active `omniqora.intelligence-runtime`
-   entitlements and verify the service credential is not expired.
+4. In Omniqora, issue a server-to-server platform credential (format
+   `<keyId>.<secret>`) with `intelligence.connection.verify` and
+   `intelligence.run.read` only, scoped to productKey `criclume` and the
+   approved tenant UUIDs. A `run.start` capability is not required while
+   billable model execution remains blocked. Provision active
+   `omniqora.intelligence-runtime` entitlements and verify credential expiry.
 5. Configure **Supabase Edge Function secrets** in the existing Lovable project:
    - `OMNIQORA_INTELLIGENCE_URL=https://YOUR_OMNIQORA_HOST/api/platform/intelligence`
    - `OMNIQORA_SERVICE_AUTH=<keyId>.<secret>`
    - `OMNIQORA_CRICLUME_ENABLED=false` initially
    The URL is fixed server-side and must use HTTPS. Keep `SUPABASE_SECRET_KEY`
    or provider-managed service-role credentials in the server runtime only.
-6. Verify Omniqora provider/model bindings, real verified tariffs, spending
-   approval, budget reservation/settlement and the AI execution worker. The
-   generic `run.start` service used by this first pilot must not be mistaken
-   for budgeted Agent Factory execution; **do not enable live paid model runs
-   until the upstream cost gate and worker are verified**.
-7. Enable each reviewed mapping and set the server-side flag only for the
-   controlled authorised-coach pilot. Smoke-test the Edge Function and the
-   `/platform` AI Intelligence tab.
+6. For paid GenAI/agentic activation, implement and verify a dedicated,
+   authenticated **service-to-service budgeted admission endpoint** inside
+   Omniqora that reuses the Agent Factory's atomic cost reservation and actual
+   receipt settlement, reviewed model rates, region/capability evaluation,
+   independent use-case approval and bounded worker. Do not reopen generic
+   `run.start` for CricLume as a shortcut.
+7. For a **connection-only** controlled coach pilot, enable reviewed mappings
+   and set the server-side flag, then click "Verify Omniqora connection" in
+   `/platform` and confirm the scoped handshake with **zero model cost**.
+   Use the six free, deterministic coaching previews while billable AI is
+   awaiting approval. A connection-only pilot must not be labelled a model pilot.
 8. Run negative tests: wrong club, wrong match, revoked member, unauthorised role,
    expired credential, duplicate request, stale run, unknown task, hostile prompt,
    provider outage, junior data payload, no entitlement and cross-tenant denial.
@@ -91,8 +101,11 @@ separately approved.
   entirety of externally shared match data (plus source UUID for audit).
 - A cached previous request for the same score revision is returned rather
   than charging again. A failed/ambiguous remote start is not blindly retried.
-- Each club has 12 AI starts/hour in the source adapter; Omniqora still
-  controls higher-level budgets, throttles and model allocation.
+- The source migration contains an atomic, idempotent club request reservation
+  capped at 12 new requests/hour. It is **not a spending approval** and the
+  paid start path remains disabled until Omniqora's budgeted API is integrated.
+- A historical AI report is marked `stale` whenever the underlying match
+  score revision changes; the dashboard must not portray old advice as current.
 - Use only approved aggregate facts. No unverified inferences presented as
   video analysis, biometric recognition or licensed DLS calculations.
 - Retain separate video consent and `analyze-delivery` review workflow; this
