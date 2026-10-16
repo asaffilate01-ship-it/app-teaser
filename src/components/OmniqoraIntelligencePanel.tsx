@@ -32,6 +32,7 @@ export function OmniqoraIntelligencePanel({
   const [matchId, setMatchId] = useState(matches[0]?.id ?? "");
   const [task, setTask] = useState<IntelligenceTask>("match_insights");
   const [history, setHistory] = useState<IntelligenceRequest[]>([]);
+  const [historyWarning, setHistoryWarning] = useState("");
   const [report, setReport] = useState<IntelligenceRequest | null>(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -51,6 +52,7 @@ export function OmniqoraIntelligencePanel({
     let active = true;
     setReport(null);
     setHistory([]);
+    setHistoryWarning("");
     setMessage("");
     setConnection(null);
     if (!matchId || !mayRequest) return;
@@ -59,9 +61,9 @@ export function OmniqoraIntelligencePanel({
       .then((result) => {
         if (active) setHistory(result.requests);
       })
-      .catch((error: unknown) => {
+      .catch(() => {
         if (active)
-          setMessage(error instanceof Error ? error.message : "Intelligence unavailable.");
+          setHistoryWarning("Cloud AI history is not available yet. Free match previews still work.");
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -249,7 +251,8 @@ export function OmniqoraIntelligencePanel({
                 <h3 className="text-base font-bold">Analysis and agent history</h3>
                 {loading && <LoaderCircle className="size-4 animate-spin" />}
               </div>
-              {history.length === 0 && (
+              {historyWarning && <p className="text-xs text-amber-200">{historyWarning}</p>}
+              {history.length === 0 && !historyWarning && (
                 <p className="text-sm text-slate-400">No previous advisory runs for this match.</p>
               )}
               {history.map((item) => (
@@ -287,9 +290,11 @@ export function OmniqoraIntelligencePanel({
                     </p>
                   ) : (
                     <p className="text-slate-400">
-                      {report.status === "completed"
-                        ? "No structured summary was returned by the AI worker."
-                        : "Omniqora has not returned a completed summary. Select this run again to refresh."}
+                      {report.status === "stale"
+                        ? "The match score has changed since this analysis was requested. The previous result is outdated."
+                        : report.status === "completed"
+                          ? "No structured summary was returned by the AI worker."
+                          : "Omniqora has not returned a completed summary. Select this run again to refresh."}
                     </p>
                   )}
                   {report.recommendations?.length ? (
