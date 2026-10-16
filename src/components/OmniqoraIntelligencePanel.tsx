@@ -63,7 +63,9 @@ export function OmniqoraIntelligencePanel({
       })
       .catch(() => {
         if (active)
-          setHistoryWarning("Cloud AI history is not available yet. Free match previews still work.");
+          setHistoryWarning(
+            "Cloud AI history is not available yet. Free match previews still work.",
+          );
       })
       .finally(() => {
         if (active) setLoading(false);
