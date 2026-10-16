@@ -1,0 +1,42 @@
+# Temporary one-branch maintenance workflow. Remove after the lockfile is refreshed.
+name: Refresh CricLume security lockfile
+
+on:
+  push:
+    branches:
+      - fix/criclume-scoring-and-release-gates-20261016
+    paths:
+      - package.json
+      - .github/workflows/security-lock-refresh.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Resolve dependency overrides into the lockfile
+        run: bun install
+      - name: Commit the regenerated deterministic lockfile
+        shell: bash
+        run: |
+          if git diff --quiet -- bun.lock; then
+            echo "Lockfile is already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bun.lock
+          git commit -m "fix(deps): regenerate Bun lockfile after security overrides"
+          git push origin HEAD:fix/criclume-scoring-and-release-gates-20261016
+      - name: Audit resolved production dependencies
+        run: bun audit --production
