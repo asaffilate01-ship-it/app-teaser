@@ -1,0 +1,49 @@
+name: Format CricLume Omniqora sources (temporary)
+on:
+  push:
+    branches:
+      - feat/criclume-omniqora-intelligence-20261016
+    paths:
+      - .github/workflows/format-criclume-omniqora.yml
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Prettier format new integration sources
+        run: |
+          bunx prettier --write \
+            supabase/functions/_shared/omniqora-contract.ts \
+            supabase/functions/omniqora-intelligence/index.ts \
+            src/lib/omniqora.ts \
+            src/components/OmniqoraIntelligencePanel.tsx \
+            tests/omniqora-intelligence.test.ts \
+            src/routes/platform.tsx
+      - name: Commit only formatting changes
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            supabase/functions/_shared/omniqora-contract.ts \
+            supabase/functions/omniqora-intelligence/index.ts \
+            src/lib/omniqora.ts \
+            src/components/OmniqoraIntelligencePanel.tsx \
+            tests/omniqora-intelligence.test.ts \
+            src/routes/platform.tsx
+          git commit -m "style: format Omniqora integration sources"
+          git push origin HEAD:feat/criclume-omniqora-intelligence-20261016
