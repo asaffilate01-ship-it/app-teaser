@@ -328,7 +328,14 @@ export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput):
     : null;
   const allOut = summaryAfter.wickets >= Math.max(1, battingTeam.players.length - 1);
   const oversComplete = maximumBalls !== null && summaryAfter.legalBalls >= maximumBalls;
-  const inningsComplete = allOut || oversComplete;
+  // In a single-innings match the chase finishes as soon as the target is reached.
+  // Do not apply this shortcut to two-innings-per-side cricket.
+  const chaseWon =
+    match.settings.inningsPerSide === 1 &&
+    match.innings.length === 2 &&
+    summaryAfter.runs >
+      summarizeInnings(match.innings[0]!, match.settings.ballsPerOver).runs;
+  const inningsComplete = allOut || oversComplete || chaseWon;
   updatedInnings.status = inningsComplete ? "completed" : "live";
 
   return {
@@ -351,6 +358,8 @@ export function endCurrentInnings(match: CricketMatch): CricketMatch {
 }
 
 export function startNextInnings(match: CricketMatch): CricketMatch {
+  // Prevent creating another innings while the current one is still in progress.
+  if (match.status !== "innings-break") return match;
   const totalInnings = match.settings.inningsPerSide * 2;
   if (match.innings.length >= totalInnings) {
     return { ...match, status: "completed", updatedAt: new Date().toISOString() };
@@ -421,7 +430,9 @@ export function battingCard(match: CricketMatch, innings: Innings): BatterRow[] 
   return team.players.map((player) => {
     const faced = innings.deliveries.filter((delivery) => delivery.strikerId === player.id);
     const runs = faced.reduce((sum, delivery) => sum + delivery.batterRuns, 0);
-    const balls = faced.filter((delivery) => delivery.legal).length;
+    // A no-ball is faced by the batter, although it does not count towards the over.
+    // A wide is not a ball faced; byes and leg-byes on legal balls still are.
+    const balls = faced.filter((delivery) => delivery.extras.wide === 0).length;
     const dismissalDelivery = innings.deliveries.find(
       (delivery) => delivery.dismissal?.batterId === player.id,
     );
@@ -452,12 +463,25 @@ export function bowlingCard(match: CricketMatch, innings: Innings): BowlerRow[] 
       const wickets = deliveries.filter(
         (delivery) => delivery.dismissal && isBowlerWicket(delivery.dismissal.type),
       ).length;
+      // Byes/leg-byes do not stop an otherwise complete over from being a maiden.
+      // The bowler must have completed every legal delivery in that over.
+      const overs = new Map<number, { legalBalls: number; chargedRuns: number }>();
+      for (const delivery of deliveries) {
+        const over = overs.get(delivery.over) ?? { legalBalls: 0, chargedRuns: 0 };
+        if (delivery.legal) over.legalBalls += 1;
+        over.chargedRuns +=
+          delivery.batterRuns + delivery.extras.wide + delivery.extras.noBall;
+        overs.set(delivery.over, over);
+      }
+      const maidens = [...overs.values()].filter(
+        (over) => over.legalBalls === match.settings.ballsPerOver && over.chargedRuns === 0,
+      ).length;
       return {
         playerId: player.id,
         name: player.name,
         balls,
         overs: `${Math.floor(balls / match.settings.ballsPerOver)}.${balls % match.settings.ballsPerOver}`,
-        maidens: 0,
+        maidens,
         runs,
         wickets,
         economy: balls ? (runs * match.settings.ballsPerOver) / balls : 0,
@@ -469,7 +493,7 @@ export function bowlingCard(match: CricketMatch, innings: Innings): BowlerRow[] 
 }
 
 export function targetForCurrentInnings(match: CricketMatch): number | null {
-  if (match.innings.length !== 2) return null;
+  if (match.settings.inningsPerSide !== 1 || match.innings.length !== 2) return null;
   return summarizeInnings(match.innings[0]!, match.settings.ballsPerOver).runs + 1;
 }
 
