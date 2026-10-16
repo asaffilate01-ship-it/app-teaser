@@ -8,10 +8,16 @@ Set `PUBLIC_APP_ORIGINS` to the comma-separated production web origins allowed t
 Edge Functions. Do not use `*`; Stripe signature and scheduled-job secret headers are deliberately
 excluded from browser CORS and remain server-to-server only.
 
-## 1. Create the Supabase environments
+## 1. Verify the existing Lovable-connected Supabase environment
 
-Use separate Supabase projects for development, staging and production. Install the Supabase CLI,
-link the correct project and apply the migration:
+**CricLume already has a Supabase connection in Lovable.** The repository's
+`supabase/config.toml` references `eivwnjbykohrlxavvpcr`. Verify that this
+matches the active Lovable project, and inspect actual deployment/migration state
+before doing anything. Do not create another CricLume production database or
+apply CricLume migrations to Dishbee or an unrelated tenant.
+
+If the project owner elects to deploy via Supabase CLI rather than the Lovable
+connection, review and target the existing authorised project explicitly:
 
 ```sh
 supabase link --project-ref YOUR_PROJECT_REF
@@ -20,10 +26,11 @@ supabase db push --include-all
 supabase functions deploy --project-ref YOUR_PROJECT_REF
 ```
 
-The safer production route is the manually approved `Deploy production backend` GitHub Action. Add
-`SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` and `SUPABASE_PROJECT_REF` to the protected
-`production` environment, run the workflow and tick its production confirmation input. Never commit
-these credentials.
+The `Deploy production backend` GitHub Action is an **optional alternate
+release route**. It requires a protected production environment containing
+`SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` and `SUPABASE_PROJECT_REF`.
+Those GitHub secrets are not prerequisites for Lovable's own linked Supabase
+runtime. Never commit credentials or apply both release routes unreviewed.
 
 Copy `.env.example` to `.env.local` for local development. Only the Supabase URL and publishable key
 and non-secret Stripe Price ID belong in the browser. Store all secret values with
@@ -36,6 +43,15 @@ GitHub Actions.
 
 Enable a production SMTP provider in Supabase Auth, customize invite/recovery templates and add the
 production and staging redirect URLs. The built-in SMTP service is not a production mail service.
+
+### Omniqora Intelligence
+
+CricLume's `/platform` AI Intelligence tab uses the **same Lovable-connected
+Supabase** to authenticate the club and call a server-side Edge Function.
+See `docs/OMNIQORA_INTELLIGENCE.md` for the exact tenant mapping, server-only
+service credential, rate limits, budget/worker gates and junior-data protections.
+The existing `analyze-delivery` endpoint remains a separate, consent-gated
+video/AI review path.
 
 ## 2. Provision organisations and matches
 
