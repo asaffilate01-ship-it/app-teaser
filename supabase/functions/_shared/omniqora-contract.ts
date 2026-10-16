@@ -32,7 +32,7 @@ export const cricketIntelligenceTasks = {
 } as const;
 
 export type CricketIntelligenceTask = keyof typeof cricketIntelligenceTasks;
-export type CricketIntelligenceOperation = "run.start" | "run.get" | "run.list";
+export type CricketIntelligenceOperation = "run.start" | "run.get" | "run.list" | "connection.verify";
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const isUuid = (value: unknown): value is string =>
@@ -53,7 +53,8 @@ export function parseCricketIntelligenceRequest(value: unknown):
       task: CricketIntelligenceTask;
     }
   | { operation: "run.get"; organisationId: string; matchId: string; requestId: string }
-  | { operation: "run.list"; organisationId: string; matchId: string } {
+  | { operation: "run.list"; organisationId: string; matchId: string }
+  | { operation: "connection.verify"; organisationId: string; matchId: string } {
   if (!value || typeof value !== "object" || Array.isArray(value))
     throw new Error("Invalid request.");
   const input = value as Record<string, unknown>;
@@ -75,6 +76,9 @@ export function parseCricketIntelligenceRequest(value: unknown):
       matchId: input.matchId,
       requestId: input.requestId,
     };
+  }
+  if (input.operation === "connection.verify") {
+    return { operation: "connection.verify", organisationId: input.organisationId, matchId: input.matchId };
   }
   if (input.operation === "run.list") {
     return { operation: "run.list", organisationId: input.organisationId, matchId: input.matchId };
