@@ -120,6 +120,14 @@ export function privacySafeMatchContext(value: unknown, status: unknown) {
   };
 }
 
+/** Exact database timestamp version, not client wall-clock time. */
+export function sameScoreRevision(recorded: unknown, current: unknown): boolean {
+  return typeof recorded === "string" &&
+    typeof current === "string" &&
+    recorded.length > 0 &&
+    recorded === current;
+}
+
 export function omniqoraEndpoint(value: string): string {
   const url = new URL(value);
   if (
