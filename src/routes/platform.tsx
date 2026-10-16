@@ -30,6 +30,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
+import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { usePlatformDashboard } from "@/hooks/use-platform-dashboard";
 import { listOrganisationMemberships, type OrganisationMembership } from "@/lib/cloud";
@@ -68,7 +69,7 @@ export const Route = createFileRoute("/platform")({
   component: Platform,
 });
 
-type PlatformTab = "overview" | "competitions" | "capture" | "players" | "safety" | "operations";
+type PlatformTab = "overview" | "competitions" | "capture" | "players" | "safety" | "intelligence" | "operations";
 type RunAction = <T>(action: () => Promise<T>) => Promise<T>;
 
 const tabDefinitions: Array<[PlatformTab, LucideIcon, string]> = [
@@ -77,6 +78,7 @@ const tabDefinitions: Array<[PlatformTab, LucideIcon, string]> = [
   ["capture", Camera, "Capture"],
   ["players", Users, "Players"],
   ["safety", ShieldCheck, "Safeguarding"],
+  ["intelligence", Sparkles, "AI Intelligence"],
   ["operations", Activity, "Operations"],
 ];
 
@@ -424,6 +426,14 @@ function OperationalPlatform({
             )}
             {tab === "safety" && (
               <Safeguarding data={dashboard.data} role={membership.role} run={dashboard.run} />
+            )}
+            {tab === "intelligence" && (
+              <OmniqoraIntelligencePanel
+                key={membership.organisationId}
+                organisationId={membership.organisationId}
+                role={membership.role}
+                matches={dashboard.data.matches}
+              />
             )}
             {tab === "operations" && (
               <Operations
