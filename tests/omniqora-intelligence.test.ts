@@ -81,7 +81,7 @@ test("AI task has bounded steps, no provider choice and advisory-only context", 
   assert.equal(upstream.profile, "operations");
   assert.equal(upstream.context.approval, "advisory_only");
   assert.deepEqual(upstream.sourceRefs, [`criclume:match:${matchId}`]);
-  assert.doesNotMatch(JSON.stringify(upstream), /Underage|playerName|biometric/i);
+  assert.doesNotMatch(JSON.stringify(upstream), /Underage|playerName|rawPhoto/i);
   assert.throws(
     () => omniqoraStartPayload({ tenantId: "not-uuid", matchId, task: "match_insights", status: "live", liveState: {} }),
     /Invalid intelligence binding/,
