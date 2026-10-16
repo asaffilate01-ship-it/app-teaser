@@ -43,7 +43,7 @@ export function buildCricketPreview(match: MatchSnapshot, task: IntelligenceTask
   const overs = typeof data["overs"] === "string" && /^\d{1,3}\.[0-5]$/.test(data["overs"])
     ? data["overs"]
     : null;
-  const balls = overs ? recentBalls(data["recent"]) : recentBalls(data["recent"]);
+  const balls = recentBalls(data["recent"]);
   const facts: string[] = [];
   const coachingPrompts: string[] = [];
   const limitations = [
