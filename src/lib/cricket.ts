@@ -333,8 +333,7 @@ export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput):
   const chaseWon =
     match.settings.inningsPerSide === 1 &&
     match.innings.length === 2 &&
-    summaryAfter.runs >
-      summarizeInnings(match.innings[0]!, match.settings.ballsPerOver).runs;
+    summaryAfter.runs > summarizeInnings(match.innings[0]!, match.settings.ballsPerOver).runs;
   const inningsComplete = allOut || oversComplete || chaseWon;
   updatedInnings.status = inningsComplete ? "completed" : "live";
 
@@ -469,8 +468,7 @@ export function bowlingCard(match: CricketMatch, innings: Innings): BowlerRow[] 
       for (const delivery of deliveries) {
         const over = overs.get(delivery.over) ?? { legalBalls: 0, chargedRuns: 0 };
         if (delivery.legal) over.legalBalls += 1;
-        over.chargedRuns +=
-          delivery.batterRuns + delivery.extras.wide + delivery.extras.noBall;
+        over.chargedRuns += delivery.batterRuns + delivery.extras.wide + delivery.extras.noBall;
         overs.set(delivery.over, over);
       }
       const maidens = [...overs.values()].filter(
