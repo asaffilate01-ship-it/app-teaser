@@ -2,6 +2,7 @@ import { createClient, type Session, type SupabaseClient } from "@supabase/supab
 import * as tus from "tus-js-client";
 import type { CricketMatch, Delivery, FieldZone, Innings, MatchFormat, Team } from "@/lib/cricket";
 import type { PlatformRole } from "@/lib/platform";
+import { reconcilePendingEvents } from "@/lib/offline-queue";
 
 export interface CloudConfiguration {
   url: string;
@@ -519,18 +520,21 @@ export async function flushPendingEvents(matchId: string): Promise<{
   remaining: number;
 }> {
   const pending = readPendingEvents(matchId);
-  const remaining: PendingMatchEvent[] = [];
-  let sent = 0;
+  const acknowledged = new Set<string>();
   for (const event of pending) {
     try {
       await appendMatchEvent(event);
-      sent += 1;
+      acknowledged.add(event.clientEventId);
     } catch {
-      remaining.push(event);
+      // Event order matters: a later innings/delivery update must not leapfrog
+      // a failed delivery. Retry the failed event and those after it next time.
+      break;
     }
   }
+  // Re-read the latest queue: new events may have been recorded during awaits.
+  const remaining = reconcilePendingEvents(readPendingEvents(matchId), acknowledged);
   persistPendingEvents(matchId, remaining);
-  return { sent, remaining: remaining.length };
+  return { sent: acknowledged.size, remaining: remaining.length };
 }
 
 export function subscribeToMatchEvents(
