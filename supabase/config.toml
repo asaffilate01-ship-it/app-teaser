@@ -53,6 +53,10 @@ enabled = false
 
 # These two endpoints authenticate with a high-entropy CRON_SECRET header.
 # They intentionally do not accept browser CORS or a user JWT.
+# This browser-invoked function also revalidates the Supabase Auth user and club role.
+[functions.omniqora-intelligence]
+verify_jwt = true
+
 [functions.cleanup-media]
 verify_jwt = false
 
