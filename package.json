@@ -15,9 +15,11 @@
     "check": "npm run typecheck && npm run test && npm run lint && npm run build"
   },
   "overrides": {
-    "js-yaml": "^4.3.1",
+    "js-yaml": "^4.3.2",
     "nanoid": "^3.3.18",
-    "rolldown": "1.2.1"
+    "rolldown": "1.2.1",
+    "seroval": "^1.6.3",
+    "source-map-js": "^1.2.2"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
