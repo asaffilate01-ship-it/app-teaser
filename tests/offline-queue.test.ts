@@ -7,10 +7,7 @@ test("replay reconciliation does not drop deliveries added during an upload", ()
     { clientEventId: "ball-1", number: 1 },
     { clientEventId: "ball-2", number: 2 },
   ];
-  const afterConcurrentScore = [
-    ...beforeReplay,
-    { clientEventId: "ball-3", number: 3 },
-  ];
+  const afterConcurrentScore = [...beforeReplay, { clientEventId: "ball-3", number: 3 }];
 
   const remaining = reconcilePendingEvents(afterConcurrentScore, new Set(["ball-1"]));
   assert.deepEqual(
@@ -29,13 +26,7 @@ test("only acknowledged events are removed and failed events remain ordered", ()
     { clientEventId: "second" },
     { clientEventId: "third" },
   ];
-  assert.deepEqual(
-    reconcilePendingEvents(queued, new Set(["first"])),
-    [queued[1], queued[2]],
-  );
+  assert.deepEqual(reconcilePendingEvents(queued, new Set(["first"])), [queued[1], queued[2]]);
   assert.deepEqual(reconcilePendingEvents(queued, new Set()), queued);
-  assert.deepEqual(
-    reconcilePendingEvents(queued, new Set(["first", "second", "third"])),
-    [],
-  );
+  assert.deepEqual(reconcilePendingEvents(queued, new Set(["first", "second", "third"])), []);
 });
