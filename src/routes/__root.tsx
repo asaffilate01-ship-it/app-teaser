@@ -35,15 +35,16 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
+function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    const safeError = error instanceof Error ? error : new Error(String(error));
+    console.error(safeError);
+    reportLovableError(safeError, { boundary: "tanstack_root_error_component" });
     reportMonitoringEvent({
       level: "error",
-      name: error.name,
-      message: error.message,
+      name: safeError.name,
+      message: safeError.message,
       context: { boundary: "tanstack_root_error_component" },
     });
   }, [error]);
