@@ -1,0 +1,51 @@
+name: Format CricLume phase 2 (temporary)
+on:
+  push:
+    branches:
+      - fix/criclume-ai-budget-readiness-20261016
+    paths:
+      - .github/workflows/format-criclume-phase2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Apply project Prettier formatting to modified sources
+        run: |
+          bunx prettier --write \
+            src/lib/cricket-insights.ts \
+            src/lib/omniqora.ts \
+            src/components/OmniqoraIntelligencePanel.tsx \
+            tests/cricket-insights.test.ts \
+            tests/omniqora-intelligence.test.ts \
+            supabase/functions/_shared/omniqora-contract.ts \
+            supabase/functions/omniqora-intelligence/index.ts
+      - name: Commit formatted sources
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "Already formatted."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/lib/cricket-insights.ts \
+            src/lib/omniqora.ts \
+            src/components/OmniqoraIntelligencePanel.tsx \
+            tests/cricket-insights.test.ts \
+            tests/omniqora-intelligence.test.ts \
+            supabase/functions/_shared/omniqora-contract.ts \
+            supabase/functions/omniqora-intelligence/index.ts
+          git commit -m "style: format CricLume phase 2 AI sources"
+          git push origin HEAD:fix/criclume-ai-budget-readiness-20261016
