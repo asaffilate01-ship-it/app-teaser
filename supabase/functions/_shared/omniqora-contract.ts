@@ -45,9 +45,7 @@ export function isCricketTask(value: unknown): value is CricketIntelligenceTask 
   );
 }
 
-export function parseCricketIntelligenceRequest(
-  value: unknown,
-):
+export function parseCricketIntelligenceRequest(value: unknown):
   | {
       operation: "run.start";
       organisationId: string;
