@@ -25,9 +25,16 @@ The production layer now includes:
 - batter, bowler and fielder career aggregation;
 - server-side adapters for Stripe, email, licensed rain rules, video processing and advisory AI review;
 - PWA installation, security headers, CodeQL/dependency/database checks and managed-backup monitoring.
+- optional, disabled-by-default Omniqora Intelligence club dashboard, safe aggregate match data and governed read-only agent run queue;
 
-External integrations remain disabled until the owner's Supabase, Stripe, email, video, AI,
-monitoring and authorised rain-rule credentials are configured. Native app-store binaries still need
+The Supabase project is connected inside Lovable. The repository has the project reference
+in `supabase/config.toml`; live migrations/functions and backups must still be verified in
+that existing connection. Do not create a duplicate database for CricLume. The Omniqora
+Intelligence bridge needs its own approved product/tenant binding and Edge Function secrets;
+see `docs/OMNIQORA_INTELLIGENCE.md`.
+
+External integrations remain disabled until the owner's authorised Supabase, Stripe, email, video, AI,
+monitoring and rain-rule credentials and approvals are configured. Native app-store binaries still need
 native capture work, signing identities and store accounts; see `docs/PRODUCTION_SETUP.md` and
 `docs/RELEASE_CHECKLIST.md`.
 
