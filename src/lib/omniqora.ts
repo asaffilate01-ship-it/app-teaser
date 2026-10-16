@@ -45,7 +45,7 @@ async function invokeIntelligence<T>(body: GatewayRequest): Promise<T> {
     if (response instanceof Response) {
       const payload: unknown = await response.clone().json().catch(() => null);
       if (payload && typeof payload === "object") {
-        const message = (payload as Record<string, unknown>).error;
+        const message = (payload as Record<string, unknown>)["error"];
         if (typeof message === "string" && message.length <= 200) {
           throw new Error(message);
         }
