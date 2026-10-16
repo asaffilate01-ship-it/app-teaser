@@ -39,8 +39,7 @@ export interface IntelligenceConnection {
 type GatewayRequest =
   | { operation: "run.list"; organisationId: string; matchId: string }
   | { operation: "connection.verify"; organisationId: string; matchId: string }
-  | { operation: "run.get"; organisationId: string; matchId: string; requestId: string }
-;
+  | { operation: "run.get"; organisationId: string; matchId: string; requestId: string };
 
 async function invokeIntelligence<T>(body: GatewayRequest): Promise<T> {
   const { data, error } = await getCloudClient().functions.invoke("omniqora-intelligence", {

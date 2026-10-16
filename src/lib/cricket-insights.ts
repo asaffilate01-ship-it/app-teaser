@@ -12,10 +12,7 @@ export type CricketPreview = {
 };
 
 function integer(value: unknown, max: number): number | null {
-  return typeof value === "number" &&
-    Number.isSafeInteger(value) &&
-    value >= 0 &&
-    value <= max
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 && value <= max
     ? value
     : null;
 }
@@ -40,9 +37,10 @@ export function buildCricketPreview(match: MatchSnapshot, task: IntelligenceTask
   const runs = integer(data["runs"], 2000);
   const wickets = integer(data["wickets"], 10);
   const target = integer(data["target"], 3000);
-  const overs = typeof data["overs"] === "string" && /^\d{1,3}\.[0-5]$/.test(data["overs"])
-    ? data["overs"]
-    : null;
+  const overs =
+    typeof data["overs"] === "string" && /^\d{1,3}\.[0-5]$/.test(data["overs"])
+      ? data["overs"]
+      : null;
   const balls = recentBalls(data["recent"]);
   const facts: string[] = [];
   const coachingPrompts: string[] = [];
@@ -59,7 +57,11 @@ export function buildCricketPreview(match: MatchSnapshot, task: IntelligenceTask
 
   if (runs !== null && target !== null && target > 0) {
     const needed = Math.max(0, target - runs);
-    facts.push(needed > 0 ? `The batting side needs ${needed} more run${needed === 1 ? "" : "s"} to reach the target.` : "The recorded target has been reached.");
+    facts.push(
+      needed > 0
+        ? `The batting side needs ${needed} more run${needed === 1 ? "" : "s"} to reach the target.`
+        : "The recorded target has been reached.",
+    );
   }
 
   if (overs && runs !== null) {
@@ -74,41 +76,64 @@ export function buildCricketPreview(match: MatchSnapshot, task: IntelligenceTask
   if (balls.length > 0) {
     const extras = balls.filter((ball) => ball === "Wd" || ball === "Nb").length;
     const boundaries = balls.filter((ball) => ball === "4" || ball === "6").length;
-    facts.push(`Last ${balls.length} scored events: ${boundaries} boundaries and ${extras} recorded wide/no-ball markers.`);
-    if (extras > 0) coachingPrompts.push(`Review bowling control: ${extras} wide/no-ball marker${extras === 1 ? "" : "s"} among the recent entries.`);
-    if (boundaries > 0) coachingPrompts.push(`Discuss the ${boundaries} recent boundary ${boundaries === 1 ? "event" : "events"} and how field positioning could be reviewed.`);
+    facts.push(
+      `Last ${balls.length} scored events: ${boundaries} boundaries and ${extras} recorded wide/no-ball markers.`,
+    );
+    if (extras > 0)
+      coachingPrompts.push(
+        `Review bowling control: ${extras} wide/no-ball marker${extras === 1 ? "" : "s"} among the recent entries.`,
+      );
+    if (boundaries > 0)
+      coachingPrompts.push(
+        `Discuss the ${boundaries} recent boundary ${boundaries === 1 ? "event" : "events"} and how field positioning could be reviewed.`,
+      );
   } else {
     limitations.push("Recent delivery details are unavailable for this match.");
   }
 
   if (wickets !== null && wickets >= 6) {
-    coachingPrompts.push(`With ${wickets} wickets recorded, discuss batting partnerships and risk management.`);
+    coachingPrompts.push(
+      `With ${wickets} wickets recorded, discuss batting partnerships and risk management.`,
+    );
   }
 
   switch (task) {
     case "batting_coach":
-      coachingPrompts.push("Discuss strike rotation and running between wickets; individual shot technique is not available from the aggregate score.");
+      coachingPrompts.push(
+        "Discuss strike rotation and running between wickets; individual shot technique is not available from the aggregate score.",
+      );
       break;
     case "bowling_coach":
-      coachingPrompts.push("Plan a line-and-length practice drill; use delivery-level evidence before evaluating individual bowlers.");
+      coachingPrompts.push(
+        "Plan a line-and-length practice drill; use delivery-level evidence before evaluating individual bowlers.",
+      );
       break;
     case "fielding_review":
-      coachingPrompts.push("Collect fielding positions and consented footage for coach review; the scoreboard alone cannot show dropped catches.");
+      coachingPrompts.push(
+        "Collect fielding positions and consented footage for coach review; the scoreboard alone cannot show dropped catches.",
+      );
       break;
     case "training_plan":
-      coachingPrompts.push("Propose a short warm-up, a skills block on batting/bowling control, and a coach-led review of the match.");
+      coachingPrompts.push(
+        "Propose a short warm-up, a skills block on batting/bowling control, and a coach-led review of the match.",
+      );
       break;
     case "analyst_agent":
-      coachingPrompts.push("Check for incomplete or contradictory match evidence before drafting an intelligence report; no tools or external actions are executed.");
+      coachingPrompts.push(
+        "Check for incomplete or contradictory match evidence before drafting an intelligence report; no tools or external actions are executed.",
+      );
       break;
     case "match_insights":
-      coachingPrompts.push("Review the scoring trend with the match scorer and note that a single snapshot cannot establish a change in momentum.");
+      coachingPrompts.push(
+        "Review the scoring trend with the match scorer and note that a single snapshot cannot establish a change in momentum.",
+      );
       break;
   }
 
   return {
     mode: "deterministic",
-    headline: task === "training_plan" ? "Coach-led training preview" : "Evidence-based cricket preview",
+    headline:
+      task === "training_plan" ? "Coach-led training preview" : "Evidence-based cricket preview",
     facts,
     coachingPrompts: [...new Set(coachingPrompts)],
     limitations,

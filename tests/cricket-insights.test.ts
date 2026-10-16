@@ -24,7 +24,9 @@ test("free match analysis quotes only observed totals and never exports player s
   assert.ok(view.facts.some((item) => item.includes("78/2") && item.includes("6.3")));
   assert.ok(view.facts.some((item) => item.includes("17 more runs")));
   assert.ok(view.facts.some((item) => item.includes("12.00")));
-  assert.ok(view.facts.some((item) => item.includes("2 boundaries") && item.includes("1 recorded")));
+  assert.ok(
+    view.facts.some((item) => item.includes("2 boundaries") && item.includes("1 recorded")),
+  );
   assert.doesNotMatch(JSON.stringify(view), /Sensitive Junior|dob|medical|videoUrl|private/i);
   assert.match(view.limitations.join(" "), /not GenAI output/);
 });
@@ -46,17 +48,20 @@ test("all six cricket report types produce distinct coach discussions", () => {
 });
 
 test("missing or malformed score data is treated as unavailable, never guessed", () => {
-  const view = buildCricketPreview({
-    status: "draft",
-    updatedAt: "2026-10-16T14:15:00.000Z",
-    liveState: {
-      runs: -5,
-      wickets: 12,
-      target: "100",
-      overs: "4.6",
-      recent: [{ label: "player-sensitive-data" }],
+  const view = buildCricketPreview(
+    {
+      status: "draft",
+      updatedAt: "2026-10-16T14:15:00.000Z",
+      liveState: {
+        runs: -5,
+        wickets: 12,
+        target: "100",
+        overs: "4.6",
+        recent: [{ label: "player-sensitive-data" }],
+      },
     },
-  }, "fielding_review");
+    "fielding_review",
+  );
   assert.match(view.facts.join(" "), /not available/);
   assert.ok(view.facts.every((item) => !/Run rate|target|boundary/i.test(item)));
   assert.ok(view.limitations.some((item) => /unavailable/.test(item)));

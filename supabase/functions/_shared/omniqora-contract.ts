@@ -32,7 +32,8 @@ export const cricketIntelligenceTasks = {
 } as const;
 
 export type CricketIntelligenceTask = keyof typeof cricketIntelligenceTasks;
-export type CricketIntelligenceOperation = "run.start" | "run.get" | "run.list" | "connection.verify";
+export type CricketIntelligenceOperation =
+  "run.start" | "run.get" | "run.list" | "connection.verify";
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const isUuid = (value: unknown): value is string =>
@@ -78,7 +79,11 @@ export function parseCricketIntelligenceRequest(value: unknown):
     };
   }
   if (input.operation === "connection.verify") {
-    return { operation: "connection.verify", organisationId: input.organisationId, matchId: input.matchId };
+    return {
+      operation: "connection.verify",
+      organisationId: input.organisationId,
+      matchId: input.matchId,
+    };
   }
   if (input.operation === "run.list") {
     return { operation: "run.list", organisationId: input.organisationId, matchId: input.matchId };
@@ -126,10 +131,12 @@ export function privacySafeMatchContext(value: unknown, status: unknown) {
 
 /** Exact database timestamp version, not client wall-clock time. */
 export function sameScoreRevision(recorded: unknown, current: unknown): boolean {
-  return typeof recorded === "string" &&
+  return (
+    typeof recorded === "string" &&
     typeof current === "string" &&
     recorded.length > 0 &&
-    recorded === current;
+    recorded === current
+  );
 }
 
 export function omniqoraEndpoint(value: string): string {

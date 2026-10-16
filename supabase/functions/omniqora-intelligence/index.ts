@@ -150,17 +150,25 @@ Deno.serve(async (request) => {
         tenantId,
         productKey: "criclume",
       });
-      if (proof.ok !== true || proof.connection !== "verified" ||
-          proof.productKey !== "criclume" || proof.entitlementActive !== true ||
-          proof.modelExecutionReady !== false) {
+      if (
+        proof.ok !== true ||
+        proof.connection !== "verified" ||
+        proof.productKey !== "criclume" ||
+        proof.entitlementActive !== true ||
+        proof.modelExecutionReady !== false
+      ) {
         return fail("Omniqora could not verify this scoped connection.", 503, request);
       }
-      return json({
-        connection: "verified",
-        entitlementActive: true,
-        modelExecutionReady: false,
-        budgetedAdmissionRequired: true,
-      }, 200, request);
+      return json(
+        {
+          connection: "verified",
+          entitlementActive: true,
+          modelExecutionReady: false,
+          budgetedAdmissionRequired: true,
+        },
+        200,
+        request,
+      );
     }
 
     if (command.operation === "run.get") {
@@ -178,15 +186,19 @@ Deno.serve(async (request) => {
         return fail("Intelligence request not found.", 404, request);
       if (!sameScoreRevision(local.source_version, match.updated_at)) {
         if (local.status !== "stale") await setRunStatus(client, local.id, "stale");
-        return json({
-          requestId: local.id,
-          task: local.task,
-          status: "stale",
-          summary: null,
-          recommendations: [],
-          humanReviewRequired: true,
-          reason: "The match has changed since this report was requested.",
-        }, 200, request);
+        return json(
+          {
+            requestId: local.id,
+            task: local.task,
+            status: "stale",
+            summary: null,
+            recommendations: [],
+            humanReviewRequired: true,
+            reason: "The match has changed since this report was requested.",
+          },
+          200,
+          request,
+        );
       }
       if (!local.omniqora_run_id) {
         return json(
