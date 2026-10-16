@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { LoaderCircle, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
+import { buildCricketPreview } from "@/lib/cricket-insights";
+import type { MatchRecord } from "@/lib/platform-cloud";
 import {
   intelligenceTaskOptions,
   listIntelligence,
   readIntelligence,
-  startIntelligence,
+  verifyIntelligenceConnection,
+  type IntelligenceConnection,
   type IntelligenceRequest,
   type IntelligenceTask,
 } from "@/lib/omniqora";
@@ -24,7 +27,7 @@ export function OmniqoraIntelligencePanel({
 }: {
   organisationId: string;
   role: string;
-  matches: { id: string; status: string }[];
+  matches: MatchRecord[];
 }) {
   const [matchId, setMatchId] = useState(matches[0]?.id ?? "");
   const [task, setTask] = useState<IntelligenceTask>("match_insights");
@@ -33,7 +36,11 @@ export function OmniqoraIntelligencePanel({
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [connection, setConnection] = useState<IntelligenceConnection | null>(null);
+  const [checking, setChecking] = useState(false);
   const mayRequest = allowedRoles.has(role);
+  const selectedMatch = matches.find((item) => item.id === matchId);
+  const preview = selectedMatch ? buildCricketPreview(selectedMatch, task) : null;
 
   useEffect(() => {
     if (matches.some((entry) => entry.id === matchId)) return;
@@ -45,6 +52,7 @@ export function OmniqoraIntelligencePanel({
     setReport(null);
     setHistory([]);
     setMessage("");
+    setConnection(null);
     if (!matchId || !mayRequest) return;
     setLoading(true);
     void listIntelligence({ organisationId, matchId })
@@ -63,20 +71,20 @@ export function OmniqoraIntelligencePanel({
     };
   }, [organisationId, matchId, mayRequest]);
 
-  const run = async () => {
-    if (!matchId || !mayRequest || busy) return;
-    setBusy(true);
+  const verify = async () => {
+    if (!matchId || !mayRequest || checking) return;
+    setChecking(true);
     setMessage("");
-    setReport(null);
+    setConnection(null);
     try {
-      const response = await startIntelligence({ organisationId, matchId, task });
-      setReport({ ...response, task });
-      const result = await listIntelligence({ organisationId, matchId });
-      setHistory(result.requests);
+      const response = await verifyIntelligenceConnection({ organisationId, matchId });
+      setConnection(response);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not queue the advisory.");
+      setMessage(
+        error instanceof Error ? error.message : "Omniqora connection is not yet verified.",
+      );
     } finally {
-      setBusy(false);
+      setChecking(false);
     }
   };
 
@@ -104,9 +112,9 @@ export function OmniqoraIntelligencePanel({
         </div>
         <h2 className="font-display text-3xl font-bold">Cricket AI and coaching</h2>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-300">
-          Ask Omniqora to prepare a cricket match analysis, a GenAI coaching draft or a bounded AI
-          analyst review. This version shares only aggregate match statistics; no player names,
-          junior profiles, recordings or biometric details are exported.
+          Review free, evidence-based cricket insights now. Scoped Omniqora GenAI and bounded
+          analyst agents are prepared in the platform, but model execution remains blocked until
+          budgeted admission, provider verification and safeguards are approved.
         </p>
         <div className="mt-4 flex items-start gap-2 rounded-xl border border-white/10 bg-white/[0.04] p-3 text-xs text-slate-300">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-300" />
@@ -120,6 +128,28 @@ export function OmniqoraIntelligencePanel({
           A club administrator, authorised coach or safeguarding officer must request AI analysis.
         </div>
       ) : (
+        <>
+          {preview && (
+            <div className="mb-5 space-y-3 rounded-2xl border border-emerald-400/20 bg-white/[0.04] p-5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-base font-bold">{preview.headline}</h3>
+                <span className="rounded-full border border-emerald-300/20 px-3 py-1 text-xs text-emerald-200">
+                  Free rules-based preview · No model calls
+                </span>
+              </div>
+              <div className="grid gap-3 lg:grid-cols-2">
+                <div className="space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Verified score facts</p>
+                  {preview.facts.map((fact) => <p key={fact} className="text-sm text-slate-200">{fact}</p>)}
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-400">For coach discussion</p>
+                  {preview.coachingPrompts.map((tip) => <p key={tip} className="text-sm text-slate-200">{tip}</p>)}
+                </div>
+              </div>
+              <p className="text-xs text-slate-400">{preview.limitations.join(" ")} Last match update: {preview.sourceUpdatedAt}.</p>
+            </div>
+          )}
         <div className="grid gap-5 lg:grid-cols-2">
           <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.04] p-5">
             <h3 className="text-base font-bold">Start a reviewed AI task</h3>
@@ -158,16 +188,26 @@ export function OmniqoraIntelligencePanel({
             </select>
             <button
               type="button"
-              disabled={busy || !matchId}
-              onClick={() => void run()}
+              disabled={checking || !matchId}
+              onClick={() => void verify()}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-300 px-4 py-3 text-sm font-bold text-[#1d1520] disabled:opacity-50"
             >
-              {busy ? (
-                <LoaderCircle className="size-4 animate-spin" />
-              ) : (
-                <Sparkles className="size-4" />
-              )}
-              Request analysis
+              {checking ? <LoaderCircle className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />}
+              Verify Omniqora connection · No model charge
+            </button>
+            {connection && (
+              <p role="status" className="rounded-xl border border-emerald-300/20 p-3 text-xs text-emerald-100">
+                Scoped Omniqora credential and entitlement verified. Paid model execution
+                remains disabled until the budgeted Agent Factory worker is authorised.
+              </p>
+            )}
+            <button
+              type="button"
+              disabled
+              title="Requires independently verified budgeted Agent Factory execution"
+              className="w-full cursor-not-allowed rounded-xl border border-white/10 px-4 py-3 text-xs font-bold text-slate-400"
+            >
+              Generate with Omniqora · Awaiting budgeted execution
             </button>
             {message && (
               <p
@@ -178,8 +218,8 @@ export function OmniqoraIntelligencePanel({
               </p>
             )}
             <p className="text-xs text-slate-400">
-              Omniqora chooses from approved models within the tenant policy. Queued is not
-              completed; a verified model worker, entitlement and cost budget are required.
+              The connection check verifies scoped access only; it does not execute a model.
+              Pricing, worker availability and model suitability must be certified separately.
             </p>
           </div>
 
@@ -247,6 +287,7 @@ export function OmniqoraIntelligencePanel({
             )}
           </div>
         </div>
+        </>
       )}
     </section>
   );
