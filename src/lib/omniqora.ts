@@ -29,8 +29,16 @@ export interface IntelligenceRequest {
   humanReviewRequired: true;
 }
 
+export interface IntelligenceConnection {
+  connection: "verified";
+  entitlementActive: true;
+  modelExecutionReady: false;
+  budgetedAdmissionRequired: true;
+}
+
 type GatewayRequest =
   | { operation: "run.list"; organisationId: string; matchId: string }
+  | { operation: "connection.verify"; organisationId: string; matchId: string }
   | { operation: "run.get"; organisationId: string; matchId: string; requestId: string }
   | { operation: "run.start"; organisationId: string; matchId: string; task: IntelligenceTask };
 
@@ -83,6 +91,17 @@ export async function readIntelligence(input: {
 export async function listIntelligence(input: { organisationId: string; matchId: string }) {
   return invokeIntelligence<{ requests: IntelligenceRequest[] }>({
     operation: "run.list",
+    ...input,
+  });
+}
+
+/** No model inference or charge. Verifies live tenant-scoped Omniqora access only. */
+export async function verifyIntelligenceConnection(input: {
+  organisationId: string;
+  matchId: string;
+}) {
+  return invokeIntelligence<IntelligenceConnection>({
+    operation: "connection.verify",
     ...input,
   });
 }
