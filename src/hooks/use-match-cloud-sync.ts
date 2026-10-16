@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CricketMatch } from "@/lib/cricket";
 import {
   battingCard,
@@ -14,6 +14,7 @@ import {
   flushPendingEvents,
   isCloudConfigured,
   queuePendingEvent,
+  readPendingEvents,
   subscribeToMatchEvents,
   type PendingMatchEvent,
 } from "@/lib/cloud";
@@ -22,10 +23,18 @@ type SyncStatus = "local" | "connecting" | "synced" | "queued" | "error";
 
 function getDeviceId(): string {
   const key = "criclume:scoring-device-id";
-  const existing = localStorage.getItem(key);
-  if (existing) return existing;
+  try {
+    const existing = localStorage.getItem(key);
+    if (existing) return existing;
+  } catch {
+    // Some mobile browsers block persistent storage: scoring still works in memory.
+  }
   const next = crypto.randomUUID();
-  localStorage.setItem(key, next);
+  try {
+    localStorage.setItem(key, next);
+  } catch {
+    // Do not crash the scorer if browser storage is unavailable.
+  }
   return next;
 }
 
@@ -93,25 +102,44 @@ export function useMatchCloudSync(
   const deviceId = useMemo(() => (typeof window === "undefined" ? "server" : getDeviceId()), []);
   const [status, setStatus] = useState<SyncStatus>(enabled ? "connecting" : "local");
   const [lastSequence, setLastSequence] = useState(0);
+  const latestRemoteSequence = useRef<{ matchId: string | null; sequence: number }>({
+    matchId: cloudMatchId,
+    sequence: 0,
+  });
 
   useEffect(() => {
     if (!enabled || !cloudMatchId) return;
     const unsubscribe = subscribeToMatchEvents(
       cloudMatchId,
       (event) => {
+        if (latestRemoteSequence.current.matchId !== cloudMatchId) {
+          latestRemoteSequence.current = { matchId: cloudMatchId, sequence: 0 };
+        }
+        // Ignore older realtime deliveries that could roll back the visible score.
+        if (event.sequence <= latestRemoteSequence.current.sequence) return;
+        latestRemoteSequence.current.sequence = event.sequence;
         setLastSequence((sequence) => Math.max(sequence, event.sequence));
-        if (event.deviceId !== deviceId) {
+        const hasPending = readPendingEvents(cloudMatchId).length > 0;
+        if (event.deviceId !== deviceId && !hasPending) {
           const snapshot = event.payload["matchSnapshot"];
           if (snapshot && typeof snapshot === "object") onRemoteMatch(snapshot as CricketMatch);
         }
-        setStatus("synced");
+        // Never overwrite unflushed local scoring with another device's snapshot.
+        setStatus(hasPending ? "queued" : "synced");
       },
-      (next) => setStatus(next === "SUBSCRIBED" ? "synced" : "connecting"),
+      (next) =>
+        setStatus(
+          next === "SUBSCRIBED"
+            ? readPendingEvents(cloudMatchId).length
+              ? "queued"
+              : "synced"
+            : "connecting",
+        ),
     );
     const flush = () => {
-      void flushPendingEvents(cloudMatchId).then((result) =>
-        setStatus(result.remaining ? "queued" : "synced"),
-      );
+      void flushPendingEvents(cloudMatchId)
+        .then((result) => setStatus(result.remaining ? "queued" : "synced"))
+        .catch(() => setStatus("error"));
     };
     window.addEventListener("online", flush);
     flush();
@@ -149,7 +177,7 @@ export function useMatchCloudSync(
       setStatus("connecting");
       try {
         const saved = await appendMatchEvent(event);
-        setLastSequence(saved.sequence);
+        setLastSequence((sequence) => Math.max(sequence, saved.sequence));
         setStatus("synced");
       } catch {
         setStatus("queued");
