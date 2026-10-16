@@ -30,21 +30,23 @@ test("only allowlisted cricket intelligence actions and match UUIDs are accepted
     { operation: "run.start", organisationId: orgId, matchId, task: "batting_coach" },
   );
   assert.throws(
-    () => parseCricketIntelligenceRequest({
-      operation: "run.start",
-      organisationId: orgId,
-      matchId: "any-match",
-      task: "match_insights",
-    }),
+    () =>
+      parseCricketIntelligenceRequest({
+        operation: "run.start",
+        organisationId: orgId,
+        matchId: "any-match",
+        task: "match_insights",
+      }),
     /valid organisation/,
   );
   assert.throws(
-    () => parseCricketIntelligenceRequest({
-      operation: "action.review",
-      organisationId: orgId,
-      matchId,
-      requestId: matchId,
-    }),
+    () =>
+      parseCricketIntelligenceRequest({
+        operation: "action.review",
+        organisationId: orgId,
+        matchId,
+        requestId: matchId,
+      }),
     /Unsupported/,
   );
 });
@@ -55,7 +57,10 @@ test("match context excludes private player data even when embedded in live stat
     wickets: 5,
     overs: "17.4",
     target: 164,
-    recent: [{ label: "4", note: secretLikePlayer }, { label: "W", name: secretLikePlayer }],
+    recent: [
+      { label: "4", note: secretLikePlayer },
+      { label: "W", name: secretLikePlayer },
+    ],
     striker: { name: secretLikePlayer, dob: "2014-01-01" },
     fullVideoUrl: "https://private.example/video",
     rawPhoto: "sensitive",
@@ -64,8 +69,12 @@ test("match context excludes private player data even when embedded in live stat
   };
   const output = privacySafeMatchContext(value, "live");
   assert.deepEqual(output, {
-    runs: 159, wickets: 5, overs: "17.4", target: 164,
-    recent: ["4", "W"], matchStatus: "live",
+    runs: 159,
+    wickets: 5,
+    overs: "17.4",
+    target: 164,
+    recent: ["4", "W"],
+    matchStatus: "live",
     evidencePolicy: "aggregates_only;no_children_or_biometrics;human_review_required",
   });
   assert.doesNotMatch(JSON.stringify(output), /Underage|dob|video|medicalNotes|striker/i);
@@ -73,7 +82,10 @@ test("match context excludes private player data even when embedded in live stat
 
 test("AI task has bounded steps, no provider choice and advisory-only context", () => {
   const upstream = omniqoraStartPayload({
-    tenantId, matchId, task: "analyst_agent", status: "live",
+    tenantId,
+    matchId,
+    task: "analyst_agent",
+    status: "live",
     liveState: { runs: 80, wickets: 2, playerName: secretLikePlayer },
   });
   assert.equal(upstream.productKey, "criclume");
@@ -83,19 +95,30 @@ test("AI task has bounded steps, no provider choice and advisory-only context", 
   assert.deepEqual(upstream.sourceRefs, [`criclume:match:${matchId}`]);
   assert.doesNotMatch(JSON.stringify(upstream), /Underage|playerName|rawPhoto/i);
   assert.throws(
-    () => omniqoraStartPayload({ tenantId: "not-uuid", matchId, task: "match_insights", status: "live", liveState: {} }),
+    () =>
+      omniqoraStartPayload({
+        tenantId: "not-uuid",
+        matchId,
+        task: "match_insights",
+        status: "live",
+        liveState: {},
+      }),
     /Invalid intelligence binding/,
   );
 });
 
 test("gateway refuses plaintext, injected path and URL credentials", () => {
-  assert.equal(omniqoraEndpoint("https://omniqora.example/api/platform/intelligence"), "https://omniqora.example/api/platform/intelligence");
+  assert.equal(
+    omniqoraEndpoint("https://omniqora.example/api/platform/intelligence"),
+    "https://omniqora.example/api/platform/intelligence",
+  );
   for (const value of [
     "http://omniqora.example/api/platform/intelligence",
     "https://evil.example@omniqora.example/api/platform/intelligence",
     "https://omniqora.example/api/platform/intelligence?token=leak",
     "https://omniqora.example/api/platform/admin",
-  ]) assert.throws(() => omniqoraEndpoint(value));
+  ])
+    assert.throws(() => omniqoraEndpoint(value));
 });
 
 test("responses expose bounded advisory text only, not privileged tool actions", () => {

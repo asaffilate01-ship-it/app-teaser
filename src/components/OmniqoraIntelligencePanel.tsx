@@ -10,7 +10,11 @@ import {
 } from "@/lib/omniqora";
 
 const allowedRoles = new Set([
-  "owner", "league_admin", "club_admin", "coach", "safeguarding_officer",
+  "owner",
+  "league_admin",
+  "club_admin",
+  "coach",
+  "safeguarding_officer",
 ]);
 
 export function OmniqoraIntelligencePanel({
@@ -48,7 +52,8 @@ export function OmniqoraIntelligencePanel({
         if (active) setHistory(result.requests);
       })
       .catch((error: unknown) => {
-        if (active) setMessage(error instanceof Error ? error.message : "Intelligence unavailable.");
+        if (active)
+          setMessage(error instanceof Error ? error.message : "Intelligence unavailable.");
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -99,14 +104,14 @@ export function OmniqoraIntelligencePanel({
         </div>
         <h2 className="font-display text-3xl font-bold">Cricket AI and coaching</h2>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-300">
-          Ask Omniqora to prepare a cricket match analysis, a GenAI coaching draft or a
-          bounded AI analyst review. This version shares only aggregate match statistics;
-          no player names, junior profiles, recordings or biometric details are exported.
+          Ask Omniqora to prepare a cricket match analysis, a GenAI coaching draft or a bounded AI
+          analyst review. This version shares only aggregate match statistics; no player names,
+          junior profiles, recordings or biometric details are exported.
         </p>
         <div className="mt-4 flex items-start gap-2 rounded-xl border border-white/10 bg-white/[0.04] p-3 text-xs text-slate-300">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-300" />
-          All results require human review. CricLume scoring, match publication,
-          communications and player records remain outside autonomous AI control.
+          All results require human review. CricLume scoring, match publication, communications and
+          player records remain outside autonomous AI control.
         </div>
       </div>
 
@@ -146,7 +151,9 @@ export function OmniqoraIntelligencePanel({
               disabled={busy}
             >
               {intelligenceTaskOptions.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
               ))}
             </select>
             <button
@@ -155,11 +162,18 @@ export function OmniqoraIntelligencePanel({
               onClick={() => void run()}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-300 px-4 py-3 text-sm font-bold text-[#1d1520] disabled:opacity-50"
             >
-              {busy ? <LoaderCircle className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+              {busy ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : (
+                <Sparkles className="size-4" />
+              )}
               Request analysis
             </button>
             {message && (
-              <p role="alert" className="rounded-xl border border-amber-300/30 bg-amber-300/10 p-3 text-xs text-amber-100">
+              <p
+                role="alert"
+                className="rounded-xl border border-amber-300/30 bg-amber-300/10 p-3 text-xs text-amber-100"
+              >
                 {message}
               </p>
             )}
@@ -187,10 +201,13 @@ export function OmniqoraIntelligencePanel({
               >
                 <span>
                   <strong className="block text-slate-100">
-                    {intelligenceTaskOptions.find((option) => option.value === item.task)?.label ?? item.task}
+                    {intelligenceTaskOptions.find((option) => option.value === item.task)?.label ??
+                      item.task}
                   </strong>
                   <span className="mt-1 block text-slate-400">
-                    {item.requestedAt ? new Date(item.requestedAt).toLocaleString() : "Recent request"}
+                    {item.requestedAt
+                      ? new Date(item.requestedAt).toLocaleString()
+                      : "Recent request"}
                   </span>
                 </span>
                 <span className="flex items-center gap-1 text-fuchsia-200">
@@ -204,7 +221,9 @@ export function OmniqoraIntelligencePanel({
                   {report.status.replaceAll("_", " ")} · Human review required
                 </p>
                 {report.summary ? (
-                  <p className="whitespace-pre-wrap leading-relaxed text-slate-200">{report.summary}</p>
+                  <p className="whitespace-pre-wrap leading-relaxed text-slate-200">
+                    {report.summary}
+                  </p>
                 ) : (
                   <p className="text-slate-400">
                     {report.status === "completed"

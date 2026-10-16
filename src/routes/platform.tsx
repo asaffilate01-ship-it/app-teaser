@@ -69,7 +69,8 @@ export const Route = createFileRoute("/platform")({
   component: Platform,
 });
 
-type PlatformTab = "overview" | "competitions" | "capture" | "players" | "safety" | "intelligence" | "operations";
+type PlatformTab =
+  "overview" | "competitions" | "capture" | "players" | "safety" | "intelligence" | "operations";
 type RunAction = <T>(action: () => Promise<T>) => Promise<T>;
 
 const tabDefinitions: Array<[PlatformTab, LucideIcon, string]> = [

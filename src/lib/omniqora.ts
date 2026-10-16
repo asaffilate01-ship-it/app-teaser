@@ -35,15 +35,17 @@ type GatewayRequest =
   | { operation: "run.start"; organisationId: string; matchId: string; task: IntelligenceTask };
 
 async function invokeIntelligence<T>(body: GatewayRequest): Promise<T> {
-  const { data, error } = await getCloudClient().functions.invoke(
-    "omniqora-intelligence",
-    { body },
-  );
+  const { data, error } = await getCloudClient().functions.invoke("omniqora-intelligence", {
+    body,
+  });
   if (error) {
     // Only the Edge Function's curated error field may be shown to the user.
     const response = error.context;
     if (response instanceof Response) {
-      const payload: unknown = await response.clone().json().catch(() => null);
+      const payload: unknown = await response
+        .clone()
+        .json()
+        .catch(() => null);
       if (payload && typeof payload === "object") {
         const message = (payload as Record<string, unknown>)["error"];
         if (typeof message === "string" && message.length <= 200) {
@@ -78,10 +80,7 @@ export async function readIntelligence(input: {
   });
 }
 
-export async function listIntelligence(input: {
-  organisationId: string;
-  matchId: string;
-}) {
+export async function listIntelligence(input: { organisationId: string; matchId: string }) {
   return invokeIntelligence<{ requests: IntelligenceRequest[] }>({
     operation: "run.list",
     ...input,

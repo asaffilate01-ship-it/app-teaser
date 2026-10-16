@@ -28,9 +28,7 @@ type LocalRun = {
   requested_at: string;
 };
 
-const permittedRoles = [
-  "owner", "league_admin", "club_admin", "coach", "safeguarding_officer",
-];
+const permittedRoles = ["owner", "league_admin", "club_admin", "coach", "safeguarding_officer"];
 
 function fail(message: string, status: number, request: Request): Response {
   return json({ error: message }, status, request);
@@ -76,7 +74,7 @@ async function sendToOmniqora(input: RecordData): Promise<RecordData> {
 }
 
 async function setRunStatus(
-  client: ReturnType<typeof import("../_shared/supabase.ts")["adminClient"]>,
+  client: ReturnType<(typeof import("../_shared/supabase.ts"))["adminClient"]>,
   runId: string,
   status: string,
   omniqoraRunId?: string,
@@ -104,9 +102,7 @@ Deno.serve(async (request) => {
     const command = parseCricketIntelligenceRequest(parsed);
     // This is the already-connected Lovable Supabase project, not Omniqora's DB.
     const { client, user } = await requireUser(request);
-    await requireOrganisationRole(
-      client, user.id, command.organisationId, permittedRoles,
-    );
+    await requireOrganisationRole(client, user.id, command.organisationId, permittedRoles);
 
     const { data: match, error: matchError } = await client
       .from("matches")
@@ -126,12 +122,18 @@ Deno.serve(async (request) => {
         .order("requested_at", { ascending: false })
         .limit(10);
       if (error) throw error;
-      return json({
-        requests: (data ?? []).map((row) => ({
-          requestId: row.id, task: row.task, status: row.status,
-          requestedAt: row.requested_at,
-        })),
-      }, 200, request);
+      return json(
+        {
+          requests: (data ?? []).map((row) => ({
+            requestId: row.id,
+            task: row.task,
+            status: row.status,
+            requestedAt: row.requested_at,
+          })),
+        },
+        200,
+        request,
+      );
     }
 
     const { data: link, error: linkError } = await client
@@ -154,7 +156,9 @@ Deno.serve(async (request) => {
     if (command.operation === "run.get") {
       const { data: local, error } = await client
         .from("criclume_omniqora_runs")
-        .select("id,organisation_id,match_id,omniqora_run_id,omniqora_tenant_id,task,source_version,status,requested_at")
+        .select(
+          "id,organisation_id,match_id,omniqora_run_id,omniqora_tenant_id,task,source_version,status,requested_at",
+        )
         .eq("id", command.requestId)
         .eq("organisation_id", command.organisationId)
         .eq("match_id", command.matchId)
@@ -163,10 +167,16 @@ Deno.serve(async (request) => {
       if (!local || local.omniqora_tenant_id !== tenantId)
         return fail("Intelligence request not found.", 404, request);
       if (!local.omniqora_run_id) {
-        return json({
-          requestId: local.id, task: local.task, status: local.status,
-          humanReviewRequired: true,
-        }, 200, request);
+        return json(
+          {
+            requestId: local.id,
+            task: local.task,
+            status: local.status,
+            humanReviewRequired: true,
+          },
+          200,
+          request,
+        );
       }
 
       const upstream = await sendToOmniqora({
@@ -216,10 +226,16 @@ Deno.serve(async (request) => {
         .eq("source_version", version)
         .single();
       if (previousError) throw previousError;
-      return json({
-        requestId: previous.id, status: previous.status,
-        reused: true, humanReviewRequired: true,
-      }, 200, request);
+      return json(
+        {
+          requestId: previous.id,
+          status: previous.status,
+          reused: true,
+          humanReviewRequired: true,
+        },
+        200,
+        request,
+      );
     }
     if (createdError || !created) throw createdError ?? new Error("Request not saved.");
 
@@ -237,12 +253,16 @@ Deno.serve(async (request) => {
         throw new Error("invalid_response");
       }
       await setRunStatus(client, created.id, "queued", upstream.runId);
-      return json({
-        requestId: created.id,
-        task: command.task,
-        status: "queued",
-        humanReviewRequired: true,
-      }, 202, request);
+      return json(
+        {
+          requestId: created.id,
+          task: command.task,
+          status: "queued",
+          humanReviewRequired: true,
+        },
+        202,
+        request,
+      );
     } catch (error) {
       // Mark failed; do not automatically retry an ambiguous upstream timeout,
       // which could create a duplicate paid agent run.
@@ -251,7 +271,11 @@ Deno.serve(async (request) => {
     }
   } catch (error) {
     if (error instanceof Error) {
-      if (/^(Invalid request|A valid organisation|Unsupported intelligence request)/.test(error.message)) {
+      if (
+        /^(Invalid request|A valid organisation|Unsupported intelligence request)/.test(
+          error.message,
+        )
+      ) {
         return fail(error.message, 422, request);
       }
       if (/permission|Authentication required/i.test(error.message)) {
@@ -261,7 +285,14 @@ Deno.serve(async (request) => {
         return fail("Omniqora rejected this tenant's scope or entitlement.", 403, request);
       }
     }
-    console.error("CricLume intelligence gateway error:", error instanceof Error ? error.name : "unknown");
-    return errorResponse(new Error("Intelligence is currently unavailable. Check connection and approvals."), 503, request);
+    console.error(
+      "CricLume intelligence gateway error:",
+      error instanceof Error ? error.name : "unknown",
+    );
+    return errorResponse(
+      new Error("Intelligence is currently unavailable. Check connection and approvals."),
+      503,
+      request,
+    );
   }
 });

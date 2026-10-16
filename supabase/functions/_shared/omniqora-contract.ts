@@ -34,29 +34,49 @@ export const cricketIntelligenceTasks = {
 export type CricketIntelligenceTask = keyof typeof cricketIntelligenceTasks;
 export type CricketIntelligenceOperation = "run.start" | "run.get" | "run.list";
 
-const uuidPattern =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const isUuid = (value: unknown): value is string =>
   typeof value === "string" && uuidPattern.test(value);
 
 export function isCricketTask(value: unknown): value is CricketIntelligenceTask {
-  return typeof value === "string" && Object.prototype.hasOwnProperty.call(cricketIntelligenceTasks, value);
+  return (
+    typeof value === "string" &&
+    Object.prototype.hasOwnProperty.call(cricketIntelligenceTasks, value)
+  );
 }
 
-export function parseCricketIntelligenceRequest(value: unknown):
-  | { operation: "run.start"; organisationId: string; matchId: string; task: CricketIntelligenceTask }
+export function parseCricketIntelligenceRequest(
+  value: unknown,
+):
+  | {
+      operation: "run.start";
+      organisationId: string;
+      matchId: string;
+      task: CricketIntelligenceTask;
+    }
   | { operation: "run.get"; organisationId: string; matchId: string; requestId: string }
   | { operation: "run.list"; organisationId: string; matchId: string } {
-  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid request.");
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new Error("Invalid request.");
   const input = value as Record<string, unknown>;
   if (!isUuid(input.organisationId) || !isUuid(input.matchId)) {
     throw new Error("A valid organisation and match are required.");
   }
   if (input.operation === "run.start" && isCricketTask(input.task)) {
-    return { operation: "run.start", organisationId: input.organisationId, matchId: input.matchId, task: input.task };
+    return {
+      operation: "run.start",
+      organisationId: input.organisationId,
+      matchId: input.matchId,
+      task: input.task,
+    };
   }
   if (input.operation === "run.get" && isUuid(input.requestId)) {
-    return { operation: "run.get", organisationId: input.organisationId, matchId: input.matchId, requestId: input.requestId };
+    return {
+      operation: "run.get",
+      organisationId: input.organisationId,
+      matchId: input.matchId,
+      requestId: input.requestId,
+    };
   }
   if (input.operation === "run.list") {
     return { operation: "run.list", organisationId: input.organisationId, matchId: input.matchId };
@@ -70,12 +90,12 @@ const integerOrNull = (value: unknown, max: number): number | null =>
     : null;
 
 export function privacySafeMatchContext(value: unknown, status: unknown) {
-  const data = value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-  const overs = typeof data.overs === "string" && /^\d{1,3}\.\d$/.test(data.overs)
-    ? data.overs
-    : null;
+  const data =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+  const overs =
+    typeof data.overs === "string" && /^\d{1,3}\.\d$/.test(data.overs) ? data.overs : null;
   const recent = Array.isArray(data.recent)
     ? data.recent.slice(-6).map((entry) => {
         const item = entry && typeof entry === "object" ? (entry as Record<string, unknown>) : {};
@@ -93,7 +113,9 @@ export function privacySafeMatchContext(value: unknown, status: unknown) {
     overs,
     target: integerOrNull(data.target, 3000),
     recent,
-    matchStatus: ["live", "completed", "innings_break", "draft", "scheduled"].includes(String(status))
+    matchStatus: ["live", "completed", "innings_break", "draft", "scheduled"].includes(
+      String(status),
+    )
       ? String(status)
       : "unknown",
     evidencePolicy: "aggregates_only;no_children_or_biometrics;human_review_required",
@@ -109,7 +131,8 @@ export function omniqoraEndpoint(value: string): string {
     url.search ||
     url.hash ||
     url.pathname !== "/api/platform/intelligence"
-  ) throw new Error("Omniqora endpoint must be the approved HTTPS intelligence API.");
+  )
+    throw new Error("Omniqora endpoint must be the approved HTTPS intelligence API.");
   return url.href;
 }
 
@@ -120,7 +143,8 @@ export function omniqoraStartPayload(input: {
   status: unknown;
   liveState: unknown;
 }) {
-  if (!isUuid(input.tenantId) || !isUuid(input.matchId)) throw new Error("Invalid intelligence binding.");
+  if (!isUuid(input.tenantId) || !isUuid(input.matchId))
+    throw new Error("Invalid intelligence binding.");
   return {
     operation: "run.start" as const,
     tenantId: input.tenantId,
@@ -151,28 +175,35 @@ export type OmniqoraRunView = {
 
 export function safeRunView(value: unknown): OmniqoraRunView {
   const response = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
-  const raw = response.run && typeof response.run === "object"
-    ? (response.run as Record<string, unknown>)
-    : {};
-  const result = raw.result && typeof raw.result === "object"
-    ? (raw.result as Record<string, unknown>)
-    : {};
-  const status = typeof raw.status === "string" && [
-    "queued", "running", "waiting_review", "completed", "failed", "cancelled", "stale",
-  ].includes(raw.status) ? raw.status : "queued";
+  const raw =
+    response.run && typeof response.run === "object"
+      ? (response.run as Record<string, unknown>)
+      : {};
+  const result =
+    raw.result && typeof raw.result === "object" ? (raw.result as Record<string, unknown>) : {};
+  const status =
+    typeof raw.status === "string" &&
+    ["queued", "running", "waiting_review", "completed", "failed", "cancelled", "stale"].includes(
+      raw.status,
+    )
+      ? raw.status
+      : "queued";
   const summaryValue = result.summary ?? result.answer ?? result.text ?? null;
   const summary = typeof summaryValue === "string" ? summaryValue.slice(0, 6000) : null;
   const suggestions = result.recommendations ?? result.suggestions ?? result.findings ?? [];
   const recommendations = Array.isArray(suggestions)
-    ? suggestions.slice(0, 8).map((item) => {
-        if (typeof item === "string") return item.slice(0, 600);
-        if (item && typeof item === "object") {
-          const record = item as Record<string, unknown>;
-          const text = record.suggestion ?? record.message ?? record.text;
-          return typeof text === "string" ? text.slice(0, 600) : "";
-        }
-        return "";
-      }).filter(Boolean)
+    ? suggestions
+        .slice(0, 8)
+        .map((item) => {
+          if (typeof item === "string") return item.slice(0, 600);
+          if (item && typeof item === "object") {
+            const record = item as Record<string, unknown>;
+            const text = record.suggestion ?? record.message ?? record.text;
+            return typeof text === "string" ? text.slice(0, 600) : "";
+          }
+          return "";
+        })
+        .filter(Boolean)
     : [];
   return {
     status,
