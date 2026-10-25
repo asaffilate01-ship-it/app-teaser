@@ -36,10 +36,23 @@ export interface IntelligenceConnection {
   budgetedAdmissionRequired: true;
 }
 
+export interface BudgetedIntelligenceReceipt {
+  requestId: string;
+  task: IntelligenceTask;
+  status: "queued" | "starting" | "reconcile_required";
+  humanReviewRequired: true;
+  reused?: boolean;
+  /** Approved reserved upper bound only, NOT actual provider expenditure. */
+  reservedMinor?: number;
+  currency?: "GBP" | "EUR" | "USD";
+  modelExecutionReady?: false;
+}
+
 type GatewayRequest =
   | { operation: "run.list"; organisationId: string; matchId: string }
   | { operation: "connection.verify"; organisationId: string; matchId: string }
-  | { operation: "run.get"; organisationId: string; matchId: string; requestId: string };
+  | { operation: "run.get"; organisationId: string; matchId: string; requestId: string }
+  | { operation: "run.start.budgeted"; organisationId: string; matchId: string; task: IntelligenceTask };
 
 async function invokeIntelligence<T>(body: GatewayRequest): Promise<T> {
   const { data, error } = await getCloudClient().functions.invoke("omniqora-intelligence", {
@@ -90,6 +103,22 @@ export async function verifyIntelligenceConnection(input: {
 }) {
   return invokeIntelligence<IntelligenceConnection>({
     operation: "connection.verify",
+    ...input,
+  });
+}
+
+/**
+ * Activation is enforced by the Lovable Supabase Edge Function and independently
+ * by Omniqora's reviewed pilot, model-rate and worker/budget settings.
+ * A browser may not select any model, tool, tariff or payment details.
+ */
+export async function requestBudgetedIntelligence(input: {
+  organisationId: string;
+  matchId: string;
+  task: IntelligenceTask;
+}) {
+  return invokeIntelligence<BudgetedIntelligenceReceipt>({
+    operation: "run.start.budgeted",
     ...input,
   });
 }
