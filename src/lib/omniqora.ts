@@ -54,7 +54,12 @@ type GatewayRequest =
   | { operation: "run.list"; organisationId: string; matchId: string }
   | { operation: "connection.verify"; organisationId: string; matchId: string }
   | { operation: "run.get"; organisationId: string; matchId: string; requestId: string }
-  | { operation: "run.start.budgeted"; organisationId: string; matchId: string; task: IntelligenceTask };
+  | {
+      operation: "run.start.budgeted";
+      organisationId: string;
+      matchId: string;
+      task: IntelligenceTask;
+    };
 
 async function invokeIntelligence<T>(body: GatewayRequest): Promise<T> {
   const { data, error } = await getCloudClient().functions.invoke("omniqora-intelligence", {

@@ -257,10 +257,16 @@ export function OmniqoraIntelligencePanel({
                 type="button"
                 disabled={!canStartPaid || !matchId || busy}
                 onClick={() => void requestBudgeted()}
-                title={canStartPaid ? "Request a capped, approved model run" : "Requires independently verified budgeted Agent Factory execution"}
+                title={
+                  canStartPaid
+                    ? "Request a capped, approved model run"
+                    : "Requires independently verified budgeted Agent Factory execution"
+                }
                 className="w-full rounded-xl border border-white/10 px-4 py-3 text-xs font-bold text-slate-400 disabled:cursor-not-allowed disabled:opacity-50 enabled:hover:border-fuchsia-300"
               >
-                {canStartPaid ? "Request reviewed GenAI · Budget enforced" : "Generate with Omniqora · Awaiting certified worker"}
+                {canStartPaid
+                  ? "Request reviewed GenAI · Budget enforced"
+                  : "Generate with Omniqora · Awaiting certified worker"}
               </button>
               {message && (
                 <p
@@ -336,11 +342,13 @@ export function OmniqoraIntelligencePanel({
                   ) : null}
                   {typeof report.reservedMinor === "number" && report.currency && (
                     <p className="rounded-xl border border-amber-300/20 p-3 text-xs text-amber-100">
-                      Reserved maximum for this run: {new Intl.NumberFormat("en-GB", {
+                      Reserved maximum for this run:{" "}
+                      {new Intl.NumberFormat("en-GB", {
                         style: "currency",
                         currency: report.currency,
-                      }).format(report.reservedMinor / 100)}. This is a reservation,
-                      not an actual model invoice; final usage requires a verified receipt.
+                      }).format(report.reservedMinor / 100)}
+                      . This is a reservation, not an actual model invoice; final usage requires a
+                      verified receipt.
                     </p>
                   )}
                   {report.model && (
