@@ -123,3 +123,81 @@ supabase test db
 
 The code can be built and unit tested without live credentials; these tests
 cannot certify an actual Lovable deployment or external Omniqora run.
+
+## Phase 3 — budgeted service admission (25 October 2026)
+
+**Source merged in GitHub is not live GenAI.** The new service-to-service
+contract `run.start.budgeted` is deliberately disabled unless an operator
+has enabled all independent controls. No model provider or worker secrets are
+set by the source change.
+
+### What is now built in source
+
+1. Omniqora provides a strictly authenticated `run.start.budgeted` branch
+   requiring capability `intelligence.run.budgeted` for product `criclume`
+   and precisely the approved tenant.
+2. Omniqora's new migration
+   `20261025090000_criclume_budgeted_admission_v1.sql` adds independent
+   operator-reviewed pilot/source bindings, an atomic and deduplicated budget
+   reservation with verified cheapest capable regional model, per-run/monthly
+   spend ceilings, and a dedicated isolated cricket job type.
+3. This model job is **explicitly excluded from the generic AI worker**;
+   no LLM or tool call is performed by admission.
+4. CricLume's Lovable-linked Supabase validates a club coach and their match,
+   claims a stable source request ID using
+   `claim_criclume_omniqora_run`, strips private player/junior/video data,
+   and sends that ID with the exact score revision to Omniqora.
+5. CricLume's additive migration
+   `20261025091500_criclume_budgeted_receipts_v1.sql` saves the external
+   reservation ID and currency/cost ceiling. Ambiguous remote responses are
+   `reconcile_required` rather than silently retried. A second request with
+   an existing source idempotency key does not trigger new provider spend.
+6. The dashboard can show the reserved cost separately from a final provider
+   invoice. The Generate button is gated by
+   `connection.modelExecutionReady===true`; this remains **false** in the
+   current code while there is no certified worker.
+
+### Default-off flags and private secrets
+
+Store these only in the **existing** CricLume Lovable-connected Supabase
+Edge Functions runtime, not in Vite/browser public settings:
+
+- `OMNIQORA_CRICLUME_ENABLED=false` initially
+- `OMNIQORA_CRICLUME_PAID_ENABLED=false` until full acceptance
+- `OMNIQORA_INTELLIGENCE_URL=https://<verified-omniqora-host>/api/platform/intelligence`
+- `OMNIQORA_SERVICE_AUTH=<scoped-key-id>.<private-secret>`
+
+The `criclume_ai_pilot_controls.enabled` and `worker_ready` switches in
+Omniqora both default to **false**. They require independently signed-off
+reviewers and future expiry. No active tenant, source binding, spending
+account, model tariff or provider was inserted by the code migration.
+
+### Required go-live evidence
+
+- [ ] Verify the correct existing Lovable Supabase project and review SQL
+      migration history; never deploy to an unrelated SaaS database.
+- [ ] Deploy reviewed source and Omniqora migrations and Edge Functions to
+      their respective approved projects with rollback plans.
+- [ ] Prove independently reviewed tenant/club/credential binding,
+      entitlement, current provider binding, region and model-evaluation
+      evidence, signed approved tariff and monthly budget.
+- [ ] Build a **dedicated** cricket read-only worker that enforces reserved
+      token/tool ceilings and submits actual provider usage receipts to
+      `settle_budgeted_ai_agent`; test safe cancellation and release of
+      unused reservations before switching `worker_ready` on.
+- [ ] Keep source scoring and video unavailable to AI write tools; test
+      two clubs, revoked credentials, stale match snapshots, rapid concurrent
+      starts, unauthorised junior data, mixed currencies and provider timeout.
+- [ ] Verify post-deployment DB/Storage backups and restore drill; the
+      current GitHub backup-monitor workflow was still failing at the last
+      reviewed run and must not be treated as backup evidence.
+- [ ] Only after a controlled authorised-club pilot with real receipt
+      reconciliation may `OMNIQORA_CRICLUME_PAID_ENABLED=true` be set and
+      `modelExecutionReady` become true in the verified handshake.
+
+### Important distinction
+
+**A budget reservation is not an actual provider charge.**
+Use actual trusted worker/model receipts for final accounting, not the
+estimated maximum `reservedMinor`. If the upstream outcome is ambiguous,
+reconcile by the stable source request UUID before taking any further action.

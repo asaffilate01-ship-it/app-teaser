@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(16);
+select plan(19);
 
 select has_table('public', 'criclume_omniqora_links', 'CricLume tenant binding is present');
 select has_table('public', 'criclume_omniqora_runs', 'CricLume AI run ledger is present');
@@ -76,6 +76,19 @@ select ok(
      'public.claim_criclume_omniqora_run(uuid,uuid,uuid,text,timestamptz,uuid)'
    )),
   'the quota and dedupe RPC runs with invoker permissions'
+);
+
+select has_column(
+  'public','criclume_omniqora_runs','omniqora_reservation_id',
+  'budget reservation receipt is stored only on the backend ledger'
+);
+select has_column(
+  'public','criclume_omniqora_runs','omniqora_reserved_minor',
+  'reserved upper-bound cost is tracked separately from actual expenditure'
+);
+select has_column(
+  'public','criclume_omniqora_runs','reconciliation_note',
+  'ambiguous provider results can be quarantined for operator review'
 );
 
 select * from finish();

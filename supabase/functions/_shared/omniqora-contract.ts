@@ -33,7 +33,7 @@ export const cricketIntelligenceTasks = {
 
 export type CricketIntelligenceTask = keyof typeof cricketIntelligenceTasks;
 export type CricketIntelligenceOperation =
-  "run.start" | "run.get" | "run.list" | "connection.verify";
+  "run.start" | "run.start.budgeted" | "run.get" | "run.list" | "connection.verify";
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const isUuid = (value: unknown): value is string =>
@@ -53,6 +53,12 @@ export function parseCricketIntelligenceRequest(value: unknown):
       matchId: string;
       task: CricketIntelligenceTask;
     }
+  | {
+      operation: "run.start.budgeted";
+      organisationId: string;
+      matchId: string;
+      task: CricketIntelligenceTask;
+    }
   | { operation: "run.get"; organisationId: string; matchId: string; requestId: string }
   | { operation: "run.list"; organisationId: string; matchId: string }
   | { operation: "connection.verify"; organisationId: string; matchId: string } {
@@ -61,6 +67,14 @@ export function parseCricketIntelligenceRequest(value: unknown):
   const input = value as Record<string, unknown>;
   if (!isUuid(input.organisationId) || !isUuid(input.matchId)) {
     throw new Error("A valid organisation and match are required.");
+  }
+  if (input.operation === "run.start.budgeted" && isCricketTask(input.task)) {
+    return {
+      operation: "run.start.budgeted",
+      organisationId: input.organisationId,
+      matchId: input.matchId,
+      task: input.task,
+    };
   }
   if (input.operation === "run.start" && isCricketTask(input.task)) {
     return {
@@ -178,6 +192,43 @@ export function omniqoraStartPayload(input: {
       approval: "advisory_only",
     },
     sourceRefs: [`criclume:match:${input.matchId}`],
+  };
+}
+
+/**
+ * Phase 3 budgeted admission payload. The source Supabase Edge Function alone
+ * derives identity/scope and the stable idempotency key. No user-selected
+ * provider, model, price, arbitrary tool or junior-identifiable data.
+ */
+export function omniqoraBudgetedPayload(input: {
+  tenantId: string;
+  sourceOrganisationId: string;
+  matchId: string;
+  sourceRevision: string;
+  task: CricketIntelligenceTask;
+  requestId: string;
+  matchStatus: unknown;
+  liveState: unknown;
+}) {
+  if (
+    !isUuid(input.tenantId) ||
+    !isUuid(input.sourceOrganisationId) ||
+    !isUuid(input.matchId) ||
+    !isUuid(input.requestId) ||
+    !Number.isFinite(Date.parse(input.sourceRevision))
+  ) {
+    throw new Error("Invalid budgeted match source binding.");
+  }
+  return {
+    operation: "run.start.budgeted" as const,
+    tenantId: input.tenantId,
+    productKey: "criclume" as const,
+    sourceOrganisationId: input.sourceOrganisationId,
+    matchId: input.matchId,
+    sourceRevision: input.sourceRevision,
+    task: input.task,
+    idempotencyKey: input.requestId,
+    snapshot: privacySafeMatchContext(input.liveState, input.matchStatus),
   };
 }
 

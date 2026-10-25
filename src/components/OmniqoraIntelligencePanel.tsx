@@ -6,6 +6,7 @@ import {
   intelligenceTaskOptions,
   listIntelligence,
   readIntelligence,
+  requestBudgetedIntelligence,
   verifyIntelligenceConnection,
   type IntelligenceConnection,
   type IntelligenceRequest,
@@ -40,6 +41,7 @@ export function OmniqoraIntelligencePanel({
   const [connection, setConnection] = useState<IntelligenceConnection | null>(null);
   const [checking, setChecking] = useState(false);
   const mayRequest = allowedRoles.has(role);
+  const canStartPaid = connection?.modelExecutionReady === true;
   const selectedMatch = matches.find((item) => item.id === matchId);
   const preview = selectedMatch ? buildCricketPreview(selectedMatch, task) : null;
 
@@ -89,6 +91,31 @@ export function OmniqoraIntelligencePanel({
       );
     } finally {
       setChecking(false);
+    }
+  };
+
+  const requestBudgeted = async () => {
+    if (!matchId || !mayRequest || !canStartPaid || busy) return;
+    setBusy(true);
+    setMessage("");
+    setReport(null);
+    try {
+      const receipt = await requestBudgetedIntelligence({
+        organisationId,
+        matchId,
+        task,
+      });
+      setReport({ ...receipt, task });
+      const historyResult = await listIntelligence({ organisationId, matchId });
+      setHistory(historyResult.requests);
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "The budgeted request could not be confirmed. Do not retry automatically.",
+      );
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -228,11 +255,18 @@ export function OmniqoraIntelligencePanel({
               )}
               <button
                 type="button"
-                disabled
-                title="Requires independently verified budgeted Agent Factory execution"
-                className="w-full cursor-not-allowed rounded-xl border border-white/10 px-4 py-3 text-xs font-bold text-slate-400"
+                disabled={!canStartPaid || !matchId || busy}
+                onClick={() => void requestBudgeted()}
+                title={
+                  canStartPaid
+                    ? "Request a capped, approved model run"
+                    : "Requires independently verified budgeted Agent Factory execution"
+                }
+                className="w-full rounded-xl border border-white/10 px-4 py-3 text-xs font-bold text-slate-400 disabled:cursor-not-allowed disabled:opacity-50 enabled:hover:border-fuchsia-300"
               >
-                Generate with Omniqora · Awaiting budgeted execution
+                {canStartPaid
+                  ? "Request reviewed GenAI · Budget enforced"
+                  : "Generate with Omniqora · Awaiting certified worker"}
               </button>
               {message && (
                 <p
@@ -306,6 +340,17 @@ export function OmniqoraIntelligencePanel({
                       ))}
                     </ul>
                   ) : null}
+                  {typeof report.reservedMinor === "number" && report.currency && (
+                    <p className="rounded-xl border border-amber-300/20 p-3 text-xs text-amber-100">
+                      Reserved maximum for this run:{" "}
+                      {new Intl.NumberFormat("en-GB", {
+                        style: "currency",
+                        currency: report.currency,
+                      }).format(report.reservedMinor / 100)}
+                      . This is a reservation, not an actual model invoice; final usage requires a
+                      verified receipt.
+                    </p>
+                  )}
                   {report.model && (
                     <p className="text-xs text-slate-400">
                       Model: {report.provider ? `${report.provider} /` : ""} {report.model}
