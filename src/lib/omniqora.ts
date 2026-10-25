@@ -27,6 +27,8 @@ export interface IntelligenceRequest {
   provider?: string | null;
   model?: string | null;
   humanReviewRequired: true;
+  reservedMinor?: number;
+  currency?: "GBP" | "EUR" | "USD";
 }
 
 export interface IntelligenceConnection {
