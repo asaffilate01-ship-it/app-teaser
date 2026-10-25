@@ -181,6 +181,43 @@ export function omniqoraStartPayload(input: {
   };
 }
 
+/**
+ * Phase 3 budgeted admission payload. The source Supabase Edge Function alone
+ * derives identity/scope and the stable idempotency key. No user-selected
+ * provider, model, price, arbitrary tool or junior-identifiable data.
+ */
+export function omniqoraBudgetedPayload(input: {
+  tenantId: string;
+  sourceOrganisationId: string;
+  matchId: string;
+  sourceRevision: string;
+  task: CricketIntelligenceTask;
+  requestId: string;
+  matchStatus: unknown;
+  liveState: unknown;
+}) {
+  if (
+    !isUuid(input.tenantId) ||
+    !isUuid(input.sourceOrganisationId) ||
+    !isUuid(input.matchId) ||
+    !isUuid(input.requestId) ||
+    !Number.isFinite(Date.parse(input.sourceRevision))
+  ) {
+    throw new Error("Invalid budgeted match source binding.");
+  }
+  return {
+    operation: "run.start.budgeted" as const,
+    tenantId: input.tenantId,
+    productKey: "criclume" as const,
+    sourceOrganisationId: input.sourceOrganisationId,
+    matchId: input.matchId,
+    sourceRevision: input.sourceRevision,
+    task: input.task,
+    idempotencyKey: input.requestId,
+    snapshot: privacySafeMatchContext(input.liveState, input.matchStatus),
+  };
+}
+
 export type OmniqoraRunView = {
   status: string;
   summary: string | null;
