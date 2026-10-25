@@ -8,6 +8,7 @@ import {
 import { requireOrganisationRole, requireUser } from "../_shared/supabase.ts";
 import {
   isUuid,
+  omniqoraBudgetedPayload,
   omniqoraEndpoint,
   parseCricketIntelligenceRequest,
   safeRunView,
@@ -224,12 +225,121 @@ Deno.serve(async (request) => {
       return json({ requestId: local.id, task: local.task, ...view }, 200, request);
     }
 
-    // Never call generic Omniqora run.start for CricLume. That route queues
-    // workers without the Agent Factory's atomic budget reservation.
-    // The free, rules-based report is already available in the dashboard.
-    // A separately verified budgeted service API will replace this gate.
+    if (command.operation === "run.start.budgeted") {
+      // Deliberately disabled until BOTH companies' reviewed tenant, model
+      // tariff, worker and spending permissions have been activated. A GitHub
+      // merge or verified connection does not automatically enable charges.
+      if (Deno.env.get("OMNIQORA_CRICLUME_PAID_ENABLED") !== "true") {
+        return fail(
+          "Budgeted GenAI is not enabled for this CricLume deployment. The free match preview remains available.",
+          409,
+          request,
+        );
+      }
+      // Strict, atomic, server-role-only source claim: prevents concurrent
+      // devices bypassing one-per-score dedupe or the club request cap.
+      const revision = String(match.updated_at);
+      const { data: claimed, error: claimError } = await client.rpc(
+        "claim_criclume_omniqora_run",
+        {
+          _organisation_id: command.organisationId,
+          _match_id: command.matchId,
+          _tenant_id: tenantId,
+          _task: command.task,
+          _source_version: revision,
+          _requested_by: user.id,
+        },
+      );
+      if (claimError || !claimed || !isUuid(claimed.requestId)) {
+        return fail(
+          "Club AI admission is not approved or the match has changed. Confirm the Lovable migration and club limits.",
+          409,
+          request,
+        );
+      }
+      // An ambiguous previous submission must never be resent automatically:
+      // the external queue may already have reserved funds.
+      if (claimed.reused === true) {
+        return json({
+          requestId: claimed.requestId,
+          task: command.task,
+          status: claimed.status,
+          reused: true,
+          humanReviewRequired: true,
+        }, 200, request);
+      }
+      try {
+        const budget = await sendToOmniqora(
+          omniqoraBudgetedPayload({
+            tenantId,
+            sourceOrganisationId: command.organisationId,
+            matchId: command.matchId,
+            sourceRevision: revision,
+            task: command.task,
+            requestId: claimed.requestId,
+            matchStatus: match.status,
+            liveState: match.live_state,
+          }),
+        );
+        if (
+          !isUuid(budget.runId) ||
+          !isUuid(budget.reservationId) ||
+          budget.status !== "queued" ||
+          typeof budget.reservedMinor !== "number" ||
+          !Number.isSafeInteger(budget.reservedMinor) ||
+          budget.reservedMinor <= 0 ||
+          budget.reservedMinor > 10000 ||
+          !["GBP", "EUR", "USD"].includes(String(budget.currency)) ||
+          budget.humanReviewRequired !== true
+        ) {
+          throw new Error("Invalid cost reservation receipt.");
+        }
+        const { error: saveError } = await client
+          .from("criclume_omniqora_runs")
+          .update({
+            status: "queued",
+            admission_mode: "budgeted",
+            omniqora_run_id: budget.runId,
+            omniqora_reservation_id: budget.reservationId,
+            omniqora_reserved_minor: budget.reservedMinor,
+            omniqora_currency: budget.currency,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", claimed.requestId)
+          .eq("organisation_id", command.organisationId);
+        if (saveError) throw saveError;
+        return json({
+          requestId: claimed.requestId,
+          task: command.task,
+          status: "queued",
+          reservedMinor: budget.reservedMinor,
+          currency: budget.currency,
+          humanReviewRequired: true,
+          modelExecutionReady: false,
+        }, 202, request);
+      } catch {
+        // A remote timeout or local receipt-save error is AMBIGUOUS.
+        // Never assume no reservation was made; never auto retry.
+        await client.from("criclume_omniqora_runs")
+          .update({
+            status: "reconcile_required",
+            admission_mode: "budgeted",
+            reconciliation_note: "Remote admission or local receipt confirmation was ambiguous; reconcile by source request UUID.",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", claimed.requestId)
+          .eq("organisation_id", command.organisationId);
+        return fail(
+          "Budget admission outcome requires an operator check before retrying. No new request has been sent automatically.",
+          503,
+          request,
+        );
+      }
+    }
+
+    // Never permit the legacy, unbudgeted run.start operation.
     return fail(
-      "Paid GenAI is awaiting Omniqora budgeted Agent Factory admission. The free match preview remains available.",
+      "Only the verified budgeted Agent Factory may handle paid CricLume GenAI.",
       409,
       request,
     );
