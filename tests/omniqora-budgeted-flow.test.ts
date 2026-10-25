@@ -22,7 +22,12 @@ test("budgeted request parser strips client-selected model, tool and callback UR
     tool: "score.write",
     endpoint: "https://untrusted.example",
   });
-  assert.deepEqual(parsed, { operation: "run.start.budgeted", organisationId, matchId, task: "match_insights" });
+  assert.deepEqual(parsed, {
+    operation: "run.start.budgeted",
+    organisationId,
+    matchId,
+    task: "match_insights",
+  });
 });
 
 test("the match authority sends only approved aggregate fields and server-issued identity", () => {
@@ -35,7 +40,10 @@ test("the match authority sends only approved aggregate fields and server-issued
     requestId,
     matchStatus: "live",
     liveState: {
-      runs: 83, wickets: 3, target: 110, overs: "12.3",
+      runs: 83,
+      wickets: 3,
+      target: 110,
+      overs: "12.3",
       recent: [{ label: "4", playerName: "Sensitive Junior" }],
       players: [{ name: "Sensitive Junior", dob: "2013-12-01" }],
       videoUrl: "https://private.example/video",
@@ -45,32 +53,69 @@ test("the match authority sends only approved aggregate fields and server-issued
   assert.equal(payload.operation, "run.start.budgeted");
   assert.equal(payload.idempotencyKey, requestId);
   assert.equal(payload.productKey, "criclume");
-  assert.deepEqual(Object.keys(payload).sort(), [
-    "idempotencyKey", "matchId", "operation", "productKey", "snapshot", "sourceOrganisationId",
-    "sourceRevision", "task", "tenantId",
-  ].sort());
+  assert.deepEqual(
+    Object.keys(payload).sort(),
+    [
+      "idempotencyKey",
+      "matchId",
+      "operation",
+      "productKey",
+      "snapshot",
+      "sourceOrganisationId",
+      "sourceRevision",
+      "task",
+      "tenantId",
+    ].sort(),
+  );
   assert.equal(payload.snapshot.runs, 83);
   assert.deepEqual(payload.snapshot.recent, ["4"]);
-  assert.doesNotMatch(JSON.stringify(payload), /Sensitive Junior|videoUrl|dob|pay out|providerKey|modelKey|allowedTools/);
+  assert.doesNotMatch(
+    JSON.stringify(payload),
+    /Sensitive Junior|videoUrl|dob|pay out|providerKey|modelKey|allowedTools/,
+  );
 });
 
 test("invalid tenant, match or idempotency identity fails before a request leaves CricLume", () => {
-  assert.throws(() => omniqoraBudgetedPayload({
-    tenantId, sourceOrganisationId: organisationId, matchId,
-    sourceRevision: "invalid", task: "match_insights",
-    requestId, matchStatus: "live", liveState: {},
-  }), /Invalid budgeted/);
-  assert.throws(() => omniqoraBudgetedPayload({
-    tenantId, sourceOrganisationId: organisationId, matchId,
-    sourceRevision: "2026-10-25T06:00:00.000Z", task: "match_insights",
-    requestId: "not-a-uuid", matchStatus: "live", liveState: {},
-  }), /Invalid budgeted/);
+  assert.throws(
+    () =>
+      omniqoraBudgetedPayload({
+        tenantId,
+        sourceOrganisationId: organisationId,
+        matchId,
+        sourceRevision: "invalid",
+        task: "match_insights",
+        requestId,
+        matchStatus: "live",
+        liveState: {},
+      }),
+    /Invalid budgeted/,
+  );
+  assert.throws(
+    () =>
+      omniqoraBudgetedPayload({
+        tenantId,
+        sourceOrganisationId: organisationId,
+        matchId,
+        sourceRevision: "2026-10-25T06:00:00.000Z",
+        task: "match_insights",
+        requestId: "not-a-uuid",
+        matchStatus: "live",
+        liveState: {},
+      }),
+    /Invalid budgeted/,
+  );
 });
 
 test("the deployed source defaults to no paid model calls and preserves ambiguous reservations", async () => {
-  const src = await readFile(new URL("../supabase/functions/omniqora-intelligence/index.ts", import.meta.url), "utf8");
+  const src = await readFile(
+    new URL("../supabase/functions/omniqora-intelligence/index.ts", import.meta.url),
+    "utf8",
+  );
   const migration = await readFile(
-    new URL("../supabase/migrations/20261025091500_criclume_budgeted_receipts_v1.sql", import.meta.url),
+    new URL(
+      "../supabase/migrations/20261025091500_criclume_budgeted_receipts_v1.sql",
+      import.meta.url,
+    ),
     "utf8",
   );
   assert.match(src, /OMNIQORA_CRICLUME_PAID_ENABLED/);

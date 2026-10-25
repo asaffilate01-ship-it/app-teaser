@@ -239,17 +239,14 @@ Deno.serve(async (request) => {
       // Strict, atomic, server-role-only source claim: prevents concurrent
       // devices bypassing one-per-score dedupe or the club request cap.
       const revision = String(match.updated_at);
-      const { data: claimed, error: claimError } = await client.rpc(
-        "claim_criclume_omniqora_run",
-        {
-          _organisation_id: command.organisationId,
-          _match_id: command.matchId,
-          _tenant_id: tenantId,
-          _task: command.task,
-          _source_version: revision,
-          _requested_by: user.id,
-        },
-      );
+      const { data: claimed, error: claimError } = await client.rpc("claim_criclume_omniqora_run", {
+        _organisation_id: command.organisationId,
+        _match_id: command.matchId,
+        _tenant_id: tenantId,
+        _task: command.task,
+        _source_version: revision,
+        _requested_by: user.id,
+      });
       if (claimError || !claimed || !isUuid(claimed.requestId)) {
         return fail(
           "Club AI admission is not approved or the match has changed. Confirm the Lovable migration and club limits.",
@@ -260,13 +257,17 @@ Deno.serve(async (request) => {
       // An ambiguous previous submission must never be resent automatically:
       // the external queue may already have reserved funds.
       if (claimed.reused === true) {
-        return json({
-          requestId: claimed.requestId,
-          task: command.task,
-          status: claimed.status,
-          reused: true,
-          humanReviewRequired: true,
-        }, 200, request);
+        return json(
+          {
+            requestId: claimed.requestId,
+            task: command.task,
+            status: claimed.status,
+            reused: true,
+            humanReviewRequired: true,
+          },
+          200,
+          request,
+        );
       }
       try {
         const budget = await sendToOmniqora(
@@ -308,23 +309,29 @@ Deno.serve(async (request) => {
           .eq("id", claimed.requestId)
           .eq("organisation_id", command.organisationId);
         if (saveError) throw saveError;
-        return json({
-          requestId: claimed.requestId,
-          task: command.task,
-          status: "queued",
-          reservedMinor: budget.reservedMinor,
-          currency: budget.currency,
-          humanReviewRequired: true,
-          modelExecutionReady: false,
-        }, 202, request);
+        return json(
+          {
+            requestId: claimed.requestId,
+            task: command.task,
+            status: "queued",
+            reservedMinor: budget.reservedMinor,
+            currency: budget.currency,
+            humanReviewRequired: true,
+            modelExecutionReady: false,
+          },
+          202,
+          request,
+        );
       } catch {
         // A remote timeout or local receipt-save error is AMBIGUOUS.
         // Never assume no reservation was made; never auto retry.
-        await client.from("criclume_omniqora_runs")
+        await client
+          .from("criclume_omniqora_runs")
           .update({
             status: "reconcile_required",
             admission_mode: "budgeted",
-            reconciliation_note: "Remote admission or local receipt confirmation was ambiguous; reconcile by source request UUID.",
+            reconciliation_note:
+              "Remote admission or local receipt confirmation was ambiguous; reconcile by source request UUID.",
             updated_at: new Date().toISOString(),
           })
           .eq("id", claimed.requestId)

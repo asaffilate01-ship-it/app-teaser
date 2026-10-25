@@ -53,7 +53,12 @@ export function parseCricketIntelligenceRequest(value: unknown):
       matchId: string;
       task: CricketIntelligenceTask;
     }
-  | { operation: "run.start.budgeted"; organisationId: string; matchId: string; task: CricketIntelligenceTask }
+  | {
+      operation: "run.start.budgeted";
+      organisationId: string;
+      matchId: string;
+      task: CricketIntelligenceTask;
+    }
   | { operation: "run.get"; organisationId: string; matchId: string; requestId: string }
   | { operation: "run.list"; organisationId: string; matchId: string }
   | { operation: "connection.verify"; organisationId: string; matchId: string } {
