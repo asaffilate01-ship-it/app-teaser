@@ -106,7 +106,7 @@ Deno.serve(async (request) => {
     if (command.operation === "run.list") {
       const { data, error } = await client
         .from("criclume_omniqora_runs")
-        .select("id,task,status,requested_at,source_version")
+        .select("id,task,status,requested_at,source_version,omniqora_reserved_minor,omniqora_currency")
         .eq("organisation_id", command.organisationId)
         .eq("match_id", command.matchId)
         .order("requested_at", { ascending: false })
@@ -119,6 +119,8 @@ Deno.serve(async (request) => {
             task: row.task,
             status: sameScoreRevision(row.source_version, match.updated_at) ? row.status : "stale",
             requestedAt: row.requested_at,
+            reservedMinor: row.omniqora_reserved_minor,
+            currency: row.omniqora_currency,
           })),
         },
         200,
@@ -176,7 +178,7 @@ Deno.serve(async (request) => {
       const { data: local, error } = await client
         .from("criclume_omniqora_runs")
         .select(
-          "id,organisation_id,match_id,omniqora_run_id,omniqora_tenant_id,task,source_version,status,requested_at",
+          "id,organisation_id,match_id,omniqora_run_id,omniqora_tenant_id,task,source_version,status,requested_at,omniqora_reserved_minor,omniqora_currency",
         )
         .eq("id", command.requestId)
         .eq("organisation_id", command.organisationId)
@@ -222,7 +224,9 @@ Deno.serve(async (request) => {
       });
       const view = safeRunView(upstream);
       if (local.status !== view.status) await setRunStatus(client, local.id, view.status);
-      return json({ requestId: local.id, task: local.task, ...view }, 200, request);
+      return json({ requestId: local.id, task: local.task, ...view,
+        reservedMinor: local.omniqora_reserved_minor,
+        currency: local.omniqora_currency }, 200, request);
     }
 
     if (command.operation === "run.start.budgeted") {
