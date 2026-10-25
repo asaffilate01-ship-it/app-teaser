@@ -34,7 +34,7 @@ export interface IntelligenceRequest {
 export interface IntelligenceConnection {
   connection: "verified";
   entitlementActive: true;
-  modelExecutionReady: false;
+  modelExecutionReady: boolean;
   budgetedAdmissionRequired: true;
 }
 
