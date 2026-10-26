@@ -30,6 +30,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
+import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { usePlatformDashboard } from "@/hooks/use-platform-dashboard";
@@ -70,7 +71,14 @@ export const Route = createFileRoute("/platform")({
 });
 
 type PlatformTab =
-  "overview" | "competitions" | "capture" | "players" | "safety" | "intelligence" | "operations";
+  | "overview"
+  | "competitions"
+  | "capture"
+  | "players"
+  | "safety"
+  | "analysis"
+  | "intelligence"
+  | "operations";
 type RunAction = <T>(action: () => Promise<T>) => Promise<T>;
 
 const tabDefinitions: Array<[PlatformTab, LucideIcon, string]> = [
@@ -79,6 +87,7 @@ const tabDefinitions: Array<[PlatformTab, LucideIcon, string]> = [
   ["capture", Camera, "Capture"],
   ["players", Users, "Players"],
   ["safety", ShieldCheck, "Safeguarding"],
+  ["analysis", BarChart3, "Analysis room"],
   ["intelligence", Sparkles, "AI Intelligence"],
   ["operations", Activity, "Operations"],
 ];
@@ -427,6 +436,15 @@ function OperationalPlatform({
             )}
             {tab === "safety" && (
               <Safeguarding data={dashboard.data} role={membership.role} run={dashboard.run} />
+            )}
+            {tab === "analysis" && (
+              <CricketAnalysisWorkspace
+                key={membership.organisationId}
+                organisationId={membership.organisationId}
+                role={membership.role}
+                matches={dashboard.data.matches}
+                players={dashboard.data.players}
+              />
             )}
             {tab === "intelligence" && (
               <OmniqoraIntelligencePanel

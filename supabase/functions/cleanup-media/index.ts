@@ -30,7 +30,20 @@ Deno.serve(async (request) => {
         .eq("id", asset.id);
       deleted += 1;
     }
-    return json({ examined: expired?.length ?? 0, deleted });
+    const evidence = await client
+      .from("criclume_analysis_files")
+      .select("id,storage_path")
+      .lte("retention_expires_at", new Date().toISOString())
+      .limit(100);
+    if (evidence.error) throw evidence.error;
+    let evidenceDeleted = 0;
+    for (const file of evidence.data) {
+      const removed = await client.storage.from("criclume-evidence").remove([file.storage_path]);
+      if (removed.error) continue;
+      const metadata = await client.from("criclume_analysis_files").delete().eq("id", file.id);
+      if (!metadata.error) evidenceDeleted++;
+    }
+    return json({ examined: expired?.length ?? 0, deleted, evidenceDeleted });
   } catch (error) {
     return errorResponse(error, 400);
   }
