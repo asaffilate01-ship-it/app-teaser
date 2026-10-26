@@ -65,3 +65,7 @@ verify_jwt = false
 
 [functions.criclume-mcp]
 verify_jwt = true
+
+# Authenticated with a provider HMAC, not a browser JWT.
+[functions.video-callback]
+verify_jwt = false

@@ -30,6 +30,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
+import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPanel";
 import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
 import { useCloudSession } from "@/hooks/use-cloud-session";
@@ -38,6 +39,7 @@ import { listOrganisationMemberships, type OrganisationMembership } from "@/lib/
 import {
   createCameraRoom,
   createCheckout,
+  openBillingPortal,
   createCompetition,
   createFixture,
   createGround,
@@ -1607,7 +1609,11 @@ function Operations({
   const checkout = async () => {
     setBusy(true);
     try {
-      const url = await run(() => createCheckout({ organisationId, priceId }));
+      const url = await run(() =>
+        data.subscription?.hasBillingAccount
+          ? openBillingPortal(organisationId)
+          : createCheckout({ organisationId, priceId }),
+      );
       window.location.assign(url);
     } finally {
       setBusy(false);
@@ -1646,6 +1652,9 @@ function Operations({
           </div>
         ))}
       </div>
+      {can(role, "billing.manage") && (
+        <IntegrationReadinessPanel key={organisationId} organisationId={organisationId} />
+      )}
       {can(role, "members.manage") && (
         <Panel
           title="Invite member"
@@ -1710,14 +1719,14 @@ function Operations({
           {can(role, "billing.manage") && (
             <button
               type="button"
-              disabled={!priceId || busy}
+              disabled={(!data.subscription?.hasBillingAccount && !priceId) || busy}
               onClick={() => void checkout()}
               className="action-primary mt-4"
             >
               Manage subscription
             </button>
           )}
-          {!priceId && (
+          {!data.subscription?.hasBillingAccount && !priceId && (
             <p className="mt-3 text-[11px] text-amber-200">
               Set VITE_STRIPE_PRICE_CLUB before enabling checkout.
             </p>

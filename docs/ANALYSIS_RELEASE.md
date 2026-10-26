@@ -23,8 +23,16 @@ MCP clients initialise protocol `2025-06-18`, send `notifications/initialized`, 
 
 Raw uploaded media is not connected to AI inference. Add separately budgeted media admission, consent/revocation rechecks, model-specific image/video token estimates, provider dispatch, saved findings and human result review before activation. General model outputs cannot establish calibrated ball speed or biomechanics. Junior or uncertain media is not authorised for external analysis.
 
-Earlier local-only billing portal, video completion callback and readiness panel changes are not part of this rebuilt release and still need implementation. Existing backup-monitor credentials, live database access and external provider configuration must be verified independently. Merging these PRs is not evidence of production deployment or successful paid calls.
+Billing portal, atomic video completion and administrator readiness checks are restored in the operational-completion follow-up. Existing backup-monitor credentials, live database access and external provider configuration must be verified independently. Merging these PRs is not evidence of production deployment or successful paid calls.
 
 GitHub candidates previously reviewed: [MediaPipe](https://github.com/google-ai-edge/mediapipe), [SAM 2](https://github.com/facebookresearch/sam2), [Supervision](https://github.com/roboflow/supervision). None has been installed or certified as a cricket tracker. Pin code/model versions, review licenses and benchmark representative cricket footage before integration.
 
 Rollback: disable MCP/worker switches and revert frontend source if required; preserve evidence, notes, leases and receipts. Use a reviewed forward migration rather than deleting customer evidence or possibly-spent reservations.
+
+## Operational completion follow-up
+
+Apply the media_completion migration and deploy transcode-video, video-callback, create-billing-portal, create-checkout-session and integration-readiness. Existing billed clubs open Stripe's portal; active/trialing/delinquent subscriptions are blocked from another checkout. Configure the Stripe portal and test the real billing workflow separately. The existing-subscription guard does not serialize two simultaneous first-time checkout requests.
+
+The configured transcoder receives a POST with jobId, assetId, sourceUrl, outputs [{kind,path,uploadUrl}], blurMode and callbackUrl, plus an idempotency-key header equal to jobId. Source links last one hour; output links are signed Supabase upload capabilities. The provider must honour blurMode, upload all required private outputs, then POST exactly {jobId,status: ready|failed}. Send x-video-timestamp (Unix seconds) and x-video-signature (lowercase HMAC-SHA256 of timestamp + dot + exact raw body), using a separately provisioned VIDEO_CALLBACK_SECRET of at least 32 characters. The dispatch never includes that secret. Callback JWT verification is disabled because it authenticates with HMAC. Five-minute timestamp window, idempotent same-state completion, conflict rejection, retention/consent recheck, and output existence validation. No provider output is trusted as a published highlight.
+
+A claimed job is not automatically replayed after timeout or failure; inspect the provider and stored job before recovery. Setup failures after claiming can also leave a processing job requiring operator reconciliation. No automatic retry/reset is implemented. The readiness panel checks schema and configuration presence only; paid AI, backups and provider acceptance are separate evidence.

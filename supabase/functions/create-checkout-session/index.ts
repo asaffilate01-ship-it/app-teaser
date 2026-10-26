@@ -35,11 +35,23 @@ Deno.serve(async (request) => {
       "club_admin",
     ]);
 
-    const { data: subscription } = await client
+    const { data: subscription, error: subscriptionError } = await client
       .from("subscriptions")
-      .select("stripe_customer_id")
+      .select("stripe_customer_id,status")
       .eq("organisation_id", body.organisationId)
       .maybeSingle();
+    if (subscriptionError) throw subscriptionError;
+    if (
+      subscription &&
+      ["active", "trialing", "past_due", "unpaid", "incomplete", "paused"].includes(
+        subscription.status,
+      )
+    )
+      return json(
+        { error: "Use the billing portal to manage this existing subscription." },
+        409,
+        request,
+      );
     const parameters = new URLSearchParams({
       mode: "subscription",
       "line_items[0][price]": configuredPriceId,
@@ -57,6 +69,8 @@ Deno.serve(async (request) => {
 
     const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
       method: "POST",
+      redirect: "error",
+      signal: AbortSignal.timeout(10000),
       headers: {
         authorization: `Bearer ${stripeKey}`,
         "content-type": "application/x-www-form-urlencoded",

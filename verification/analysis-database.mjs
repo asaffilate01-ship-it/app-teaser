@@ -131,7 +131,77 @@ assert.equal(
   ).rows[0].allowed,
   false,
 );
+// Atomic media completion requires real private output objects; no provider is called.
+const room = "a6000000-0000-4000-8000-000000000001",
+  device = "a7000000-0000-4000-8000-000000000001",
+  asset = "a8000000-0000-4000-8000-000000000001";
+await db.query("insert into public.camera_rooms(id,match_id,opened_by) values($1,$2,$3)", [
+  room,
+  match,
+  a,
+]);
+await db.query(
+  "insert into public.camera_devices(id,room_id,user_id,device_key,label,angle) values($1,$2,$3,'fixture','Fixture','pavilion_end')",
+  [device, room, a],
+);
+await db.query(
+  "insert into public.video_assets(id,organisation_id,room_id,device_id,storage_path,started_at,status,recording_consent,retention_expires_at,created_by) values($1,$2,$3,$4,'fixture-source.webm',now(),'uploaded','granted',now()+interval '1 day',$5)",
+  [asset, org, room, device, a],
+);
+await db.query(
+  "insert into storage.objects(bucket_id,name) values('match-video','fixture-source.webm')",
+);
+assert.equal(
+  (
+    await db.query(
+      "select has_function_privilege('authenticated','public.complete_video_processing(uuid,text)','execute') as allowed",
+    )
+  ).rows[0].allowed,
+  false,
+);
+await assert.rejects(
+  () => db.query("select public.claim_video_processing($1,$2)", [asset, b]),
+  /permission denied/,
+);
+const job = (await db.query("select public.claim_video_processing($1,$2) as j", [asset, a])).rows[0]
+  .j;
+const repeat = (await db.query("select public.claim_video_processing($1,$2) as j", [asset, a]))
+  .rows[0].j;
+assert.equal(job.jobId, repeat.jobId);
+assert.equal(repeat.reused, true);
+await assert.rejects(
+  () => db.query("select public.complete_video_processing($1,'ready')", [job.jobId]),
+  /output missing/,
+);
+assert.equal(
+  (await db.query("select status from public.video_assets where id=$1", [asset])).rows[0].status,
+  "processing",
+);
+for (const path of [job.prefix + "proxy.mp4", job.prefix + "thumbnail.jpg"])
+  await db.query("insert into storage.objects(bucket_id,name) values('match-video',$1)", [path]);
+assert.equal(
+  (await db.query("select public.complete_video_processing($1,'ready') as r", [job.jobId])).rows[0]
+    .r.status,
+  "ready",
+);
+assert.equal(
+  (await db.query("select public.complete_video_processing($1,'ready') as r", [job.jobId])).rows[0]
+    .r.reused,
+  true,
+);
+await assert.rejects(
+  () => db.query("select public.complete_video_processing($1,'failed')", [job.jobId]),
+  /Conflicting completion/,
+);
+assert.equal(
+  (
+    await db.query("select count(*)::integer as n from public.video_variants where asset_id=$1", [
+      asset,
+    ])
+  ).rows[0].n,
+  2,
+);
 await db.close();
 console.log(
-  "All migrations applied; coaching writes, cross-club isolation, object access, expiry and anonymous denial passed.",
+  "All migrations applied; coaching writes, cross-club isolation, object access, expiry, anonymous denial and atomic media completion passed.",
 );
