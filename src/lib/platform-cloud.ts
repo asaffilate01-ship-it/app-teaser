@@ -134,6 +134,7 @@ export interface MemberRecord {
 }
 
 export interface SubscriptionRecord {
+  hasBillingAccount: boolean;
   plan: string;
   status: string;
   currentPeriodEnd: string | null;
@@ -390,7 +391,7 @@ export async function loadOrganisationDashboard(
     ? await maybeRow<Record<string, unknown>>(
         client
           .from("subscriptions")
-          .select("plan,status,current_period_end,cancel_at_period_end")
+          .select("plan,status,current_period_end,cancel_at_period_end,stripe_customer_id")
           .eq("organisation_id", organisationId)
           .maybeSingle(),
       )
@@ -584,6 +585,7 @@ export async function loadOrganisationDashboard(
     },
     subscription: subscription
       ? {
+          hasBillingAccount: Boolean(subscription["stripe_customer_id"]),
           plan: String(subscription["plan"]),
           status: String(subscription["status"]),
           currentPeriodEnd: subscription["current_period_end"]
@@ -885,4 +887,15 @@ export async function createCheckout(input: {
   });
   if (!result.url) throw new Error("Stripe did not return a checkout URL.");
   return result.url;
+}
+
+export async function openBillingPortal(organisationId: string) {
+  const r = await invokePlatformFunction<{ url: string }>("create-billing-portal", {
+    organisationId,
+    returnUrl: window.location.origin + "/platform",
+  });
+  const url = new URL(r.url);
+  if (url.protocol !== "https:" || url.hostname !== "billing.stripe.com")
+    throw new Error("Invalid billing portal URL.");
+  return url.toString();
 }

@@ -223,16 +223,22 @@ function MatchCamera() {
         onProgress: (uploaded, total) =>
           setUploadProgress(total ? Math.round((uploaded / total) * 100) : 0),
       });
-      await getCloudClient()
+      const { error: saveError } = await getCloudClient()
         .from("video_assets")
         .update({ storage_path: path, status: "uploaded" })
         .eq("id", asset.id);
+      if (saveError) throw saveError;
       setUploadProgress(100);
-      setMessage("Upload verified. The cloud processing job has been requested.");
+      setMessage("Upload saved. Requesting processing…");
       try {
-        await invokePlatformFunction("transcode-video", { assetId: asset.id });
+        const job = await invokePlatformFunction<{ status: string }>("transcode-video", {
+          assetId: asset.id,
+        });
+        setMessage(`Upload saved. Processing status: ${job.status}.`);
       } catch {
-        /* source remains safely uploaded */
+        setMessage(
+          "Upload saved. Processing is unavailable; check the existing job before retrying.",
+        );
       }
     } catch (error) {
       setMessage(
