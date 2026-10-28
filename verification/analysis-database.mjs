@@ -439,6 +439,59 @@ assert.equal(
   ).rows[0].n,
   3,
 );
+
+// Creation retries remain scoped to the authenticated creator and original payload.
+const creationKey = "a9000000-0000-4000-8000-000000000001";
+const createOnce = (u, name = "Retry Club", key = creationKey) =>
+  asUser(u, () => db.query("select public.create_organisation_once($1,$2,'club') id", [key, name]));
+const created = (await createOnce(a)).rows[0].id;
+assert.equal((await createOnce(a)).rows[0].id, created);
+assert.equal(
+  (
+    await db.query(
+      "select count(*)::int n from public.organisations where created_by=$1 and creation_request_id=$2",
+      [a, creationKey],
+    )
+  ).rows[0].n,
+  1,
+);
+assert.equal(
+  (
+    await db.query(
+      "select role::text from public.organisation_members where organisation_id=$1 and user_id=$2",
+      [created, a],
+    )
+  ).rows[0].role,
+  "owner",
+);
+await assert.rejects(() => createOnce(a, "Changed Club"), /different organisation details/);
+assert.notEqual((await createOnce(b)).rows[0].id, created);
+await assert.rejects(() => createOnce(a, " "), /2 to 120/);
+await assert.rejects(() => createOnce(a, "Retry Club", null), /request ID/);
+await assert.rejects(
+  () =>
+    asUser(a, () =>
+      db.query("update public.organisations set creation_request_id=null where id=$1", [created]),
+    ),
+  /cannot be changed/,
+);
+await db.query(
+  "update public.organisation_members set status='suspended' where organisation_id=$1 and user_id=$2",
+  [created, a],
+);
+await assert.rejects(() => createOnce(a), /access is unavailable/);
+await db.exec("begin;set local role anon");
+try {
+  await assert.rejects(
+    () => db.query("select public.create_organisation_once($1,'Anonymous','club')", [creationKey]),
+    /permission denied/,
+  );
+} finally {
+  await db.exec("rollback");
+}
+console.log(
+  "Organisation creation replay, payload conflicts, owner bootstrap, identity immutability, cross-user isolation and revoked/anonymous access passed.",
+);
 await db.close();
 console.log(
   "All migrations applied; structured annotations, source scope/expiry/deletion, append-only coaching writes, cross-club isolation, object access, expiry, anonymous denial and atomic media completion passed.",

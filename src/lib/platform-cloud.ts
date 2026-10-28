@@ -206,21 +206,16 @@ export async function createOrganisation(input: {
   name: string;
   kind: OrganisationRecord["kind"];
   user: User;
+  requestId: string;
 }): Promise<string> {
-  const suffix = crypto.randomUUID().slice(0, 6);
-  const baseSlug = slugify(input.name) || "cricket-organisation";
-  const { data, error } = await getCloudClient()
-    .from("organisations")
-    .insert({
-      name: input.name.trim(),
-      kind: input.kind,
-      slug: `${baseSlug}-${suffix}`,
-      created_by: input.user.id,
-    })
-    .select("id")
-    .single();
+  const { data, error } = await getCloudClient().rpc("create_organisation_once", {
+    p_request_id: input.requestId,
+    p_name: input.name.trim(),
+    p_kind: input.kind,
+  });
   if (error) throw error;
-  return data.id as string;
+  if (typeof data !== "string") throw new Error("Organisation creation did not return an ID.");
+  return data;
 }
 
 export async function loadOrganisationDashboard(
