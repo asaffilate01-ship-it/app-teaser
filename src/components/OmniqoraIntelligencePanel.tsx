@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { LoaderCircle, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
 import { buildCricketPreview } from "@/lib/cricket-insights";
 import type { MatchRecord } from "@/lib/platform-cloud";
@@ -30,7 +30,42 @@ export function OmniqoraIntelligencePanel({
   role: string;
   matches: MatchRecord[];
 }) {
-  const [matchId, setMatchId] = useState(matches[0]?.id ?? "");
+  const [selection, setSelection] = useState(matches[0]?.id ?? "");
+  const matchId = matches.some((match) => match.id === selection)
+    ? selection
+    : (matches[0]?.id ?? "");
+  return (
+    <ScopedIntelligencePanel
+      key={`${organisationId}:${role}:${matchId}`}
+      organisationId={organisationId}
+      role={role}
+      matches={matches}
+      matchId={matchId}
+      setMatchId={setSelection}
+    />
+  );
+}
+
+function ScopedIntelligencePanel({
+  organisationId,
+  role,
+  matches,
+  matchId,
+  setMatchId,
+}: {
+  organisationId: string;
+  role: string;
+  matches: MatchRecord[];
+  matchId: string;
+  setMatchId: (id: string) => void;
+}) {
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const [task, setTask] = useState<IntelligenceTask>("match_insights");
   const [history, setHistory] = useState<IntelligenceRequest[]>([]);
   const [historyWarning, setHistoryWarning] = useState("");
@@ -44,11 +79,6 @@ export function OmniqoraIntelligencePanel({
   const canStartPaid = connection?.modelExecutionReady === true;
   const selectedMatch = matches.find((item) => item.id === matchId);
   const preview = selectedMatch ? buildCricketPreview(selectedMatch, task) : null;
-
-  useEffect(() => {
-    if (matches.some((entry) => entry.id === matchId)) return;
-    setMatchId(matches[0]?.id ?? "");
-  }, [matchId, matches]);
 
   useEffect(() => {
     let active = true;
@@ -77,6 +107,23 @@ export function OmniqoraIntelligencePanel({
     };
   }, [organisationId, matchId, mayRequest]);
 
+  const reloadHistory = async () => {
+    if (!matchId || !mayRequest) return;
+    setLoading(true);
+    setHistoryWarning("");
+    try {
+      const result = await listIntelligence({ organisationId, matchId });
+      if (mounted.current) setHistory(result.requests);
+    } catch {
+      if (mounted.current)
+        setHistoryWarning(
+          "History could not be refreshed. Any confirmed run below is preserved. Retry history before starting another run.",
+        );
+    } finally {
+      if (mounted.current) setLoading(false);
+    }
+  };
+
   const verify = async () => {
     if (!matchId || !mayRequest || checking) return;
     setChecking(true);
@@ -84,18 +131,19 @@ export function OmniqoraIntelligencePanel({
     setConnection(null);
     try {
       const response = await verifyIntelligenceConnection({ organisationId, matchId });
-      setConnection(response);
+      if (mounted.current) setConnection(response);
     } catch (error) {
+      if (!mounted.current) return;
       setMessage(
         error instanceof Error ? error.message : "Omniqora connection is not yet verified.",
       );
     } finally {
-      setChecking(false);
+      if (mounted.current) setChecking(false);
     }
   };
 
   const requestBudgeted = async () => {
-    if (!matchId || !mayRequest || !canStartPaid || busy) return;
+    if (!matchId || !mayRequest || !canStartPaid || busy || loading) return;
     setBusy(true);
     setMessage("");
     setReport(null);
@@ -105,33 +153,35 @@ export function OmniqoraIntelligencePanel({
         matchId,
         task,
       });
+      if (!mounted.current) return;
       setReport({ ...receipt, task });
-      const historyResult = await listIntelligence({ organisationId, matchId });
-      setHistory(historyResult.requests);
+      await reloadHistory();
     } catch (error) {
+      if (!mounted.current) return;
       setMessage(
         error instanceof Error
           ? error.message
           : "The budgeted request could not be confirmed. Do not retry automatically.",
       );
     } finally {
-      setBusy(false);
+      if (mounted.current) setBusy(false);
     }
   };
 
   const refresh = async (requestId: string) => {
-    if (!matchId || busy) return;
+    if (!matchId || !mayRequest || busy || loading) return;
     setBusy(true);
     setMessage("");
     try {
       const result = await readIntelligence({ organisationId, matchId, requestId });
+      if (!mounted.current) return;
       setReport(result);
-      const updated = await listIntelligence({ organisationId, matchId });
-      setHistory(updated.requests);
+      await reloadHistory();
     } catch (error) {
+      if (!mounted.current) return;
       setMessage(error instanceof Error ? error.message : "Could not refresh this advisory.");
     } finally {
-      setBusy(false);
+      if (mounted.current) setBusy(false);
     }
   };
 
@@ -249,13 +299,14 @@ export function OmniqoraIntelligencePanel({
                   role="status"
                   className="rounded-xl border border-emerald-300/20 p-3 text-xs text-emerald-100"
                 >
-                  Scoped Omniqora credential and entitlement verified. Paid model execution remains
-                  disabled until the budgeted Agent Factory worker is authorised.
+                  {canStartPaid
+                    ? "Scoped access and budgeted worker readiness verified. Any run remains subject to server-side admission and budget checks."
+                    : "Scoped Omniqora credential and entitlement verified. Paid execution remains disabled until the budgeted worker is ready."}
                 </p>
               )}
               <button
                 type="button"
-                disabled={!canStartPaid || !matchId || busy}
+                disabled={!canStartPaid || !matchId || busy || loading}
                 onClick={() => void requestBudgeted()}
                 title={
                   canStartPaid
@@ -285,17 +336,28 @@ export function OmniqoraIntelligencePanel({
             <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-5">
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-base font-bold">Analysis and agent history</h3>
-                {loading && <LoaderCircle className="size-4 animate-spin" />}
+                <button
+                  type="button"
+                  disabled={loading || busy || !matchId}
+                  onClick={() => void reloadHistory()}
+                  className="min-h-11 rounded-lg border border-white/15 px-3 text-xs disabled:opacity-50"
+                >
+                  {loading ? "Loading history…" : "Refresh history"}
+                </button>
               </div>
-              {historyWarning && <p className="text-xs text-amber-200">{historyWarning}</p>}
-              {history.length === 0 && !historyWarning && (
+              {historyWarning && (
+                <p role="alert" className="text-xs text-amber-200">
+                  {historyWarning}
+                </p>
+              )}
+              {history.length === 0 && !historyWarning && !loading && Boolean(matchId) && (
                 <p className="text-sm text-slate-400">No previous advisory runs for this match.</p>
               )}
               {history.map((item) => (
                 <button
                   type="button"
                   key={item.requestId}
-                  disabled={busy}
+                  disabled={busy || loading}
                   onClick={() => void refresh(item.requestId)}
                   className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 p-3 text-left text-xs hover:border-fuchsia-300/40 disabled:opacity-50"
                 >
@@ -317,6 +379,17 @@ export function OmniqoraIntelligencePanel({
               ))}
               {report && (
                 <div className="space-y-3 border-t border-white/10 pt-4 text-sm">
+                  <p className="break-all text-xs text-slate-400">
+                    Request reference: {report.requestId}
+                  </p>
+                  <button
+                    type="button"
+                    className="min-h-11 rounded-lg border border-white/15 px-3 text-xs disabled:opacity-50"
+                    disabled={busy || loading}
+                    onClick={() => void refresh(report.requestId)}
+                  >
+                    Refresh this run
+                  </button>
                   <p className="text-xs font-semibold uppercase text-fuchsia-300">
                     {report.status.replaceAll("_", " ")} · Human review required
                   </p>
