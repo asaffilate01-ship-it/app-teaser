@@ -276,6 +276,67 @@ assert.equal(
   ).rows[0].n,
   2,
 );
+// Exercise both CASE branches through the actual match-creation RPC.
+const away = "a2000000-0000-4000-8000-000000000003";
+await db.query(
+  "insert into public.teams(id,organisation_id,name,short_name) values($1,$2,'Second fixture team','S')",
+  [away, org],
+);
+await db.query(
+  "update public.organisation_members set role='owner' where organisation_id=$1 and user_id=$2",
+  [org, a],
+);
+for (const team of [org, away]) {
+  for (let i = 0; i < 2; i++) {
+    const player = (
+      await db.query(
+        "insert into public.players(organisation_id,display_name) values($1,'Fixture player') returning id",
+        [org],
+      )
+    ).rows[0].id;
+    await db.query("insert into public.team_players(team_id,player_id) values($1,$2)", [
+      team,
+      player,
+    ]);
+  }
+}
+for (const scheduled of [null, "2026-12-01T10:00:00Z"]) {
+  const result = (
+    await asUser(a, () =>
+      db.query(
+        "select public.create_match_workspace($1,$1,$2,null,null,$3,'private',$1,20,1,6,'{}',null) as result",
+        [org, away, scheduled],
+      ),
+    )
+  ).rows[0].result;
+  const created = (
+    await db.query("select status from public.matches where id=$1", [result.matchId])
+  ).rows[0];
+  assert.equal(created.status, scheduled ? "scheduled" : "draft");
+  assert.equal(
+    (
+      await db.query("select count(*)::int as n from public.match_squads where match_id=$1", [
+        result.matchId,
+      ])
+    ).rows[0].n,
+    4,
+  );
+  assert.equal(
+    (await db.query("select match_id from public.innings where id=$1", [result.inningsId])).rows[0]
+      .match_id,
+    result.matchId,
+  );
+}
+await assert.rejects(
+  () =>
+    asUser(b, () =>
+      db.query(
+        "select public.create_match_workspace($1,$1,$2,null,null,null,'private',$1,20,1,6,'{}',null)",
+        [org, away],
+      ),
+    ),
+  (e) => e.code === "42501",
+);
 await db.close();
 console.log(
   "All migrations applied; structured annotations, source scope/expiry/deletion, append-only coaching writes, cross-club isolation, object access, expiry, anonymous denial and atomic media completion passed.",

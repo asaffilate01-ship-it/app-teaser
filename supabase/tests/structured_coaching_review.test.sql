@@ -1,10 +1,10 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(8);
-select has_column('public','criclume_analysis_notes','shot_type');
-select has_column('public','criclume_analysis_notes','bowling_line');
-select has_column('public','criclume_analysis_notes','bowling_length');
-select has_column('public','criclume_analysis_notes','fielding_action');
+select has_column('public','criclume_analysis_notes','shot_type','shot_type is available');
+select has_column('public','criclume_analysis_notes','bowling_line','bowling_line is available');
+select has_column('public','criclume_analysis_notes','bowling_length','bowling_length is available');
+select has_column('public','criclume_analysis_notes','fielding_action','fielding_action is available');
 select ok((select relrowsecurity from pg_class where oid='public.criclume_analysis_notes'::regclass),'notes remain protected by RLS');
 select ok(not has_table_privilege('anon','public.criclume_analysis_notes','select'),'no public coaching notes');
 select ok(not has_table_privilege('authenticated','public.criclume_analysis_notes','update'),'coaching history is append only');

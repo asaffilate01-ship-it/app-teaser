@@ -21,6 +21,8 @@ Existing coach-role, author, tenant, match and delivery policies continue to app
 
 No provider credentials, live migrations, publication or paid inference were used in this release. OpenAI/Claude/Gemini aggregate routing through Omniqora is unchanged. Raw photo/video inference still requires the separate consent, provider and budget workflow.
 
+The follow-up migration `20261028092521_match_workspace_status_cast.sql` fixes an existing match-creation RPC error: a CASE expression returned text instead of the `match_status` enum. Draft and scheduled match creation, squad copying and initial innings creation are covered by regression tests, including cross-club denial.
+
 ## Validation
 
 - `npm run check`: TypeScript, 45 unit tests, lint and production build.
