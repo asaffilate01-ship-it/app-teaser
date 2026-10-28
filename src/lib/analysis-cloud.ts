@@ -1,4 +1,9 @@
 import {
+  evidencePageRequest,
+  evidencePageSize,
+  type EvidenceFilters,
+} from "@/lib/evidence-library";
+import {
   validateCoaching,
   emptyCoachingFields,
   type CoachingFields,
@@ -24,7 +29,7 @@ export type AnalysisNote = CoachingAnnotation & {
   evidence_file_id: string | null;
   evidence_time_seconds: number | null;
 };
-export async function loadAnalysis(organisationId: string, matchId: string) {
+export async function loadAnalysis(organisationId: string, matchId: string, selectedSourceId = "") {
   const db = getCloudClient();
   const m = await db
     .from("matches")
@@ -80,8 +85,15 @@ export async function loadAnalysis(organisationId: string, matchId: string) {
     .select("id,kind,storage_path,label,includes_junior,created_by")
     .eq("organisation_id", organisationId)
     .eq("match_id", matchId)
+    .eq("analysis_consent", true)
+    .gt("retention_expires_at", new Date().toISOString())
     .order("created_at", { ascending: false })
+    .order("id")
     .limit(100);
+  if (selectedSourceId && !files.error && !files.data?.some((f) => f.id === selectedSourceId)) {
+    const selected = await readEvidenceFile(organisationId, matchId, selectedSourceId);
+    if (selected) files.data?.push(selected);
+  }
   const notes: AnalysisNote[] = [];
   let notesAvailable = true;
   for (let offset = 0; ; offset += 500) {
@@ -220,4 +232,50 @@ export async function saveNote(
     created_by: user.id,
   });
   if (r.error) throw r.error;
+}
+
+const evidenceColumns = "id,kind,storage_path,label,includes_junior,created_by";
+export async function listEvidence(
+  org: string,
+  match: string,
+  filters: EvidenceFilters,
+  page: number,
+) {
+  const bounds = evidencePageRequest(filters, page);
+  let query = getCloudClient()
+    .from("criclume_analysis_files")
+    .select(evidenceColumns)
+    .eq("organisation_id", org)
+    .eq("match_id", match)
+    .eq("analysis_consent", true)
+    .gt("retention_expires_at", new Date().toISOString());
+  if (filters.kind !== "all") query = query.eq("kind", filters.kind);
+  if (filters.people !== "all") query = query.eq("includes_junior", filters.people === "junior");
+  if (bounds.pattern) query = query.ilike("label", bounds.pattern);
+  const result = await query
+    .order("created_at", { ascending: false })
+    .order("id")
+    .range(bounds.from, bounds.to);
+  if (result.error) throw result.error;
+  return {
+    files: result.data.slice(0, evidencePageSize) as EvidenceFile[],
+    hasMore: result.data.length > evidencePageSize,
+  };
+}
+export async function readEvidenceFile(
+  org: string,
+  match: string,
+  id: string,
+): Promise<EvidenceFile | null> {
+  const result = await getCloudClient()
+    .from("criclume_analysis_files")
+    .select(evidenceColumns)
+    .eq("id", id)
+    .eq("organisation_id", org)
+    .eq("match_id", match)
+    .eq("analysis_consent", true)
+    .gt("retention_expires_at", new Date().toISOString())
+    .maybeSingle();
+  if (result.error) throw result.error;
+  return result.data as EvidenceFile | null;
 }
