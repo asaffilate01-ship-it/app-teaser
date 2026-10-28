@@ -1,3 +1,4 @@
+import { reviewReportHtml } from "@/lib/review-report";
 import { EvidenceLibrary } from "@/components/EvidenceLibrary";
 import {
   coachingKeys,
@@ -139,7 +140,7 @@ function MatchAnalysis({
       .then((r) => {
         if (active) {
           setData(r);
-          setRefreshedAt(new Date().toLocaleTimeString());
+          setRefreshedAt(new Date().toISOString());
           setPreview(null);
           setClipSelection(null);
           setPage(0);
@@ -268,6 +269,30 @@ function MatchAnalysis({
     a.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
+  const exportReport = () => {
+    if (!data || !refreshedAt || !data.workspaceAvailable || loading) return;
+    const html = reviewReportHtml({
+      organisationId: org,
+      matchId: match,
+      loadedAt: refreshedAt,
+      generatedAt: new Date().toISOString(),
+      filters,
+      history,
+      search,
+      deliveries: data.deliveries,
+      notes: data.notes,
+      mediaIds: data.mediaIds,
+    });
+    const url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `criclume-${filters.discipline}-review.html`;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setNotice(
+      "Review report downloaded. It includes saved private notes; open it in a browser to print or save as PDF.",
+    );
+  };
   if (!data)
     return (
       <section className="workspace-empty" aria-busy={loading} aria-live="polite">
@@ -294,7 +319,7 @@ function MatchAnalysis({
         <p className="text-xs text-slate-400" role="status">
           {loading
             ? "Refreshing match evidence…"
-            : `Evidence loaded at ${refreshedAt ?? "—"}. Refresh after scoring changes.`}
+            : `Evidence loaded at ${refreshedAt ? new Date(refreshedAt).toLocaleTimeString() : "—"}. Refresh after scoring changes.`}
         </p>
         <button
           className={field}
@@ -868,6 +893,13 @@ function MatchAnalysis({
           </button>
           <button className={field} disabled={!visibleNotes.length} onClick={() => exportCsv(true)}>
             Export observations CSV
+          </button>
+          <button
+            className={field}
+            disabled={busy || loading || !data.workspaceAvailable}
+            onClick={exportReport}
+          >
+            Download review report
           </button>
         </div>
         {data.workspaceAvailable && !visibleNotes.length && (

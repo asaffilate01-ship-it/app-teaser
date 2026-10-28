@@ -51,3 +51,13 @@ Submit **Search evidence** to combine a literal filename substring with photo/vi
 This uses offset pagination, not an immutable snapshot: simultaneous uploads/removals can shift pages. No signed URLs are prefetched or exported. Production media playback and live deployment are not exercised by the synthetic browser tests.
 
 Validation for this phase: 49 unit tests, TypeScript, lint, production build; PostgreSQL fixtures with 125 files verify access beyond the old cap, combined filters and cross-club denial. Chromium at 390px/1440px covers pagination/end-of-list, search/type/age filters, error/retry/reset, selecting and refreshing older sources, direct note-source playback URL and overflow/runtime checks.
+
+## Downloadable coaching report
+
+**Download review report** produces a standalone HTML file from the loaded analysis data and current review filters. It records both evidence-load and export times in UTC, shows the current delivery totals, lists filter criteria, and includes saved matching observations with delivery/source references and recorded video positions. Unsaved drafts are excluded. Open the download in a browser and use Print / Save as PDF.
+
+The document contains up to 250 delivery rows and 100 observations, with explicit shown/total counts. Aggregate totals cover all matching current deliveries; existing CSV exports remain the complete matching row exports. Historical observations are labelled and do not affect score totals. The report intentionally does not add player names from the roster. Coach-authored text may still contain personal information, so downloads should remain within authorised coaching recipients.
+
+All inserted text is HTML-escaped. The generated file has no scripts, embedded images/video, automatically generated media access URLs or external styles/fonts, and a restrictive content security policy. It is generated locally without a provider request, database write or new service requirement. A downloaded copy is a static private document: it does not refresh and cannot be revoked through storage permissions.
+
+Validation for the report phase: 53 unit tests, TypeScript, lint and production build; browser download checks confirm saved-only notes and source references without media URLs. Desktop/mobile HTML and A4 browser print output are inspected. Tests cover current versus historical statistics, filter scope, hostile text escaping, empty reports and labelled excerpt limits.
