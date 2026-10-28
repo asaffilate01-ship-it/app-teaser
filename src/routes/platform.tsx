@@ -1,3 +1,8 @@
+import {
+  readOrganisationDraft,
+  storeOrganisationDraft,
+  type OrganisationDraft,
+} from "@/lib/onboarding-request";
 import { SectionNavigation } from "@/components/SectionNavigation";
 import { readSection, platformSections } from "@/lib/navigation";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -206,6 +211,7 @@ export function Platform() {
   if (memberships.length === 0)
     return (
       <OrganisationOnboarding
+        key={session.user.id}
         user={session.user}
         onCreated={() => {
           createdForUser.current = session.user.id;
@@ -349,24 +355,49 @@ function OrganisationOnboarding({
   user: { id: string };
   onCreated: () => Promise<void>;
 }) {
-  const [name, setName] = useState("");
-  const [kind, setKind] = useState<"club" | "league" | "school" | "academy">("club");
+  const [draft, setDraft] = useState<OrganisationDraft | null>(() => {
+    try {
+      return readOrganisationDraft(window.localStorage, user.id);
+    } catch {
+      return null;
+    }
+  });
+  const [persistent, setPersistent] = useState(true);
+  const submitting = useRef(false);
+  const [name, setName] = useState(draft?.name ?? "");
+  const [kind, setKind] = useState<"club" | "league" | "school" | "academy">(draft?.kind ?? "club");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (submitting.current) return;
+    const cleanName = name.trim();
+    if (cleanName.length < 2 || cleanName.length > 120) {
+      setError("Enter an organisation name of 2 to 120 characters.");
+      return;
+    }
+    const request = draft ?? { requestId: crypto.randomUUID(), name: cleanName, kind };
+    setDraft(request);
+    try {
+      setPersistent(storeOrganisationDraft(window.localStorage, user.id, request));
+    } catch {
+      setPersistent(false);
+    }
+    submitting.current = true;
     setBusy(true);
     setError(null);
     try {
       await createOrganisation({
-        name,
-        kind,
+        name: request.name,
+        kind: request.kind,
+        requestId: request.requestId,
         user: user as Parameters<typeof createOrganisation>[0]["user"],
       });
       await onCreated();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Organisation could not be created.");
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   };
@@ -391,6 +422,8 @@ function OrganisationOnboarding({
               <input
                 required
                 minLength={2}
+                maxLength={120}
+                disabled={busy || Boolean(draft)}
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 className="scorer-input"
@@ -399,6 +432,7 @@ function OrganisationOnboarding({
             </Field>
             <Field label="Organisation type">
               <select
+                disabled={busy || Boolean(draft)}
                 value={kind}
                 onChange={(event) => setKind(event.target.value as typeof kind)}
                 className="scorer-input"
@@ -410,12 +444,25 @@ function OrganisationOnboarding({
               </select>
             </Field>
           </div>
+          {draft && (
+            <p role="status" className="mt-4 text-sm text-amber-200">
+              These details are kept for a safe retry. Continue to recover the same organisation if
+              the first response was interrupted.
+            </p>
+          )}
+          {!persistent && (
+            <p role="status" className="mt-3 text-sm text-amber-200">
+              Browser storage is unavailable. Keep this page open while retrying; recovery across
+              reloads is unavailable.
+            </p>
+          )}
           {error && <ErrorNotice message={error} />}
           <button
             disabled={busy}
             className="mt-5 flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-400 px-7 text-sm font-extrabold disabled:opacity-50"
           >
-            {busy && <LoaderCircle className="size-4 animate-spin" />} Create organisation
+            {busy && <LoaderCircle className="size-4 animate-spin" />}{" "}
+            {draft ? "Continue organisation setup" : "Create organisation"}
           </button>
         </form>
       </main>

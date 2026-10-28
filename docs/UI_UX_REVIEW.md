@@ -61,3 +61,13 @@ Membership lookup failures no longer fall through to the create-organisation for
 This is client-side recovery, not server-side creation idempotency: an ambiguous network failure during the create request itself, or a full page reload, still requires server-side idempotency/reconciliation work. No live database or provider changes are included.
 
 Validated with `npm run check` (56 tests, typecheck, lint and production build) and real-component Chromium using synthetic authentication/membership responses: initial failure, retry to confirmed empty account, confirmed creation followed by empty membership, repeated access retry without another creation, delayed old-account rejection and mobile/desktop overflow checks. These checks do not establish live authentication or provisioning readiness.
+
+## Idempotent organisation setup
+
+The setup form now keeps a creator-scoped request ID and original name/type for retries. Pending details are restored from browser storage after reload; blocked storage falls back to the current page session with an explicit warning. Details remain locked once submitted so an ambiguous result cannot silently turn a retry into a different creation request.
+
+`create_organisation_once` is a security-invoker database function. It uses the authenticated user, existing INSERT/SELECT policies and owner-membership trigger. A unique creator/request constraint serialises retries; a replay returns the existing accessible organisation only when name/type match. Creation identity cannot be changed after insertion. Inserts finish before the subsequent SELECT, fixing the previous immediate-return path that could hit SELECT RLS before owner membership existed. Anonymous execution is revoked.
+
+Validation: 58 unit tests, typecheck, lint and production build; all migrations and embedded PostgreSQL tests for replay, changed payload rejection, creator isolation, immutable identity, automatic owner membership and revoked/anonymous access; browser simulation of a lost response, reload, identical request ID and access-only retry. Real PostgreSQL CI also checks the function's invoker mode and execution grants.
+
+Release requires the new migration before this frontend. No live migration was applied. The guarantee covers retries with the same ID while the organisation exists; separate browser profiles/tabs that independently begin setup, cleared browser storage, deleted organisations and older clients using direct inserts are not globally deduplicated. This replaces the earlier ambiguous-timeout gap for the supported same-request flow; it is not a claim of global name-based deduplication.
