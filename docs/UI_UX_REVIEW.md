@@ -45,3 +45,11 @@ Validated the real components with synthetic fixtures at 375px, 844px and 1440px
 3. Human review lifecycle: correction/version history and reviewed AI results. Structured manual observations, archive search and downloadable reports are already implemented.
 4. Broader form accessibility: field-linked validation summaries and inline errors across onboarding/scoring flows; test with assistive technology.
 5. Publication: hosted asset checks and operational/backup verification before a live release.
+
+## Coaching form validation follow-up
+
+Applied UI UX Pro Max's `error summary validation` guidance to the coaching observation form. Save is now an actual form submission with a focused, linked error summary and inline errors connected through `aria-describedby`/`aria-invalid`. Coaches can discover why short/blank notes, invalid video offsets and stale source/delivery selections cannot be saved. Character guidance stays visible before submission.
+
+A failed server save retains all draft fields and offers retry in the same form. Fields are disabled during requests to prevent edits from being cleared by completion of an earlier save. Existing database permissions remain authoritative; this change does not weaken access checks or introduce provider calls.
+
+Validation: boundary tests for meaningful note lengths, video offsets and stale associations; real-component Chromium checks for summary focus, field links, corrected errors, draft retention after a simulated network failure, successful retry and no overflow at 375/844/1440px. Broader onboarding/scoring validation, assistive-technology review and live-service acceptance remain pending.
