@@ -1,3 +1,4 @@
+import { EvidenceLibrary } from "@/components/EvidenceLibrary";
 import {
   coachingKeys,
   coachingOptions,
@@ -10,7 +11,7 @@ import {
   coachingCsv,
   type CoachingFields,
 } from "@/lib/coaching";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import {
   filterDeliveries,
   summarizeDeliveries,
@@ -20,6 +21,7 @@ import {
 } from "@/lib/analysis";
 import {
   loadAnalysis,
+  readEvidenceFile,
   uploadEvidence,
   evidenceUrl,
   removeEvidence,
@@ -124,6 +126,8 @@ function MatchAnalysis({
   const [annotations, setAnnotations] = useState<CoachingFields>({ ...emptyCoachingFields });
   const [source, setSource] = useState("");
   const [sourceTime, setSourceTime] = useState("");
+  const selectedSourceRef = useRef(source);
+  selectedSourceRef.current = source;
   const [notePage, setNotePage] = useState(0);
   const [history, setHistory] = useState<ObservationHistory>("current");
   const [refreshedAt, setRefreshedAt] = useState<string | null>(null);
@@ -131,7 +135,7 @@ function MatchAnalysis({
     let active = true;
     setLoading(true);
     setError("");
-    void loadAnalysis(org, match)
+    void loadAnalysis(org, match, selectedSourceRef.current)
       .then((r) => {
         if (active) {
           setData(r);
@@ -540,8 +544,8 @@ function MatchAnalysis({
       <section className="rounded-2xl border border-white/10 p-5">
         <h3 className="text-lg font-semibold">Private photos and videos</h3>
         <p className="mt-1 text-xs text-slate-400">
-          Up to 50 MB per file. 90-day retention. Latest 100 files shown. Uploading does not send
-          media to an AI provider.
+          Up to 50 MB per file. 90-day retention. Browse all available evidence below. Uploading
+          does not send media to an AI provider.
         </p>
         {data && !data.workspaceAvailable ? (
           <p className="mt-3 text-amber-200">Evidence storage needs the analysis migration.</p>
@@ -589,44 +593,41 @@ function MatchAnalysis({
               >
                 Upload evidence
               </button>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {data.files.map((f) => (
-                  <article key={f.id} className="rounded-xl border border-white/10 p-3">
-                    <button
-                      disabled={busy}
-                      className="block max-w-full truncate text-left text-emerald-300"
-                      onClick={() => void showFile(f)}
-                    >
-                      {f.label}
-                    </button>
-                    <p className="mt-1 text-xs text-slate-400">
-                      {f.kind} ·{" "}
-                      {f.includes_junior
-                        ? "Junior/uncertain — external AI blocked"
-                        : "Adult evidence — provider consent still required"}
-                    </p>
-                    <button
-                      disabled={busy}
-                      className="mt-2 text-xs text-slate-400 underline"
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            "Remove this private evidence? Only the uploader can remove it.",
-                          )
-                        )
-                          void action(async () => {
-                            setPreview(null);
-                            await removeEvidence(f);
-                            setNotice("Evidence removed.");
-                            setVersion((v) => v + 1);
-                          });
-                      }}
-                    >
-                      Remove my upload
-                    </button>
-                  </article>
-                ))}
-              </div>
+              <EvidenceLibrary
+                organisationId={org}
+                matchId={match}
+                version={version}
+                busy={busy || loading}
+                onOpen={(f) => void showFile(f)}
+                onSelect={(f) => {
+                  setData((previous) =>
+                    previous
+                      ? {
+                          ...previous,
+                          files: previous.files.some((item) => item.id === f.id)
+                            ? previous.files
+                            : [...previous.files, f],
+                        }
+                      : previous,
+                  );
+                  setSource(f.id);
+                  setSourceTime("");
+                  setNotice(
+                    `Source selected: ${f.label}. Continue in Coaching observations below.`,
+                  );
+                }}
+                onRemove={(f) => {
+                  if (
+                    window.confirm("Remove this private evidence? Only the uploader can remove it.")
+                  )
+                    void action(async () => {
+                      setPreview(null);
+                      await removeEvidence(f);
+                      setNotice("Evidence removed.");
+                      setVersion((v) => v + 1);
+                    });
+                }}
+              />
             </>
           )
         )}
@@ -900,24 +901,32 @@ function MatchAnalysis({
                     })()
                   : "Whole match"}
               </p>
-              {n.evidence_file_id &&
-                (() => {
-                  const f = data.files.find((f) => f.id === n.evidence_file_id);
-                  return f ? (
-                    <button
-                      className="mt-2 text-sm text-emerald-200 underline"
-                      disabled={busy}
-                      onClick={() => void showFile(f, n.evidence_time_seconds)}
-                    >
-                      Open source: {f.label}
-                      {n.evidence_time_seconds !== null ? ` · ${n.evidence_time_seconds}s` : ""}
-                    </button>
-                  ) : (
-                    <p className="mt-2 text-xs text-slate-400">
-                      Source unavailable or outside the latest 100 files.
-                    </p>
-                  );
-                })()}
+              {n.evidence_file_id && (
+                <button
+                  className="mt-2 text-sm text-emerald-200 underline"
+                  disabled={busy || loading}
+                  onClick={() =>
+                    void action(async () => {
+                      const f = await readEvidenceFile(org, match, n.evidence_file_id!);
+                      if (!f) throw new Error("Source unavailable, expired or removed.");
+                      setClipSelection(null);
+                      const url = await evidenceUrl(f);
+                      setPreview({
+                        url:
+                          f.kind === "video" && n.evidence_time_seconds !== null
+                            ? `${url}#t=${n.evidence_time_seconds}`
+                            : url,
+                        kind: f.kind,
+                        label: f.label,
+                      });
+                    })
+                  }
+                >
+                  Open linked source
+                  {n.evidence_time_seconds !== null ? ` · ${n.evidence_time_seconds}s` : ""}
+                </button>
+              )}
+
               {!n.evidence_file_id && n.evidence_time_seconds !== null && (
                 <p className="mt-2 text-xs text-slate-400">
                   Source removed · recorded time {n.evidence_time_seconds}s

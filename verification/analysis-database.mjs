@@ -393,6 +393,52 @@ assert.equal(
   ).rows.length,
   0,
 );
+// Evidence browsing can reach beyond the former 100-file cap without crossing tenant scope.
+await db.query(
+  `insert into public.criclume_analysis_files(id,organisation_id,match_id,kind,storage_path,label,analysis_consent,includes_junior,created_by,created_at)
+select id,$1::uuid,$2::uuid,case when n%2=0 then 'video' else 'image' end,$1::uuid::text||'/'||$2::uuid::text||'/'||id::text||'.webm','Archive '||lpad(n::text,3,'0'),true,n%2=1,$3::uuid,now()-n*interval '1 minute'
+from (select gen_random_uuid() id,n from generate_series(1,125) n) fixtures`,
+  [org, match, a],
+);
+const finalPage = await asUser(a, () =>
+  db.query(
+    "select id,label from public.criclume_analysis_files where organisation_id=$1 and match_id=$2 and analysis_consent and retention_expires_at>now() order by created_at desc,id offset 120 limit 25",
+    [org, match],
+  ),
+);
+assert.equal(finalPage.rows.length, 5);
+assert.equal(finalPage.rows[4].label, "Archive 125");
+const olderSource = finalPage.rows[4].id;
+assert.equal(
+  (
+    await asUser(a, () =>
+      db.query(
+        "select id from public.criclume_analysis_files where id=$1 and organisation_id=$2 and match_id=$3 and retention_expires_at>now()",
+        [olderSource, org, match],
+      ),
+    )
+  ).rows.length,
+  1,
+);
+assert.equal(
+  (
+    await asUser(b, () =>
+      db.query("select id from public.criclume_analysis_files where id=$1", [olderSource]),
+    )
+  ).rows.length,
+  0,
+);
+assert.equal(
+  (
+    await asUser(a, () =>
+      db.query(
+        "select count(*)::int n from public.criclume_analysis_files where organisation_id=$1 and match_id=$2 and kind='video' and not includes_junior and label ilike '%Archive 12%' and retention_expires_at>now()",
+        [org, match],
+      ),
+    )
+  ).rows[0].n,
+  3,
+);
 await db.close();
 console.log(
   "All migrations applied; structured annotations, source scope/expiry/deletion, append-only coaching writes, cross-club isolation, object access, expiry, anonymous denial and atomic media completion passed.",
