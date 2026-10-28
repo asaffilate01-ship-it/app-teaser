@@ -63,6 +63,7 @@ export function coachingCsv(
       note: string;
       tags: string;
       created_at: string;
+      delivery_state?: string;
       evidence_file_id?: string | null;
       evidence_time_seconds?: number | null;
     }
@@ -72,6 +73,7 @@ export function coachingCsv(
     "id",
     "discipline",
     "delivery_id",
+    "delivery_state",
     ...coachingKeys,
     "note",
     "tags",
@@ -88,4 +90,35 @@ export function coachingCsv(
   return [columns, ...notes.map((n) => columns.map((key) => n[key]))]
     .map((row) => row.map(cell).join(","))
     .join("\r\n");
+}
+
+export type ObservationHistory = "current" | "historical" | "all";
+export function observationState(deliveryId: string | null, currentIds: Set<string>) {
+  return deliveryId === null
+    ? "whole_match"
+    : currentIds.has(deliveryId)
+      ? "current"
+      : "no_longer_current";
+}
+export function filterObservations<T extends CoachingAnnotation & { note: string; tags: string }>(
+  notes: T[],
+  discipline: Discipline,
+  fields: CoachingFields,
+  search: string,
+  history: ObservationHistory,
+  currentIds: Set<string>,
+  filteredIds: Set<string>,
+): T[] {
+  return notes.filter((n) => {
+    if (
+      n.discipline !== discipline ||
+      !matchesCoaching(n, fields) ||
+      !`${n.note} ${n.tags}`.toLowerCase().includes(search.toLowerCase())
+    )
+      return false;
+    const historical = n.delivery_id !== null && !currentIds.has(n.delivery_id);
+    if (historical) return history !== "current";
+    if (history === "historical") return false;
+    return n.delivery_id === null || filteredIds.has(n.delivery_id);
+  });
 }

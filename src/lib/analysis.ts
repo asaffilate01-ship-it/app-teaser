@@ -23,7 +23,11 @@ export type DeliveryEvidence = {
   shot_zone: string | null;
   fielding_zone: string | null;
   superseded_by: string | null;
+  voided_by_event_id?: string | null;
 };
+export function isCurrentDelivery(delivery: DeliveryEvidence): boolean {
+  return !delivery.superseded_by && !delivery.voided_by_event_id;
+}
 export type AnalysisFilters = {
   discipline: Discipline;
   player: string;
@@ -63,7 +67,7 @@ export function filterDeliveries(
       : null;
   return rows.filter(
     (d) =>
-      !d.superseded_by &&
+      isCurrentDelivery(d) &&
       (!f.player ||
         (f.discipline === "batting"
           ? d.striker_id
@@ -88,7 +92,7 @@ export function filterDeliveries(
   );
 }
 export function summarizeDeliveries(rows: DeliveryEvidence[]) {
-  return rows.reduce(
+  return rows.filter(isCurrentDelivery).reduce(
     (s, d) => ({
       deliveries: s.deliveries + 1,
       batterRuns: s.batterRuns + d.batter_runs,
@@ -121,18 +125,20 @@ export function deliveryCsv(rows: DeliveryEvidence[]) {
       "shot_zone",
       "fielding_zone",
     ],
-    ...rows.map((d) => [
-      d.innings_id,
-      d.over_number,
-      d.ball_in_over,
-      d.batter_runs,
-      d.total_runs,
-      d.legal_ball,
-      d.wicket,
-      d.delivery_style,
-      d.shot_zone,
-      d.fielding_zone,
-    ]),
+    ...rows
+      .filter(isCurrentDelivery)
+      .map((d) => [
+        d.innings_id,
+        d.over_number,
+        d.ball_in_over,
+        d.batter_runs,
+        d.total_runs,
+        d.legal_ball,
+        d.wicket,
+        d.delivery_style,
+        d.shot_zone,
+        d.fielding_zone,
+      ]),
   ]
     .map((r) => r.map(cell).join(","))
     .join("\r\n");
