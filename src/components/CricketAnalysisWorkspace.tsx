@@ -1,3 +1,4 @@
+import { observationErrors } from "@/lib/observation-form";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { reviewReportHtml } from "@/lib/review-report";
 import { EvidenceLibrary } from "@/components/EvidenceLibrary";
@@ -129,6 +130,10 @@ function MatchAnalysis({
     setPreview(null);
     setClipSelection(null);
   };
+  const [submitted, setSubmitted] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const errorSummary = useRef<HTMLDivElement>(null);
+  const focusErrors = () => window.requestAnimationFrame(() => errorSummary.current?.focus());
   const [note, setNote] = useState("");
   const [tags, setTags] = useState("");
   const [delivery, setDelivery] = useState("");
@@ -197,6 +202,26 @@ function MatchAnalysis({
   );
   const staleDelivery = Boolean(delivery && !currentDeliveryIds.has(delivery));
   const staleSource = Boolean(source && !data?.files.some((f) => f.id === source));
+  const formErrors = submitted
+    ? observationErrors({
+        note,
+        time: sourceTime,
+        sourceKind: data?.files.find((f) => f.id === source)?.kind,
+        staleSource,
+        staleDelivery,
+      })
+    : {};
+  const errorFor = (key: keyof typeof formErrors) =>
+    formErrors[key] ? (
+      <span id={`observation-${key}-error`} className="text-sm text-amber-200">
+        {formErrors[key]}
+      </span>
+    ) : null;
+  const fieldAccessibility = (key: keyof typeof formErrors) => ({
+    id: `observation-${key}`,
+    "aria-invalid": Boolean(formErrors[key]),
+    "aria-describedby": formErrors[key] ? `observation-${key}-error` : undefined,
+  });
   useEffect(() => {
     setNotePage(0);
   }, [filters, search, history]);
@@ -764,141 +789,211 @@ function MatchAnalysis({
           remain visible.
         </p>
         <div className="mt-4 grid gap-3">
-          <label className="grid gap-1 text-sm">
-            Delivery (optional)
-            <select
-              className={field}
-              value={delivery}
-              onChange={(e) => setDelivery(e.target.value)}
-            >
-              <option value="">Whole match</option>
-              {staleDelivery && (
-                <option value={delivery}>
-                  Selected delivery is no longer current — choose another
-                </option>
-              )}
-              {(data?.deliveries ?? []).map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.over_number}.{d.ball_in_over} · {names.get(d.striker_id) ?? "Player"}
-                </option>
-              ))}
-            </select>
-          </label>
-          <fieldset className="grid gap-3 rounded-xl border border-white/10 p-4 sm:grid-cols-2">
-            <legend className="px-2 text-sm">Classify this observation (optional)</legend>
-            {coachingKeys.map((key) => (
-              <label key={key} className="grid gap-1 text-sm">
-                {coachingLabels[key]}
+          <form
+            aria-label="Save coaching observation"
+            className="grid gap-3"
+            noValidate
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (busy || loading || !data.workspaceAvailable) return;
+              setSubmitted(true);
+              setSaveError("");
+              const invalid = observationErrors({
+                note,
+                time: sourceTime,
+                sourceKind: data.files.find((f) => f.id === source)?.kind,
+                staleSource,
+                staleDelivery,
+              });
+              if (Object.keys(invalid).length) {
+                focusErrors();
+                return;
+              }
+              void action(async () => {
+                try {
+                  await saveNote(
+                    org,
+                    match,
+                    filters.discipline,
+                    note,
+                    tags,
+                    delivery,
+                    annotations,
+                    source,
+                    sourceTime,
+                  );
+                  setNote("");
+                  setTags("");
+                  setAnnotations({ ...emptyCoachingFields });
+                  setSource("");
+                  setSourceTime("");
+                  setSubmitted(false);
+                  setNotice(
+                    "Coaching observation saved. Clear filters if it is not visible below.",
+                  );
+                  setVersion((v) => v + 1);
+                } catch {
+                  setSaveError(
+                    "Your observation was not saved. Your draft is preserved. Check your connection and club access, then try again.",
+                  );
+                  focusErrors();
+                }
+              });
+            }}
+          >
+            {(Object.keys(formErrors).length > 0 || saveError) && (
+              <div
+                ref={errorSummary}
+                tabIndex={-1}
+                role="alert"
+                aria-labelledby="observation-error-title"
+                className="rounded-xl border border-amber-400/40 p-4 text-amber-100"
+              >
+                <h4 id="observation-error-title" className="font-semibold">
+                  Check your observation
+                </h4>
+                {saveError && <p>{saveError}</p>}
+                <ul className="mt-2 list-inside list-disc">
+                  {Object.entries(formErrors).map(([key, message]) => (
+                    <li key={key}>
+                      <a
+                        className="underline"
+                        href={`#observation-${key}`}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          document.getElementById(`observation-${key}`)?.focus();
+                        }}
+                      >
+                        {message}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <fieldset disabled={busy || loading} className="grid min-w-0 gap-3">
+              <legend className="sr-only">Observation details</legend>
+              <label className="grid gap-1 text-sm">
+                Delivery (optional)
                 <select
-                  aria-label={`Record ${coachingLabels[key].toLowerCase()}`}
+                  {...fieldAccessibility("delivery")}
                   className={field}
-                  value={annotations[key]}
-                  onChange={(e) => setAnnotations((a) => ({ ...a, [key]: e.target.value }))}
+                  value={delivery}
+                  onChange={(e) => setDelivery(e.target.value)}
                 >
-                  <option value="">Not recorded</option>
-                  {coachingOptions[key].map((value) => (
-                    <option key={value} value={value}>
-                      {coachingLabel(value)}
+                  <option value="">Whole match</option>
+                  {staleDelivery && (
+                    <option value={delivery}>
+                      Selected delivery is no longer current — choose another
+                    </option>
+                  )}
+                  {(data?.deliveries ?? []).map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.over_number}.{d.ball_in_over} · {names.get(d.striker_id) ?? "Player"}
                     </option>
                   ))}
                 </select>
+                {errorFor("delivery")}
               </label>
-            ))}
-          </fieldset>
-          <label className="grid gap-1 text-sm">
-            Source photo or video (optional)
-            <select
-              aria-label="Observation source"
-              className={field}
-              value={source}
-              onChange={(e) => {
-                setSource(e.target.value);
-                setSourceTime("");
-              }}
-            >
-              <option value="">No source linked</option>
-              {staleSource && (
-                <option value={source}>Selected source unavailable — choose another</option>
+              <fieldset className="grid gap-3 rounded-xl border border-white/10 p-4 sm:grid-cols-2">
+                <legend className="px-2 text-sm">Classify this observation (optional)</legend>
+                {coachingKeys.map((key) => (
+                  <label key={key} className="grid gap-1 text-sm">
+                    {coachingLabels[key]}
+                    <select
+                      aria-label={`Record ${coachingLabels[key].toLowerCase()}`}
+                      className={field}
+                      value={annotations[key]}
+                      onChange={(e) => setAnnotations((a) => ({ ...a, [key]: e.target.value }))}
+                    >
+                      <option value="">Not recorded</option>
+                      {coachingOptions[key].map((value) => (
+                        <option key={value} value={value}>
+                          {coachingLabel(value)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+              </fieldset>
+              <label className="grid gap-1 text-sm">
+                Source photo or video (optional)
+                <select
+                  {...fieldAccessibility("source")}
+                  aria-label="Observation source"
+                  className={field}
+                  value={source}
+                  onChange={(e) => {
+                    setSource(e.target.value);
+                    setSourceTime("");
+                  }}
+                >
+                  <option value="">No source linked</option>
+                  {staleSource && (
+                    <option value={source}>Selected source unavailable — choose another</option>
+                  )}
+                  {data.files.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.label} · {f.kind}
+                    </option>
+                  ))}
+                </select>
+                {errorFor("source")}
+              </label>
+              {data.files.find((f) => f.id === source)?.kind === "video" && (
+                <label className="grid gap-1 text-sm">
+                  Video time (whole seconds, optional)
+                  <input
+                    className={field}
+                    {...fieldAccessibility("time")}
+                    type="number"
+                    min="0"
+                    max="86400"
+                    step="1"
+                    value={sourceTime}
+                    onChange={(e) => setSourceTime(e.target.value)}
+                  />
+                  {errorFor("time")}
+                </label>
               )}
-              {data.files.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.label} · {f.kind}
-                </option>
-              ))}
-            </select>
-          </label>
-          {data.files.find((f) => f.id === source)?.kind === "video" && (
-            <label className="grid gap-1 text-sm">
-              Video time (whole seconds, optional)
-              <input
-                className={field}
-                type="number"
-                min="0"
-                max="86400"
-                step="1"
-                value={sourceTime}
-                onChange={(e) => setSourceTime(e.target.value)}
-              />
-            </label>
-          )}
-          <label className="grid gap-1 text-sm">
-            Observation
-            <textarea
-              className={field}
-              maxLength={3000}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
-          </label>
-          <label className="grid gap-1 text-sm">
-            Additional tags
-            <input
-              className={field}
-              maxLength={300}
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-            />
-          </label>
-          {(staleDelivery || staleSource) && (
-            <p role="alert" className="text-sm text-amber-200">
-              Your draft is preserved. Choose a current delivery or available source before saving.
-            </p>
-          )}
-          <button
-            className="action-primary justify-self-start"
-            disabled={
-              busy ||
-              loading ||
-              staleDelivery ||
-              staleSource ||
-              !data?.workspaceAvailable ||
-              note.trim().length < 3
-            }
-            onClick={() =>
-              void action(async () => {
-                await saveNote(
-                  org,
-                  match,
-                  filters.discipline,
-                  note,
-                  tags,
-                  delivery,
-                  annotations,
-                  source,
-                  sourceTime,
-                );
-                setNote("");
-                setTags("");
-                setAnnotations({ ...emptyCoachingFields });
-                setSource("");
-                setSourceTime("");
-                setNotice("Coaching observation saved. Clear filters if it is not visible below.");
-                setVersion((v) => v + 1);
-              })
-            }
-          >
-            Save {filters.discipline} note
-          </button>
+              <label className="grid gap-1 text-sm">
+                Observation
+                <textarea
+                  {...fieldAccessibility("note")}
+                  className={field}
+                  maxLength={3000}
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                />
+                {errorFor("note")}
+                <span className="text-xs text-slate-400">
+                  3–3000 characters · {note.length}/3000 used
+                </span>
+              </label>
+              <label className="grid gap-1 text-sm">
+                Additional tags
+                <input
+                  className={field}
+                  maxLength={300}
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                />
+              </label>
+              {(staleDelivery || staleSource) && (
+                <p role="alert" className="text-sm text-amber-200">
+                  Your draft is preserved. Choose a current delivery or available source before
+                  saving.
+                </p>
+              )}
+            </fieldset>
+            <button
+              type="submit"
+              className="action-primary justify-self-start"
+              disabled={busy || loading || !data.workspaceAvailable}
+            >
+              {busy ? "Saving…" : `Save ${filters.discipline} note`}
+            </button>
+          </form>
           <label className="grid gap-1 text-sm">
             Observation history
             <select
