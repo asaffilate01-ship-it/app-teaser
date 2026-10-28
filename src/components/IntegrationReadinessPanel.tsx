@@ -1,24 +1,40 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { invokePlatformFunction } from "@/lib/cloud";
 type Report = {
   checkedAt: string;
   checks: Array<{ id: string; label: string; status: string; detail: string }>;
 };
 export function IntegrationReadinessPanel({ organisationId }: { organisationId: string }) {
+  return <ScopedReadinessPanel key={organisationId} organisationId={organisationId} />;
+}
+function ScopedReadinessPanel({ organisationId }: { organisationId: string }) {
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const [report, setReport] = useState<Report | null>(null),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const refresh = async () => {
+    if (busy) return;
+    setReport(null);
     setBusy(true);
     setError("");
     try {
-      setReport(await invokePlatformFunction<Report>("integration-readiness", { organisationId }));
+      const result = await invokePlatformFunction<Report>("integration-readiness", {
+        organisationId,
+      });
+      if (mounted.current) setReport(result);
     } catch {
+      if (!mounted.current) return;
       setError(
         "Readiness could not be checked. Verify administrator access and function deployment.",
       );
     } finally {
-      setBusy(false);
+      if (mounted.current) setBusy(false);
     }
   };
   return (
@@ -47,7 +63,18 @@ export function IntegrationReadinessPanel({ organisationId }: { organisationId: 
             {report.checks.map((c) => (
               <div key={c.id} className="rounded-xl border border-white/10 p-3">
                 <p className="text-sm font-semibold">
-                  {c.label} · <span className="text-emerald-300">{c.status}</span>
+                  {c.label} ·{" "}
+                  <span
+                    className={
+                      c.status === "verified"
+                        ? "text-emerald-300"
+                        : c.status === "missing" || c.status === "unavailable"
+                          ? "text-rose-200"
+                          : "text-amber-200"
+                    }
+                  >
+                    {c.status}
+                  </span>
                 </p>
                 <p className="mt-1 text-xs text-slate-400">{c.detail}</p>
               </div>
