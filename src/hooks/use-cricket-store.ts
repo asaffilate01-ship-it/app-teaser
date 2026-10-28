@@ -1,43 +1,88 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CricketMatch } from "@/lib/cricket";
-
-const STORAGE_KEY = "criclume.matches.v1";
+import { parseScorerMatches, scorerStorageKey } from "@/lib/scorer-storage";
 
 export function useCricketStore() {
   const [matches, setMatches] = useState<CricketMatch[]>([]);
   const [loaded, setLoaded] = useState(false);
-
+  const [storageIssue, setStorageIssue] = useState<string | null>(null);
+  const [recoveryData, setRecoveryData] = useState<string | null>(null);
+  const [dirty, setDirty] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const mayWrite = useRef(false);
   useEffect(() => {
+    mayWrite.current = false;
     try {
-      const saved = window.localStorage.getItem(STORAGE_KEY);
-      if (saved) setMatches(JSON.parse(saved) as CricketMatch[]);
+      const raw = window.localStorage.getItem(scorerStorageKey);
+      if (raw !== null) {
+        try {
+          setMatches(parseScorerMatches(raw));
+        } catch {
+          setRecoveryData(raw);
+          setStorageIssue(
+            "Saved match data could not be read. It has been preserved. New scoring changes stay in memory; download both backups before closing this page.",
+          );
+          return;
+        }
+      }
+      mayWrite.current = true;
     } catch {
-      // A private browser or blocked storage must not stop live scoring.
+      setStorageIssue(
+        "Device storage could not be read. Existing data will not be overwritten. New scoring changes stay in memory; download a backup before closing this page.",
+      );
     } finally {
       setLoaded(true);
     }
   }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
+  const persist = useCallback(() => {
+    if (!loaded || !mayWrite.current) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(matches));
+      window.localStorage.setItem(scorerStorageKey, JSON.stringify(matches));
+      setStorageIssue(null);
+      setSaved(true);
+      setDirty(false);
     } catch {
-      // The scorer remains usable in memory if the device has no storage quota.
+      setSaved(false);
+      setStorageIssue(
+        "Changes could not be saved on this device. Keep this page open, download a backup, or retry saving after freeing browser storage.",
+      );
     }
   }, [loaded, matches]);
-
+  useEffect(() => {
+    persist();
+  }, [persist]);
+  useEffect(() => {
+    if (!storageIssue || !dirty) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [storageIssue, dirty]);
   const upsertMatch = useCallback((match: CricketMatch) => {
-    setMatches((current) => {
-      const existing = current.findIndex((item) => item.id === match.id);
-      if (existing === -1) return [match, ...current];
-      return current.map((item) => (item.id === match.id ? match : item));
-    });
+    setSaved(false);
+    setDirty(true);
+    setMatches((current) =>
+      current.some((item) => item.id === match.id)
+        ? current.map((item) => (item.id === match.id ? match : item))
+        : [match, ...current],
+    );
   }, []);
-
   const removeMatch = useCallback((matchId: string) => {
+    setSaved(false);
+    setDirty(true);
     setMatches((current) => current.filter((match) => match.id !== matchId));
   }, []);
-
-  return { matches, loaded, upsertMatch, removeMatch };
+  return {
+    matches,
+    loaded,
+    upsertMatch,
+    removeMatch,
+    storageIssue,
+    recoveryData,
+    saved,
+    retrySave: persist,
+    canRetrySave: mayWrite.current,
+  };
 }

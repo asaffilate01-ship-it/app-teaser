@@ -79,3 +79,13 @@ Omniqora panel state is now isolated by organisation, role and match. Switching 
 History can be refreshed independently without starting a run. A confirmed receipt/report remains visible if a later history lookup fails, with its request reference and a direct refresh action. Initial loading no longer displays a false empty-history message. Configuration readiness also resets on club changes and clears old results before another check. Missing/unavailable statuses no longer use success green; configuration presence still does not claim working provider execution.
 
 Validation: `npm run check` (58 tests, typecheck, lint, production build); real-component Chromium with synthetic gateway responses for delayed verification across matches, history failure after confirmed admission, history-only retry with unchanged run count, late report after club switch, stale readiness clearing and 375/1440px overflow checks. No AI model calls or live integration checks were made. These are browser state/recovery fixes; staging activation, raw-media dispatch and observation correction history remain separate work.
+
+## Scorer storage recovery
+
+The scorer no longer treats arbitrary parsed JSON as a valid match list or overwrites unreadable saved data with an empty array. It validates the persisted scorer structure and team references, preserves unknown fields, and leaves the original key untouched when reading/validation fails. Current-session scoring can continue in memory.
+
+Storage failures are visible rather than silently claiming successful device saving. The recovery banner downloads the current match list and, when available, the exact unreadable original. Quota/write failures offer retry without clearing in-memory scores. Unsaved edits enable the browser's normal leave-page warning. If initial reading fails, writes stay disabled to protect unseen existing data. Cloud linkage does not imply completed synchronisation.
+
+Validation: parser tests cover recorded deliveries, forward fields, malformed/partial data, duplicate IDs and invalid innings/team references; Chromium against the actual scorer covers preserved corrupt storage, exact backup download, quota failure, retained match backup, successful retry and mobile/desktop overflow. No live cloud data or database schema changes.
+
+Remaining storage work: a validated user-facing backup import/restore flow and conflict handling for simultaneous edits in separate tabs/devices. Downloading a backup does not itself restore it. Keep player names and private notes in exported files private.

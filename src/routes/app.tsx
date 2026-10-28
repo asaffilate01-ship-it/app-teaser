@@ -153,8 +153,26 @@ const dismissalTypes: { value: DismissalType; label: string }[] = [
   { value: "obstructing-the-field", label: "Obstructing the field" },
 ];
 
-function CricketApp() {
-  const { matches, loaded, upsertMatch, removeMatch } = useCricketStore();
+export function CricketApp() {
+  const {
+    matches,
+    loaded,
+    upsertMatch,
+    removeMatch,
+    storageIssue,
+    recoveryData,
+    saved,
+    retrySave,
+    canRetrySave,
+  } = useCricketStore();
+  const downloadBackup = (raw: string, filename: string) => {
+    const url = URL.createObjectURL(new Blob([raw], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
   const cloudSession = useCloudSession();
   const [screen, setScreen] = useState<AppScreen>("dashboard");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -261,13 +279,52 @@ function CricketApp() {
                 <CloudOff className="size-3.5 text-amber-300" />
               )}
               <span className="hidden sm:inline">
-                {cloudLinked ? "Cloud match linked" : "Saved on this device"}
+                {cloudLinked
+                  ? "Cloud match linked"
+                  : saved
+                    ? "Saved on this device"
+                    : "Device save pending"}
               </span>
             </span>
           </div>
         </div>
       </header>
 
+      {storageIssue && (
+        <section
+          aria-label="Device storage recovery"
+          className="mx-auto mt-4 max-w-7xl rounded-xl border border-amber-300/40 bg-amber-300/10 p-4 text-amber-100"
+        >
+          <p role="alert">{storageIssue}</p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <button
+              className="action-primary"
+              onClick={() =>
+                downloadBackup(JSON.stringify(matches, null, 2), "criclume-current-matches.json")
+              }
+            >
+              Download current matches
+            </button>
+            {recoveryData !== null && (
+              <button
+                className="action-primary"
+                onClick={() => downloadBackup(recoveryData, "criclume-preserved-device-data.json")}
+              >
+                Download preserved data
+              </button>
+            )}
+            {canRetrySave && (
+              <button className="action-primary" onClick={retrySave}>
+                Retry device save
+              </button>
+            )}
+          </div>
+          <p className="mt-2 text-xs">
+            Backups may contain player names and private notes. Keep them private. Cloud match
+            linkage does not confirm that every change has synced.
+          </p>
+        </section>
+      )}
       {!loaded || (cloudLinked && ["idle", "loading"].includes(cloudBootstrap.status)) ? (
         <div className="flex min-h-[70vh] items-center justify-center text-sm text-slate-400">
           {cloudLinked ? "Loading cloud match…" : "Loading scorer…"}
