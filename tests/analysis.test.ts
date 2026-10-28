@@ -104,3 +104,17 @@ test("MCP does not expose write tools or arbitrary arguments", async () => {
   assert.equal(JSON.stringify(r).includes("private SQL"), false);
   assert.match(JSON.stringify(r), /isError":true/);
 });
+
+test("undone and replaced deliveries are excluded from filtering, summary and CSV", () => {
+  const undone = {
+    ...row,
+    id: "undone",
+    voided_by_event_id: "undo",
+    batter_runs: 6,
+    total_runs: 6,
+  };
+  const replaced = { ...row, id: "replaced", superseded_by: "new", batter_runs: 6, total_runs: 6 };
+  assert.deepEqual(filterDeliveries([row, undone, replaced], defaultAnalysisFilters), [row]);
+  assert.deepEqual(summarizeDeliveries([row, undone, replaced]), summarizeDeliveries([row]));
+  assert.equal(deliveryCsv([row, undone, replaced]), deliveryCsv([row]));
+});

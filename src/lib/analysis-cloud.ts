@@ -38,10 +38,11 @@ export async function loadAnalysis(organisationId: string, matchId: string) {
     const r = await db
       .from("deliveries")
       .select(
-        "id,innings_id,sequence,over_number,ball_in_over,striker_id,bowler_id,fielder_id,delivery_style,outcome,batter_runs,total_runs,legal_ball,wicket,shot_zone,fielding_zone,superseded_by",
+        "id,innings_id,sequence,over_number,ball_in_over,striker_id,bowler_id,fielder_id,delivery_style,outcome,batter_runs,total_runs,legal_ball,wicket,shot_zone,fielding_zone,superseded_by,voided_by_event_id",
       )
       .eq("match_id", matchId)
       .is("superseded_by", null)
+      .is("voided_by_event_id", null)
       .order("sequence")
       .order("id")
       .range(offset, offset + 499);

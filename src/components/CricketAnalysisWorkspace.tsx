@@ -4,7 +4,9 @@ import {
   coachingLabels,
   coachingLabel,
   emptyCoachingFields,
-  matchesCoaching,
+  filterObservations,
+  observationState,
+  type ObservationHistory,
   coachingCsv,
   type CoachingFields,
 } from "@/lib/coaching";
@@ -123,13 +125,22 @@ function MatchAnalysis({
   const [source, setSource] = useState("");
   const [sourceTime, setSourceTime] = useState("");
   const [notePage, setNotePage] = useState(0);
+  const [history, setHistory] = useState<ObservationHistory>("current");
+  const [refreshedAt, setRefreshedAt] = useState<string | null>(null);
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError("");
     void loadAnalysis(org, match)
       .then((r) => {
-        if (active) setData(r);
+        if (active) {
+          setData(r);
+          setRefreshedAt(new Date().toLocaleTimeString());
+          setPreview(null);
+          setClipSelection(null);
+          setPage(0);
+          setNotePage(0);
+        }
       })
       .catch(() => {
         if (active)
@@ -155,16 +166,21 @@ function MatchAnalysis({
   );
   const summary = summarizeDeliveries(rows);
   const visibleDeliveryIds = new Set(rows.map((d) => d.id));
-  const visibleNotes = (data?.notes ?? []).filter(
-    (n) =>
-      n.discipline === filters.discipline &&
-      matchesCoaching(n, filters.coaching ?? emptyCoachingFields) &&
-      (!n.delivery_id || visibleDeliveryIds.has(n.delivery_id)) &&
-      `${n.note} ${n.tags}`.toLowerCase().includes(search.toLowerCase()),
+  const currentDeliveryIds = new Set((data?.deliveries ?? []).map((d) => d.id));
+  const visibleNotes = filterObservations(
+    data?.notes ?? [],
+    filters.discipline,
+    filters.coaching ?? emptyCoachingFields,
+    search,
+    history,
+    currentDeliveryIds,
+    visibleDeliveryIds,
   );
+  const staleDelivery = Boolean(delivery && !currentDeliveryIds.has(delivery));
+  const staleSource = Boolean(source && !data?.files.some((f) => f.id === source));
   useEffect(() => {
     setNotePage(0);
-  }, [filters, search]);
+  }, [filters, search, history]);
   const names = new Map(players.map((p) => [p.id, p.name]));
   const update = <K extends keyof AnalysisFilters>(k: K, v: AnalysisFilters[K]) => {
     setFilters((f) => ({ ...f, [k]: v }));
@@ -226,9 +242,21 @@ function MatchAnalysis({
     });
   const exportCsv = (notes = false) => {
     const url = URL.createObjectURL(
-      new Blob([notes ? coachingCsv(visibleNotes) : deliveryCsv(rows)], {
-        type: "text/csv;charset=utf-8",
-      }),
+      new Blob(
+        [
+          notes
+            ? coachingCsv(
+                visibleNotes.map((n) => ({
+                  ...n,
+                  delivery_state: observationState(n.delivery_id, currentDeliveryIds),
+                })),
+              )
+            : deliveryCsv(rows),
+        ],
+        {
+          type: "text/csv;charset=utf-8",
+        },
+      ),
     );
     const a = document.createElement("a");
     a.href = url;
@@ -258,6 +286,20 @@ function MatchAnalysis({
     );
   return (
     <div className="space-y-5" aria-busy={loading || busy}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-slate-400" role="status">
+          {loading
+            ? "Refreshing match evidence…"
+            : `Evidence loaded at ${refreshedAt ?? "—"}. Refresh after scoring changes.`}
+        </p>
+        <button
+          className={field}
+          disabled={loading || busy}
+          onClick={() => setVersion((v) => v + 1)}
+        >
+          Refresh match evidence
+        </button>
+      </div>
       {error && (
         <p role="alert" className="rounded-xl border border-amber-400/30 p-3 text-amber-200">
           {error}{" "}
@@ -652,6 +694,11 @@ function MatchAnalysis({
               onChange={(e) => setDelivery(e.target.value)}
             >
               <option value="">Whole match</option>
+              {staleDelivery && (
+                <option value={delivery}>
+                  Selected delivery is no longer current — choose another
+                </option>
+              )}
               {(data?.deliveries ?? []).map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.over_number}.{d.ball_in_over} · {names.get(d.striker_id) ?? "Player"}
@@ -692,6 +739,9 @@ function MatchAnalysis({
               }}
             >
               <option value="">No source linked</option>
+              {staleSource && (
+                <option value={source}>Selected source unavailable — choose another</option>
+              )}
               {data.files.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.label} · {f.kind}
@@ -731,9 +781,21 @@ function MatchAnalysis({
               onChange={(e) => setTags(e.target.value)}
             />
           </label>
+          {(staleDelivery || staleSource) && (
+            <p role="alert" className="text-sm text-amber-200">
+              Your draft is preserved. Choose a current delivery or available source before saving.
+            </p>
+          )}
           <button
             className="action-primary justify-self-start"
-            disabled={busy || !data?.workspaceAvailable || note.trim().length < 3}
+            disabled={
+              busy ||
+              loading ||
+              staleDelivery ||
+              staleSource ||
+              !data?.workspaceAvailable ||
+              note.trim().length < 3
+            }
             onClick={() =>
               void action(async () => {
                 await saveNote(
@@ -759,6 +821,26 @@ function MatchAnalysis({
           >
             Save {filters.discipline} note
           </button>
+          <label className="grid gap-1 text-sm">
+            Observation history
+            <select
+              className={field}
+              aria-label="Observation history"
+              value={history}
+              onChange={(e) => setHistory(e.target.value as ObservationHistory)}
+            >
+              <option value="current">Current deliveries and whole match</option>
+              <option value="historical">No-longer-current deliveries</option>
+              <option value="all">Current and historical observations</option>
+            </select>
+          </label>
+          {history !== "current" && (
+            <p className="text-xs text-amber-200">
+              Historical observations are preserved for review. They follow discipline,
+              classification and text filters; current player, over and outcome filters cannot be
+              applied to them. They never contribute to delivery statistics.
+            </p>
+          )}
           <label className="grid gap-1 text-sm">
             Search notes and tags
             <input className={field} value={search} onChange={(e) => setSearch(e.target.value)} />

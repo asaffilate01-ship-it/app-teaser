@@ -337,6 +337,62 @@ await assert.rejects(
     ),
   (e) => e.code === "42501",
 );
+// Notes on an undone delivery remain readable but new notes cannot target that delivery.
+const fixture = (
+  await db.query(
+    "select i.id as innings_id,m.id as match_id from public.matches m join public.innings i on i.match_id=m.id where m.owner_organisation_id=$1 and m.status='scheduled' limit 1",
+    [org],
+  )
+).rows[0];
+const batterIds = (
+  await db.query("select player_id from public.team_players where team_id=$1 order by player_id", [
+    org,
+  ])
+).rows.map((r) => r.player_id);
+const bowler = (
+  await db.query("select player_id from public.team_players where team_id=$1 limit 1", [away])
+).rows[0].player_id;
+const deliveryId = (
+  await db.query(
+    "insert into public.deliveries(match_id,innings_id,sequence,over_number,ball_in_over,striker_id,non_striker_id,bowler_id,outcome,occurred_at,recorded_by) values($1,$2,1,0,1,$3,$4,$5,'runs',now(),$6) returning id",
+    [fixture.match_id, fixture.innings_id, batterIds[0], batterIds[1], bowler, a],
+  )
+).rows[0].id;
+const insertDeliveryNote = () =>
+  asUser(a, () =>
+    db.query(
+      "insert into public.criclume_analysis_notes(organisation_id,match_id,discipline,delivery_id,note,created_by) values($1,$2,'batting',$3,'Retained review',$4) returning id",
+      [org, fixture.match_id, deliveryId, a],
+    ),
+  );
+const oldNote = (await insertDeliveryNote()).rows[0].id;
+const undoEvent = (
+  await db.query(
+    "insert into public.match_events(match_id,sequence,client_event_id,device_id,event_type,payload,occurred_at,recorded_by) values($1,1,gen_random_uuid(),'fixture','undo','{}',now(),$2) returning id",
+    [fixture.match_id, a],
+  )
+).rows[0].id;
+await db.query("update public.deliveries set voided_by_event_id=$2 where id=$1", [
+  deliveryId,
+  undoEvent,
+]);
+await assert.rejects(insertDeliveryNote, (e) => e.code === "42501");
+assert.equal(
+  (
+    await asUser(a, () =>
+      db.query("select id from public.criclume_analysis_notes where id=$1", [oldNote]),
+    )
+  ).rows.length,
+  1,
+);
+assert.equal(
+  (
+    await asUser(b, () =>
+      db.query("select id from public.criclume_analysis_notes where id=$1", [oldNote]),
+    )
+  ).rows.length,
+  0,
+);
 await db.close();
 console.log(
   "All migrations applied; structured annotations, source scope/expiry/deletion, append-only coaching writes, cross-club isolation, object access, expiry, anonymous denial and atomic media completion passed.",
