@@ -1,3 +1,9 @@
+import {
+  validateCoaching,
+  emptyCoachingFields,
+  type CoachingFields,
+  type CoachingAnnotation,
+} from "@/lib/coaching";
 import { getCloudClient } from "@/lib/cloud";
 import type { DeliveryEvidence, Discipline } from "@/lib/analysis";
 export type EvidenceFile = {
@@ -8,13 +14,15 @@ export type EvidenceFile = {
   includes_junior: boolean;
   created_by: string;
 };
-export type AnalysisNote = {
+export type AnalysisNote = CoachingAnnotation & {
   id: string;
   discipline: Discipline;
   note: string;
   tags: string;
   delivery_id: string | null;
   created_at: string;
+  evidence_file_id: string | null;
+  evidence_time_seconds: number | null;
 };
 export async function loadAnalysis(organisationId: string, matchId: string) {
   const db = getCloudClient();
@@ -66,28 +74,41 @@ export async function loadAnalysis(organisationId: string, matchId: string) {
       if (offset >= 9500) throw new Error("Too many linked clips.");
     }
   }
-  const [files, notes] = await Promise.all([
-    db
-      .from("criclume_analysis_files")
-      .select("id,kind,storage_path,label,includes_junior,created_by")
-      .eq("organisation_id", organisationId)
-      .eq("match_id", matchId)
-      .order("created_at", { ascending: false })
-      .limit(100),
-    db
+  const files = await db
+    .from("criclume_analysis_files")
+    .select("id,kind,storage_path,label,includes_junior,created_by")
+    .eq("organisation_id", organisationId)
+    .eq("match_id", matchId)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  const notes: AnalysisNote[] = [];
+  let notesAvailable = true;
+  for (let offset = 0; ; offset += 500) {
+    const result = await db
       .from("criclume_analysis_notes")
-      .select("id,discipline,note,tags,delivery_id,created_at")
+      .select(
+        "id,discipline,note,tags,delivery_id,created_at,shot_type,bowling_line,bowling_length,fielding_action,evidence_file_id,evidence_time_seconds",
+      )
       .eq("organisation_id", organisationId)
       .eq("match_id", matchId)
       .order("created_at", { ascending: false })
-      .limit(100),
-  ]);
+      .order("id")
+      .range(offset, offset + 499);
+    if (result.error) {
+      notesAvailable = false;
+      notes.length = 0;
+      break;
+    }
+    notes.push(...(result.data as AnalysisNote[]));
+    if (result.data.length < 500) break;
+    if (offset >= 9500) throw new Error("Match exceeds coaching review limit.");
+  }
   return {
     deliveries,
     clips,
     files: (files.data ?? []) as EvidenceFile[],
-    notes: (notes.data ?? []) as AnalysisNote[],
-    workspaceAvailable: !files.error && !notes.error,
+    notes,
+    workspaceAvailable: !files.error && notesAvailable,
     mediaIds: new Set(clips.map((c) => c.delivery_id)),
   };
 }
@@ -177,13 +198,18 @@ export async function saveNote(
   note: string,
   tags: string,
   deliveryId: string,
+  fields: CoachingFields = emptyCoachingFields,
+  evidenceId = "",
+  seconds = "",
 ) {
   const db = getCloudClient();
   const {
     data: { user },
   } = await db.auth.getUser();
   if (!user) throw new Error("Sign in first.");
+  const annotations = validateCoaching(fields, evidenceId, seconds);
   const r = await db.from("criclume_analysis_notes").insert({
+    ...annotations,
     organisation_id: org,
     match_id: match,
     discipline,

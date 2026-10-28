@@ -1,3 +1,9 @@
+import {
+  coachingKeys,
+  matchesCoaching,
+  type CoachingFields,
+  type CoachingAnnotation,
+} from "./coaching.ts";
 export type Discipline = "batting" | "bowling" | "fielding";
 export type DeliveryEvidence = {
   id: string;
@@ -28,6 +34,7 @@ export type AnalysisFilters = {
   fromOver: string;
   toOver: string;
   mediaOnly: boolean;
+  coaching?: CoachingFields;
 };
 export const defaultAnalysisFilters: AnalysisFilters = {
   discipline: "batting",
@@ -44,7 +51,16 @@ export function filterDeliveries(
   rows: DeliveryEvidence[],
   f: AnalysisFilters,
   media: Set<string> = new Set(),
+  annotations: CoachingAnnotation[] = [],
 ) {
+  const classifiedIds =
+    f.coaching && coachingKeys.some((key) => f.coaching?.[key])
+      ? new Set(
+          annotations
+            .filter((n) => n.discipline === f.discipline && matchesCoaching(n, f.coaching!))
+            .map((n) => n.delivery_id),
+        )
+      : null;
   return rows.filter(
     (d) =>
       !d.superseded_by &&
@@ -67,7 +83,8 @@ export function filterDeliveries(
               : d.outcome === f.outcome)) &&
       (f.fromOver === "" || d.over_number >= Number(f.fromOver)) &&
       (f.toOver === "" || d.over_number <= Number(f.toOver)) &&
-      (!f.mediaOnly || media.has(d.id)),
+      (!f.mediaOnly || media.has(d.id)) &&
+      (!classifiedIds || classifiedIds.has(d.id)),
   );
 }
 export function summarizeDeliveries(rows: DeliveryEvidence[]) {

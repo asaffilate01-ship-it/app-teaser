@@ -111,6 +111,77 @@ await assert.rejects(
     ),
   (e) => e.code === "42501",
 );
+// Structured review classifications and evidence scope are enforced by PostgreSQL.
+const secondMatch = "a4000000-0000-4000-8000-000000000002";
+await db.query(
+  "insert into public.matches(id,owner_organisation_id,home_team_id,away_team_id,created_by) values($1,$2,$2,$3,$4)",
+  [secondMatch, org, other, a],
+);
+const writeAnnotation = (user, m, fields = {}) =>
+  asUser(user, () =>
+    db.query(
+      "insert into public.criclume_analysis_notes(organisation_id,match_id,discipline,note,created_by,shot_type,bowling_length,evidence_file_id,evidence_time_seconds) values($1,$2,'batting','Coach review',$3,$4,$5,$6,$7) returning id",
+      [org, m, user, fields.shot ?? "drive", "full", fields.file ?? file, fields.seconds ?? null],
+    ),
+  );
+await writeAnnotation(a, match);
+await assert.rejects(
+  () => writeAnnotation(a, secondMatch),
+  (e) => e.code === "42501",
+);
+await assert.rejects(
+  () => writeAnnotation(b, match),
+  (e) => e.code === "42501",
+);
+await assert.rejects(
+  () => writeAnnotation(a, match, { shot: "invented" }),
+  (e) => e.code === "23514",
+);
+await assert.rejects(
+  () => writeAnnotation(a, match, { seconds: 0 }),
+  (e) => e.code === "42501",
+); // photo cannot have video time
+const videoFile = "a5000000-0000-4000-8000-000000000002";
+await asUser(a, () =>
+  db.query(
+    "insert into public.criclume_analysis_files(id,organisation_id,match_id,kind,storage_path,label,analysis_consent,created_by) values($1,$2,$3,'video',$4,'Video fixture',true,$5)",
+    [videoFile, org, match, `${org}/${match}/${videoFile}.mp4`, a],
+  ),
+);
+const reviewId = (await writeAnnotation(a, match, { file: videoFile, seconds: 12 })).rows[0].id;
+await assert.rejects(
+  () => writeAnnotation(a, match, { file: videoFile, seconds: -1 }),
+  (e) => e.code === "23514",
+);
+await assert.rejects(
+  () => writeAnnotation(a, match, { file: videoFile, seconds: 86401 }),
+  (e) => e.code === "23514",
+);
+await assert.rejects(
+  () =>
+    asUser(a, () =>
+      db.query("update public.criclume_analysis_notes set shot_type='cut' where id=$1", [reviewId]),
+    ),
+  (e) => e.code === "42501",
+);
+await assert.rejects(
+  () =>
+    asUser(a, () => db.query("delete from public.criclume_analysis_notes where id=$1", [reviewId])),
+  (e) => e.code === "42501",
+);
+await asUser(a, () =>
+  db.query("delete from public.criclume_analysis_files where id=$1", [videoFile]),
+);
+const retained = (
+  await asUser(a, () =>
+    db.query(
+      "select evidence_file_id,evidence_time_seconds from public.criclume_analysis_notes where id=$1",
+      [reviewId],
+    ),
+  )
+).rows[0];
+assert.equal(retained.evidence_file_id, null);
+assert.equal(retained.evidence_time_seconds, 12);
 await db.query(
   "update public.criclume_analysis_files set retention_expires_at=now()-interval '1 day' where id=$1",
   [file],
@@ -123,6 +194,10 @@ await asUser(a, async () => {
     0,
   );
 });
+await assert.rejects(
+  () => writeAnnotation(a, match),
+  (e) => e.code === "42501",
+); // expired source
 assert.equal(
   (
     await db.query(
@@ -203,5 +278,5 @@ assert.equal(
 );
 await db.close();
 console.log(
-  "All migrations applied; coaching writes, cross-club isolation, object access, expiry, anonymous denial and atomic media completion passed.",
+  "All migrations applied; structured annotations, source scope/expiry/deletion, append-only coaching writes, cross-club isolation, object access, expiry, anonymous denial and atomic media completion passed.",
 );
