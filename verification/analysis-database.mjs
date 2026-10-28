@@ -111,6 +111,77 @@ await assert.rejects(
     ),
   (e) => e.code === "42501",
 );
+// Structured review classifications and evidence scope are enforced by PostgreSQL.
+const secondMatch = "a4000000-0000-4000-8000-000000000002";
+await db.query(
+  "insert into public.matches(id,owner_organisation_id,home_team_id,away_team_id,created_by) values($1,$2,$2,$3,$4)",
+  [secondMatch, org, other, a],
+);
+const writeAnnotation = (user, m, fields = {}) =>
+  asUser(user, () =>
+    db.query(
+      "insert into public.criclume_analysis_notes(organisation_id,match_id,discipline,note,created_by,shot_type,bowling_length,evidence_file_id,evidence_time_seconds) values($1,$2,'batting','Coach review',$3,$4,$5,$6,$7) returning id",
+      [org, m, user, fields.shot ?? "drive", "full", fields.file ?? file, fields.seconds ?? null],
+    ),
+  );
+await writeAnnotation(a, match);
+await assert.rejects(
+  () => writeAnnotation(a, secondMatch),
+  (e) => e.code === "42501",
+);
+await assert.rejects(
+  () => writeAnnotation(b, match),
+  (e) => e.code === "42501",
+);
+await assert.rejects(
+  () => writeAnnotation(a, match, { shot: "invented" }),
+  (e) => e.code === "23514",
+);
+await assert.rejects(
+  () => writeAnnotation(a, match, { seconds: 0 }),
+  (e) => e.code === "42501",
+); // photo cannot have video time
+const videoFile = "a5000000-0000-4000-8000-000000000002";
+await asUser(a, () =>
+  db.query(
+    "insert into public.criclume_analysis_files(id,organisation_id,match_id,kind,storage_path,label,analysis_consent,created_by) values($1,$2,$3,'video',$4,'Video fixture',true,$5)",
+    [videoFile, org, match, `${org}/${match}/${videoFile}.mp4`, a],
+  ),
+);
+const reviewId = (await writeAnnotation(a, match, { file: videoFile, seconds: 12 })).rows[0].id;
+await assert.rejects(
+  () => writeAnnotation(a, match, { file: videoFile, seconds: -1 }),
+  (e) => e.code === "23514",
+);
+await assert.rejects(
+  () => writeAnnotation(a, match, { file: videoFile, seconds: 86401 }),
+  (e) => e.code === "23514",
+);
+await assert.rejects(
+  () =>
+    asUser(a, () =>
+      db.query("update public.criclume_analysis_notes set shot_type='cut' where id=$1", [reviewId]),
+    ),
+  (e) => e.code === "42501",
+);
+await assert.rejects(
+  () =>
+    asUser(a, () => db.query("delete from public.criclume_analysis_notes where id=$1", [reviewId])),
+  (e) => e.code === "42501",
+);
+await asUser(a, () =>
+  db.query("delete from public.criclume_analysis_files where id=$1", [videoFile]),
+);
+const retained = (
+  await asUser(a, () =>
+    db.query(
+      "select evidence_file_id,evidence_time_seconds from public.criclume_analysis_notes where id=$1",
+      [reviewId],
+    ),
+  )
+).rows[0];
+assert.equal(retained.evidence_file_id, null);
+assert.equal(retained.evidence_time_seconds, 12);
 await db.query(
   "update public.criclume_analysis_files set retention_expires_at=now()-interval '1 day' where id=$1",
   [file],
@@ -123,6 +194,10 @@ await asUser(a, async () => {
     0,
   );
 });
+await assert.rejects(
+  () => writeAnnotation(a, match),
+  (e) => e.code === "42501",
+); // expired source
 assert.equal(
   (
     await db.query(
@@ -201,7 +276,68 @@ assert.equal(
   ).rows[0].n,
   2,
 );
+// Exercise both CASE branches through the actual match-creation RPC.
+const away = "a2000000-0000-4000-8000-000000000003";
+await db.query(
+  "insert into public.teams(id,organisation_id,name,short_name) values($1,$2,'Second fixture team','S')",
+  [away, org],
+);
+await db.query(
+  "update public.organisation_members set role='owner' where organisation_id=$1 and user_id=$2",
+  [org, a],
+);
+for (const team of [org, away]) {
+  for (let i = 0; i < 2; i++) {
+    const player = (
+      await db.query(
+        "insert into public.players(organisation_id,display_name) values($1,'Fixture player') returning id",
+        [org],
+      )
+    ).rows[0].id;
+    await db.query("insert into public.team_players(team_id,player_id) values($1,$2)", [
+      team,
+      player,
+    ]);
+  }
+}
+for (const scheduled of [null, "2026-12-01T10:00:00Z"]) {
+  const result = (
+    await asUser(a, () =>
+      db.query(
+        "select public.create_match_workspace($1,$1,$2,null,null,$3,'private',$1,20,1,6,'{}',null) as result",
+        [org, away, scheduled],
+      ),
+    )
+  ).rows[0].result;
+  const created = (
+    await db.query("select status from public.matches where id=$1", [result.matchId])
+  ).rows[0];
+  assert.equal(created.status, scheduled ? "scheduled" : "draft");
+  assert.equal(
+    (
+      await db.query("select count(*)::int as n from public.match_squads where match_id=$1", [
+        result.matchId,
+      ])
+    ).rows[0].n,
+    4,
+  );
+  assert.equal(
+    (await db.query("select match_id from public.innings where id=$1", [result.inningsId])).rows[0]
+      .match_id,
+    result.matchId,
+  );
+}
+await assert.rejects(
+  () =>
+    asUser(b, () =>
+      db.query(
+        "select public.create_match_workspace($1,$1,$2,null,null,null,'private',$1,20,1,6,'{}',null)",
+        [org, away],
+      ),
+    ),
+  (e) => e.code === "42501",
+);
 await db.close();
 console.log(
-  "All migrations applied; coaching writes, cross-club isolation, object access, expiry, anonymous denial and atomic media completion passed.",
+  "All migrations applied; structured annotations, source scope/expiry/deletion, append-only coaching writes, cross-club isolation, object access, expiry, anonymous denial and atomic media completion passed.",
 );

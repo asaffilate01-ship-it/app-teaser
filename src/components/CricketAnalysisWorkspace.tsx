@@ -1,3 +1,13 @@
+import {
+  coachingKeys,
+  coachingOptions,
+  coachingLabels,
+  coachingLabel,
+  emptyCoachingFields,
+  matchesCoaching,
+  coachingCsv,
+  type CoachingFields,
+} from "@/lib/coaching";
 import { useEffect, useMemo, useState } from "react";
 import {
   filterDeliveries,
@@ -109,6 +119,10 @@ function MatchAnalysis({
   const [tags, setTags] = useState("");
   const [delivery, setDelivery] = useState("");
   const [search, setSearch] = useState("");
+  const [annotations, setAnnotations] = useState<CoachingFields>({ ...emptyCoachingFields });
+  const [source, setSource] = useState("");
+  const [sourceTime, setSourceTime] = useState("");
+  const [notePage, setNotePage] = useState(0);
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -136,10 +150,21 @@ function MatchAnalysis({
     return () => window.clearTimeout(t);
   }, [preview]);
   const rows = useMemo(
-    () => filterDeliveries(data?.deliveries ?? [], filters, data?.mediaIds),
+    () => filterDeliveries(data?.deliveries ?? [], filters, data?.mediaIds, data?.notes),
     [data, filters],
   );
   const summary = summarizeDeliveries(rows);
+  const visibleDeliveryIds = new Set(rows.map((d) => d.id));
+  const visibleNotes = (data?.notes ?? []).filter(
+    (n) =>
+      n.discipline === filters.discipline &&
+      matchesCoaching(n, filters.coaching ?? emptyCoachingFields) &&
+      (!n.delivery_id || visibleDeliveryIds.has(n.delivery_id)) &&
+      `${n.note} ${n.tags}`.toLowerCase().includes(search.toLowerCase()),
+  );
+  useEffect(() => {
+    setNotePage(0);
+  }, [filters, search]);
   const names = new Map(players.map((p) => [p.id, p.name]));
   const update = <K extends keyof AnalysisFilters>(k: K, v: AnalysisFilters[K]) => {
     setFilters((f) => ({ ...f, [k]: v }));
@@ -178,10 +203,15 @@ function MatchAnalysis({
       setBusy(false);
     }
   };
-  const showFile = (f: EvidenceFile) =>
+  const showFile = (f: EvidenceFile, seconds: number | null = null) =>
     action(async () => {
       setClipSelection(null);
-      setPreview({ url: await evidenceUrl(f), kind: f.kind, label: f.label });
+      const url = await evidenceUrl(f);
+      setPreview({
+        url: seconds !== null && f.kind === "video" ? `${url}#t=${seconds}` : url,
+        kind: f.kind,
+        label: f.label,
+      });
     });
   const showClip = (id: string, index = 0) =>
     action(async () => {
@@ -194,13 +224,15 @@ function MatchAnalysis({
           label: `Delivery clip · Camera view ${index + 1}`,
         });
     });
-  const exportCsv = () => {
+  const exportCsv = (notes = false) => {
     const url = URL.createObjectURL(
-      new Blob([deliveryCsv(rows)], { type: "text/csv;charset=utf-8" }),
+      new Blob([notes ? coachingCsv(visibleNotes) : deliveryCsv(rows)], {
+        type: "text/csv;charset=utf-8",
+      }),
     );
     const a = document.createElement("a");
     a.href = url;
-    a.download = `criclume-${filters.discipline}.csv`;
+    a.download = `criclume-${filters.discipline}${notes ? "-observations" : ""}.csv`;
     a.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
@@ -330,6 +362,40 @@ function MatchAnalysis({
           Linked clips only
         </label>
       </div>
+      <fieldset className="rounded-2xl border border-white/10 p-4">
+        <legend className="px-2 text-sm font-semibold">Coach observation filters</legend>
+        <p className="mb-3 text-xs text-slate-400">
+          Matches classifications recorded together in one human observation for this discipline.
+          Unannotated deliveries are excluded when a filter is selected.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {coachingKeys.map((key) => (
+            <label key={key} className="grid gap-1 text-xs text-slate-400">
+              {coachingLabels[key]}
+              <select
+                aria-label={`Filter ${coachingLabels[key].toLowerCase()}`}
+                className={field}
+                disabled={!data.workspaceAvailable}
+                value={filters.coaching?.[key] ?? ""}
+                onChange={(e) =>
+                  update("coaching", {
+                    ...emptyCoachingFields,
+                    ...filters.coaching,
+                    [key]: e.target.value,
+                  })
+                }
+              >
+                <option value="">All recorded values</option>
+                {coachingOptions[key].map((value) => (
+                  <option key={value} value={value}>
+                    {coachingLabel(value)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
         {Object.entries(summary).map(([k, v]) => (
           <div key={k} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
@@ -425,7 +491,7 @@ function MatchAnalysis({
         >
           Next
         </button>
-        <button className={field} disabled={!rows.length} onClick={exportCsv}>
+        <button className={field} disabled={!rows.length} onClick={() => exportCsv()}>
           Export filtered CSV
         </button>
       </div>
@@ -566,8 +632,16 @@ function MatchAnalysis({
       </section>
       <section className="rounded-2xl border border-white/10 p-5">
         <h3 className="text-lg font-semibold">Coaching observations</h3>
+        {!data.workspaceAvailable && (
+          <p role="status" className="mt-3 text-sm text-amber-200">
+            Coaching storage is unavailable. Ask your club administrator to confirm access and apply
+            the latest workspace update.
+          </p>
+        )}
         <p className="mt-1 text-xs text-slate-400">
-          Human notes, separate from official scores. Latest 100 notes shown.
+          Human observations, separate from official scores. Classifications describe what a coach
+          recorded, not AI measurements. Delivery notes follow the filters above; whole-match notes
+          remain visible.
         </p>
         <div className="mt-4 grid gap-3">
           <label className="grid gap-1 text-sm">
@@ -585,6 +659,60 @@ function MatchAnalysis({
               ))}
             </select>
           </label>
+          <fieldset className="grid gap-3 rounded-xl border border-white/10 p-4 sm:grid-cols-2">
+            <legend className="px-2 text-sm">Classify this observation (optional)</legend>
+            {coachingKeys.map((key) => (
+              <label key={key} className="grid gap-1 text-sm">
+                {coachingLabels[key]}
+                <select
+                  aria-label={`Record ${coachingLabels[key].toLowerCase()}`}
+                  className={field}
+                  value={annotations[key]}
+                  onChange={(e) => setAnnotations((a) => ({ ...a, [key]: e.target.value }))}
+                >
+                  <option value="">Not recorded</option>
+                  {coachingOptions[key].map((value) => (
+                    <option key={value} value={value}>
+                      {coachingLabel(value)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </fieldset>
+          <label className="grid gap-1 text-sm">
+            Source photo or video (optional)
+            <select
+              aria-label="Observation source"
+              className={field}
+              value={source}
+              onChange={(e) => {
+                setSource(e.target.value);
+                setSourceTime("");
+              }}
+            >
+              <option value="">No source linked</option>
+              {data.files.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.label} · {f.kind}
+                </option>
+              ))}
+            </select>
+          </label>
+          {data.files.find((f) => f.id === source)?.kind === "video" && (
+            <label className="grid gap-1 text-sm">
+              Video time (whole seconds, optional)
+              <input
+                className={field}
+                type="number"
+                min="0"
+                max="86400"
+                step="1"
+                value={sourceTime}
+                onChange={(e) => setSourceTime(e.target.value)}
+              />
+            </label>
+          )}
           <label className="grid gap-1 text-sm">
             Observation
             <textarea
@@ -595,7 +723,7 @@ function MatchAnalysis({
             />
           </label>
           <label className="grid gap-1 text-sm">
-            Tags: shot type, line, length or fielding action
+            Additional tags
             <input
               className={field}
               maxLength={300}
@@ -608,9 +736,23 @@ function MatchAnalysis({
             disabled={busy || !data?.workspaceAvailable || note.trim().length < 3}
             onClick={() =>
               void action(async () => {
-                await saveNote(org, match, filters.discipline, note, tags, delivery);
+                await saveNote(
+                  org,
+                  match,
+                  filters.discipline,
+                  note,
+                  tags,
+                  delivery,
+                  annotations,
+                  source,
+                  sourceTime,
+                );
                 setNote("");
-                setNotice("Coaching observation saved.");
+                setTags("");
+                setAnnotations({ ...emptyCoachingFields });
+                setSource("");
+                setSourceTime("");
+                setNotice("Coaching observation saved. Clear filters if it is not visible below.");
                 setVersion((v) => v + 1);
               })
             }
@@ -622,21 +764,89 @@ function MatchAnalysis({
             <input className={field} value={search} onChange={(e) => setSearch(e.target.value)} />
           </label>
         </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            className={field}
+            disabled={notePage === 0}
+            onClick={() => setNotePage((p) => p - 1)}
+          >
+            Previous observations
+          </button>
+          <p role="status" className="text-xs text-slate-300">
+            {visibleNotes.length} matching observations · Page {notePage + 1} of{" "}
+            {Math.max(1, Math.ceil(visibleNotes.length / 20))}
+          </p>
+          <button
+            className={field}
+            disabled={(notePage + 1) * 20 >= visibleNotes.length}
+            onClick={() => setNotePage((p) => p + 1)}
+          >
+            Next observations
+          </button>
+          <button className={field} disabled={!visibleNotes.length} onClick={() => exportCsv(true)}>
+            Export observations CSV
+          </button>
+        </div>
+        {data.workspaceAvailable && !visibleNotes.length && (
+          <p className="mt-4 text-sm text-slate-400">
+            No observations match this discipline and these filters.
+          </p>
+        )}
         <div className="mt-4 space-y-3">
-          {data?.notes
-            .filter(
-              (n) =>
-                n.discipline === filters.discipline &&
-                `${n.note} ${n.tags}`.toLowerCase().includes(search.toLowerCase()),
-            )
-            .map((n) => (
-              <article key={n.id} className="rounded-xl border border-white/10 p-4">
-                <p className="whitespace-pre-wrap text-sm">{n.note}</p>
+          {visibleNotes.slice(notePage * 20, notePage * 20 + 20).map((n) => (
+            <article key={n.id} className="rounded-xl border border-white/10 p-4">
+              <p className="whitespace-pre-wrap text-sm">{n.note}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {coachingKeys
+                  .filter((key) => n[key])
+                  .map((key) => (
+                    <span
+                      key={key}
+                      className="rounded-full border border-amber-300/20 px-2 py-1 text-xs text-amber-200"
+                    >
+                      {coachingLabels[key]}: {coachingLabel(n[key]!)}
+                    </span>
+                  ))}
+              </div>
+              <p className="mt-2 text-xs text-slate-400">
+                {n.delivery_id
+                  ? (() => {
+                      const d = data.deliveries.find((d) => d.id === n.delivery_id);
+                      return d
+                        ? `Delivery ${d.over_number}.${d.ball_in_over}`
+                        : "Delivery no longer current";
+                    })()
+                  : "Whole match"}
+              </p>
+              {n.evidence_file_id &&
+                (() => {
+                  const f = data.files.find((f) => f.id === n.evidence_file_id);
+                  return f ? (
+                    <button
+                      className="mt-2 text-sm text-emerald-200 underline"
+                      disabled={busy}
+                      onClick={() => void showFile(f, n.evidence_time_seconds)}
+                    >
+                      Open source: {f.label}
+                      {n.evidence_time_seconds !== null ? ` · ${n.evidence_time_seconds}s` : ""}
+                    </button>
+                  ) : (
+                    <p className="mt-2 text-xs text-slate-400">
+                      Source unavailable or outside the latest 100 files.
+                    </p>
+                  );
+                })()}
+              {!n.evidence_file_id && n.evidence_time_seconds !== null && (
                 <p className="mt-2 text-xs text-slate-400">
-                  {n.tags} · {new Date(n.created_at).toLocaleString()} · Human observation
+                  Source removed · recorded time {n.evidence_time_seconds}s
                 </p>
-              </article>
-            ))}
+              )}
+
+              <p className="mt-2 text-xs text-slate-400">
+                {n.tags} · {new Date(n.created_at).toLocaleString()} · Human observation
+              </p>
+            </article>
+          ))}
         </div>
       </section>
     </div>
