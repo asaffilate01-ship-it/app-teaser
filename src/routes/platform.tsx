@@ -1,7 +1,15 @@
 import { SectionNavigation } from "@/components/SectionNavigation";
 import { readSection, platformSections } from "@/lib/navigation";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import {
   Activity,
   BarChart3,
@@ -100,7 +108,7 @@ const tabDefinitions: Array<[PlatformTab, LucideIcon, string]> = [
   ["operations", Activity, "Operations"],
 ];
 
-function Platform() {
+export function Platform() {
   const {
     configured,
     session,
@@ -113,39 +121,98 @@ function Platform() {
   const [membershipsLoading, setMembershipsLoading] = useState(false);
   const [selectedOrganisationId, setSelectedOrganisationId] = useState<string | null>(null);
 
-  const reloadMemberships = useCallback(async () => {
-    if (!session) return;
-    setMembershipsLoading(true);
-    try {
-      const next = await listOrganisationMemberships();
-      setMemberships(next);
-      const saved = window.localStorage.getItem("criclume:selected-organisation");
-      const selected = next.find((item) => item.organisationId === saved) ?? next[0] ?? null;
-      setSelectedOrganisationId(selected?.organisationId ?? null);
-    } finally {
-      setMembershipsLoading(false);
-    }
-  }, [session]);
+  const [membershipError, setMembershipError] = useState<string | null>(null);
+  const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
+  const membershipRequest = useRef(0);
+  const createdForUser = useRef<string | null>(null);
+  const reloadMemberships = useCallback(
+    async (requireMembership = false) => {
+      if (!session) return;
+      const request = ++membershipRequest.current;
+      setMembershipsLoading(true);
+      setMembershipError(null);
+      try {
+        const next = await listOrganisationMemberships();
+        if (request !== membershipRequest.current) return;
+        if (requireMembership && next.length === 0) {
+          throw new Error("Created organisation membership is not available yet.");
+        }
+        let saved: string | null = null;
+        try {
+          saved = window.localStorage.getItem("criclume:selected-organisation");
+        } catch {
+          /* Storage is optional. */
+        }
+        setMemberships(next);
+        const selected = next.find((item) => item.organisationId === saved) ?? next[0] ?? null;
+        setSelectedOrganisationId(selected?.organisationId ?? null);
+      } catch {
+        if (request === membershipRequest.current)
+          setMembershipError(
+            "Your organisations could not be loaded. Check your connection and try again. If you just created an organisation, do not create another.",
+          );
+      } finally {
+        if (request === membershipRequest.current) {
+          setLoadedUserId(session.user.id);
+          setMembershipsLoading(false);
+        }
+      }
+    },
+    [session],
+  );
 
   useEffect(() => {
+    setMemberships([]);
+    setSelectedOrganisationId(null);
+    setLoadedUserId(null);
+    setMembershipError(null);
     if (session) void reloadMemberships();
-    else {
-      setMemberships([]);
-      setSelectedOrganisationId(null);
-    }
+    return () => {
+      membershipRequest.current += 1;
+    };
   }, [reloadMemberships, session]);
 
   const selectOrganisation = (id: string) => {
-    window.localStorage.setItem("criclume:selected-organisation", id);
+    try {
+      window.localStorage.setItem("criclume:selected-organisation", id);
+    } catch {
+      /* Selection still works without persistence. */
+    }
     setSelectedOrganisationId(id);
   };
 
   if (!configured) return <ActivationGate />;
   if (sessionLoading) return <FullPageStatus title="Connecting to CricLume Cloud…" />;
   if (!session) return <SignInPanel error={sessionError} requestLink={requestLink} />;
-  if (membershipsLoading) return <FullPageStatus title="Loading your organisations…" />;
+  if (membershipsLoading || loadedUserId !== session.user.id)
+    return <FullPageStatus title="Loading your organisations…" />;
+  if (membershipError)
+    return (
+      <PageFrame>
+        <main id="main-content" tabIndex={-1} className="mx-auto max-w-xl px-4 py-12">
+          <h1 className="text-2xl font-bold">Organisation access unavailable</h1>
+          <p role="alert" className="mt-4 text-amber-200">
+            {membershipError}
+          </p>
+          <button
+            className="action-primary mt-6"
+            onClick={() => void reloadMemberships(createdForUser.current === session.user.id)}
+          >
+            Retry organisation access
+          </button>
+        </main>
+      </PageFrame>
+    );
   if (memberships.length === 0)
-    return <OrganisationOnboarding user={session.user} onCreated={reloadMemberships} />;
+    return (
+      <OrganisationOnboarding
+        user={session.user}
+        onCreated={() => {
+          createdForUser.current = session.user.id;
+          return reloadMemberships(true);
+        }}
+      />
+    );
 
   const selected =
     memberships.find((item) => item.organisationId === selectedOrganisationId) ?? memberships[0]!;

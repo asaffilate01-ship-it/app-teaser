@@ -53,3 +53,11 @@ Applied UI UX Pro Max's `error summary validation` guidance to the coaching obse
 A failed server save retains all draft fields and offers retry in the same form. Fields are disabled during requests to prevent edits from being cleared by completion of an earlier save. Existing database permissions remain authoritative; this change does not weaken access checks or introduce provider calls.
 
 Validation: boundary tests for meaningful note lengths, video offsets and stale associations; real-component Chromium checks for summary focus, field links, corrected errors, draft retention after a simulated network failure, successful retry and no overflow at 375/844/1440px. Broader onboarding/scoring validation, assistive-technology review and live-service acceptance remain pending.
+
+## Organisation access recovery
+
+Membership lookup failures no longer fall through to the create-organisation form. The initial account lookup stays in a loading state until it completes; failed requests show an explicit access error and retry. A confirmed creation followed by missing or failed membership loading retries access only, preventing another creation attempt in that page session. Request generations discard late results after account changes/unmounts. Browser storage is optional, so blocked local storage cannot turn successful membership loading into an access failure.
+
+This is client-side recovery, not server-side creation idempotency: an ambiguous network failure during the create request itself, or a full page reload, still requires server-side idempotency/reconciliation work. No live database or provider changes are included.
+
+Validated with `npm run check` (56 tests, typecheck, lint and production build) and real-component Chromium using synthetic authentication/membership responses: initial failure, retry to confirmed empty account, confirmed creation followed by empty membership, repeated access retry without another creation, delayed old-account rejection and mobile/desktop overflow checks. These checks do not establish live authentication or provisioning readiness.
