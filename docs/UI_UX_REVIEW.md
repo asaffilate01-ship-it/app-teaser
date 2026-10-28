@@ -29,3 +29,19 @@ Reference: [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-ski
 | Release readiness     | Hosted logo/image checks, real-device accessibility review, signed media playback and operational monitoring                                     | Staging end-to-end review, backup/restore verification and explicit publication decision                                        |
 
 Existing OpenAI/Claude/Gemini routing works on aggregate cricket data; this phase does not claim that raw photos or videos are sent to those providers. No paid inference or live deployment was performed.
+
+## Evidence preview follow-up
+
+Applied the same pinned UI UX Pro Max reference to keyboard interaction and mobile evidence review. Private previews now use the existing Radix dialog: accessible title/description, focus containment, Escape dismissal and focus return to the initiating control. Camera responses arriving after dismissal cannot reopen the preview. Loading/failure feedback remains inside the dialog. The existing 60-second timeout is explained and announces closure.
+
+Evidence filenames wrap, actions identify their source file to assistive technology, and file actions/dialog close controls provide 44px minimum touch targets. No new runtime dependency or provider call was added.
+
+Validated the real components with synthetic fixtures at 375px, 844px and 1440px: keyboard opening, repeated Tab containment, Escape, focus restoration, source selection and no horizontal overflow. This does not validate live signed-media playback or claim a native mobile build.
+
+### Remaining priorities after the review releases
+
+1. Staging service activation: migrations, authentication, billing and signed video callbacks, followed by real-device/media checks.
+2. Raw-media AI: resolve server-side provider credential configuration; implement consent-aware dispatch, budgets, asynchronous results and provenance through Omniqora.
+3. Human review lifecycle: correction/version history and reviewed AI results. Structured manual observations, archive search and downloadable reports are already implemented.
+4. Broader form accessibility: field-linked validation summaries and inline errors across onboarding/scoring flows; test with assistive technology.
+5. Publication: hosted asset checks and operational/backup verification before a live release.

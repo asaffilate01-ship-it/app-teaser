@@ -140,7 +140,7 @@ export function EvidenceLibrary({
               <article key={f.id} className="min-w-0 rounded-xl border border-white/10 p-3">
                 <button
                   disabled={busy}
-                  className="block max-w-full truncate text-left text-emerald-300"
+                  className="block min-h-11 max-w-full break-words text-left text-emerald-300"
                   title={f.label}
                   onClick={() => onOpen(f)}
                 >
@@ -155,14 +155,16 @@ export function EvidenceLibrary({
                 <div className="mt-3 flex flex-wrap gap-3">
                   <button
                     disabled={busy}
-                    className="text-sm text-amber-200 underline"
+                    aria-label={`Use ${f.label} in observation`}
+                    className="min-h-11 text-sm text-amber-200 underline"
                     onClick={() => onSelect(f)}
                   >
                     Use in observation
                   </button>
                   <button
                     disabled={busy}
-                    className="text-xs text-slate-400 underline"
+                    aria-label={`Remove my upload: ${f.label}`}
+                    className="min-h-11 text-sm text-slate-300 underline"
                     onClick={() => onRemove(f)}
                   >
                     Remove my upload

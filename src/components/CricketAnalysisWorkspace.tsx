@@ -1,3 +1,4 @@
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { reviewReportHtml } from "@/lib/review-report";
 import { EvidenceLibrary } from "@/components/EvidenceLibrary";
 import {
@@ -120,6 +121,14 @@ function MatchAnalysis({
   const [consent, setConsent] = useState(false);
   const [junior, setJunior] = useState(true);
   const [preview, setPreview] = useState<{ url: string; kind: string; label: string } | null>(null);
+  const [previewFailed, setPreviewFailed] = useState(false);
+  const previewOrigin = useRef<HTMLElement | null>(null);
+  const previewRequest = useRef(0);
+  const closePreview = () => {
+    previewRequest.current += 1;
+    setPreview(null);
+    setClipSelection(null);
+  };
   const [note, setNote] = useState("");
   const [tags, setTags] = useState("");
   const [delivery, setDelivery] = useState("");
@@ -161,8 +170,13 @@ function MatchAnalysis({
     };
   }, [org, match, version]);
   useEffect(() => {
+    setPreviewFailed(false);
     if (!preview) return;
-    const t = window.setTimeout(() => setPreview(null), 60000);
+    const t = window.setTimeout(() => {
+      previewRequest.current += 1;
+      setPreview(null);
+      setNotice("Private preview closed after 60 seconds. Open the source again to continue.");
+    }, 60000);
     return () => window.clearTimeout(t);
   }, [preview]);
   const rows = useMemo(
@@ -213,6 +227,7 @@ function MatchAnalysis({
     </label>
   );
   const action = async (fn: () => Promise<void>) => {
+    if (!preview) previewOrigin.current = document.activeElement as HTMLElement;
     setBusy(true);
     setError("");
     setNotice("");
@@ -236,14 +251,18 @@ function MatchAnalysis({
     });
   const showClip = (id: string, index = 0) =>
     action(async () => {
+      const request = ++previewRequest.current;
       const c = data?.clips.filter((c) => c.delivery_id === id)[index];
       setClipSelection({ deliveryId: id, index });
-      if (c)
+      if (c) {
+        const url = await clipUrl(c.asset_id);
+        if (request !== previewRequest.current) return;
         setPreview({
-          url: `${await clipUrl(c.asset_id)}#t=${c.offset_start_ms / 1000},${c.offset_end_ms / 1000}`,
+          url: `${url}#t=${c.offset_start_ms / 1000},${c.offset_end_ms / 1000}`,
           kind: "video",
           label: `Delivery clip · Camera view ${index + 1}`,
         });
+      }
     });
   const exportCsv = (notes = false) => {
     const url = URL.createObjectURL(
@@ -657,45 +676,78 @@ function MatchAnalysis({
           )
         )}
         {preview && (
-          <div className="mt-4">
-            <div className="mb-2 flex justify-between">
-              <span>{preview.label}</span>
-              <button onClick={() => setPreview(null)}>Close</button>
-            </div>
-            {clipSelection && (
-              <label className="mb-3 grid gap-2 text-sm">
-                Camera view
-                <select
-                  className={field}
-                  value={clipSelection.index}
-                  disabled={busy}
-                  onChange={(e) => void showClip(clipSelection.deliveryId, Number(e.target.value))}
-                >
-                  {data.clips
-                    .filter((c) => c.delivery_id === clipSelection.deliveryId)
-                    .map((c, index) => (
-                      <option key={`${c.asset_id}:${index}`} value={index}>
-                        Camera view {index + 1}
-                      </option>
-                    ))}
-                </select>
-              </label>
-            )}
-            {preview.kind === "image" ? (
-              <img
-                src={preview.url}
-                alt={preview.label}
-                className="max-h-96 rounded-xl object-contain"
-              />
-            ) : (
-              <video
-                src={preview.url}
-                controls
-                preload="metadata"
-                className="max-h-96 w-full rounded-xl"
-              />
-            )}
-          </div>
+          <Dialog
+            open
+            onOpenChange={(open) => {
+              if (!open) closePreview();
+            }}
+          >
+            <DialogContent
+              className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-4xl overflow-y-auto rounded-2xl border-white/20 bg-slate-950 text-white"
+              onCloseAutoFocus={(event) => {
+                event.preventDefault();
+                if (previewOrigin.current?.isConnected) previewOrigin.current.focus();
+              }}
+            >
+              <DialogTitle className="break-words pr-12">{preview.label}</DialogTitle>
+              <DialogDescription className="text-slate-300">
+                Private evidence preview. Closes after 60 seconds; reopen the source to continue.
+              </DialogDescription>
+              {busy && (
+                <p role="status" className="text-sm text-slate-300">
+                  Loading camera view…
+                </p>
+              )}
+              {error && (
+                <p role="alert" className="text-sm text-amber-200">
+                  {error}
+                </p>
+              )}
+              {clipSelection && (
+                <label className="mb-3 grid gap-2 text-sm">
+                  Camera view
+                  <select
+                    className={field}
+                    value={clipSelection.index}
+                    disabled={busy}
+                    onChange={(e) =>
+                      void showClip(clipSelection.deliveryId, Number(e.target.value))
+                    }
+                  >
+                    {data.clips
+                      .filter((c) => c.delivery_id === clipSelection.deliveryId)
+                      .map((c, index) => (
+                        <option key={`${c.asset_id}:${index}`} value={index}>
+                          Camera view {index + 1}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              )}
+              {previewFailed && (
+                <p role="alert" className="text-sm text-amber-200">
+                  This media could not be played or displayed. Close and reopen the source for a
+                  fresh link. If it still fails, check the file format and your connection.
+                </p>
+              )}
+              {preview.kind === "image" ? (
+                <img
+                  src={preview.url}
+                  onError={() => setPreviewFailed(true)}
+                  alt={preview.label}
+                  className="max-h-[60dvh] w-full rounded-xl object-contain"
+                />
+              ) : (
+                <video
+                  src={preview.url}
+                  onError={() => setPreviewFailed(true)}
+                  controls
+                  preload="metadata"
+                  className="max-h-96 w-full rounded-xl"
+                />
+              )}
+            </DialogContent>
+          </Dialog>
         )}
       </section>
       <section className="rounded-2xl border border-white/10 p-5">
