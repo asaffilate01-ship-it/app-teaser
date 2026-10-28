@@ -40,8 +40,15 @@ export function usePlatformDashboard(organisationId: string | null, role: Platfo
     setData(null);
     setLoading(Boolean(organisationId && role));
     void refresh();
-    if (!organisationId || !role) return;
-    return subscribeToOrganisationOperations(organisationId, () => void refresh());
+    if (!organisationId || !role)
+      return () => {
+        requestRef.current++;
+      };
+    const unsubscribe = subscribeToOrganisationOperations(organisationId, () => void refresh());
+    return () => {
+      requestRef.current++;
+      unsubscribe();
+    };
   }, [organisationId, refresh, role]);
 
   const run = useCallback(

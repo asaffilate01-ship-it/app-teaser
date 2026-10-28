@@ -130,6 +130,20 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <a
+          className="skip-link"
+          href="#main-content"
+          onClick={(event) => {
+            const main = document.getElementById("main-content");
+            if (main) {
+              event.preventDefault();
+              main.focus();
+              main.scrollIntoView({ block: "start" });
+            }
+          }}
+        >
+          Skip to main content
+        </a>
         {children}
         <Scripts />
       </body>

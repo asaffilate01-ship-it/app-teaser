@@ -32,8 +32,8 @@ export function CricketAnalysisWorkspace({
   const [match, setMatch] = useState(matches[0]?.id ?? "");
   return (
     <section className="space-y-5">
-      <header className="rounded-3xl border border-emerald-300/20 bg-gradient-to-br from-emerald-950/50 to-slate-950 p-6">
-        <p className="text-xs uppercase tracking-widest text-emerald-300">
+      <header className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-[#2c1429] via-[#17111f] to-[#2a210e] p-6 md:p-8">
+        <p className="text-xs font-bold uppercase tracking-widest text-amber-200">
           CricLume · Analysis room
         </p>
         <h2 className="mt-2 text-3xl font-bold">Every delivery. Every angle.</h2>
@@ -46,6 +46,15 @@ export function CricketAnalysisWorkspace({
         <p>Coaching access is required.</p>
       ) : (
         <>
+          {matches.length === 0 && (
+            <div className="workspace-empty">
+              <h3 className="text-xl">Your first analysis starts with a match</h3>
+              <p>
+                Create a match in Competitions, record deliveries in the scorer, then return here to
+                review your team’s performance.
+              </p>
+            </div>
+          )}
           <label className="flex flex-col gap-2 text-sm">
             Match
             <select className={field} value={match} onChange={(e) => setMatch(e.target.value)}>
@@ -87,6 +96,11 @@ function MatchAnalysis({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [version, setVersion] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [notice, setNotice] = useState("");
+  const [clipSelection, setClipSelection] = useState<{ deliveryId: string; index: number } | null>(
+    null,
+  );
   const [file, setFile] = useState<File | null>(null);
   const [consent, setConsent] = useState(false);
   const [junior, setJunior] = useState(true);
@@ -97,13 +111,20 @@ function MatchAnalysis({
   const [search, setSearch] = useState("");
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setError("");
     void loadAnalysis(org, match)
       .then((r) => {
         if (active) setData(r);
       })
       .catch(() => {
         if (active)
-          setError("Evidence could not be loaded. Check your access and database deployment.");
+          setError(
+            "Evidence could not be loaded. Check your connection or ask your club administrator to confirm access.",
+          );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
       });
     return () => {
       active = false;
@@ -148,6 +169,7 @@ function MatchAnalysis({
   const action = async (fn: () => Promise<void>) => {
     setBusy(true);
     setError("");
+    setNotice("");
     try {
       await fn();
     } catch (e) {
@@ -157,15 +179,19 @@ function MatchAnalysis({
     }
   };
   const showFile = (f: EvidenceFile) =>
-    action(async () => setPreview({ url: await evidenceUrl(f), kind: f.kind, label: f.label }));
-  const showClip = (id: string) =>
     action(async () => {
-      const c = data?.clips.find((c) => c.delivery_id === id);
+      setClipSelection(null);
+      setPreview({ url: await evidenceUrl(f), kind: f.kind, label: f.label });
+    });
+  const showClip = (id: string, index = 0) =>
+    action(async () => {
+      const c = data?.clips.filter((c) => c.delivery_id === id)[index];
+      setClipSelection({ deliveryId: id, index });
       if (c)
         setPreview({
           url: `${await clipUrl(c.asset_id)}#t=${c.offset_start_ms / 1000},${c.offset_end_ms / 1000}`,
           kind: "video",
-          label: "Delivery clip",
+          label: `Delivery clip · Camera view ${index + 1}`,
         });
     });
   const exportCsv = () => {
@@ -178,11 +204,47 @@ function MatchAnalysis({
     a.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
+  if (!data)
+    return (
+      <section className="workspace-empty" aria-busy={loading} aria-live="polite">
+        <h3 className="text-xl">
+          {loading ? "Loading your match evidence" : "Match evidence unavailable"}
+        </h3>
+        <p>{loading ? "Preparing recorded deliveries, linked clips and coaching notes…" : error}</p>
+        {loading ? (
+          <div className="grid w-full grid-cols-3 gap-3" aria-hidden="true">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-20 animate-pulse rounded-xl bg-white/10" />
+            ))}
+          </div>
+        ) : (
+          <button className="action-primary" onClick={() => setVersion((v) => v + 1)}>
+            Try again
+          </button>
+        )}
+      </section>
+    );
   return (
-    <div className="space-y-5">
+    <div className="space-y-5" aria-busy={loading || busy}>
       {error && (
         <p role="alert" className="rounded-xl border border-amber-400/30 p-3 text-amber-200">
-          {error}
+          {error}{" "}
+          <button
+            type="button"
+            className="ml-3 underline"
+            disabled={loading}
+            onClick={() => setVersion((v) => v + 1)}
+          >
+            Reload evidence
+          </button>
+        </p>
+      )}
+      {notice && (
+        <p
+          role="status"
+          className="rounded-xl border border-emerald-300/30 bg-emerald-300/10 p-3 text-sm text-emerald-200"
+        >
+          {notice}
         </p>
       )}
       <div className="flex flex-wrap gap-2">
@@ -201,7 +263,20 @@ function MatchAnalysis({
           </button>
         ))}
       </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-slate-300">Refine the evidence you want to review.</p>
+        <button
+          type="button"
+          className="rounded-lg border border-white/15 px-3 py-2 text-sm"
+          onClick={() => {
+            setFilters({ ...defaultAnalysisFilters, discipline: filters.discipline });
+            setPage(0);
+          }}
+        >
+          Reset filters
+        </button>
+      </div>
+      <div className="grid gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:grid-cols-2 lg:grid-cols-4">
         {select(
           filters.discipline === "batting"
             ? "Batter"
@@ -267,11 +342,23 @@ function MatchAnalysis({
         Recorded events only. Team runs include extras; wicket events include run-outs and are not
         bowler wickets.
       </p>
-      <div className="overflow-x-auto rounded-xl border border-white/10">
+      <div
+        className="overflow-x-auto rounded-xl border border-white/10"
+        role="region"
+        aria-label="Recorded deliveries; scroll horizontally for more columns"
+        tabIndex={0}
+      >
         <table className="w-full text-left text-sm">
           <thead className="bg-white/5 text-xs text-slate-400">
             <tr>
-              {["Ball", "Batter", "Bowler", "Runs", "Outcome", "Evidence"].map((x) => (
+              {[
+                "Ball",
+                "Batter",
+                filters.discipline === "fielding" ? "Fielder" : "Bowler",
+                "Runs",
+                "Outcome",
+                "Evidence",
+              ].map((x) => (
                 <th key={x} className="p-3">
                   {x}
                 </th>
@@ -285,7 +372,13 @@ function MatchAnalysis({
                   {d.over_number}.{d.ball_in_over}
                 </td>
                 <td className="p-3">{names.get(d.striker_id) ?? "Player"}</td>
-                <td className="p-3">{names.get(d.bowler_id) ?? "Player"}</td>
+                <td className="p-3">
+                  {filters.discipline === "fielding"
+                    ? d.fielder_id
+                      ? (names.get(d.fielder_id) ?? "Fielder")
+                      : "Not recorded"
+                    : (names.get(d.bowler_id) ?? "Player")}
+                </td>
                 <td className="p-3">{d.total_runs}</td>
                 <td className="p-3">{d.wicket ? "Wicket" : d.outcome}</td>
                 <td className="p-3">
@@ -296,7 +389,7 @@ function MatchAnalysis({
                       className="text-emerald-300 underline"
                       onClick={() => void showClip(d.id)}
                     >
-                      Play clip
+                      Play clip · {data.clips.filter((c) => c.delivery_id === d.id).length} view(s)
                     </button>
                   ) : (
                     "No linked clip"
@@ -320,7 +413,11 @@ function MatchAnalysis({
         <button className={field} disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
           Previous
         </button>
-        <span>{rows.length} matching deliveries</span>
+        <span role="status" aria-live="polite">
+          {rows.length} matching deliveries · Page{" "}
+          {Math.min(page + 1, Math.max(1, Math.ceil(rows.length / 30)))} of{" "}
+          {Math.max(1, Math.ceil(rows.length / 30))}
+        </span>
         <button
           className={field}
           disabled={(page + 1) * 30 >= rows.length}
@@ -376,6 +473,7 @@ function MatchAnalysis({
                     if (file) {
                       await uploadEvidence(org, match, file, consent, junior);
                       setFile(null);
+                      setNotice("Evidence uploaded. It is private and has not been sent to AI.");
                       setVersion((v) => v + 1);
                     }
                   })
@@ -411,6 +509,7 @@ function MatchAnalysis({
                           void action(async () => {
                             setPreview(null);
                             await removeEvidence(f);
+                            setNotice("Evidence removed.");
                             setVersion((v) => v + 1);
                           });
                       }}
@@ -429,6 +528,25 @@ function MatchAnalysis({
               <span>{preview.label}</span>
               <button onClick={() => setPreview(null)}>Close</button>
             </div>
+            {clipSelection && (
+              <label className="mb-3 grid gap-2 text-sm">
+                Camera view
+                <select
+                  className={field}
+                  value={clipSelection.index}
+                  disabled={busy}
+                  onChange={(e) => void showClip(clipSelection.deliveryId, Number(e.target.value))}
+                >
+                  {data.clips
+                    .filter((c) => c.delivery_id === clipSelection.deliveryId)
+                    .map((c, index) => (
+                      <option key={`${c.asset_id}:${index}`} value={index}>
+                        Camera view {index + 1}
+                      </option>
+                    ))}
+                </select>
+              </label>
+            )}
             {preview.kind === "image" ? (
               <img
                 src={preview.url}
@@ -492,6 +610,7 @@ function MatchAnalysis({
               void action(async () => {
                 await saveNote(org, match, filters.discipline, note, tags, delivery);
                 setNote("");
+                setNotice("Coaching observation saved.");
                 setVersion((v) => v + 1);
               })
             }

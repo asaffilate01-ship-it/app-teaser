@@ -1,3 +1,5 @@
+import { SectionNavigation } from "@/components/SectionNavigation";
+import { readSection, platformSections } from "@/lib/navigation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import {
@@ -58,6 +60,10 @@ import {
 import { can, platformRoles, type PlatformRole } from "@/lib/platform";
 
 export const Route = createFileRoute("/platform")({
+  validateSearch: (search: Record<string, unknown>): { section?: PlatformTab } => {
+    const section = readSection(search["section"], platformSections);
+    return { section: section ?? "overview" };
+  },
   head: () => ({
     meta: [
       { title: "CricLume Cloud — Club and competition control centre" },
@@ -145,6 +151,7 @@ function Platform() {
     memberships.find((item) => item.organisationId === selectedOrganisationId) ?? memberships[0]!;
   return (
     <OperationalPlatform
+      key={`${selected.organisationId}:${selected.role}`}
       membership={selected}
       memberships={memberships}
       onSelectOrganisation={selectOrganisation}
@@ -156,7 +163,11 @@ function Platform() {
 function ActivationGate() {
   return (
     <PageFrame>
-      <main className="mx-auto flex min-h-[calc(100vh-74px)] max-w-4xl items-center px-4 py-12 md:px-8">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto flex min-h-[calc(100vh-74px)] max-w-4xl items-center px-4 py-12 md:px-8"
+      >
         <section className="w-full rounded-3xl border border-amber-300/20 bg-gradient-to-br from-amber-300/[0.09] via-white/[0.03] to-rose-400/[0.07] p-6 md:p-10">
           <span className="flex size-12 items-center justify-center rounded-2xl bg-amber-300/10 text-amber-300">
             <Database className="size-6" />
@@ -220,7 +231,11 @@ function SignInPanel({
   };
   return (
     <PageFrame>
-      <main className="mx-auto flex min-h-[calc(100vh-74px)] max-w-xl items-center px-4 py-12">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto flex min-h-[calc(100vh-74px)] max-w-xl items-center px-4 py-12"
+      >
         <form
           onSubmit={(event) => void submit(event)}
           className="w-full rounded-3xl border border-white/10 bg-white/[0.04] p-6 md:p-9"
@@ -290,7 +305,11 @@ function OrganisationOnboarding({
   };
   return (
     <PageFrame>
-      <main className="mx-auto flex min-h-[calc(100vh-74px)] max-w-2xl items-center px-4 py-12">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto flex min-h-[calc(100vh-74px)] max-w-2xl items-center px-4 py-12"
+      >
         <form
           onSubmit={(event) => void submit(event)}
           className="w-full rounded-3xl border border-white/10 bg-white/[0.04] p-6 md:p-9"
@@ -348,7 +367,10 @@ function OperationalPlatform({
   onSelectOrganisation: (id: string) => void;
   signOut: () => Promise<void>;
 }) {
-  const [tab, setTab] = useState<PlatformTab>("overview");
+  const tab = Route.useSearch().section ?? "overview";
+  const navigate = Route.useNavigate();
+  const setTab = (section: PlatformTab) =>
+    void navigate({ search: { section }, resetScroll: true });
   const dashboard = usePlatformDashboard(membership.organisationId, membership.role);
   return (
     <PageFrame
@@ -356,9 +378,10 @@ function OperationalPlatform({
         <div className="flex items-center gap-2">
           {memberships.length > 1 && (
             <select
+              aria-label="Organisation"
               value={membership.organisationId}
               onChange={(event) => onSelectOrganisation(event.target.value)}
-              className="h-9 max-w-48 rounded-md border border-white/10 bg-[#17111f] px-2 text-xs"
+              className="h-11 max-w-36 rounded-md border border-white/10 bg-[#17111f] px-2 text-xs"
             >
               {memberships.map((item) => (
                 <option key={item.organisationId} value={item.organisationId}>
@@ -380,7 +403,7 @@ function OperationalPlatform({
         </div>
       }
     >
-      <main className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-9">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-9">
         <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
           <div>
             <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-200">
@@ -391,7 +414,7 @@ function OperationalPlatform({
               {membership.organisationName}
             </h1>
             <p className="mt-2 text-sm text-slate-400">
-              Live organisation records protected by Postgres row-level security.
+              Your club, match day and coaching work in one place.
             </p>
           </div>
           <button
@@ -404,23 +427,26 @@ function OperationalPlatform({
             Refresh
           </button>
         </div>
-        <nav
-          className="mb-6 flex gap-1 overflow-x-auto rounded-lg border border-white/10 bg-white/[0.03] p-1"
-          aria-label="Platform sections"
-        >
-          {tabDefinitions.map(([value, Icon, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setTab(value)}
-              className={`flex shrink-0 items-center gap-2 rounded-md px-3 py-2.5 text-xs font-bold transition ${tab === value ? "bg-white/10 text-white" : "text-slate-400 hover:text-white"}`}
-            >
-              <Icon className="size-4" /> {label}
-            </button>
-          ))}
-        </nav>
+        <SectionNavigation
+          label="Workspace section"
+          value={tab}
+          onChange={setTab}
+          items={tabDefinitions}
+        />
         {dashboard.error && <ErrorNotice message={dashboard.error} />}
-        {dashboard.loading || !dashboard.data ? (
+        {!dashboard.loading && !dashboard.data && dashboard.error ? (
+          <section className="workspace-empty" role="status">
+            <h2>Let’s get your workspace back</h2>
+            <p>Your club records could not be loaded. Try the connection again.</p>
+            <button
+              className="action-primary"
+              disabled={dashboard.refreshing}
+              onClick={() => void dashboard.refresh()}
+            >
+              Try again
+            </button>
+          </section>
+        ) : dashboard.loading || !dashboard.data ? (
           <FullPanelStatus title="Loading operational data…" />
         ) : (
           <>
@@ -1785,7 +1811,7 @@ function PageFrame({ children, right }: { children: ReactNode; right?: ReactNode
   return (
     <div className="min-h-screen bg-[#0f0d17] text-slate-100">
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0f0d17]/95 px-4 py-3 backdrop-blur-xl md:px-8">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link to="/" aria-label="CricLume home">
               <img src={logoAsset.url} alt="CricLume" className="h-9 w-auto md:h-11" />

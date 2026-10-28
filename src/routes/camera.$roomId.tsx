@@ -280,7 +280,11 @@ function MatchCamera() {
           </span>
         </div>
       </header>
-      <main className="mx-auto grid max-w-5xl gap-5 px-4 py-6 lg:grid-cols-[1.4fr_1fr]">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto grid max-w-5xl gap-5 px-4 py-6 lg:grid-cols-[1.4fr_1fr]"
+      >
         <section className="overflow-hidden rounded-xl border border-white/10 bg-black/30">
           <div className="relative aspect-video bg-black">
             <video ref={videoRef} muted playsInline className="h-full w-full object-cover" />
