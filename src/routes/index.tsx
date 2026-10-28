@@ -1,3 +1,4 @@
+import { readSection, publicSections } from "@/lib/navigation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { regions, defaultRegion, findRegion, detectCountry, type Region } from "@/lib/pricing";
@@ -35,6 +36,10 @@ import shotMobile from "@/assets/shot-mobile.jpg";
 import shotReview from "@/assets/shot-review.jpg";
 
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>): { section?: TabId } => {
+    const section = readSection(search["section"], publicSections);
+    return { section: section ?? "home" };
+  },
   head: () => ({
     meta: [
       { title: "CricLume — See every ball. Shape every game." },
@@ -97,7 +102,9 @@ function PromoRoot() {
 
 function Promo() {
   const { t } = useI18n();
-  const [tab, setTab] = useState<TabId>("home");
+  const tab = Route.useSearch().section ?? "home";
+  const navigate = Route.useNavigate();
+  const setTab = (section: TabId) => void navigate({ search: { section }, resetScroll: true });
   const active = tabMeta.find((m) => m.id === tab)!;
 
   return (
@@ -110,7 +117,11 @@ function Promo() {
           onHome={() => setTab("home")}
           onChange={setTab}
         />
-        <main className="flex-1 overflow-y-auto px-5 pb-10 pt-5 md:mx-auto md:w-full md:max-w-6xl md:px-8 md:pb-16 md:pt-12 lg:px-12">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 px-5 pb-24 pt-5 md:mx-auto md:w-full md:max-w-6xl md:px-8 md:pb-16 md:pt-12 lg:px-12"
+        >
           <TabPanel key={tab}>
             {tab === "home" && <HomeTab onNavigate={setTab} />}
             {tab === "features" && <FeaturesTab />}
@@ -133,7 +144,11 @@ function Ticker() {
     <div className="dark-band overflow-hidden py-2">
       <div className="ticker-track">
         {[0, 1].map((dup) => (
-          <div key={dup} className="flex shrink-0 items-center">
+          <div
+            key={dup}
+            aria-hidden={dup === 1 ? true : undefined}
+            className="flex shrink-0 items-center"
+          >
             {t.ticker.map((item) => (
               <span
                 key={item}
@@ -909,31 +924,36 @@ function LoginTab() {
 function BottomNav({ tab, onChange }: { tab: TabId; onChange: (t: TabId) => void }) {
   const { t } = useI18n();
   return (
-    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.08)] backdrop-blur-xl md:hidden">
-      <ul className="grid grid-cols-6">
-        {tabMeta.map(({ id, key, icon: Icon }) => {
-          const active = tab === id;
-          return (
-            <li key={id}>
-              <button
-                onClick={() => onChange(id)}
-                aria-current={active ? "page" : undefined}
-                className={`flex w-full flex-col items-center gap-1 py-2.5 text-[10px] font-semibold uppercase tracking-wide transition-colors ${
-                  active ? "text-primary" : "text-slate-500 hover:text-slate-900"
-                }`}
-              >
-                <span
-                  className={`flex size-9 items-center justify-center rounded-xl transition-all ${
-                    active ? "brand-gradient text-primary-foreground shadow-md" : "bg-transparent"
+    <nav
+      aria-label="Primary navigation"
+      className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.08)] backdrop-blur-xl md:hidden"
+    >
+      <ul className="grid grid-cols-5">
+        {tabMeta
+          .filter((item) => item.id !== "screens")
+          .map(({ id, key, icon: Icon }) => {
+            const active = tab === id;
+            return (
+              <li key={id}>
+                <button
+                  onClick={() => onChange(id)}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex w-full flex-col items-center gap-1 py-2.5 text-[10px] font-semibold uppercase tracking-wide transition-colors ${
+                    active ? "text-primary" : "text-slate-500 hover:text-slate-900"
                   }`}
                 >
-                  <Icon className="size-[18px]" />
-                </span>
-                {t.nav[key]}
-              </button>
-            </li>
-          );
-        })}
+                  <span
+                    className={`flex size-9 items-center justify-center rounded-xl transition-all ${
+                      active ? "brand-gradient text-primary-foreground shadow-md" : "bg-transparent"
+                    }`}
+                  >
+                    <Icon className="size-[18px]" />
+                  </span>
+                  {t.nav[key]}
+                </button>
+              </li>
+            );
+          })}
       </ul>
     </nav>
   );

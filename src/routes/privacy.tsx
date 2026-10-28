@@ -140,7 +140,11 @@ export function LegalPage({
           </Link>
         </div>
       </header>
-      <main className="mx-auto max-w-4xl px-4 py-10 md:px-8 md:py-16">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto max-w-4xl px-4 py-10 md:px-8 md:py-16"
+      >
         <div className="mb-8 flex size-12 items-center justify-center rounded-2xl bg-amber-300/10 text-amber-300">
           <ShieldCheck className="size-6" />
         </div>

@@ -228,7 +228,7 @@ function CricketApp() {
   return (
     <div className="min-h-screen bg-[#0f0d17] text-slate-100">
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0f0d17]/95 px-4 py-3 backdrop-blur-xl md:px-8">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             {screen !== "dashboard" && (
               <button
@@ -250,9 +250,9 @@ function CricketApp() {
           <div className="flex items-center gap-3 text-xs text-slate-400">
             <Link
               to="/platform"
-              className="hidden font-bold text-slate-300 hover:text-white md:inline"
+              className="rounded-lg border border-white/15 px-3 py-2 font-bold text-slate-300 hover:text-white"
             >
-              Cloud control centre
+              Club workspace
             </Link>
             <span className="flex items-center gap-2">
               {cloudLinked ? (
@@ -273,7 +273,11 @@ function CricketApp() {
           {cloudLinked ? "Loading cloud match…" : "Loading scorer…"}
         </div>
       ) : cloudLinked && cloudBootstrap.status === "error" ? (
-        <main className="mx-auto flex min-h-[70vh] max-w-xl items-center px-4 py-12 text-center">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="mx-auto flex min-h-[70vh] max-w-xl items-center px-4 py-12 text-center"
+        >
           <section className="w-full rounded-3xl border border-rose-400/20 bg-white/[0.04] p-7">
             <CloudOff className="mx-auto size-10 text-rose-300" />
             <h1 className="mt-4 text-2xl font-bold">Cloud match unavailable</h1>
@@ -324,7 +328,11 @@ function Dashboard({
   onDelete: (id: string) => void;
 }) {
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 md:px-8 md:py-12">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 md:px-8 md:py-12"
+    >
       <section className="grid gap-6 overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#2a1427] via-[#17111f] to-[#2b220e] p-6 shadow-2xl md:grid-cols-[1fr_auto] md:items-end md:p-10">
         <div className="space-y-4">
           <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-amber-300">
@@ -526,7 +534,11 @@ function MatchSetup({
   };
 
   return (
-    <main className="mx-auto w-full max-w-5xl space-y-8 px-4 py-8 md:px-8 md:py-12">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="mx-auto w-full max-w-5xl space-y-8 px-4 py-8 md:px-8 md:py-12"
+    >
       <div>
         <p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-300">Match setup</p>
         <h1 className="mt-1 font-display text-4xl font-bold md:text-5xl">Set the game up once</h1>
@@ -751,7 +763,11 @@ function LiveMatch({
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl pb-28 md:px-8 md:py-8">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="mx-auto w-full max-w-7xl pb-28 md:px-8 md:py-8"
+    >
       <section className="border-b border-white/10 bg-gradient-to-br from-[#2c1429] via-[#17111f] to-[#2a210e] px-4 py-6 md:rounded-3xl md:border md:px-8 md:py-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -789,7 +805,10 @@ function LiveMatch({
         </div>
       </section>
 
-      <nav className="no-scrollbar sticky top-[65px] z-30 flex gap-1 overflow-x-auto border-b border-white/10 bg-[#0f0d17]/95 px-3 py-2 backdrop-blur-xl md:top-[77px] md:mt-4 md:rounded-2xl md:border md:px-2">
+      <nav
+        aria-label="Match sections"
+        className="no-scrollbar sticky top-[65px] z-30 flex gap-1 overflow-x-auto border-b border-white/10 bg-[#0f0d17]/95 px-3 py-2 backdrop-blur-xl md:top-[77px] md:mt-4 md:rounded-2xl md:border md:px-2"
+      >
         {[
           ["score", Gauge, "Score"],
           ["timeline", History, "Timeline"],
@@ -802,6 +821,7 @@ function LiveMatch({
             <button
               key={String(id)}
               type="button"
+              aria-current={tab === id ? "page" : undefined}
               onClick={() => setTab(id as MatchTab)}
               className={`flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold ${tab === id ? "bg-amber-300 text-[#1d1520]" : "text-slate-400"}`}
             >

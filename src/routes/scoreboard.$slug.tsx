@@ -114,7 +114,11 @@ function PublicScoreboard() {
           </div>
         </div>
       </header>
-      <main className="relative mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-14">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="relative mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-14"
+      >
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
           <div className="flex flex-wrap gap-4">
             <span className="flex items-center gap-1.5">
