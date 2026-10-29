@@ -70,3 +70,45 @@ test("ground uses the filtered subset and preserves exact counts for repeated zo
     true,
   );
 });
+
+test("zone filters and ground totals agree across case and whitespace variants", () => {
+  const rows = [
+    row,
+    { ...row, id: "2", shot_zone: "COVER" },
+    { ...row, id: "3", shot_zone: "  cover  " },
+    { ...row, id: "4", shot_zone: "Point" },
+  ];
+  const filtered = filterDeliveries(rows, { ...defaultAnalysisFilters, zone: "Cover" });
+  assert.equal(filtered.length, 3);
+  assert.equal(
+    summarizeGround(filtered, "batting").zones.find((z) => z.name === "Cover")?.deliveries,
+    3,
+  );
+  const fielding = filterDeliveries(rows, {
+    ...defaultAnalysisFilters,
+    discipline: "fielding",
+    zone: " point ",
+  });
+  assert.equal(fielding.length, 4);
+});
+
+import { analysisZoneOptions } from "../src/lib/analysis-ground.ts";
+test("zone choices deduplicate variants, preserve unknown names and exclude historical rows", () => {
+  const rows = [
+    row,
+    { ...row, id: "2", shot_zone: "COVER" },
+    { ...row, id: "3", shot_zone: "Custom  position" },
+    { ...row, id: "4", shot_zone: "   " },
+    { ...row, id: "5", shot_zone: "Straight", voided_by_event_id: "undo" },
+  ];
+  assert.deepEqual(analysisZoneOptions(rows, "batting"), [
+    ["cover", "Cover"],
+    ["custom position", "Custom position"],
+  ]);
+  assert.deepEqual(analysisZoneOptions(rows, "fielding"), [["point", "Point"]]);
+  assert.equal(
+    filterDeliveries(rows, { ...defaultAnalysisFilters, zone: "custom position" }).length,
+    1,
+  );
+  assert.equal(summarizeGround(rows, "batting").unmapped, 2);
+});

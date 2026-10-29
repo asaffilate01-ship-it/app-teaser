@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { DeliveryEvidence, Discipline } from "@/lib/analysis";
+import { normalizeAnalysisZone, type DeliveryEvidence, type Discipline } from "@/lib/analysis";
 import { summarizeGround, type GroundMetric } from "@/lib/analysis-ground";
 import type { createGroundScene, GroundView } from "@/lib/ground-scene";
 
@@ -8,9 +8,15 @@ const control =
 export function AnalysisGround({
   rows,
   discipline,
+  activeZone = "",
+  onReviewZone,
+  onClearZone,
 }: {
   rows: DeliveryEvidence[];
   discipline: Discipline;
+  activeZone?: string;
+  onReviewZone?: (zone: string) => void;
+  onClearZone?: () => void;
 }) {
   const data = useMemo(() => summarizeGround(rows, discipline), [rows, discipline]);
   const [metric, setMetric] = useState<GroundMetric>("deliveries");
@@ -104,6 +110,21 @@ export function AnalysisGround({
           ))}
         </div>
       </header>
+      {activeZone && (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-3 text-sm text-emerald-100">
+          <p>
+            Zone filter:{" "}
+            {data.zones.find(
+              (z) => normalizeAnalysisZone(z.name) === normalizeAnalysisZone(activeZone),
+            )?.name ?? activeZone}
+          </p>
+          {onClearZone && (
+            <button type="button" className={control} onClick={onClearZone}>
+              Clear zone filter
+            </button>
+          )}
+        </div>
+      )}
       <div className="grid lg:grid-cols-[minmax(0,1.55fr)_minmax(270px,1fr)]">
         <div className="min-w-0 border-b border-white/10 lg:border-b-0 lg:border-r">
           <div className="flex flex-wrap gap-3 px-5 pt-5">
@@ -264,6 +285,16 @@ export function AnalysisGround({
               <p>Select a numbered zone to inspect its recorded figures.</p>
             )}
           </div>
+          {current && onReviewZone && (
+            <button
+              type="button"
+              className={`${control} mt-3 w-full border-emerald-200/30 bg-emerald-200/10 text-emerald-100 disabled:opacity-50`}
+              disabled={current.deliveries === 0}
+              onClick={() => onReviewZone(normalizeAnalysisZone(current.name))}
+            >
+              Review {current.name} deliveries
+            </button>
+          )}
         </aside>
       </div>
     </section>

@@ -51,6 +51,10 @@ export const defaultAnalysisFilters: AnalysisFilters = {
   toOver: "",
   mediaOnly: false,
 };
+/** Match recorded zone labels consistently without inventing aliases or coordinates. */
+export function normalizeAnalysisZone(value: string | null | undefined): string {
+  return (value ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+}
 export function filterDeliveries(
   rows: DeliveryEvidence[],
   f: AnalysisFilters,
@@ -76,7 +80,9 @@ export function filterDeliveries(
             : d.fielder_id) === f.player) &&
       (!f.innings || d.innings_id === f.innings) &&
       (!f.style || d.delivery_style === f.style) &&
-      (!f.zone || (f.discipline === "fielding" ? d.fielding_zone : d.shot_zone) === f.zone) &&
+      (!f.zone ||
+        normalizeAnalysisZone(f.discipline === "fielding" ? d.fielding_zone : d.shot_zone) ===
+          normalizeAnalysisZone(f.zone)) &&
       (!f.outcome ||
         (f.outcome === "wickets"
           ? d.wicket

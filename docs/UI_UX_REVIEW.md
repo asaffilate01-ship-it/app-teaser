@@ -153,3 +153,13 @@ Aggregate summaries include all matching rows, independently of the report's 250
 Validation: 81 unit tests, TypeScript, lint (eight existing warnings), production build and Chromium rendering of the generated report. Tests cover discipline-specific runs/zones, unknown coverage, filtered rows, hidden-note conflicts, duplicate notes, totals beyond excerpt limits and hostile classification values. Browser checks cover exact coverage, all five length rows, mobile overflow, resource-free rendering and print output; printed pages were visually inspected. No database changes or live deployment.
 
 Still pending: coaching correction history, hypothetical field-setting scenarios, raw-media measurement and cross-device score reconciliation. Exporting these summaries does not add those capabilities or turn coach classifications into measured tracking data.
+
+## Ground-to-delivery review — 29 October 2026
+
+A selected Match Observatory zone now offers a review action that applies the zone to the shared analysis filters and moves keyboard focus to the recorded-delivery table. Coaches can then use the existing authorised clip controls and exports. A visible active-zone strip clears only that filter, preserving player, innings, outcome and other selections. Zones with no matching deliveries cannot launch an empty review.
+
+Zone matching now consistently trims whitespace, collapses repeated spaces and ignores letter case across filtering, ground aggregation and dropdown options. Known zones use their existing display labels; case/spacing variants share one option. Unknown recorded names remain selectable and explicitly unplotted, without invented aliases or positions. Fielding continues to use fielding zones; batting and bowling use shot destinations. CSV retains original recorded values, while its filtered subset agrees with the ground and report.
+
+Validation: 84 tests, typecheck, lint (eight existing warnings) and production build. Chromium exercised the actual analysis workspace with synthetic cloud fixtures: deduplicated zone options, keyboard review and table focus, retaining the player filter when clearing a zone, CSV/report totals, correct clip-asset dispatch, fielding-specific filtering, empty-zone disabling and mobile overflow. No database changes or live deployment.
+
+Remaining phases: explicit coaching correction history, field-setting scenarios, raw-media measurements and cross-device scoring reconciliation. This change connects existing recorded evidence rather than generating new observations.

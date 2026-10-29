@@ -203,3 +203,20 @@ test("new report sections remain resource-free and reject hostile classification
   assert.match(html, /Unclassified deliveries/);
   assert.match(html, /&lt;img/);
 });
+
+test("zone drill-down criteria preserve player filters and report the same ground subset", () => {
+  const data = {
+    ...input,
+    deliveries: [
+      delivery,
+      { ...delivery, id: "variant", shot_zone: " COVER " },
+      { ...delivery, id: "other", striker_id: "someone-else" },
+    ],
+    filters: { ...defaultAnalysisFilters, zone: "Cover", player: "b" },
+  };
+  const report = reviewSnapshot(data);
+  assert.equal(report.rows.length, 2);
+  assert.equal(report.ground.mapped, 2);
+  assert.equal(report.summary.batterRuns, 8);
+  assert.match(reviewReportHtml(data), /2 of 2 matching deliveries have a recognised shot zone/);
+});
