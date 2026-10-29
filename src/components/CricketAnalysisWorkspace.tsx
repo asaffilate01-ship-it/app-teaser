@@ -514,18 +514,6 @@ function MatchAnalysis({
           ))}
         </div>
       </fieldset>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        {Object.entries(summary).map(([k, v]) => (
-          <div key={k} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-            <p className="text-xs capitalize text-slate-400">{k.replace(/([A-Z])/g, " $1")}</p>
-            <strong className="text-2xl">{v}</strong>
-          </div>
-        ))}
-      </div>
-      <p className="text-xs text-slate-400">
-        Recorded events only. Team runs include extras; wicket events include run-outs and are not
-        bowler wickets.
-      </p>
       <AnalysisGround
         inningsIds={options("innings_id")}
         playerNames={names}

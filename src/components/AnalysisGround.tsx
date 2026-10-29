@@ -1,3 +1,4 @@
+import { AnalysisDashboard } from "./AnalysisDashboard";
 import { SpatialCricketLab } from "./SpatialCricketLab";
 import type { CoachingAnnotation } from "@/lib/coaching";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -312,9 +313,24 @@ export function AnalysisGround(
   },
 ) {
   const [spatial, setSpatial] = useState(true);
+  const [dashboard, setDashboard] = useState(true);
+  if (dashboard)
+    return (
+      <AnalysisDashboard
+        rows={props.rows}
+        discipline={props.discipline}
+        {...(props.inningsIds ? { inningsIds: props.inningsIds } : {})}
+        {...(props.playerNames ? { playerNames: props.playerNames } : {})}
+        {...(props.onReviewZone ? { onReviewZone: props.onReviewZone } : {})}
+        onExplore={() => setDashboard(false)}
+      />
+    );
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
+        <button className={control} onClick={() => setDashboard(true)}>
+          Club dashboard
+        </button>
         <button className={control} aria-pressed={spatial} onClick={() => setSpatial(true)}>
           Wagon wheel, pitch & field
         </button>
