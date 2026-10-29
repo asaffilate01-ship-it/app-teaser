@@ -10,7 +10,6 @@ import {
   targetForCurrentInnings,
 } from "@/lib/cricket";
 import {
-  appendMatchEvent,
   flushPendingEvents,
   isCloudConfigured,
   queuePendingEvent,
@@ -109,9 +108,11 @@ export function useMatchCloudSync(
 
   useEffect(() => {
     if (!enabled || !cloudMatchId) return;
+    let active = true;
     const unsubscribe = subscribeToMatchEvents(
       cloudMatchId,
       (event) => {
+        if (!active) return;
         if (latestRemoteSequence.current.matchId !== cloudMatchId) {
           latestRemoteSequence.current = { matchId: cloudMatchId, sequence: 0 };
         }
@@ -128,6 +129,7 @@ export function useMatchCloudSync(
         setStatus(hasPending ? "queued" : "synced");
       },
       (next) =>
+        active &&
         setStatus(
           next === "SUBSCRIBED"
             ? readPendingEvents(cloudMatchId).length
@@ -138,12 +140,19 @@ export function useMatchCloudSync(
     );
     const flush = () => {
       void flushPendingEvents(cloudMatchId)
-        .then((result) => setStatus(result.remaining ? "queued" : "synced"))
-        .catch(() => setStatus("error"));
+        .then((result) => {
+          if (!active) return;
+          setLastSequence((sequence) => Math.max(sequence, result.lastSequence));
+          setStatus(result.remaining ? "queued" : "synced");
+        })
+        .catch(() => {
+          if (active) setStatus("error");
+        });
     };
     window.addEventListener("online", flush);
     flush();
     return () => {
+      active = false;
       unsubscribe();
       window.removeEventListener("online", flush);
     };
@@ -169,18 +178,20 @@ export function useMatchCloudSync(
         },
         occurredAt: new Date().toISOString(),
       };
-      if (!navigator.onLine) {
-        queuePendingEvent(event);
-        setStatus("queued");
-        return;
-      }
-      setStatus("connecting");
       try {
-        const saved = await appendMatchEvent(event);
-        setLastSequence((sequence) => Math.max(sequence, saved.sequence));
-        setStatus("synced");
+        // Persist before any network request: new scores must never leapfrog
+        // older offline events, including a delivery whose retry is failing.
+        queuePendingEvent(event);
+        if (!navigator.onLine) {
+          setStatus("queued");
+          return;
+        }
+        setStatus("connecting");
+        const result = await flushPendingEvents(cloudMatchId);
+        setLastSequence((sequence) => Math.max(sequence, result.lastSequence));
+        setStatus(result.remaining ? "queued" : "synced");
       } catch {
-        setStatus("queued");
+        setStatus("error");
       }
     },
     [cloudMatchId, deviceId, enabled],

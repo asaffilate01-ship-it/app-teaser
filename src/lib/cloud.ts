@@ -2,7 +2,7 @@ import { createClient, type Session, type SupabaseClient } from "@supabase/supab
 import * as tus from "tus-js-client";
 import type { CricketMatch, Delivery, FieldZone, Innings, MatchFormat, Team } from "@/lib/cricket";
 import type { PlatformRole } from "@/lib/platform";
-import { reconcilePendingEvents } from "@/lib/offline-queue";
+import { createOrderedQueueDrainer } from "@/lib/offline-queue";
 
 export interface CloudConfiguration {
   url: string;
@@ -515,27 +515,12 @@ export async function appendMatchEvent(event: PendingMatchEvent): Promise<MatchE
   }
 }
 
-export async function flushPendingEvents(matchId: string): Promise<{
-  sent: number;
-  remaining: number;
-}> {
-  const pending = readPendingEvents(matchId);
-  const acknowledged = new Set<string>();
-  for (const event of pending) {
-    try {
-      await appendMatchEvent(event);
-      acknowledged.add(event.clientEventId);
-    } catch {
-      // Event order matters: a later innings/delivery update must not leapfrog
-      // a failed delivery. Retry the failed event and those after it next time.
-      break;
-    }
-  }
-  // Re-read the latest queue: new events may have been recorded during awaits.
-  const remaining = reconcilePendingEvents(readPendingEvents(matchId), acknowledged);
-  persistPendingEvents(matchId, remaining);
-  return { sent: acknowledged.size, remaining: remaining.length };
-}
+// All scorer publishes enqueue first; reconnect and publish share this drain.
+export const flushPendingEvents = createOrderedQueueDrainer<PendingMatchEvent>({
+  read: readPendingEvents,
+  write: persistPendingEvents,
+  send: appendMatchEvent,
+});
 
 export function subscribeToMatchEvents(
   matchId: string,
