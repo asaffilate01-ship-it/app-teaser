@@ -99,3 +99,19 @@ test("progression accumulates extras per innings and preserves innings identity 
   ]);
   assert.match(filtered.marks[0]!.label, /Innings 2/);
 });
+
+test("a selected delivery beyond the rendering cap stays visible without exceeding the cap", async () => {
+  const { visibleSpatialMarks } = await import("../src/lib/spatial-analysis.ts");
+  const marks = buildSpatialData(
+    Array.from({ length: 510 }, (_, i) => ({ ...row, id: `d${i}` })),
+    [],
+    "wagon",
+  ).marks;
+  const visible = visibleSpatialMarks(marks, "d509");
+  assert.equal(visible.length, 500);
+  assert.equal(visible.at(-1)!.id, "d509");
+  assert.equal(new Set(visible.map((m) => m.id)).size, 500);
+  assert.equal(marks.length, 510);
+  assert.deepEqual(visibleSpatialMarks(marks, "missing"), marks.slice(0, 500));
+  assert.equal(visibleSpatialMarks(marks, "d2").filter((m) => m.id === "d2").length, 1);
+});

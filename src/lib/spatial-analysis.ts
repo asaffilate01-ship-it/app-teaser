@@ -141,3 +141,15 @@ export function buildSpatialData(
     conflicting: bowling.conflicting.length,
   };
 }
+
+/** Bound GPU work while keeping a selected item visible beyond the first page of marks. */
+export function visibleSpatialMarks(
+  marks: SpatialMark[],
+  selected: string,
+  limit = 500,
+): SpatialMark[] {
+  const visible = marks.slice(0, limit);
+  if (limit < 1 || !selected || visible.some((mark) => mark.id === selected)) return visible;
+  const chosen = marks.find((mark) => mark.id === selected);
+  return chosen ? [...visible.slice(0, Math.max(0, limit - 1)), chosen] : visible;
+}
