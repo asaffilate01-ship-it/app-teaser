@@ -113,6 +113,7 @@ function MatchAnalysis({
   const [data, setData] = useState<Awaited<ReturnType<typeof loadAnalysis>> | null>(null);
   const [filters, setFilters] = useState<AnalysisFilters>({ ...defaultAnalysisFilters });
   const [page, setPage] = useState(0);
+  const [spatialDelivery, setSpatialDelivery] = useState("");
   const deliveryTable = useRef<HTMLDivElement>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -526,6 +527,17 @@ function MatchAnalysis({
         bowler wickets.
       </p>
       <AnalysisGround
+        inningsIds={options("innings_id")}
+        playerNames={names}
+        notes={data.notes}
+        onReviewDelivery={(id) => {
+          setSpatialDelivery(id);
+          setPage(Math.max(0, Math.floor(rows.findIndex((r) => r.id === id) / 30)));
+          window.requestAnimationFrame(() => {
+            deliveryTable.current?.scrollIntoView({ block: "start" });
+            document.getElementById(`delivery-${id}`)?.focus({ preventScroll: true });
+          });
+        }}
         rows={rows}
         discipline={filters.discipline}
         activeZone={filters.zone}
@@ -581,7 +593,12 @@ function MatchAnalysis({
           </thead>
           <tbody>
             {rows.slice(page * 30, page * 30 + 30).map((d) => (
-              <tr key={d.id} className="border-t border-white/5">
+              <tr
+                key={d.id}
+                id={`delivery-${d.id}`}
+                tabIndex={-1}
+                className={`border-t border-white/5 ${spatialDelivery === d.id ? "bg-amber-200/10" : ""}`}
+              >
                 <td className="p-3">
                   {d.over_number}.{d.ball_in_over}
                 </td>

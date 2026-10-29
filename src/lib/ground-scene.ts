@@ -1,6 +1,8 @@
 import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import type { SpatialMark } from "./spatial-analysis";
 import type { GroundZone, GroundMetric } from "./analysis-ground";
-export type GroundView = "perspective" | "overhead" | "end";
+export type GroundView = "perspective" | "overhead" | "end" | "pitch";
 
 /** On-demand rendering only. The owner must call dispose on hide/unmount. */
 export function createGroundScene(
@@ -82,6 +84,12 @@ export function createGroundScene(
       }
     }
   };
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enablePan = false;
+  controls.minDistance = 18;
+  controls.maxDistance = 500;
+  controls.maxPolarAngle = Math.PI / 2.05;
+  controls.addEventListener("change", render);
   const resize = () => {
     if (disposed) return;
     const width = Math.max(1, host.clientWidth),
@@ -91,18 +99,25 @@ export function createGroundScene(
     camera.updateProjectionMatrix();
     // Fit the whole ground on narrow screens as well as desktop.
     const distance = Math.max(
-      view === "perspective" ? 116 : 145,
-      (view === "perspective" ? 120 : 145) / camera.aspect,
+      view === "pitch" ? 32 : view === "perspective" ? 116 : 145,
+      (view === "pitch" ? 40 : view === "perspective" ? 120 : 145) / camera.aspect,
     );
     if (view === "overhead") camera.position.set(0, distance, 0.01);
-    else if (view === "end") camera.position.set(0, distance * 0.55, distance * 0.85);
+    else if (view === "pitch") camera.position.set(distance * 0.35, distance * 0.7, distance * 0.7);
+    else if (view === "end") camera.position.set(0, distance * 0.55, -distance * 0.85);
     else camera.position.set(distance * 0.42, distance * 0.72, distance * 0.75);
     camera.lookAt(0, 0, 0);
+    controls.update();
     render();
   };
   const observer = new ResizeObserver(resize);
   observer.observe(host);
+  let pointerStart = { x: 0, y: 0 };
+  const pointerDown = (event: PointerEvent) => {
+    pointerStart = { x: event.clientX, y: event.clientY };
+  };
   const click = (event: MouseEvent) => {
+    if (Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) > 5) return;
     const bounds = renderer.domElement.getBoundingClientRect();
     ray.setFromCamera(
       new THREE.Vector2(
@@ -118,11 +133,18 @@ export function createGroundScene(
     event.preventDefault();
     onFailure();
   };
+  renderer.domElement.addEventListener("pointerdown", pointerDown);
   renderer.domElement.addEventListener("click", click);
   renderer.domElement.addEventListener("webglcontextlost", lost);
   resize();
   return {
-    update(zones: GroundZone[], metric: GroundMetric, selected: string, nextView: GroundView) {
+    update(
+      zones: GroundZone[],
+      metric: GroundMetric,
+      selected: string,
+      nextView: GroundView,
+      marks: SpatialMark[] = [],
+    ) {
       for (const bar of bars) {
         scene.remove(bar);
         bar.geometry.dispose();
@@ -177,12 +199,71 @@ export function createGroundScene(
         scene.add(label);
         labels.push(label);
       });
-      view = nextView;
-      resize();
+      for (const mark of marks) {
+        const color = mark.id === selected ? 0xffffff : mark.color;
+        const geometry =
+          mark.shape === "shot"
+            ? new THREE.TubeGeometry(
+                new THREE.LineCurve3(
+                  new THREE.Vector3(0, 0.4, 8.5),
+                  new THREE.Vector3(mark.x, 0.4, mark.z),
+                ),
+                1,
+                0.16,
+                5,
+                false,
+              )
+            : mark.shape === "bar"
+              ? new THREE.BoxGeometry(1, mark.height, 2)
+              : mark.shape === "fielder"
+                ? new THREE.CapsuleGeometry(0.6, 1.8, 4, 8)
+                : new THREE.SphereGeometry(0.45, 12, 8);
+        const object = mesh(geometry, color);
+        if (mark.shape !== "shot")
+          object.position.set(
+            mark.x,
+            mark.shape === "bar"
+              ? mark.height / 2 + 0.2
+              : mark.shape === "fielder"
+                ? 1.7
+                : mark.height,
+            mark.z,
+          );
+        if (mark.shape === "trend") {
+          const start = new THREE.Vector3(
+            mark.fromX ?? mark.x,
+            mark.fromHeight ?? mark.height,
+            mark.z,
+          );
+          const end = new THREE.Vector3(mark.x, mark.height, mark.z);
+          if (start.distanceTo(end) > 0.001) {
+            const line = mesh(
+              new THREE.TubeGeometry(new THREE.LineCurve3(start, end), 1, 0.18, 6, false),
+              color,
+            );
+            line.userData["zone"] = mark.id;
+            bars.push(line);
+          }
+        }
+        if (mark.shape === "fielder") {
+          const head = mesh(new THREE.SphereGeometry(0.65, 10, 8), color);
+          head.position.set(mark.x, 3.8, mark.z);
+          head.userData["zone"] = mark.id;
+          bars.push(head);
+        }
+        object.userData["zone"] = mark.id;
+        bars.push(object);
+      }
+      if (view !== nextView) {
+        view = nextView;
+        resize();
+      } else render();
     },
     dispose() {
       disposed = true;
       observer.disconnect();
+      controls.dispose();
+      renderer.domElement.removeEventListener("pointerdown", pointerDown);
       renderer.domElement.removeEventListener("click", click);
       renderer.domElement.removeEventListener("webglcontextlost", lost);
       geometries.forEach((g) => g.dispose());
