@@ -1,3 +1,4 @@
+import { BowlingPlacement } from "@/components/BowlingPlacement";
 import { AnalysisGround } from "@/components/AnalysisGround";
 import { observationErrors } from "@/lib/observation-form";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -525,6 +526,17 @@ function MatchAnalysis({
         bowler wickets.
       </p>
       <AnalysisGround rows={rows} discipline={filters.discipline} />
+      {filters.discipline === "bowling" && (
+        <BowlingPlacement
+          rows={rows}
+          notes={data.notes}
+          inningsIds={options("innings_id")}
+          names={names}
+          mediaIds={data.mediaIds}
+          busy={busy || loading}
+          onPlayClip={(id) => void showClip(id)}
+        />
+      )}
       <div
         className="overflow-x-auto rounded-xl border border-white/10"
         role="region"
