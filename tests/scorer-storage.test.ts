@@ -89,3 +89,45 @@ test("restoring always creates independent local identities and preserves source
   assert.equal(original.teams[0].name, "Home");
   assert.equal(copied[1]!.teams[0].name, "Home");
 });
+
+test("a stale scorer cannot overwrite another tab's save or cleared storage", async () => {
+  const { commitScorerSnapshot } = await import("../src/lib/scorer-storage.ts");
+  let value: string | null = "original";
+  let writes = 0;
+  const storage = {
+    getItem: () => value,
+    setItem: (_key: string, next: string) => {
+      value = next;
+      writes++;
+    },
+  };
+  assert.deepEqual(commitScorerSnapshot(storage, "original", "tab-a"), { saved: true });
+  assert.deepEqual(commitScorerSnapshot(storage, "original", "tab-b"), {
+    saved: false,
+    current: "tab-a",
+  });
+  assert.equal(writes, 1);
+  assert.equal(value, "tab-a");
+  value = null;
+  assert.deepEqual(commitScorerSnapshot(storage, "tab-a", "stale"), {
+    saved: false,
+    current: null,
+  });
+  assert.equal(writes, 1);
+});
+test("device write failures preserve the expected baseline for retry", async () => {
+  const { commitScorerSnapshot } = await import("../src/lib/scorer-storage.ts");
+  let value: string | null = null;
+  let fail = true;
+  const storage = {
+    getItem: () => value,
+    setItem: (_key: string, next: string) => {
+      if (fail) throw Error("quota");
+      value = next;
+    },
+  };
+  assert.throws(() => commitScorerSnapshot(storage, null, "saved"), /quota/);
+  assert.equal(value, null);
+  fail = false;
+  assert.deepEqual(commitScorerSnapshot(storage, null, "saved"), { saved: true });
+});

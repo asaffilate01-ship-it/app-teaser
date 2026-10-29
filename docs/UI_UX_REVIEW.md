@@ -103,3 +103,13 @@ Remaining: controlled replacement/merge of existing versions and simultaneous-ed
 ### Dependency check follow-up
 
 The production audit detected two Seroval advisories in the previous 1.6.9 lock entry during this release. The override now pins 1.6.11, covering [GHSA-f86p-h4j2-7qgj](https://github.com/advisories/GHSA-f86p-h4j2-7qgj) and [GHSA-9wx9-5pv9-3349](https://github.com/advisories/GHSA-9wx9-5pv9-3349). Dependency audit, build and browser verification are repeated with the patched lockfile before merge.
+
+## Device scorer tab-conflict protection — 29 October 2026
+
+Device saves now acquire an exclusive same-origin Web Lock and compare the live stored snapshot with the tab's last known version before writing. A different value, removal or clear blocks the stale tab from saving. Storage events also surface conflicts promptly without replacing the tab's in-memory matches. Queued saves are invalidated when newer edits arrive or the scorer unmounts; waiting for a lock times out with retry guidance rather than waiting indefinitely. Initial reads no longer rewrite unchanged data.
+
+The recovery banner keeps current-tab and latest-device downloads available and offers a clearly labelled reload to use the latest device data. Reload replaces the in-memory version; the existing leave-page warning protects unsaved/conflicting state. Quota failures remain retryable against the unchanged baseline. If the browser lacks Web Locks, edits remain in memory with an explicit explanation and backup action rather than making uncoordinated writes.
+
+Validation: 65 unit tests, typecheck, lint and production build. Chromium with multiple real scorer tabs checked sequential and near-simultaneous saves, a losing tab's independent downloaded backup, reloading the winner's data, device-data removal, unsupported-lock fallback, multiple edits queued behind a lock, quota failure/retry and 375/1440px layout.
+
+Limits: coordination applies to this updated scorer on the same browser origin. Older app versions or unrelated code that writes the key without taking the lock can still race. No cross-device/server conflict resolution or automatic score merging is claimed. Users can retain both versions via backups and import them as independent copies. Staging activation, raw-media AI and coaching correction history remain separate phases.
