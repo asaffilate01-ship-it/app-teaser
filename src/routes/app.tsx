@@ -1,3 +1,4 @@
+import { ScorerBackupImport } from "@/components/ScorerBackupImport";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   useCallback,
@@ -159,6 +160,7 @@ export function CricketApp() {
     loaded,
     upsertMatch,
     removeMatch,
+    importMatches,
     storageIssue,
     recoveryData,
     saved,
@@ -367,6 +369,7 @@ export function CricketApp() {
           onNew={() => setScreen("setup")}
           onOpen={openMatch}
           onDelete={removeMatch}
+          onImport={cloudLinked ? undefined : importMatches}
         />
       )}
     </div>
@@ -378,11 +381,13 @@ function Dashboard({
   onNew,
   onOpen,
   onDelete,
+  onImport,
 }: {
   matches: CricketMatch[];
   onNew: () => void;
   onOpen: (id: string) => void;
   onDelete: (id: string) => void;
+  onImport: ((matches: CricketMatch[]) => void) | undefined;
 }) {
   return (
     <main
@@ -402,7 +407,7 @@ function Dashboard({
           </h1>
           <p className="max-w-2xl text-sm leading-relaxed text-slate-300 md:text-base">
             Start a match, select the players and record runs, extras, dismissals, field zones and
-            fielders. Every entry is timestamped and kept on this device.
+            fielders. Every entry is timestamped; check the device saving status before closing.
           </p>
         </div>
         <button
@@ -414,6 +419,8 @@ function Dashboard({
         </button>
       </section>
 
+      {onImport && <ScorerBackupImport onImport={onImport} />}
+
       <section className="space-y-4">
         <div className="flex items-end justify-between gap-3">
           <div>
@@ -422,7 +429,7 @@ function Dashboard({
             </p>
             <h2 className="mt-1 font-display text-2xl font-bold md:text-3xl">Your matches</h2>
           </div>
-          <span className="text-sm text-slate-400">{matches.length} saved</span>
+          <span className="text-sm text-slate-400">{matches.length} matches</span>
         </div>
 
         {matches.length === 0 ? (
@@ -466,6 +473,9 @@ function Dashboard({
                       <Trash2 className="size-4" />
                     </button>
                   </div>
+                  {match.id.startsWith("restored-") && (
+                    <p className="mt-3 text-xs font-semibold text-amber-200">Restored local copy</p>
+                  )}
                   <h3 className="mt-4 font-display text-xl font-bold">
                     {batting.name} v {bowling.name}
                   </h3>

@@ -89,3 +89,17 @@ Storage failures are visible rather than silently claiming successful device sav
 Validation: parser tests cover recorded deliveries, forward fields, malformed/partial data, duplicate IDs and invalid innings/team references; Chromium against the actual scorer covers preserved corrupt storage, exact backup download, quota failure, retained match backup, successful retry and mobile/desktop overflow. No live cloud data or database schema changes.
 
 Remaining storage work: a validated user-facing backup import/restore flow and conflict handling for simultaneous edits in separate tabs/devices. Downloading a backup does not itself restore it. Keep player names and private notes in exported files private.
+
+## Validated backup import — 29 October 2026
+
+The local scorer dashboard now accepts both single-match JSON exports and multi-match backups. Files are bounded to 10 MB/100 matches and validated as a complete batch before a keyboard-focusable preview is shown. Invalid files import nothing. Confirmation creates independent copies with new `restored-` IDs and a visible restored-copy label; existing matches are never replaced. Cancelling or choosing a different file clears the pending preview, and late file reads cannot replace a newer selection.
+
+The importer is unavailable within a cloud-linked scorer session. Imported copies are local and do not restore server scores or cloud event queues. Existing storage protections still apply: unreadable device data stays untouched, restored copies can be used/downloaded in memory, and quota failures use the existing retry/backup flow. Re-importing intentionally creates additional copies.
+
+Validation: 63 unit tests including single/list imports, empty/partial/oversized rejection, batch limits, independent identities and deep-copy isolation; TypeScript, lint and production build. Chromium against the actual scorer checked invalid files, focused previews, cancellation, preserving existing matches, successful import, unreadable-storage memory recovery, downloading the restored copy and 375/1440px layouts. Live cloud services were not called.
+
+Remaining: controlled replacement/merge of existing versions and simultaneous-edit conflict handling. The original file is not repaired by importing copies; cloud restoration remains an authenticated server workflow. Staging activation, raw-media AI and coaching correction history remain separate phases.
+
+### Dependency check follow-up
+
+The production audit detected two Seroval advisories in the previous 1.6.9 lock entry during this release. The override now pins 1.6.11, covering [GHSA-f86p-h4j2-7qgj](https://github.com/advisories/GHSA-f86p-h4j2-7qgj) and [GHSA-9wx9-5pv9-3349](https://github.com/advisories/GHSA-9wx9-5pv9-3349). Dependency audit, build and browser verification are repeated with the patched lockfile before merge.
