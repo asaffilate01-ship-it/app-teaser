@@ -52,3 +52,11 @@ Orbit/zoom and camera presets render on demand. Mobile pixel density is capped, 
 The default analysis view now follows the Club dashboard reference: three contribution cards, simultaneous Three.js run-rate and segmented wagon-wheel panels, and player contribution lists. The wheel uses equal category sectors with heights for delivery counts and percentages of mapped deliveries; it is explicitly a zone-distribution summary. Pitch, raised ball paths and field planning remain in the detailed explorer with a return-to-dashboard action.
 
 Run-rate calculations accumulate filtered team runs including extras and divide by legal balls/6, retaining separate innings. A zero legal-ball denominator displays unavailable rather than an invented rate. Targets/projections are not inferred. Zone review uses the shared delivery filters. Both panels have exact accessible figures and a 2D alternative with independent WebGL failure handling. Browser verification uses synthetic fixtures and does not assert live deployment.
+
+## Field-plan continuity and filtered-chart fixes
+
+Field plans now remain in match-level component state when switching among the club dashboard, zone totals and detailed explorer. They are still session-only: export before changing match or leaving the page. The existing JSON export format can now be imported, with a 64 KB limit, supported version/type checks, exactly eleven named positions and finite coordinates within the schematic field boundary. Invalid imports retain the current plan; imports never write match evidence. Export also validates the plan so its own files can be reopened.
+
+The club dashboard shows the active zone filter and a clear action. The bounded spatial renderer keeps a selected record visible even when it lies beyond the first 500 marks, while maintaining the same rendering limit and full paginated list.
+
+Validation includes field-plan parser tests, rendering-cap tests and Chromium fixture checks for dashboard/zone navigation, export/import round trips, malformed/oversized file handling and mobile overflow. These checks do not assert cloud persistence or production deployment.

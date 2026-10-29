@@ -141,12 +141,16 @@ export function AnalysisDashboard({
   playerNames,
   onReviewZone,
   onExplore,
+  activeZone,
+  onClearZone,
 }: {
   rows: DeliveryEvidence[];
   discipline: Discipline;
   inningsIds?: string[];
   playerNames?: ReadonlyMap<string, string>;
   onReviewZone?: (zone: string) => void;
+  activeZone?: string;
+  onClearZone?: () => void;
   onExplore: () => void;
 }) {
   const [flat, setFlat] = useState(false),
@@ -181,6 +185,23 @@ export function AnalysisDashboard({
           </button>
         </div>
       </header>
+      {activeZone && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300/25 bg-amber-300/5 p-3 text-sm">
+          <p>
+            Zone filter:{" "}
+            <strong>
+              {ground.zones.find((z) => z.name.toLowerCase() === activeZone.toLowerCase())?.name ??
+                activeZone}
+            </strong>{" "}
+            · all panels show this zone only
+          </p>
+          {onClearZone && (
+            <button className={button} onClick={onClearZone}>
+              Clear zone filter
+            </button>
+          )}
+        </div>
+      )}
       <div className="grid gap-3 sm:grid-cols-3">
         {[
           [

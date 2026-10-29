@@ -1,3 +1,4 @@
+import { initialField } from "@/lib/spatial-analysis";
 import { AnalysisDashboard } from "./AnalysisDashboard";
 import { SpatialCricketLab } from "./SpatialCricketLab";
 import type { CoachingAnnotation } from "@/lib/coaching";
@@ -314,6 +315,7 @@ export function AnalysisGround(
 ) {
   const [spatial, setSpatial] = useState(true);
   const [dashboard, setDashboard] = useState(true);
+  const [fieldPlan, setFieldPlan] = useState(initialField);
   if (dashboard)
     return (
       <AnalysisDashboard
@@ -322,6 +324,8 @@ export function AnalysisGround(
         {...(props.inningsIds ? { inningsIds: props.inningsIds } : {})}
         {...(props.playerNames ? { playerNames: props.playerNames } : {})}
         {...(props.onReviewZone ? { onReviewZone: props.onReviewZone } : {})}
+        activeZone={props.activeZone ?? ""}
+        {...(props.onClearZone ? { onClearZone: props.onClearZone } : {})}
         onExplore={() => setDashboard(false)}
       />
     );
@@ -340,6 +344,8 @@ export function AnalysisGround(
       </div>
       {spatial ? (
         <SpatialCricketLab
+          fieldPlan={fieldPlan}
+          onFieldPlanChange={setFieldPlan}
           rows={props.rows}
           notes={props.notes ?? []}
           {...(props.inningsIds ? { inningsIds: props.inningsIds } : {})}

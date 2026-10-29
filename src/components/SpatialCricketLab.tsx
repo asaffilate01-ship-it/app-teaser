@@ -1,8 +1,11 @@
+import { parseFieldPlan, maxFieldPlanBytes } from "@/lib/field-plan";
+import type { FieldPosition } from "@/lib/spatial-analysis";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DeliveryEvidence } from "@/lib/analysis";
 import type { CoachingAnnotation } from "@/lib/coaching";
 import {
   buildSpatialData,
+  visibleSpatialMarks,
   initialField,
   type SpatialMode,
   type SpatialMark,
@@ -23,7 +26,11 @@ export function SpatialCricketLab({
   onReviewDelivery,
   inningsIds,
   playerNames,
+  fieldPlan,
+  onFieldPlanChange,
 }: {
+  fieldPlan?: FieldPosition[];
+  onFieldPlanChange?: (positions: FieldPosition[]) => void;
   rows: DeliveryEvidence[];
   notes: CoachingAnnotation[];
   inningsIds?: string[];
@@ -38,7 +45,19 @@ export function SpatialCricketLab({
   const [view, setView] = useState<GroundView>("perspective");
   const [selected, setSelected] = useState("");
   const [planner, setPlanner] = useState(false);
-  const [field, setField] = useState(initialField);
+  const [localField, setLocalField] = useState(initialField);
+  const field = fieldPlan ?? localField;
+  const setField = onFieldPlanChange ?? setLocalField;
+  const [importMessage, setImportMessage] = useState("");
+  const [importError, setImportError] = useState("");
+  const [importing, setImporting] = useState(false);
+  const importVersion = useRef(0);
+  useEffect(
+    () => () => {
+      importVersion.current++;
+    },
+    [],
+  );
   const [slot, setSlot] = useState(0);
   const [page, setPage] = useState(0);
   const data = useMemo(
@@ -63,10 +82,11 @@ export function SpatialCricketLab({
           ),
     [planning, field, data, raised],
   );
+  const plottedMarks = useMemo(() => visibleSpatialMarks(marks, selected), [marks, selected]);
   const host = useRef<HTMLDivElement>(null);
   const scene = useRef<ReturnType<typeof createGroundScene> | null>(null);
-  const latest = useRef({ marks, selected, view });
-  latest.current = { marks, selected, view };
+  const latest = useRef({ marks: plottedMarks, selected, view });
+  latest.current = { marks: plottedMarks, selected, view };
   useEffect(() => {
     setSelected("");
     setPage(0);
@@ -83,7 +103,7 @@ export function SpatialCricketLab({
           if (active) setFailed(true);
         });
         const d = latest.current;
-        scene.current.update([], "deliveries", d.selected, d.view, d.marks.slice(0, 500));
+        scene.current.update([], "deliveries", d.selected, d.view, d.marks);
         setReady(true);
       })
       .catch(() => {
@@ -97,11 +117,11 @@ export function SpatialCricketLab({
   }, [flat]);
   useEffect(() => {
     try {
-      scene.current?.update([], "deliveries", selected, view, marks.slice(0, 500));
+      scene.current?.update([], "deliveries", selected, view, plottedMarks);
     } catch {
       setFailed(true);
     }
-  }, [marks, selected, view]);
+  }, [plottedMarks, selected, view]);
   useEffect(() => {
     if (failed) {
       scene.current?.dispose();
@@ -111,6 +131,22 @@ export function SpatialCricketLab({
   const selectedMark = marks.find((m) => m.id === selected);
   const fallback = flat || failed;
   const exportField = () => {
+    try {
+      parseFieldPlan(
+        JSON.stringify({
+          type: "criclume-field-plan",
+          version: 1,
+          schematic: true,
+          positions: field,
+        }),
+      );
+      setImportError("");
+    } catch (error) {
+      setImportError(
+        error instanceof Error ? error.message : "Check your field positions before exporting.",
+      );
+      return;
+    }
     const blob = new Blob(
       [
         JSON.stringify(
@@ -219,7 +255,7 @@ export function SpatialCricketLab({
               >
                 <circle r="43" fill="#124c43" stroke="#d9e4cc" strokeWidth=".3" />
                 <rect x="-2.5" y="-10.5" width="5" height="21" fill="#b69c69" />
-                {marks.slice(0, 500).map((m) => (
+                {plottedMarks.map((m) => (
                   <g
                     key={m.id}
                     fill={`#${m.color.toString(16).padStart(6, "0")}`}
@@ -263,7 +299,7 @@ export function SpatialCricketLab({
                   : mode === "overs"
                     ? "Column heights show team runs including extras, scaled to the largest filtered over. Each innings/over stays separate; filtered overs may be incomplete. Order and exact values appear in the list."
                     : planning
-                      ? "Editable schematic field plan for this session. Export to keep it. This does not change recorded fielding evidence or validate competition field restrictions."
+                      ? "Editable schematic field plan, kept when switching dashboard views for this match. Export before changing match or leaving the page; import the file to restore it. This does not change recorded fielding evidence or validate competition field restrictions."
                       : "Markers indicate where fielding events were recorded, not a complete field setting or tracked player locations. Repeated events overlap."}
           </p>
           <p className="mt-2 text-xs text-slate-300">
@@ -279,7 +315,7 @@ export function SpatialCricketLab({
               {data.total} filtered deliveries · {data.excluded} without a plotted classification
               {mode === "pitch" ? ` (including ${data.conflicting} conflicting)` : ""}.{" "}
               {marks.length > 500
-                ? "First 500 marks rendered; the complete list remains available."
+                ? "Up to 500 marks rendered, including your selected delivery; the complete list remains available."
                 : ""}
             </p>
           )}
@@ -337,6 +373,59 @@ export function SpatialCricketLab({
                   />
                 </label>
               ))}
+              <label className="grid gap-1 text-sm">
+                Import field plan
+                <input
+                  aria-label="Import field plan"
+                  type="file"
+                  accept=".json,application/json"
+                  disabled={importing}
+                  className="min-w-0 w-full text-xs"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (!file) return;
+                    const version = ++importVersion.current;
+                    setImporting(true);
+                    setImportError("");
+                    setImportMessage("");
+                    try {
+                      if (file.size > maxFieldPlanBytes)
+                        throw new Error("Field plan must be smaller than 64 KB.");
+                      const positions = parseFieldPlan(await file.text());
+                      if (version !== importVersion.current) return;
+                      setField(positions);
+                      setSlot(0);
+                      setSelected("");
+                      setImportMessage(
+                        "Imported 11 positions. Recorded match evidence is unchanged.",
+                      );
+                    } catch (error) {
+                      if (version === importVersion.current)
+                        setImportError(
+                          error instanceof Error ? error.message : "Unable to read field plan.",
+                        );
+                    } finally {
+                      if (version === importVersion.current) setImporting(false);
+                    }
+                  }}
+                />
+              </label>
+              {importing && (
+                <p role="status" className="text-xs">
+                  Reading field plan…
+                </p>
+              )}
+              {importMessage && (
+                <p role="status" className="text-xs text-emerald-200">
+                  {importMessage}
+                </p>
+              )}
+              {importError && (
+                <p role="alert" className="text-xs text-rose-200">
+                  {importError} Your current plan has been kept.
+                </p>
+              )}
               <div className="flex flex-wrap gap-2">
                 <button className={control} onClick={exportField}>
                   Export field plan
