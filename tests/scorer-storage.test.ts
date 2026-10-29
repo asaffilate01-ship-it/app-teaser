@@ -1,7 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createMatch, recordDelivery, currentInnings } from "../src/lib/cricket.ts";
-import { parseScorerMatches } from "../src/lib/scorer-storage.ts";
+import {
+  parseScorerMatches,
+  parseScorerBackup,
+  copyBackupMatches,
+  maxBackupBytes,
+} from "../src/lib/scorer-storage.ts";
 function fixture() {
   return createMatch({
     homeTeamName: "Home",
@@ -50,4 +55,37 @@ test("malformed data and invalid scorer structure are rejected as a whole", () =
     JSON.stringify([{ ...match, innings: [{ ...match.innings[0], battingTeamId: "missing" }] }]),
   ])
     assert.throws(() => parseScorerMatches(raw));
+});
+
+test("backup import accepts single exports and lists, but rejects empty or partial batches", () => {
+  const original = fixture();
+  assert.deepEqual(parseScorerBackup(JSON.stringify(original)), [original]);
+  assert.deepEqual(parseScorerBackup(JSON.stringify([original])), [original]);
+  for (const raw of ["[]", "null", "broken", JSON.stringify([original, {}])])
+    assert.throws(() => parseScorerBackup(raw));
+});
+test("backup resource limits reject oversized files and more than 100 matches", () => {
+  assert.throws(() => parseScorerBackup(" ".repeat(maxBackupBytes + 1)), /10 MB/);
+  const original = fixture();
+  const rows = Array.from({ length: 100 }, (_, index) => ({ ...original, id: String(index) }));
+  assert.equal(parseScorerBackup(JSON.stringify(rows)).length, 100);
+  assert.throws(
+    () => parseScorerBackup(JSON.stringify([...rows, { ...original, id: "extra" }])),
+    /1 to 100/,
+  );
+});
+test("restoring always creates independent local identities and preserves source scores", () => {
+  const original = fixture();
+  original.id = "a1000000-0000-4000-8000-000000000001";
+  const before = JSON.stringify(original);
+  let sequence = 0;
+  const copied = copyBackupMatches([original, original], () => String(++sequence));
+  assert.deepEqual(
+    copied.map((match) => match.id),
+    ["restored-1", "restored-2"],
+  );
+  assert.equal(JSON.stringify(original), before);
+  copied[0]!.teams[0].name = "Edited local copy";
+  assert.equal(original.teams[0].name, "Home");
+  assert.equal(copied[1]!.teams[0].name, "Home");
 });

@@ -110,3 +110,31 @@ export function parseScorerMatches(raw: string): CricketMatch[] {
   matchesSchema.parse(value);
   return value as CricketMatch[];
 }
+
+export const maxBackupBytes = 10 * 1024 * 1024;
+export const maxBackupMatches = 100;
+export function parseScorerBackup(raw: string): CricketMatch[] {
+  if (new TextEncoder().encode(raw).byteLength > maxBackupBytes)
+    throw new Error("Choose a backup smaller than 10 MB.");
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    throw new Error("This file is not valid JSON. Choose a CricLume match export or backup.");
+  }
+  const rows = Array.isArray(value) ? value : [value];
+  if (rows.length === 0 || rows.length > maxBackupMatches)
+    throw new Error("Choose a backup containing 1 to 100 matches.");
+  if (!matchesSchema.safeParse(rows).success)
+    throw new Error(
+      "The backup contains incomplete or unsupported match data. Nothing has been imported.",
+    );
+  return rows as CricketMatch[];
+}
+/** Copies never reuse a cloud or existing local match identity. */
+export function copyBackupMatches(
+  matches: CricketMatch[],
+  newId: () => string = () => crypto.randomUUID(),
+): CricketMatch[] {
+  return matches.map((match) => ({ ...structuredClone(match), id: `restored-${newId()}` }));
+}

@@ -69,6 +69,11 @@ export function useCricketStore() {
         : [match, ...current],
     );
   }, []);
+  const importMatches = useCallback((incoming: CricketMatch[]) => {
+    setSaved(false);
+    setDirty(true);
+    setMatches((current) => [...incoming, ...current]);
+  }, []);
   const removeMatch = useCallback((matchId: string) => {
     setSaved(false);
     setDirty(true);
@@ -79,6 +84,7 @@ export function useCricketStore() {
     loaded,
     upsertMatch,
     removeMatch,
+    importMatches,
     storageIssue,
     recoveryData,
     saved,
