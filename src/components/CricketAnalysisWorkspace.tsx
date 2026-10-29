@@ -1,3 +1,4 @@
+import { AnalysisGround } from "@/components/AnalysisGround";
 import { observationErrors } from "@/lib/observation-form";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { reviewReportHtml } from "@/lib/review-report";
@@ -523,6 +524,7 @@ function MatchAnalysis({
         Recorded events only. Team runs include extras; wicket events include run-outs and are not
         bowler wickets.
       </p>
+      <AnalysisGround rows={rows} discipline={filters.discipline} />
       <div
         className="overflow-x-auto rounded-xl border border-white/10"
         role="region"
