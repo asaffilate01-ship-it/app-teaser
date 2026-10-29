@@ -13,7 +13,12 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLang] = useState<Lang>("en");
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY) as Lang | null;
+    let stored: Lang | null = null;
+    try {
+      stored = window.localStorage.getItem(STORAGE_KEY) as Lang | null;
+    } catch {
+      // Public pages remain usable when browser storage is blocked.
+    }
     if (stored && stored in languages) {
       setLang(stored);
       return;

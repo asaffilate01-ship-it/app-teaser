@@ -17,9 +17,8 @@ import {
   Layers,
   Images,
   HelpCircle,
-  Lock,
+  Play,
   ArrowRight,
-  ArrowLeft,
   Check,
   Eye,
   Globe,
@@ -68,7 +67,7 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: "https://app-teaser.lovable.app/" }],
   }),
-  component: PromoRoot,
+  component: HomepageRoot,
 });
 
 type TabId = "home" | "features" | "screens" | "pricing" | "faq" | "login";
@@ -79,7 +78,7 @@ const tabMeta: { id: TabId; icon: typeof Home; key: keyof Content["nav"] }[] = [
   { id: "screens", icon: Images, key: "screens" },
   { id: "pricing", icon: Tag, key: "pricing" },
   { id: "faq", icon: HelpCircle, key: "faq" },
-  { id: "login", icon: Lock, key: "login" },
+  { id: "login", icon: Play, key: "login" },
 ];
 
 const featureIcons = [Zap, Video, Activity, BarChart3, Smartphone, Users, Eye];
@@ -92,44 +91,61 @@ const screenImages = [
 const planIcons = [Zap, Building2, Trophy];
 const revenueIcons = [Tag, Video, Globe, Users];
 
-function PromoRoot() {
+function HomepageRoot() {
   return (
     <I18nProvider>
-      <Promo />
+      <Homepage />
     </I18nProvider>
   );
 }
 
-function Promo() {
-  const { t } = useI18n();
+function Homepage() {
   const tab = Route.useSearch().section ?? "home";
   const navigate = Route.useNavigate();
-  const setTab = (section: TabId) => void navigate({ search: { section }, resetScroll: true });
-  const active = tabMeta.find((m) => m.id === tab)!;
+  const focusSection = (section: TabId) => {
+    const target = document.getElementById(`home-${section}`);
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView({ block: "start" });
+  };
+  const setTab = (section: TabId) => {
+    if (section === tab) focusSection(section);
+    else void navigate({ search: { section }, resetScroll: false });
+  };
+  useEffect(() => {
+    if (tab !== "home") focusSection(tab);
+    else if (window.location.search) focusSection("home");
+  }, [tab]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-border/60 md:max-w-none md:border-x-0">
         <Ticker />
-        <Header
-          tab={tab}
-          label={t.nav[active.key]}
-          onHome={() => setTab("home")}
-          onChange={setTab}
-        />
+        <Header tab={tab} onHome={() => setTab("home")} onChange={setTab} />
         <main
           id="main-content"
           tabIndex={-1}
           className="flex-1 px-5 pb-24 pt-5 md:mx-auto md:w-full md:max-w-6xl md:px-8 md:pb-16 md:pt-12 lg:px-12"
         >
-          <TabPanel key={tab}>
-            {tab === "home" && <HomeTab onNavigate={setTab} />}
-            {tab === "features" && <FeaturesTab />}
-            {tab === "screens" && <ScreensTab />}
-            {tab === "pricing" && <PricingTab />}
-            {tab === "faq" && <FaqTab />}
-            {tab === "login" && <LoginTab />}
-          </TabPanel>
+          <div className="space-y-16 md:space-y-24">
+            <section id="home-home" tabIndex={-1} className="scroll-mt-28">
+              <HomeTab onNavigate={setTab} />
+            </section>
+            <section id="home-features" tabIndex={-1} className="scroll-mt-28">
+              <FeaturesTab />
+            </section>
+            <section id="home-screens" tabIndex={-1} className="scroll-mt-28">
+              <ScreensTab />
+            </section>
+            <section id="home-pricing" tabIndex={-1} className="scroll-mt-28">
+              <PricingTab />
+            </section>
+            <section id="home-faq" tabIndex={-1} className="scroll-mt-28">
+              <FaqTab />
+            </section>
+            <section id="home-login" tabIndex={-1} className="scroll-mt-28">
+              <GetStarted />
+            </section>
+          </div>
         </main>
         <SiteFooter onNavigate={setTab} />
         <BottomNav tab={tab} onChange={setTab} />
@@ -167,17 +183,14 @@ function Ticker() {
 
 function Header({
   tab,
-  label,
   onHome,
   onChange,
 }: {
   tab: TabId;
-  label: string;
   onHome: () => void;
   onChange: (t: TabId) => void;
 }) {
   const { t } = useI18n();
-  const isHome = tab === "home";
   return (
     <header className="sticky top-0 z-20 border-b border-border/15 bg-white px-5 py-3 shadow-sm backdrop-blur-xl md:px-8 md:py-4 lg:px-12">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
@@ -218,34 +231,16 @@ function Header({
             onClick={() => onChange("login")}
             className="brand-gradient glow ml-2 inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-bold uppercase tracking-wider text-primary-foreground"
           >
-            <Lock className="size-3.5" /> {t.nav.login}
+            <Play className="size-3.5" /> {t.nav.login}
           </button>
         </nav>
 
         <div className="flex items-center gap-2 md:hidden">
           <LanguageSelect />
-          {!isHome && (
-            <>
-              <span className="font-display text-sm font-bold uppercase tracking-wide text-slate-500">
-                {label}
-              </span>
-              <button
-                onClick={onHome}
-                className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-slate-800 transition-colors hover:bg-slate-200"
-                aria-label={t.backToHome}
-              >
-                <ArrowLeft className="size-4" />
-              </button>
-            </>
-          )}
         </div>
       </div>
     </header>
   );
-}
-
-function TabPanel({ children }: { children: React.ReactNode }) {
-  return <div className="tab-enter">{children}</div>;
 }
 
 const fixtures = [
@@ -543,12 +538,12 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           </p>
           <p className="text-sm text-slate-600">{t.footer.accessLine1}</p>
           <p className="text-sm text-slate-600">{t.footer.accessLine2}</p>
-          <button
-            onClick={() => onNavigate("login")}
+          <Link
+            to="/app"
             className="brand-gradient mt-2 inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-bold uppercase tracking-wider text-primary-foreground"
           >
             {t.footer.cta} <ArrowRight className="size-3.5" />
-          </button>
+          </Link>
         </div>
       </div>
       <div className="mx-auto mt-8 w-full max-w-6xl border-t border-slate-200 pt-5 text-xs uppercase tracking-wide text-slate-500">
@@ -868,14 +863,14 @@ function FaqTab() {
   );
 }
 
-function LoginTab() {
+function GetStarted() {
   const { t } = useI18n();
 
   return (
     <div className="space-y-5 md:mx-auto md:max-w-md">
       <div className="space-y-2.5">
         <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-gold">
-          <Lock className="size-3" /> {t.login.badge}
+          <Play className="size-3" /> {t.login.badge}
         </span>
         <h2 className="text-3xl font-bold leading-tight tracking-tight">{t.login.title}</h2>
 
@@ -884,13 +879,6 @@ function LoginTab() {
       </div>
 
       <div className="surface-card space-y-3.5 p-5">
-        <div className="rounded-2xl border border-gold/25 bg-gold/10 p-4">
-          <p className="text-sm font-semibold text-foreground">Scoring preview available now</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Create a match and score ball by ball without an account. Match data stays on this
-            device during the preview.
-          </p>
-        </div>
         <Link
           to="/app"
           className="brand-gradient glow flex h-12 w-full items-center justify-center rounded-full text-sm font-bold uppercase tracking-wider text-primary-foreground active:scale-[0.98]"
@@ -901,17 +889,9 @@ function LoginTab() {
           to="/platform"
           className="flex h-11 w-full items-center justify-center rounded-full border border-border text-sm font-bold text-foreground transition hover:border-gold/50"
         >
-          Open cloud control centre
+          {t.login.requestInvite}
         </Link>
-        <p className="text-center text-sm text-muted-foreground">
-          {t.login.noAccount}{" "}
-          <a
-            href="mailto:hello@criclume.com?subject=CricLume%20club%20pilot"
-            className="font-semibold text-gold"
-          >
-            {t.login.requestInvite}
-          </a>
-        </p>
+        <p className="text-center text-sm text-muted-foreground">{t.login.noAccount}</p>
       </div>
 
       <p className="text-center text-xs leading-relaxed text-muted-foreground">
