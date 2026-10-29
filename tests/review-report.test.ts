@@ -103,3 +103,103 @@ test("empty reports explain missing evidence without fabricated statistics", () 
   assert.match(html, /Not recorded/);
   assert.ok(!html.includes("NaN"));
 });
+
+test("report zone totals follow discipline, filters and unknown-zone coverage", () => {
+  const data = {
+    ...input,
+    deliveries: [delivery, { ...delivery, id: "missing", shot_zone: null }],
+  };
+  const batting = reviewSnapshot(data);
+  assert.equal(batting.ground.mapped, 1);
+  assert.equal(batting.ground.unmapped, 1);
+  assert.equal(batting.ground.zones.find((z) => z.name === "Cover")?.runs, 4);
+  assert.equal(batting.bowling, null);
+  assert.match(reviewReportHtml(data), /1 of 2 matching deliveries/);
+  const bowling = reviewSnapshot({
+    ...data,
+    filters: { ...defaultAnalysisFilters, discipline: "bowling" },
+  });
+  assert.equal(bowling.ground.zones.find((z) => z.name === "Cover")?.runs, 5);
+  const fielding = reviewSnapshot({
+    ...data,
+    filters: { ...defaultAnalysisFilters, discipline: "fielding" },
+  });
+  assert.equal(fielding.ground.mapped, 0);
+  assert.equal(fielding.ground.unmapped, 2);
+  assert.equal(
+    reviewSnapshot({ ...data, filters: { ...defaultAnalysisFilters, player: "other" } }).ground
+      .mapped,
+    0,
+  );
+});
+
+test("report placement agrees with dashboard semantics even when note search hides conflicts", () => {
+  const note = {
+    ...input.notes[0]!,
+    discipline: "bowling" as const,
+    delivery_id: "d",
+    bowling_line: "off_stump",
+    bowling_length: "good",
+  };
+  const data = {
+    ...input,
+    filters: { ...defaultAnalysisFilters, discipline: "bowling" as const },
+    notes: [note, { ...note, id: "n2", bowling_length: "short" }],
+    search: "no such text",
+    history: "historical" as const,
+  };
+  const result = reviewSnapshot(data);
+  assert.equal(result.notes.length, 0);
+  assert.equal(result.bowling?.conflicting.length, 1);
+  assert.equal(result.bowling?.mapped, 0);
+  const html = reviewReportHtml(data);
+  assert.match(html, /Conflicting classifications/);
+  assert.match(html, /even when observation search or history settings hide some notes/);
+  assert.match(html, /full toss \(no bounce\)/);
+});
+
+test("placement aggregates cover every matching row beyond report excerpt limits", () => {
+  const deliveries = Array.from({ length: 251 }, (_, i) => ({ ...delivery, id: `ball${i}` }));
+  const notes = deliveries.map((d) => ({
+    ...input.notes[0]!,
+    discipline: "bowling" as const,
+    delivery_id: d.id,
+    bowling_line: "off_stump",
+    bowling_length: "good",
+  }));
+  const data = {
+    ...input,
+    filters: { ...defaultAnalysisFilters, discipline: "bowling" as const },
+    deliveries,
+    notes: [...notes, notes[0]!],
+  };
+  const result = reviewSnapshot(data);
+  assert.equal(result.bowling?.mapped, 251);
+  assert.equal(result.bowling?.cells.find((c) => c.key === "good:off_stump")?.runs, 1255);
+  const html = reviewReportHtml(data);
+  assert.match(html, /251 \/ 1255 \/ 0/);
+  assert.match(html, /Showing 250 of 251 matching deliveries/);
+  assert.match(html, /251 of 251 matching deliveries have a recognised shot zone/);
+});
+
+test("new report sections remain resource-free and reject hostile classification values", () => {
+  const attack = '<img src="https://bad.invalid/x" onerror="alert(1)">';
+  const html = reviewReportHtml({
+    ...input,
+    filters: { ...defaultAnalysisFilters, discipline: "bowling" },
+    deliveries: [{ ...delivery, shot_zone: attack }],
+    notes: [
+      {
+        ...input.notes[0]!,
+        discipline: "bowling",
+        delivery_id: "d",
+        bowling_line: attack,
+        bowling_length: "good",
+      },
+    ],
+  });
+  assert.ok(!/<(?:script|img|canvas|iframe|link)\b/i.test(html));
+  assert.match(html, /No mapped zones/);
+  assert.match(html, /Unclassified deliveries/);
+  assert.match(html, /&lt;img/);
+});

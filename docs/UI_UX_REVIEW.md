@@ -143,3 +143,13 @@ A delivery contributes once even if duplicate observations agree. A complete, su
 Validation: 77 unit tests, typecheck, lint (eight existing warnings) and production build. Chromium with the actual component and synthetic fixtures checked measure changes, keyboard selection, conflict/unclassified review, correct clip ID dispatch and disabled controls, pagination, stable innings numbering, clear-selection focus, empty filters and mobile scrolling without page overflow. No schema changes, paid AI calls or live deployment.
 
 Next: append-only coaching correction history to resolve conflicting classifications explicitly; field-setting scenarios; video-linked spatial inspection. Measured ball trajectories and cross-device scoring reconciliation remain separate work. This matrix does not silently pick a winning observation or change official scores.
+
+## Analysis summaries in coaching reports — 29 October 2026
+
+Downloaded review reports now include the Match Observatory's recognised-zone totals and, for bowling, the full line/length matrix with classified, conflicting and unclassified coverage. These sections reuse the dashboard aggregation helpers and the same filtered current deliveries. Zone runs remain batter runs for batting and team runs otherwise; fielding uses fielding zones. Unknown zones remain explicitly unmapped. The matrix preserves full-toss/no-bounce and wicket-event distinctions.
+
+Aggregate summaries include all matching rows, independently of the report's 250-delivery and 100-observation excerpt limits. Bowling classification uses all loaded bowling notes for those deliveries, as the dashboard does, so a note-search/history filter cannot hide a conflict from the summary. The report explains this difference from the observation excerpt. It remains a standalone HTML snapshot without scripts, remote resources, media or signed URLs. Native tables include captions and row/column headers, and the new summary sections stay together when printing.
+
+Validation: 81 unit tests, TypeScript, lint (eight existing warnings), production build and Chromium rendering of the generated report. Tests cover discipline-specific runs/zones, unknown coverage, filtered rows, hidden-note conflicts, duplicate notes, totals beyond excerpt limits and hostile classification values. Browser checks cover exact coverage, all five length rows, mobile overflow, resource-free rendering and print output; printed pages were visually inspected. No database changes or live deployment.
+
+Still pending: coaching correction history, hypothetical field-setting scenarios, raw-media measurement and cross-device score reconciliation. Exporting these summaries does not add those capabilities or turn coach classifications into measured tracking data.
