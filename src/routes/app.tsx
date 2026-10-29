@@ -162,6 +162,7 @@ export function CricketApp() {
     removeMatch,
     importMatches,
     storageIssue,
+    storageConflict,
     recoveryData,
     saved,
     retrySave,
@@ -315,12 +316,23 @@ export function CricketApp() {
                 Download preserved data
               </button>
             )}
+            {storageConflict && (
+              <button className="action-primary" onClick={() => window.location.reload()}>
+                Reload latest device data
+              </button>
+            )}
             {canRetrySave && (
               <button className="action-primary" onClick={retrySave}>
                 Retry device save
               </button>
             )}
           </div>
+          {storageConflict && (
+            <p className="mt-2 text-sm">
+              Reload replaces this tab’s in-memory matches. Download your current matches first if
+              you want to keep them.
+            </p>
+          )}
           <p className="mt-2 text-xs">
             Backups may contain player names and private notes. Keep them private. Cloud match
             linkage does not confirm that every change has synced.

@@ -138,3 +138,16 @@ export function copyBackupMatches(
 ): CricketMatch[] {
   return matches.map((match) => ({ ...structuredClone(match), id: `restored-${newId()}` }));
 }
+
+export const scorerWriteLock = "criclume:matches:v1:write";
+/** Call while holding the shared browser lock; a stale reader must never overwrite newer data. */
+export function commitScorerSnapshot(
+  storage: Pick<Storage, "getItem" | "setItem">,
+  expected: string | null,
+  next: string,
+): { saved: true } | { saved: false; current: string | null } {
+  const current = storage.getItem(scorerStorageKey);
+  if (current !== expected) return { saved: false, current };
+  storage.setItem(scorerStorageKey, next);
+  return { saved: true };
+}
