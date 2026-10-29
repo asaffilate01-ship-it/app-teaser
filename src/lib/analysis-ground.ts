@@ -1,4 +1,9 @@
-import { isCurrentDelivery, type DeliveryEvidence, type Discipline } from "./analysis.ts";
+import {
+  isCurrentDelivery,
+  normalizeAnalysisZone,
+  type DeliveryEvidence,
+  type Discipline,
+} from "./analysis.ts";
 
 // Schematic reference positions, not measured player or ball coordinates.
 export const groundZones = [
@@ -32,9 +37,9 @@ export function summarizeGround(rows: DeliveryEvidence[], discipline: Discipline
   }));
   let unmapped = 0;
   for (const row of rows.filter(isCurrentDelivery)) {
-    const name = (discipline === "fielding" ? row.fielding_zone : row.shot_zone)
-      ?.trim()
-      .toLowerCase();
+    const name = normalizeAnalysisZone(
+      discipline === "fielding" ? row.fielding_zone : row.shot_zone,
+    );
     const zone = zones.find((zone) => zone.name.toLowerCase() === name);
     if (!zone) {
       unmapped++;
@@ -45,4 +50,23 @@ export function summarizeGround(rows: DeliveryEvidence[], discipline: Discipline
     zone.wickets += Number(row.wicket);
   }
   return { zones, unmapped, mapped: zones.reduce((sum, zone) => sum + zone.deliveries, 0) };
+}
+
+/** One option per recorded zone; unknown names remain selectable but unplotted. */
+export function analysisZoneOptions(
+  rows: DeliveryEvidence[],
+  discipline: Discipline,
+): Array<[string, string]> {
+  const options = new Map<string, string>();
+  for (const row of rows.filter(isCurrentDelivery)) {
+    const raw = discipline === "fielding" ? row.fielding_zone : row.shot_zone;
+    const key = normalizeAnalysisZone(raw);
+    if (!key || options.has(key)) continue;
+    options.set(
+      key,
+      groundZones.find((zone) => normalizeAnalysisZone(zone.name) === key)?.name ??
+        raw!.trim().replace(/\s+/g, " "),
+    );
+  }
+  return Array.from(options.entries());
 }

@@ -1,3 +1,4 @@
+import { analysisZoneOptions } from "@/lib/analysis-ground";
 import { BowlingPlacement } from "@/components/BowlingPlacement";
 import { AnalysisGround } from "@/components/AnalysisGround";
 import { observationErrors } from "@/lib/observation-form";
@@ -112,6 +113,7 @@ function MatchAnalysis({
   const [data, setData] = useState<Awaited<ReturnType<typeof loadAnalysis>> | null>(null);
   const [filters, setFilters] = useState<AnalysisFilters>({ ...defaultAnalysisFilters });
   const [page, setPage] = useState(0);
+  const deliveryTable = useRef<HTMLDivElement>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [version, setVersion] = useState(0);
@@ -243,7 +245,12 @@ function MatchAnalysis({
   ) => (
     <label className="flex flex-col gap-1 text-xs text-slate-400">
       {label}
-      <select className={field} value={filters[key]} onChange={(e) => update(key, e.target.value)}>
+      <select
+        aria-label={label}
+        className={field}
+        value={filters[key]}
+        onChange={(e) => update(key, e.target.value)}
+      >
         <option value="">All</option>
         {items.map(([id, label]) => (
           <option key={id} value={id}>
@@ -445,14 +452,7 @@ function MatchAnalysis({
           "style",
           options("delivery_style").map((v) => [v, v]),
         )}
-        {select(
-          "Zone",
-          "zone",
-          options(filters.discipline === "fielding" ? "fielding_zone" : "shot_zone").map((v) => [
-            v,
-            v,
-          ]),
-        )}
+        {select("Zone", "zone", analysisZoneOptions(data.deliveries, filters.discipline))}
         {select("Outcome", "outcome", [
           ["wickets", "Wicket events"],
           ["boundaries", "Boundaries"],
@@ -525,7 +525,25 @@ function MatchAnalysis({
         Recorded events only. Team runs include extras; wicket events include run-outs and are not
         bowler wickets.
       </p>
-      <AnalysisGround rows={rows} discipline={filters.discipline} />
+      <AnalysisGround
+        rows={rows}
+        discipline={filters.discipline}
+        activeZone={filters.zone}
+        onReviewZone={(zone) => {
+          update("zone", zone);
+          window.requestAnimationFrame(() => {
+            deliveryTable.current?.scrollIntoView({ block: "start" });
+            deliveryTable.current?.focus({ preventScroll: true });
+          });
+        }}
+        onClearZone={() => {
+          update("zone", "");
+          window.requestAnimationFrame(() => {
+            deliveryTable.current?.scrollIntoView({ block: "start" });
+            deliveryTable.current?.focus({ preventScroll: true });
+          });
+        }}
+      />
       {filters.discipline === "bowling" && (
         <BowlingPlacement
           rows={rows}
@@ -538,6 +556,7 @@ function MatchAnalysis({
         />
       )}
       <div
+        ref={deliveryTable}
         className="overflow-x-auto rounded-xl border border-white/10"
         role="region"
         aria-label="Recorded deliveries; scroll horizontally for more columns"
