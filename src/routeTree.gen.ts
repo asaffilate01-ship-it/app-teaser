@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PromoRouteImport } from './routes/promo'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as CameraRoomIdRouteImport } from './routes/camera.$roomId'
 import { Route as ScoreboardSlugRouteImport } from './routes/scoreboard.$slug'
@@ -37,6 +38,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PromoRoute = PromoRouteImport.update({
+  id: '/promo',
+  path: '/promo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRoute
   '/platform': typeof PlatformRoute
   '/privacy': typeof PrivacyRoute
+  '/promo': typeof PromoRoute
   '/terms': typeof TermsRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppRoute
   '/platform': typeof PlatformRoute
   '/privacy': typeof PrivacyRoute
+  '/promo': typeof PromoRoute
   '/terms': typeof TermsRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/app': typeof AppRoute
   '/platform': typeof PlatformRoute
   '/privacy': typeof PrivacyRoute
+  '/promo': typeof PromoRoute
   '/terms': typeof TermsRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/platform'
     | '/privacy'
+    | '/promo'
     | '/terms'
     | '/camera/$roomId'
     | '/scoreboard/$slug'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/platform'
     | '/privacy'
+    | '/promo'
     | '/terms'
     | '/camera/$roomId'
     | '/scoreboard/$slug'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/platform'
     | '/privacy'
+    | '/promo'
     | '/terms'
     | '/camera/$roomId'
     | '/scoreboard/$slug'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRoute
   PlatformRoute: typeof PlatformRoute
   PrivacyRoute: typeof PrivacyRoute
+  PromoRoute: typeof PromoRoute
   TermsRoute: typeof TermsRoute
   CameraRoomIdRoute: typeof CameraRoomIdRoute
   ScoreboardSlugRoute: typeof ScoreboardSlugRoute
@@ -151,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/promo': {
+      id: '/promo'
+      path: '/promo'
+      fullPath: '/promo'
+      preLoaderRoute: typeof PromoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRoute,
   PlatformRoute: PlatformRoute,
   PrivacyRoute: PrivacyRoute,
+  PromoRoute: PromoRoute,
   TermsRoute: TermsRoute,
   CameraRoomIdRoute: CameraRoomIdRoute,
   ScoreboardSlugRoute: ScoreboardSlugRoute,
