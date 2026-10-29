@@ -32,6 +32,7 @@ export function SpatialCricketLab({
 }) {
   const [mode, setMode] = useState<SpatialMode>("wagon");
   const [flat, setFlat] = useState(false);
+  const [raised, setRaised] = useState(true);
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
   const [view, setView] = useState<GroundView>("perspective");
@@ -57,8 +58,10 @@ export function SpatialCricketLab({
             color: 0x60a5fa,
             shape: "fielder",
           }))
-        : data.marks,
-    [planning, field, data],
+        : data.marks.map((mark) =>
+            mark.shape === "shot" ? { ...mark, height: raised ? 10 : 0 } : mark,
+          ),
+    [planning, field, data, raised],
   );
   const host = useRef<HTMLDivElement>(null);
   const scene = useRef<ReturnType<typeof createGroundScene> | null>(null);
@@ -157,6 +160,20 @@ export function SpatialCricketLab({
         <button className={control} onClick={() => setFlat(!flat)}>
           {flat ? "Show 3D" : "Show 2D"}
         </button>
+        {mode === "wagon" && !fallback && (
+          <label className="text-sm">
+            Shot display{" "}
+            <select
+              aria-label="Shot display"
+              className={control}
+              value={raised ? "arcs" : "traces"}
+              onChange={(e) => setRaised(e.target.value === "arcs")}
+            >
+              <option value="arcs">Raised 3D arcs</option>
+              <option value="traces">Ground-level traces</option>
+            </select>
+          </label>
+        )}
         {!fallback && (
           <label className="text-sm">
             Camera{" "}
@@ -238,7 +255,7 @@ export function SpatialCricketLab({
           )}
           <p className="mt-3 text-xs leading-relaxed text-slate-300">
             {mode === "wagon"
-              ? "Lines connect the batting crease to recorded zone centres. They show direction categories, not measured flight paths or shot distances. Overlapping deliveries share a line."
+              ? "Paths connect the batting crease to recorded zone centres. Raised 3D arcs use an illustrative height, not measured ball flight. Ground traces show the same directions at turf level. Overlapping deliveries share a path."
               : mode === "pitch"
                 ? "Balls use categorical line/length positions, not measured bounce coordinates. Full tosses are raised because they have no bounce. Repeated classifications overlap."
                 : mode === "worm"

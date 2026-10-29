@@ -199,18 +199,22 @@ export function createGroundScene(
         scene.add(label);
         labels.push(label);
       });
-      for (const mark of marks) {
+      // Draw the selected path last so coincident deliveries cannot hide its highlight.
+      for (const mark of [...marks].sort(
+        (a, b) => Number(a.id === selected) - Number(b.id === selected),
+      )) {
         const color = mark.id === selected ? 0xffffff : mark.color;
         const geometry =
           mark.shape === "shot"
             ? new THREE.TubeGeometry(
-                new THREE.LineCurve3(
+                new THREE.QuadraticBezierCurve3(
                   new THREE.Vector3(0, 0.4, 8.5),
+                  new THREE.Vector3(mark.x / 2, 0.4 + 2 * mark.height, (8.5 + mark.z) / 2),
                   new THREE.Vector3(mark.x, 0.4, mark.z),
                 ),
-                1,
-                0.16,
-                5,
+                32,
+                mark.id === selected ? 0.35 : 0.22,
+                8,
                 false,
               )
             : mark.shape === "bar"
@@ -229,6 +233,12 @@ export function createGroundScene(
                 : mark.height,
             mark.z,
           );
+        if (mark.shape === "shot") {
+          const endpoint = mesh(new THREE.SphereGeometry(0.6, 12, 8), color);
+          endpoint.position.set(mark.x, 0.6, mark.z);
+          endpoint.userData["zone"] = mark.id;
+          bars.push(endpoint);
+        }
         if (mark.shape === "trend") {
           const start = new THREE.Vector3(
             mark.fromX ?? mark.x,
