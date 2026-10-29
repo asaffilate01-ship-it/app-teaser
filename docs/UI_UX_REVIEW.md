@@ -99,3 +99,7 @@ The importer is unavailable within a cloud-linked scorer session. Imported copie
 Validation: 63 unit tests including single/list imports, empty/partial/oversized rejection, batch limits, independent identities and deep-copy isolation; TypeScript, lint and production build. Chromium against the actual scorer checked invalid files, focused previews, cancellation, preserving existing matches, successful import, unreadable-storage memory recovery, downloading the restored copy and 375/1440px layouts. Live cloud services were not called.
 
 Remaining: controlled replacement/merge of existing versions and simultaneous-edit conflict handling. The original file is not repaired by importing copies; cloud restoration remains an authenticated server workflow. Staging activation, raw-media AI and coaching correction history remain separate phases.
+
+### Dependency check follow-up
+
+The production audit detected two Seroval advisories in the previous 1.6.9 lock entry during this release. The override now pins 1.6.11, covering [GHSA-f86p-h4j2-7qgj](https://github.com/advisories/GHSA-f86p-h4j2-7qgj) and [GHSA-9wx9-5pv9-3349](https://github.com/advisories/GHSA-9wx9-5pv9-3349). Dependency audit, build and browser verification are repeated with the patched lockfile before merge.
