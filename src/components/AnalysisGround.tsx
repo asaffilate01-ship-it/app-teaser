@@ -1,3 +1,5 @@
+import { SpatialCricketLab } from "./SpatialCricketLab";
+import type { CoachingAnnotation } from "@/lib/coaching";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { normalizeAnalysisZone, type DeliveryEvidence, type Discipline } from "@/lib/analysis";
 import { summarizeGround, type GroundMetric } from "@/lib/analysis-ground";
@@ -5,7 +7,7 @@ import type { createGroundScene, GroundView } from "@/lib/ground-scene";
 
 const control =
   "min-h-11 rounded-xl border border-white/15 px-3 py-2 text-sm text-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200";
-export function AnalysisGround({
+function ZoneGround({
   rows,
   discipline,
   activeZone = "",
@@ -298,5 +300,39 @@ export function AnalysisGround({
         </aside>
       </div>
     </section>
+  );
+}
+
+export function AnalysisGround(
+  props: Parameters<typeof ZoneGround>[0] & {
+    notes?: CoachingAnnotation[];
+    inningsIds?: string[];
+    playerNames?: ReadonlyMap<string, string>;
+    onReviewDelivery?: (id: string) => void;
+  },
+) {
+  const [spatial, setSpatial] = useState(true);
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
+        <button className={control} aria-pressed={spatial} onClick={() => setSpatial(true)}>
+          Wagon wheel, pitch & field
+        </button>
+        <button className={control} aria-pressed={!spatial} onClick={() => setSpatial(false)}>
+          Zone totals & review
+        </button>
+      </div>
+      {spatial ? (
+        <SpatialCricketLab
+          rows={props.rows}
+          notes={props.notes ?? []}
+          {...(props.inningsIds ? { inningsIds: props.inningsIds } : {})}
+          {...(props.playerNames ? { playerNames: props.playerNames } : {})}
+          {...(props.onReviewDelivery ? { onReviewDelivery: props.onReviewDelivery } : {})}
+        />
+      ) : (
+        <ZoneGround {...props} />
+      )}
+    </div>
   );
 }
