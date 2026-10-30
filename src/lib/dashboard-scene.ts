@@ -1,3 +1,4 @@
+import { battingCrease, type WagonShot } from "./wagon-wheel";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import type { GroundZone } from "./analysis-ground";
@@ -13,6 +14,7 @@ export function createDashboardScene(
   series: RateSeries,
   onSelect: (key: string) => void,
   onFailure: () => void,
+  shots: WagonShot[] = [],
 ) {
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -69,40 +71,41 @@ export function createDashboardScene(
     scene.add(o);
   };
   if (kind === "wheel") {
-    const max = Math.max(1, ...zones.map((z) => z.deliveries));
-    zones.forEach((zone, i) => {
-      const start = (i * Math.PI * 2) / zones.length + 0.025,
-        end = ((i + 1) * Math.PI * 2) / zones.length - 0.025;
-      const shape = new THREE.Shape();
-      shape.absarc(0, 0, 9, start, end, false);
-      shape.lineTo(4 * Math.cos(end), 4 * Math.sin(end));
-      shape.absarc(0, 0, 4, end, start, true);
-      shape.closePath();
-      const depth = zone.deliveries ? 1 + (3 * zone.deliveries) / max : 0.25;
-      const o = mesh(
-        new THREE.ExtrudeGeometry(shape, {
-          depth,
-          bevelEnabled: true,
-          bevelSize: 0.08,
-          bevelThickness: 0.08,
-          bevelSegments: 2,
-          steps: 1,
-          curveSegments: 24,
-        }),
-        zone.deliveries ? dashboardColors[i % dashboardColors.length]! : 0x373a42,
-      );
-      o.rotation.x = -Math.PI / 2;
-      o.userData["key"] = zone.name;
-      picks.push(o);
-      const angle = (start + end) / 2;
-      label(
-        `${i + 1}: ${zone.deliveries}`,
-        6.6 * Math.cos(angle),
-        depth + 0.7,
-        -6.6 * Math.sin(angle),
-      );
-    });
-    label(String(zones.reduce((n, z) => n + z.deliveries, 0)), 0, 1, 0);
+    mesh(new THREE.CylinderGeometry(9, 9, 0.35, 80), 0x124c43).position.y = -0.2;
+    const boundary = mesh(new THREE.TorusGeometry(8.8, 0.035, 6, 80), 0xe5e7cf);
+    boundary.rotation.x = Math.PI / 2;
+    mesh(new THREE.BoxGeometry(1, 0.05, 4.2), 0xc4ad7b).position.y = 0.02;
+    for (const z of [-1.7, 1.7]) {
+      const crease = mesh(new THREE.BoxGeometry(1.4, 0.03, 0.025), 0xffffff);
+      crease.position.set(0, 0.08, z);
+    }
+    const batter = mesh(new THREE.SphereGeometry(0.15, 12, 8), 0xffffff);
+    batter.position.set(battingCrease.x / 5, 0.2, battingCrease.z / 5);
+    for (const shot of shots.slice(0, 500)) {
+      const color = Number.parseInt(shot.color.slice(1), 16);
+      if (!shot.fielding) {
+        const path = mesh(
+          new THREE.TubeGeometry(
+            new THREE.LineCurve3(
+              new THREE.Vector3(battingCrease.x / 5, 0.13, battingCrease.z / 5),
+              new THREE.Vector3(shot.x / 5, 0.13, shot.z / 5),
+            ),
+            1,
+            0.035,
+            6,
+            false,
+          ),
+          color,
+        );
+        path.userData["key"] = shot.zone;
+        picks.push(path);
+      }
+      const ball = mesh(new THREE.SphereGeometry(0.1, 10, 8), color);
+      ball.position.set(shot.x / 5, 0.18, shot.z / 5);
+      ball.userData["key"] = shot.zone;
+      picks.push(ball);
+    }
+    zones.forEach((zone, i) => label(`${i + 1}. ${zone.name}`, zone.x / 4.1, 0.5, zone.z / 4.1));
   } else {
     const points = series.flatMap((s) => s.points);
     const maxRate = Math.max(1, ...points.map((p) => p.rate ?? 0));

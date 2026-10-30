@@ -1,3 +1,4 @@
+import { battingCrease, wagonWheelShots, type WagonShot } from "@/lib/wagon-wheel";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DeliveryEvidence, Discipline } from "@/lib/analysis";
 import { summarizeGround, type GroundZone } from "@/lib/analysis-ground";
@@ -6,18 +7,20 @@ import { dashboardAnalysis, type RateSeries } from "@/lib/dashboard-analysis";
 const button =
   "min-h-11 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-slate-200";
 const card = "min-w-0 rounded-2xl border border-white/10 bg-[#1d1f24] p-4 sm:p-5";
-function Plot({
+export function Plot({
   kind,
   zones,
   series,
   flat,
   onSelect,
+  shots,
 }: {
   kind: "wheel" | "rate";
   zones: GroundZone[];
   series: RateSeries;
   flat: boolean;
   onSelect: (key: string) => void;
+  shots: WagonShot[];
 }) {
   const host = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(false);
@@ -45,6 +48,7 @@ function Plot({
               queueMicrotask(() => scene?.dispose());
             }
           },
+          shots,
         );
         setReady(true);
       })
@@ -55,7 +59,7 @@ function Plot({
       active = false;
       scene?.dispose();
     };
-  }, [kind, zones, series, flat]);
+  }, [kind, zones, series, flat, shots]);
   const fallback = flat || failed;
   const max = Math.max(1, ...series.flatMap((s) => s.points.map((p) => p.rate ?? 0)));
   const maxOver = Math.max(1, ...series.flatMap((s) => s.points.map((p) => p.over)));
@@ -70,25 +74,41 @@ function Plot({
         )}
         {fallback &&
           (kind === "wheel" ? (
-            <div className="grid h-full content-center gap-1 overflow-auto px-3">
-              {zones.map((z) => (
-                <div
-                  key={z.name}
-                  className="grid grid-cols-[100px_1fr_30px] items-center gap-2 text-xs"
-                >
-                  <span>{z.name}</span>
-                  <span className="h-2 rounded bg-white/10">
-                    <span
-                      className="block h-2 rounded bg-rose-400"
-                      style={{
-                        width: `${(100 * z.deliveries) / Math.max(1, ...zones.map((z) => z.deliveries))}%`,
-                      }}
+            <svg
+              viewBox="-55 -55 110 110"
+              role="img"
+              aria-label="Cricket wagon wheel on a ground"
+              className="h-full w-full"
+            >
+              <circle r="44" fill="#124c43" stroke="#e5e7cf" strokeWidth=".4" />
+              <rect x="-2.5" y="-10.5" width="5" height="21" fill="#c4ad7b" />
+              {shots.slice(0, 500).map((shot) => (
+                <g key={shot.id}>
+                  {!shot.fielding && (
+                    <path
+                      d={`M${battingCrease.x} ${battingCrease.z} L${shot.x} ${shot.z}`}
+                      stroke={shot.color}
+                      strokeWidth=".5"
+                      fill="none"
                     />
-                  </span>
-                  <span>{z.deliveries}</span>
-                </div>
+                  )}
+                  <circle cx={shot.x} cy={shot.z} r=".7" fill={shot.color} />
+                </g>
               ))}
-            </div>
+              <circle cx={battingCrease.x} cy={battingCrease.z} r=".8" fill="white" />
+              {zones.map((z, i) => (
+                <text
+                  key={z.name}
+                  x={z.x * 1.13}
+                  y={z.z * 1.13}
+                  fill="white"
+                  textAnchor="middle"
+                  fontSize="3"
+                >
+                  {i + 1}
+                </text>
+              ))}
+            </svg>
           ) : (
             <svg
               role="img"
@@ -158,6 +178,7 @@ export function AnalysisDashboard({
     [point, setPoint] = useState("");
   const current = useMemo(() => uniqueCurrent(rows), [rows]);
   const ground = useMemo(() => summarizeGround(current, discipline), [current, discipline]);
+  const shots = useMemo(() => wagonWheelShots(current, discipline), [current, discipline]);
   const data = useMemo(() => dashboardAnalysis(current, inningsIds), [current, inningsIds]);
   const selected = ground.zones.find((z) => z.name === zone);
   const selectedPoint = data.series
@@ -230,6 +251,7 @@ export function AnalysisDashboard({
             Cumulative filtered runs per six legal balls · separate innings
           </p>
           <Plot
+            shots={shots}
             kind="rate"
             zones={ground.zones}
             series={data.series}
@@ -291,18 +313,26 @@ export function AnalysisDashboard({
           )}
         </article>
         <article className={card}>
-          <h4 className="font-bold uppercase tracking-wide">3D wagon wheel</h4>
+          <h4 className="font-bold uppercase tracking-wide">
+            {discipline === "fielding" ? "Fielding event map" : "Wagon wheel"}
+          </h4>
           <p className="mt-1 text-xs text-slate-400">
             {discipline === "fielding" ? "Fielding" : "Shot"} zone distribution · {ground.mapped}{" "}
             mapped deliveries
           </p>
           <Plot
+            shots={shots}
             kind="wheel"
             zones={ground.zones}
             series={data.series}
             flat={flat}
             onSelect={setZone}
           />
+          {shots.length > 500 && (
+            <p className="text-xs text-amber-200">
+              Showing the first 500 plotted events. Zone totals below include every filtered event.
+            </p>
+          )}
           <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3">
             {ground.zones.map((z, i) => (
               <button
@@ -320,8 +350,11 @@ export function AnalysisDashboard({
             ))}
           </div>
           <p className="mt-2 text-xs text-slate-400">
-            Equal category sectors; height shows delivery count. Percentages use mapped deliveries.{" "}
-            {ground.unmapped} unclassified. This is a zone summary, not measured shot direction.
+            {discipline === "fielding"
+              ? "Points show recorded fielding-event zones, not a complete field setting."
+              : "Shot lines radiate from the batter to recorded zone centres. Overlapping shots share a line; exact direction, distance and flight are not tracked."}{" "}
+            Percentages use mapped deliveries. {ground.unmapped} unclassified. Teal: other outcomes;
+            gold: four; purple: six; pink: wicket event.
           </p>
           {selected && (
             <div role="status" className="mt-3 flex flex-wrap items-center gap-2 text-sm">
