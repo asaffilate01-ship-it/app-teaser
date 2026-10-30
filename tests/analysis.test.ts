@@ -118,3 +118,34 @@ test("undone and replaced deliveries are excluded from filtering, summary and CS
   assert.deepEqual(summarizeDeliveries([row, undone, replaced]), summarizeDeliveries([row]));
   assert.equal(deliveryCsv([row, undone, replaced]), deliveryCsv([row]));
 });
+
+test("matchup filters intersect all roles independently of the displayed discipline", () => {
+  const other = { ...row, id: "other", bowler_id: "other-bowler" };
+  for (const discipline of ["batting", "bowling", "fielding"] as const) {
+    const filters = {
+      ...defaultAnalysisFilters,
+      discipline,
+      batter: "batter",
+      bowler: "bowler",
+      fielder: "fielder",
+    };
+    assert.deepEqual(filterDeliveries([row, other], filters), [row]);
+    for (const key of ["batter", "bowler", "fielder"] as const)
+      assert.deepEqual(filterDeliveries([row], { ...filters, [key]: "missing" }), []);
+    assert.deepEqual(filterDeliveries([{ ...row, fielder_id: null }], filters), []);
+  }
+});
+
+test("fours and sixes use batter runs while dot filtering includes team extras", () => {
+  const six = { ...row, id: "six", batter_runs: 6, total_runs: 6 };
+  const extras = { ...row, id: "extras", batter_runs: 0, total_runs: 4 };
+  const dot = { ...row, id: "dot", batter_runs: 0, total_runs: 0 };
+  const rows = [row, six, extras, dot];
+  for (const [outcome, expected] of [
+    ["4", [row]],
+    ["6", [six]],
+    ["boundaries", [row, six]],
+    ["dots", [dot]],
+  ] as const)
+    assert.deepEqual(filterDeliveries(rows, { ...defaultAnalysisFilters, outcome }), expected);
+});

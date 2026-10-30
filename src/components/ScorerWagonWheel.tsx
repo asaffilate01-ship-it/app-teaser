@@ -1,3 +1,4 @@
+import { defaultAnalysisFilters, filterDeliveries } from "@/lib/analysis";
 import { useMemo, useState } from "react";
 import type { Innings, Player } from "@/lib/cricket";
 import { scorerWagonEvidence, wagonWheelShots } from "@/lib/wagon-wheel";
@@ -15,17 +16,12 @@ export function ScorerWagonWheel({ innings, players }: { innings: Innings; playe
     [selected, setSelected] = useState("");
   const evidence = useMemo(() => scorerWagonEvidence(innings), [innings]);
   const rows = useMemo(
-    () =>
-      evidence.filter(
-        (r) =>
-          (!batter || r.striker_id === batter) &&
-          (!bowler || r.bowler_id === bowler) &&
-          (!outcome || (outcome === "wickets" ? r.wicket : r.batter_runs === Number(outcome))),
-      ),
+    () => filterDeliveries(evidence, { ...defaultAnalysisFilters, batter, bowler, outcome }),
     [evidence, batter, bowler, outcome],
   );
   const shots = useMemo(() => wagonWheelShots(rows, "batting"), [rows]);
   const ground = useMemo(() => summarizeGround(rows, "batting"), [rows]);
+  const selectedRows = filterDeliveries(rows, { ...defaultAnalysisFilters, zone: selected });
   const zone = ground.zones.find((z) => z.name === selected);
   return (
     <section
@@ -56,7 +52,10 @@ export function ScorerWagonWheel({ innings, players }: { innings: Innings; playe
               className={control}
               aria-label={`Wagon wheel ${label.toLowerCase()}`}
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={(e) => {
+                setValue(e.target.value);
+                setSelected("");
+              }}
             >
               <option value="">All {label.toLowerCase()}s</option>
               {[...new Set(evidence.map((r) => r[key]))].map((id) => (
@@ -73,12 +72,17 @@ export function ScorerWagonWheel({ innings, players }: { innings: Innings; playe
             aria-label="Wagon wheel outcome"
             className={control}
             value={outcome}
-            onChange={(e) => setOutcome(e.target.value)}
+            onChange={(e) => {
+              setOutcome(e.target.value);
+              setSelected("");
+            }}
           >
             <option value="">All outcomes</option>
             <option value="4">Fours</option>
             <option value="6">Sixes</option>
             <option value="wickets">Wickets</option>
+            <option value="boundaries">Boundaries</option>
+            <option value="dots">Dot deliveries</option>
           </select>
         </label>
         <button
@@ -132,6 +136,58 @@ export function ScorerWagonWheel({ innings, players }: { innings: Innings; playe
               </span>
             </button>
           ))}
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-lg font-semibold">
+          {selected ? `${selected} deliveries` : "Matching deliveries"}
+        </h3>
+        {selected && (
+          <button className={control} onClick={() => setSelected("")}>
+            Clear zone selection
+          </button>
+        )}
+      </div>
+      <p className="text-xs text-slate-300" role="status">
+        Showing {Math.min(30, selectedRows.length)} of {selectedRows.length} matching deliveries.
+        Select a zone on the wheel to inspect its recorded deliveries.
+      </p>
+      <div
+        className="max-h-80 overflow-auto rounded-xl border border-white/10"
+        tabIndex={0}
+        aria-label="Matching wagon wheel deliveries"
+      >
+        <table className="w-full text-left text-xs">
+          <thead>
+            <tr>
+              {["Ball", "Batter", "Bowler", "Batter runs", "Team runs", "Outcome", "Zone"].map(
+                (label) => (
+                  <th key={label} scope="col" className="p-2">
+                    {label}
+                  </th>
+                ),
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {selectedRows.slice(0, 30).map((row) => (
+              <tr key={row.id} className="border-t border-white/10">
+                <td className="p-2">
+                  {row.over_number}.{row.ball_in_over}
+                </td>
+                <td className="p-2">
+                  {players.find((p) => p.id === row.striker_id)?.name ?? "Player"}
+                </td>
+                <td className="p-2">
+                  {players.find((p) => p.id === row.bowler_id)?.name ?? "Player"}
+                </td>
+                <td className="p-2">{row.batter_runs}</td>
+                <td className="p-2">{row.total_runs}</td>
+                <td className="p-2">{row.wicket ? "Wicket event" : row.outcome}</td>
+                <td className="p-2">{row.shot_zone || "Not recorded"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
       {zone && (
         <p role="status" className="text-sm">

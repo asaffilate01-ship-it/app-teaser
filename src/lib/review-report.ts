@@ -80,6 +80,9 @@ export function reviewReportHtml(input: ReviewReportInput): string {
   const criteria: Array<[string, string]> = [
     ["Discipline", input.filters.discipline],
     ["Player reference", input.filters.player || "All"],
+    ["Batter reference", input.filters.batter || "All"],
+    ["Bowler reference", input.filters.bowler || "All"],
+    ["Fielder reference", input.filters.fielder || "All"],
     ["Innings reference", input.filters.innings || "All"],
     ["Bowling style", input.filters.style || "All"],
     ["Zone", input.filters.zone || "All"],

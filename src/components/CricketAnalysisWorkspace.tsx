@@ -241,7 +241,7 @@ function MatchAnalysis({
     );
   const select = (
     label: string,
-    key: "player" | "innings" | "style" | "zone" | "outcome",
+    key: "batter" | "bowler" | "fielder" | "player" | "innings" | "style" | "zone" | "outcome",
     items: Array<[string, string]>,
   ) => (
     <label className="flex flex-col gap-1 text-xs text-slate-400">
@@ -249,7 +249,7 @@ function MatchAnalysis({
       <select
         aria-label={label}
         className={field}
-        value={filters[key]}
+        value={filters[key] ?? ""}
         onChange={(e) => update(key, e.target.value)}
       >
         <option value="">All</option>
@@ -435,12 +435,18 @@ function MatchAnalysis({
       </div>
       <div className="grid gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:grid-cols-2 lg:grid-cols-4">
         {select(
-          filters.discipline === "batting"
-            ? "Batter"
-            : filters.discipline === "bowling"
-              ? "Bowler"
-              : "Fielder",
-          "player",
+          "Batter",
+          "batter",
+          players.map((p) => [p.id, p.name]),
+        )}
+        {select(
+          "Bowler",
+          "bowler",
+          players.map((p) => [p.id, p.name]),
+        )}
+        {select(
+          "Fielder",
+          "fielder",
           players.map((p) => [p.id, p.name]),
         )}
         {select(
@@ -457,6 +463,8 @@ function MatchAnalysis({
         {select("Outcome", "outcome", [
           ["wickets", "Wicket events"],
           ["boundaries", "Boundaries"],
+          ["4", "Fours"],
+          ["6", "Sixes"],
           ["dots", "Dot deliveries"],
         ])}
         {(["fromOver", "toOver"] as const).map((k) => (

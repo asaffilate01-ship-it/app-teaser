@@ -31,6 +31,9 @@ export function isCurrentDelivery(delivery: DeliveryEvidence): boolean {
 export type AnalysisFilters = {
   discipline: Discipline;
   player: string;
+  batter?: string;
+  bowler?: string;
+  fielder?: string;
   innings: string;
   style: string;
   zone: string;
@@ -78,6 +81,9 @@ export function filterDeliveries(
           : f.discipline === "bowling"
             ? d.bowler_id
             : d.fielder_id) === f.player) &&
+      (!f.batter || d.striker_id === f.batter) &&
+      (!f.bowler || d.bowler_id === f.bowler) &&
+      (!f.fielder || d.fielder_id === f.fielder) &&
       (!f.innings || d.innings_id === f.innings) &&
       (!f.style || d.delivery_style === f.style) &&
       (!f.zone ||
@@ -88,9 +94,11 @@ export function filterDeliveries(
           ? d.wicket
           : f.outcome === "boundaries"
             ? [4, 6].includes(d.batter_runs)
-            : f.outcome === "dots"
-              ? d.total_runs === 0
-              : d.outcome === f.outcome)) &&
+            : f.outcome === "4" || f.outcome === "6"
+              ? d.batter_runs === Number(f.outcome)
+              : f.outcome === "dots"
+                ? d.total_runs === 0
+                : d.outcome === f.outcome)) &&
       (f.fromOver === "" || d.over_number >= Number(f.fromOver)) &&
       (f.toOver === "" || d.over_number <= Number(f.toOver)) &&
       (!f.mediaOnly || media.has(d.id)) &&
