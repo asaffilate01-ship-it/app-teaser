@@ -220,3 +220,15 @@ test("zone drill-down criteria preserve player filters and report the same groun
   assert.equal(report.summary.batterRuns, 8);
   assert.match(reviewReportHtml(data), /2 of 2 matching deliveries have a recognised shot zone/);
 });
+
+test("review reports preserve matchup criteria and filter the evidence consistently", () => {
+  const filters = { ...defaultAnalysisFilters, batter: "b", bowler: "w", outcome: "4" };
+  assert.deepEqual(reviewSnapshot({ ...input, filters }).rows, [delivery]);
+  assert.equal(
+    reviewSnapshot({ ...input, filters: { ...filters, bowler: "other" } }).rows.length,
+    0,
+  );
+  const html = reviewReportHtml({ ...input, filters });
+  assert.match(html, /Batter reference<\/dt><dd>b<\/dd>/);
+  assert.match(html, /Bowler reference<\/dt><dd>w<\/dd>/);
+});
