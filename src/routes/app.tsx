@@ -1,3 +1,4 @@
+import { ScorerWagonWheel } from "@/components/ScorerWagonWheel";
 import { ScorerBackupImport } from "@/components/ScorerBackupImport";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
@@ -52,7 +53,6 @@ import {
   createMatch,
   currentInnings,
   deliveryLabel,
-  deliveryRuns,
   endCurrentInnings,
   findPlayer,
   findTeam,
@@ -1670,15 +1670,6 @@ function DataTable({ headings, rows }: { headings: string[]; rows: (string | num
 function Analysis({ match }: { match: CricketMatch }) {
   const innings = currentInnings(match);
   const summary = summarizeInnings(innings, match.settings.ballsPerOver);
-  const zoneCounts = fieldZones
-    .map((zone) => ({
-      zone,
-      count: innings.deliveries.filter((ball) => ball.fieldZone === zone).length,
-      runs: innings.deliveries
-        .filter((ball) => ball.fieldZone === zone)
-        .reduce((sum, ball) => sum + deliveryRuns(ball), 0),
-    }))
-    .filter((item) => item.count);
   const missingZones = innings.deliveries.filter(
     (ball) => ball.fieldZone === "Not recorded",
   ).length;
@@ -1706,40 +1697,11 @@ function Analysis({ match }: { match: CricketMatch }) {
   ];
   return (
     <section className="grid gap-5 lg:grid-cols-2">
-      <div className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5 md:p-7">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-300">
-            Wagon-wheel data
-          </p>
-          <h2 className="font-display text-3xl font-bold">Scoring areas</h2>
-        </div>
-        {zoneCounts.length ? (
-          zoneCounts.map((item) => (
-            <div key={item.zone}>
-              <div className="mb-1 flex justify-between text-xs">
-                <span className="font-bold">{item.zone}</span>
-                <span className="text-slate-400">
-                  {item.runs} runs • {item.count} balls
-                </span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-white/5">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-fuchsia-600 to-amber-300"
-                  style={{
-                    width: `${Math.max(5, (item.count / innings.deliveries.length) * 100)}%`,
-                  }}
-                />
-              </div>
-            </div>
-          ))
-        ) : (
-          <EmptyState
-            icon={Activity}
-            title="No shot data yet"
-            body="Locations build automatically as deliveries are scored."
-          />
-        )}
-      </div>
+      <ScorerWagonWheel
+        key={innings.id}
+        innings={innings}
+        players={match.teams.flatMap((team) => team.players)}
+      />
       <div className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5 md:p-7">
         <div className="flex items-start justify-between gap-3">
           <div>

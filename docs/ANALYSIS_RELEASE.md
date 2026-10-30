@@ -60,3 +60,9 @@ Field plans now remain in match-level component state when switching among the c
 The club dashboard shows the active zone filter and a clear action. The bounded spatial renderer keeps a selected record visible even when it lies beyond the first 500 marks, while maintaining the same rendering limit and full paginated list.
 
 Validation includes field-plan parser tests, rendering-cap tests and Chromium fixture checks for dashboard/zone navigation, export/import round trips, malformed/oversized file handling and mobile overflow. These checks do not assert cloud persistence or production deployment.
+
+## Wagon-wheel correction — 30 October 2026
+
+The public scorer's own `/app` Analysis tab still displayed horizontal bars labelled "Wagon-wheel data"; earlier 3D changes were confined to the club workspace. Replace that scorer panel with the shared cricket-ground renderer, radial shots from the batting crease, outcome colours, zone totals, batter/bowler/outcome filters and a 2D wheel. The club dashboard's extruded zone sectors and bar-chart fallback are also replaced by the same shot-based presentation. Fielding mode shows event points and is labelled as a fielding-event map.
+
+Unknown zones remain unplotted, and repeated directions overlap rather than inventing precise coordinates. Three-dimensional depth belongs to the ground; shot distances and flight heights are not measured. The render cap is disclosed when exceeded, while totals use the complete filtered set. Browser verification exercises the real `/app` route with synthetic local match data: match opening, Analysis navigation, WebGL rendering, six-only filtering, filter reset, radial SVG fallback, context loss and mobile overflow. No production records are changed.
