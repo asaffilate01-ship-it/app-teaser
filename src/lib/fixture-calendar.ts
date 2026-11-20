@@ -74,15 +74,26 @@ export function fixtureCalendarIcs(input: {
     "VERSION:2.0",
     "PRODID:-//CricLume//Fixtures//EN",
     "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
     `X-WR-CALNAME:${escapeCalendarText(input.competitionName)}`,
   ];
   let included = 0;
+  const seen = new Set<string>();
   for (const fixture of items) {
     const starts = startUtc(fixture.startsAt);
     if (!starts) continue;
     const reference = plain(`${input.competitionId}-${fixture.id}`)
       .replace(/[^a-zA-Z0-9._-]/g, "-")
       .slice(0, 180);
+    if (seen.has(reference)) continue;
+    seen.add(reference);
+    const normalStatus = fixture.status.trim().toLowerCase();
+    const calendarStatus =
+      normalStatus === "cancelled" || normalStatus === "canceled"
+        ? "CANCELLED"
+        : ["scheduled", "confirmed", "live", "completed"].includes(normalStatus)
+          ? "CONFIRMED"
+          : "TENTATIVE";
     const description = [input.seasonName, fixture.round, fixture.status]
       .filter((value): value is string => Boolean(value))
       .join(" · ");
@@ -91,6 +102,7 @@ export function fixtureCalendarIcs(input: {
       `UID:criclume-${reference}@criclume.com`,
       `DTSTAMP:${stamp}`,
       `DTSTART:${starts}`,
+      `STATUS:${calendarStatus}`,
       `SUMMARY:${escapeCalendarText(`${fixture.homeTeam} v ${fixture.awayTeam}`)}`,
       `DESCRIPTION:${escapeCalendarText(description)}`,
     );

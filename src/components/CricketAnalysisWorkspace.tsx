@@ -3,6 +3,7 @@ import { BowlingPlacement } from "@/components/BowlingPlacement";
 import { AnalysisGround } from "@/components/AnalysisGround";
 import { observationErrors } from "@/lib/observation-form";
 import { summarizeCoachingEvidence } from "@/lib/coaching-evidence";
+import { buildCoachReviewQueue } from "@/lib/coaching-review-queue";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { reviewReportHtml } from "@/lib/review-report";
 import { EvidenceLibrary } from "@/components/EvidenceLibrary";
@@ -195,6 +196,7 @@ function MatchAnalysis({
     [data, filters],
   );
   const summary = summarizeDeliveries(rows);
+  const reviewQueue = buildCoachReviewQueue(rows, data?.mediaIds ?? new Set(), data?.notes ?? []);
   const evidenceReadiness = summarizeCoachingEvidence(
     data?.deliveries ?? [],
     data?.mediaIds ?? new Set<string>(),
@@ -574,6 +576,50 @@ function MatchAnalysis({
           ))}
         </div>
       </fieldset>
+      {data.workspaceAvailable && reviewQueue.length > 0 && (
+        <section
+          aria-label="Coaching review suggestions"
+          className="rounded-2xl border border-amber-300/20 bg-white/[0.025] p-4 md:p-5"
+        >
+          <h3 className="text-lg font-bold">Coaching review queue</h3>
+          <p className="mt-1 text-xs leading-relaxed text-slate-400">
+            Suggested deliveries based on recorded wickets, boundaries and missing classifications.
+            These are rule-based prompts for a human coach, not AI video findings.
+          </p>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            {reviewQueue.map((item) => (
+              <button
+                key={item.deliveryId}
+                type="button"
+                className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-white/10 bg-slate-900/60 p-3 text-left transition hover:border-amber-200/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-200"
+                aria-label={`Review ball ${item.ball}: ${item.label}; ${item.reason}`}
+                onClick={() => {
+                  setSpatialDelivery(item.deliveryId);
+                  const index = rows.findIndex((row) => row.id === item.deliveryId);
+                  if (index < 0) return;
+                  setPage(Math.floor(index / 30));
+                  window.requestAnimationFrame(() => {
+                    deliveryTable.current?.scrollIntoView({ block: "start" });
+                    document
+                      .getElementById(`delivery-${item.deliveryId}`)
+                      ?.focus({ preventScroll: true });
+                  });
+                }}
+              >
+                <span className="min-w-0">
+                  <strong className="block text-sm text-slate-100">
+                    Ball {item.ball} · {item.label}
+                  </strong>
+                  <span className="block text-xs text-slate-400">{item.reason}</span>
+                </span>
+                <span className="shrink-0 text-[11px] text-amber-200">
+                  {item.hasClip ? "Clip linked" : "No clip"}
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
       <AnalysisGround
         inningsIds={options("innings_id")}
         playerNames={names}
