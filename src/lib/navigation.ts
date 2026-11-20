@@ -4,6 +4,7 @@ export const platformSections = [
   "competitions",
   "capture",
   "players",
+  "academy",
   "safety",
   "analysis",
   "intelligence",

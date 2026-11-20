@@ -29,6 +29,7 @@ import {
   ExternalLink,
   FileCheck2,
   Gauge,
+  GraduationCap,
   LoaderCircle,
   LockKeyhole,
   Mail,
@@ -48,6 +49,7 @@ import {
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPanel";
 import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace";
+import { AcademyDashboard } from "@/components/AcademyDashboard";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { usePlatformDashboard } from "@/hooks/use-platform-dashboard";
@@ -97,6 +99,7 @@ type PlatformTab =
   | "competitions"
   | "capture"
   | "players"
+  | "academy"
   | "safety"
   | "analysis"
   | "intelligence"
@@ -108,6 +111,7 @@ const tabDefinitions: Array<[PlatformTab, LucideIcon, string]> = [
   ["competitions", Trophy, "Competitions"],
   ["capture", Camera, "Capture"],
   ["players", Users, "Players"],
+  ["academy", GraduationCap, "Academy"],
   ["safety", ShieldCheck, "Safeguarding"],
   ["analysis", BarChart3, "Analysis room"],
   ["intelligence", Sparkles, "AI Intelligence"],
@@ -581,6 +585,14 @@ function OperationalPlatform({
             )}
             {tab === "players" && (
               <Players data={dashboard.data} role={membership.role} run={dashboard.run} />
+            )}
+            {tab === "academy" && (
+              <AcademyDashboard
+                data={dashboard.data}
+                role={membership.role}
+                onOpenPlayers={() => setTab("players")}
+                onOpenCompetitions={() => setTab("competitions")}
+              />
             )}
             {tab === "safety" && (
               <Safeguarding data={dashboard.data} role={membership.role} run={dashboard.run} />
