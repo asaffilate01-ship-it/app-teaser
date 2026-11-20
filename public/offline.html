@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#17111f">
+    <title>Connection lost · CricLume</title>
+    <style>
+      :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #17111f; color: #f8f4ed }
+      * { box-sizing: border-box }
+      body { min-height: 100svh; margin: 0; display: grid; place-items: center; padding: 2rem }
+      main { max-width: 30rem; width: 100%; padding: 2rem; border: 1px solid #4b374c; border-radius: 1.5rem; background: #261b2a }
+      h1 { font-size: 1.7rem; line-height: 1.2; margin: 0.75rem 0 }
+      p { line-height: 1.65; color: #e5dae9 }
+      strong { color: #f4d37d }
+      .brand { color: #f4d37d; font-weight: 800; letter-spacing: 0.08em }
+      button { min-height: 48px; width: 100%; margin-top: 1rem; border: none; border-radius: 0.8rem; font-weight: 800; font-size: 1rem; background: #f4d37d; color: #241522; cursor: pointer }
+      button:focus-visible { outline: 3px solid #fff; outline-offset: 3px }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="brand">CRICLUME</span>
+      <h1>You're offline</h1>
+      <p>The page could not load. <strong>If you are already scoring a match in an open tab, keep that tab open</strong> so its on-device scoring session is preserved.</p>
+      <p>This screen does not mean your scores have synced to the cloud. Reconnect before relying on an updated public scoreboard.</p>
+      <button type="button" onclick="location.reload()">Try again</button>
+    </main>
+  </body>
+</html>
