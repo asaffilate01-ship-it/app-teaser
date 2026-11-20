@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createMatch, currentInnings, recordDelivery } from "../src/lib/cricket.ts";
-import { reviewCloudBootstrap, reviewRemoteScorerSnapshot } from "../src/lib/scorer-reconciliation.ts";
+import {
+  reviewCloudBootstrap,
+  reviewRemoteScorerSnapshot,
+} from "../src/lib/scorer-reconciliation.ts";
 
 function fixture() {
   return createMatch({
