@@ -54,15 +54,6 @@ export function reviewRemoteScorerSnapshot(
     if (fromCloud.deliveries.length < onDevice.deliveries.length) {
       return reject(`The cloud copy is missing recorded deliveries from innings ${i + 1}.`);
     }
-    if (
-      fromCloud.deliveries.length === onDevice.deliveries.length &&
-      (onDevice.strikerId !== fromCloud.strikerId ||
-        onDevice.nonStrikerId !== fromCloud.nonStrikerId ||
-        onDevice.bowlerId !== fromCloud.bowlerId ||
-        onDevice.end !== fromCloud.end)
-    ) {
-      return reject(`Scorer assignments in innings ${i + 1} were changed without a new delivery.`);
-    }
     for (let j = 0; j < onDevice.deliveries.length; j += 1) {
       const deviceDelivery: Delivery = onDevice.deliveries[j]!;
       const cloudDelivery: Delivery | undefined = fromCloud.deliveries[j];
@@ -72,6 +63,15 @@ export function reviewRemoteScorerSnapshot(
       if (JSON.stringify(deviceDelivery) !== JSON.stringify(cloudDelivery)) {
         return reject(`Delivery ${j + 1} of innings ${i + 1} was edited on another scorer.`);
       }
+    }
+    if (
+      fromCloud.deliveries.length === onDevice.deliveries.length &&
+      (onDevice.strikerId !== fromCloud.strikerId ||
+        onDevice.nonStrikerId !== fromCloud.nonStrikerId ||
+        onDevice.bowlerId !== fromCloud.bowlerId ||
+        onDevice.end !== fromCloud.end)
+    ) {
+      return reject(`Scorer assignments in innings ${i + 1} were changed without a new delivery.`);
     }
   }
   return { safe: true, reason: null };
