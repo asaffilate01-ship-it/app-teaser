@@ -36,11 +36,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
         with:
-          version: latest
+          version: 3.2.0
       - name: Start isolated Supabase stack
-        run: supabase start -x studio,imgproxy,inbucket,logflare,vector,supavisor
+        run: supabase start -x studio,imgproxy,mailpit,logflare,vector,supavisor
       - name: Lint database functions and policies
         run: supabase db lint --local --level warning
       - name: Run database and RLS tests
