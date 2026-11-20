@@ -1,4 +1,4 @@
-import { isCurrentDelivery, type DeliveryEvidence } from "./analysis";
+import { isCurrentDelivery, type DeliveryEvidence } from "./analysis.ts";
 
 export type CoachReviewSuggestion = {
   deliveryId: string;
