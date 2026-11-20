@@ -260,11 +260,7 @@ function ScopedIntelligencePanel({
               <p className="text-xs text-slate-400">
                 {preview.limitations.join(" ")} Last match update: {preview.sourceUpdatedAt}.
               </p>
-              <button
-                type="button"
-                className="workspace-nav-item"
-                onClick={downloadBriefing}
-              >
+              <button type="button" className="workspace-nav-item" onClick={downloadBriefing}>
                 Download source-labelled coach briefing
               </button>
             </div>
