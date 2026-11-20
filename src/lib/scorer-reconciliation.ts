@@ -1,8 +1,6 @@
 import type { CricketMatch, Delivery } from "./cricket";
 
-export type ScorerSnapshotReview =
-  | { safe: true; reason: null }
-  | { safe: false; reason: string };
+export type ScorerSnapshotReview = { safe: true; reason: null } | { safe: false; reason: string };
 
 /**
  * A received scoreboard snapshot may be ahead of the on-device copy, but it
