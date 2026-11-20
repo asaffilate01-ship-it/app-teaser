@@ -45,13 +45,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "CricLume is ball-by-ball cricket scoring with multi-angle camera rooms, live scoreboards and coaching review. Available in English, German, Dutch, Afrikaans and French.",
+          "Try ball-by-ball cricket scoring and local video review on CricLume. Explore club and league tools, with additional cloud features under pilot testing.",
       },
       { property: "og:title", content: "CricLume — See every ball. Shape every game." },
       {
         property: "og:description",
         content:
-          "Ball-by-ball scoring, multi-phone camera rooms, live scoreboards and slow-motion coaching review for clubs and academies.",
+          "Ball-by-ball cricket scoring and local video review, with additional cloud club features under pilot testing.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://app-teaser.lovable.app/" },
@@ -89,7 +89,6 @@ const screenImages = [
   { src: shotReview, w: 1600, h: 1008 },
 ];
 const planIcons = [Zap, Building2, Trophy];
-const revenueIcons = [Tag, Video, Globe, Users];
 
 function HomepageRoot() {
   return (
@@ -119,7 +118,6 @@ function Homepage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-border/60 md:max-w-none md:border-x-0">
-        <Ticker />
         <Header tab={tab} onHome={() => setTab("home")} onChange={setTab} />
         <main
           id="main-content"
@@ -149,33 +147,6 @@ function Homepage() {
         </main>
         <SiteFooter onNavigate={setTab} />
         <BottomNav tab={tab} onChange={setTab} />
-      </div>
-    </div>
-  );
-}
-
-function Ticker() {
-  const { t } = useI18n();
-  return (
-    <div className="dark-band overflow-hidden py-2">
-      <div className="ticker-track">
-        {[0, 1].map((dup) => (
-          <div
-            key={dup}
-            aria-hidden={dup === 1 ? true : undefined}
-            className="flex shrink-0 items-center"
-          >
-            {t.ticker.map((item) => (
-              <span
-                key={item}
-                className="flex items-center gap-3 px-5 text-xs font-semibold uppercase tracking-[0.1em]"
-              >
-                <span className="size-1.5 rounded-full bg-gold" />
-                {item}
-              </span>
-            ))}
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -314,7 +285,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         <section className="surface-card overflow-hidden">
           <div className="flex items-center justify-between gap-3 border-b border-border/60 px-4 py-2.5">
             <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-gold">
-              <span className="size-1.5 animate-pulse rounded-full bg-primary" /> {t.hero.liveNow}
+              {t.hero.previewLabel}
             </span>
             <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Riverside CC 148/4
@@ -333,7 +304,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
       <section className="grid grid-cols-3 gap-2 text-center md:gap-5">
         {t.stats.map((s) => (
           <div key={s.v} className="surface-card lift-card px-2 py-4 md:px-6 md:py-8">
-            <p className="font-display text-2xl font-bold leading-none bg-gradient-to-br from-primary to-gold bg-clip-text text-transparent md:text-5xl">
+            <p className="font-display break-words text-base font-bold leading-tight bg-gradient-to-br from-primary to-gold bg-clip-text text-transparent sm:text-xl md:text-3xl">
               {s.k}
             </p>
             <p className="mt-1.5 text-xs leading-tight text-muted-foreground md:mt-3 md:text-sm">
@@ -363,8 +334,11 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         </div>
       </section>
 
-      {/* Fixtures + league table */}
+      {/* Illustration only: these fixtures, results and club names are not live data. */}
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <p className="rounded-xl border border-border/70 bg-card/70 px-4 py-2 text-xs leading-relaxed text-muted-foreground lg:col-span-2">
+          {t.home.sampleNotice}
+        </p>
         <div className="space-y-4">
           <SectionHeader kicker={t.home.fixturesKicker}>{t.home.fixturesTitle}</SectionHeader>
           <div className="space-y-3">
@@ -451,20 +425,6 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         </div>
       </section>
 
-      {/* Trust strip */}
-      <section className="space-y-4">
-        <SectionHeader kicker={t.home.trustKicker}>{t.home.trustTitle}</SectionHeader>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {["Riverside CC", "Northgate CC", "Ashford Academy", "Harbour CC"].map((c) => (
-            <div
-              key={c}
-              className="surface-card flex items-center justify-center px-3 py-5 text-center font-display text-sm font-bold uppercase tracking-wide text-muted-foreground"
-            >
-              {c}
-            </div>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }
@@ -718,9 +678,7 @@ function PricingTab() {
         {t.pricing.intro} {region.note}
       </p>
       <p className="rounded-2xl border border-gold/30 bg-gold/10 p-4 text-sm leading-relaxed text-muted-foreground">
-        These are pilot-plan targets, not an active public checkout. Stripe subscription and webhook
-        support is built, but paid Club and League plans open only after the production account and
-        pilot terms are activated.
+        {t.pricing.pilotNotice}
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -778,13 +736,17 @@ function PricingTab() {
                 ))}
               </ul>
               <button
-                onClick={() =>
-                  i === 2
-                    ? window.location.assign(
-                        "mailto:hello@criclume.com?subject=CricLume%20league%20pilot",
-                      )
-                    : window.location.assign("/app")
-                }
+                onClick={() => {
+                  if (i === 0) {
+                    window.location.assign("/app");
+                    return;
+                  }
+                  window.location.assign(
+                    i === 1
+                      ? "mailto:hello@criclume.com?subject=CricLume%20Club%20pilot"
+                      : "mailto:hello@criclume.com?subject=CricLume%20League%20pilot",
+                  );
+                }}
                 className={`mt-auto h-11 w-full rounded-full text-sm font-bold uppercase tracking-wider transition-transform active:scale-[0.98] ${featured ? "brand-gradient glow text-primary-foreground" : "border border-border bg-secondary text-foreground"}`}
               >
                 {p.cta}
@@ -794,25 +756,6 @@ function PricingTab() {
         })}
       </div>
 
-      <div className="space-y-4 md:space-y-6">
-        <SectionHeader kicker={t.pricing.revenueKicker}>{t.pricing.revenueTitle}</SectionHeader>
-        <div className="grid gap-3 md:grid-cols-2 md:gap-5">
-          {t.pricing.revenue.map((r, i) => {
-            const Icon = revenueIcons[i]!;
-            return (
-              <div key={r.title} className="surface-card flex gap-3 p-4 md:p-5">
-                <div className="icon-tile flex size-10 shrink-0 items-center justify-center">
-                  <Icon className="size-4.5 text-gold" />
-                </div>
-                <div className="space-y-1">
-                  <p className="font-semibold tracking-tight">{r.title}</p>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{r.body}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
       <p className="text-xs leading-relaxed text-muted-foreground">{t.pricing.footnote}</p>
     </div>
