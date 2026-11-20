@@ -29,10 +29,7 @@ test("unverified tenants, unauthorized roles and missing matches are blocked", (
     }).ready,
     false,
   );
-  assert.equal(
-    assessCricketAIRequest({ role: "player", hasMatch: true, connection }).ready,
-    false,
-  );
+  assert.equal(assessCricketAIRequest({ role: "player", hasMatch: true, connection }).ready, false);
 });
 
 test("an independently certified worker allows request eligibility, not model execution", () => {
