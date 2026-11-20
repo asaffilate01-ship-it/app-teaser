@@ -84,3 +84,49 @@ test("fixture names cannot inject extra calendar records, and long lines are fol
     assert.ok(new TextEncoder().encode(line).length <= 75, line);
   }
 });
+
+test("cancelled fixtures retain a stable UID and export cancellation without guessing a duration", () => {
+  const fixtures = [{
+    id: "f-cancel",
+    startsAt: "2026-12-10T12:00:00+05:00",
+    homeTeam: "North",
+    awayTeam: "South",
+    ground: null,
+    round: null,
+    status: "cancelled",
+  }];
+  const result = fixtureCalendarIcs({
+    competitionId: "league",
+    competitionName: "Winter Cup",
+    seasonName: "2026",
+    fixtures,
+    generatedAt: new Date("2026-11-20T00:00:00Z"),
+  });
+  assert.match(result.contents, /METHOD:PUBLISH/);
+  assert.match(result.contents, /STATUS:CANCELLED/);
+  assert.match(result.contents, /UID:criclume-league-f-cancel@criclume.com/);
+  assert.equal(result.contents.includes("DTEND"), false);
+  assert.equal(result.included, 1);
+});
+
+test("duplicate fixture IDs never create duplicate events", () => {
+  const base = {
+    id: "one",
+    startsAt: "2026-12-10T12:00:00Z",
+    homeTeam: "North",
+    awayTeam: "South",
+    ground: null,
+    round: null,
+    status: "scheduled",
+  };
+  const result = fixtureCalendarIcs({
+    competitionId: "league",
+    competitionName: "Cup",
+    seasonName: "2026",
+    fixtures: [base, { ...base }, { ...base, id: "two", status: "planned" }],
+  });
+  assert.equal(result.included, 2);
+  assert.equal(result.skipped, 1);
+  assert.match(result.contents, /STATUS:CONFIRMED/);
+  assert.match(result.contents, /STATUS:TENTATIVE/);
+});
