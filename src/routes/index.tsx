@@ -424,7 +424,6 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           </button>
         </div>
       </section>
-
     </div>
   );
 }
@@ -755,7 +754,6 @@ function PricingTab() {
           );
         })}
       </div>
-
 
       <p className="text-xs leading-relaxed text-muted-foreground">{t.pricing.footnote}</p>
     </div>
