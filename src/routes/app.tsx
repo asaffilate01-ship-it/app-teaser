@@ -918,6 +918,31 @@ function LiveMatch({
         </button>
       </nav>
 
+      {tab === "score" && (
+        <aside
+          aria-label="Compact live score"
+          className="sticky top-[118px] z-20 grid grid-cols-[1fr_auto] items-center gap-2 border-b border-amber-300/20 bg-[#211828]/95 px-4 py-2 text-slate-100 shadow-lg backdrop-blur-xl md:hidden"
+        >
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold">
+              {findPlayer(match, innings.strikerId)?.name ?? "Set striker"}
+              <span className="px-1 text-slate-500">·</span>
+              {findPlayer(match, innings.bowlerId)?.name ?? "Set bowler"}
+            </p>
+            <p className="text-[11px] text-slate-300">
+              {summary.overs} overs ·{" "}
+              {cloudSync.enabled ? `Cloud: ${cloudSync.status}` : "Saved on this device"}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="font-display text-2xl font-bold tabular-nums text-amber-200">
+              {summary.runs}/{summary.wickets}
+            </p>
+            {target != null && <p className="text-[10px] text-slate-300">Target {target}</p>}
+          </div>
+        </aside>
+      )}
+
       <div className="px-4 py-5 md:px-0">
         {cloudActionError && (
           <p className="mb-4 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-200">

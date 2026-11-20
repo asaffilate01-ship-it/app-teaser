@@ -517,7 +517,11 @@ function OperationalPlatform({
         </div>
       }
     >
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-9">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto max-w-7xl px-4 pt-6 pb-28 md:px-8 md:pt-9 lg:pb-9"
+      >
         <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
           <div>
             <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-200">
@@ -546,6 +550,7 @@ function OperationalPlatform({
           value={tab}
           onChange={setTab}
           items={tabDefinitions}
+          mobilePrimary={["overview", "competitions", "capture", "analysis"]}
         />
         {dashboard.error && <ErrorNotice message={dashboard.error} />}
         {!dashboard.loading && !dashboard.data && dashboard.error ? (
