@@ -214,11 +214,7 @@ export function CricketApp() {
     setCloudBootstrap({ status: "loading" });
     void loadCloudMatchSnapshot(cloudMatchId)
       .then((match) => {
-        const review = reviewCloudBootstrap(
-          local,
-          match,
-          readPendingEvents(cloudMatchId).length,
-        );
+        const review = reviewCloudBootstrap(local, match, readPendingEvents(cloudMatchId).length);
         if (!review.safe) {
           if (!local) {
             setCloudBootstrap({
