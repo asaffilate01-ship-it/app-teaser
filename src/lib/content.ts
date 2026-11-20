@@ -33,8 +33,7 @@ export const en = {
     seasonKicker: "Season",
     seasonTitle: "Example league table",
     sampleNotice: "Illustrative data only — not live fixtures, results or partner clubs.",
-    standingsNote:
-      "This table uses sample results to illustrate a possible league view.",
+    standingsNote: "This table uses sample results to illustrate a possible league view.",
     tablePos: "Pos",
     tableClub: "Club",
     tableP: "P",
@@ -81,7 +80,8 @@ export const en = {
   featuresTab: {
     kicker: "Platform",
     title: "Features",
-    intro: "The scorer and local video tools are available to try. Club cloud viewing and advanced integrations are being tested.",
+    intro:
+      "The scorer and local video tools are available to try. Club cloud viewing and advanced integrations are being tested.",
     watchTitle: "Cloud viewing options (pilot)",
     watchBody:
       "Private, opposition, league and public viewing rules require a configured club cloud workspace; they are not features of the device-only scorer.",
@@ -139,7 +139,8 @@ export const en = {
     detecting: "Detecting your region…",
     selectLabel: "Select your country",
     mostPopular: "For clubs",
-    pilotNotice: "Club and League plans are not yet available to purchase online. Prices and features are indicative; contact us about a pilot.",
+    pilotNotice:
+      "Club and League plans are not yet available to purchase online. Prices and features are indicative; contact us about a pilot.",
     free: "Free",
     custom: "Custom",
     plans: [
@@ -288,8 +289,7 @@ export const de: Content = {
     seasonKicker: "Saison",
     seasonTitle: "Beispieltabelle",
     sampleNotice: "Nur Beispiele — keine Live-Spiele, Ergebnisse oder bestätigten Partnervereine.",
-    standingsNote:
-      "Diese Tabelle zeigt Beispieldaten als Vorschau einer möglichen Ligaansicht.",
+    standingsNote: "Diese Tabelle zeigt Beispieldaten als Vorschau einer möglichen Ligaansicht.",
     tablePos: "Pl.",
     tableClub: "Club",
     tableP: "Sp",
@@ -336,7 +336,8 @@ export const de: Content = {
   featuresTab: {
     kicker: "Plattform",
     title: "Funktionen",
-    intro: "Scoring und lokale Videoanalyse sind ausprobierbar. Club-Cloud-Ansichten und erweiterte Integrationen werden getestet.",
+    intro:
+      "Scoring und lokale Videoanalyse sind ausprobierbar. Club-Cloud-Ansichten und erweiterte Integrationen werden getestet.",
     watchTitle: "Cloud-Zugriffe (Pilot)",
     watchBody:
       "Private, gegnerische, Liga- und öffentliche Ansichten brauchen einen eingerichteten Club-Cloud-Zugang und sind nicht Teil des lokalen Scorers.",
@@ -398,7 +399,8 @@ export const de: Content = {
     detecting: "Region wird erkannt…",
     selectLabel: "Land auswählen",
     mostPopular: "Für Vereine",
-    pilotNotice: "Club- und Liga-Abos sind noch nicht online buchbar. Preise und Leistungen sind vorläufig; frage nach dem Pilot.",
+    pilotNotice:
+      "Club- und Liga-Abos sind noch nicht online buchbar. Preise und Leistungen sind vorläufig; frage nach dem Pilot.",
     free: "Kostenlos",
     custom: "Individuell",
     plans: [
@@ -544,9 +546,9 @@ export const nl: Content = {
     vs: "tegen",
     seasonKicker: "Seizoen",
     seasonTitle: "Voorbeeldstand",
-    sampleNotice: "Alleen voorbeelden — geen actuele wedstrijden, uitslagen of bevestigde partnerclubs.",
-    standingsNote:
-      "Deze tabel gebruikt voorbeeldresultaten om een competitieoverzicht te tonen.",
+    sampleNotice:
+      "Alleen voorbeelden — geen actuele wedstrijden, uitslagen of bevestigde partnerclubs.",
+    standingsNote: "Deze tabel gebruikt voorbeeldresultaten om een competitieoverzicht te tonen.",
     tablePos: "Pos",
     tableClub: "Club",
     tableP: "G",
@@ -593,7 +595,8 @@ export const nl: Content = {
   featuresTab: {
     kicker: "Platform",
     title: "Functies",
-    intro: "De scorer en lokale videofuncties zijn te proberen. Cloudweergaven en geavanceerde koppelingen worden getest.",
+    intro:
+      "De scorer en lokale videofuncties zijn te proberen. Cloudweergaven en geavanceerde koppelingen worden getest.",
     watchTitle: "Cloudtoegang (pilot)",
     watchBody:
       "Privé-, tegenstander-, competitie- en openbare weergaven vragen een ingestelde clubcloud en zijn geen onderdeel van de lokale scorer.",
@@ -652,7 +655,8 @@ export const nl: Content = {
     detecting: "Regio detecteren…",
     selectLabel: "Kies je land",
     mostPopular: "Voor clubs",
-    pilotNotice: "Club- en competitieabonnementen zijn nog niet online verkrijgbaar. Prijzen en functies zijn indicatief; neem contact op voor de pilot.",
+    pilotNotice:
+      "Club- en competitieabonnementen zijn nog niet online verkrijgbaar. Prijzen en functies zijn indicatief; neem contact op voor de pilot.",
     free: "Gratis",
     custom: "Op maat",
     plans: [
@@ -798,9 +802,9 @@ export const af: Content = {
     vs: "teen",
     seasonKicker: "Seisoen",
     seasonTitle: "Voorbeeldranglys",
-    sampleNotice: "Slegs voorbeelde — nie regstreekse wedstryde, uitslae of bevestigde vennootklubs nie.",
-    standingsNote:
-      "Hierdie tabel toon slegs voorbeelduitslae vir 'n moontlike liga-oorsig.",
+    sampleNotice:
+      "Slegs voorbeelde — nie regstreekse wedstryde, uitslae of bevestigde vennootklubs nie.",
+    standingsNote: "Hierdie tabel toon slegs voorbeelduitslae vir 'n moontlike liga-oorsig.",
     tablePos: "Pos",
     tableClub: "Klub",
     tableP: "G",
@@ -847,7 +851,8 @@ export const af: Content = {
   featuresTab: {
     kicker: "Platform",
     title: "Kenmerke",
-    intro: "Die tellingblad en plaaslike video-oorsig kan getoets word. Klubwolkaansigte en ander integrasies word nog getoets.",
+    intro:
+      "Die tellingblad en plaaslike video-oorsig kan getoets word. Klubwolkaansigte en ander integrasies word nog getoets.",
     watchTitle: "Wolktoegang (loods)",
     watchBody:
       "Private, teenstander-, liga- en openbare aansigte vereis 'n opgestelde klubwolkdiens; dit is nie deel van die plaaslike tellingblad nie.",
@@ -909,7 +914,8 @@ export const af: Content = {
     detecting: "Streek word bepaal…",
     selectLabel: "Kies jou land",
     mostPopular: "Vir klubs",
-    pilotNotice: "Klub- en liga-intekeninge is nog nie aanlyn beskikbaar nie. Pryse en funksies is voorlopig; kontak ons oor die loodsprojek.",
+    pilotNotice:
+      "Klub- en liga-intekeninge is nog nie aanlyn beskikbaar nie. Pryse en funksies is voorlopig; kontak ons oor die loodsprojek.",
     free: "Gratis",
     custom: "Pasgemaak",
     plans: [
@@ -1055,9 +1061,9 @@ export const fr: Content = {
     vs: "contre",
     seasonKicker: "Saison",
     seasonTitle: "Classement d'exemple",
-    sampleNotice: "Données illustratives — pas de matchs, résultats ou clubs partenaires en direct.",
-    standingsNote:
-      "Ce classement utilise des résultats d'exemple pour illustrer l'interface.",
+    sampleNotice:
+      "Données illustratives — pas de matchs, résultats ou clubs partenaires en direct.",
+    standingsNote: "Ce classement utilise des résultats d'exemple pour illustrer l'interface.",
     tablePos: "Pos",
     tableClub: "Club",
     tableP: "J",
@@ -1104,7 +1110,8 @@ export const fr: Content = {
   featuresTab: {
     kicker: "Plateforme",
     title: "Fonctions",
-    intro: "Le marqueur et la revue vidéo locale sont disponibles à l'essai. Les vues cloud et les intégrations avancées sont en pilote.",
+    intro:
+      "Le marqueur et la revue vidéo locale sont disponibles à l'essai. Les vues cloud et les intégrations avancées sont en pilote.",
     watchTitle: "Accès cloud (pilote)",
     watchBody:
       "Les vues privées, adversaires, ligues et publiques nécessitent un espace cloud configuré; elles ne font pas partie du marqueur local.",
@@ -1165,7 +1172,8 @@ export const fr: Content = {
     detecting: "Détection de votre région…",
     selectLabel: "Choisissez votre pays",
     mostPopular: "Pour les clubs",
-    pilotNotice: "Les offres Club et Ligue ne sont pas encore achetables en ligne. Les prix et fonctions sont indicatifs ; contactez-nous pour le pilote.",
+    pilotNotice:
+      "Les offres Club et Ligue ne sont pas encore achetables en ligne. Les prix et fonctions sont indicatifs ; contactez-nous pour le pilote.",
     free: "Gratuit",
     custom: "Sur mesure",
     plans: [
