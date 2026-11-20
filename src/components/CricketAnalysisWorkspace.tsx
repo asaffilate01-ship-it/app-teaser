@@ -435,9 +435,9 @@ function MatchAnalysis({
           ))}
         </dl>
         <p className="text-xs leading-relaxed text-slate-300">
-          Clip links are recorded associations, not proof of available playback or consent.
-          Coach observations are human-authored and do not measure ball speed or trajectory.
-          Private media is accessed only through authorised, time-limited links.
+          Clip links are recorded associations, not proof of available playback or consent. Coach
+          observations are human-authored and do not measure ball speed or trajectory. Private media
+          is accessed only through authorised, time-limited links.
         </p>
         {data.workspaceAvailable && evidenceReadiness.historicalObservations > 0 && (
           <button
