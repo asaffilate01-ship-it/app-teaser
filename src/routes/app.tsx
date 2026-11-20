@@ -72,7 +72,7 @@ import {
   type ShotOutcome,
 } from "@/lib/cricket";
 import { loadCloudMatchSnapshot, readPendingEvents, startCloudInnings } from "@/lib/cloud";
-import { reviewRemoteScorerSnapshot } from "@/lib/scorer-reconciliation";
+import { reviewCloudBootstrap, reviewRemoteScorerSnapshot } from "@/lib/scorer-reconciliation";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 
 export const Route = createFileRoute("/app")({
@@ -180,6 +180,7 @@ export function CricketApp() {
   const cloudSession = useCloudSession();
   const [screen, setScreen] = useState<AppScreen>("dashboard");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [bootstrapConflict, setBootstrapConflict] = useState<string | null>(null);
   const [cloudBootstrap, setCloudBootstrap] = useState<{
     status: "idle" | "loading" | "ready" | "error";
     message?: string;
@@ -213,7 +214,26 @@ export function CricketApp() {
     setCloudBootstrap({ status: "loading" });
     void loadCloudMatchSnapshot(cloudMatchId)
       .then((match) => {
-        upsertMatch(match);
+        const review = reviewCloudBootstrap(
+          local,
+          match,
+          readPendingEvents(cloudMatchId).length,
+        );
+        if (!review.safe) {
+          if (!local) {
+            setCloudBootstrap({
+              status: "error",
+              message: `${review.reason} Restore the device's queued scoring data before opening this cloud match.`,
+            });
+            return;
+          }
+          // Keep every on-device delivery and pause scoring until a lead scorer
+          // reviews the different versions. Never silently replace local work.
+          setBootstrapConflict(review.reason);
+        } else {
+          upsertMatch(match);
+          setBootstrapConflict(null);
+        }
         setSelectedId(match.id);
         setScreen("match");
         setCloudBootstrap({ status: "ready" });
@@ -375,6 +395,8 @@ export function CricketApp() {
           match={selectedMatch}
           onSave={upsertMatch}
           onExit={() => setScreen("dashboard")}
+          initialCloudConflict={bootstrapConflict}
+          onCloudConflictResolved={() => setBootstrapConflict(null)}
         />
       ) : (
         <Dashboard
@@ -776,14 +798,18 @@ function LiveMatch({
   match,
   onSave,
   onExit,
+  initialCloudConflict,
+  onCloudConflictResolved,
 }: {
   match: CricketMatch;
   onSave: (match: CricketMatch) => void;
   onExit: () => void;
+  initialCloudConflict: string | null;
+  onCloudConflictResolved: () => void;
 }) {
   const [tab, setTab] = useState<MatchTab>("score");
   const [cloudActionError, setCloudActionError] = useState<string | null>(null);
-  const [cloudConflict, setCloudConflict] = useState<string | null>(null);
+  const [cloudConflict, setCloudConflict] = useState<string | null>(initialCloudConflict);
   const [backupRequested, setBackupRequested] = useState(false);
   const [reconciling, setReconciling] = useState(false);
   const cloudMatchId = useMemo(() => {
@@ -791,15 +817,16 @@ function LiveMatch({
     return new URLSearchParams(window.location.search).get("cloudMatch");
   }, []);
   const acceptRemoteMatch = useCallback(
-    (remote: CricketMatch) => {
-      if (remote.id !== match.id || cloudConflict) return;
+    (remote: CricketMatch): boolean => {
+      if (remote.id !== match.id || cloudConflict) return false;
       const review = reviewRemoteScorerSnapshot(match, remote);
       if (!review.safe) {
         setCloudConflict(review.reason);
         setBackupRequested(false);
-        return;
+        return false;
       }
       onSave(remote);
+      return true;
     },
     [cloudConflict, match, onSave],
   );
@@ -876,6 +903,7 @@ function LiveMatch({
       if (current.id !== match.id) throw new Error("Cloud returned a different match.");
       onSave(current);
       setCloudConflict(null);
+      onCloudConflictResolved();
       setBackupRequested(false);
     } catch (reason) {
       setCloudActionError(
