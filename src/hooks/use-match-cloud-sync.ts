@@ -96,6 +96,7 @@ function publicLiveState(match: CricketMatch): Record<string, unknown> {
 export function useMatchCloudSync(
   cloudMatchId: string | null,
   onRemoteMatch: (match: CricketMatch) => boolean | void,
+  pausedForReview = false,
 ) {
   const enabled = Boolean(cloudMatchId && isCloudConfigured());
   const deviceId = useMemo(() => (typeof window === "undefined" ? "server" : getDeviceId()), []);
@@ -107,7 +108,7 @@ export function useMatchCloudSync(
   });
 
   useEffect(() => {
-    if (!enabled || !cloudMatchId) return;
+    if (!enabled || !cloudMatchId || pausedForReview) return;
     let active = true;
     const unsubscribe = subscribeToMatchEvents(
       cloudMatchId,
@@ -161,11 +162,11 @@ export function useMatchCloudSync(
       unsubscribe();
       window.removeEventListener("online", flush);
     };
-  }, [cloudMatchId, deviceId, enabled, onRemoteMatch]);
+  }, [cloudMatchId, deviceId, enabled, onRemoteMatch, pausedForReview]);
 
   const publish = useCallback(
     async (match: CricketMatch, eventType: string) => {
-      if (!enabled || !cloudMatchId) return;
+      if (!enabled || !cloudMatchId || pausedForReview) return;
       const innings = currentInnings(match);
       const delivery = eventType === "delivery.recorded" ? innings.deliveries.at(-1) : null;
       const canonicalInningsEvent = ["delivery.recorded", "delivery.voided"].includes(eventType);
@@ -199,8 +200,8 @@ export function useMatchCloudSync(
         setStatus("error");
       }
     },
-    [cloudMatchId, deviceId, enabled],
+    [cloudMatchId, deviceId, enabled, pausedForReview],
   );
 
-  return { enabled, status, lastSequence, publish };
+  return { enabled, status: pausedForReview ? "conflict" : status, lastSequence, publish };
 }
