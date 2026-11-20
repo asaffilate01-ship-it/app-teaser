@@ -34,7 +34,7 @@ export const en = {
     seasonTitle: "Example league table",
     sampleNotice: "Illustrative data only — not live fixtures, results or partner clubs.",
     standingsNote:
-      "Standings, run rates and player records build themselves from every ball you score.",
+      "This table uses sample results to illustrate a possible league view.",
     tablePos: "Pos",
     tableClub: "Club",
     tableP: "P",
@@ -81,10 +81,10 @@ export const en = {
   featuresTab: {
     kicker: "Platform",
     title: "Features",
-    intro: "The working scoring preview and the cloud capabilities now being built around it.",
-    watchTitle: "Who can watch live",
+    intro: "The scorer and local video tools are available to try. Club cloud viewing and advanced integrations are being tested.",
+    watchTitle: "Cloud viewing options (pilot)",
     watchBody:
-      "Leagues set a default for a competition, clubs can override it per match — and change it mid-innings.",
+      "Private, opposition, league and public viewing rules require a configured club cloud workspace; they are not features of the device-only scorer.",
     watchOptions: [
       { t: "Club only", d: "Scorers, coaches and members of your own club." },
       { t: "Opposition club", d: "The other team's staff and players follow the same live feed." },
@@ -239,7 +239,7 @@ export const en = {
     copyright: "CricLume. See every ball. Shape every game.",
   },
   footer: {
-    desc: "Ball-by-ball scoring, multi-angle camera rooms, live scoreboards and coaching review for clubs, leagues and academies.",
+    desc: "Try on-device cricket scoring and local video review. Club, league and cloud features are in development.",
     explore: "Explore",
     access: "Access",
     accessLine1: "Scoring is open to everyone",
@@ -289,7 +289,7 @@ export const de: Content = {
     seasonTitle: "Beispieltabelle",
     sampleNotice: "Nur Beispiele — keine Live-Spiele, Ergebnisse oder bestätigten Partnervereine.",
     standingsNote:
-      "Tabellen, Run Rates und Spielerstatistiken entstehen automatisch aus jedem erfassten Ball.",
+      "Diese Tabelle zeigt Beispieldaten als Vorschau einer möglichen Ligaansicht.",
     tablePos: "Pl.",
     tableClub: "Club",
     tableP: "Sp",
@@ -336,10 +336,10 @@ export const de: Content = {
   featuresTab: {
     kicker: "Plattform",
     title: "Funktionen",
-    intro: "Alles, was im aktuellen CricLume-Build enthalten ist.",
-    watchTitle: "Wer live zuschauen darf",
+    intro: "Scoring und lokale Videoanalyse sind ausprobierbar. Club-Cloud-Ansichten und erweiterte Integrationen werden getestet.",
+    watchTitle: "Cloud-Zugriffe (Pilot)",
     watchBody:
-      "Ligen legen eine Voreinstellung fest, Clubs können sie pro Spiel überschreiben — auch während des Innings.",
+      "Private, gegnerische, Liga- und öffentliche Ansichten brauchen einen eingerichteten Club-Cloud-Zugang und sind nicht Teil des lokalen Scorers.",
     watchOptions: [
       { t: "Nur Club", d: "Scorer, Trainer und Mitglieder des eigenen Clubs." },
       {
@@ -498,7 +498,7 @@ export const de: Content = {
     copyright: "CricLume. Jeder Ball. Jeder Vorteil.",
   },
   footer: {
-    desc: "Scoring Ball für Ball, Kameraräume mit mehreren Winkeln, Live-Anzeigetafeln und Trainingsanalyse für Clubs, Ligen und Akademien.",
+    desc: "Cricket-Scoring auf deinem Gerät und lokale Videoanalyse. Club-, Liga- und Cloud-Funktionen sind in Entwicklung.",
     explore: "Entdecken",
     access: "Zugang",
     accessLine1: "Scoring steht allen offen",
@@ -546,7 +546,7 @@ export const nl: Content = {
     seasonTitle: "Voorbeeldstand",
     sampleNotice: "Alleen voorbeelden — geen actuele wedstrijden, uitslagen of bevestigde partnerclubs.",
     standingsNote:
-      "Standen, run rates en spelersstatistieken ontstaan automatisch uit elke bal die je scoort.",
+      "Deze tabel gebruikt voorbeeldresultaten om een competitieoverzicht te tonen.",
     tablePos: "Pos",
     tableClub: "Club",
     tableP: "G",
@@ -593,10 +593,10 @@ export const nl: Content = {
   featuresTab: {
     kicker: "Platform",
     title: "Functies",
-    intro: "Alles wat in de huidige CricLume-build zit.",
-    watchTitle: "Wie mag live meekijken",
+    intro: "De scorer en lokale videofuncties zijn te proberen. Cloudweergaven en geavanceerde koppelingen worden getest.",
+    watchTitle: "Cloudtoegang (pilot)",
     watchBody:
-      "Competities stellen een standaard in, clubs kunnen die per wedstrijd aanpassen — zelfs tijdens een innings.",
+      "Privé-, tegenstander-, competitie- en openbare weergaven vragen een ingestelde clubcloud en zijn geen onderdeel van de lokale scorer.",
     watchOptions: [
       { t: "Alleen club", d: "Scorers, coaches en leden van je eigen club." },
       { t: "Tegenstander", d: "Staf en spelers van het andere team volgen dezelfde live feed." },
@@ -752,7 +752,7 @@ export const nl: Content = {
     copyright: "CricLume. Elke bal. Elk voordeel.",
   },
   footer: {
-    desc: "Bal voor bal scoren, camerakamers met meerdere hoeken, live scoreborden en coachingsanalyse voor clubs, competities en academies.",
+    desc: "Probeer cricket scoren en lokale videoreview. Club-, competitie- en cloudfuncties zijn in ontwikkeling.",
     explore: "Ontdek",
     access: "Toegang",
     accessLine1: "Scoren is voor iedereen toegankelijk",
@@ -800,7 +800,7 @@ export const af: Content = {
     seasonTitle: "Voorbeeldranglys",
     sampleNotice: "Slegs voorbeelde — nie regstreekse wedstryde, uitslae of bevestigde vennootklubs nie.",
     standingsNote:
-      "Ranglyste, lopietempo's en spelerrekords bou hulself uit elke bal wat jy aanteken.",
+      "Hierdie tabel toon slegs voorbeelduitslae vir 'n moontlike liga-oorsig.",
     tablePos: "Pos",
     tableClub: "Klub",
     tableP: "G",
@@ -847,10 +847,10 @@ export const af: Content = {
   featuresTab: {
     kicker: "Platform",
     title: "Kenmerke",
-    intro: "Alles wat in die huidige CricLume-weergawe beskikbaar is.",
-    watchTitle: "Wie mag regstreeks kyk",
+    intro: "Die tellingblad en plaaslike video-oorsig kan getoets word. Klubwolkaansigte en ander integrasies word nog getoets.",
+    watchTitle: "Wolktoegang (loods)",
     watchBody:
-      "Ligas stel 'n verstek vir 'n kompetisie; klubs kan dit per wedstryd verander — selfs tydens 'n beurt.",
+      "Private, teenstander-, liga- en openbare aansigte vereis 'n opgestelde klubwolkdiens; dit is nie deel van die plaaslike tellingblad nie.",
     watchOptions: [
       { t: "Slegs klub", d: "Aantekenaars, afrigters en lede van jou eie klub." },
       {
@@ -1009,7 +1009,7 @@ export const af: Content = {
     copyright: "CricLume. Elke bal. Elke voordeel.",
   },
   footer: {
-    desc: "Bal-vir-bal aantekening, kamerakamers met verskeie hoeke, regstreekse telborde en afrigtersontleding vir klubs, ligas en akademies.",
+    desc: "Probeer telling op jou toestel en plaaslike videohersiening. Klub-, liga- en wolkfunksies word ontwikkel.",
     explore: "Verken",
     access: "Toegang",
     accessLine1: "Telling is oop vir almal",
@@ -1057,7 +1057,7 @@ export const fr: Content = {
     seasonTitle: "Classement d'exemple",
     sampleNotice: "Données illustratives — pas de matchs, résultats ou clubs partenaires en direct.",
     standingsNote:
-      "Classements, run rates et statistiques des joueurs se construisent à partir de chaque balle enregistrée.",
+      "Ce classement utilise des résultats d'exemple pour illustrer l'interface.",
     tablePos: "Pos",
     tableClub: "Club",
     tableP: "J",
@@ -1104,10 +1104,10 @@ export const fr: Content = {
   featuresTab: {
     kicker: "Plateforme",
     title: "Fonctions",
-    intro: "Tout ce que contient la version actuelle de CricLume.",
-    watchTitle: "Qui peut regarder en direct",
+    intro: "Le marqueur et la revue vidéo locale sont disponibles à l'essai. Les vues cloud et les intégrations avancées sont en pilote.",
+    watchTitle: "Accès cloud (pilote)",
     watchBody:
-      "Les ligues définissent une valeur par défaut, les clubs peuvent la modifier match par match — même en cours de manche.",
+      "Les vues privées, adversaires, ligues et publiques nécessitent un espace cloud configuré; elles ne font pas partie du marqueur local.",
     watchOptions: [
       { t: "Club uniquement", d: "Marqueurs, entraîneurs et membres de votre club." },
       { t: "Club adverse", d: "Le staff et les joueurs adverses suivent le même flux en direct." },
@@ -1265,7 +1265,7 @@ export const fr: Content = {
     copyright: "CricLume. Chaque balle. Chaque avantage.",
   },
   footer: {
-    desc: "Marquage balle par balle, salles caméra multi-angles, tableaux de score en direct et analyse d'entraînement pour clubs, ligues et académies.",
+    desc: "Essayez le marquage sur appareil et la revue vidéo locale. Les fonctions club, ligue et cloud sont en développement.",
     explore: "Explorer",
     access: "Accès",
     accessLine1: "Le marquage est ouvert à tous",
