@@ -34,8 +34,24 @@ test("unscheduled or timezone-ambiguous fixtures are excluded instead of guessed
     competitionName: "Cup",
     seasonName: "2026",
     fixtures: [
-      { id: "a", startsAt: null, homeTeam: "A", awayTeam: "B", ground: null, round: null, status: "planned" },
-      { id: "b", startsAt: "2026-11-20T17:00", homeTeam: "A", awayTeam: "B", ground: null, round: null, status: "planned" },
+      {
+        id: "a",
+        startsAt: null,
+        homeTeam: "A",
+        awayTeam: "B",
+        ground: null,
+        round: null,
+        status: "planned",
+      },
+      {
+        id: "b",
+        startsAt: "2026-11-20T17:00",
+        homeTeam: "A",
+        awayTeam: "B",
+        ground: null,
+        round: null,
+        status: "planned",
+      },
     ],
   });
   assert.equal(result.included, 0);
@@ -48,15 +64,18 @@ test("fixture names cannot inject extra calendar records, and long lines are fol
     competitionId: "c1",
     competitionName: "Community Cup",
     seasonName: "2026",
-    fixtures: [{
-      id: "f1",
-      startsAt: "2026-11-20T15:00:00Z",
-      homeTeam: "North; Juniors, Boys",
-      awayTeam: "South\r\nBEGIN:VEVENT",
-      ground: "Example Cricket Ground",
-      round: "Regional qualifying tournament with a very long descriptive title and extra details",
-      status: "scheduled",
-    }],
+    fixtures: [
+      {
+        id: "f1",
+        startsAt: "2026-11-20T15:00:00Z",
+        homeTeam: "North; Juniors, Boys",
+        awayTeam: "South\r\nBEGIN:VEVENT",
+        ground: "Example Cricket Ground",
+        round:
+          "Regional qualifying tournament with a very long descriptive title and extra details",
+        status: "scheduled",
+      },
+    ],
   });
   assert.equal(result.contents.split("\r\n").filter((line) => line === "BEGIN:VEVENT").length, 1);
   assert.match(result.contents, /North\\; Juniors\\, Boys/);
