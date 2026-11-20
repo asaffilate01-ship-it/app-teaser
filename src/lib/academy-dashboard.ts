@@ -53,9 +53,7 @@ export function academyOverview(data: AcademyData, asOf: Date = new Date()) {
     };
   });
   cohorts.sort((a, b) => a.ageGroup.localeCompare(b.ageGroup) || a.name.localeCompare(b.name));
-  const assigned = new Set(cohorts.flatMap((cohort) => data.teams.find(
-    (team) => team.id === cohort.teamId,
-  )?.playerIds ?? []));
+  const assigned = new Set(data.teams.flatMap((team) => team.playerIds));
   return {
     cohorts,
     teams: data.teams.length,
@@ -66,8 +64,7 @@ export function academyOverview(data: AcademyData, asOf: Date = new Date()) {
     ).length,
     unassignedPlayers: data.players.filter((player) => !assigned.has(player.id)).length,
     coachingConsentsToReview: data.players.filter(
-      (player) =>
-        player.isJunior && player.consent?.coachingAnalysis !== "granted",
+      (player) => player.isJunior && player.consent?.coachingAnalysis !== "granted",
     ).length,
     recordedMatches: data.matches.length,
   };
@@ -81,7 +78,14 @@ export function academyCohortsCsv(cohorts: readonly AcademyCohort[]): string {
     return `"${protectedValue.replaceAll('"', '""')}"`;
   };
   return [
-    ["Team", "Age group", "Registered", "Juniors", "Coaching consents to review", "Upcoming fixtures"],
+    [
+      "Team",
+      "Age group",
+      "Registered",
+      "Juniors",
+      "Coaching consents to review",
+      "Upcoming fixtures",
+    ],
     ...cohorts.map((cohort) => [
       cohort.name,
       cohort.ageGroup,
@@ -90,5 +94,7 @@ export function academyCohortsCsv(cohorts: readonly AcademyCohort[]): string {
       cohort.coachingConsentsToReview,
       cohort.upcomingFixtures,
     ]),
-  ].map((row) => row.map(cell).join(",")).join("\r\n");
+  ]
+    .map((row) => row.map(cell).join(","))
+    .join("\r\n");
 }
