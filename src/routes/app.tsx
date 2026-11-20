@@ -930,7 +930,8 @@ function LiveMatch({
               {findPlayer(match, innings.bowlerId)?.name ?? "Set bowler"}
             </p>
             <p className="text-[11px] text-slate-300">
-              {summary.overs} overs · {cloudSync.enabled ? `Cloud: ${cloudSync.status}` : "Saved on this device"}
+              {summary.overs} overs ·{" "}
+              {cloudSync.enabled ? `Cloud: ${cloudSync.status}` : "Saved on this device"}
             </p>
           </div>
           <div className="text-right">
