@@ -86,15 +86,17 @@ test("fixture names cannot inject extra calendar records, and long lines are fol
 });
 
 test("cancelled fixtures retain a stable UID and export cancellation without guessing a duration", () => {
-  const fixtures = [{
-    id: "f-cancel",
-    startsAt: "2026-12-10T12:00:00+05:00",
-    homeTeam: "North",
-    awayTeam: "South",
-    ground: null,
-    round: null,
-    status: "cancelled",
-  }];
+  const fixtures = [
+    {
+      id: "f-cancel",
+      startsAt: "2026-12-10T12:00:00+05:00",
+      homeTeam: "North",
+      awayTeam: "South",
+      ground: null,
+      round: null,
+      status: "cancelled",
+    },
+  ];
   const result = fixtureCalendarIcs({
     competitionId: "league",
     competitionName: "Winter Cup",
