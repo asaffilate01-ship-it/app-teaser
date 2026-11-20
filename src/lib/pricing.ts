@@ -180,24 +180,27 @@ const EU_COUNTRIES = new Set([
   "SE",
 ]);
 
-/** Best-effort country detection: IP lookup first, then browser locale. */
+/** Get the region from a browser language tag without making any network requests. */
+export function regionFromLocale(locale: string | null | undefined): string | null {
+  if (!locale) return null;
+  const parts = locale.replaceAll("_", "-").split("-");
+  const region = parts.slice(1).find((part) => /^[A-Za-z]{2}$/.test(part));
+  return region ? region.toUpperCase() : null;
+}
+
+/**
+ * Country selection is an optional locale-based suggestion.
+ * We do not send the visitor's IP address to third-party geolocation services.
+ */
 export async function detectCountry(): Promise<string | null> {
   try {
-    const res = await fetch("https://ipapi.co/country/", { cache: "no-store" });
-    if (res.ok) {
-      const text = (await res.text()).trim();
-      if (/^[A-Z]{2}$/i.test(text)) return text.toUpperCase();
+    if (typeof navigator === "undefined") return null;
+    for (const locale of [navigator.language, ...navigator.languages]) {
+      const region = regionFromLocale(locale);
+      if (region) return region;
     }
   } catch {
-    /* ignore and fall back */
-  }
-  try {
-    const locale = navigator.language || "";
-    const parts = locale.split("-");
-    const last = parts[parts.length - 1];
-    if (last && /^[A-Za-z]{2}$/.test(last)) return last.toUpperCase();
-  } catch {
-    /* ignore */
+    // Users can always choose their region from the pricing selector.
   }
   return null;
 }
