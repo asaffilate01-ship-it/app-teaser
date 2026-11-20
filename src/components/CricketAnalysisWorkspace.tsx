@@ -2,6 +2,7 @@ import { analysisZoneOptions } from "@/lib/analysis-ground";
 import { BowlingPlacement } from "@/components/BowlingPlacement";
 import { AnalysisGround } from "@/components/AnalysisGround";
 import { observationErrors } from "@/lib/observation-form";
+import { summarizeCoachingEvidence } from "@/lib/coaching-evidence";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { reviewReportHtml } from "@/lib/review-report";
 import { EvidenceLibrary } from "@/components/EvidenceLibrary";
@@ -194,6 +195,11 @@ function MatchAnalysis({
     [data, filters],
   );
   const summary = summarizeDeliveries(rows);
+  const evidenceReadiness = summarizeCoachingEvidence(
+    data?.deliveries ?? [],
+    data?.mediaIds ?? new Set<string>(),
+    data?.notes ?? [],
+  );
   const visibleDeliveryIds = new Set(rows.map((d) => d.id));
   const currentDeliveryIds = new Set((data?.deliveries ?? []).map((d) => d.id));
   const visibleNotes = filterObservations(
@@ -404,6 +410,52 @@ function MatchAnalysis({
           {notice}
         </p>
       )}
+      <section
+        aria-label="Coaching evidence readiness"
+        className="space-y-3 rounded-2xl border border-amber-300/20 bg-white/[0.04] p-4 md:p-5"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="font-bold text-amber-100">Evidence readiness</h3>
+          <span className="text-xs text-slate-300">Records and references · Not AI tracking</span>
+        </div>
+        <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {[
+            ["Current deliveries", evidenceReadiness.currentDeliveries],
+            ["Clip-linked deliveries", evidenceReadiness.clipLinkedDeliveries],
+            ["Coach-reviewed deliveries", evidenceReadiness.manuallyReviewedDeliveries],
+            [
+              "Historical observations",
+              data.workspaceAvailable ? evidenceReadiness.historicalObservations : "Unavailable",
+            ],
+          ].map(([label, value]) => (
+            <div key={label} className="rounded-xl border border-white/10 bg-black/10 p-3">
+              <dt className="text-xs text-slate-300">{label}</dt>
+              <dd className="mt-1 text-xl font-bold tabular-nums">{value}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="text-xs leading-relaxed text-slate-300">
+          Clip links are recorded associations, not proof of available playback or consent. Coach
+          observations are human-authored and do not measure ball speed or trajectory. Private media
+          is accessed only through authorised, time-limited links.
+        </p>
+        {data.workspaceAvailable && evidenceReadiness.historicalObservations > 0 && (
+          <button
+            type="button"
+            className="workspace-nav-item"
+            onClick={() => {
+              setHistory("historical");
+              window.requestAnimationFrame(() =>
+                document.getElementById("coaching-observations")?.scrollIntoView({
+                  block: "start",
+                }),
+              );
+            }}
+          >
+            Review no-longer-current observations
+          </button>
+        )}
+      </section>
       <div className="flex flex-wrap gap-2">
         {(["batting", "bowling", "fielding"] as const).map((d) => (
           <button
@@ -821,7 +873,7 @@ function MatchAnalysis({
           </Dialog>
         )}
       </section>
-      <section className="rounded-2xl border border-white/10 p-5">
+      <section id="coaching-observations" className="rounded-2xl border border-white/10 p-5">
         <h3 className="text-lg font-semibold">Coaching observations</h3>
         {!data.workspaceAvailable && (
           <p role="status" className="mt-3 text-sm text-amber-200">
