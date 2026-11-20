@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createMatch, currentInnings, recordDelivery } from "../src/lib/cricket.ts";
-import { reviewRemoteScorerSnapshot } from "../src/lib/scorer-reconciliation.ts";
+import { reviewCloudBootstrap, reviewRemoteScorerSnapshot } from "../src/lib/scorer-reconciliation.ts";
 
 function fixture() {
   return createMatch({
@@ -82,4 +82,47 @@ test("different teams, match identity or innings structure require review", () =
   const noInnings = structuredClone(base);
   noInnings.innings = [];
   assert.equal(reviewRemoteScorerSnapshot(base, noInnings).safe, false);
+});
+
+test("cloud bootstrap never erases unsent offline scoring, even if the remote snapshot matches", () => {
+  const local = addBall(fixture(), 4);
+  const remote = structuredClone(local);
+  const review = reviewCloudBootstrap(local, remote, 2);
+  assert.equal(review.safe, false);
+  assert.match(review.reason ?? "", /unsent scoring/i);
+  assert.equal(reviewCloudBootstrap(undefined, remote, 1).safe, false);
+  assert.equal(reviewCloudBootstrap(undefined, remote, 0).safe, true);
+});
+
+test("cloud bootstrap requires review for a divergent score instead of overwriting a device", () => {
+  const first = addBall(fixture(), 1);
+  const other = structuredClone(first);
+  other.innings[0]!.deliveries[0]!.batterRuns = 6;
+  assert.equal(reviewCloudBootstrap(first, other, 0).safe, false);
+});
+
+test("a remote snapshot cannot silently change rules, rosters or completed status", () => {
+  const local = fixture();
+  const rules = structuredClone(local);
+  rules.settings.ballsPerOver = 8;
+  assert.match(reviewRemoteScorerSnapshot(local, rules).reason ?? "", /rules or setup/);
+  const players = structuredClone(local);
+  players.teams[0]!.players[0]!.name = "Different player";
+  assert.match(reviewRemoteScorerSnapshot(local, players).reason ?? "", /registered players/);
+  const completed = structuredClone(local);
+  completed.status = "completed";
+  assert.match(reviewRemoteScorerSnapshot(completed, local).reason ?? "", /reopen a match/);
+});
+
+test("bowling side changes, innings regression and silent striker swaps require review", () => {
+  const local = fixture();
+  const swapped = structuredClone(local);
+  swapped.innings[0]!.bowlingTeamId = local.innings[0]!.battingTeamId;
+  assert.match(reviewRemoteScorerSnapshot(local, swapped).reason ?? "", /bowling sides/);
+  const reordered = structuredClone(local);
+  reordered.innings[0]!.strikerId = local.innings[0]!.nonStrikerId;
+  assert.match(reviewRemoteScorerSnapshot(local, reordered).reason ?? "", /Scorer assignments/);
+  const completed = structuredClone(local);
+  completed.innings[0]!.status = "completed";
+  assert.match(reviewRemoteScorerSnapshot(completed, local).reason ?? "", /reopen innings/);
 });
