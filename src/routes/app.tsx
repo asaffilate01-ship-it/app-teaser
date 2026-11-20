@@ -71,7 +71,8 @@ import {
   type RecordDeliveryInput,
   type ShotOutcome,
 } from "@/lib/cricket";
-import { loadCloudMatchSnapshot, startCloudInnings } from "@/lib/cloud";
+import { loadCloudMatchSnapshot, readPendingEvents, startCloudInnings } from "@/lib/cloud";
+import { reviewRemoteScorerSnapshot } from "@/lib/scorer-reconciliation";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 
 export const Route = createFileRoute("/app")({
@@ -782,22 +783,34 @@ function LiveMatch({
 }) {
   const [tab, setTab] = useState<MatchTab>("score");
   const [cloudActionError, setCloudActionError] = useState<string | null>(null);
+  const [cloudConflict, setCloudConflict] = useState<string | null>(null);
+  const [backupRequested, setBackupRequested] = useState(false);
+  const [reconciling, setReconciling] = useState(false);
   const cloudMatchId = useMemo(() => {
     if (typeof window === "undefined") return null;
     return new URLSearchParams(window.location.search).get("cloudMatch");
   }, []);
   const acceptRemoteMatch = useCallback(
     (remote: CricketMatch) => {
-      if (remote.id === match.id) onSave(remote);
+      if (remote.id !== match.id || cloudConflict) return;
+      const review = reviewRemoteScorerSnapshot(match, remote);
+      if (!review.safe) {
+        setCloudConflict(review.reason);
+        setBackupRequested(false);
+        return;
+      }
+      onSave(remote);
     },
-    [match.id, onSave],
+    [cloudConflict, match, onSave],
   );
   const cloudSync = useMatchCloudSync(cloudMatchId, acceptRemoteMatch);
   const saveAndSync = (next: CricketMatch, eventType = "match.snapshot") => {
+    if (cloudConflict) return;
     onSave(next);
     void cloudSync.publish(next, eventType);
   };
   const advanceInnings = async () => {
+    if (cloudConflict) return;
     setCloudActionError(null);
     let next = startNextInnings(match);
     if (next.innings.length === match.innings.length || !cloudMatchId) {
@@ -839,6 +852,38 @@ function LiveMatch({
       .toLowerCase();
     anchor.click();
     URL.revokeObjectURL(url);
+  };
+
+  const replaceLocalWithCloud = async () => {
+    if (!cloudMatchId || !backupRequested || reconciling) return;
+    if (readPendingEvents(cloudMatchId).length > 0) {
+      setCloudActionError(
+        "Unsent deliveries are still queued. Keep your local copy and ask the lead scorer to reconcile.",
+      );
+      return;
+    }
+    if (
+      !window.confirm(
+        "Replace this device's working match with the latest cloud copy? Check that your local backup downloaded first.",
+      )
+    ) {
+      return;
+    }
+    setReconciling(true);
+    setCloudActionError(null);
+    try {
+      const current = await loadCloudMatchSnapshot(cloudMatchId);
+      if (current.id !== match.id) throw new Error("Cloud returned a different match.");
+      onSave(current);
+      setCloudConflict(null);
+      setBackupRequested(false);
+    } catch (reason) {
+      setCloudActionError(
+        reason instanceof Error ? reason.message : "The cloud score could not be loaded.",
+      );
+    } finally {
+      setReconciling(false);
+    }
   };
 
   return (
@@ -949,7 +994,47 @@ function LiveMatch({
             {cloudActionError}
           </p>
         )}
-        {tab === "score" && (
+        {cloudConflict && (
+          <section
+            role="alert"
+            className="mb-5 space-y-3 rounded-2xl border border-rose-300/60 bg-rose-950/50 p-5 text-slate-100"
+          >
+            <h2 className="text-xl font-bold text-rose-200">Scorer versions need review</h2>
+            <p className="text-sm leading-relaxed">
+              {cloudConflict} This device's recorded deliveries have been kept. Scoring is paused to
+              prevent a different device overwriting your work.
+            </p>
+            <p className="text-sm">
+              Download your local copy, check your Downloads folder, and agree the correct score
+              with the lead scorer before replacing this working copy.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                className="action-primary"
+                onClick={() => {
+                  exportMatch();
+                  setBackupRequested(true);
+                }}
+              >
+                Download local backup
+              </button>
+              <button
+                type="button"
+                className="workspace-nav-item"
+                disabled={!backupRequested || reconciling}
+                onClick={() => void replaceLocalWithCloud()}
+              >
+                {reconciling ? "Loading cloud score…" : "Replace with reviewed cloud copy"}
+              </button>
+            </div>
+            <p className="text-xs text-slate-300">
+              A requested download does not prove a backup was saved. Check the file before choosing
+              the cloud version. No automated merge has been performed.
+            </p>
+          </section>
+        )}
+        {tab === "score" && !cloudConflict && (
           <ScoringPad
             match={match}
             onSave={saveAndSync}
