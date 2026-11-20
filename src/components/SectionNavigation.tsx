@@ -65,11 +65,15 @@ export function SectionNavigation<T extends string>({
               onClick={() => onChange(key)}
               aria-current={value === key ? "page" : undefined}
               className={`flex min-h-[62px] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] font-bold transition-colors ${
-                value === key ? "bg-amber-300/15 text-amber-200" : "text-slate-300 hover:bg-white/10"
+                value === key
+                  ? "bg-amber-300/15 text-amber-200"
+                  : "text-slate-300 hover:bg-white/10"
               }`}
             >
               <Icon className="size-5 shrink-0" aria-hidden="true" />
-              <span className="max-w-full truncate">{text === "Analysis room" ? "Analysis" : text}</span>
+              <span className="max-w-full truncate">
+                {text === "Analysis room" ? "Analysis" : text}
+              </span>
             </button>
           ))}
           {secondary.length > 0 && (
@@ -78,9 +82,15 @@ export function SectionNavigation<T extends string>({
                 <button
                   type="button"
                   aria-current={moreSelected ? "page" : undefined}
-                  aria-label={moreSelected ? `More sections, viewing ${currentLabel}` : "More workspace sections"}
+                  aria-label={
+                    moreSelected
+                      ? `More sections, viewing ${currentLabel}`
+                      : "More workspace sections"
+                  }
                   className={`flex min-h-[62px] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] font-bold transition-colors ${
-                    moreSelected ? "bg-amber-300/15 text-amber-200" : "text-slate-300 hover:bg-white/10"
+                    moreSelected
+                      ? "bg-amber-300/15 text-amber-200"
+                      : "text-slate-300 hover:bg-white/10"
                   }`}
                 >
                   <MoreHorizontal className="size-5" aria-hidden="true" />
