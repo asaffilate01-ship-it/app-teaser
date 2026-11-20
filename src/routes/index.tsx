@@ -596,13 +596,6 @@ function FeaturesTab() {
     <div className="space-y-5 md:space-y-8">
       <SectionHeader kicker={t.featuresTab.kicker}>{t.featuresTab.title}</SectionHeader>
       <p className="text-sm text-muted-foreground md:text-base">{t.featuresTab.intro}</p>
-      <div className="rounded-2xl border border-gold/30 bg-gold/10 p-4 text-sm leading-relaxed text-muted-foreground">
-        <strong className="text-foreground">Built into this release:</strong> offline and
-        cloud-ready ball-by-ball scoring, role-based club and league administration, realtime event
-        sync, public scoreboards, camera-room capture, career history, competition tools and
-        on-device coaching review. Paid, AI, video-processing and rain-rule services activate only
-        after their secure providers are configured.
-      </div>
       <div className="space-y-3 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 lg:grid-cols-3">
         {t.features.map((f, i) => (
           <FeatureRow key={f.title} icon={featureIcons[i]!} title={f.title} body={f.body} />
