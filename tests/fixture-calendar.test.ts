@@ -58,7 +58,7 @@ test("fixture names cannot inject extra calendar records, and long lines are fol
       status: "scheduled",
     }],
   });
-  assert.equal(result.contents.split("\\r\\n").filter((line) => line === "BEGIN:VEVENT").length, 1);
+  assert.equal(result.contents.split("\r\n").filter((line) => line === "BEGIN:VEVENT").length, 1);
   assert.match(result.contents, /North\\; Juniors\\, Boys/);
   assert.equal(result.contents.includes("\r\nBEGIN:VEVENT\r\n"), true);
   for (const line of result.contents.split("\r\n")) {
