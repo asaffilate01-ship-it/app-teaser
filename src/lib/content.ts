@@ -101,7 +101,7 @@ export const en = {
     alsoItems: [
       "Field zones, fielder selection and delivery timeline",
       "Undo on any ball, with a full audit of edits",
-      "Voice notes and AI-audit presentation in review",
+      "On-device slow motion, frame stepping and drawing tools",
       "Competitions, innings and deliveries stored per club",
       "Demo match data so you can trial before onboarding",
     ],
@@ -202,7 +202,7 @@ export const en = {
       },
       {
         q: "Can I score without signal?",
-        a: "Yes. The preview keeps match data on the scoring device, so patchy ground coverage does not stop scoring. Cross-device synchronization is not active yet.",
+        a: "Yes. If the scorer is already open, you can keep recording balls on your device without a signal. Cloud sync is a separate club service and must be tested before match day.",
       },
       {
         q: "Does it handle rain rules?",
@@ -217,12 +217,8 @@ export const en = {
         a: "Not in the device-only preview. Private, opposition, league and public visibility controls are specified for the cloud pilot.",
       },
       {
-        q: "How does CricLume make money?",
-        a: "Clubs and leagues pay an annual subscription per team or competition, billed on the tier that matches how much scoring, video and analysis they use. Extra video storage, league-wide packages and sponsor-branded streams are paid add-ons.",
-      },
-      {
         q: "Is there a free option?",
-        a: "Yes. Starter is free for a single team with ball-by-ball scoring and a live scoreboard. The camera room is not included — you add angles once you move to the Club plan. It is supported by light advertising on scoreboard and review pages.",
+        a: "Yes. The scorer lets you record a match and download a backup without an account. A public live scoreboard and managed cloud services need separate club setup.",
       },
       {
         q: "How do I get access?",
@@ -363,7 +359,7 @@ export const de: Content = {
     alsoItems: [
       "Feldzonen, Fielder-Auswahl und Ball-Timeline",
       "Rückgängig bei jedem Ball, mit vollständiger Änderungshistorie",
-      "Sprachnotizen und KI-Auswertung in der Analyse",
+      "Lokale Videoanalyse mit Zeitlupe und Zeichenwerkzeugen",
       "Wettbewerbe, Innings und Bälle pro Club gespeichert",
       "Demo-Spieldaten zum Testen vor dem Onboarding",
     ],
@@ -461,31 +457,27 @@ export const de: Content = {
       },
       {
         q: "Brauche ich spezielle Kameras?",
-        a: "Nein. Der Kameraraum koppelt normale Handys. Starte mit je einem an beiden Enden und einem seitlich und füge beliebig viele Winkel hinzu — jede Aufnahme bleibt mit ihrem Ball verknüpft.",
+        a: "Nein. Lokale Videoanalyse funktioniert mit Aufnahmen normaler Handys. Synchronisierte Mehrkameraaufnahmen werden im Cloud-Pilot erprobt.",
       },
       {
         q: "Kann ich ohne Empfang scoren?",
-        a: "Das Scoring funktioniert auch bei schlechter Abdeckung weiter und synchronisiert sich, sobald die Verbindung zurück ist.",
+        a: "Ja. Wenn der Scorer bereits geöffnet ist, kannst du Bälle ohne Internet auf deinem Gerät erfassen. Die Club-Cloud-Synchronisierung muss separat eingerichtet und getestet werden.",
       },
       {
         q: "Werden Regenregeln unterstützt?",
-        a: "Ja. CricLume wendet die üblichen Regenregeln an, um Ziele und Ergebnisse bei Unterbrechungen anzupassen.",
+        a: "Noch nicht. Offizielle Regen-Zielberechnungen werden erst nach Prüfung der Methode und der nötigen Lizenz aktiviert.",
       },
       {
         q: "Wo werden Videos gespeichert?",
-        a: "Clips und Anmerkungen werden beim Spiel im eigenen Bereich deiner Organisation gespeichert; Einwilligungs- und Datenschutzkontrollen sind Teil der Roadmap.",
+        a: "Bei der lokalen Vorschau bleiben ausgewählte Aufnahmen auf deinem Gerät. Private Cloud-Speicherung und Einwilligungen müssen gesondert eingerichtet werden.",
       },
       {
         q: "Können andere Clubs und die Liga unser Scoring live sehen?",
-        a: "Ja. Jedes Spiel hat eine Sichtbarkeitseinstellung: privat, mit dem Gegner geteilt, für die Liga offen oder als öffentlicher Link. Ligen können auch eine Voreinstellung für alle Spiele festlegen.",
-      },
-      {
-        q: "Wie verdient CricLume Geld?",
-        a: "Clubs und Ligen zahlen ein Abo pro Team oder Wettbewerb, passend zum Umfang von Scoring, Video und Analyse. Zusätzlicher Videospeicher, Liga-Pakete und gesponserte Streams sind kostenpflichtige Add-ons.",
+        a: "Nicht über den lokalen Scorer allein. Private, gegnerische, Liga- und öffentliche Ansichten erfordern eine eingerichtete Club-Cloud-Umgebung.",
       },
       {
         q: "Gibt es eine kostenlose Option?",
-        a: "Ja. Starter ist kostenlos für ein Team mit Scoring Ball für Ball und Live-Anzeigetafel. Der Kameraraum ist nicht enthalten — Winkel gibt es ab dem Club-Tarif. Finanziert wird das über leichte Werbung.",
+        a: "Ja. Du kannst ein Spiel kostenlos auf deinem Gerät erfassen und exportieren. Öffentliche Live-Anzeigetafeln und Cloud-Dienste brauchen eine separate Einrichtung.",
       },
       {
         q: "Wie bekomme ich Zugang?",
@@ -719,31 +711,27 @@ export const nl: Content = {
       },
       {
         q: "Heb ik speciale camera's nodig?",
-        a: "Nee. De camerakamer koppelt gewone telefoons. Begin met één aan beide kanten en één van opzij en voeg zoveel hoeken toe als je wilt — elke opname blijft aan zijn bal gekoppeld.",
+        a: "Nee. Voor lokale videoreview volstaan normale telefoonvideo's. Gesynchroniseerde multi-telefoonopnamen worden in de cloudpilot getest.",
       },
       {
         q: "Kan ik scoren zonder bereik?",
-        a: "Scoren blijft werken bij slechte dekking en synchroniseert zodra de verbinding terug is.",
+        a: "Ja. Als de scorer al openstaat, kun je zonder internet ballen op je apparaat registreren. Cloudsynchronisatie is een aparte clubdienst die vooraf getest moet worden.",
       },
       {
         q: "Ondersteunt het regenregels?",
-        a: "Ja. CricLume past standaard regenregels toe om doelen en uitslagen aan te passen bij onderbrekingen.",
+        a: "Nog niet. Officiële regendoelberekeningen worden pas ingeschakeld na verificatie van de methode en benodigde licentie.",
       },
       {
         q: "Waar wordt video opgeslagen?",
-        a: "Clips en annotaties worden bij de wedstrijd opgeslagen in de eigen ruimte van je organisatie, met toestemmings- en privacycontroles op de roadmap.",
+        a: "Bij lokale review blijven gekozen video's op je apparaat. Privécloudopslag en toestemming vereisen een aparte configuratie.",
       },
       {
         q: "Kunnen andere clubs en de competitie ons live volgen?",
-        a: "Ja. Elke wedstrijd heeft een zichtbaarheidsinstelling: privé, gedeeld met de tegenstander, open voor de competitie of een openbare link. Competities kunnen ook een standaard instellen.",
-      },
-      {
-        q: "Hoe verdient CricLume geld?",
-        a: "Clubs en competities betalen een abonnement per team of competitie, passend bij hoeveel scoren, video en analyse ze gebruiken. Extra opslag, competitiepakketten en gesponsorde streams zijn betaalde extra's.",
+        a: "Niet via de lokale scorer alleen. Privé-, tegenstander-, competitie- en openbare weergaven vereisen een ingestelde clubcloud.",
       },
       {
         q: "Is er een gratis optie?",
-        a: "Ja. Starter is gratis voor één team met bal-voor-bal scoren en een live scorebord. De camerakamer zit er niet bij — hoeken krijg je vanaf het Club-abonnement. Het wordt ondersteund door lichte advertenties.",
+        a: "Ja. Je kunt een wedstrijd gratis op je apparaat registreren en exporteren. Openbare live scoreborden en clouddiensten vereisen aparte inrichting.",
       },
       {
         q: "Hoe krijg ik toegang?",
@@ -882,7 +870,7 @@ export const af: Content = {
     alsoItems: [
       "Veldsones, veldwerkerkeuse en baltydlyn",
       "Ontdoen op enige bal, met volledige oudit van wysigings",
-      "Stemnotas en KI-oudit in die ontleding",
+      "Plaaslike videohersiening met stadige aksie en merke",
       "Kompetisies, beurte en balle per klub gestoor",
       "Demo-wedstryddata om te toets voor aanboord",
     ],
@@ -980,31 +968,27 @@ export const af: Content = {
       },
       {
         q: "Het ek spesiale kameras nodig?",
-        a: "Nee. Die kamerakamer koppel gewone fone. Begin met een aan elke kant en een van die sykant, en voeg soveel hoeke by as wat jy wil — elke opname bly aan sy bal gekoppel.",
+        a: "Nee. Gewone selfoonvideo's werk vir plaaslike hersiening. Gesinchroniseerde opnames met meer fone word in die wolkloods getoets.",
       },
       {
         q: "Kan ek sonder sein aanteken?",
-        a: "Aantekening werk aan deur swak dekking en sinchroniseer weer sodra die verbinding terug is.",
+        a: "Ja. As die tellingblad reeds oop is, kan jy balle sonder internet op jou toestel aanteken. Wolksinchronisasie is 'n aparte klubdiens wat vooraf getoets moet word.",
       },
       {
         q: "Hanteer dit reënreëls?",
-        a: "Ja. CricLume pas standaard reënreëls toe om teikens en uitslae aan te pas wanneer 'n wedstryd onderbreek word.",
+        a: "Nog nie. Amptelike reënteikenberekeninge word eers geaktiveer ná verifikasie van die metode en vereiste lisensie.",
       },
       {
         q: "Waar word video gestoor?",
-        a: "Knipsels en aantekeninge word by die wedstryd in jou organisasie se eie ruimte gestoor, met toestemmings- en privaatheidskontroles op die padkaart.",
+        a: "Vir plaaslike hersiening bly gekose video's op jou toestel. Private wolkberging en toestemming vereis aparte opstelling.",
       },
       {
         q: "Kan ander klubs en die liga ons regstreeks volg?",
-        a: "Ja. Elke wedstryd het 'n sigbaarheidsinstelling: privaat, gedeel met die teenstander, oop vir die liga, of 'n openbare skakel. Ligas kan ook 'n verstek vir elke wedstryd stel.",
-      },
-      {
-        q: "Hoe maak CricLume geld?",
-        a: "Klubs en ligas betaal 'n intekening per span of kompetisie, op die vlak wat pas by hoeveel aantekening, video en ontleding hulle gebruik. Ekstra berging, ligapakkette en geborgde strome is betaalde byvoegings.",
+        a: "Nie via die plaaslike tellingblad alleen nie. Private, teenstander-, liga- en openbare aansigte vereis 'n opgestelde klubwolkdiens.",
       },
       {
         q: "Is daar 'n gratis opsie?",
-        a: "Ja. Starter is gratis vir een span met bal-vir-bal aantekening en 'n regstreekse telbord. Die kamerakamer is nie ingesluit nie — hoeke kom by die Klub-plan. Dit word deur ligte advertensies ondersteun.",
+        a: "Ja. Jy kan 'n wedstryd gratis op jou toestel aanteken en uitvoer. Openbare telborde en wolkdienste vereis aparte opstelling.",
       },
       {
         q: "Hoe kry ek toegang?",
@@ -1140,7 +1124,7 @@ export const fr: Content = {
     alsoItems: [
       "Zones de champ, sélection des fielders et chronologie des balles",
       "Annulation sur chaque balle, avec historique complet des modifications",
-      "Notes vocales et analyse IA dans la revue",
+      "Revue vidéo locale avec ralenti et annotations",
       "Compétitions, manches et balles enregistrées par club",
       "Données de match de démo pour tester avant l'intégration",
     ],
@@ -1240,31 +1224,27 @@ export const fr: Content = {
       },
       {
         q: "Faut-il des caméras spéciales ?",
-        a: "Non. La salle caméra associe des téléphones ordinaires. Commencez avec un à chaque extrémité et un de côté, puis ajoutez autant d'angles que nécessaire — chaque enregistrement reste lié à sa balle.",
+        a: "Non. Des vidéos filmées avec un téléphone suffisent pour la revue locale. La capture synchronisée multi-téléphones est testée dans le pilote cloud.",
       },
       {
         q: "Puis-je marquer sans réseau ?",
-        a: "Le marquage continue de fonctionner avec une couverture faible et se synchronise dès le retour de la connexion.",
+        a: "Oui. Si le marqueur est déjà ouvert, vous pouvez enregistrer les balles sur votre appareil sans connexion. La synchronisation cloud est un service club distinct à tester avant le match.",
       },
       {
         q: "Les règles de pluie sont-elles gérées ?",
-        a: "Oui. CricLume applique les règles de pluie standard pour ajuster objectifs et résultats en cas d'interruption.",
+        a: "Pas encore. Les calculs officiels des objectifs après pluie seront activés uniquement après vérification de la méthode et de la licence requise.",
       },
       {
         q: "Où sont stockées les vidéos ?",
-        a: "Clips et annotations sont stockés avec le match dans l'espace propre à votre organisation ; les contrôles de consentement et de confidentialité sont à la feuille de route.",
+        a: "Dans la revue locale, les vidéos choisies restent sur votre appareil. Le stockage cloud privé et les consentements nécessitent une configuration distincte.",
       },
       {
         q: "Les autres clubs et la ligue peuvent-ils suivre en direct ?",
-        a: "Oui. Chaque match a un réglage de visibilité : privé, partagé avec l'adversaire, ouvert à la ligue, ou lien public. Les ligues peuvent aussi définir une valeur par défaut.",
-      },
-      {
-        q: "Comment CricLume gagne-t-il de l'argent ?",
-        a: "Clubs et ligues paient un abonnement par équipe ou compétition, selon leur usage du marquage, de la vidéo et de l'analyse. Stockage supplémentaire, packs de ligue et diffusions sponsorisées sont des options payantes.",
+        a: "Pas avec le marqueur local seul. Les vues privées, adversaires, ligues et publiques nécessitent un service cloud configuré.",
       },
       {
         q: "Existe-t-il une offre gratuite ?",
-        a: "Oui. Starter est gratuit pour une équipe avec marquage balle par balle et tableau en direct. La salle caméra n'est pas incluse — les angles arrivent avec la formule Club. Elle est financée par une publicité légère.",
+        a: "Oui. Vous pouvez saisir et exporter gratuitement un match sur votre appareil. Les tableaux de score publics et services cloud nécessitent une configuration distincte.",
       },
       {
         q: "Comment obtenir un accès ?",
