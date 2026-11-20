@@ -826,7 +826,7 @@ function LiveMatch({
     },
     [cloudConflict, match, onSave],
   );
-  const cloudSync = useMatchCloudSync(cloudMatchId, acceptRemoteMatch);
+  const cloudSync = useMatchCloudSync(cloudMatchId, acceptRemoteMatch, Boolean(cloudConflict));
   const saveAndSync = (next: CricketMatch, eventType = "match.snapshot") => {
     if (cloudConflict) return;
     onSave(next);
