@@ -22,6 +22,10 @@ jobs:
             echo "::error::Set a fine-grained Supabase token with backups_read and the production project ref."
             exit 1
           fi
+          if [ "$SUPABASE_PROJECT_REF" != "eivwnjbykohrlxavvpcr" ]; then
+            echo "::error::Refusing to verify an unrelated project; set CricLume\x27s existing Supabase project ref."
+            exit 1
+          fi
       - name: Verify PITR or a recent completed managed backup
         shell: bash
         run: |
