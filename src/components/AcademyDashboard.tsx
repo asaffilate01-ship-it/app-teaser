@@ -88,8 +88,7 @@ export function AcademyDashboard({
           </span>
         </p>
         <p className="mt-2 text-xs text-slate-400">
-          Missing, withdrawn, denied and pending coaching consent do not mean approval.
-          Safeguarding decisions must be reviewed before processing junior media.
+          Review consent before processing any junior media.
         </p>
       </section>
       <section className="rounded-2xl border border-white/10 p-5">
