@@ -81,12 +81,15 @@ export function AcademyDashboard({
       <section className="rounded-2xl border border-white/10 bg-white/[0.025] p-5">
         <h3 className="text-lg font-bold">Safeguarding readiness</h3>
         <p className="mt-2 text-sm text-slate-300">
-          {snapshot.juniorPlayers} registered junior player(s) ·{" "}
-          {snapshot.coachingConsentsToReview} coaching consent record(s) require review.
+          <span>{snapshot.juniorPlayers} registered junior player(s)</span>
+          <span>
+            {" · "}
+            {snapshot.coachingConsentsToReview} coaching consent record(s) require review.
+          </span>
         </p>
         <p className="mt-2 text-xs text-slate-400">
-          A missing, withdrawn, denied or pending coaching consent is not treated as approval.
-          Use the safeguarding workspace to review decisions before processing junior media.
+          Missing, withdrawn, denied and pending coaching consent do not mean approval.
+          Safeguarding decisions must be reviewed before processing junior media.
         </p>
       </section>
       <section className="rounded-2xl border border-white/10 p-5">
@@ -101,10 +104,16 @@ export function AcademyDashboard({
           <div className="flex flex-wrap items-end gap-2">
             <label className="grid gap-1 text-xs text-slate-400">
               Age group
-              <select className={field} value={ageFilter} onChange={(e) => setAgeFilter(e.target.value)}>
+              <select
+                className={field}
+                value={ageFilter}
+                onChange={(e) => setAgeFilter(e.target.value)}
+              >
                 <option value="all">All groups</option>
                 {options.map((age) => (
-                  <option key={age} value={age}>{age}</option>
+                  <option key={age} value={age}>
+                    {age}
+                  </option>
                 ))}
               </select>
             </label>
@@ -117,15 +126,26 @@ export function AcademyDashboard({
           <table className="min-w-[680px] w-full text-left text-sm">
             <thead className="border-b border-white/10 text-xs text-slate-400">
               <tr>
-                {["Team", "Age group", "Registered", "Juniors", "Consent review", "Upcoming fixtures"].map(
-                  (label) => <th key={label} scope="col" className="px-3 py-3">{label}</th>,
-                )}
+                {[
+                  "Team",
+                  "Age group",
+                  "Registered",
+                  "Juniors",
+                  "Consent review",
+                  "Upcoming fixtures",
+                ].map((label) => (
+                  <th key={label} scope="col" className="px-3 py-3">
+                    {label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {cohorts.map((cohort) => (
                 <tr key={cohort.teamId} className="border-b border-white/5">
-                  <th scope="row" className="px-3 py-3 text-slate-100">{cohort.name}</th>
+                  <th scope="row" className="px-3 py-3 text-slate-100">
+                    {cohort.name}
+                  </th>
                   <td className="px-3 py-3">{cohort.ageGroup}</td>
                   <td className="px-3 py-3 tabular-nums">{cohort.registered}</td>
                   <td className="px-3 py-3 tabular-nums">{cohort.juniors}</td>
