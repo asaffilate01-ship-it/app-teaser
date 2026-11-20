@@ -1001,8 +1001,8 @@ function LiveMatch({
           >
             <h2 className="text-xl font-bold text-rose-200">Scorer versions need review</h2>
             <p className="text-sm leading-relaxed">
-              {cloudConflict} This device's recorded deliveries have been kept. Scoring is paused
-              to prevent a different device overwriting your work.
+              {cloudConflict} This device's recorded deliveries have been kept. Scoring is paused to
+              prevent a different device overwriting your work.
             </p>
             <p className="text-sm">
               Download your local copy, check your Downloads folder, and agree the correct score
@@ -1029,8 +1029,8 @@ function LiveMatch({
               </button>
             </div>
             <p className="text-xs text-slate-300">
-              A requested download does not prove a backup was saved. Check the file before
-              choosing the cloud version. No automated merge has been performed.
+              A requested download does not prove a backup was saved. Check the file before choosing
+              the cloud version. No automated merge has been performed.
             </p>
           </section>
         )}
