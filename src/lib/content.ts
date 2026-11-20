@@ -8,37 +8,31 @@ export const en = {
     faq: "FAQs",
     login: "Get started",
   },
-  ticker: [
-    "Live • Riverside CC 148/4 (18.2)",
-    "4+ camera angles per delivery",
-    "Coaching review • frame-by-frame",
-    "Start scoring — no invitation needed",
-    "Scoreboards ready for stream overlay",
-  ],
   hero: {
     l1: "Every ball.",
     l2: "Every angle.",
     l3: "Every advantage.",
-    body: "CricLume is building the complete club-match record: ball-by-ball scoring today, with synced phone cameras, live scoreboards and AI-assisted coaching review following through the cloud pilot.",
+    body: "Score cricket matches ball by ball, including when the signal drops. Review local videos on your device; connected club and multi-phone features are being tested in the cloud pilot.",
     ctaPrimary: "Start scoring",
     ctaSecondary: "See the screens",
-    liveNow: "Live now",
+    previewLabel: "Example scorecard",
   },
   stats: [
-    { k: "4+", v: "camera angles per ball" },
-    { k: "<1s", v: "to log a delivery" },
-    { k: "100%", v: "match history kept" },
+    { k: "Ball-by-ball", v: "Runs, wickets and extras" },
+    { k: "On-device", v: "Scoring without a signal" },
+    { k: "Video review", v: "Frame-by-frame tools" },
   ],
   home: {
     matchDayKicker: "Match day",
     matchDayTitle: "Built for match day",
     allFeatures: "All features",
     fixturesKicker: "Fixtures",
-    fixturesTitle: "Upcoming matches",
+    fixturesTitle: "Example fixtures",
     scoring: "Scoring",
     vs: "vs",
     seasonKicker: "Season",
-    seasonTitle: "Club standings",
+    seasonTitle: "Example league table",
+    sampleNotice: "Illustrative data only — not live fixtures, results or partner clubs.",
     standingsNote:
       "Standings, run rates and player records build themselves from every ball you score.",
     tablePos: "Pos",
@@ -50,10 +44,8 @@ export const en = {
     ctaTitle1: "Watch the match back,",
     ctaTitle2: "ball by ball",
     ctaBody:
-      "Every delivery links to its own synced angles — slow it down, step frames, draw on it and send voice notes to the squad before the next session.",
+      "Review recorded footage with slow motion, frame stepping and drawing tools on your device. Multi-phone capture and AI analysis are separate pilot features.",
     ctaButton: "Start scoring",
-    trustKicker: "Preview data",
-    trustTitle: "Example clubs, leagues and academies",
     tags: { league: "League", academy: "Academy", cup: "T20 Cup" },
   },
   features: [
@@ -117,7 +109,7 @@ export const en = {
   screensTab: {
     kicker: "Product tour",
     title: "Screens",
-    intro: "Dashboards, scoreboards, mobile scoring and the review room.",
+    intro: "Illustrative views of scoring, scoreboards, analysis and video review.",
     items: [
       {
         label: "Club dashboard",
@@ -146,20 +138,21 @@ export const en = {
     showing: "Showing prices for",
     detecting: "Detecting your region…",
     selectLabel: "Select your country",
-    mostPopular: "Most popular",
+    mostPopular: "For clubs",
+    pilotNotice: "Club and League plans are not yet available to purchase online. Prices and features are indicative; contact us about a pilot.",
     free: "Free",
     custom: "Custom",
     plans: [
       {
         name: "Starter",
         period: "one team",
-        blurb: "Get a side scoring properly and sharing a live scoreboard.",
+        blurb: "Score and export matches without a club subscription.",
         perks: [
           "Ball-by-ball scoring for 1 team",
-          "Live scoreboard + public match link",
+          "On-device scorecards and match exports",
           "No camera room — upgrade to add angles",
           "Basic batting & bowling stats",
-          "Light advertising on scoreboard and review pages",
+          "Downloadable JSON match backup",
         ],
         cta: "Start free",
       },
@@ -175,7 +168,7 @@ export const en = {
           "Share live scoring with opposition clubs",
           "Season-long club analytics",
         ],
-        cta: "Get started",
+        cta: "Ask about Club",
       },
       {
         name: "League",
@@ -192,28 +185,8 @@ export const en = {
         cta: "Talk to us",
       },
     ],
-    revenueKicker: "Business model",
-    revenueTitle: "How CricLume makes money",
-    revenue: [
-      {
-        title: "Subscriptions",
-        body: "Recurring club and league plans are the core of the business — billed monthly or annually per team, with two months free on annual.",
-      },
-      {
-        title: "Video & storage add-ons",
-        body: "Extra retention, 4K clips and bulk season archives are priced on top of the base tier.",
-      },
-      {
-        title: "Sponsorship & streams",
-        body: "Leagues can sell branded overlays and sponsored public match links; CricLume takes a share of the placement.",
-      },
-      {
-        title: "Services",
-        body: "Onboarding, historic data migration and bespoke reporting for larger leagues and academies.",
-      },
-    ],
     footnote:
-      "Annual billing saves two months on every paid tier. Schools and junior sections get 50% off the Club plan.",
+      "Pilot prices and features are indicative. Taxes, billing terms and educational discounts will be confirmed before subscription.",
   },
   faq: {
     kicker: "Answers",
@@ -294,37 +267,31 @@ export const de: Content = {
     faq: "FAQ",
     login: "Loslegen",
   },
-  ticker: [
-    "Live • Riverside CC 148/4 (18.2)",
-    "4+ Kamerawinkel pro Ball",
-    "Trainingsanalyse • Bild für Bild",
-    "Scoring starten — ohne Einladung",
-    "Anzeigetafeln bereit für Stream-Overlay",
-  ],
   hero: {
     l1: "Jeder Ball.",
     l2: "Jeder Winkel.",
     l3: "Jeder Vorteil.",
-    body: "CricLume macht aus einem Clubspiel eine vollständige Aufzeichnung: Scoring Ball für Ball, synchronisierte Handykameras aus jedem Winkel, Live-Anzeigetafeln und ein Analyseraum, aus dem das ganze Team lernt.",
+    body: "Erfasse Cricketspiele Ball für Ball, auch bei schwachem Empfang. Lokale Videos kannst du auf deinem Gerät prüfen; Cloud- und Mehrkamerafunktionen werden im Pilot getestet.",
     ctaPrimary: "Scoring starten",
     ctaSecondary: "Ansichten entdecken",
-    liveNow: "Jetzt live",
+    previewLabel: "Beispiel-Spielstand",
   },
   stats: [
-    { k: "4+", v: "Kamerawinkel pro Ball" },
-    { k: "<1s", v: "um einen Ball zu erfassen" },
-    { k: "100%", v: "Spielhistorie gespeichert" },
+    { k: "Ball für Ball", v: "Runs, Extras und Wickets" },
+    { k: "Auf dem Gerät", v: "Scoring ohne Empfang" },
+    { k: "Videoanalyse", v: "Bild-für-Bild-Werkzeuge" },
   ],
   home: {
     matchDayKicker: "Spieltag",
     matchDayTitle: "Für den Spieltag gebaut",
     allFeatures: "Alle Funktionen",
     fixturesKicker: "Spielplan",
-    fixturesTitle: "Kommende Spiele",
+    fixturesTitle: "Beispielspiele",
     scoring: "Scoring",
     vs: "gegen",
     seasonKicker: "Saison",
-    seasonTitle: "Tabelle",
+    seasonTitle: "Beispieltabelle",
+    sampleNotice: "Nur Beispiele — keine Live-Spiele, Ergebnisse oder bestätigten Partnervereine.",
     standingsNote:
       "Tabellen, Run Rates und Spielerstatistiken entstehen automatisch aus jedem erfassten Ball.",
     tablePos: "Pl.",
@@ -336,10 +303,8 @@ export const de: Content = {
     ctaTitle1: "Sieh das Spiel erneut,",
     ctaTitle2: "Ball für Ball",
     ctaBody:
-      "Jeder Ball ist mit seinen synchronisierten Winkeln verknüpft — verlangsamen, Bild für Bild springen, einzeichnen und Sprachnotizen ans Team schicken.",
+      "Prüfe aufgenommene Videos auf deinem Gerät mit Zeitlupe, Einzelbildern und Zeichenwerkzeugen. Mehrkamera- und KI-Funktionen werden getrennt getestet.",
     ctaButton: "Scoring starten",
-    trustKicker: "Entwickelt mit",
-    trustTitle: "Clubs, Ligen und Akademien",
     tags: { league: "Liga", academy: "Akademie", cup: "T20-Pokal" },
   },
   features: [
@@ -406,7 +371,7 @@ export const de: Content = {
   screensTab: {
     kicker: "Produkttour",
     title: "Ansichten",
-    intro: "Dashboards, Anzeigetafeln, mobiles Scoring und der Analyseraum.",
+    intro: "Beispielansichten von Scoring, Scoreboards, Analyse und Videoprüfung.",
     items: [
       {
         label: "Club-Dashboard",
@@ -436,20 +401,21 @@ export const de: Content = {
     showing: "Preise für",
     detecting: "Region wird erkannt…",
     selectLabel: "Land auswählen",
-    mostPopular: "Am beliebtesten",
+    mostPopular: "Für Vereine",
+    pilotNotice: "Club- und Liga-Abos sind noch nicht online buchbar. Preise und Leistungen sind vorläufig; frage nach dem Pilot.",
     free: "Kostenlos",
     custom: "Individuell",
     plans: [
       {
         name: "Starter",
         period: "ein Team",
-        blurb: "Bring ein Team ins richtige Scoring und teile eine Live-Anzeigetafel.",
+        blurb: "Starte mit Scoring ohne Club-Abonnement.",
         perks: [
           "Scoring Ball für Ball für 1 Team",
-          "Live-Anzeigetafel + öffentlicher Spiel-Link",
+          "Lokale Scorecards und Spielexporte",
           "Kein Kameraraum — Upgrade für Winkel",
           "Basis-Statistiken für Batting & Bowling",
-          "Leichte Werbung auf Anzeigetafel- und Analyseseiten",
+          "JSON-Sicherung des Spiels herunterladen",
         ],
         cta: "Kostenlos starten",
       },
@@ -465,7 +431,7 @@ export const de: Content = {
           "Live-Scoring mit Gegnern teilen",
           "Club-Analysen für die ganze Saison",
         ],
-        cta: "Loslegen",
+        cta: "Club anfragen",
       },
       {
         name: "Liga",
@@ -482,28 +448,8 @@ export const de: Content = {
         cta: "Kontakt aufnehmen",
       },
     ],
-    revenueKicker: "Geschäftsmodell",
-    revenueTitle: "Wie CricLume Geld verdient",
-    revenue: [
-      {
-        title: "Abonnements",
-        body: "Wiederkehrende Club- und Liga-Tarife sind der Kern des Geschäfts — monatlich oder jährlich pro Team, mit zwei Freimonaten bei Jahreszahlung.",
-      },
-      {
-        title: "Video- & Speicher-Add-ons",
-        body: "Längere Speicherung, 4K-Clips und komplette Saisonarchive werden zusätzlich berechnet.",
-      },
-      {
-        title: "Sponsoring & Streams",
-        body: "Ligen können gebrandete Overlays und gesponserte Spiel-Links verkaufen; CricLume erhält einen Anteil.",
-      },
-      {
-        title: "Services",
-        body: "Onboarding, Migration historischer Daten und individuelle Auswertungen für größere Ligen und Akademien.",
-      },
-    ],
     footnote:
-      "Jahreszahlung spart zwei Monate in jedem bezahlten Tarif. Schulen und Jugendabteilungen erhalten 50 % Rabatt auf den Club-Tarif.",
+      "Pilotpreise und Funktionen sind vorläufig. Steuern, Vertragsbedingungen und Schulrabatte werden vor Abschluss bestätigt.",
   },
   faq: {
     kicker: "Antworten",
@@ -582,37 +528,31 @@ export const nl: Content = {
     faq: "FAQ",
     login: "Aan de slag",
   },
-  ticker: [
-    "Live • Riverside CC 148/4 (18.2)",
-    "4+ camerahoeken per bal",
-    "Coachingsanalyse • beeld voor beeld",
-    "Begin met scoren — geen uitnodiging nodig",
-    "Scoreborden klaar voor stream-overlay",
-  ],
   hero: {
     l1: "Elke bal.",
     l2: "Elke hoek.",
     l3: "Elk voordeel.",
-    body: "CricLume maakt van een clubwedstrijd een volledig verslag: scoren bal voor bal, gesynchroniseerde telefooncamera's vanuit elke hoek, live scoreborden en een analysekamer waar het hele team van leert.",
+    body: "Registreer cricketwedstrijden bal voor bal, ook bij slecht bereik. Bekijk lokale video's op je apparaat; cloud- en multi-telefoonfuncties worden getest.",
     ctaPrimary: "Begin met scoren",
     ctaSecondary: "Bekijk de schermen",
-    liveNow: "Nu live",
+    previewLabel: "Voorbeeldscore",
   },
   stats: [
-    { k: "4+", v: "camerahoeken per bal" },
-    { k: "<1s", v: "om een bal vast te leggen" },
-    { k: "100%", v: "wedstrijdhistorie bewaard" },
+    { k: "Bal voor bal", v: "Runs, extra's en wickets" },
+    { k: "Op apparaat", v: "Scoren zonder bereik" },
+    { k: "Videoreview", v: "Beeld voor beeld" },
   ],
   home: {
     matchDayKicker: "Wedstrijddag",
     matchDayTitle: "Gebouwd voor de wedstrijddag",
     allFeatures: "Alle functies",
     fixturesKicker: "Programma",
-    fixturesTitle: "Komende wedstrijden",
+    fixturesTitle: "Voorbeeldwedstrijden",
     scoring: "Scoren",
     vs: "tegen",
     seasonKicker: "Seizoen",
-    seasonTitle: "Clubstand",
+    seasonTitle: "Voorbeeldstand",
+    sampleNotice: "Alleen voorbeelden — geen actuele wedstrijden, uitslagen of bevestigde partnerclubs.",
     standingsNote:
       "Standen, run rates en spelersstatistieken ontstaan automatisch uit elke bal die je scoort.",
     tablePos: "Pos",
@@ -624,10 +564,8 @@ export const nl: Content = {
     ctaTitle1: "Kijk de wedstrijd terug,",
     ctaTitle2: "bal voor bal",
     ctaBody:
-      "Elke bal is gekoppeld aan zijn eigen gesynchroniseerde hoeken — vertraag, stap door beelden, teken erop en stuur spraaknotities naar het team.",
+      "Bekijk opgenomen video met vertraging, beeld-voor-beeld en tekengereedschap. Multi-telefoonopnamen en AI-analyse zijn aparte pilotfuncties.",
     ctaButton: "Begin met scoren",
-    trustKicker: "Gebouwd met",
-    trustTitle: "Clubs, competities en academies",
     tags: { league: "Competitie", academy: "Academie", cup: "T20-beker" },
   },
   features: [
@@ -691,7 +629,7 @@ export const nl: Content = {
   screensTab: {
     kicker: "Producttour",
     title: "Schermen",
-    intro: "Dashboards, scoreborden, mobiel scoren en de analysekamer.",
+    intro: "Illustratieve schermen voor scoren, scoreborden, analyse en videoreview.",
     items: [
       {
         label: "Clubdashboard",
@@ -721,20 +659,21 @@ export const nl: Content = {
     showing: "Prijzen voor",
     detecting: "Regio detecteren…",
     selectLabel: "Kies je land",
-    mostPopular: "Meest gekozen",
+    mostPopular: "Voor clubs",
+    pilotNotice: "Club- en competitieabonnementen zijn nog niet online verkrijgbaar. Prijzen en functies zijn indicatief; neem contact op voor de pilot.",
     free: "Gratis",
     custom: "Op maat",
     plans: [
       {
         name: "Starter",
         period: "één team",
-        blurb: "Laat één team goed scoren en deel een live scorebord.",
+        blurb: "Begin met scoren zonder clubabonnement.",
         perks: [
           "Bal voor bal scoren voor 1 team",
-          "Live scorebord + openbare wedstrijdlink",
+          "Lokale scorekaarten en wedstrijdexport",
           "Geen camerakamer — upgrade voor hoeken",
           "Basisstatistieken batting & bowling",
-          "Lichte advertenties op scorebord- en analysepagina's",
+          "JSON-back-up van de wedstrijd downloaden",
         ],
         cta: "Gratis beginnen",
       },
@@ -750,7 +689,7 @@ export const nl: Content = {
           "Live scoren delen met tegenstanders",
           "Clubanalyses voor het hele seizoen",
         ],
-        cta: "Aan de slag",
+        cta: "Vraag naar Club",
       },
       {
         name: "Competitie",
@@ -767,28 +706,8 @@ export const nl: Content = {
         cta: "Neem contact op",
       },
     ],
-    revenueKicker: "Verdienmodel",
-    revenueTitle: "Hoe CricLume geld verdient",
-    revenue: [
-      {
-        title: "Abonnementen",
-        body: "Terugkerende club- en competitieabonnementen vormen de kern — maandelijks of jaarlijks per team, met twee maanden gratis bij jaarbetaling.",
-      },
-      {
-        title: "Video- & opslagextra's",
-        body: "Langere bewaring, 4K-clips en volledige seizoensarchieven worden bovenop het basistarief berekend.",
-      },
-      {
-        title: "Sponsoring & streams",
-        body: "Competities kunnen gebrande overlays en gesponsorde wedstrijdlinks verkopen; CricLume krijgt een deel.",
-      },
-      {
-        title: "Diensten",
-        body: "Onboarding, migratie van historische data en rapportage op maat voor grotere competities en academies.",
-      },
-    ],
     footnote:
-      "Jaarbetaling bespaart twee maanden op elk betaald abonnement. Scholen en jeugdafdelingen krijgen 50% korting op het Club-abonnement.",
+      "Pilotprijzen en functies zijn indicatief. Belastingen, voorwaarden en onderwijskortingen worden vooraf bevestigd.",
   },
   faq: {
     kicker: "Antwoorden",
@@ -867,37 +786,31 @@ export const af: Content = {
     faq: "Vrae",
     login: "Begin hier",
   },
-  ticker: [
-    "Regstreeks • Riverside CC 148/4 (18.2)",
-    "4+ kamerahoeke per bal",
-    "Afrigtersontleding • raampie vir raampie",
-    "Begin tel — geen uitnodiging nodig nie",
-    "Telborde gereed vir stroom-oorlegging",
-  ],
   hero: {
     l1: "Elke bal.",
     l2: "Elke hoek.",
     l3: "Elke voordeel.",
-    body: "CricLume maak van 'n klubwedstryd 'n volledige rekord: bal-vir-bal aantekening, gesinchroniseerde selfoonkameras uit elke hoek, regstreekse telborde en 'n ontledingskamer waaruit die hele span kan leer.",
+    body: "Teken krieketwedstryde bal vir bal aan, ook met swak sein. Hersien plaaslike video op jou toestel; wolk- en meervoudige foonfunksies word getoets.",
     ctaPrimary: "Begin tel",
     ctaSecondary: "Sien die skerms",
-    liveNow: "Nou regstreeks",
+    previewLabel: "Voorbeeldtelbord",
   },
   stats: [
-    { k: "4+", v: "kamerahoeke per bal" },
-    { k: "<1s", v: "om 'n bal aan te teken" },
-    { k: "100%", v: "wedstrydgeskiedenis behou" },
+    { k: "Bal vir bal", v: "Lopies, ekstras en paaltjies" },
+    { k: "Op toestel", v: "Telling sonder sein" },
+    { k: "Video-oorsig", v: "Raampie vir raampie" },
   ],
   home: {
     matchDayKicker: "Wedstryddag",
     matchDayTitle: "Gebou vir wedstryddag",
     allFeatures: "Alle kenmerke",
     fixturesKicker: "Programme",
-    fixturesTitle: "Komende wedstryde",
+    fixturesTitle: "Voorbeeldwedstryde",
     scoring: "Aantekening",
     vs: "teen",
     seasonKicker: "Seisoen",
-    seasonTitle: "Klubranglys",
+    seasonTitle: "Voorbeeldranglys",
+    sampleNotice: "Slegs voorbeelde — nie regstreekse wedstryde, uitslae of bevestigde vennootklubs nie.",
     standingsNote:
       "Ranglyste, lopietempo's en spelerrekords bou hulself uit elke bal wat jy aanteken.",
     tablePos: "Pos",
@@ -909,10 +822,8 @@ export const af: Content = {
     ctaTitle1: "Kyk die wedstryd weer,",
     ctaTitle2: "bal vir bal",
     ctaBody:
-      "Elke bal skakel na sy eie gesinchroniseerde hoeke — vertraag dit, stap deur raampies, teken daarop en stuur stemnotas aan die span.",
+      "Hersien opgeneemde video's met stadige aksie, raampie-vir-raampie en tekengereedskap. Meervoudige kameras en KI is aparte loodsfunksies.",
     ctaButton: "Begin tel",
-    trustKicker: "Gebou saam met",
-    trustTitle: "Klubs, ligas en akademies",
     tags: { league: "Liga", academy: "Akademie", cup: "T20-beker" },
   },
   features: [
@@ -979,7 +890,7 @@ export const af: Content = {
   screensTab: {
     kicker: "Produkttoer",
     title: "Skerms",
-    intro: "Paneelborde, telborde, mobiele aantekening en die ontledingskamer.",
+    intro: "Voorbeeldskerms vir telling, telborde, ontleding en videohersiening.",
     items: [
       {
         label: "Klubpaneelbord",
@@ -1009,20 +920,21 @@ export const af: Content = {
     showing: "Pryse vir",
     detecting: "Streek word bepaal…",
     selectLabel: "Kies jou land",
-    mostPopular: "Gewildste",
+    mostPopular: "Vir klubs",
+    pilotNotice: "Klub- en liga-intekeninge is nog nie aanlyn beskikbaar nie. Pryse en funksies is voorlopig; kontak ons oor die loodsprojek.",
     free: "Gratis",
     custom: "Pasgemaak",
     plans: [
       {
         name: "Starter",
         period: "een span",
-        blurb: "Kry een span behoorlik aan die aanteken met 'n regstreekse telbord.",
+        blurb: "Begin telling sonder klubintekening.",
         perks: [
           "Bal-vir-bal aantekening vir 1 span",
-          "Regstreekse telbord + openbare wedstrydskakel",
+          "Plaaslike telkaarte en uitvoer",
           "Geen kamerakamer nie — opgradeer vir hoeke",
           "Basiese kolf- en boulstatistieke",
-          "Ligte advertensies op telbord- en ontledingsbladsye",
+          "Laai 'n JSON-rugsteun af",
         ],
         cta: "Begin gratis",
       },
@@ -1038,7 +950,7 @@ export const af: Content = {
           "Deel regstreekse aantekening met teenstanders",
           "Klubontledings vir die hele seisoen",
         ],
-        cta: "Begin nou",
+        cta: "Vra oor Klub",
       },
       {
         name: "Liga",
@@ -1055,28 +967,8 @@ export const af: Content = {
         cta: "Praat met ons",
       },
     ],
-    revenueKicker: "Sakemodel",
-    revenueTitle: "Hoe CricLume geld maak",
-    revenue: [
-      {
-        title: "Intekening",
-        body: "Herhalende klub- en ligaplanne is die kern van die besigheid — maandeliks of jaarliks per span, met twee maande gratis op jaarlikse betaling.",
-      },
-      {
-        title: "Video- en bergingbyvoegings",
-        body: "Langer berging, 4K-knipsels en volledige seisoenargiewe word bo-op die basisplan gehef.",
-      },
-      {
-        title: "Borgskap en strome",
-        body: "Ligas kan gemerkte oorlegings en geborgde wedstrydskakels verkoop; CricLume kry 'n deel.",
-      },
-      {
-        title: "Dienste",
-        body: "Aanboord, migrasie van historiese data en pasgemaakte verslae vir groter ligas en akademies.",
-      },
-    ],
     footnote:
-      "Jaarlikse betaling spaar twee maande op elke betaalde plan. Skole en juniorafdelings kry 50% afslag op die Klub-plan.",
+      "Loodspryse en funksies is voorlopig. Belasting, bepalings en skoolafslag word vooraf bevestig.",
   },
   faq: {
     kicker: "Antwoorde",
@@ -1155,37 +1047,31 @@ export const fr: Content = {
     faq: "FAQ",
     login: "Commencer",
   },
-  ticker: [
-    "En direct • Riverside CC 148/4 (18.2)",
-    "4+ angles de caméra par balle",
-    "Analyse d'entraînement • image par image",
-    "Commencez le marquage — sans invitation",
-    "Tableaux de score prêts pour l'overlay de stream",
-  ],
   hero: {
     l1: "Chaque balle.",
     l2: "Chaque angle.",
     l3: "Chaque avantage.",
-    body: "CricLume transforme un match de club en archive complète : marquage balle par balle, caméras de téléphone synchronisées sous tous les angles, tableaux de score en direct et une salle d'analyse dont toute l'équipe profite.",
+    body: "Notez chaque balle, même avec une connexion limitée. Revoyez les vidéos locales sur votre appareil ; les fonctions cloud et multi-téléphones sont testées en pilote.",
     ctaPrimary: "Commencer le marquage",
     ctaSecondary: "Voir les écrans",
-    liveNow: "En direct",
+    previewLabel: "Score d'exemple",
   },
   stats: [
-    { k: "4+", v: "angles de caméra par balle" },
-    { k: "<1s", v: "pour enregistrer une balle" },
-    { k: "100%", v: "historique des matchs conservé" },
+    { k: "Balle par balle", v: "Points, extras et éliminations" },
+    { k: "Sur l'appareil", v: "Saisie sans réseau" },
+    { k: "Revue vidéo", v: "Image par image" },
   ],
   home: {
     matchDayKicker: "Jour de match",
     matchDayTitle: "Conçu pour le jour de match",
     allFeatures: "Toutes les fonctions",
     fixturesKicker: "Calendrier",
-    fixturesTitle: "Prochains matchs",
+    fixturesTitle: "Matchs d'exemple",
     scoring: "Marquage",
     vs: "contre",
     seasonKicker: "Saison",
-    seasonTitle: "Classement des clubs",
+    seasonTitle: "Classement d'exemple",
+    sampleNotice: "Données illustratives — pas de matchs, résultats ou clubs partenaires en direct.",
     standingsNote:
       "Classements, run rates et statistiques des joueurs se construisent à partir de chaque balle enregistrée.",
     tablePos: "Pos",
@@ -1197,10 +1083,8 @@ export const fr: Content = {
     ctaTitle1: "Revoyez le match,",
     ctaTitle2: "balle par balle",
     ctaBody:
-      "Chaque balle est liée à ses angles synchronisés — ralentissez, avancez image par image, dessinez dessus et envoyez des notes vocales à l'équipe.",
+      "Revoyez des vidéos sur votre appareil au ralenti, image par image et avec annotations. La capture multi-téléphones et l'IA restent des fonctions pilotes.",
     ctaButton: "Commencer le marquage",
-    trustKicker: "Construit avec",
-    trustTitle: "Clubs, ligues et académies",
     tags: { league: "Ligue", academy: "Académie", cup: "Coupe T20" },
   },
   features: [
@@ -1264,7 +1148,7 @@ export const fr: Content = {
   screensTab: {
     kicker: "Visite du produit",
     title: "Écrans",
-    intro: "Tableaux de bord, tableaux de score, marquage mobile et salle d'analyse.",
+    intro: "Vues illustratives du marquage, des scores, de l'analyse et de la revue vidéo.",
     items: [
       {
         label: "Tableau de bord du club",
@@ -1296,20 +1180,21 @@ export const fr: Content = {
     showing: "Tarifs pour",
     detecting: "Détection de votre région…",
     selectLabel: "Choisissez votre pays",
-    mostPopular: "Le plus choisi",
+    mostPopular: "Pour les clubs",
+    pilotNotice: "Les offres Club et Ligue ne sont pas encore achetables en ligne. Les prix et fonctions sont indicatifs ; contactez-nous pour le pilote.",
     free: "Gratuit",
     custom: "Sur mesure",
     plans: [
       {
         name: "Starter",
         period: "une équipe",
-        blurb: "Faites marquer correctement une équipe et partagez un tableau en direct.",
+        blurb: "Commencez le marquage sans abonnement club.",
         perks: [
           "Marquage balle par balle pour 1 équipe",
-          "Tableau de score en direct + lien public",
+          "Feuilles de score et exports locaux",
           "Pas de salle caméra — passez à l'offre supérieure",
           "Statistiques de base batting et bowling",
-          "Publicité légère sur les pages score et analyse",
+          "Télécharger la sauvegarde JSON",
         ],
         cta: "Commencer gratuitement",
       },
@@ -1325,7 +1210,7 @@ export const fr: Content = {
           "Partage du direct avec les clubs adverses",
           "Analyses du club sur toute la saison",
         ],
-        cta: "Commencer",
+        cta: "Demander Club",
       },
       {
         name: "Ligue",
@@ -1342,28 +1227,8 @@ export const fr: Content = {
         cta: "Nous contacter",
       },
     ],
-    revenueKicker: "Modèle économique",
-    revenueTitle: "Comment CricLume gagne de l'argent",
-    revenue: [
-      {
-        title: "Abonnements",
-        body: "Les abonnements récurrents des clubs et ligues sont le cœur du modèle — mensuels ou annuels par équipe, avec deux mois offerts à l'année.",
-      },
-      {
-        title: "Options vidéo et stockage",
-        body: "Conservation prolongée, clips 4K et archives de saison sont facturés en plus de la formule de base.",
-      },
-      {
-        title: "Sponsoring et diffusions",
-        body: "Les ligues peuvent vendre des overlays sponsorisés et des liens de match parrainés ; CricLume perçoit une part.",
-      },
-      {
-        title: "Services",
-        body: "Intégration, migration des données historiques et rapports sur mesure pour les grandes ligues et académies.",
-      },
-    ],
     footnote:
-      "Le paiement annuel offre deux mois sur chaque formule payante. Écoles et sections jeunes bénéficient de 50 % de remise sur la formule Club.",
+      "Les tarifs et fonctionnalités pilotes sont indicatifs. Taxes, conditions et remises scolaires seront confirmées avant inscription.",
   },
   faq: {
     kicker: "Réponses",
