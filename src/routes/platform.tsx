@@ -4,6 +4,7 @@ import {
   type OrganisationDraft,
 } from "@/lib/onboarding-request";
 import { SectionNavigation } from "@/components/SectionNavigation";
+import { fixtureCalendarIcs } from "@/lib/fixture-calendar";
 import { readSection, platformSections } from "@/lib/navigation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
@@ -938,6 +939,35 @@ function MatchCard({
   );
 }
 
+function downloadFixtureCalendar(data: PlatformDashboardData, competition: CompetitionRecord) {
+  const fixtures = data.fixtures
+    .filter((fixture) => fixture.competitionId === competition.id)
+    .map((fixture) => ({
+      id: fixture.id,
+      startsAt: fixture.startsAt,
+      homeTeam: teamName(data, fixture.homeTeamId),
+      awayTeam: teamName(data, fixture.awayTeamId),
+      ground: fixture.groundId ? groundName(data, fixture.groundId) : null,
+      round: fixture.roundName,
+      status: fixture.status,
+    }));
+  const calendar = fixtureCalendarIcs({
+    competitionId: competition.id,
+    competitionName: competition.name,
+    seasonName: competition.seasonName,
+    fixtures,
+  });
+  if (!calendar.included) return;
+  const url = URL.createObjectURL(
+    new Blob([calendar.contents], { type: "text/calendar;charset=utf-8" }),
+  );
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `criclume-${competition.id.slice(0, 8)}-fixtures.ics`;
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function Competitions({
   data,
   role,
@@ -962,6 +992,10 @@ function Competitions({
           />
         ) : (
           <div className="space-y-5">
+            <p className="text-xs text-slate-400">
+              Calendar exports include only fixtures with confirmed absolute start timestamps. No
+              match duration or unscheduled venue is invented.
+            </p>
             {data.competitions.map((competition) => (
               <div key={competition.id}>
                 <div className="flex flex-wrap items-end justify-between gap-2">
@@ -972,13 +1006,30 @@ function Competitions({
                       {competition.activeRuleVersion}
                     </p>
                   </div>
-                  <span className="text-xs text-amber-200">
-                    {
-                      data.fixtures.filter((fixture) => fixture.competitionId === competition.id)
-                        .length
-                    }{" "}
-                    fixtures
-                  </span>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="text-xs text-amber-200">
+                      {
+                        data.fixtures.filter((fixture) => fixture.competitionId === competition.id)
+                          .length
+                      }{" "}
+                      fixtures
+                    </span>
+                    <button
+                      type="button"
+                      className="workspace-nav-item"
+                      disabled={
+                        !data.fixtures.some(
+                          (fixture) =>
+                            fixture.competitionId === competition.id && Boolean(fixture.startsAt),
+                        )
+                      }
+                      onClick={() => downloadFixtureCalendar(data, competition)}
+                      aria-label={`Download ${competition.name} fixtures as an iCalendar file`}
+                    >
+                      <CalendarDays className="size-4" aria-hidden="true" />
+                      Download .ics
+                    </button>
+                  </div>
                 </div>
                 <div className="mt-3 grid gap-2 lg:grid-cols-2">
                   {data.fixtures
