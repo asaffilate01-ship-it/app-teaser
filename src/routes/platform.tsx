@@ -993,8 +993,8 @@ function Competitions({
         ) : (
           <div className="space-y-5">
             <p className="text-xs text-slate-400">
-              Calendar exports include only fixtures with confirmed absolute start timestamps.
-              No match duration or unscheduled venue is invented.
+              Calendar exports include only fixtures with confirmed absolute start timestamps. No
+              match duration or unscheduled venue is invented.
             </p>
             {data.competitions.map((competition) => (
               <div key={competition.id}>
