@@ -600,7 +600,9 @@ function MatchAnalysis({
                   setPage(Math.floor(index / 30));
                   window.requestAnimationFrame(() => {
                     deliveryTable.current?.scrollIntoView({ block: "start" });
-                    document.getElementById(`delivery-${item.deliveryId}`)?.focus({ preventScroll: true });
+                    document
+                      .getElementById(`delivery-${item.deliveryId}`)
+                      ?.focus({ preventScroll: true });
                   });
                 }}
               >
