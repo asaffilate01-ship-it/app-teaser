@@ -27,16 +27,12 @@ test("coaching review counts only current delivered evidence and unique annotate
   const a = ball("a1");
   const b = ball("b2");
   const old = ball("c3", "a1");
-  const summary = summarizeCoachingEvidence(
-    [a, b, old],
-    new Set(["a1", "c3", "ghost"]),
-    [
-      { delivery_id: "a1", evidence_file_id: "file", evidence_time_seconds: 0 },
-      { delivery_id: "a1", evidence_file_id: null, evidence_time_seconds: null },
-      { delivery_id: "c3", evidence_file_id: "old-file", evidence_time_seconds: 3 },
-      { delivery_id: null, evidence_file_id: null, evidence_time_seconds: null },
-    ],
-  );
+  const summary = summarizeCoachingEvidence([a, b, old], new Set(["a1", "c3", "ghost"]), [
+    { delivery_id: "a1", evidence_file_id: "file", evidence_time_seconds: 0 },
+    { delivery_id: "a1", evidence_file_id: null, evidence_time_seconds: null },
+    { delivery_id: "c3", evidence_file_id: "old-file", evidence_time_seconds: 3 },
+    { delivery_id: null, evidence_file_id: null, evidence_time_seconds: null },
+  ]);
   assert.deepEqual(summary, {
     currentDeliveries: 2,
     clipLinkedDeliveries: 1,
