@@ -36,20 +36,24 @@ jobs:
             echo "::error::Set SUPABASE_ACCESS_TOKEN, SUPABASE_DB_PASSWORD and SUPABASE_PROJECT_REF in the production environment."
             exit 1
           fi
+          if [ "$SUPABASE_PROJECT_REF" != "eivwnjbykohrlxavvpcr" ]; then
+            echo "::error::Refusing deployment: configured project does not match CricLume."
+            exit 1
+          fi
 
       - name: Set up Supabase CLI
-        uses: supabase/setup-cli@v1
+        uses: supabase/setup-cli@v3
         with:
-          version: latest
+          version: 3.2.0
 
       - name: Link production project
         run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: Preview pending migrations
-        run: supabase db push --dry-run --include-all
+        run: supabase db push --dry-run --include-all --remote
 
       - name: Apply database migrations
-        run: supabase db push --include-all
+        run: supabase db push --include-all --remote --yes
 
       - name: Deploy Edge Functions
-        run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF"
+        run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF" --yes
