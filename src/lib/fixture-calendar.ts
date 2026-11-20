@@ -20,10 +20,7 @@ function plain(value: string): string {
 }
 
 function escapeCalendarText(value: string): string {
-  return plain(value)
-    .replaceAll("\\", "\\\\")
-    .replaceAll(";", "\\;")
-    .replaceAll(",", "\\,");
+  return plain(value).replaceAll("\\", "\\\\").replaceAll(";", "\\;").replaceAll(",", "\\,");
 }
 
 function foldLine(line: string): string {
@@ -43,12 +40,18 @@ function foldLine(line: string): string {
 }
 
 function startUtc(value: string | null): string | null {
-  if (!value || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/i.test(value)) {
+  if (
+    !value ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/i.test(value)
+  ) {
     return null;
   }
   const date = new Date(value);
   if (!Number.isFinite(date.valueOf())) return null;
-  return date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  return date
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
 }
 
 /**
