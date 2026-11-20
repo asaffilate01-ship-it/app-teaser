@@ -1,7 +1,14 @@
 import type { CricketPreview } from "./cricket-insights";
 
 const singleLine = (value: string) =>
-  value.replace(/[\r\n\u0000-\u001f\u007f]+/g, " ").trim().slice(0, 300);
+  Array.from(value)
+    .map((character) => {
+      const code = character.charCodeAt(0);
+      return code < 32 || code === 127 ? " " : character;
+    })
+    .join("")
+    .trim()
+    .slice(0, 300);
 
 /**
  * Export the free deterministic coach briefing only.
