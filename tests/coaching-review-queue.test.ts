@@ -35,7 +35,10 @@ test("review queue prioritises unreviewed wickets then boundaries without invent
     new Set(["boundary"]),
     [],
   );
-  assert.deepEqual(items.map((i) => i.deliveryId), ["wicket", "boundary", "six"]);
+  assert.deepEqual(
+    items.map((i) => i.deliveryId),
+    ["wicket", "boundary", "six"],
+  );
   assert.equal(items[0]?.hasClip, false);
   assert.equal(items[1]?.hasClip, true);
   assert.equal(items[0]?.ball, "1.3");
