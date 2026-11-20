@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { LoaderCircle, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
 import { buildCricketPreview } from "@/lib/cricket-insights";
+import { assessCricketAIRequest } from "@/lib/ai-readiness";
+import { coachBriefingMarkdown } from "@/lib/coach-briefing";
 import type { MatchRecord } from "@/lib/platform-cloud";
 import {
   intelligenceTaskOptions,
@@ -76,9 +78,24 @@ function ScopedIntelligencePanel({
   const [connection, setConnection] = useState<IntelligenceConnection | null>(null);
   const [checking, setChecking] = useState(false);
   const mayRequest = allowedRoles.has(role);
-  const canStartPaid = connection?.modelExecutionReady === true;
   const selectedMatch = matches.find((item) => item.id === matchId);
   const preview = selectedMatch ? buildCricketPreview(selectedMatch, task) : null;
+  const readiness = assessCricketAIRequest({
+    role,
+    hasMatch: Boolean(selectedMatch),
+    connection,
+  });
+  const canStartPaid = readiness.ready;
+  const downloadBriefing = () => {
+    if (!preview) return;
+    const content = coachBriefingMarkdown(preview);
+    const url = URL.createObjectURL(new Blob([content], { type: "text/markdown;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "criclume-coach-briefing.md";
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   useEffect(() => {
     let active = true;
@@ -243,6 +260,9 @@ function ScopedIntelligencePanel({
               <p className="text-xs text-slate-400">
                 {preview.limitations.join(" ")} Last match update: {preview.sourceUpdatedAt}.
               </p>
+              <button type="button" className="workspace-nav-item" onClick={downloadBriefing}>
+                Download source-labelled coach briefing
+              </button>
             </div>
           )}
           <div className="grid gap-5 lg:grid-cols-2">
@@ -281,6 +301,16 @@ function ScopedIntelligencePanel({
                   </option>
                 ))}
               </select>
+              <ul className="space-y-1 text-xs text-slate-300" aria-label="AI readiness checks">
+                {readiness.checks.map((check) => (
+                  <li key={check.label} className="flex items-center gap-2">
+                    <span className={check.passed ? "text-emerald-300" : "text-amber-200"}>
+                      {check.passed ? "Verified" : "Pending"}
+                    </span>
+                    <span>{check.label}</span>
+                  </li>
+                ))}
+              </ul>
               <button
                 type="button"
                 disabled={checking || !matchId}
