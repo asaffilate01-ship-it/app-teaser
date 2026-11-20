@@ -23,10 +23,7 @@ function makePlayer(id: string, isJunior: boolean): PlayerRecord {
     consent: null,
   };
 }
-type Inputs = Pick<
-  PlatformDashboardData,
-  "teams" | "players" | "members" | "fixtures" | "matches"
->;
+type Inputs = Pick<PlatformDashboardData, "teams" | "players" | "members" | "fixtures" | "matches">;
 function fixture(): Inputs {
   const matchFixture = (id: string, startsAt: string, status: string) => ({
     id,
