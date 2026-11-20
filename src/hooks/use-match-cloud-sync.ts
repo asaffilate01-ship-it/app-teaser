@@ -18,7 +18,7 @@ import {
   type PendingMatchEvent,
 } from "@/lib/cloud";
 
-type SyncStatus = "local" | "connecting" | "synced" | "queued" | "error";
+type SyncStatus = "local" | "connecting" | "synced" | "queued" | "conflict" | "error";
 
 function getDeviceId(): string {
   const key = "criclume:scoring-device-id";
@@ -95,7 +95,7 @@ function publicLiveState(match: CricketMatch): Record<string, unknown> {
 
 export function useMatchCloudSync(
   cloudMatchId: string | null,
-  onRemoteMatch: (match: CricketMatch) => void,
+  onRemoteMatch: (match: CricketMatch) => boolean | void,
 ) {
   const enabled = Boolean(cloudMatchId && isCloudConfigured());
   const deviceId = useMemo(() => (typeof window === "undefined" ? "server" : getDeviceId()), []);
@@ -123,7 +123,12 @@ export function useMatchCloudSync(
         const hasPending = readPendingEvents(cloudMatchId).length > 0;
         if (event.deviceId !== deviceId && !hasPending) {
           const snapshot = event.payload["matchSnapshot"];
-          if (snapshot && typeof snapshot === "object") onRemoteMatch(snapshot as CricketMatch);
+          if (snapshot && typeof snapshot === "object") {
+            if (onRemoteMatch(snapshot as CricketMatch) === false) {
+              setStatus("conflict");
+              return;
+            }
+          }
         }
         // Never overwrite unflushed local scoring with another device's snapshot.
         setStatus(hasPending ? "queued" : "synced");
