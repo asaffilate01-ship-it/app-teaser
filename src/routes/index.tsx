@@ -255,13 +255,9 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
               {t.screensTab.items[1]!.label}
             </span>
           </div>
-          <img
-            src={shotScoreboard}
-            alt={t.screensTab.items[1]!.caption}
-            width={1600}
-            height={1008}
-            className="w-full"
-          />
+          <div className="p-2 sm:p-3">
+            <MarketingScreenPreview kind="scoreboard" />
+          </div>
         </section>
       </div>
 
