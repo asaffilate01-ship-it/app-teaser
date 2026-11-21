@@ -19,8 +19,8 @@ jobs:
       - name: Install pinned LiveKit browser client and format changed sources
         run: |
           bun install --frozen-lockfile
-          if ! grep -q '"livekit-client": "2.25.0"' package.json; then
-            bun add --exact livekit-client@2.25.0
+          if ! grep -q '"livekit-client": "2.23.0"' package.json; then
+            bun add --exact livekit-client@2.23.0
           fi
           bunx prettier --write \
             src/lib/camera-cloud.ts \
