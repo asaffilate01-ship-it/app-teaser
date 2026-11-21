@@ -4,7 +4,7 @@ import {
   type OrganisationDraft,
 } from "@/lib/onboarding-request";
 import { SectionNavigation } from "@/components/SectionNavigation";
-import { validateCloudMatchSetup } from "@/lib/match-setup";
+import { readLimitedOvers, validateCloudMatchSetup } from "@/lib/match-setup";
 import { fixtureCalendarIcs } from "@/lib/fixture-calendar";
 import { readSection, platformSections } from "@/lib/navigation";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -1103,22 +1103,40 @@ function CompetitionForm({ data, run }: { data: PlatformDashboardData; run: RunA
   const [format, setFormat] = useState("league");
   const [overs, setOvers] = useState("20");
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (busy) return;
+    setError(null);
+    const oversPerInnings = readLimitedOvers(overs);
+    if (name.trim().length < 2 || name.trim().length > 120) {
+      setError("Enter a competition name between 2 and 120 characters.");
+      return;
+    }
+    if (season.trim().length < 2 || season.trim().length > 120) {
+      setError("Enter a season name between 2 and 120 characters.");
+      return;
+    }
+    if (oversPerInnings === null) {
+      setError("Enter a whole number of overs between 1 and 100.");
+      return;
+    }
     setBusy(true);
     try {
       await run(() =>
         createCompetition({
           organisationId: data.organisationId,
-          name,
+          name: name.trim(),
           format,
-          seasonName: season,
-          oversPerInnings: Number(overs),
+          seasonName: season.trim(),
+          oversPerInnings,
           inningsPerSide: 1,
           ballsPerOver: 6,
         }),
       );
       setName("");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not create this competition.");
     } finally {
       setBusy(false);
     }
@@ -1163,11 +1181,18 @@ function CompetitionForm({ data, run }: { data: PlatformDashboardData; run: RunA
             required
             type="number"
             min="1"
+            max="100"
+            step="1"
             value={overs}
             onChange={(event) => setOvers(event.target.value)}
             className="scorer-input"
           />
         </Field>
+        {error && (
+          <p role="alert" className="text-sm text-rose-200 md:col-span-4">
+            {error}
+          </p>
+        )}
         <button disabled={busy} className="action-primary md:col-span-4 md:justify-self-end">
           {busy && <LoaderCircle className="size-4 animate-spin" />} Create competition
         </button>
@@ -1185,9 +1210,32 @@ function FixtureForm({ data, run }: { data: PlatformDashboardData; run: RunActio
   const [round, setRound] = useState("");
   const [busy, setBusy] = useState(false);
   const competition = data.competitions.find((item) => item.id === competitionId);
+  const [error, setError] = useState<string | null>(null);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!competition) return;
+    if (busy) return;
+    setError(null);
+    if (!competition || !competition.ruleVersionId) {
+      setError("Choose a competition with an active rule version.");
+      return;
+    }
+    if (home === away || !data.teams.some((team) => team.id === home) ||
+        !data.teams.some((team) => team.id === away)) {
+      setError("Choose two different registered teams.");
+      return;
+    }
+    if (ground && !data.grounds.some((item) => item.id === ground)) {
+      setError("Select a registered ground or leave it blank.");
+      return;
+    }
+    if (startsAt && !Number.isFinite(new Date(startsAt).getTime())) {
+      setError("Enter a valid start date and time.");
+      return;
+    }
+    if (round.trim().length > 120) {
+      setError("Keep the round name under 120 characters.");
+      return;
+    }
     setBusy(true);
     try {
       await run(() =>
@@ -1197,10 +1245,13 @@ function FixtureForm({ data, run }: { data: PlatformDashboardData; run: RunActio
           awayTeamId: away,
           groundId: ground,
           startsAt,
-          roundName: round,
+          roundName: round.trim(),
         }),
       );
       setRound("");
+      setStartsAt("");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not schedule this fixture.");
     } finally {
       setBusy(false);
     }
@@ -1251,6 +1302,9 @@ function FixtureForm({ data, run }: { data: PlatformDashboardData; run: RunActio
               onChange={(event) => setStartsAt(event.target.value)}
               className="scorer-input"
             />
+            <span className="text-xs text-slate-400">
+              Time is entered in your device’s local time zone. Confirm venue time before saving.
+            </span>
           </Field>
           <Field label="Round">
             <input
@@ -1260,6 +1314,11 @@ function FixtureForm({ data, run }: { data: PlatformDashboardData; run: RunActio
               placeholder="Round 1"
             />
           </Field>
+          {error && (
+            <p role="alert" className="text-sm text-rose-200 md:col-span-3">
+              {error}
+            </p>
+          )}
           <button
             disabled={busy || home === away}
             className="action-primary md:col-span-3 md:justify-self-end"
