@@ -233,14 +233,15 @@ Deno.serve(async (request) => {
           const head = await s3.send(new HeadObjectCommand({ Bucket: bucket, Key: sourcePath }));
           if (
             head.ContentLength !== recording.archive_object_bytes ||
-            (recording.archive_object_etag && head.ETag !== recording.archive_object_etag)
+            !recording.archive_object_etag ||
+            head.ETag !== recording.archive_object_etag
           )
             throw new ImportFailure("source_changed");
           const object = await s3.send(
             new GetObjectCommand({
               Bucket: bucket,
               Key: sourcePath,
-              ...(head.ETag ? { IfMatch: head.ETag } : {}),
+              IfMatch: recording.archive_object_etag,
             }),
           );
           bytes = object.Body ? await object.Body.transformToByteArray() : new Uint8Array(0);
