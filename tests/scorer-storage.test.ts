@@ -6,6 +6,7 @@ import {
   parseScorerBackup,
   copyBackupMatches,
   maxBackupBytes,
+  readScorerSnapshot,
 } from "../src/lib/scorer-storage.ts";
 function fixture() {
   return createMatch({
@@ -130,4 +131,46 @@ test("device write failures preserve the expected baseline for retry", async () 
   assert.equal(value, null);
   fail = false;
   assert.deepEqual(commitScorerSnapshot(storage, null, "saved"), { saved: true });
+});
+
+test("cloud event snapshots are validated before replacing local scores", () => {
+  const original = fixture();
+  const future = { ...original, futureMetadata: { matchRevision: 12 } };
+  assert.deepEqual(readScorerSnapshot(future, original.id), future);
+
+  for (const value of [
+    null,
+    [],
+    {},
+    { ...original, id: "another-match" },
+    { ...original, teams: [] },
+    { ...original, innings: [] },
+    { ...original, status: "invalid" },
+    { ...original, settings: { ...original.settings, ballsPerOver: 0 } },
+    { ...original, innings: [{ ...original.innings[0], battingTeamId: "unknown-team" }] },
+  ]) {
+    assert.equal(readScorerSnapshot(value, original.id), null);
+  }
+});
+
+test("malformed cloud delivery events fail closed without destroying the original match", () => {
+  const original = fixture();
+  const originalJson = JSON.stringify(original);
+  const malformed = {
+    ...original,
+    innings: [
+      {
+        ...original.innings[0]!,
+        deliveries: [
+          {
+            id: "delivery",
+            legal: true,
+            batterRuns: -1,
+          },
+        ],
+      },
+    ],
+  };
+  assert.equal(readScorerSnapshot(malformed, original.id), null);
+  assert.equal(JSON.stringify(original), originalJson);
 });
