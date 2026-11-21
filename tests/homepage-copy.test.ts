@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { languages } from "../src/lib/content.ts";
 
 const internalMoneyQuestions = [
@@ -24,7 +25,11 @@ test("public homepage translations exclude internal commercial strategy and fabr
       publicText,
       /Live • Riverside CC|Regstreeks • Riverside CC|En direct • Riverside CC/,
     );
-    assert.ok(copy.home.sampleNotice.length > 24, `${language}: examples must be labelled`);
+    assert.ok(copy.home.workflowKicker.length > 5, `${language}: workflow heading is required`);
+    assert.equal(copy.home.workflowSteps.length, 3, `${language}: explain three core workflows`);
+    for (const step of copy.home.workflowSteps) {
+      assert.ok(step.title.length > 3 && step.body.length > 30, `${language}: avoid empty workflow cards`);
+    }
     assert.ok(copy.hero.previewLabel.length > 5, `${language}: screenshot needs preview label`);
     assert.ok(
       copy.pricing.pilotNotice.length > 40,
@@ -61,4 +66,11 @@ test("free scoring and paid Club enquiries are distinct public journeys", () => 
     assert.ok(hasMatchExport, `${language}: free plan needs the match export perk`);
     assert.ok(copy.pricing.plans[1]!.cta.length > 3);
   }
+});
+
+test("homepage does not advertise stale fictional fixtures or invented results", () => {
+  const route = readFileSync("src/routes/index.tsx", "utf8");
+  assert.doesNotMatch(route, /const fixtures\s*=|const leaderboard\s*=|Sat 12 Sep|Riverside CC 148\/4/);
+  assert.match(route, /t\.home\.workflowSteps\.map/);
+  assert.match(route, /t\.hero\.previewLabel/);
 });
