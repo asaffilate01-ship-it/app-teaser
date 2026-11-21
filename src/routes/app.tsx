@@ -71,7 +71,12 @@ import {
   type RecordDeliveryInput,
   type ShotOutcome,
 } from "@/lib/cricket";
-import { loadCloudMatchSnapshot, readPendingEvents, startCloudInnings } from "@/lib/cloud";
+import {
+  loadCloudMatchSnapshot,
+  readPendingEvents,
+  readRawPendingEventQueue,
+  startCloudInnings,
+} from "@/lib/cloud";
 import { reviewCloudBootstrap, reviewRemoteScorerSnapshot } from "@/lib/scorer-reconciliation";
 import { describeScorerSyncRecovery } from "@/lib/scorer-sync-status";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
@@ -893,6 +898,27 @@ function LiveMatch({
     URL.revokeObjectURL(url);
   };
 
+  const exportPreservedQueue = () => {
+    if (!cloudMatchId) return;
+    try {
+      const raw = readRawPendingEventQueue(cloudMatchId);
+      if (raw === null) {
+        setCloudActionError("This device has no saved offline events for this match.");
+        return;
+      }
+      const url = URL.createObjectURL(new Blob([raw], { type: "text/plain;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `criclume-offline-queue-${cloudMatchId.slice(0, 8).replace(/[^a-zA-Z0-9-]/g, "")}.txt`;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      setCloudActionError(
+        "This browser could not read the saved offline events. Keep this device data for recovery.",
+      );
+    }
+  };
+
   const replaceLocalWithCloud = async () => {
     if (!cloudMatchId || !backupRequested || reconciling) return;
     let pendingEvents = 0;
@@ -1047,6 +1073,11 @@ function LiveMatch({
               <button type="button" className="workspace-nav-item min-h-11" onClick={exportMatch}>
                 Export device backup
               </button>
+              {cloudSync.queueUnreadable && (
+                <button type="button" className="workspace-nav-item min-h-11" onClick={exportPreservedQueue}>
+                  Export preserved queue
+                </button>
+              )}
             </div>
           </section>
         )}
@@ -1083,6 +1114,11 @@ function LiveMatch({
               >
                 {reconciling ? "Loading cloud score…" : "Replace with reviewed cloud copy"}
               </button>
+              {cloudMatchId && (
+                <button type="button" className="workspace-nav-item" onClick={exportPreservedQueue}>
+                  Export offline queue
+                </button>
+              )}
             </div>
             <p className="text-xs text-slate-300">
               A requested download does not prove a backup was saved. Check the file before choosing
