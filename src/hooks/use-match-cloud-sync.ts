@@ -260,7 +260,10 @@ export function useMatchCloudSync(
     [cloudMatchId, deviceId, enabled, pausedForReview],
   );
 
-  const visibleStatus =
-    pausedForReview ? "conflict" : status === "synced" && pendingCount > 0 ? "queued" : status;
+  const visibleStatus = pausedForReview
+    ? "conflict"
+    : status === "synced" && pendingCount > 0
+      ? "queued"
+      : status;
   return { enabled, status: visibleStatus, lastSequence, pendingCount, publish, retry };
 }
