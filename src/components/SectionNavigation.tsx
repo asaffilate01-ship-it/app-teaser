@@ -19,12 +19,14 @@ export function SectionNavigation<T extends string>({
   onChange,
   items,
   mobilePrimary,
+  desktopGroups,
 }: {
   label: string;
   value: T;
   onChange: (value: T) => void;
   items: Array<readonly [T, LucideIcon, string]>;
   mobilePrimary?: readonly T[];
+  desktopGroups?: readonly { label: string; keys: readonly T[] }[];
 }) {
   const primary = items.filter(([id]) =>
     mobilePrimary ? mobilePrimary.includes(id) : items.slice(0, 4).some(([key]) => key === id),
@@ -33,24 +35,37 @@ export function SectionNavigation<T extends string>({
   const currentLabel = items.find(([id]) => id === value)?.[2] ?? label;
   const moreSelected = secondary.some(([id]) => id === value);
 
+  const groups = desktopGroups ?? [{ label: "Workspace", keys: items.map(([id]) => id) }];
   return (
-    <div className="workspace-nav">
+    <div className="workspace-nav lg:m-0 lg:rounded-2xl lg:p-3">
       <div className="flex items-center justify-between gap-3 lg:hidden">
         <p className="min-w-0 text-sm font-bold text-slate-100">{currentLabel}</p>
         <span className="shrink-0 text-xs text-slate-400">Navigate below</span>
       </div>
-      <nav aria-label={label} className="hidden flex-wrap gap-2 lg:flex">
-        {items.map(([key, Icon, text]) => (
-          <button
-            key={key}
-            type="button"
-            aria-current={value === key ? "page" : undefined}
-            className="workspace-nav-item"
-            onClick={() => onChange(key)}
-          >
-            <Icon className="size-4" aria-hidden="true" />
-            {text}
-          </button>
+      <nav aria-label={label} className="hidden lg:block">
+        <p className="mb-4 border-b border-white/10 px-3 pb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-200">
+          CricLume workspace
+        </p>
+        {groups.map((group) => (
+          <div key={group.label} className="mb-4 space-y-1 last:mb-0">
+            <h2 className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.17em] text-slate-500">
+              {group.label}
+            </h2>
+            {items
+              .filter(([key]) => group.keys.includes(key))
+              .map(([key, Icon, text]) => (
+                <button
+                  key={key}
+                  type="button"
+                  aria-current={value === key ? "page" : undefined}
+                  className="workspace-nav-item w-full justify-start text-left"
+                  onClick={() => onChange(key)}
+                >
+                  <Icon className="size-4 shrink-0" aria-hidden="true" />
+                  <span className="min-w-0 truncate">{text}</span>
+                </button>
+              ))}
+          </div>
         ))}
       </nav>
       <nav
