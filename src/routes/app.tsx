@@ -847,6 +847,11 @@ function LiveMatch({
   const battingTeam = findTeam(match, innings.battingTeamId);
   const bowlingTeam = findTeam(match, innings.bowlingTeamId);
   const target = targetForCurrentInnings(match);
+  const activeBatters = battingCard(match, innings);
+  const activeBowlers = bowlingCard(match, innings);
+  const striker = activeBatters.find((batter) => batter.playerId === innings.strikerId);
+  const nonStriker = activeBatters.find((batter) => batter.playerId === innings.nonStrikerId);
+  const currentBowler = activeBowlers.find((bowler) => bowler.playerId === innings.bowlerId);
 
   const exportMatch = () => {
     const blob = new Blob([JSON.stringify(match, null, 2)], { type: "application/json" });
@@ -933,6 +938,42 @@ function LiveMatch({
               {target ? ` • Target ${target}` : ""}
             </p>
           </div>
+        </div>
+      </section>
+
+      <section
+        aria-label="Current batting and bowling"
+        className="grid gap-3 border-b border-white/10 bg-[#19131d] px-4 py-3 sm:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:mt-3 md:rounded-2xl md:border md:p-4"
+      >
+        <div className="min-w-0 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+          <h2 className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-200">
+            At the crease
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {[striker, nonStriker].map((batter, index) => (
+              <div key={index} className="min-w-0">
+                <p className="truncate text-xs font-bold text-slate-100">
+                  {batter?.name ?? "Batter not selected"} {index === 0 ? "*" : ""}
+                </p>
+                <p className="mt-1 font-display text-xl font-bold tabular-nums text-amber-100">
+                  {batter ? `${batter.runs} (${batter.balls})` : "—"}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="min-w-0 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+          <h2 className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-200">
+            Current bowler
+          </h2>
+          <p className="truncate text-xs font-bold text-slate-100">
+            {currentBowler?.name ?? "Bowler not selected"}
+          </p>
+          <p className="mt-1 font-display text-xl font-bold tabular-nums text-amber-100">
+            {currentBowler
+              ? `${currentBowler.overs} - ${currentBowler.runs} - ${currentBowler.wickets}`
+              : "—"}
+          </p>
         </div>
       </section>
 
@@ -1297,7 +1338,7 @@ function ScoringPad({
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
+        <div className="grid grid-cols-4 gap-2 min-[390px]:grid-cols-7">
           {[0, 1, 2, 3, 4, 5, 6].map((runs) => (
             <button
               key={runs}
