@@ -16,6 +16,10 @@ export interface CameraCloudRecording {
   archive_check_attempts: number;
   archive_object_bytes: number | null;
   archive_checked_at: string | null;
+  camera_cloud_import_jobs?:
+    | Array<{ state: string; failure_code: string | null }>
+    | { state: string; failure_code: string | null }
+    | null;
   created_at: string;
   updated_at: string;
   ended_at: string | null;

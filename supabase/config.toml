@@ -87,3 +87,11 @@ verify_jwt = false
 # Separate scheduled object check, authenticated with CRON_SECRET; never a public URL.
 [functions.camera-cloud-archive]
 verify_jwt = false
+
+# Club owner or safeguarding officer must approve a private import using JWT.
+[functions.camera-cloud-import-request]
+verify_jwt = true
+
+# Internal S3-to-private-Storage copy; secret-authenticated and disabled by default.
+[functions.camera-cloud-import-worker]
+verify_jwt = false
