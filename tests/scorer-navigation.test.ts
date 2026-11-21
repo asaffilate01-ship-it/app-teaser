@@ -1,9 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  defaultScorerDestination,
-  scorerDestinations,
-} from "../src/lib/scorer-navigation.ts";
+import { defaultScorerDestination, scorerDestinations } from "../src/lib/scorer-navigation.ts";
 
 test("scorer navigation includes all match sections in a fixed mobile-friendly order", () => {
   assert.equal(defaultScorerDestination, "score");
