@@ -159,6 +159,6 @@ test("CSV contains team statistics but neutralises spreadsheet formulas", () => 
   }).rows;
   const csv = leagueStandingsCsv(rows, new Map(teams.map((team) => [team.id, team.name])));
   assert.match(csv, /"'=HYPERLINK/);
-  assert.match(csv, /"Net/);
+  assert.match(csv, /"NRR"/);
   assert.doesNotMatch(csv, /approved-admin|signedOffBy|playerId/);
 });
