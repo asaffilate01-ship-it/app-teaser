@@ -1,0 +1,35 @@
+name: Prepare CricLume long media worker (temporary)
+on:
+  push:
+    branches:
+      - feat/criclume-large-media-stream-transfer-20261121
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+      - name: Generate worker lockfile and format changed source
+        run: |
+          npm install --prefix workers/camera-long-transfer --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm ci --prefix workers/camera-long-transfer --omit=dev --ignore-scripts
+          node --check workers/camera-long-transfer/index.mjs
+          node workers/camera-long-transfer/index.mjs
+          bun install --frozen-lockfile
+          bunx prettier --write src/lib/camera-long-transfer-policy.ts tests/camera-long-transfer-policy.test.ts src/components/CameraImportApproval.tsx workers/camera-long-transfer/index.mjs
+      - name: Commit lockfile and formatter output
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add workers/camera-long-transfer/package-lock.json src/lib/camera-long-transfer-policy.ts tests/camera-long-transfer-policy.test.ts src/components/CameraImportApproval.tsx workers/camera-long-transfer/index.mjs
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(camera): lock isolated S3 worker dependencies and format source'
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
