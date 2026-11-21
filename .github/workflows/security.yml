@@ -33,7 +33,13 @@ jobs:
         run: bun audit --production
 
   database-lint:
+    # Multiple CricLume PRs can start the fixed-port local Supabase stack at once.
+    # Serialise this one host-port-sensitive check; leave CodeQL/audit parallel.
+    concurrency:
+      group: criclume-local-database-lint
+      cancel-in-progress: false
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v3
