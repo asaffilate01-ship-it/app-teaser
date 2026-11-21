@@ -85,29 +85,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CricLume — See every ball. Shape every game." },
+      { title: "CricLume | Cricket Scoring & Club Tools" },
       {
         name: "description",
         content:
-          "Ball-by-ball cricket scoring, multi-angle camera rooms, live scoreboards and coaching review.",
+          "Ball-by-ball cricket scoring, match scorecards, coaching video review, fixtures and cricket club management.",
       },
       { name: "author", content: "CricLume" },
-      { property: "og:title", content: "CricLume — See every ball. Shape every game." },
-      {
-        property: "og:description",
-        content:
-          "Ball-by-ball cricket scoring, multi-angle camera rooms, live scoreboards and coaching review for clubs and academies.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@criclume" },
+      { name: "theme-color", content: "#17111f" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "icon", href: "/favicon.png", type: "image/png", sizes: "64x64" },
+      { rel: "icon", href: "/icon.svg", type: "image/svg+xml" },
+      { rel: "apple-touch-icon", href: "/icon-192.png", sizes: "192x192" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
