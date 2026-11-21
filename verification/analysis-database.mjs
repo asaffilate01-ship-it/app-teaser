@@ -370,6 +370,37 @@ assert.equal(
   ).rows.length,
   0,
 );
+// Review approval is a server-only write; juniors require a separate guardian
+// attestation, and a provider-complete S3 object is not automatically imported.
+const importAssetId = "ba000000-0000-4000-8000-000000000001";
+const addImport = (guardian = true) =>
+  db.query(
+    "insert into public.camera_cloud_import_jobs(recording_id,asset_id,organisation_id,room_id,device_id,approved_by,recording_permission_attested,includes_junior,guardian_permission_attested,retention_expires_at) values($1,$2,$3,$4,$5,$6,true,true,$7,now()+interval '30 days')",
+    [cloudJob, importAssetId, org, room, device, a, guardian],
+  );
+await assert.rejects(() => addImport(false), (error) => error.code === "23514");
+await assert.rejects(
+  () => asUser(a, () => addImport()),
+  (error) => error.code === "42501",
+);
+await addImport();
+await assert.rejects(addImport, (error) => error.code === "23505");
+assert.equal(
+  (await asUser(b, () => db.query("select * from public.camera_cloud_import_jobs"))).rows.length,
+  0,
+);
+await assert.rejects(
+  () => db.query(
+    "update public.camera_cloud_import_jobs set state='imported' where recording_id=$1",
+    [cloudJob],
+  ),
+  (error) => error.code === "23514",
+);
+assert.equal(
+  (await db.query("select state from public.camera_cloud_import_jobs where recording_id=$1", [cloudJob]))
+    .rows[0].state,
+  "approved",
+);
 const autoJob = "b9000000-0000-4000-8000-000000000002";
 await db.query(
   "insert into public.camera_cloud_recordings(id,room_id,device_id,requested_by,provider_room_name,object_path,start_source) values($1,$2,$3,$4,$5,$6,'match_state')",
