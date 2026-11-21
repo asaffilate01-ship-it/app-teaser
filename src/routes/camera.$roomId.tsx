@@ -688,9 +688,13 @@ function MatchCamera() {
                     // Revoking permission stops both capture and outgoing media immediately.
                     stopRecording();
                     stopLiveSharing();
+                    streamRef.current?.getTracks().forEach((track) => track.stop());
+                    streamRef.current = null;
+                    if (videoRef.current) videoRef.current.srcObject = null;
+                    setPreviewing(false);
                     if (autoRecordArmed) void setArmed(false);
                     setMessage(
-                      "Recording and live sharing stopped because permission was withdrawn.",
+                      "Camera capture and live sharing stopped because permission was withdrawn.",
                     );
                   }
                 }}
