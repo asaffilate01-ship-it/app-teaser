@@ -3,6 +3,7 @@ import * as tus from "tus-js-client";
 import type { CricketMatch, Delivery, FieldZone, Innings, MatchFormat, Team } from "@/lib/cricket";
 import type { PlatformRole } from "@/lib/platform";
 import { createOrderedQueueDrainer } from "@/lib/offline-queue";
+import { readScorerSnapshot } from "@/lib/scorer-storage";
 
 export interface CloudConfiguration {
   url: string;
@@ -134,14 +135,6 @@ export async function listOrganisationMemberships(): Promise<OrganisationMembers
   });
 }
 
-function isCricketMatch(value: unknown, matchId: string): value is CricketMatch {
-  if (!value || typeof value !== "object") return false;
-  const candidate = value as Partial<CricketMatch>;
-  return (
-    candidate.id === matchId && Array.isArray(candidate.teams) && Array.isArray(candidate.innings)
-  );
-}
-
 function cloudMatchStatus(value: unknown): CricketMatch["status"] {
   if (value === "completed") return "completed";
   if (value === "innings_break") return "innings-break";
@@ -173,7 +166,8 @@ export async function loadCloudMatchSnapshot(matchId: string): Promise<CricketMa
   for (const row of recentEvents ?? []) {
     const payload = row.payload as Record<string, unknown> | null;
     const snapshot = payload?.["matchSnapshot"];
-    if (isCricketMatch(snapshot, matchId)) return snapshot;
+    const validated = readScorerSnapshot(snapshot, matchId);
+    if (validated) return validated;
   }
 
   const { data: match, error: matchError } = await client
@@ -326,7 +320,7 @@ export async function loadCloudMatchSnapshot(matchId: string): Promise<CricketMa
   if (innings.length === 0) throw new Error("The cloud match has no innings workspace.");
 
   const weather = (match.weather ?? {}) as Record<string, unknown>;
-  return {
+  const reconstructed: CricketMatch = {
     id: matchId,
     createdAt: match.created_at as string,
     updatedAt: match.updated_at as string,
@@ -346,6 +340,9 @@ export async function loadCloudMatchSnapshot(matchId: string): Promise<CricketMa
     teams,
     innings,
   };
+  const validated = readScorerSnapshot(reconstructed, matchId);
+  if (!validated) throw new Error("The cloud match contains incomplete scoring data.");
+  return validated;
 }
 
 export async function startCloudInnings(input: {
