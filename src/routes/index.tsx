@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { regions, defaultRegion, findRegion, detectCountry, type Region } from "@/lib/pricing";
 import { I18nProvider, useI18n, LanguageSelect } from "@/lib/i18n";
 import type { Content } from "@/lib/content";
+import { MarketingScreenPreview } from "@/components/MarketingScreenPreview";
 import { canonicalUrl, CRICLUME_OG_IMAGE, HOME_TITLE, HOME_DESCRIPTION, criclumeStructuredData } from "@/lib/seo";
 import {
   Activity,
@@ -30,10 +31,6 @@ import {
 
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 import fullLogoAsset from "@/assets/criclume-logo-full.png.asset.json";
-import shotDashboard from "@/assets/shot-dashboard.jpg";
-import shotScoreboard from "@/assets/shot-scoreboard.jpg";
-import shotMobile from "@/assets/shot-mobile.jpg";
-import shotReview from "@/assets/shot-review.jpg";
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): { section?: TabId } => {
@@ -85,12 +82,7 @@ const tabMeta: { id: TabId; icon: typeof Home; key: keyof Content["nav"] }[] = [
 
 const featureIcons = [Zap, Video, Activity, BarChart3, Smartphone, Users, Eye];
 const workflowIcons = [Zap, Video, Users];
-const screenImages = [
-  { src: shotDashboard, w: 1600, h: 1008 },
-  { src: shotScoreboard, w: 1600, h: 1008 },
-  { src: shotMobile, w: 768, h: 1408 },
-  { src: shotReview, w: 1600, h: 1008 },
-];
+const screenKinds = ["dashboard", "scoreboard", "scorer", "review"] as const;
 const planIcons = [Zap, Building2, Trophy];
 
 function HomepageRoot() {
@@ -536,37 +528,44 @@ function ScreensTab() {
   return (
     <div className="space-y-5 md:space-y-8">
       <SectionHeader kicker={t.screensTab.kicker}>{t.screensTab.title}</SectionHeader>
-      <p className="text-sm text-muted-foreground md:text-base">{t.screensTab.intro}</p>
-      <div className="space-y-5 md:grid md:grid-cols-2 md:gap-6 md:space-y-0">
-        {t.screensTab.items.map((s, i) => {
-          const img = screenImages[i]!;
-          return (
-            <figure key={s.label} className="surface-card lift-card overflow-hidden">
-              <div className="overflow-x-auto no-scrollbar border-b border-border/60 bg-secondary/40 md:overflow-hidden">
-                <img
-                  src={img.src}
-                  alt={`${s.label} — ${s.caption}`}
-                  width={img.w}
-                  height={img.h}
-                  loading="lazy"
-                  className={
-                    img.w > img.h
-                      ? "h-auto w-[160%] max-w-none md:w-full"
-                      : "h-auto w-full md:mx-auto md:max-w-xs"
-                  }
-                />
-              </div>
-              <figcaption className="space-y-1.5 p-4 md:p-6">
-                <p className="font-display text-lg font-bold leading-tight text-gold md:text-2xl">
-                  {s.label}
-                </p>
-                <p className="text-sm leading-relaxed text-muted-foreground md:text-sm">
-                  {s.caption}
-                </p>
-              </figcaption>
-            </figure>
-          );
-        })}
+      <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground md:text-base">
+        {t.screensTab.intro}
+      </p>
+      <div className="grid gap-5 md:grid-cols-2 md:gap-6">
+        {t.screensTab.items.map((screen, index) => (
+          <figure key={screen.label} className="surface-card overflow-hidden">
+            <div className="p-2 sm:p-3">
+              <MarketingScreenPreview kind={screenKinds[index]!} />
+            </div>
+            <figcaption className="space-y-2 border-t border-white/10 p-4 md:p-5">
+              <h3 className="font-display text-xl font-bold leading-tight text-gold">
+                {screen.label}
+              </h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">{screen.caption}</p>
+              {index === 2 ? (
+                <Link
+                  to="/app"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-gold/40 px-4 py-2 text-sm font-bold text-gold hover:bg-gold/10"
+                >
+                  {t.hero.ctaPrimary}
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              ) : (
+                <Link
+                  to="/platform"
+                  search={{
+                    section:
+                      index === 3 ? "analysis" : index === 1 ? "competitions" : "overview",
+                  }}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-gold/40 px-4 py-2 text-sm font-bold text-gold hover:bg-gold/10"
+                >
+                  {t.login.requestInvite}
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              )}
+            </figcaption>
+          </figure>
+        ))}
       </div>
     </div>
   );
