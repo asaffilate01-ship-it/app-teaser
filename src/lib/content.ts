@@ -28,18 +28,15 @@ export const en = {
     workflowSteps: [
       {
         title: "Score the match",
-        body:
-          "Record runs, wickets, extras and corrections on your device, including during temporary signal loss.",
+        body: "Record runs, wickets, extras and corrections on your device, including during temporary signal loss.",
       },
       {
         title: "Review recorded footage",
-        body:
-          "Open videos on your device to use slow motion, frame stepping and drawing tools during coaching review.",
+        body: "Open videos on your device to use slow motion, frame stepping and drawing tools during coaching review.",
       },
       {
         title: "Organise your club",
-        body:
-          "Use the private club workspace for teams and fixtures. Connected services require an authorised setup.",
+        body: "Use the private club workspace for teams and fixtures. Connected services require an authorised setup.",
       },
     ],
     matchDayKicker: "Match day",
@@ -303,18 +300,15 @@ export const de: Content = {
     workflowSteps: [
       {
         title: "Spiel erfassen",
-        body:
-          "Erfasse Runs, Wickets, Extras und Korrekturen auf deinem Gerät, auch bei kurzzeitigem Netzausfall.",
+        body: "Erfasse Runs, Wickets, Extras und Korrekturen auf deinem Gerät, auch bei kurzzeitigem Netzausfall.",
       },
       {
         title: "Aufnahmen prüfen",
-        body:
-          "Prüfe lokale Videos in Zeitlupe, Bild für Bild und mit Zeichenwerkzeugen.",
+        body: "Prüfe lokale Videos in Zeitlupe, Bild für Bild und mit Zeichenwerkzeugen.",
       },
       {
         title: "Verein organisieren",
-        body:
-          "Nutze den privaten Vereinsbereich für Teams und Spiele. Cloud-Dienste müssen autorisiert eingerichtet sein.",
+        body: "Nutze den privaten Vereinsbereich für Teams und Spiele. Cloud-Dienste müssen autorisiert eingerichtet sein.",
       },
     ],
     matchDayKicker: "Spieltag",
@@ -580,18 +574,15 @@ export const nl: Content = {
     workflowSteps: [
       {
         title: "Wedstrijd scoren",
-        body:
-          "Leg runs, wickets, extra's en correcties vast op je apparaat, ook bij tijdelijke verbindingsproblemen.",
+        body: "Leg runs, wickets, extra's en correcties vast op je apparaat, ook bij tijdelijke verbindingsproblemen.",
       },
       {
         title: "Opnamen terugkijken",
-        body:
-          "Bekijk lokale video's in slow motion, beeld voor beeld en met tekengereedschap.",
+        body: "Bekijk lokale video's in slow motion, beeld voor beeld en met tekengereedschap.",
       },
       {
         title: "Club organiseren",
-        body:
-          "Gebruik de privéclubomgeving voor teams en wedstrijden. Clouddiensten vereisen een toegestane inrichting.",
+        body: "Gebruik de privéclubomgeving voor teams en wedstrijden. Clouddiensten vereisen een toegestane inrichting.",
       },
     ],
     matchDayKicker: "Wedstrijddag",
@@ -855,18 +846,15 @@ export const af: Content = {
     workflowSteps: [
       {
         title: "Teken die wedstryd aan",
-        body:
-          "Teken lopies, paaltjies, ekstras en regstellings op jou toestel aan, selfs wanneer die sein kortliks wegval.",
+        body: "Teken lopies, paaltjies, ekstras en regstellings op jou toestel aan, selfs wanneer die sein kortliks wegval.",
       },
       {
         title: "Hersien opnames",
-        body:
-          "Kyk plaaslike video's in stadige aksie, raam vir raam, en gebruik tekengereedskap.",
+        body: "Kyk plaaslike video's in stadige aksie, raam vir raam, en gebruik tekengereedskap.",
       },
       {
         title: "Organiseer jou klub",
-        body:
-          "Gebruik die private klubwerkruimte vir spanne en wedstryde. Wolkdienste vereis gemagtigde opstelling.",
+        body: "Gebruik die private klubwerkruimte vir spanne en wedstryde. Wolkdienste vereis gemagtigde opstelling.",
       },
     ],
     matchDayKicker: "Wedstryddag",
@@ -1133,18 +1121,15 @@ export const fr: Content = {
     workflowSteps: [
       {
         title: "Marquer le match",
-        body:
-          "Enregistrez runs, guichets, extras et corrections sur votre appareil, même pendant une coupure temporaire de réseau.",
+        body: "Enregistrez runs, guichets, extras et corrections sur votre appareil, même pendant une coupure temporaire de réseau.",
       },
       {
         title: "Revoir les vidéos",
-        body:
-          "Examinez des vidéos locales au ralenti, image par image, avec des outils de dessin.",
+        body: "Examinez des vidéos locales au ralenti, image par image, avec des outils de dessin.",
       },
       {
         title: "Organiser le club",
-        body:
-          "Gérez équipes et rencontres dans l'espace privé du club. Les services cloud nécessitent une configuration autorisée.",
+        body: "Gérez équipes et rencontres dans l'espace privé du club. Les services cloud nécessitent une configuration autorisée.",
       },
     ],
     matchDayKicker: "Jour de match",
