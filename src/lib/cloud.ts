@@ -2,7 +2,11 @@ import { createClient, type Session, type SupabaseClient } from "@supabase/supab
 import * as tus from "tus-js-client";
 import type { CricketMatch, Delivery, FieldZone, Innings, MatchFormat, Team } from "@/lib/cricket";
 import type { PlatformRole } from "@/lib/platform";
-import { createOrderedQueueDrainer } from "@/lib/offline-queue";
+import {
+  createOrderedQueueDrainer,
+  parsePendingScorerQueue,
+  type PendingScorerQueueEvent,
+} from "@/lib/offline-queue";
 import { readScorerSnapshot } from "@/lib/scorer-storage";
 
 export interface CloudConfiguration {
@@ -365,14 +369,7 @@ function storageQueueKey(matchId: string): string {
   return `criclume:cloud-queue:${matchId}`;
 }
 
-export interface PendingMatchEvent {
-  matchId: string;
-  clientEventId: string;
-  deviceId: string;
-  eventType: string;
-  payload: Record<string, unknown>;
-  occurredAt: string;
-}
+export type PendingMatchEvent = PendingScorerQueueEvent;
 
 export async function recordCanonicalDelivery(input: {
   matchId: string;
@@ -422,13 +419,7 @@ export async function voidLastCanonicalDelivery(input: {
 
 export function readPendingEvents(matchId: string): PendingMatchEvent[] {
   if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(
-      localStorage.getItem(storageQueueKey(matchId)) ?? "[]",
-    ) as PendingMatchEvent[];
-  } catch {
-    return [];
-  }
+  return parsePendingScorerQueue(localStorage.getItem(storageQueueKey(matchId)), matchId);
 }
 
 export function queuePendingEvent(event: PendingMatchEvent): void {
