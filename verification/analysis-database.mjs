@@ -227,14 +227,13 @@ const receiptCommand = (
     [room, device, a],
   )
 ).rows[0].id;
-const receiptInsert =
-  (user) =>
-    asUser(user, () =>
-      db.query(
-        "insert into public.camera_command_receipts(command_id,room_id,device_id,reported_by,outcome,reason_code) values($1,$2,$3,$4,'started','none') returning command_id",
-        [receiptCommand, room, device, user],
-      ),
-    );
+const receiptInsert = (user) =>
+  asUser(user, () =>
+    db.query(
+      "insert into public.camera_command_receipts(command_id,room_id,device_id,reported_by,outcome,reason_code) values($1,$2,$3,$4,'started','none') returning command_id",
+      [receiptCommand, room, device, user],
+    ),
+  );
 await assert.rejects(receiptInsert(b), (error) => error.code === "42501");
 assert.equal((await receiptInsert(a)).rows[0].command_id, receiptCommand);
 await assert.rejects(receiptInsert(a), (error) => error.code === "23505");
