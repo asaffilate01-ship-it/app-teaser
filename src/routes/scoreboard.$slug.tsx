@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Clock3, MapPin, Radio, RotateCw } from "lucide-react";
+import { Clock3, MapPin, Radio, RotateCw, Share2 } from "lucide-react";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 import { getCloudClient, isCloudConfigured } from "@/lib/cloud";
 
@@ -10,8 +10,9 @@ export const Route = createFileRoute("/scoreboard/$slug")({
       { title: "Live cricket score — CricLume" },
       {
         name: "description",
-        content: "Live cricket score, innings state and recent deliveries powered by CricLume.",
+        content: "CricLume match scoreboard with live cricket runs, wickets, overs and delivery-by-delivery updates.",
       },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: PublicScoreboard,
@@ -47,6 +48,7 @@ function PublicScoreboard() {
   const [scoreboard, setScoreboard] = useState<ScoreboardData | null>(null);
   const [loading, setLoading] = useState(isCloudConfigured());
   const [error, setError] = useState<string | null>(null);
+  const [shareNotice, setShareNotice] = useState("");
 
   useEffect(() => {
     if (!isCloudConfigured()) return;
@@ -100,6 +102,34 @@ function PublicScoreboard() {
       ? scoreboard.homeTeam
       : scoreboard.awayTeam;
   const bowling = batting.id === scoreboard.homeTeam.id ? scoreboard.awayTeam : scoreboard.homeTeam;
+  const live = scoreboard.status === "live";
+  const statusLabel = live
+    ? "Live score"
+    : scoreboard.status === "completed"
+      ? "Final score"
+      : scoreboard.status === "scheduled"
+        ? "Scheduled match"
+        : "Match scoreboard";
+  const share = async () => {
+    const url = window.location.href;
+    setShareNotice("");
+    try {
+      if (typeof navigator.share === "function") {
+        await navigator.share({
+          title: `${scoreboard.homeTeam.name} v ${scoreboard.awayTeam.name} | CricLume`,
+          text: "Cricket match score on CricLume",
+          url,
+        });
+        return;
+      }
+      if (!navigator.clipboard) throw new Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(url);
+      setShareNotice("Scoreboard link copied.");
+    } catch (reason) {
+      if (reason instanceof Error && reason.name === "AbortError") return;
+      setShareNotice("Sharing is unavailable. Copy the address from your browser.");
+    }
+  };
   return (
     <div className="min-h-screen overflow-hidden bg-[#0f0d17] text-white">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(244,63,94,0.15),transparent_35%),radial-gradient(circle_at_80%_70%,rgba(251,191,36,0.12),transparent_38%)]" />
@@ -108,9 +138,26 @@ function PublicScoreboard() {
           <Link to="/">
             <img src={logoAsset.url} alt="CricLume" className="h-10 w-auto" />
           </Link>
-          <div className="flex items-center gap-2 rounded-full border border-rose-400/25 bg-rose-400/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-rose-300">
-            <span className="size-2 animate-pulse rounded-full bg-rose-400" />
-            Live scoreboard
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <span
+              aria-live="polite"
+              className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] ${
+                live
+                  ? "border-rose-400/30 bg-rose-400/10 text-rose-200"
+                  : "border-amber-300/30 bg-amber-300/10 text-amber-200"
+              }`}
+            >
+              {live && <span className="size-2 animate-pulse rounded-full bg-rose-400" />}
+              {statusLabel}
+            </span>
+            <button
+              type="button"
+              onClick={() => void share()}
+              className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/20 px-3 text-xs font-bold text-white hover:border-amber-300/60"
+            >
+              <Share2 className="size-4 text-amber-300" aria-hidden="true" />
+              Share
+            </button>
           </div>
         </div>
       </header>
@@ -137,14 +184,19 @@ function PublicScoreboard() {
           </div>
           <span>{scoreboard.weather?.summary}</span>
         </div>
-        <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-5 shadow-2xl shadow-black/40 md:p-9">
+        {shareNotice && (
+          <p role="status" className="mb-4 rounded-xl border border-amber-300/20 px-4 py-2 text-sm text-amber-200">
+            {shareNotice}
+          </p>
+        )}
+        <section className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-[#2a1323] via-[#16131e] to-[#1f191c] p-5 shadow-2xl shadow-black/40 md:p-9">
           <div className="flex items-center justify-between gap-4">
             <div>
               <div className="text-xs font-bold uppercase tracking-[0.18em] text-amber-200">
                 {batting.name} batting
               </div>
               <div className="mt-3 flex items-end gap-3">
-                <span className="text-6xl font-bold tracking-tight md:text-8xl">
+                <span className="font-display text-5xl font-bold tracking-tight tabular-nums text-amber-100 sm:text-6xl md:text-8xl">
                   {scoreboard.liveState.runs ?? 0}/{scoreboard.liveState.wickets ?? 0}
                 </span>
                 <span className="pb-2 text-lg font-bold text-slate-400">
