@@ -52,6 +52,7 @@ import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPanel";
 import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace";
 import { AcademyDashboard } from "@/components/AcademyDashboard";
+import { LeagueStandings } from "@/components/LeagueStandings";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { usePlatformDashboard } from "@/hooks/use-platform-dashboard";
@@ -1120,6 +1121,13 @@ function Competitions({
                     </button>
                   </div>
                 </div>
+                {competition.format === "league" && (
+                  <LeagueStandings
+                    competition={competition}
+                    fixtures={data.fixtures}
+                    teams={data.teams}
+                  />
+                )}
                 <div className="mt-3 grid gap-2 lg:grid-cols-2">
                   {data.fixtures
                     .filter((fixture) => fixture.competitionId === competition.id)
