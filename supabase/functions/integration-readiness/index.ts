@@ -74,6 +74,20 @@ Deno.serve(async (request) => {
     });
 
     checks.push({
+      id: "cloud-match-auto",
+      label: "Automatic cloud recording on live matches",
+      status:
+        Deno.env.get("CRICLUME_CLOUD_AUTO_ENABLED") !== "true"
+          ? "disabled"
+          : Deno.env.get("CRICLUME_CLOUD_CAPTURE_ENABLED") === "true" &&
+              Boolean(Deno.env.get("CRON_SECRET")?.trim())
+            ? "configured"
+            : "missing",
+      detail:
+        "Requires operator adult-only opt-in, an armed consented device, actual LiveKit publishing, " +
+        "private S3 and a separately installed one-minute scheduled invocation. Not a live test.",
+    });
+    checks.push({
       id: "paid-ai",
       label: "Paid AI switch",
       status: Deno.env.get("OMNIQORA_CRICLUME_PAID_ENABLED") === "true" ? "configured" : "disabled",

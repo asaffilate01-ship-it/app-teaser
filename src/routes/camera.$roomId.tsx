@@ -94,6 +94,8 @@ function MatchCamera() {
   const [cloudPublishing, setCloudPublishing] = useState(false);
   const [cloudConnecting, setCloudConnecting] = useState(false);
   const [autoRecordArmed, setAutoRecordArmed] = useState(false);
+  const [cloudAutoEnabled, setCloudAutoEnabled] = useState(false);
+  const [cloudAutoBusy, setCloudAutoBusy] = useState(false);
   const [failedSegments, setFailedSegments] = useState(0);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [consent, setConsent] = useState(false);
@@ -136,6 +138,12 @@ function MatchCamera() {
       .eq("device_id", paired.id)
       .maybeSingle();
     setAutoRecordArmed(Boolean(savedArm?.armed));
+    const { data: savedCloudOptIn } = await getCloudClient()
+      .from("camera_cloud_auto_opt_ins")
+      .select("enabled")
+      .eq("device_id", paired.id)
+      .maybeSingle();
+    setCloudAutoEnabled(Boolean(savedCloudOptIn?.enabled));
     const presence: CameraPresence = {
       deviceId: paired.id,
       label: paired.label,
@@ -216,6 +224,7 @@ function MatchCamera() {
       );
       if (!armed && recordingRef.current) stopRecording();
       if (!armed && cloudPublisherRef.current) void stopCloudPublisher();
+      if (!armed && cloudAutoEnabled) void setCloudAutoEnabledByOperator(false);
     }
   };
 
@@ -286,6 +295,50 @@ function MatchCamera() {
         // must verify and stop any lingering provider-side recording.
       }
     }
+  };
+
+  const setCloudAutoEnabledByOperator = async (enabled: boolean) => {
+    if (!device || !session || cloudAutoBusy) return;
+    if (enabled && (!consent || !autoRecordArmed || includesJunior)) {
+      setMessage(
+        "Automatic cloud recording is limited to confirmed adult-only matches with explicit camera permission.",
+      );
+      return;
+    }
+    setCloudAutoBusy(true);
+    if (!enabled) {
+      // Disconnect now, even if updating the preference fails.
+      void stopCloudPublisher();
+      setCloudAutoEnabled(false);
+    }
+    const { error } = await getCloudClient()
+      .from("camera_cloud_auto_opt_ins")
+      .upsert(
+        {
+          device_id: device.id,
+          room_id: roomId,
+          operator_id: session.user.id,
+          enabled,
+          adult_only_attested: enabled && !includesJunior,
+          opted_in_at: enabled ? new Date().toISOString() : null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "device_id" },
+      );
+    if (error) {
+      setMessage("Cloud opt-in could not be saved. Confirm that CricLume's backend is deployed.");
+      // If the user cannot revoke the database preference, disarm the local
+      // recording as a second, independent server-enforced safety condition.
+      if (!enabled && autoRecordArmed) void setArmed(false);
+    } else {
+      setCloudAutoEnabled(enabled);
+      setMessage(
+        enabled
+          ? "Adult-only auto-cloud recording enabled for this phone. Keep its cloud publisher connected. The director/platform must also authorise automatic starts."
+          : "Automatic cloud recording disabled for this phone.",
+      );
+    }
+    setCloudAutoBusy(false);
   };
 
   const startRecording = () => {
@@ -800,6 +853,7 @@ function MatchCamera() {
                     streamRef.current = null;
                     if (videoRef.current) videoRef.current.srcObject = null;
                     setPreviewing(false);
+                    if (cloudAutoEnabled) void setCloudAutoEnabledByOperator(false);
                     if (autoRecordArmed) void setArmed(false);
                     setMessage(
                       "Camera capture and live sharing stopped because permission was withdrawn.",
@@ -823,12 +877,36 @@ function MatchCamera() {
                 requests it. This phone must stay on with its preview running.
               </span>
             </label>
+            <label className="mt-4 flex items-start gap-3 text-xs leading-5 text-amber-100">
+              <input
+                type="checkbox"
+                checked={cloudAutoEnabled}
+                disabled={
+                  !device || !consent || !autoRecordArmed || includesJunior || cloudAutoBusy
+                }
+                onChange={(event) => void setCloudAutoEnabledByOperator(event.target.checked)}
+                className="mt-1 accent-amber-300"
+              />
+              <span>
+                Opt in to **server-side automatic cloud recording** for an adult-only match when it
+                goes live. By enabling this I confirm all recorded participants are adults and the
+                club has authorised this camera's cloud recording. Publishing to LiveKit is a
+                separate button; the platform's auto-cloud switch must also be enabled.
+              </span>
+            </label>
             <label className="mt-3 flex items-center gap-3 text-xs text-slate-300">
               <input
                 type="checkbox"
                 checked={includesJunior}
                 disabled={recording}
-                onChange={(event) => setIncludesJunior(event.target.checked)}
+                onChange={(event) => {
+                  const junior = event.target.checked;
+                  setIncludesJunior(junior);
+                  if (junior && cloudAutoEnabled) {
+                    void setCloudAutoEnabledByOperator(false);
+                    if (autoRecordArmed) void setArmed(false);
+                  }
+                }}
                 className="accent-amber-300"
               />
               This recording includes junior players

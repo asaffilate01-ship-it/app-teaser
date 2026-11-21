@@ -157,8 +157,10 @@ export function CameraCloudRecordingPanel({
               </div>
               {recording && (
                 <p className="mt-2 text-[11px] text-slate-500">
-                  Request: {new Date(recording.created_at).toLocaleString()} · Status checked via
-                  server
+                  {recording.start_source === "match_state"
+                    ? "Automatically started by match"
+                    : "Director-started recording"}{" "}
+                  · {new Date(recording.created_at).toLocaleString()}
                 </p>
               )}
             </div>

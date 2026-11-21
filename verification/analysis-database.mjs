@@ -291,6 +291,79 @@ await assert.rejects(
   (error) => error.code === "23505",
 );
 
+// Automatic cloud capture is separate from a local recording arm and cannot
+// be enabled by someone else's paired device identity.
+await db.query(
+  "insert into public.camera_recording_arms(device_id,room_id,user_id,armed,consent_confirmed) values($1,$2,$3,true,true)",
+  [device, room, a],
+);
+await assert.rejects(
+  () =>
+    asUser(b, () =>
+      db.query(
+        "insert into public.camera_cloud_auto_opt_ins(device_id,room_id,operator_id,enabled,adult_only_attested,opted_in_at) values($1,$2,$3,true,true,now())",
+        [device, room, b],
+      ),
+    ),
+  (error) => error.code === "42501",
+);
+await assert.rejects(
+  () =>
+    asUser(a, () =>
+      db.query(
+        "insert into public.camera_cloud_auto_opt_ins(device_id,room_id,operator_id,enabled,adult_only_attested,opted_in_at) values($1,$2,$3,true,false,now())",
+        [device, room, a],
+      ),
+    ),
+  (error) => error.code === "23514",
+);
+await asUser(a, () =>
+  db.query(
+    "insert into public.camera_cloud_auto_opt_ins(device_id,room_id,operator_id,enabled,adult_only_attested,opted_in_at) values($1,$2,$3,true,true,now())",
+    [device, room, a],
+  ),
+);
+assert.equal(
+  (await asUser(a, () => db.query("select enabled from public.camera_cloud_auto_opt_ins"))).rows[0]
+    .enabled,
+  true,
+);
+assert.equal(
+  (await asUser(b, () => db.query("select enabled from public.camera_cloud_auto_opt_ins"))).rows
+    .length,
+  0,
+);
+await db.query("update public.camera_cloud_recordings set state='provider_completed' where id=$1", [
+  cloudJob,
+]);
+const autoJob = "b9000000-0000-4000-8000-000000000002";
+await db.query(
+  "insert into public.camera_cloud_recordings(id,room_id,device_id,requested_by,provider_room_name,object_path,start_source) values($1,$2,$3,$4,$5,$6,'match_state')",
+  [
+    autoJob,
+    room,
+    device,
+    a,
+    "criclume-" + room + "-" + device,
+    org + "/" + room + "/" + device + "/" + autoJob + ".mp4",
+  ],
+);
+await db.query("update public.camera_cloud_recordings set state='failed' where id=$1", [autoJob]);
+await assert.rejects(
+  () =>
+    db.query(
+      "insert into public.camera_cloud_recordings(room_id,device_id,requested_by,provider_room_name,object_path,start_source) values($1,$2,$3,$4,$5,'match_state')",
+      [
+        room,
+        device,
+        a,
+        "criclume-" + room + "-" + device,
+        org + "/" + room + "/" + device + "/another.mp4",
+      ],
+    ),
+  (error) => error.code === "23505",
+);
+
 await db.query(
   "insert into public.video_assets(id,organisation_id,room_id,device_id,storage_path,started_at,status,recording_consent,retention_expires_at,created_by) values($1,$2,$3,$4,'fixture-source.webm',now(),'uploaded','granted',now()+interval '1 day',$5)",
   [asset, org, room, device, a],
