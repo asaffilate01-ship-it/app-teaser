@@ -584,7 +584,8 @@ export async function uploadVideoResumably(input: {
   if (!configuration) throw new Error("CricLume Cloud is not configured.");
   const { data } = await getCloudClient().auth.getSession();
   if (!data.session) throw new Error("Sign in before uploading video.");
-  const objectName = `${input.organisationId}/${input.roomId}/${input.assetId}/source.webm`;
+  const extension = input.contentType.includes("mp4") ? "mp4" : "webm";
+  const objectName = `${input.organisationId}/${input.roomId}/${input.assetId}/source.${extension}`;
 
   return await new Promise((resolve, reject) => {
     const upload = new tus.Upload(input.file, {
