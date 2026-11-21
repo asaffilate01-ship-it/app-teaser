@@ -104,6 +104,17 @@ const match = z
 const matchesSchema = z
   .array(match)
   .refine((rows) => new Set(rows.map((r) => r.id)).size === rows.length);
+/**
+ * Validate an untrusted cloud event before allowing it to replace any local
+ * scoreboard data. Preserve versioned unknown fields as the storage parser does.
+ * A syntactically plausible object with missing deliveries is never trusted.
+ */
+export function readScorerSnapshot(value: unknown, matchId: string): CricketMatch | null {
+  if (!value || typeof value !== "object") return null;
+  if ((value as { id?: unknown }).id !== matchId) return null;
+  return match.safeParse(value).success ? (value as CricketMatch) : null;
+}
+
 /** Validate without discarding unknown fields from a newer scorer version. */
 export function parseScorerMatches(raw: string): CricketMatch[] {
   const value: unknown = JSON.parse(raw);
