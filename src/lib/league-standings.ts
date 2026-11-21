@@ -104,7 +104,13 @@ function validRules(rules: CompetitionRecord["rules"]): rules is NonNullable<
   CompetitionRecord["rules"]
 > {
   if (!rules || !Number.isInteger(rules.ballsPerOver) || rules.ballsPerOver < 1) return false;
-  if (rules.ballsPerOver > 12 || !Array.isArray(rules.tieBreakers)) return false;
+  if (
+    rules.ballsPerOver > 12 ||
+    !Array.isArray(rules.tieBreakers) ||
+    rules.tieBreakers.length === 0
+  ) {
+    return false;
+  }
   if (!rules.points || !["win", "tie", "noResult", "loss"].every((key) => {
     const value = rules.points[key as keyof typeof rules.points];
     return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
@@ -130,9 +136,13 @@ export function buildLeagueStandings(input: LeagueInput): LeagueStandingsPreview
   const participantIds = [
     ...new Set(visible.flatMap((fixture) => [fixture.homeTeamId, fixture.awayTeamId])),
   ].filter((id) => knownTeams.has(id));
-  const recorded = visible.filter((fixture) =>
-    recordedStatuses.has(fixture.status.toLowerCase()),
-  );
+  const recordedIds = new Set<string>();
+  const recorded = visible.filter((fixture) => {
+    if (!recordedStatuses.has(fixture.status.toLowerCase())) return false;
+    if (recordedIds.has(fixture.id)) return false;
+    recordedIds.add(fixture.id);
+    return true;
+  });
   const base = {
     rows: [] as TableRow[],
     counted: 0,
