@@ -689,7 +689,9 @@ function MatchCamera() {
                     stopRecording();
                     stopLiveSharing();
                     if (autoRecordArmed) void setArmed(false);
-                    setMessage("Recording and live sharing stopped because permission was withdrawn.");
+                    setMessage(
+                      "Recording and live sharing stopped because permission was withdrawn.",
+                    );
                   }
                 }}
                 className="mt-1 accent-amber-300"
