@@ -217,6 +217,9 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
     <div className="space-y-10 md:space-y-16">
       <div className="grid gap-7 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-12">
         <section className="space-y-4 md:space-y-6">
+          <p className="text-xs font-bold uppercase tracking-[0.15em] text-gold md:text-sm">
+            {t.hero.keywordLine}
+          </p>
           <h1 className="text-[2.8rem] font-bold leading-[1.05] tracking-tight md:text-6xl lg:text-[5.2rem]">
             {t.hero.l1}
             <br />
