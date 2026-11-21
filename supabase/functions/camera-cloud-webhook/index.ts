@@ -37,22 +37,29 @@ Deno.serve(async (request) => {
       return json({ accepted: true, alreadyFinal: true });
     const status = Number(info.status);
     const state =
-      status === 3 ? "provider_completed" :
-      [4, 5, 6].includes(status) ? "failed" :
-      status === 2 ? "stopping" :
-      status === 1 ? "recording" : "starting";
+      status === 3
+        ? "provider_completed"
+        : [4, 5, 6].includes(status)
+          ? "failed"
+          : status === 2
+            ? "stopping"
+            : status === 1
+              ? "recording"
+              : "starting";
     // Never regress a requested stop when a late ACTIVE event is delivered.
     if (stored.state === "stopping" && state === "recording")
       return json({ accepted: true, ignored: "stale_active" });
     const now = new Date().toISOString();
-    const { error: updateError } = await client.from("camera_cloud_recordings")
+    const { error: updateError } = await client
+      .from("camera_cloud_recordings")
       .update({
         state,
         provider_status: status,
         provider_updated_at: now,
         updated_at: now,
         ...(["provider_completed", "failed"].includes(state) ? { ended_at: now } : {}),
-      }).eq("id", stored.id);
+      })
+      .eq("id", stored.id);
     if (updateError) throw updateError;
     // Provider completion is not the same as a verified, consented archive.
     return json({ accepted: true, state });

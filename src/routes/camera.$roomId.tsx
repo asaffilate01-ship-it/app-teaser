@@ -13,7 +13,11 @@ import {
 } from "lucide-react";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 import { connectLiveCamera, type LiveCameraSession } from "@/lib/camera-live";
-import { cameraCloudStop, publishCameraToCloud, type CameraCloudPublisher } from "@/lib/camera-cloud";
+import {
+  cameraCloudStop,
+  publishCameraToCloud,
+  type CameraCloudPublisher,
+} from "@/lib/camera-cloud";
 import { Cloud } from "lucide-react";
 import {
   nextCameraCommand,
@@ -251,14 +255,11 @@ function MatchCamera() {
     if (cloudPublisherRef.current || cloudConnecting) return;
     setCloudConnecting(true);
     try {
-      const publisher = await publishCameraToCloud(
-        roomId, device.id, streamRef.current,
-        () => {
-          cloudPublisherRef.current = null;
-          setCloudPublishing(false);
-          setMessage("Cloud camera connection lost. Confirm provider recording status.");
-        },
-      );
+      const publisher = await publishCameraToCloud(roomId, device.id, streamRef.current, () => {
+        cloudPublisherRef.current = null;
+        setCloudPublishing(false);
+        setMessage("Cloud camera connection lost. Confirm provider recording status.");
+      });
       cloudPublisherRef.current = publisher;
       setCloudPublishing(true);
       setMessage(
@@ -714,12 +715,17 @@ function MatchCamera() {
                     <button
                       type="button"
                       disabled={!consent || !autoRecordArmed || cloudConnecting}
-                      onClick={() => void (cloudPublishing ? stopCloudPublisher() : startCloudPublisher())}
+                      onClick={() =>
+                        void (cloudPublishing ? stopCloudPublisher() : startCloudPublisher())
+                      }
                       className="inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-300/40 px-3 text-xs font-bold text-amber-200 disabled:opacity-40"
                     >
                       <Cloud className="size-4" />
-                      {cloudConnecting ? "Connecting cloud camera…" :
-                        cloudPublishing ? "Stop cloud publishing" : "Publish to cloud recorder"}
+                      {cloudConnecting
+                        ? "Connecting cloud camera…"
+                        : cloudPublishing
+                          ? "Stop cloud publishing"
+                          : "Publish to cloud recorder"}
                     </button>
                     <button
                       type="button"

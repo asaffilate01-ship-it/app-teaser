@@ -19,10 +19,15 @@ export function cameraCloudActive(state: unknown): boolean {
 
 export function cameraCloudLabel(state: CameraCloudState): string {
   switch (state) {
-    case "starting": return "Provider starting; recording not yet confirmed";
-    case "recording": return "Provider reports recording active";
-    case "stopping": return "Provider finalising the recording";
-    case "provider_completed": return "Provider completed; private archive not yet verified";
-    case "failed": return "Cloud recording failed; inspect provider";
+    case "starting":
+      return "Provider starting; recording not yet confirmed";
+    case "recording":
+      return "Provider reports recording active";
+    case "stopping":
+      return "Provider finalising the recording";
+    case "provider_completed":
+      return "Provider completed; private archive not yet verified";
+    case "failed":
+      return "Cloud recording failed; inspect provider";
   }
 }

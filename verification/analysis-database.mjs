@@ -270,10 +270,9 @@ assert.equal(
 await assert.rejects(
   () =>
     asUser(a, () =>
-      db.query(
-        "update public.camera_cloud_recordings set state='provider_completed' where id=$1",
-        [cloudJob],
-      ),
+      db.query("update public.camera_cloud_recordings set state='provider_completed' where id=$1", [
+        cloudJob,
+      ]),
     ),
   (error) => error.code === "42501",
 );

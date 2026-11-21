@@ -31,10 +31,13 @@ export function CameraCloudRecordingPanel({
 
   const refresh = useCallback(async () => {
     const results = await Promise.allSettled(
-      ids.split(",").filter(Boolean).map(async (deviceId) => ({
-        deviceId,
-        response: await cameraCloudStatus(roomId, deviceId),
-      })),
+      ids
+        .split(",")
+        .filter(Boolean)
+        .map(async (deviceId) => ({
+          deviceId,
+          response: await cameraCloudStatus(roomId, deviceId),
+        })),
     );
     const next: Record<string, CameraCloudRecording | null> = {};
     const errors: Record<string, string> = {};
@@ -67,9 +70,10 @@ export function CameraCloudRecordingPanel({
       action === "start" &&
       !window.confirm(
         "Start a chargeable, private cloud recording of this camera? " +
-        "The operator must have enabled cloud publishing and granted recording consent.",
+          "The operator must have enabled cloud publishing and granted recording consent.",
       )
-    ) return;
+    )
+      return;
     setBusy((current) => ({ ...current, [deviceId]: true }));
     try {
       if (action === "start") await cameraCloudStart(roomId, deviceId);
@@ -86,16 +90,19 @@ export function CameraCloudRecordingPanel({
   };
 
   return (
-    <section aria-label="Server-side cloud camera recording" className="mt-6 rounded-xl border border-white/10 bg-[#171d29] p-4">
+    <section
+      aria-label="Server-side cloud camera recording"
+      className="mt-6 rounded-xl border border-white/10 bg-[#171d29] p-4"
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="inline-flex items-center gap-2 text-base font-bold">
             <Cloud className="size-5 text-amber-300" /> Server-side camera recording
           </h2>
           <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-400">
-            Real LiveKit Egress requests to an approved private storage bucket. Recording must
-            be explicitly enabled by the operator and director. A provider-complete status
-            does not certify that the archived video has been validated.
+            Real LiveKit Egress requests to an approved private storage bucket. Recording must be
+            explicitly enabled by the operator and director. A provider-complete status does not
+            certify that the archived video has been validated.
           </p>
         </div>
         <button
@@ -110,7 +117,8 @@ export function CameraCloudRecordingPanel({
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         {devices.map((device) => {
           const recording = recordings[device.id];
-          const active = recording?.state === "starting" ||
+          const active =
+            recording?.state === "starting" ||
             recording?.state === "recording" ||
             recording?.state === "stopping";
           const armed = armedDeviceIds.includes(device.id);
@@ -125,7 +133,8 @@ export function CameraCloudRecordingPanel({
               </p>
               {unavailable[device.id] && (
                 <p role="alert" className="mt-2 flex items-start gap-2 text-xs text-rose-200">
-                  <ShieldAlert className="size-4 shrink-0" />{unavailable[device.id]}
+                  <ShieldAlert className="size-4 shrink-0" />
+                  {unavailable[device.id]}
                 </p>
               )}
               <div className="mt-3 flex flex-wrap gap-2">
@@ -148,7 +157,8 @@ export function CameraCloudRecordingPanel({
               </div>
               {recording && (
                 <p className="mt-2 text-[11px] text-slate-500">
-                  Request: {new Date(recording.created_at).toLocaleString()} · Status checked via server
+                  Request: {new Date(recording.created_at).toLocaleString()} · Status checked via
+                  server
                 </p>
               )}
             </div>
@@ -156,9 +166,11 @@ export function CameraCloudRecordingPanel({
         })}
       </div>
       <p className="mt-3 text-[11px] text-slate-500">
-        {lastChecked ? "Last provider status check: " + new Date(lastChecked).toLocaleTimeString()
+        {lastChecked
+          ? "Last provider status check: " + new Date(lastChecked).toLocaleTimeString()
           : "Checking provider configuration"}
-        {" · "}Cloud output is withheld from public playback until the archive and safeguarding checks pass.
+        {" · "}Cloud output is withheld from public playback until the archive and safeguarding
+        checks pass.
       </p>
     </section>
   );

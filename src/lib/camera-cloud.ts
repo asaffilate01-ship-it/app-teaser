@@ -15,9 +15,19 @@ export interface CameraCloudRecording {
   ended_at: string | null;
 }
 
-interface TokenResponse { url: string; token: string; expiresIn: number }
-interface StatusResponse { recordings: CameraCloudRecording[] }
-interface ControlResponse { recordingId: string; status: CameraCloudState; reused?: boolean }
+interface TokenResponse {
+  url: string;
+  token: string;
+  expiresIn: number;
+}
+interface StatusResponse {
+  recordings: CameraCloudRecording[];
+}
+interface ControlResponse {
+  recordingId: string;
+  status: CameraCloudState;
+  reused?: boolean;
+}
 
 export async function cameraCloudRequest<T>(
   action: CameraCloudAction,
@@ -28,10 +38,12 @@ export async function cameraCloudRequest<T>(
   const { data, error } = await getCloudClient().functions.invoke("camera-cloud", {
     body: { action, roomId, deviceId, ...(role ? { role } : {}) },
   });
-  if (error) throw new Error("Cloud camera provider unavailable. Check activation and account access.");
-  if (!data || data.error) throw new Error(
-    typeof data?.error === "string" ? data.error : "Cloud camera request was not accepted.",
-  );
+  if (error)
+    throw new Error("Cloud camera provider unavailable. Check activation and account access.");
+  if (!data || data.error)
+    throw new Error(
+      typeof data?.error === "string" ? data.error : "Cloud camera request was not accepted.",
+    );
   return data as T;
 }
 
@@ -56,9 +68,7 @@ export async function publishCameraToCloud(
 ): Promise<CameraCloudPublisher> {
   if (!stream.active || stream.getVideoTracks().length === 0)
     throw new Error("Start an active camera preview before publishing.");
-  const credentials = await cameraCloudRequest<TokenResponse>(
-    "token", roomId, deviceId, "camera",
-  );
+  const credentials = await cameraCloudRequest<TokenResponse>("token", roomId, deviceId, "camera");
   if (!credentials.url.startsWith("wss://") || !credentials.token)
     throw new Error("Provider returned an invalid camera connection.");
   const room = new Room({ adaptiveStream: true, dynacast: true });
