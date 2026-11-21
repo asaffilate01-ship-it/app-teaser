@@ -202,6 +202,25 @@ Deno.serve(async (request) => {
         const sha256 = Array.from(new Uint8Array(shaBuffer), (b) =>
           b.toString(16).padStart(2, "0")).join("");
 
+        // Permission and reviewer authorisation can change during a 32 MiB transfer.
+        // Recheck immediately before creating any private video asset.
+        const [freshArm, freshMember, freshSource] = await Promise.all([
+          db.from("camera_recording_arms").select("consent_confirmed")
+            .eq("device_id", row.device_id).eq("room_id", row.room_id).maybeSingle(),
+          db.from("organisation_members").select("role")
+            .eq("organisation_id", row.organisation_id).eq("user_id", row.approved_by)
+            .eq("status", "active").in("role", ["owner", "safeguarding_officer"]).maybeSingle(),
+          db.from("camera_cloud_recordings")
+            .select("state,archive_check_status")
+            .eq("id", row.recording_id).maybeSingle(),
+        ]);
+        if (freshArm.error || freshMember.error || freshSource.error ||
+            !freshArm.data?.consent_confirmed || !freshMember.data ||
+            freshSource.data?.state !== "provider_completed" ||
+            freshSource.data?.archive_check_status !== "object_confirmed" ||
+            Date.parse(row.retention_expires_at) <= Date.now())
+          throw new ImportFailure("permission_expired");
+
         // A status=uploading record with no storage_path is NOT reviewable.
         const { error: assetError } = await db.from("video_assets").insert({
           id: row.asset_id,
