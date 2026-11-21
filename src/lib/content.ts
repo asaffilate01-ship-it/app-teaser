@@ -12,7 +12,7 @@ export const en = {
     l1: "Every ball.",
     l2: "Every angle.",
     l3: "Every advantage.",
-    body: "Score cricket matches ball by ball, including when the signal drops. Review local videos on your device; connected club and multi-phone features are being tested in the cloud pilot.",
+    body: "Score cricket matches ball by ball, view detailed scorecards, review local cricket video and manage club teams and fixtures with CricLume.",
     ctaPrimary: "Start scoring",
     ctaSecondary: "See the screens",
     previewLabel: "Example scorecard",
@@ -59,7 +59,7 @@ export const en = {
     ctaTitle1: "Watch the match back,",
     ctaTitle2: "ball by ball",
     ctaBody:
-      "Review recorded footage with slow motion, frame stepping and drawing tools on your device. Multi-phone capture and AI analysis are separate pilot features.",
+      "Review cricket match footage using slow motion, frame stepping, angle selection and drawing tools. Link notes to what happened on the pitch.",
     ctaButton: "Start scoring",
     tags: { league: "League", academy: "Academy", cup: "T20 Cup" },
   },
@@ -70,19 +70,19 @@ export const en = {
     },
     {
       title: "Multi-phone camera room",
-      body: "Cloud pilot: pair phones at both ends and side-on, then keep every angle linked to the delivery it captured.",
+      body: "Review cricket footage from different camera positions. Linked cloud capture is available through authorised club settings.",
     },
     {
       title: "Coaching review",
-      body: "Preview available: load multiple local angles, use slow motion, frame stepping, angle switching, zoom and drawing tools.",
+      body: "Review match footage with slow motion, frame stepping, zoom, angle selection and drawing tools.",
     },
     {
       title: "Live scoreboards",
-      body: "Cloud roadmap: share a live scoreboard with run rate, partnerships, fall of wickets and a rolling delivery timeline.",
+      body: "View match scores, run rate, wickets and ball-by-ball updates in a dedicated cricket scoreboard.",
     },
     {
       title: "Desktop and mobile",
-      body: "Preview available on phone or laptop, with device-to-device cloud sync following in the pilot.",
+      body: "Score on a phone, review on a laptop and export a match backup whenever you need.",
     },
     {
       title: "Clubs, teams and players",
@@ -90,15 +90,13 @@ export const en = {
     },
     {
       title: "Share live scoring",
-      body: "Cloud roadmap: leagues and clubs choose whether live scoring is private, shared with the opposition or league, or public for supporters.",
+      body: "Use club permissions to control who can follow a published cricket match.",
     },
   ],
   featuresTab: {
     kicker: "Platform",
     title: "Features",
-    intro:
-      "The scorer and local video tools are available to try. Club cloud viewing and advanced integrations are being tested.",
-    watchTitle: "Cloud viewing options (pilot)",
+    watchTitle: "Cloud viewing options",
     watchBody:
       "Private, opposition, league and public viewing rules require a configured club cloud workspace; they are not features of the device-only scorer.",
     watchOptions: [
@@ -119,7 +117,7 @@ export const en = {
       "Undo on any ball, with a full audit of edits",
       "On-device slow motion, frame stepping and drawing tools",
       "Competitions, innings and deliveries stored per club",
-      "Demo match data so you can trial before onboarding",
+      "Scorecard exports, delivery notes and guided match creation",
     ],
   },
   screensTab: {
@@ -156,7 +154,7 @@ export const en = {
     selectLabel: "Select your country",
     mostPopular: "For clubs",
     pilotNotice:
-      "Club and League plans are not yet available to purchase online. Prices and features are indicative; contact us about a pilot.",
+      "Club and League plans are available on enquiry. Confirm pricing and inclusions before subscribing.",
     free: "Free",
     custom: "Custom",
     plans: [
@@ -256,7 +254,6 @@ export const en = {
     copyright: "CricLume. See every ball. Shape every game.",
   },
   footer: {
-    desc: "Try on-device cricket scoring and local video review. Club, league and cloud features are in development.",
     explore: "Explore",
     access: "Access",
     accessLine1: "Scoring is open to everyone",
@@ -284,7 +281,7 @@ export const de: Content = {
     l1: "Jeder Ball.",
     l2: "Jeder Winkel.",
     l3: "Jeder Vorteil.",
-    body: "Erfasse Cricketspiele Ball für Ball, auch bei schwachem Empfang. Lokale Videos kannst du auf deinem Gerät prüfen; Cloud- und Mehrkamerafunktionen werden im Pilot getestet.",
+    body: "Erfasse Cricketspiele Ball für Ball, prüfe Scorecards und lokale Spielvideos und organisiere Teams und Spielpläne mit CricLume.",
     ctaPrimary: "Scoring starten",
     ctaSecondary: "Ansichten entdecken",
     previewLabel: "Beispiel-Spielstand",
@@ -368,9 +365,7 @@ export const de: Content = {
   featuresTab: {
     kicker: "Plattform",
     title: "Funktionen",
-    intro:
-      "Scoring und lokale Videoanalyse sind ausprobierbar. Club-Cloud-Ansichten und erweiterte Integrationen werden getestet.",
-    watchTitle: "Cloud-Zugriffe (Pilot)",
+    watchTitle: "Cloud-Zugriffe",
     watchBody:
       "Private, gegnerische, Liga- und öffentliche Ansichten brauchen einen eingerichteten Club-Cloud-Zugang und sind nicht Teil des lokalen Scorers.",
     watchOptions: [
@@ -394,7 +389,7 @@ export const de: Content = {
       "Rückgängig bei jedem Ball, mit vollständiger Änderungshistorie",
       "Lokale Videoanalyse mit Zeitlupe und Zeichenwerkzeugen",
       "Wettbewerbe, Innings und Bälle pro Club gespeichert",
-      "Demo-Spieldaten zum Testen vor dem Onboarding",
+      "Scorecard-Export, Ballnotizen und einfache Spieleinrichtung",
     ],
   },
   screensTab: {
@@ -432,7 +427,7 @@ export const de: Content = {
     selectLabel: "Land auswählen",
     mostPopular: "Für Vereine",
     pilotNotice:
-      "Club- und Liga-Abos sind noch nicht online buchbar. Preise und Leistungen sind vorläufig; frage nach dem Pilot.",
+      "Club- und Liga-Tarife auf Anfrage. Preise und Leistungen vor Vertragsabschluss bestätigen.",
     free: "Kostenlos",
     custom: "Individuell",
     plans: [
@@ -532,7 +527,6 @@ export const de: Content = {
     copyright: "CricLume. Jeder Ball. Jeder Vorteil.",
   },
   footer: {
-    desc: "Cricket-Scoring auf deinem Gerät und lokale Videoanalyse. Club-, Liga- und Cloud-Funktionen sind in Entwicklung.",
     explore: "Entdecken",
     access: "Zugang",
     accessLine1: "Scoring steht allen offen",
@@ -558,7 +552,7 @@ export const nl: Content = {
     l1: "Elke bal.",
     l2: "Elke hoek.",
     l3: "Elk voordeel.",
-    body: "Registreer cricketwedstrijden bal voor bal, ook bij slecht bereik. Bekijk lokale video's op je apparaat; cloud- en multi-telefoonfuncties worden getest.",
+    body: "Registreer cricketwedstrijden bal voor bal, bekijk scorekaarten en lokale video's en organiseer teams en wedstrijden met CricLume.",
     ctaPrimary: "Begin met scoren",
     ctaSecondary: "Bekijk de schermen",
     previewLabel: "Voorbeeldscore",
@@ -606,7 +600,7 @@ export const nl: Content = {
     ctaTitle1: "Kijk de wedstrijd terug,",
     ctaTitle2: "bal voor bal",
     ctaBody:
-      "Bekijk opgenomen video met vertraging, beeld-voor-beeld en tekengereedschap. Multi-telefoonopnamen en AI-analyse zijn aparte pilotfuncties.",
+      "Bekijk cricketbeelden in slow motion, wissel van camerahoek, ga beeld voor beeld en voeg opmerkingen toe.",
     ctaButton: "Begin met scoren",
     tags: { league: "Competitie", academy: "Academie", cup: "T20-beker" },
   },
@@ -643,9 +637,7 @@ export const nl: Content = {
   featuresTab: {
     kicker: "Platform",
     title: "Functies",
-    intro:
-      "De scorer en lokale videofuncties zijn te proberen. Cloudweergaven en geavanceerde koppelingen worden getest.",
-    watchTitle: "Cloudtoegang (pilot)",
+    watchTitle: "Cloudtoegang",
     watchBody:
       "Privé-, tegenstander-, competitie- en openbare weergaven vragen een ingestelde clubcloud en zijn geen onderdeel van de lokale scorer.",
     watchOptions: [
@@ -666,7 +658,7 @@ export const nl: Content = {
       "Ongedaan maken op elke bal, met volledige wijzigingshistorie",
       "Spraaknotities en AI-analyse in de review",
       "Competities, innings en ballen per club opgeslagen",
-      "Demowedstrijddata om te proberen vóór onboarding",
+      "Scorekaarten exporteren, balnotities en eenvoudige wedstrijdinvoer",
     ],
   },
   screensTab: {
@@ -704,7 +696,7 @@ export const nl: Content = {
     selectLabel: "Kies je land",
     mostPopular: "Voor clubs",
     pilotNotice:
-      "Club- en competitieabonnementen zijn nog niet online verkrijgbaar. Prijzen en functies zijn indicatief; neem contact op voor de pilot.",
+      "Club- en competitieabonnementen op aanvraag. Controleer prijzen en voorwaarden vooraf.",
     free: "Gratis",
     custom: "Op maat",
     plans: [
@@ -804,7 +796,6 @@ export const nl: Content = {
     copyright: "CricLume. Elke bal. Elk voordeel.",
   },
   footer: {
-    desc: "Probeer cricket scoren en lokale videoreview. Club-, competitie- en cloudfuncties zijn in ontwikkeling.",
     explore: "Ontdek",
     access: "Toegang",
     accessLine1: "Scoren is voor iedereen toegankelijk",
@@ -830,7 +821,7 @@ export const af: Content = {
     l1: "Elke bal.",
     l2: "Elke hoek.",
     l3: "Elke voordeel.",
-    body: "Teken krieketwedstryde bal vir bal aan, ook met swak sein. Hersien plaaslike video op jou toestel; wolk- en meervoudige foonfunksies word getoets.",
+    body: "Teken krieketwedstryde bal vir bal aan, bekyk telkaarte en plaaslike video's en organiseer spanne en wedstryde met CricLume.",
     ctaPrimary: "Begin tel",
     ctaSecondary: "Sien die skerms",
     previewLabel: "Voorbeeldtelbord",
@@ -915,9 +906,7 @@ export const af: Content = {
   featuresTab: {
     kicker: "Platform",
     title: "Kenmerke",
-    intro:
-      "Die tellingblad en plaaslike video-oorsig kan getoets word. Klubwolkaansigte en ander integrasies word nog getoets.",
-    watchTitle: "Wolktoegang (loods)",
+    watchTitle: "Wolktoegang",
     watchBody:
       "Private, teenstander-, liga- en openbare aansigte vereis 'n opgestelde klubwolkdiens; dit is nie deel van die plaaslike tellingblad nie.",
     watchOptions: [
@@ -941,7 +930,7 @@ export const af: Content = {
       "Ontdoen op enige bal, met volledige oudit van wysigings",
       "Plaaslike videohersiening met stadige aksie en merke",
       "Kompetisies, beurte en balle per klub gestoor",
-      "Demo-wedstryddata om te toets voor aanboord",
+      "Telkaarte uitvoer, balnotas en maklike wedstrydopstelling",
     ],
   },
   screensTab: {
@@ -1079,7 +1068,6 @@ export const af: Content = {
     copyright: "CricLume. Elke bal. Elke voordeel.",
   },
   footer: {
-    desc: "Probeer telling op jou toestel en plaaslike videohersiening. Klub-, liga- en wolkfunksies word ontwikkel.",
     explore: "Verken",
     access: "Toegang",
     accessLine1: "Telling is oop vir almal",
@@ -1105,7 +1093,7 @@ export const fr: Content = {
     l1: "Chaque balle.",
     l2: "Chaque angle.",
     l3: "Chaque avantage.",
-    body: "Notez chaque balle, même avec une connexion limitée. Revoyez les vidéos locales sur votre appareil ; les fonctions cloud et multi-téléphones sont testées en pilote.",
+    body: "Enregistrez les matchs de cricket balle par balle, consultez les scores, revoyez les vidéos locales et organisez équipes et rencontres avec CricLume.",
     ctaPrimary: "Commencer le marquage",
     ctaSecondary: "Voir les écrans",
     previewLabel: "Score d'exemple",
@@ -1153,7 +1141,7 @@ export const fr: Content = {
     ctaTitle1: "Revoyez le match,",
     ctaTitle2: "balle par balle",
     ctaBody:
-      "Revoyez des vidéos sur votre appareil au ralenti, image par image et avec annotations. La capture multi-téléphones et l'IA restent des fonctions pilotes.",
+      "Revoyez les vidéos de cricket au ralenti et image par image, choisissez un angle et ajoutez vos annotations.",
     ctaButton: "Commencer le marquage",
     tags: { league: "Ligue", academy: "Académie", cup: "Coupe T20" },
   },
@@ -1190,9 +1178,7 @@ export const fr: Content = {
   featuresTab: {
     kicker: "Plateforme",
     title: "Fonctions",
-    intro:
-      "Le marqueur et la revue vidéo locale sont disponibles à l'essai. Les vues cloud et les intégrations avancées sont en pilote.",
-    watchTitle: "Accès cloud (pilote)",
+    watchTitle: "Accès cloud",
     watchBody:
       "Les vues privées, adversaires, ligues et publiques nécessitent un espace cloud configuré; elles ne font pas partie du marqueur local.",
     watchOptions: [
@@ -1213,7 +1199,7 @@ export const fr: Content = {
       "Annulation sur chaque balle, avec historique complet des modifications",
       "Revue vidéo locale avec ralenti et annotations",
       "Compétitions, manches et balles enregistrées par club",
-      "Données de match de démo pour tester avant l'intégration",
+      "Exports des scores, notes par balle et configuration guidée",
     ],
   },
   screensTab: {
@@ -1253,7 +1239,7 @@ export const fr: Content = {
     selectLabel: "Choisissez votre pays",
     mostPopular: "Pour les clubs",
     pilotNotice:
-      "Les offres Club et Ligue ne sont pas encore achetables en ligne. Les prix et fonctions sont indicatifs ; contactez-nous pour le pilote.",
+      "Offres Club et Ligue sur demande. Confirmez les prix et les prestations avant de souscrire.",
     free: "Gratuit",
     custom: "Sur mesure",
     plans: [
@@ -1353,7 +1339,6 @@ export const fr: Content = {
     copyright: "CricLume. Chaque balle. Chaque avantage.",
   },
   footer: {
-    desc: "Essayez le marquage sur appareil et la revue vidéo locale. Les fonctions club, ligue et cloud sont en développement.",
     explore: "Explorer",
     access: "Accès",
     accessLine1: "Le marquage est ouvert à tous",
