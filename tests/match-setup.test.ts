@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { validateCloudMatchSetup, validateDeviceMatchSetup } from "../src/lib/match-setup.ts";
+import {
+  readLimitedOvers,
+  validateCloudMatchSetup,
+  validateDeviceMatchSetup,
+} from "../src/lib/match-setup.ts";
 
 const device = {
   homeName: "Northside CC",
@@ -89,5 +93,13 @@ test("cloud match setup requires two registered, populated, distinct teams", () 
     { ...valid, teams: [{ id: "north", playerIds: ["a", "a"] }, clubs[1]!] },
   ]) {
     assert.equal(validateCloudMatchSetup(invalid).ok, false);
+  }
+});
+
+test("competition formats use the same bounded over count as real match scoring", () => {
+  assert.equal(readLimitedOvers("20"), 20);
+  assert.equal(readLimitedOvers(" 50 "), 50);
+  for (const value of ["", "0", "-5", "12.5", "1e2", "101", "Infinity", "foo"]) {
+    assert.equal(readLimitedOvers(value), null);
   }
 });
