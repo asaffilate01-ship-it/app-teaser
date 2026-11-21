@@ -3,6 +3,7 @@ import { getCloudClient } from "@/lib/cloud";
 
 export type CameraCloudAction = "token" | "start" | "stop" | "status";
 import { type CameraCloudState } from "@/lib/camera-cloud-status";
+import type { CameraArchiveStatus } from "@/lib/camera-archive-policy";
 export { cameraCloudLabel, cameraCloudActive } from "@/lib/camera-cloud-status";
 
 export interface CameraCloudRecording {
@@ -11,6 +12,10 @@ export interface CameraCloudRecording {
   state: CameraCloudState;
   provider_status: number | null;
   start_source?: "director" | "match_state";
+  archive_check_status: CameraArchiveStatus;
+  archive_check_attempts: number;
+  archive_object_bytes: number | null;
+  archive_checked_at: string | null;
   created_at: string;
   updated_at: string;
   ended_at: string | null;

@@ -78,3 +78,25 @@ Safeguards implemented in source:
 7. Negatively test missing consent, junior footage, disconnected phone, another club, duplicate workers, provider outage, revoked operator, delayed callbacks and cost cap, then test four phones on mobile data. Do not claim production readiness before real-ground acceptance.
 
 **No production scheduler, provider account or migration has been deployed in this repository update.** Phone publishers must remain active for the provider to capture frames.
+
+
+## Next phase — private archived MP4 inspection (source only)
+
+New **camera-cloud-archive** server function inspects LiveKit jobs after the provider has reported \`provider_completed\`. It is a separate **CRON_SECRET**-authenticated endpoint, disabled by default with \`CRICLUME_CLOUD_ARCHIVE_CHECK_ENABLED=false\`. It cannot be called from a camera browser.
+
+For every eligible job, the worker derives the canonical object key from the server-verified organisation, room, device and recording ID. It uses the private S3 provider credentials already configured above, performs \`HeadObject\` to confirm object presence and size, then fetches only the first 64 bytes to check the MP4 \`ftyp\` marker. It does **not** read the full video, make public links, or certify player consent.
+
+The worker records one of these limited statuses: uninspected, object confirmed, object missing, invalid object, storage error or manual review required. It checks at most 10 completed jobs per request and stops retrying failures after five attempts. A successful private object check requires at least 1 KiB and a valid MP4 header, but **is not** a checksum, full video decode, publication consent, or safeguarding approval. Recording download, transcode and highlights remain blocked until later verified ingestion and approval.
+
+The new database migration includes columns for private check status, attempt count, object byte length, ETag metadata and timestamps. These are server-written only; club and phone accounts can view permitted check statuses but cannot falsify them.
+
+**Deployment order and conditions:**
+
+1. Obtain permission to operate on the actual CricLume Supabase project, and back up its database. **Never deploy to Dishbee.**
+2. Apply the \`camera_cloud_archive_inspection\` migration after the previously merged camera/cloud schema migrations, then deploy \`camera-cloud-archive\`, \`camera-cloud\` and \`integration-readiness\` to that same project.
+3. Configure \`CRICLUME_CLOUD_ARCHIVE_CHECK_ENABLED=true\` only after verifying the existing private S3 bucket, object HEAD/GET permissions and CRON_SECRET. It uses the same server-only S3 credentials as LiveKit Egress.
+4. Install a trusted scheduled POST to \`/functions/v1/camera-cloud-archive\` using \`x-cron-secret\`, e.g. once a minute. The schedule is **not created by this GitHub change**.
+5. Verify with real consenting adult footage: signed provider-complete callback, exact object path, HEAD size, MP4 container header, missing-file retries, forbidden permissions, wrong-tenant access, and no browser-created archive confirmations.
+6. Follow with private library ingestion, full playback and checksum checks if required, junior/guardian safeguards, blur and retention/deletion enforcement, and approval before any sharing or highlights.
+
+Existing source-code and CI passing do not mean this worker is active, scheduled, or has inspected any real footage.

@@ -83,3 +83,7 @@ verify_jwt = false
 # No browser JWT or CORS; the function performs server-side authorisation.
 [functions.camera-cloud-auto]
 verify_jwt = false
+
+# Separate scheduled object check, authenticated with CRON_SECRET; never a public URL.
+[functions.camera-cloud-archive]
+verify_jwt = false

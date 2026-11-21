@@ -22,5 +22,6 @@ jobs:
           deno check --node-modules-dir=auto \
             supabase/functions/camera-cloud/index.ts \
             supabase/functions/camera-cloud-auto/index.ts \
+            supabase/functions/camera-cloud-archive/index.ts \
             supabase/functions/camera-cloud-webhook/index.ts \
             supabase/functions/integration-readiness/index.ts

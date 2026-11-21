@@ -336,6 +336,40 @@ assert.equal(
 await db.query("update public.camera_cloud_recordings set state='provider_completed' where id=$1", [
   cloudJob,
 ]);
+// A provider completion cannot become a confirmed private archive without
+// object evidence from a trusted server-side S3 inspection.
+await assert.rejects(
+  () =>
+    db.query(
+      "update public.camera_cloud_recordings set archive_check_status='object_confirmed' where id=$1",
+      [cloudJob],
+    ),
+  (error) => error.code === "23514",
+);
+await db.query(
+  "update public.camera_cloud_recordings set archive_check_status='object_confirmed',archive_check_attempts=1,archive_object_bytes=2048,archive_checked_at=now(),archive_object_confirmed_at=now() where id=$1",
+  [cloudJob],
+);
+assert.equal(
+  (
+    await asUser(a, () =>
+      db.query("select archive_check_status from public.camera_cloud_recordings where id=$1", [
+        cloudJob,
+      ]),
+    )
+  ).rows[0].archive_check_status,
+  "object_confirmed",
+);
+assert.equal(
+  (
+    await asUser(b, () =>
+      db.query("select archive_check_status from public.camera_cloud_recordings where id=$1", [
+        cloudJob,
+      ]),
+    )
+  ).rows.length,
+  0,
+);
 const autoJob = "b9000000-0000-4000-8000-000000000002";
 await db.query(
   "insert into public.camera_cloud_recordings(id,room_id,device_id,requested_by,provider_room_name,object_path,start_source) values($1,$2,$3,$4,$5,$6,'match_state')",
