@@ -1,5 +1,7 @@
 import { ScorerWagonWheel } from "@/components/ScorerWagonWheel";
 import { ScorerBackupImport } from "@/components/ScorerBackupImport";
+import { ScorerMatchNavigation } from "@/components/ScorerMatchNavigation";
+import { defaultScorerDestination, type ScorerDestination } from "@/lib/scorer-navigation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   useCallback,
@@ -92,7 +94,6 @@ export const Route = createFileRoute("/app")({
 });
 
 type AppScreen = "dashboard" | "setup" | "match";
-type MatchTab = "score" | "timeline" | "scorecard" | "analysis" | "video";
 
 const fieldZones: FieldZone[] = [
   "Fine leg",
@@ -239,7 +240,7 @@ export function CricketApp() {
   return (
     <div className="min-h-screen bg-[#0f0d17] text-slate-100">
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0f0d17]/95 px-4 py-3 backdrop-blur-xl md:px-8">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 md:gap-3">
           <div className="flex items-center gap-3">
             {screen !== "dashboard" && (
               <button
@@ -258,12 +259,14 @@ export function CricketApp() {
               Scorer preview
             </span>
           </div>
-          <div className="flex items-center gap-3 text-xs text-slate-400">
+          <div className="flex shrink-0 items-center gap-2 text-xs text-slate-400 md:gap-3">
             <Link
               to="/platform"
-              className="rounded-lg border border-white/15 px-3 py-2 font-bold text-slate-300 hover:text-white"
+              aria-label="Club workspace"
+              className="flex size-10 items-center justify-center rounded-lg border border-white/15 font-bold text-slate-300 hover:text-white sm:h-auto sm:w-auto sm:px-3 sm:py-2"
             >
-              Club workspace
+              <Users className="size-4 sm:hidden" aria-hidden="true" />
+              <span className="hidden sm:inline">Club workspace</span>
             </Link>
             <span className="flex items-center gap-2">
               {cloudLinked ? (
@@ -786,7 +789,11 @@ function LiveMatch({
   initialCloudConflict: string | null;
   onCloudConflictResolved: () => void;
 }) {
-  const [tab, setTab] = useState<MatchTab>("score");
+  const [tab, setTab] = useState<ScorerDestination>(defaultScorerDestination);
+  const changeTab = (next: ScorerDestination) => {
+    setTab(next);
+    if (window.innerWidth < 768) window.scrollTo({ top: 0, behavior: "auto" });
+  };
   const [cloudActionError, setCloudActionError] = useState<string | null>(null);
   const [cloudConflict, setCloudConflict] = useState<string | null>(initialCloudConflict);
   const [backupRequested, setBackupRequested] = useState(false);
@@ -897,7 +904,7 @@ function LiveMatch({
     <main
       id="main-content"
       tabIndex={-1}
-      className="mx-auto w-full max-w-7xl pb-28 md:px-8 md:py-8"
+      className="mx-auto w-full max-w-7xl pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-8 md:py-8"
     >
       <section className="border-b border-white/10 bg-gradient-to-br from-[#2c1429] via-[#17111f] to-[#2a210e] px-4 py-6 md:rounded-3xl md:border md:px-8 md:py-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -936,44 +943,12 @@ function LiveMatch({
         </div>
       </section>
 
-      <nav
-        aria-label="Match sections"
-        className="no-scrollbar sticky top-[65px] z-30 flex gap-1 overflow-x-auto border-b border-white/10 bg-[#0f0d17]/95 px-3 py-2 backdrop-blur-xl md:top-[77px] md:mt-4 md:rounded-2xl md:border md:px-2"
-      >
-        {[
-          ["score", Gauge, "Score"],
-          ["timeline", History, "Timeline"],
-          ["scorecard", Trophy, "Scorecard"],
-          ["analysis", BarChart3, "Analysis"],
-          ["video", Video, "Video lab"],
-        ].map(([id, Icon, label]) => {
-          const TabIcon = Icon as typeof Gauge;
-          return (
-            <button
-              key={String(id)}
-              type="button"
-              aria-current={tab === id ? "page" : undefined}
-              onClick={() => setTab(id as MatchTab)}
-              className={`flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold ${tab === id ? "bg-amber-300 text-[#1d1520]" : "text-slate-400"}`}
-            >
-              <TabIcon className="size-4" />
-              {String(label)}
-            </button>
-          );
-        })}
-        <button
-          type="button"
-          onClick={exportMatch}
-          className="ml-auto flex shrink-0 items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-400"
-        >
-          <Download className="size-4" /> Export
-        </button>
-      </nav>
+      <ScorerMatchNavigation active={tab} onChange={changeTab} onExport={exportMatch} />
 
       {tab === "score" && (
         <aside
           aria-label="Compact live score"
-          className="sticky top-[118px] z-20 grid grid-cols-[1fr_auto] items-center gap-2 border-b border-amber-300/20 bg-[#211828]/95 px-4 py-2 text-slate-100 shadow-lg backdrop-blur-xl md:hidden"
+          className="sticky top-[64px] z-30 grid grid-cols-[1fr_auto] items-center gap-2 border-b border-amber-300/20 bg-[#211828]/95 px-4 py-2 text-slate-100 shadow-lg backdrop-blur-xl md:hidden"
         >
           <div className="min-w-0">
             <p className="truncate text-xs font-semibold">
@@ -983,14 +958,25 @@ function LiveMatch({
             </p>
             <p className="text-[11px] text-slate-300">
               {summary.overs} overs ·{" "}
-              {cloudSync.enabled ? `Cloud: ${cloudSync.status}` : "Saved on this device"}
+              {cloudSync.enabled ? `Cloud: ${cloudSync.status}` : "On this device"}
             </p>
           </div>
-          <div className="text-right">
-            <p className="font-display text-2xl font-bold tabular-nums text-amber-200">
-              {summary.runs}/{summary.wickets}
-            </p>
-            {target != null && <p className="text-[10px] text-slate-300">Target {target}</p>}
+          <div className="flex items-center gap-2">
+            <div className="text-right">
+              <p className="font-display text-2xl font-bold tabular-nums text-amber-200">
+                {summary.runs}/{summary.wickets}
+              </p>
+              {target != null && <p className="text-[10px] text-slate-300">Target {target}</p>}
+            </div>
+            <button
+              type="button"
+              onClick={exportMatch}
+              aria-label="Export current match backup"
+              title="Export match backup"
+              className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-amber-200/20 bg-white/5 text-amber-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-200"
+            >
+              <Download className="size-5" aria-hidden="true" />
+            </button>
           </div>
         </aside>
       )}
@@ -1041,14 +1027,16 @@ function LiveMatch({
             </p>
           </section>
         )}
-        {tab === "score" && !cloudConflict && (
-          <ScoringPad
-            match={match}
-            onSave={saveAndSync}
-            onAdvanceInnings={() => void advanceInnings()}
-            onExit={onExit}
-          />
-        )}
+        <div hidden={tab !== "score"}>
+          {!cloudConflict && (
+            <ScoringPad
+              match={match}
+              onSave={saveAndSync}
+              onAdvanceInnings={() => void advanceInnings()}
+              onExit={onExit}
+            />
+          )}
+        </div>
         {tab === "timeline" && <Timeline match={match} />}
         {tab === "scorecard" && <Scorecard match={match} />}
         {tab === "analysis" && <Analysis match={match} />}
@@ -1171,17 +1159,21 @@ function ScoringPad({
 
   return (
     <div className="grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
-      <section className="space-y-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4 md:p-6">
+      <section className="order-2 space-y-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4 md:p-6 lg:order-1">
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Striker">
-            <PlayerSelect team={battingTeam} value={strikerId} onChange={setStrikerId} />
-          </Field>
+          <div className="hidden lg:block">
+            <Field label="Striker">
+              <PlayerSelect team={battingTeam} value={strikerId} onChange={setStrikerId} />
+            </Field>
+          </div>
           <Field label="Non-striker">
             <PlayerSelect team={battingTeam} value={nonStrikerId} onChange={setNonStrikerId} />
           </Field>
-          <Field label="Bowler">
-            <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} />
-          </Field>
+          <div className="hidden lg:block">
+            <Field label="Bowler">
+              <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} />
+            </Field>
+          </div>
           <Field label="Bowling end">
             <select
               value={end}
@@ -1279,7 +1271,7 @@ function ScoringPad({
         )}
       </section>
 
-      <section className="space-y-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4 md:p-6">
+      <section className="order-1 space-y-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4 md:p-6 lg:order-2">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-amber-300">
@@ -1295,6 +1287,15 @@ function ScoringPad({
               {(summary.legalBalls % match.settings.ballsPerOver) + 1}
             </strong>
           </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-black/20 p-3 lg:hidden">
+          <Field label="Striker">
+            <PlayerSelect team={battingTeam} value={strikerId} onChange={setStrikerId} />
+          </Field>
+          <Field label="Bowler">
+            <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} />
+          </Field>
         </div>
 
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
