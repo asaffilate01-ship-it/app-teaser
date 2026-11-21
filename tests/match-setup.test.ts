@@ -23,10 +23,12 @@ test("real device match setup accepts independent lineups and integer overs", ()
     awayLineup: ["F Smith", "G Jones", "H Williams"],
     oversPerInnings: 20,
   });
-  assert.deepEqual(
-    validateDeviceMatchSetup({ ...device, format: "Multi-day", overs: "" }),
-    { ok: true, homeLineup: ["A Khan", "B Patel", "C Ali"], awayLineup: ["F Smith", "G Jones", "H Williams"], oversPerInnings: null },
-  );
+  assert.deepEqual(validateDeviceMatchSetup({ ...device, format: "Multi-day", overs: "" }), {
+    ok: true,
+    homeLineup: ["A Khan", "B Patel", "C Ali"],
+    awayLineup: ["F Smith", "G Jones", "H Williams"],
+    oversPerInnings: null,
+  });
 });
 
 test("device setup refuses fake or ambiguous match identities", () => {
@@ -35,14 +37,28 @@ test("device setup refuses fake or ambiguous match identities", () => {
     { ...device, homeName: "Northside CC", awayName: " northside cc " },
     { ...device, awayPlayers: "F Smith" },
     { ...device, homePlayers: "A Khan\na khan\nC Ali" },
-    { ...device, awayPlayers: Array.from({ length: 12 }, (_, index) => `Player ${index}`).join("\n") },
+    {
+      ...device,
+      awayPlayers: Array.from({ length: 12 }, (_, index) => `Player ${index}`).join("\n"),
+    },
   ]) {
     assert.equal(validateDeviceMatchSetup(draft).ok, false);
   }
 });
 
 test("over limits must be safe whole numbers, not silently coerced", () => {
-  for (const overs of ["", "0", "-1", "1.5", "20.5", "NaN", "Infinity", "1e3", "101", "999999999999999999999"]) {
+  for (const overs of [
+    "",
+    "0",
+    "-1",
+    "1.5",
+    "20.5",
+    "NaN",
+    "Infinity",
+    "1e3",
+    "101",
+    "999999999999999999999",
+  ]) {
     const local = validateDeviceMatchSetup({ ...device, overs });
     const cloud = validateCloudMatchSetup({
       homeTeamId: "north",
