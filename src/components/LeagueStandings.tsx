@@ -41,8 +41,9 @@ export function LeagueStandings({
           </div>
           <p className="mt-2 max-w-3xl text-xs leading-relaxed text-slate-400">
             Based only on explicitly signed-off fixture results under the current rule version.
-            CricLume does not infer winners, scores or net run rate from incomplete fixtures.
-            This preview does not sign off or publish a league result.
+            CricLume does not infer winners or scores from incomplete fixtures. Net run rate
+            here uses recorded legal balls; competition rules for all-out or rain-shortened innings
+            may require additional adjustment. This preview does not publish an official result.
           </p>
         </div>
         <button
