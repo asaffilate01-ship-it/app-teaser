@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowLeft, Camera, Check, CircleStop, Maximize2, Radio, RefreshCw, ShieldCheck, Video } from "lucide-react";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { getCloudClient, isCloudConfigured } from "@/lib/cloud";
@@ -52,19 +52,67 @@ function CameraDirector() {
   const [soundDevice, setSoundDevice] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
-  const liveRef = useRef<LiveCameraSession | null>(null);
+  const liveRef = useRef<Map<string, LiveCameraSession>>(new Map());
+  const connectingRef = useRef<Set<string>>(new Set());
+  const activeRef = useRef(true);
+
+  const connectDevice = useCallback(async (deviceId: string) => {
+    if (liveRef.current.has(deviceId) || connectingRef.current.has(deviceId)) return;
+    connectingRef.current.add(deviceId);
+    try {
+      const connection = await connectLiveCamera({
+        roomId,
+        cameraId: deviceId,
+        identity: "director:" + crypto.randomUUID(),
+        mode: "director",
+        onReady: (from) => {
+          if (from === deviceId) {
+            void liveRef.current.get(deviceId)?.watch(deviceId)
+              .catch((error: unknown) => setMessage(String(error)));
+          }
+        },
+        onStream: (from, stream) => {
+          if (!activeRef.current || from !== deviceId) return;
+          setStreams((current) => {
+            const next = { ...current };
+            if (stream) next[deviceId] = stream;
+            else delete next[deviceId];
+            return next;
+          });
+        },
+        onStatus: (from, state) => {
+          if (activeRef.current && from === deviceId) {
+            setStates((current) => ({ ...current, [deviceId]: state }));
+          }
+        },
+        onError: (error) => {
+          if (activeRef.current) setMessage(error);
+        },
+      });
+      if (!activeRef.current) {
+        connection.close();
+        return;
+      }
+      liveRef.current.set(deviceId, connection);
+      await connection.watch(deviceId);
+    } catch (error) {
+      if (activeRef.current) {
+        setMessage(error instanceof Error ? error.message : "Private camera stream failed.");
+      }
+    } finally {
+      connectingRef.current.delete(deviceId);
+    }
+  }, [roomId]);
 
   useEffect(() => {
     if (!configured || !session) return;
     const client = getCloudClient();
-    let active = true;
-    let live: LiveCameraSession | null = null;
-
+    activeRef.current = true;
     const load = async () => {
       try {
         const access = await client.rpc("can_direct_camera_room", { p_room_id: roomId });
         if (access.error) throw access.error;
-        if (!active) return;
+        if (!activeRef.current) return;
         setAuthorised(access.data === true);
         if (access.data !== true) return;
 
@@ -77,53 +125,25 @@ function CameraDirector() {
         if (roomResult.error) throw roomResult.error;
         if (deviceResult.error) throw deviceResult.error;
         if (armResult.error) throw armResult.error;
-        if (!active) return;
+        if (!activeRef.current) return;
         setRoom(roomResult.data as RoomRecord);
         const connectedDevices = (deviceResult.data ?? []) as DeviceRecord[];
         setDevices(connectedDevices);
         setArms((armResult.data ?? []) as RecordingArm[]);
-
-        live = await connectLiveCamera({
-          roomId,
-          identity: "director:" + crypto.randomUUID(),
-          mode: "director",
-          onReady: (deviceId) => {
-            // The live-media room is restricted to registered operators and directors.
-            void live?.watch(deviceId).catch((error: unknown) => setMessage(String(error)));
-          },
-          onStream: (deviceId, stream) => {
-            if (!active) return;
-            setStreams((current) => {
-              const next = { ...current };
-              if (stream) next[deviceId] = stream;
-              else delete next[deviceId];
-              return next;
-            });
-          },
-          onStatus: (deviceId, state) => {
-            if (active) setStates((current) => ({ ...current, [deviceId]: state }));
-          },
-          onError: (error) => {
-            if (active) setMessage(error);
-          },
-        });
-        if (!active) {
-          live.close();
-          return;
-        }
-        liveRef.current = live;
-        await Promise.allSettled(connectedDevices.map((device) => live?.watch(device.id)));
+        await Promise.allSettled(connectedDevices.map((device) => connectDevice(device.id)));
       } catch (error) {
-        if (active) setMessage(error instanceof Error ? error.message : "Camera room failed to load.");
+        if (activeRef.current) {
+          setMessage(error instanceof Error ? error.message : "Camera room failed to load.");
+        }
       }
     };
     void load();
     return () => {
-      active = false;
-      live?.close();
-      liveRef.current = null;
+      activeRef.current = false;
+      for (const connection of liveRef.current.values()) connection.close();
+      liveRef.current.clear();
     };
-  }, [configured, roomId, session]);
+  }, [configured, roomId, session, connectDevice]);
 
   const refresh = async () => {
     setMessage("");
@@ -136,8 +156,10 @@ function CameraDirector() {
       ]);
       if (deviceResult.error) throw deviceResult.error;
       if (armResult.error) throw armResult.error;
-      setDevices((deviceResult.data ?? []) as DeviceRecord[]);
+      const nextDevices = (deviceResult.data ?? []) as DeviceRecord[];
+      setDevices(nextDevices);
       setArms((armResult.data ?? []) as RecordingArm[]);
+      await Promise.allSettled(nextDevices.map((device) => connectDevice(device.id)));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not refresh cameras.");
     }
@@ -277,7 +299,7 @@ function CameraDirector() {
                       <Camera className="size-9" />
                       <span>{states[device.id] === "failed" ? "Live connection failed" : "Waiting for private live camera…"}</span>
                       <button
-                        onClick={() => void liveRef.current?.watch(device.id).catch((error: unknown) => setMessage(String(error)))}
+                        onClick={() => void (liveRef.current.get(device.id)?.watch(device.id) ?? connectDevice(device.id)).catch((error: unknown) => setMessage(String(error)))}
                         className="rounded-md border border-white/20 px-3 py-2 text-xs"
                       >Reconnect</button>
                     </div>
