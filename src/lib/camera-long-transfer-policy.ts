@@ -14,19 +14,22 @@ export function allowedLongTransferSize(value: number | null): boolean {
   );
 }
 
-export function longTransferEligible(input: {
-  jobState: string;
-  failureCode: string | null;
-  recordingState: string;
-  archiveState: string;
-  sizeBytes: number | null;
-  retainsUntil: string;
-  consentConfirmed: boolean;
-  reviewerActive: boolean;
-  recordingPermissionAttested: boolean;
-  includesJunior: boolean;
-  guardianPermissionAttested: boolean;
-}, nowMs: number): boolean {
+export function longTransferEligible(
+  input: {
+    jobState: string;
+    failureCode: string | null;
+    recordingState: string;
+    archiveState: string;
+    sizeBytes: number | null;
+    retainsUntil: string;
+    consentConfirmed: boolean;
+    reviewerActive: boolean;
+    recordingPermissionAttested: boolean;
+    includesJunior: boolean;
+    guardianPermissionAttested: boolean;
+  },
+  nowMs: number,
+): boolean {
   return (
     input.jobState === "manual_review" &&
     input.failureCode === "large_file_requires_external_worker" &&

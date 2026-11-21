@@ -43,9 +43,13 @@ test("only verified long recordings with current permissions are transfer eligib
     { reviewerActive: false },
     { recordingPermissionAttested: false },
     { guardianPermissionAttested: false },
-  ]) assert.equal(longTransferEligible({ ...baseline, ...patch }, nowMs), false);
+  ])
+    assert.equal(longTransferEligible({ ...baseline, ...patch }, nowMs), false);
   assert.equal(
-    longTransferEligible({ ...baseline, includesJunior: false, guardianPermissionAttested: false }, nowMs),
+    longTransferEligible(
+      { ...baseline, includesJunior: false, guardianPermissionAttested: false },
+      nowMs,
+    ),
     true,
   );
 });
@@ -75,12 +79,19 @@ test("worker refuses Dishbee and arbitrary S3 destination project endpoints", ()
     "http://" + LONG_TRANSFER_WORKER_REF + ".supabase.co/storage/v1/s3",
     correct + "?tenant=bad",
     correct.replace("/storage/v1/s3", "/other"),
-  ]) assert.equal(isExpectedSupabaseS3Endpoint(bad, LONG_TRANSFER_WORKER_REF), false);
+  ])
+    assert.equal(isExpectedSupabaseS3Endpoint(bad, LONG_TRANSFER_WORKER_REF), false);
   assert.equal(isExpectedSupabaseS3Endpoint(correct, "ebzinvoxundsdubczqfg"), false);
 });
 
 test("rejects malformed MP4 headers without claiming validation of whole video", () => {
-  assert.equal(monitorMp4Header(new Uint8Array([0,0,0,20,102,116,121,112,105,115,111,109])), true);
-  assert.equal(monitorMp4Header(new Uint8Array([0,0,0,20,0,0,0,0,105,115,111,109])), false);
+  assert.equal(
+    monitorMp4Header(new Uint8Array([0, 0, 0, 20, 102, 116, 121, 112, 105, 115, 111, 109])),
+    true,
+  );
+  assert.equal(
+    monitorMp4Header(new Uint8Array([0, 0, 0, 20, 0, 0, 0, 0, 105, 115, 111, 109])),
+    false,
+  );
   assert.equal(monitorMp4Header(new Uint8Array(0)), false);
 });
