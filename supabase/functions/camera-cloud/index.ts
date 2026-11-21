@@ -308,9 +308,16 @@ Deno.serve(async (request) => {
         .maybeSingle();
       if (error) throw error;
       if (!updated) {
-        const { data: current } = await client.from("camera_cloud_recordings")
-          .select("state").eq("id", session.id).maybeSingle();
-        return json({ recordingId: session.id, status: current?.state ?? "stopping" }, 200, request);
+        const { data: current } = await client
+          .from("camera_cloud_recordings")
+          .select("state")
+          .eq("id", session.id)
+          .maybeSingle();
+        return json(
+          { recordingId: session.id, status: current?.state ?? "stopping" },
+          200,
+          request,
+        );
       }
       return json({ recordingId: session.id, status: updated.state }, 202, request);
     }
