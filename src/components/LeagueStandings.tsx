@@ -42,8 +42,7 @@ export function LeagueStandings({
             <h4 className="text-base font-bold text-slate-100">Provisional league table</h4>
           </div>
           <p className="mt-2 max-w-3xl text-xs leading-relaxed text-slate-400">
-            Based only on explicitly signed-off fixture results under the current rule version.
-            Only signed-off results are counted. NRR is indicative; all-outs and rain need review.
+            Uses signed-off results and the current rules. NRR may need all-out or rain adjustment.
           </p>
         </div>
         <button
