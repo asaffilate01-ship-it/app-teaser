@@ -1,0 +1,25 @@
+name: Camera Edge Function Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deno-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Typecheck authenticated camera cloud endpoint and provider webhooks
+        run: |
+          deno check --node-modules-dir=auto \
+            supabase/functions/camera-cloud/index.ts \
+            supabase/functions/camera-cloud-webhook/index.ts \
+            supabase/functions/integration-readiness/index.ts

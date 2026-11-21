@@ -246,6 +246,51 @@ assert.equal(
   1,
 );
 
+// Cloud provider sessions are private and one active egress per camera.
+const cloudJob = "b9000000-0000-4000-8000-000000000001";
+await db.query(
+  "insert into public.camera_cloud_recordings(id,room_id,device_id,requested_by,provider_room_name,object_path) values($1,$2,$3,$4,$5,$6)",
+  [
+    cloudJob,
+    room,
+    device,
+    a,
+    "criclume-" + room + "-" + device,
+    org + "/" + room + "/" + device + "/" + cloudJob + ".mp4",
+  ],
+);
+assert.equal(
+  (await asUser(a, () => db.query("select id from public.camera_cloud_recordings"))).rows.length,
+  1,
+);
+assert.equal(
+  (await asUser(b, () => db.query("select id from public.camera_cloud_recordings"))).rows.length,
+  0,
+);
+await assert.rejects(
+  () =>
+    asUser(a, () =>
+      db.query("update public.camera_cloud_recordings set state='provider_completed' where id=$1", [
+        cloudJob,
+      ]),
+    ),
+  (error) => error.code === "42501",
+);
+await assert.rejects(
+  () =>
+    db.query(
+      "insert into public.camera_cloud_recordings(room_id,device_id,requested_by,provider_room_name,object_path) values($1,$2,$3,$4,$5)",
+      [
+        room,
+        device,
+        a,
+        "criclume-" + room + "-" + device,
+        org + "/" + room + "/" + device + "/secondary.mp4",
+      ],
+    ),
+  (error) => error.code === "23505",
+);
+
 await db.query(
   "insert into public.video_assets(id,organisation_id,room_id,device_id,storage_path,started_at,status,recording_consent,retention_expires_at,created_by) values($1,$2,$3,$4,'fixture-source.webm',now(),'uploaded','granted',now()+interval '1 day',$5)",
   [asset, org, room, device, a],

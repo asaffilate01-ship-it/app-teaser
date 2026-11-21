@@ -14,6 +14,12 @@ import {
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 import { connectLiveCamera, type LiveCameraSession } from "@/lib/camera-live";
 import {
+  cameraCloudStop,
+  publishCameraToCloud,
+  type CameraCloudPublisher,
+} from "@/lib/camera-cloud";
+import { Cloud } from "lucide-react";
+import {
   nextCameraCommand,
   reportCameraCommandResult,
   type CameraCommandCursor,
@@ -71,6 +77,7 @@ function MatchCamera() {
   const uploadQueueRef = useRef<Promise<void>>(Promise.resolve());
   const failedSegmentsRef = useRef<Array<{ blob: Blob; startedAt: string; endedAt: string }>>([]);
   const liveRef = useRef<LiveCameraSession | null>(null);
+  const cloudPublisherRef = useRef<CameraCloudPublisher | null>(null);
   const commandHandlerRef = useRef<(command: Record<string, unknown>) => void>(() => {});
   const lastAppliedCommandRef = useRef<CameraCommandCursor | null>(null);
   const presenceHeartbeatRef = useRef<() => void>(() => {});
@@ -84,6 +91,8 @@ function MatchCamera() {
   const [recording, setRecording] = useState(false);
   const [previewing, setPreviewing] = useState(false);
   const [liveSharing, setLiveSharing] = useState(false);
+  const [cloudPublishing, setCloudPublishing] = useState(false);
+  const [cloudConnecting, setCloudConnecting] = useState(false);
   const [autoRecordArmed, setAutoRecordArmed] = useState(false);
   const [failedSegments, setFailedSegments] = useState(0);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -99,6 +108,7 @@ function MatchCamera() {
       if (segmentTimerRef.current) clearTimeout(segmentTimerRef.current);
       if (recorderRef.current?.state === "recording") recorderRef.current.stop();
       liveRef.current?.close();
+      void cloudPublisherRef.current?.close();
       streamRef.current?.getTracks().forEach((track) => track.stop());
       presenceRef.current?.leave();
     },
@@ -162,6 +172,7 @@ function MatchCamera() {
           setPreviewing(false);
           liveRef.current?.close();
           setLiveSharing(false);
+          void stopCloudPublisher();
           setMessage("Camera or microphone disconnected. Check that the saved clips uploaded.");
         });
       });
@@ -204,6 +215,7 @@ function MatchCamera() {
           : "Automatic recording disarmed.",
       );
       if (!armed && recordingRef.current) stopRecording();
+      if (!armed && cloudPublisherRef.current) void stopCloudPublisher();
     }
   };
 
@@ -233,6 +245,47 @@ function MatchCamera() {
     liveRef.current = null;
     setLiveSharing(false);
     setMessage("Private live video sharing stopped.");
+  };
+
+  const startCloudPublisher = async () => {
+    if (!device || !streamRef.current || !consent || !autoRecordArmed) {
+      setMessage("Camera preview, permission and automatic recording arming are required.");
+      return;
+    }
+    if (cloudPublisherRef.current || cloudConnecting) return;
+    setCloudConnecting(true);
+    try {
+      const publisher = await publishCameraToCloud(roomId, device.id, streamRef.current, () => {
+        cloudPublisherRef.current = null;
+        setCloudPublishing(false);
+        setMessage("Cloud camera connection lost. Confirm provider recording status.");
+      });
+      cloudPublisherRef.current = publisher;
+      setCloudPublishing(true);
+      setMessage(
+        "Camera is publishing privately to LiveKit. A director must separately start cloud recording.",
+      );
+    } catch (error) {
+      setCloudPublishing(false);
+      setMessage(error instanceof Error ? error.message : "Private cloud publishing failed.");
+    } finally {
+      setCloudConnecting(false);
+    }
+  };
+
+  const stopCloudPublisher = async () => {
+    const publisher = cloudPublisherRef.current;
+    cloudPublisherRef.current = null;
+    setCloudPublishing(false);
+    await publisher?.close();
+    if (device) {
+      try {
+        await cameraCloudStop(roomId, device.id);
+      } catch {
+        // The phone stops its own media unconditionally. An authorised director
+        // must verify and stop any lingering provider-side recording.
+      }
+    }
   };
 
   const startRecording = () => {
@@ -661,6 +714,21 @@ function MatchCamera() {
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
+                      disabled={!consent || !autoRecordArmed || cloudConnecting}
+                      onClick={() =>
+                        void (cloudPublishing ? stopCloudPublisher() : startCloudPublisher())
+                      }
+                      className="inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-300/40 px-3 text-xs font-bold text-amber-200 disabled:opacity-40"
+                    >
+                      <Cloud className="size-4" />
+                      {cloudConnecting
+                        ? "Connecting cloud camera…"
+                        : cloudPublishing
+                          ? "Stop cloud publishing"
+                          : "Publish to cloud recorder"}
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => (liveSharing ? stopLiveSharing() : void startLiveSharing())}
                       className={
                         "rounded-md px-4 py-2.5 text-xs font-bold " +
@@ -727,6 +795,7 @@ function MatchCamera() {
                     // Revoking permission stops both capture and outgoing media immediately.
                     stopRecording();
                     stopLiveSharing();
+                    void stopCloudPublisher();
                     streamRef.current?.getTracks().forEach((track) => track.stop());
                     streamRef.current = null;
                     if (videoRef.current) videoRef.current.srcObject = null;

@@ -1,0 +1,52 @@
+# CricLume Cloud Camera & Server Egress — activation guide
+
+**Status: source-implemented, provider/production UNVERIFIED.** This feature is disabled by default. The implementation does **not** create a LiveKit account, issue charges, provision an S3 bucket, deploy database migrations, certify junior consent or turn the website into a live broadcast.
+
+## What is implemented
+
+1. A signed-in paired phone chooses **Publish to cloud recorder** after enabling preview, confirming club recording permission and arming auto-record. The browser obtains a short-lived, scoped LiveKit token from CricLume's own Supabase Edge Function, then publishes the phone's existing camera/audio tracks to a **private per-device LiveKit room**. No API secret is shipped to the browser.
+2. A club-authorised director opens the **Server-side cloud recording** panel and separately approves a start request. The backend verifies the director's roles, room/device ownership, operator's recording arming/consent and the real LiveKit publisher. It reserves a unique active session, calls LiveKit's real per-participant egress service, and targets a configured **private S3-compatible bucket**.
+3. An authorised director, or the paired camera operator, can issue a stop. A verified LiveKit signed webhook updates the provider state. Source code distinguishes **starting**, **recording**, **stopping**, **provider completed**, and **failed**. The dashboard deliberately does not claim archival verification.
+4. Provider jobs are stored under database RLS, preventing ordinary browsers from fabricating completed files or starting duplicate per-device egress.
+5. Existing peer-to-peer review, phone-side segmented recording and opt-in controls remain available independently. LiveKit publishing is a separate control; it does not silently enable itself.
+
+## Correct project and secrets
+
+The CricLume project is recorded in the repo as Supabase ref eivwnjbykohrlxavvpcr. **Do not deploy any of this to Dishbee.** Deploy migrations and Edge Functions only to the approved CricLume project following staging database tests and backup.
+
+The following must be configured as **server-side Supabase Edge Function secrets in CricLume**, not public Vite variables:
+
+- CRICLUME_CLOUD_CAPTURE_ENABLED=true only after review and a verified provider/storage setup
+- LIVEKIT_URL (wss:// hosted provider), LIVEKIT_API_KEY, LIVEKIT_API_SECRET
+- CRICLUME_CAPTURE_S3_ENDPOINT (https://)
+- CRICLUME_CAPTURE_S3_BUCKET (a private bucket with no public ACL)
+- CRICLUME_CAPTURE_S3_REGION
+- CRICLUME_CAPTURE_S3_ACCESS_KEY, CRICLUME_CAPTURE_S3_SECRET_KEY
+- SUPABASE_URL plus service-role credential for the approved CricLume project
+
+Configure the LiveKit project webhook to call the authenticated-provider endpoint:
+https://<criclume-supabase-project-host>/functions/v1/camera-cloud-webhook
+The webhook must deliver the **raw request body** and LiveKit **Authorization** signature. The Edge Function validates it with LiveKit's WebhookReceiver.
+
+Apply the generated cloud camera migration after existing P3 camera migrations. Deploy **camera-cloud** (user JWT verified) and **camera-cloud-webhook** (provider signature verified, no browser JWT) together. The provider may charge for recording minutes and storage; production use requires approved budgets, monitored concurrency and retention.
+
+## Privacy and limitations
+
+- The operator's browser explicitly sends media to LiveKit. The cloud egress runs on the provider after the director presses Start and can continue while the director closes their screen; it cannot record frames if the phone loses connectivity or stops publishing.
+- The S3 output path is private and is NOT automatically added to CricLume's authorised, consent-gated video library. **Provider-complete is not archive-verified**. Before playback/publication, verify the object bytes and tenant scope, then ingest through CricLume's safeguarding, retention, blur and publication-consent pipeline. Never expose an S3 URI as a public link.
+- For juniors or uncertain age, access remains restricted; provider output is not automatically reviewable or publishable. Guardian permissions, withdrawal response and reliable remote-stop orchestration require real-world testing.
+- Turning off consent on the phone stops local tracks, private live sharing and cloud publishing; it also asks the backend to stop any active provider egress. Offline browser closure cannot guarantee immediate server revocation, so directors need operational incident controls and a provider dashboard.
+- Server token time-to-live is five minutes for new joins; room and camera identity are server-derived. Token expiry by itself is not a guarantee that an already-established connection is revoked.
+- Recording sessions start **manually** from the director panel. Match-state triggered cloud egress automation, eventual-consistency reconciliation, automatic archival verification, replay synchronization and durable scheduled stop are separate, future gates.
+
+## Real-ground acceptance checklist
+
+1. Verify Supabase migrations and production ownership; retain evidence of backup and restore.
+2. Pilot one consenting adult device in a private test room. Confirm publisher is visible in LiveKit and that the director cannot access another organisation's room.
+3. Confirm Start returns a **real** LiveKit egress ID and a private S3 object is written; confirm Stop, signed webhook, final provider status and object integrity.
+4. Attempt duplicate start requests, forged cloud tokens, cross-club access, revoked member, another paired operator, missing consent and cloud switch off. All must fail closed.
+5. Test four cameras on Wi-Fi and 4G/5G, phone sleep/reconnect, loss of electricity, delayed webhooks, provider outage, 4+ hour recordings and quota limits.
+6. Test consent withdrawal (including an ongoing provider job), junior footage exclusion, deletion/retention compliance, blur processing and export permissions.
+7. Only after sign-off enable paid provider usage, budget monitoring, server-side event-driven auto-start/stop and verified media ingestion.
+
+References: LiveKit JS server SDK v2, LiveKit Egress API, Supabase Storage/RLS and Edge Function docs.

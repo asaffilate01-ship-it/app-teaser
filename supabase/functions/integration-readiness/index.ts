@@ -49,6 +49,30 @@ Deno.serve(async (request) => {
         status: keys.every((k) => Boolean(Deno.env.get(k)?.trim())) ? "configured" : "missing",
         detail: "Configuration presence only. Provider acceptance requires a live test.",
       });
+    const cloudCaptureKeys = [
+      "LIVEKIT_URL",
+      "LIVEKIT_API_KEY",
+      "LIVEKIT_API_SECRET",
+      "CRICLUME_CAPTURE_S3_ACCESS_KEY",
+      "CRICLUME_CAPTURE_S3_SECRET_KEY",
+      "CRICLUME_CAPTURE_S3_BUCKET",
+      "CRICLUME_CAPTURE_S3_REGION",
+      "CRICLUME_CAPTURE_S3_ENDPOINT",
+    ];
+    const captureEnabled = Deno.env.get("CRICLUME_CLOUD_CAPTURE_ENABLED") === "true";
+    checks.push({
+      id: "cloud-capture",
+      label: "LiveKit cloud camera recording",
+      status: !captureEnabled
+        ? "disabled"
+        : cloudCaptureKeys.every((name) => Boolean(Deno.env.get(name)?.trim()))
+          ? "configured"
+          : "missing",
+      detail:
+        "Configuration only. A real camera publishing, provider egress test, " +
+        "private storage review and retention checks are required before production sign-off.",
+    });
+
     checks.push({
       id: "paid-ai",
       label: "Paid AI switch",
