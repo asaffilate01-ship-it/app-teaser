@@ -219,6 +219,34 @@ await db.query(
   "insert into public.camera_devices(id,room_id,user_id,device_key,label,angle) values($1,$2,$3,'fixture','Fixture','pavilion_end')",
   [device, room, a],
 );
+// Camera acknowledgments cannot be impersonated by an unrelated club, edited
+// or duplicated; they report only the phone action, not a saved media object.
+const receiptCommand = (
+  await db.query(
+    "insert into public.camera_recording_commands(room_id,device_id,action,issued_by) values($1,$2,'start',$3) returning id",
+    [room, device, a],
+  )
+).rows[0].id;
+const receiptInsert =
+  (user) =>
+    asUser(user, () =>
+      db.query(
+        "insert into public.camera_command_receipts(command_id,room_id,device_id,reported_by,outcome,reason_code) values($1,$2,$3,$4,'started','none') returning command_id",
+        [receiptCommand, room, device, user],
+      ),
+    );
+await assert.rejects(receiptInsert(b), (error) => error.code === "42501");
+assert.equal((await receiptInsert(a)).rows[0].command_id, receiptCommand);
+await assert.rejects(receiptInsert(a), (error) => error.code === "23505");
+assert.equal(
+  (await asUser(b, () => db.query("select * from public.camera_command_receipts"))).rows.length,
+  0,
+);
+assert.equal(
+  (await asUser(a, () => db.query("select * from public.camera_command_receipts"))).rows.length,
+  1,
+);
+
 await db.query(
   "insert into public.video_assets(id,organisation_id,room_id,device_id,storage_path,started_at,status,recording_consent,retention_expires_at,created_by) values($1,$2,$3,$4,'fixture-source.webm',now(),'uploaded','granted',now()+interval '1 day',$5)",
   [asset, org, room, device, a],
