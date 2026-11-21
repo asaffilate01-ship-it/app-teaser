@@ -345,7 +345,7 @@ function MatchCamera() {
       }
     };
     const channel = client
-      .channel("camera-command:" + roomId + ":" + device.id, { config: { private: true } })
+      .channel("camera:" + roomId, { config: { private: true } })
       .on(
         "postgres_changes",
         {
