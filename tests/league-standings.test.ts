@@ -151,6 +151,41 @@ test("different competitions and duplicate fixtures do not create extra points",
   assert.equal(preview.rows[0]?.points, 4);
 });
 
+test("explicit null winner is allowed for no-result, but contradictory winner aliases are not", () => {
+  const accepted = buildLeagueStandings({
+    competition,
+    fixtures: [
+      resultFixture({
+        id: "no-result",
+        status: "abandoned",
+        result: { winnerTeamId: null, noResult: true },
+      }),
+    ],
+    teams,
+  });
+  assert.equal(accepted.counted, 1);
+
+  const rejected = buildLeagueStandings({
+    competition,
+    fixtures: [
+      resultFixture({
+        id: "conflicting-winner",
+        result: {
+          winnerTeamId: "north",
+          winner_team_id: "south",
+          homeRuns: 120,
+          awayRuns: 90,
+          homeLegalBalls: 120,
+          awayLegalBalls: 120,
+        },
+      }),
+    ],
+    teams,
+  });
+  assert.equal(rejected.counted, 0);
+  assert.equal(rejected.awaitingReview, 1);
+});
+
 test("CSV contains team statistics but neutralises spreadsheet formulas", () => {
   const rows = buildLeagueStandings({
     competition,
