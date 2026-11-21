@@ -169,12 +169,12 @@ function PublicScoreboard() {
               label="Batters"
               primary={
                 scoreboard.liveState.striker
-                  ? `${scoreboard.liveState.striker.name} ${scoreboard.liveState.striker.runs}* (${scoreboard.liveState.striker.balls})`
+                  ? `Striker ${scoreboard.liveState.striker.runs}* (${scoreboard.liveState.striker.balls})`
                   : "Awaiting striker"
               }
               secondary={
                 scoreboard.liveState.nonStriker
-                  ? `${scoreboard.liveState.nonStriker.name} ${scoreboard.liveState.nonStriker.runs} (${scoreboard.liveState.nonStriker.balls})`
+                  ? `Non-striker ${scoreboard.liveState.nonStriker.runs} (${scoreboard.liveState.nonStriker.balls})`
                   : "Awaiting non-striker"
               }
             />
@@ -182,7 +182,7 @@ function PublicScoreboard() {
               label="Bowler"
               primary={
                 scoreboard.liveState.bowler
-                  ? `${scoreboard.liveState.bowler.name} ${scoreboard.liveState.bowler.wickets}/${scoreboard.liveState.bowler.runs}`
+                  ? `Bowler ${scoreboard.liveState.bowler.wickets}/${scoreboard.liveState.bowler.runs}`
                   : "Awaiting bowler"
               }
               secondary={
@@ -190,6 +190,10 @@ function PublicScoreboard() {
               }
             />
           </div>
+          <p className="mt-3 text-xs text-slate-400">
+            Player names are withheld on public scoreboards until publication permission can be
+            independently verified.
+          </p>
           <div className="mt-7">
             <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
               Recent deliveries
