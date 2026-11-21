@@ -14,6 +14,7 @@ export interface LiveCameraSession {
 
 export interface LiveCameraOptions {
   roomId: string;
+  cameraId?: string;
   identity: string;
   mode: "director" | "camera";
   stream?: MediaStream;
@@ -32,18 +33,19 @@ function getIceServers(): RTCIceServer[] {
   // A club should configure its approved TURN service for mobile network access.
   // Without one, this peer-to-peer pilot may not connect across NATs.
   const server = import.meta.env["VITE_CAMERA_ICE_URL"]?.trim();
-  const username = import.meta.env["VITE_CAMERA_ICE_USERNAME"]?.trim();
-  const credential = import.meta.env["VITE_CAMERA_ICE_CREDENTIAL"]?.trim();
-  return server
-    ? [{ urls: server, ...(username && credential ? { username, credential } : {}) }]
-    : [];
+  // Do not bake persistent TURN credentials into public Vite bundles.
+  return server ? [{ urls: server }] : [];
 }
 
 export async function connectLiveCamera(options: LiveCameraOptions): Promise<LiveCameraSession> {
   const { roomId, identity, mode, stream, onStream, onStatus, onReady, onError } = options;
+  const cameraId = mode === "camera" ? identity : options.cameraId;
+  if (!cameraId) throw new Error("Director must select a paired camera.");
   const client = getCloudClient();
   await client.realtime.setAuth();
-  const channel: RealtimeChannel = client.channel("camera-live:" + roomId, {
+  // A separate RLS-protected topic for each device prevents other operators
+  // from seeing a camera they do not own.
+  const channel: RealtimeChannel = client.channel("camera-live:" + roomId + ":" + cameraId, {
     config: { private: true, broadcast: { ack: true } },
   });
   const peers = new Map<string, Peer>();
@@ -171,7 +173,8 @@ export async function connectLiveCamera(options: LiveCameraOptions): Promise<Liv
 
   return {
     watch: async (deviceId) => {
-      if (mode !== "director") throw new Error("Only a director can request a live view.");
+      if (mode !== "director" || deviceId !== cameraId)
+        throw new Error("Only the selected director camera may be requested.");
       await send({ kind: "watch", from: identity, to: deviceId });
     },
     announce: async () => {
