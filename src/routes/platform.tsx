@@ -1219,8 +1219,11 @@ function FixtureForm({ data, run }: { data: PlatformDashboardData; run: RunActio
       setError("Choose a competition with an active rule version.");
       return;
     }
-    if (home === away || !data.teams.some((team) => team.id === home) ||
-        !data.teams.some((team) => team.id === away)) {
+    if (
+      home === away ||
+      !data.teams.some((team) => team.id === home) ||
+      !data.teams.some((team) => team.id === away)
+    ) {
       setError("Choose two different registered teams.");
       return;
     }
