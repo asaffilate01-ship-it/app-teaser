@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { cameraArchiveStatusLabel } from "@/lib/camera-archive-policy";
 import { Cloud, CircleStop, RefreshCw, Radio, ShieldAlert } from "lucide-react";
 import {
   cameraCloudLabel,
@@ -131,6 +132,14 @@ export function CameraCloudRecordingPanel({
               <p role="status" className="mt-2 text-xs text-amber-100">
                 {recording ? cameraCloudLabel(recording.state) : "No provider recording reported"}
               </p>
+              {recording?.state === "provider_completed" && (
+                <p className="mt-2 rounded-md border border-amber-300/20 px-2 py-2 text-xs text-amber-100">
+                  {cameraArchiveStatusLabel(recording.archive_check_status)}
+                  {recording.archive_check_status === "object_confirmed" &&
+                    recording.archive_object_bytes !== null &&
+                    " · " + Math.round(recording.archive_object_bytes / 1024) + " KiB"}
+                </p>
+              )}
               {unavailable[device.id] && (
                 <p role="alert" className="mt-2 flex items-start gap-2 text-xs text-rose-200">
                   <ShieldAlert className="size-4 shrink-0" />
