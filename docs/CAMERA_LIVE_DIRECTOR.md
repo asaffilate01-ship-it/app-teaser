@@ -29,3 +29,15 @@ No new production database deployment was performed here. CricLume's project ref
 7. Run all tests, typecheck, lint, build, database security checks, backup/restore drill and production provider reviews before live operation.
 
 Next: managed SFU and per-track server recording with clock-synchronised every-ball replay; see #63.
+
+## Camera privacy and reconnect hardening (next phase)
+
+- The current code includes a Supabase CLI-generated `camera_media_privacy_gate` migration. It is **source only until explicitly deployed** to the verified CricLume project (not the Dishbee Supabase connection).
+- Adult recording review is limited to approved roles (owner, safeguarding officer, club/league administrator or coach) and the original authorised camera operator. Junior or age-uncertain footage is restricted to the safeguarding roles and its original operator.
+- Raw sources and unblurred derivatives cannot be signed by ordinary club reviewers when the video policy requests blurring. The playback API no longer provides a separate unblurred-source bypass.
+- Authenticated browser users cannot arbitrarily update recording consent/retention or claim that a video processing variant is ready. Trusted service-role processing remains available.
+- Video uploads must use the canonical organisation/room/asset/source path. A derived `processed` object path cannot be forged by a camera uploader.
+- The camera screen treats the age category as junior/uncertain unless explicitly changed, stops live sharing and capture on consent withdrawal, and refreshes the latest authorised recording command after reconnection.
+- The command refresh is **not** a substitute for server-side egress: phones must be awake and have permissions; a stopped or disconnected device does not record.
+
+Before live use, test under real guardian/child safeguarding requirements, negative-role access, a separate scorer/viewer account, cross-organisation access, deleted/expired/withdrawn clips, and private signed URLs. A signed URL issued before consent withdrawal may remain accessible until its short expiry; immediate revocation requires an additional proxy or provider-side revocation mechanism.
