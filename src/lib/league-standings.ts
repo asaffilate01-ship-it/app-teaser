@@ -48,11 +48,20 @@ function bonusField(source: Record<string, unknown>, key: string): number | null
 function validatedResult(fixture: FixtureRecord): CompletedFixture | null {
   const result = fixture.result;
   if (!result || typeof result !== "object" || Array.isArray(result)) return null;
-  const winner = result["winnerTeamId"] ?? result["winner_team_id"];
+  const camelWinner = result["winnerTeamId"];
+  const snakeWinner = result["winner_team_id"];
+  if (
+    camelWinner !== undefined &&
+    snakeWinner !== undefined &&
+    camelWinner !== snakeWinner
+  ) {
+    return null;
+  }
+  const winner = camelWinner ?? snakeWinner;
   const tied = result["tied"] === true;
   const noResult = result["noResult"] === true || result["no_result"] === true;
   const hasWinner = typeof winner === "string" && winner.length > 0;
-  if (winner !== undefined && !hasWinner) return null;
+  if (winner != null && !hasWinner) return null;
   if (hasWinner && winner !== fixture.homeTeamId && winner !== fixture.awayTeamId) return null;
   if (Number(hasWinner) + Number(tied) + Number(noResult) !== 1) return null;
   if (fixture.status.toLowerCase() === "abandoned" && !noResult) return null;
@@ -136,18 +145,15 @@ export function buildLeagueStandings(input: LeagueInput): LeagueStandingsPreview
   const participantIds = [
     ...new Set(visible.flatMap((fixture) => [fixture.homeTeamId, fixture.awayTeamId])),
   ].filter((id) => knownTeams.has(id));
-  const recordedIds = new Set<string>();
-  const recorded = visible.filter((fixture) => {
-    if (!recordedStatuses.has(fixture.status.toLowerCase())) return false;
-    if (recordedIds.has(fixture.id)) return false;
-    recordedIds.add(fixture.id);
-    return true;
-  });
+  const unique = [...new Map(visible.map((fixture) => [fixture.id, fixture])).values()];
+  const recorded = unique.filter((fixture) =>
+    recordedStatuses.has(fixture.status.toLowerCase()),
+  );
   const base = {
     rows: [] as TableRow[],
     counted: 0,
     awaitingReview: recorded.length,
-    scheduled: visible.length - recorded.length,
+    scheduled: unique.length - recorded.length,
     participants: participantIds.length,
   };
   if (!validRules(competition.rules) || !competition.ruleVersionId) {
@@ -160,10 +166,7 @@ export function buildLeagueStandings(input: LeagueInput): LeagueStandingsPreview
     };
   }
   const accepted: CompletedFixture[] = [];
-  const seen = new Set<string>();
   for (const fixture of recorded) {
-    if (seen.has(fixture.id)) continue;
-    seen.add(fixture.id);
     if (
       !signedOff(fixture) ||
       fixture.ruleVersionId !== competition.ruleVersionId ||
