@@ -186,7 +186,30 @@ export function CricketApp() {
     setCloudBootstrap({ status: "loading" });
     void loadCloudMatchSnapshot(cloudMatchId)
       .then((match) => {
-        const review = reviewCloudBootstrap(local, match, readPendingEvents(cloudMatchId).length);
+        let pendingEvents = 0;
+        try {
+          pendingEvents = readPendingEvents(cloudMatchId).length;
+        } catch {
+          if (!local) {
+            setCloudBootstrap({
+              status: "error",
+              message:
+                "The saved offline scoring queue is unreadable. No stored data was cleared. " +
+                "Recover device data before opening this cloud match.",
+            });
+            return;
+          }
+          // A damaged offline queue may contain unacknowledged local deliveries.
+          // Do not silently load the cloud score over a previously saved match.
+          setBootstrapConflict(
+            "The saved offline scoring queue is unreadable. No pending data was cleared.",
+          );
+          setSelectedId(local.id);
+          setScreen("match");
+          setCloudBootstrap({ status: "ready" });
+          return;
+        }
+        const review = reviewCloudBootstrap(local, match, pendingEvents);
         if (!review.safe) {
           if (!local) {
             setCloudBootstrap({
@@ -815,7 +838,11 @@ function LiveMatch({
     [cloudConflict, match, onSave],
   );
   const cloudSync = useMatchCloudSync(cloudMatchId, acceptRemoteMatch, Boolean(cloudConflict));
-  const syncRecovery = describeScorerSyncRecovery(cloudSync.status, cloudSync.pendingCount);
+  const syncRecovery = describeScorerSyncRecovery(
+    cloudSync.status,
+    cloudSync.pendingCount,
+    cloudSync.queueUnreadable,
+  );
   const saveAndSync = (next: CricketMatch, eventType = "match.snapshot") => {
     if (cloudConflict) return;
     onSave(next);
@@ -868,7 +895,17 @@ function LiveMatch({
 
   const replaceLocalWithCloud = async () => {
     if (!cloudMatchId || !backupRequested || reconciling) return;
-    if (readPendingEvents(cloudMatchId).length > 0) {
+    let pendingEvents = 0;
+    try {
+      pendingEvents = readPendingEvents(cloudMatchId).length;
+    } catch {
+      setCloudActionError(
+        "Saved offline deliveries could not be read. Nothing was cleared or replaced. " +
+          "Ask your club administrator to recover the device queue.",
+      );
+      return;
+    }
+    if (pendingEvents > 0) {
       setCloudActionError(
         "Unsent deliveries are still queued. Keep your local copy and ask the lead scorer to reconcile.",
       );
