@@ -12,6 +12,7 @@ import {
   Video,
 } from "lucide-react";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
+import { connectLiveCamera, type LiveCameraSession } from "@/lib/camera-live";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import {
   getCloudClient,
@@ -59,8 +60,12 @@ function MatchCamera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const captureStartedAtRef = useRef<string>("");
+  const recordingRef = useRef(false);
+  const segmentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const uploadQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const failedSegmentsRef = useRef<Array<{ blob: Blob; startedAt: string; endedAt: string }>>([]);
+  const liveRef = useRef<LiveCameraSession | null>(null);
+  const commandHandlerRef = useRef<(command: Record<string, unknown>) => void>(() => {});
   const presenceRef = useRef<Awaited<ReturnType<typeof joinCameraPresence>> | null>(null);
   const [email, setEmail] = useState("");
   const [token, setToken] = useState("");
@@ -70,6 +75,9 @@ function MatchCamera() {
   const [devices, setDevices] = useState<CameraPresence[]>([]);
   const [recording, setRecording] = useState(false);
   const [previewing, setPreviewing] = useState(false);
+  const [liveSharing, setLiveSharing] = useState(false);
+  const [autoRecordArmed, setAutoRecordArmed] = useState(false);
+  const [failedSegments, setFailedSegments] = useState(0);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [consent, setConsent] = useState(false);
   const [includesJunior, setIncludesJunior] = useState(false);
@@ -78,7 +86,10 @@ function MatchCamera() {
 
   useEffect(
     () => () => {
-      recorderRef.current?.stop();
+      recordingRef.current = false;
+      if (segmentTimerRef.current) clearTimeout(segmentTimerRef.current);
+      if (recorderRef.current?.state === "recording") recorderRef.current.stop();
+      liveRef.current?.close();
       streamRef.current?.getTracks().forEach((track) => track.stop());
       presenceRef.current?.leave();
     },
@@ -100,11 +111,15 @@ function MatchCamera() {
     }
     const paired = data as PairedDevice;
     setDevice(paired);
+    const { data: savedArm } = await getCloudClient()
+      .from("camera_recording_arms").select("armed")
+      .eq("device_id", paired.id).maybeSingle();
+    setAutoRecordArmed(Boolean(savedArm?.armed));
     const presence: CameraPresence = {
       deviceId: paired.id,
       label: paired.label,
       angle: paired.angle,
-      batteryPercent: 100,
+      batteryPercent: undefined,
       signal: "good",
       recording: false,
       clockOffsetMs: 0,
@@ -118,51 +133,209 @@ function MatchCamera() {
 
   const startPreview = async () => {
     setMessage(null);
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: "environment",
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-        frameRate: { ideal: 30 },
-      },
-      audio: true,
-    });
-    streamRef.current = stream;
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream;
-      await videoRef.current.play();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          frameRate: { ideal: 30 },
+        },
+        audio: true,
+      });
+      streamRef.current = stream;
+      stream.getTracks().forEach((track) => {
+        track.addEventListener("ended", () => {
+          recordingRef.current = false;
+          if (segmentTimerRef.current) clearTimeout(segmentTimerRef.current);
+          setRecording(false);
+          setPreviewing(false);
+          liveRef.current?.close();
+          setLiveSharing(false);
+          setMessage("Camera or microphone disconnected. Check that the saved clips uploaded.");
+        });
+      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      setPreviewing(true);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Camera access was denied.");
     }
-    setPreviewing(true);
+  };
+
+  const setArmed = async (armed: boolean) => {
+    if (!device || !session) return;
+    if (armed && !consent) {
+      setMessage("Confirm match recording permission before arming automatic capture.");
+      return;
+    }
+    const { error } = await getCloudClient().from("camera_recording_arms").upsert({
+      device_id: device.id,
+      room_id: roomId,
+      user_id: session.user.id,
+      armed,
+      consent_confirmed: armed && consent,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "device_id" });
+    if (error) {
+      setMessage("Could not save auto-record preference: " + error.message);
+    } else {
+      setAutoRecordArmed(armed);
+      setMessage(armed
+        ? "Automatic recording armed. Keep this phone awake and its camera preview running."
+        : "Automatic recording disarmed.");
+      if (!armed && recordingRef.current) stopRecording();
+    }
+  };
+
+  const startLiveSharing = async () => {
+    if (!device || !streamRef.current || !consent) {
+      setMessage("Camera preview and club permission are required before live sharing.");
+      return;
+    }
+    try {
+      const connection = await connectLiveCamera({
+        roomId,
+        identity: device.id,
+        mode: "camera",
+        stream: streamRef.current,
+        onError: (error) => setMessage(error),
+      });
+      liveRef.current = connection;
+      setLiveSharing(true);
+      setMessage("Private live feed enabled for authorised match directors.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Private live share failed.");
+    }
+  };
+
+  const stopLiveSharing = () => {
+    liveRef.current?.close();
+    liveRef.current = null;
+    setLiveSharing(false);
+    setMessage("Private live video sharing stopped.");
   };
 
   const startRecording = () => {
     const stream = streamRef.current;
-    if (!stream || !device) return;
+    if (!stream || !device || recordingRef.current) return;
     if (!consent) {
-      setMessage("Confirm recording consent before capture starts.");
+      setMessage("Confirm match recording permission before capture starts.");
       return;
     }
-    chunksRef.current = [];
-    const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
-      ? "video/webm;codecs=vp9,opus"
-      : "video/webm";
-    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 6_000_000 });
-    recorder.ondataavailable = (event) => {
-      if (event.data.size > 0) chunksRef.current.push(event.data);
+    if (typeof MediaRecorder === "undefined") {
+      setMessage("This browser does not support MediaRecorder. Use another camera device.");
+      return;
+    }
+    const mimeType = [
+      "video/webm;codecs=vp9,opus",
+      "video/webm;codecs=vp8,opus",
+      "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+      "video/webm",
+      "video/mp4",
+    ].find((format) => MediaRecorder.isTypeSupported(format));
+    if (!mimeType) {
+      setMessage("This device has no supported WebM or MP4 recording format.");
+      return;
+    }
+    const beginSegment = () => {
+      if (!recordingRef.current || !stream.active) return;
+      try {
+        const chunks: Blob[] = [];
+        const startedAt = new Date().toISOString();
+        const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 3_000_000 });
+        recorder.ondataavailable = (event) => {
+          if (event.data.size > 0) chunks.push(event.data);
+        };
+        recorder.onstop = () => {
+          if (segmentTimerRef.current) clearTimeout(segmentTimerRef.current);
+          const endedAt = new Date().toISOString();
+          const blob = new Blob(chunks, { type: mimeType });
+          if (blob.size > 0) {
+            uploadQueueRef.current = uploadQueueRef.current
+              .catch(() => {})
+              .then(() => saveRecording(blob, startedAt, endedAt));
+          }
+          if (recordingRef.current && stream.active) beginSegment();
+        };
+        recorder.onerror = () => {
+          recordingRef.current = false;
+          setRecording(false);
+          setMessage("This recording segment failed. Check the camera and retained uploads.");
+        };
+        recorder.start(5_000);
+        recorderRef.current = recorder;
+        segmentTimerRef.current = setTimeout(() => {
+          if (recorder.state === "recording") recorder.stop();
+        }, 60_000);
+      } catch (error) {
+        recordingRef.current = false;
+        setRecording(false);
+        setMessage(error instanceof Error ? error.message : "Could not start this camera recording.");
+      }
     };
-    recorder.onstop = () => void saveRecording(new Blob(chunksRef.current, { type: mimeType }));
-    recorder.start(5_000);
-    recorderRef.current = recorder;
-    captureStartedAtRef.current = new Date().toISOString();
+    recordingRef.current = true;
     setRecording(true);
+    beginSegment();
     void updatePresence(true);
   };
 
   const stopRecording = () => {
-    recorderRef.current?.stop();
+    if (!recordingRef.current) return;
+    recordingRef.current = false;
+    if (segmentTimerRef.current) clearTimeout(segmentTimerRef.current);
+    if (recorderRef.current?.state === "recording") recorderRef.current.stop();
     setRecording(false);
     void updatePresence(false);
   };
+
+  // Commands are durable server-authorised rows, not spoofable broadcast payloads.
+  commandHandlerRef.current = (command) => {
+    if (!device || command["device_id"] !== device.id) return;
+    const timestamp = Date.parse(String(command["created_at"] ?? ""));
+    if (!Number.isFinite(timestamp) || Math.abs(Date.now() - timestamp) > 120_000) return;
+    if (command["action"] === "stop") {
+      stopRecording();
+    } else if (command["action"] === "start") {
+      if (consent && autoRecordArmed && previewing) startRecording();
+      else setMessage("Auto-record requested, but the preview, permission or arming is missing.");
+    }
+  };
+
+  useEffect(() => {
+    if (!device) return;
+    const channel = getCloudClient()
+      .channel("camera:" + roomId, { config: { private: true } })
+      .on("postgres_changes",
+        { event: "INSERT", schema: "public", table: "camera_recording_commands",
+          filter: "room_id=eq." + roomId },
+        (payload) => commandHandlerRef.current(payload.new as Record<string, unknown>))
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          setMessage("Automatic recording channel is offline; use the local record button.");
+        }
+      });
+    return () => { void getCloudClient().removeChannel(channel); };
+  }, [roomId, device]);
+
+  // If the camera is armed after the match started, make a single live-status
+  // check when the preview becomes available. Do not restart after a manual stop.
+  useEffect(() => {
+    if (!device || !autoRecordArmed || !consent || !previewing) return;
+    let active = true;
+    void getCloudClient().from("camera_rooms")
+      .select("matches!inner(status)").eq("id", roomId).single()
+      .then(({ data, error }) => {
+        if (error || !active) return;
+        const match = data?.matches as unknown as { status: string } | undefined;
+        if (match?.status === "live" && !recordingRef.current) startRecording();
+      });
+    return () => { active = false; };
+    // Only arming and camera availability should trigger this initial status check.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [device, autoRecordArmed, consent, previewing, roomId]);
 
   const updatePresence = async (isRecording: boolean) => {
     if (!device || !presenceRef.current) return;
@@ -170,7 +343,7 @@ function MatchCamera() {
       deviceId: device.id,
       label: device.label,
       angle: device.angle,
-      batteryPercent: 100,
+      batteryPercent: undefined,
       signal: navigator.onLine ? "good" : "poor",
       recording: isRecording,
       clockOffsetMs: 0,
@@ -178,7 +351,7 @@ function MatchCamera() {
     });
   };
 
-  const saveRecording = async (blob: Blob) => {
+  const saveRecording = async (blob: Blob, startedAt: string, endedAt: string) => {
     if (!device || !session) return;
     setUploadProgress(0);
     setMessage("Preparing encrypted cloud upload…");
@@ -201,8 +374,8 @@ function MatchCamera() {
           device_id: device.id,
           content_type: blob.type,
           size_bytes: blob.size,
-          started_at: captureStartedAtRef.current,
-          ended_at: new Date().toISOString(),
+          started_at: startedAt,
+          ended_at: endedAt,
           status: "uploading",
           recording_consent: "granted",
           publication_consent: "pending",
@@ -241,12 +414,25 @@ function MatchCamera() {
         );
       }
     } catch (error) {
+      failedSegmentsRef.current.push({ blob, startedAt, endedAt });
+      setFailedSegments(failedSegmentsRef.current.length);
       setMessage(
-        error instanceof Error
-          ? error.message
-          : "Upload failed; the recording remains in this browser session.",
+        (error instanceof Error ? error.message : "Upload failed.") +
+        " Recording is still on this device. Download unsaved clips before closing the page.",
       );
     }
+  };
+
+  const downloadFailedSegments = () => {
+    failedSegmentsRef.current.forEach((segment, index) => {
+      const url = URL.createObjectURL(segment.blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "criclume-" + roomId + "-" + segment.startedAt.replaceAll(":", "-") +
+        "-" + index + (segment.blob.type.includes("mp4") ? ".mp4" : ".webm");
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+    });
   };
 
   if (!configured)
