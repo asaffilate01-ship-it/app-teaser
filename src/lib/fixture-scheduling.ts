@@ -19,8 +19,7 @@ function absoluteStart(value: string | null): number | null {
   if (
     !value ||
     !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/i.test(
-      value,
-    )
+      value)
   ) {
     return null;
   }
@@ -64,9 +63,7 @@ export function reviewFixtureSchedule(
         teamIds.has(id),
       );
       const sharedGroundId =
-        a.fixture.groundId && a.fixture.groundId === b.fixture.groundId
-          ? a.fixture.groundId
-          : null;
+        a.fixture.groundId && a.fixture.groundId === b.fixture.groundId ? a.fixture.groundId : null;
       if (!sharedTeamIds.length && !sharedGroundId) continue;
       const key = [a.fixture.id, b.fixture.id].sort().join("|");
       if (seen.has(key)) continue;
