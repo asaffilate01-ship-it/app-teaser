@@ -71,7 +71,12 @@ import {
   type RecordDeliveryInput,
   type ShotOutcome,
 } from "@/lib/cricket";
-import { loadCloudMatchSnapshot, readPendingEvents, startCloudInnings } from "@/lib/cloud";
+import {
+  loadCloudMatchSnapshot,
+  readPendingEvents,
+  readRawPendingEventQueue,
+  startCloudInnings,
+} from "@/lib/cloud";
 import { reviewCloudBootstrap, reviewRemoteScorerSnapshot } from "@/lib/scorer-reconciliation";
 import { describeScorerSyncRecovery } from "@/lib/scorer-sync-status";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
@@ -186,7 +191,30 @@ export function CricketApp() {
     setCloudBootstrap({ status: "loading" });
     void loadCloudMatchSnapshot(cloudMatchId)
       .then((match) => {
-        const review = reviewCloudBootstrap(local, match, readPendingEvents(cloudMatchId).length);
+        let pendingEvents = 0;
+        try {
+          pendingEvents = readPendingEvents(cloudMatchId).length;
+        } catch {
+          if (!local) {
+            setCloudBootstrap({
+              status: "error",
+              message:
+                "The saved offline scoring queue is unreadable. No stored data was cleared. " +
+                "Recover device data before opening this cloud match.",
+            });
+            return;
+          }
+          // A damaged offline queue may contain unacknowledged local deliveries.
+          // Do not silently load the cloud score over a previously saved match.
+          setBootstrapConflict(
+            "The saved offline scoring queue is unreadable. No pending data was cleared.",
+          );
+          setSelectedId(local.id);
+          setScreen("match");
+          setCloudBootstrap({ status: "ready" });
+          return;
+        }
+        const review = reviewCloudBootstrap(local, match, pendingEvents);
         if (!review.safe) {
           if (!local) {
             setCloudBootstrap({
@@ -815,7 +843,11 @@ function LiveMatch({
     [cloudConflict, match, onSave],
   );
   const cloudSync = useMatchCloudSync(cloudMatchId, acceptRemoteMatch, Boolean(cloudConflict));
-  const syncRecovery = describeScorerSyncRecovery(cloudSync.status, cloudSync.pendingCount);
+  const syncRecovery = describeScorerSyncRecovery(
+    cloudSync.status,
+    cloudSync.pendingCount,
+    cloudSync.queueUnreadable,
+  );
   const saveAndSync = (next: CricketMatch, eventType = "match.snapshot") => {
     if (cloudConflict) return;
     onSave(next);
@@ -866,9 +898,40 @@ function LiveMatch({
     URL.revokeObjectURL(url);
   };
 
+  const exportPreservedQueue = () => {
+    if (!cloudMatchId) return;
+    try {
+      const raw = readRawPendingEventQueue(cloudMatchId);
+      if (raw === null) {
+        setCloudActionError("This device has no saved offline events for this match.");
+        return;
+      }
+      const url = URL.createObjectURL(new Blob([raw], { type: "text/plain;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `criclume-offline-queue-${cloudMatchId.slice(0, 8).replace(/[^a-zA-Z0-9-]/g, "")}.txt`;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      setCloudActionError(
+        "This browser could not read the saved offline events. Keep this device data for recovery.",
+      );
+    }
+  };
+
   const replaceLocalWithCloud = async () => {
     if (!cloudMatchId || !backupRequested || reconciling) return;
-    if (readPendingEvents(cloudMatchId).length > 0) {
+    let pendingEvents = 0;
+    try {
+      pendingEvents = readPendingEvents(cloudMatchId).length;
+    } catch {
+      setCloudActionError(
+        "Saved offline deliveries could not be read. Nothing was cleared or replaced. " +
+          "Ask your club administrator to recover the device queue.",
+      );
+      return;
+    }
+    if (pendingEvents > 0) {
       setCloudActionError(
         "Unsent deliveries are still queued. Keep your local copy and ask the lead scorer to reconcile.",
       );
@@ -1010,6 +1073,15 @@ function LiveMatch({
               <button type="button" className="workspace-nav-item min-h-11" onClick={exportMatch}>
                 Export device backup
               </button>
+              {cloudSync.queueUnreadable && (
+                <button
+                  type="button"
+                  className="workspace-nav-item min-h-11"
+                  onClick={exportPreservedQueue}
+                >
+                  Export preserved queue
+                </button>
+              )}
             </div>
           </section>
         )}
@@ -1046,6 +1118,11 @@ function LiveMatch({
               >
                 {reconciling ? "Loading cloud score…" : "Replace with reviewed cloud copy"}
               </button>
+              {cloudMatchId && (
+                <button type="button" className="workspace-nav-item" onClick={exportPreservedQueue}>
+                  Export offline queue
+                </button>
+              )}
             </div>
             <p className="text-xs text-slate-300">
               A requested download does not prove a backup was saved. Check the file before choosing

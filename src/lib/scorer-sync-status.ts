@@ -15,9 +15,20 @@ export type ScorerSyncRecovery = {
 export function describeScorerSyncRecovery(
   status: ScorerSyncStatus,
   pendingEvents: number,
+  queueUnreadable = false,
 ): ScorerSyncRecovery {
   const pending = Number.isSafeInteger(pendingEvents) && pendingEvents > 0 ? pendingEvents : 0;
   const count = `${pending} scoring ${pending === 1 ? "change" : "changes"}`;
+  if (queueUnreadable) {
+    return {
+      show: true,
+      title: "Saved offline scoring queue needs recovery",
+      detail:
+        "The saved queue cannot be read. Original storage was not cleared. " +
+        "Export a match backup and ask a club administrator to recover unsent deliveries.",
+      canRetry: false,
+    };
+  }
   if (status === "conflict") {
     return {
       show: false,

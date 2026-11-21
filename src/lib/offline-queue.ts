@@ -57,3 +57,62 @@ export function createOrderedQueueDrainer<T extends { clientEventId: string }>(i
     return operation;
   };
 }
+
+/** Preserve unknown future fields without trusting incomplete or cross-match events. */
+export interface PendingScorerQueueEvent {
+  matchId: string;
+  clientEventId: string;
+  deviceId: string;
+  eventType: string;
+  payload: Record<string, unknown>;
+  occurredAt: string;
+}
+
+const unreadableQueueMessage =
+  "Saved offline scoring changes could not be read. The original queue was preserved. " +
+  "Export a match backup and ask your club administrator to review device storage.";
+
+/**
+ * Never convert malformed persisted scoring data into an empty queue.
+ * Otherwise the next recorded delivery would overwrite the only remaining
+ * evidence of earlier unsent scores. No repair or deletion happens here.
+ */
+export function parsePendingScorerQueue(
+  raw: string | null,
+  matchId: string,
+): PendingScorerQueueEvent[] {
+  if (raw === null) return [];
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    throw new Error(unreadableQueueMessage);
+  }
+  if (!Array.isArray(value)) throw new Error(unreadableQueueMessage);
+  const seen = new Set<string>();
+  for (const row of value) {
+    if (!row || typeof row !== "object" || Array.isArray(row)) {
+      throw new Error(unreadableQueueMessage);
+    }
+    const event = row as Record<string, unknown>;
+    if (
+      event["matchId"] !== matchId ||
+      typeof event["clientEventId"] !== "string" ||
+      !event["clientEventId"] ||
+      typeof event["deviceId"] !== "string" ||
+      !event["deviceId"] ||
+      typeof event["eventType"] !== "string" ||
+      !event["eventType"] ||
+      typeof event["occurredAt"] !== "string" ||
+      !event["occurredAt"] ||
+      !event["payload"] ||
+      typeof event["payload"] !== "object" ||
+      Array.isArray(event["payload"]) ||
+      seen.has(event["clientEventId"])
+    ) {
+      throw new Error(unreadableQueueMessage);
+    }
+    seen.add(event["clientEventId"] as string);
+  }
+  return value as PendingScorerQueueEvent[];
+}
