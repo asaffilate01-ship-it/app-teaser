@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalPage } from "./privacy";
+import { canonicalUrl } from "@/lib/seo";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/terms")({
         content: "Terms for using the CricLume cricket scoring, competition and coaching platform.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://app-teaser.lovable.app/terms" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/terms") }],
   }),
   component: TermsPage,
 });
@@ -19,19 +20,18 @@ function TermsPage() {
   return (
     <LegalPage title="Platform terms" subtitle="Effective 25 August 2026">
       <p>
-        These terms apply to the free CricLume website, device scoring preview and any cloud pilot
-        service provided by iTechLounge Ltd. By using CricLume, you agree to these terms. A paid or
+        These terms apply to the free CricLume website, on-device scorer and any connected club
+        services provided by iTechLounge Ltd. By using CricLume, you agree to these terms. A paid or
         organisation-wide service may also have an order form and data-processing agreement; those
         documents take priority where they expressly differ.
       </p>
 
-      <h2>Preview status</h2>
+      <h2>On-device scoring and service availability</h2>
       <p>
-        CricLume is under active development. The preview is provided for evaluation and pilot
-        scoring. Features may change, and local browser data may be lost because of device failure,
+        Local match records are saved in the browser and may be lost because of device failure,
         browser settings, cleared storage or product updates. Export important matches and maintain
-        any official scorebook or backup required by your competition. Cloud features are available
-        only when the relevant organisation and service integrations have been activated.
+        any official scorebook or backup required by your competition. Cloud-dependent functions
+        require an authorised organisation and configured services.
       </p>
 
       <h2>Scoring responsibility</h2>
@@ -70,8 +70,8 @@ function TermsPage() {
       <h2>Acceptable use</h2>
       <p>
         Do not attempt to disrupt the service, introduce malicious code, bypass access controls,
-        scrape protected areas, misrepresent affiliation with CricLume, or use the preview for an
-        unlawful purpose. You must not resell the preview or remove CricLume branding without
+        scrape protected areas, misrepresent affiliation with CricLume, or use the service for an
+        unlawful purpose. You must not resell the service or remove CricLume branding without
         written permission.
       </p>
 
@@ -85,11 +85,11 @@ function TermsPage() {
 
       <h2>Availability and liability</h2>
       <p>
-        The preview is supplied as available, without a promise that it will be uninterrupted or
+        The service is supplied as available, without a promise that it will be uninterrupted or
         error-free. Nothing in these terms excludes liability that cannot lawfully be excluded. To
         the fullest extent permitted by law, iTechLounge Ltd is not responsible for indirect loss,
-        lost data, missed fixtures, incorrect unofficial records or decisions made from preview
-        analytics.
+        lost data, missed fixtures, incorrect unofficial records or decisions made from
+        unverified analytics.
       </p>
 
       <h2>Changes and contact</h2>
