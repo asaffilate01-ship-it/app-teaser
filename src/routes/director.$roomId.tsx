@@ -14,6 +14,8 @@ import {
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { CameraReplayLibrary } from "@/components/CameraReplayLibrary";
 import { CameraCommandConfirmations } from "@/components/CameraCommandConfirmations";
+import { CameraCloudRecordingPanel } from "@/components/CameraCloudRecordingPanel";
+import { Cloud } from "lucide-react";
 import { getCloudClient, isCloudConfigured, type CameraPresence } from "@/lib/cloud";
 import {
   connectLiveCamera,
@@ -64,6 +66,7 @@ function CameraDirector() {
   const [focus, setFocus] = useState<string | null>(null);
   const [soundDevice, setSoundDevice] = useState<string | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [cloudRecordingOpen, setCloudRecordingOpen] = useState(false);
   const [commandRefreshKey, setCommandRefreshKey] = useState(0);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -465,6 +468,15 @@ function CameraDirector() {
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <button
             type="button"
+            aria-expanded={cloudRecordingOpen}
+            onClick={() => setCloudRecordingOpen((open) => !open)}
+            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-300/40 px-4 text-sm font-semibold text-amber-200"
+          >
+            <Cloud className="size-4" />
+            {cloudRecordingOpen ? "Hide cloud recording" : "Server-side cloud recording"}
+          </button>
+          <button
+            type="button"
             aria-expanded={reviewOpen}
             onClick={() => setReviewOpen((value) => !value)}
             className="inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-300/40 px-4 text-sm font-semibold text-amber-200"
@@ -476,6 +488,13 @@ function CameraDirector() {
             Private, consented clips and estimated ball-by-ball cue points
           </span>
         </div>
+        {cloudRecordingOpen && (
+          <CameraCloudRecordingPanel
+            roomId={roomId}
+            devices={devices}
+            armedDeviceIds={armedDevices.map((device) => device.id)}
+          />
+        )}
         {reviewOpen && (
           <CameraReplayLibrary roomId={roomId} matchId={room.match_id} devices={devices} />
         )}
