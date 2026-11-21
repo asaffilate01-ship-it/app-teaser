@@ -134,15 +134,20 @@ function CameraDirector() {
         if (access.data !== true) return;
 
         await client.realtime.setAuth();
-        presenceChannel = client.channel("camera:" + roomId, { config: { private: true } })
+        presenceChannel = client
+          .channel("camera:" + roomId, { config: { private: true } })
           .on("presence", { event: "sync" }, () => {
             if (!activeRef.current || !presenceChannel) return;
-            const members = Object.values(presenceChannel.presenceState())
-              .flat() as unknown as CameraPresence[];
-            setPresence(Object.fromEntries(
-              members.filter((member) => Boolean(member.deviceId))
-                .map((member) => [member.deviceId, member]),
-            ));
+            const members = Object.values(
+              presenceChannel.presenceState(),
+            ).flat() as unknown as CameraPresence[];
+            setPresence(
+              Object.fromEntries(
+                members
+                  .filter((member) => Boolean(member.deviceId))
+                  .map((member) => [member.deviceId, member]),
+              ),
+            );
           })
           .subscribe();
         const [roomResult, deviceResult, armResult] = await Promise.all([
@@ -291,8 +296,8 @@ function CameraDirector() {
             </span>
             <h1 className="mt-2 text-2xl font-bold md:text-4xl">{room.name}</h1>
             <p className="mt-2 text-sm text-slate-400">
-              {devices.length} paired angles · {armedDevices.length} auto-record armed ·
-              {" "}{recordingCount} reporting recording · room {room.status}
+              {devices.length} paired angles · {armedDevices.length} auto-record armed ·{" "}
+              {recordingCount} reporting recording · room {room.status}
             </p>
           </div>
           <button
@@ -403,8 +408,12 @@ function CameraDirector() {
                       {device.angle.replaceAll("_", " ")} · {states[device.id] ?? "offline"}
                       {" · "}
                       {armed ? "Auto-record armed" : "Not armed"}
-                      {" · "}{presence[device.id]?.recording ? "Phone reports REC" :
-                        presence[device.id] ? "Phone not recording" : "Phone offline/unverified"}
+                      {" · "}
+                      {presence[device.id]?.recording
+                        ? "Phone reports REC"
+                        : presence[device.id]
+                          ? "Phone not recording"
+                          : "Phone offline/unverified"}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
