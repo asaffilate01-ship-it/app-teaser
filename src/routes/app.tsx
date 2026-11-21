@@ -995,9 +995,7 @@ function LiveMatch({
           >
             <div className="min-w-0">
               <h2 className="font-bold text-amber-200">{syncRecovery.title}</h2>
-              <p className="mt-1 text-xs leading-relaxed text-slate-300">
-                {syncRecovery.detail}
-              </p>
+              <p className="mt-1 text-xs leading-relaxed text-slate-300">{syncRecovery.detail}</p>
             </div>
             <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
               {syncRecovery.canRetry && (
@@ -1009,11 +1007,7 @@ function LiveMatch({
                   Retry cloud sync
                 </button>
               )}
-              <button
-                type="button"
-                className="workspace-nav-item min-h-11"
-                onClick={exportMatch}
-              >
+              <button type="button" className="workspace-nav-item min-h-11" onClick={exportMatch}>
                 Export device backup
               </button>
             </div>
