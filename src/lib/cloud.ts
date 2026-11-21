@@ -422,6 +422,12 @@ export function readPendingEvents(matchId: string): PendingMatchEvent[] {
   return parsePendingScorerQueue(localStorage.getItem(storageQueueKey(matchId)), matchId);
 }
 
+/** Recovery-only: never parse, clear or upload potentially damaged local scoring data. */
+export function readRawPendingEventQueue(matchId: string): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(storageQueueKey(matchId));
+}
+
 export function queuePendingEvent(event: PendingMatchEvent): void {
   if (typeof window === "undefined") return;
   const pending = readPendingEvents(event.matchId);
