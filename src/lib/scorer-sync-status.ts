@@ -1,11 +1,5 @@
 export type ScorerSyncStatus =
-  | "local"
-  | "connecting"
-  | "synced"
-  | "queued"
-  | "offline"
-  | "conflict"
-  | "error";
+  "local" | "connecting" | "synced" | "queued" | "offline" | "conflict" | "error";
 
 export type ScorerSyncRecovery = {
   show: boolean;
