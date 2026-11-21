@@ -68,10 +68,12 @@ create policy video_assets_member_select on public.video_assets
 -- complete_camera_asset_upload RPC instead of broad direct UPDATE privileges.
 drop policy if exists video_assets_capture_update on public.video_assets;
 revoke update on public.video_assets from authenticated;
+grant select, update on public.video_assets to service_role;
 
 drop policy if exists video_variants_admin_insert on public.video_variants;
 drop policy if exists video_variants_admin_update on public.video_variants;
 revoke insert, update on public.video_variants from authenticated;
+grant select, insert, update on public.video_variants to service_role;
 
 drop policy if exists video_variants_member_select on public.video_variants;
 create policy video_variants_member_select on public.video_variants
