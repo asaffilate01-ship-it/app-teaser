@@ -714,7 +714,9 @@ function MatchSetup({
                 onChange={(event) => team.setPlayers(event.target.value)}
                 rows={11}
                 className="scorer-input min-h-60 py-3 leading-7"
-                placeholder={"Enter the players in batting order, one per line\nAt least 2, maximum 11"}
+                placeholder={
+                  "Enter the players in batting order, one per line\nAt least 2, maximum 11"
+                }
               />
             </Field>
             <label
@@ -733,7 +735,10 @@ function MatchSetup({
       </section>
 
       {error && (
-        <p role="alert" className="rounded-2xl border border-rose-400/30 bg-rose-400/10 p-4 text-sm text-rose-200">
+        <p
+          role="alert"
+          className="rounded-2xl border border-rose-400/30 bg-rose-400/10 p-4 text-sm text-rose-200"
+        >
           {error}
         </p>
       )}
