@@ -41,9 +41,9 @@ export function LeagueStandings({
           </div>
           <p className="mt-2 max-w-3xl text-xs leading-relaxed text-slate-400">
             Based only on explicitly signed-off fixture results under the current rule version.
-            CricLume does not infer winners or scores from incomplete fixtures. Net run rate
-            here uses recorded legal balls; competition rules for all-out or rain-shortened innings
-            may require additional adjustment. This preview does not publish an official result.
+            CricLume does not infer winners or scores from incomplete fixtures.
+            NRR uses recorded legal balls and may require adjustments for all-outs and rain.
+            This preview does not publish official results.
           </p>
         </div>
         <button
@@ -62,7 +62,10 @@ export function LeagueStandings({
         <span>{preview.scheduled} other fixture(s)</span>
       </div>
       {preview.blockedReason ? (
-        <p role="status" className="mt-4 rounded-lg border border-amber-300/30 p-3 text-sm text-amber-200">
+        <p
+          role="status"
+          className="mt-4 rounded-lg border border-amber-300/30 p-3 text-sm text-amber-200"
+        >
           {preview.blockedReason} Standings are not calculated.
         </p>
       ) : !preview.counted ? (
@@ -85,13 +88,7 @@ export function LeagueStandings({
                     key={label}
                     scope="col"
                     className="px-3 py-2 font-semibold"
-                    title={
-                      label === "NRR"
-                        ? "Net run rate"
-                        : label === "NR"
-                          ? "No result"
-                          : undefined
-                    }
+                    title={label === "NRR" ? "Net run rate" : label === "NR" ? "No result" : undefined}
                   >
                     {label}
                   </th>
@@ -124,8 +121,7 @@ export function LeagueStandings({
       )}
       {preview.awaitingReview > 0 && !preview.blockedReason && (
         <p className="mt-3 text-xs text-amber-200">
-          Some result records were excluded. Rankings may change when the organiser verifies
-          those fixtures and the competition rule version.
+          Some results were excluded. Rankings may change after organiser verification.
         </p>
       )}
       <p className="mt-2 text-xs text-slate-500">
