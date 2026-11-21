@@ -250,11 +250,12 @@ Deno.serve(async (request) => {
         });
         egressId = started.egressId;
         if (!egressId) throw new Error("Provider did not return an egress ID.");
+        const providerState = started.status === 1 ? "recording" : "starting";
         const { error: saveError } = await client
           .from("camera_cloud_recordings")
           .update({
             provider_egress_id: egressId,
-            state: started.status === 1 ? "recording" : "starting",
+            state: providerState,
             provider_status: started.status,
             provider_updated_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -262,7 +263,7 @@ Deno.serve(async (request) => {
           .eq("id", recordingId)
           .eq("state", "starting");
         if (saveError) throw saveError;
-        return json({ recordingId, status: "starting", reused: false }, 202, request);
+        return json({ recordingId, status: providerState, reused: false }, 202, request);
       } catch {
         if (egressId) {
           try {
@@ -298,12 +299,20 @@ Deno.serve(async (request) => {
       await new EgressClient(config.httpsUrl, config.key, config.secret).stopEgress(
         session.provider_egress_id,
       );
-      const { error } = await client
+      const { data: updated, error } = await client
         .from("camera_cloud_recordings")
         .update({ state: "stopping", updated_at: new Date().toISOString() })
-        .eq("id", session.id);
+        .eq("id", session.id)
+        .in("state", ["starting", "recording"])
+        .select("state")
+        .maybeSingle();
       if (error) throw error;
-      return json({ recordingId: session.id, status: "stopping" }, 202, request);
+      if (!updated) {
+        const { data: current } = await client.from("camera_cloud_recordings")
+          .select("state").eq("id", session.id).maybeSingle();
+        return json({ recordingId: session.id, status: current?.state ?? "stopping" }, 200, request);
+      }
+      return json({ recordingId: session.id, status: updated.state }, 202, request);
     }
     return json({ error: "Unsupported camera action." }, 400, request);
   } catch {
