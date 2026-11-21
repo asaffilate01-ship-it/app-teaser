@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { regions, defaultRegion, findRegion, detectCountry, type Region } from "@/lib/pricing";
 import { I18nProvider, useI18n, LanguageSelect } from "@/lib/i18n";
 import type { Content } from "@/lib/content";
+import { canonicalUrl, CRICLUME_OG_IMAGE, HOME_TITLE, HOME_DESCRIPTION, criclumeStructuredData } from "@/lib/seo";
 import {
   Activity,
   ChevronDown,
@@ -41,31 +42,32 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "CricLume — See every ball. Shape every game." },
-      {
-        name: "description",
-        content:
-          "Try ball-by-ball cricket scoring and local video review on CricLume. Explore club and league tools, with additional cloud features under pilot testing.",
-      },
-      { property: "og:title", content: "CricLume — See every ball. Shape every game." },
-      {
-        property: "og:description",
-        content:
-          "Ball-by-ball cricket scoring and local video review, with additional cloud club features under pilot testing.",
-      },
+      { title: HOME_TITLE },
+      { name: "description", content: HOME_DESCRIPTION },
+      { name: "robots", content: "index, follow, max-image-preview:large" },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://app-teaser.lovable.app/" },
+      { property: "og:site_name", content: "CricLume" },
+      { property: "og:locale", content: "en_GB" },
+      { property: "og:url", content: canonicalUrl("/") },
+      { property: "og:title", content: HOME_TITLE },
+      { property: "og:description", content: HOME_DESCRIPTION },
+      { property: "og:image", content: CRICLUME_OG_IMAGE },
+      { property: "og:image:type", content: "image/png" },
+      { property: "og:image:width", content: "512" },
+      { property: "og:image:height", content: "512" },
+      { property: "og:image:alt", content: "CricLume cricket scoring crest" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: HOME_TITLE },
+      { name: "twitter:description", content: HOME_DESCRIPTION },
+      { name: "twitter:image", content: CRICLUME_OG_IMAGE },
+    ],
+    links: [{ rel: "canonical", href: canonicalUrl("/") }],
+    scripts: [
       {
-        property: "og:image",
-        content: `https://app-teaser.lovable.app${fullLogoAsset.url}`,
-      },
-      { name: "twitter:card", content: "summary_large_image" },
-      {
-        name: "twitter:image",
-        content: `https://app-teaser.lovable.app${fullLogoAsset.url}`,
+        type: "application/ld+json",
+        children: JSON.stringify(criclumeStructuredData),
       },
     ],
-    links: [{ rel: "canonical", href: "https://app-teaser.lovable.app/" }],
   }),
   component: HomepageRoot,
 });
@@ -398,7 +400,6 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
             width={1600}
             height={640}
           />
-          <p className="max-w-sm text-sm leading-relaxed text-slate-600">{t.footer.desc}</p>
           <LanguageSelect />
         </div>
         <div className="space-y-2">
@@ -478,7 +479,6 @@ function FeaturesTab() {
   return (
     <div className="space-y-5 md:space-y-8">
       <SectionHeader kicker={t.featuresTab.kicker}>{t.featuresTab.title}</SectionHeader>
-      <p className="text-sm text-muted-foreground md:text-base">{t.featuresTab.intro}</p>
       <div className="space-y-3 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 lg:grid-cols-3">
         {t.features.map((f, i) => (
           <FeatureRow key={f.title} icon={featureIcons[i]!} title={f.title} body={f.body} />
@@ -666,8 +666,8 @@ function PricingTab() {
                   }
                   window.location.assign(
                     i === 1
-                      ? "mailto:hello@criclume.com?subject=CricLume%20Club%20pilot"
-                      : "mailto:hello@criclume.com?subject=CricLume%20League%20pilot",
+                      ? "mailto:hello@criclume.com?subject=CricLume%20Club%20enquiry"
+                      : "mailto:hello@criclume.com?subject=CricLume%20League%20enquiry",
                   );
                 }}
                 className={`mt-auto h-11 w-full rounded-full text-sm font-bold uppercase tracking-wider transition-transform active:scale-[0.98] ${featured ? "brand-gradient glow text-primary-foreground" : "border border-border bg-secondary text-foreground"}`}
