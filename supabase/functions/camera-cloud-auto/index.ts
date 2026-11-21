@@ -397,7 +397,9 @@ Deno.serve(async (request) => {
               if (providerEgressId) {
                 try {
                   await egress.stopEgress(providerEgressId);
-                } catch {}
+                } catch {
+                  // Keep this provider job reserved for a later stop attempt.
+                }
                 await db
                   .from("camera_cloud_recordings")
                   .update({
