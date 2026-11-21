@@ -67,6 +67,8 @@ function MatchCamera() {
   const failedSegmentsRef = useRef<Array<{ blob: Blob; startedAt: string; endedAt: string }>>([]);
   const liveRef = useRef<LiveCameraSession | null>(null);
   const commandHandlerRef = useRef<(command: Record<string, unknown>) => void>(() => {});
+  const seenCommandIdRef = useRef<string | null>(null);
+  const presenceHeartbeatRef = useRef<() => void>(() => {});
   const presenceRef = useRef<Awaited<ReturnType<typeof joinCameraPresence>> | null>(null);
   const [email, setEmail] = useState("");
   const [token, setToken] = useState("");
@@ -81,7 +83,8 @@ function MatchCamera() {
   const [failedSegments, setFailedSegments] = useState(0);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [consent, setConsent] = useState(false);
-  const [includesJunior, setIncludesJunior] = useState(false);
+  // Treat the age category as junior/uncertain until the operator explicitly confirms adult-only.
+  const [includesJunior, setIncludesJunior] = useState(true);
   const [blurMode, setBlurMode] = useState<"none" | "faces" | "people">("none");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -272,6 +275,7 @@ function MatchCamera() {
         recorder.onerror = () => {
           recordingRef.current = false;
           setRecording(false);
+          void updatePresence(false);
           setMessage("This recording segment failed. Check the camera and retained uploads.");
         };
         recorder.start(5_000);
@@ -290,7 +294,7 @@ function MatchCamera() {
     recordingRef.current = true;
     setRecording(true);
     beginSegment();
-    void updatePresence(true);
+    if (recordingRef.current) void updatePresence(true);
   };
 
   const stopRecording = () => {
@@ -307,17 +311,40 @@ function MatchCamera() {
     if (!device || command["device_id"] !== device.id) return;
     const timestamp = Date.parse(String(command["created_at"] ?? ""));
     if (!Number.isFinite(timestamp) || Math.abs(Date.now() - timestamp) > 120_000) return;
+    const id = String(command["id"] ?? "");
+    if (id && seenCommandIdRef.current === id) return;
+    if (id) seenCommandIdRef.current = id;
     if (command["action"] === "stop") {
       stopRecording();
     } else if (command["action"] === "start") {
       if (consent && autoRecordArmed && previewing) startRecording();
-      else setMessage("Auto-record requested, but the preview, permission or arming is missing.");
+      else setMessage("Auto-record requested, but preview, permission or arming is missing.");
     }
   };
 
+  // A realtime event can be missed while a phone changes networks or resumes.
+  // Reconcile the newest authorised command on reconnect and while foregrounded.
   useEffect(() => {
     if (!device) return;
-    const channel = getCloudClient()
+    const client = getCloudClient();
+    let active = true;
+    const reconcile = async () => {
+      const result = await client
+        .from("camera_recording_commands")
+        .select("id,device_id,action,created_at")
+        .eq("device_id", device.id)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!active) return;
+      if (result.error) {
+        setMessage("Camera command sync is unavailable. Check the recorder manually.");
+      } else if (result.data) {
+        commandHandlerRef.current(result.data as Record<string, unknown>);
+      }
+    };
+    const channel = client
       .channel("camera:" + roomId, { config: { private: true } })
       .on(
         "postgres_changes",
@@ -325,19 +352,42 @@ function MatchCamera() {
           event: "INSERT",
           schema: "public",
           table: "camera_recording_commands",
-          filter: "room_id=eq." + roomId,
+          filter: "device_id=eq." + device.id,
         },
         (payload) => commandHandlerRef.current(payload.new as Record<string, unknown>),
       )
       .subscribe((status) => {
+        if (status === "SUBSCRIBED") void reconcile();
         if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          setMessage("Automatic recording channel is offline; use the local record button.");
+          setMessage("Camera command channel is offline; use local recording controls.");
         }
       });
+    const onOnline = () => void reconcile();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void reconcile();
+    };
+    window.addEventListener("online", onOnline);
+    document.addEventListener("visibilitychange", onVisible);
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible" && navigator.onLine) void reconcile();
+    }, 15_000);
     return () => {
-      void getCloudClient().removeChannel(channel);
+      active = false;
+      window.clearInterval(timer);
+      window.removeEventListener("online", onOnline);
+      document.removeEventListener("visibilitychange", onVisible);
+      void client.removeChannel(channel);
     };
   }, [roomId, device]);
+
+  presenceHeartbeatRef.current = () => {
+    if (device && previewing) void updatePresence(recordingRef.current);
+  };
+  useEffect(() => {
+    if (!device) return;
+    const heartbeat = window.setInterval(() => presenceHeartbeatRef.current(), 15_000);
+    return () => window.clearInterval(heartbeat);
+  }, [device]);
 
   // If the camera is armed after the match started, make a single live-status
   // check when the preview becomes available. Do not restart after a manual stop.
@@ -632,8 +682,21 @@ function MatchCamera() {
                 type="checkbox"
                 checked={consent}
                 onChange={(event) => {
-                  setConsent(event.target.checked);
-                  if (!event.target.checked && autoRecordArmed) void setArmed(false);
+                  const granted = event.target.checked;
+                  setConsent(granted);
+                  if (!granted) {
+                    // Revoking permission stops both capture and outgoing media immediately.
+                    stopRecording();
+                    stopLiveSharing();
+                    streamRef.current?.getTracks().forEach((track) => track.stop());
+                    streamRef.current = null;
+                    if (videoRef.current) videoRef.current.srcObject = null;
+                    setPreviewing(false);
+                    if (autoRecordArmed) void setArmed(false);
+                    setMessage(
+                      "Camera capture and live sharing stopped because permission was withdrawn.",
+                    );
+                  }
                 }}
                 className="mt-1 accent-amber-300"
               />
@@ -656,6 +719,7 @@ function MatchCamera() {
               <input
                 type="checkbox"
                 checked={includesJunior}
+                disabled={recording}
                 onChange={(event) => setIncludesJunior(event.target.checked)}
                 className="accent-amber-300"
               />
@@ -665,6 +729,7 @@ function MatchCamera() {
               Privacy processing
               <select
                 value={blurMode}
+                disabled={recording}
                 onChange={(event) => setBlurMode(event.target.value as typeof blurMode)}
                 className="mt-2 w-full rounded-md border border-white/10 bg-[#191621] p-2.5 text-xs normal-case tracking-normal text-white"
               >
