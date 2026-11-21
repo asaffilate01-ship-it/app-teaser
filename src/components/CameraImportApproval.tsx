@@ -26,7 +26,9 @@ export function CameraImportApproval({
         <p>{cloudImportReviewLabel(job.state as CloudImportState)}</p>
         {job.state === "manual_review" && (
           <p className="mt-1 text-amber-200">
-            Import needs a separate review or transfer service. Do not assume footage is saved.
+            {job.failure_code === "large_file_requires_external_worker"
+              ? "Long recording requires the dedicated private streaming worker. Confirm its transfer status with an authorised operator."
+              : "Import needs a separate review or transfer service. Do not assume footage is saved."}
           </p>
         )}
       </div>
