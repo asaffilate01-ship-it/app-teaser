@@ -9,6 +9,7 @@ export const en = {
     login: "Get started",
   },
   hero: {
+    keywordLine: "Cricket scoring app · Ball-by-ball scorecards · Club management",
     l1: "Every ball.",
     l2: "Every angle.",
     l3: "Every advantage.",
@@ -278,6 +279,7 @@ export const de: Content = {
     login: "Loslegen",
   },
   hero: {
+    keywordLine: "Cricket-Scoring-App · Ball-für-Ball-Scorecards · Vereinsverwaltung",
     l1: "Jeder Ball.",
     l2: "Jeder Winkel.",
     l3: "Jeder Vorteil.",
@@ -549,6 +551,7 @@ export const nl: Content = {
     login: "Aan de slag",
   },
   hero: {
+    keywordLine: "Cricket score-app · Scorekaarten per bal · Clubbeheer",
     l1: "Elke bal.",
     l2: "Elke hoek.",
     l3: "Elk voordeel.",
@@ -818,6 +821,7 @@ export const af: Content = {
     login: "Begin hier",
   },
   hero: {
+    keywordLine: "Kriekettelling-app · Bal-vir-bal telkaarte · Klubbestuur",
     l1: "Elke bal.",
     l2: "Elke hoek.",
     l3: "Elke voordeel.",
@@ -1090,6 +1094,7 @@ export const fr: Content = {
     login: "Commencer",
   },
   hero: {
+    keywordLine: "Application de score de cricket · Balle par balle · Gestion des clubs",
     l1: "Chaque balle.",
     l2: "Chaque angle.",
     l3: "Chaque avantage.",
