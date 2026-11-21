@@ -93,6 +93,14 @@ function publicLiveState(match: CricketMatch): Record<string, unknown> {
   };
 }
 
+function safeQueueCount(matchId: string): number | null {
+  try {
+    return readPendingEvents(matchId).length;
+  } catch {
+    return null;
+  }
+}
+
 export function useMatchCloudSync(
   cloudMatchId: string | null,
   onRemoteMatch: (match: CricketMatch) => boolean | void,
@@ -102,6 +110,18 @@ export function useMatchCloudSync(
   const deviceId = useMemo(() => (typeof window === "undefined" ? "server" : getDeviceId()), []);
   const [status, setStatus] = useState<ScorerSyncStatus>(enabled ? "connecting" : "local");
   const [pendingCount, setPendingCount] = useState(0);
+  const [queueUnreadable, setQueueUnreadable] = useState(false);
+  const notePending = useCallback((matchId: string): number | null => {
+    const count = safeQueueCount(matchId);
+    if (count === null) {
+      setQueueUnreadable(true);
+      setStatus("error");
+      return null;
+    }
+    setQueueUnreadable(false);
+    setPendingCount(count);
+    return count;
+  }, []);
   const [lastSequence, setLastSequence] = useState(0);
   const latestRemoteSequence = useRef<{ matchId: string | null; sequence: number }>({
     matchId: cloudMatchId,
@@ -111,7 +131,7 @@ export function useMatchCloudSync(
   useEffect(() => {
     if (!enabled || !cloudMatchId || pausedForReview) return;
     let active = true;
-    setPendingCount(readPendingEvents(cloudMatchId).length);
+    if (notePending(cloudMatchId) === null) return;
     if (!navigator.onLine) setStatus("offline");
     const unsubscribe = subscribeToMatchEvents(
       cloudMatchId,
@@ -124,9 +144,9 @@ export function useMatchCloudSync(
         if (event.sequence <= latestRemoteSequence.current.sequence) return;
         latestRemoteSequence.current.sequence = event.sequence;
         setLastSequence((sequence) => Math.max(sequence, event.sequence));
-        const waiting = readPendingEvents(cloudMatchId).length;
+        const waiting = notePending(cloudMatchId);
+        if (waiting === null) return;
         const hasPending = waiting > 0;
-        setPendingCount(waiting);
         if (event.deviceId !== deviceId && !hasPending) {
           const snapshot = event.payload["matchSnapshot"];
           if (snapshot !== undefined && snapshot !== null) {
@@ -147,8 +167,8 @@ export function useMatchCloudSync(
       },
       (next) => {
         if (!active) return;
-        const waiting = readPendingEvents(cloudMatchId).length;
-        setPendingCount(waiting);
+        const waiting = notePending(cloudMatchId);
+        if (waiting === null) return;
         setStatus(
           !navigator.onLine
             ? "offline"
@@ -161,8 +181,8 @@ export function useMatchCloudSync(
       },
     );
     const flush = () => {
+      if (notePending(cloudMatchId) === null) return;
       if (!navigator.onLine) {
-        setPendingCount(readPendingEvents(cloudMatchId).length);
         setStatus("offline");
         return;
       }
@@ -174,15 +194,13 @@ export function useMatchCloudSync(
           setStatus(!navigator.onLine ? "offline" : result.remaining ? "queued" : "synced");
         })
         .catch(() => {
-          if (active) {
-            setPendingCount(readPendingEvents(cloudMatchId).length);
+          if (active && notePending(cloudMatchId) !== null) {
             setStatus(navigator.onLine ? "error" : "offline");
           }
         });
     };
     const offline = () => {
-      setPendingCount(readPendingEvents(cloudMatchId).length);
-      setStatus("offline");
+      if (notePending(cloudMatchId) !== null) setStatus("offline");
     };
     const online = () => {
       setStatus("connecting");
@@ -197,13 +215,13 @@ export function useMatchCloudSync(
       window.removeEventListener("online", online);
       window.removeEventListener("offline", offline);
     };
-  }, [cloudMatchId, deviceId, enabled, onRemoteMatch, pausedForReview]);
+  }, [cloudMatchId, deviceId, enabled, notePending, onRemoteMatch, pausedForReview]);
 
   const retry = useCallback(async () => {
-    if (!enabled || !cloudMatchId || pausedForReview) return;
+    if (!enabled || !cloudMatchId || pausedForReview || queueUnreadable) return;
+    if (notePending(cloudMatchId) === null) return;
     if (!navigator.onLine) {
       setStatus("offline");
-      setPendingCount(readPendingEvents(cloudMatchId).length);
       return;
     }
     setStatus("connecting");
@@ -213,14 +231,15 @@ export function useMatchCloudSync(
       setPendingCount(result.remaining);
       setStatus(!navigator.onLine ? "offline" : result.remaining ? "queued" : "synced");
     } catch {
-      setPendingCount(readPendingEvents(cloudMatchId).length);
-      setStatus(navigator.onLine ? "error" : "offline");
+      if (notePending(cloudMatchId) !== null) {
+        setStatus(navigator.onLine ? "error" : "offline");
+      }
     }
-  }, [cloudMatchId, enabled, pausedForReview]);
+  }, [cloudMatchId, enabled, notePending, pausedForReview, queueUnreadable]);
 
   const publish = useCallback(
     async (match: CricketMatch, eventType: string) => {
-      if (!enabled || !cloudMatchId || pausedForReview) return;
+      if (!enabled || !cloudMatchId || pausedForReview || queueUnreadable) return;
       const innings = currentInnings(match);
       const delivery = eventType === "delivery.recorded" ? innings.deliveries.at(-1) : null;
       const canonicalInningsEvent = ["delivery.recorded", "delivery.voided"].includes(eventType);
@@ -242,7 +261,7 @@ export function useMatchCloudSync(
         // Persist before any network request: new scores must never leapfrog
         // older offline events, including a delivery whose retry is failing.
         queuePendingEvent(event);
-        setPendingCount(readPendingEvents(cloudMatchId).length);
+        if (notePending(cloudMatchId) === null) return;
         if (!navigator.onLine) {
           setStatus("offline");
           return;
@@ -253,11 +272,12 @@ export function useMatchCloudSync(
         setPendingCount(result.remaining);
         setStatus(!navigator.onLine ? "offline" : result.remaining ? "queued" : "synced");
       } catch {
-        setPendingCount(readPendingEvents(cloudMatchId).length);
-        setStatus(navigator.onLine ? "error" : "offline");
+        if (notePending(cloudMatchId) !== null) {
+          setStatus(navigator.onLine ? "error" : "offline");
+        }
       }
     },
-    [cloudMatchId, deviceId, enabled, pausedForReview],
+    [cloudMatchId, deviceId, enabled, notePending, pausedForReview, queueUnreadable],
   );
 
   const visibleStatus = pausedForReview
@@ -265,5 +285,5 @@ export function useMatchCloudSync(
     : status === "synced" && pendingCount > 0
       ? "queued"
       : status;
-  return { enabled, status: visibleStatus, lastSequence, pendingCount, publish, retry };
+  return { enabled, status: visibleStatus, lastSequence, pendingCount, queueUnreadable, publish, retry };
 }
