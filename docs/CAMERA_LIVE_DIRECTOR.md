@@ -41,3 +41,13 @@ Next: managed SFU and per-track server recording with clock-synchronised every-b
 - The command refresh is **not** a substitute for server-side egress: phones must be awake and have permissions; a stopped or disconnected device does not record.
 
 Before live use, test under real guardian/child safeguarding requirements, negative-role access, a separate scorer/viewer account, cross-organisation access, deleted/expired/withdrawn clips, and private signed URLs. A signed URL issued before consent withdrawal may remain accessible until its short expiry; immediate revocation requires an additional proxy or provider-side revocation mechanism.
+
+## Durable phone acknowledgments for director recording controls
+
+- New source migration: `20261121173000_camera_command_receipts.sql`. It creates an append-only, RLS-protected receipt per authorised command.
+- After the phone receives a recent START or STOP instruction, it reports a distinct status: **started**, **already recording**, **stopped**, **already stopped**, **blocked** (consent/arming/preview), or **failed** (recorder error). Stale, malformed, cross-camera and out-of-order commands are rejected by the device.
+- A response may be inserted only by the explicitly paired phone operator for the same room/device and a recent command; ordinary directors cannot forge a phone's response.
+- The director panel lists latest requested action and available phone response, including missing acknowledgments and timestamps. It refreshes periodically while the page is visible and after sending a control request.
+- **Interpretation:** A receipt is a *phone report about its recorder*, not a checksum of uploaded footage, not proof of a current continuous recording, and not a server-side recording guarantee. Verify separately that private video assets exist and processing succeeded.
+- The migration has **not** been applied to CricLume's production Supabase project. The connected Supabase account currently exposes Dishbee only. Production activation requires approved access to the correct CricLume project, RLS tests, and real-phone acceptance tests.
+- Remaining production work: managed SFU and consent-gated server egress, media-provider credentials, sustained network recording, storage retention/privacy checks, and calibrated synchronisation.
