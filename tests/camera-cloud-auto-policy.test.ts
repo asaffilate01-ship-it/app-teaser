@@ -30,26 +30,39 @@ test("cloud auto recording requires live match, explicit operator opt-in and an 
     { autoEnabled: false },
     { adultOnlyAttested: false },
   ]) {
-    assert.equal(canAutomaticallyStartCamera({ ...ready, ...input, publisherPresent: true }), false);
+    assert.equal(
+      canAutomaticallyStartCamera({ ...ready, ...input, publisherPresent: true }),
+      false,
+    );
   }
 });
 
 test("reconciler stops all cloud recordings when the match ends, room closes or consent is withdrawn", () => {
   const baseline = {
-    ...ready, source: "match_state" as const,
+    ...ready,
+    source: "match_state" as const,
     nowMs: Date.parse("2026-11-21T12:30:00Z"),
     startedAt: "2026-11-21T12:00:00Z",
     maxDurationMinutes: 120,
   };
   assert.equal(automaticCloudStopCause(baseline), null);
-  assert.equal(automaticCloudStopCause({ ...baseline, matchStatus: "completed" }), "match_not_live");
+  assert.equal(
+    automaticCloudStopCause({ ...baseline, matchStatus: "completed" }),
+    "match_not_live",
+  );
   assert.equal(automaticCloudStopCause({ ...baseline, roomStatus: "archived" }), "room_closed");
-  assert.equal(automaticCloudStopCause({ ...baseline, consentConfirmed: false }), "consent_withdrawn");
+  assert.equal(
+    automaticCloudStopCause({ ...baseline, consentConfirmed: false }),
+    "consent_withdrawn",
+  );
   assert.equal(automaticCloudStopCause({ ...baseline, localArmed: false }), "consent_withdrawn");
   assert.equal(automaticCloudStopCause({ ...baseline, autoEnabled: false }), "auto_opt_out");
   assert.equal(automaticCloudStopCause({ ...baseline, adultOnlyAttested: false }), "auto_opt_out");
   // Explicit manual director recording is not cancelled solely by auto opt-out.
-  assert.equal(automaticCloudStopCause({ ...baseline, source: "director", autoEnabled: false }), null);
+  assert.equal(
+    automaticCloudStopCause({ ...baseline, source: "director", autoEnabled: false }),
+    null,
+  );
 });
 
 test("hard duration cap and malformed timestamps fail closed", () => {

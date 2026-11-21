@@ -333,23 +333,33 @@ assert.equal(
     .length,
   0,
 );
-await db.query(
-  "update public.camera_cloud_recordings set state='provider_completed' where id=$1",
-  [cloudJob],
-);
+await db.query("update public.camera_cloud_recordings set state='provider_completed' where id=$1", [
+  cloudJob,
+]);
 const autoJob = "b9000000-0000-4000-8000-000000000002";
 await db.query(
   "insert into public.camera_cloud_recordings(id,room_id,device_id,requested_by,provider_room_name,object_path,start_source) values($1,$2,$3,$4,$5,$6,'match_state')",
-  [autoJob, room, device, a, "criclume-" + room + "-" + device,
-   org + "/" + room + "/" + device + "/" + autoJob + ".mp4"],
+  [
+    autoJob,
+    room,
+    device,
+    a,
+    "criclume-" + room + "-" + device,
+    org + "/" + room + "/" + device + "/" + autoJob + ".mp4",
+  ],
 );
 await db.query("update public.camera_cloud_recordings set state='failed' where id=$1", [autoJob]);
 await assert.rejects(
   () =>
     db.query(
       "insert into public.camera_cloud_recordings(room_id,device_id,requested_by,provider_room_name,object_path,start_source) values($1,$2,$3,$4,$5,'match_state')",
-      [room, device, a, "criclume-" + room + "-" + device,
-       org + "/" + room + "/" + device + "/another.mp4"],
+      [
+        room,
+        device,
+        a,
+        "criclume-" + room + "-" + device,
+        org + "/" + room + "/" + device + "/another.mp4",
+      ],
     ),
   (error) => error.code === "23505",
 );

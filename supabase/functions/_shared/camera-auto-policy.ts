@@ -8,11 +8,7 @@ export interface CloudCameraEligibility {
 }
 
 export type CloudStopCause =
-  | "match_not_live"
-  | "room_closed"
-  | "consent_withdrawn"
-  | "auto_opt_out"
-  | "duration_limit";
+  "match_not_live" | "room_closed" | "consent_withdrawn" | "auto_opt_out" | "duration_limit";
 
 export const activeCloudStates = ["starting", "recording", "stopping"] as const;
 

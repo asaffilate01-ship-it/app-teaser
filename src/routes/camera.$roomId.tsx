@@ -311,18 +311,20 @@ function MatchCamera() {
       void stopCloudPublisher();
       setCloudAutoEnabled(false);
     }
-    const { error } = await getCloudClient().from("camera_cloud_auto_opt_ins").upsert(
-      {
-        device_id: device.id,
-        room_id: roomId,
-        operator_id: session.user.id,
-        enabled,
-        adult_only_attested: enabled && !includesJunior,
-        opted_in_at: enabled ? new Date().toISOString() : null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "device_id" },
-    );
+    const { error } = await getCloudClient()
+      .from("camera_cloud_auto_opt_ins")
+      .upsert(
+        {
+          device_id: device.id,
+          room_id: roomId,
+          operator_id: session.user.id,
+          enabled,
+          adult_only_attested: enabled && !includesJunior,
+          opted_in_at: enabled ? new Date().toISOString() : null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "device_id" },
+      );
     if (error) {
       setMessage("Cloud opt-in could not be saved. Confirm that CricLume's backend is deployed.");
       // If the user cannot revoke the database preference, disarm the local
@@ -879,18 +881,17 @@ function MatchCamera() {
               <input
                 type="checkbox"
                 checked={cloudAutoEnabled}
-                disabled={!device || !consent || !autoRecordArmed || includesJunior || cloudAutoBusy}
-                onChange={(event) =>
-                  void setCloudAutoEnabledByOperator(event.target.checked)
+                disabled={
+                  !device || !consent || !autoRecordArmed || includesJunior || cloudAutoBusy
                 }
+                onChange={(event) => void setCloudAutoEnabledByOperator(event.target.checked)}
                 className="mt-1 accent-amber-300"
               />
               <span>
-                Opt in to **server-side automatic cloud recording** for an adult-only
-                match when it goes live. By enabling this I confirm all recorded
-                participants are adults and the club has authorised this camera's
-                cloud recording. Publishing to LiveKit is a separate button; the
-                platform's auto-cloud switch must also be enabled.
+                Opt in to **server-side automatic cloud recording** for an adult-only match when it
+                goes live. By enabling this I confirm all recorded participants are adults and the
+                club has authorised this camera's cloud recording. Publishing to LiveKit is a
+                separate button; the platform's auto-cloud switch must also be enabled.
               </span>
             </label>
             <label className="mt-3 flex items-center gap-3 text-xs text-slate-300">
