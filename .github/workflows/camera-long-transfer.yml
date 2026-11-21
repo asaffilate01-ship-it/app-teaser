@@ -1,0 +1,28 @@
+name: CricLume long media worker
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  worker-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: workers/camera-long-transfer/package-lock.json
+      - name: Install isolated pinned worker dependencies
+        run: npm ci --prefix workers/camera-long-transfer --omit=dev --ignore-scripts
+      - name: Validate streaming worker syntax
+        run: node --check workers/camera-long-transfer/index.mjs
+      - name: Verify disabled by default without provider calls
+        run: node workers/camera-long-transfer/index.mjs
+      - name: Worker dependency audit
+        run: npm audit --prefix workers/camera-long-transfer --omit=dev --audit-level=high
