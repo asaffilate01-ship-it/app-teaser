@@ -177,25 +177,44 @@ create trigger camera_arm_auto_record
 after insert or update of armed on public.camera_recording_arms
 for each row execute function public.camera_recording_arm_transition();
 
--- Separate media signalling from the broad match-presence channel. Spectators
--- cannot subscribe to live camera SDP/ICE traffic. WebRTC media stays encrypted.
+-- Earlier camera-device update RLS allowed every match viewer to edit other
+-- devices, including their user_id. Close that ownership escalation first.
+drop policy if exists camera_devices_self_update on public.camera_devices;
+create policy camera_devices_self_update on public.camera_devices
+for update to authenticated
+using (user_id = (select auth.uid()))
+with check (user_id = (select auth.uid())
+  and public.can_access_camera_room(room_id));
+
+-- Media signalling is scoped to ONE paired device per private topic. A phone
+-- operator cannot watch another phone just because they share a match.
+create function public.can_access_camera_signal_topic(p_topic text)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select case when p_topic ~ '^camera-live:[0-9a-fA-F-]{36}:[0-9a-fA-F-]{36}$'
+    then (
+      public.can_direct_camera_room(split_part(p_topic, ':', 2)::uuid)
+      or exists (
+        select 1 from public.camera_devices d
+        where d.id = split_part(p_topic, ':', 3)::uuid
+          and d.room_id = split_part(p_topic, ':', 2)::uuid
+          and d.user_id = (select auth.uid())
+      )
+    )
+    else false end;
+$$;
+revoke all on function public.can_access_camera_signal_topic(text)
+  from public, anon, authenticated;
+grant execute on function public.can_access_camera_signal_topic(text) to authenticated;
+
 create policy camera_live_signal_read on realtime.messages for select to authenticated
 using (
-  (select realtime.topic()) ~ '^camera-live:[0-9a-fA-F-]{36}$'
-  and realtime.messages.extension = 'broadcast'
-  and (
-    public.can_direct_camera_room(split_part((select realtime.topic()), ':', 2)::uuid)
-    or public.can_operate_camera_room(split_part((select realtime.topic()), ':', 2)::uuid)
-  )
+  realtime.messages.extension = 'broadcast'
+  and public.can_access_camera_signal_topic((select realtime.topic()))
 );
 create policy camera_live_signal_write on realtime.messages for insert to authenticated
 with check (
-  (select realtime.topic()) ~ '^camera-live:[0-9a-fA-F-]{36}$'
-  and realtime.messages.extension = 'broadcast'
-  and (
-    public.can_direct_camera_room(split_part((select realtime.topic()), ':', 2)::uuid)
-    or public.can_operate_camera_room(split_part((select realtime.topic()), ':', 2)::uuid)
-  )
+  realtime.messages.extension = 'broadcast'
+  and public.can_access_camera_signal_topic((select realtime.topic()))
 );
 
 alter publication supabase_realtime add table public.camera_recording_commands;
