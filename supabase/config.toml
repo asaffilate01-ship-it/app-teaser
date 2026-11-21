@@ -69,3 +69,12 @@ verify_jwt = true
 # Authenticated with a provider HMAC, not a browser JWT.
 [functions.video-callback]
 verify_jwt = false
+
+# User JWT is revalidated, matched to CricLume organisation and paired device.
+[functions.camera-cloud]
+verify_jwt = true
+
+# Provider webhook is authenticated with LiveKit's signed Authorization header,
+# not a browser JWT or CORS. Never expose this endpoint as a client action.
+[functions.camera-cloud-webhook]
+verify_jwt = false
