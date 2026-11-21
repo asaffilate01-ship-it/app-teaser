@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { CameraReplayLibrary } from "@/components/CameraReplayLibrary";
+import { CameraCommandConfirmations } from "@/components/CameraCommandConfirmations";
 import { getCloudClient, isCloudConfigured, type CameraPresence } from "@/lib/cloud";
 import {
   connectLiveCamera,
@@ -63,6 +64,7 @@ function CameraDirector() {
   const [focus, setFocus] = useState<string | null>(null);
   const [soundDevice, setSoundDevice] = useState<string | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [commandRefreshKey, setCommandRefreshKey] = useState(0);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const liveRef = useRef<Map<string, LiveCameraSession>>(new Map());
@@ -223,6 +225,7 @@ function CameraDirector() {
           })),
         );
       if (error) throw error;
+      setCommandRefreshKey((value) => value + 1);
       setMessage(
         action === "start"
           ? "Recording request sent. Verify each phone reports Recording before relying on the footage."
@@ -360,6 +363,11 @@ function CameraDirector() {
           </p>
         )}
 
+        <CameraCommandConfirmations
+          roomId={roomId}
+          devices={devices}
+          refreshKey={commandRefreshKey}
+        />
         <div
           className={
             "mt-5 grid gap-4 " +
