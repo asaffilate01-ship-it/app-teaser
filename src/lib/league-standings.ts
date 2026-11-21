@@ -120,10 +120,18 @@ function validRules(rules: CompetitionRecord["rules"]): rules is NonNullable<
   ) {
     return false;
   }
-  if (!rules.points || !["win", "tie", "noResult", "loss"].every((key) => {
-    const value = rules.points[key as keyof typeof rules.points];
-    return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
-  })) {
+  if (!rules.points) return false;
+  const values = [
+    rules.points.win,
+    rules.points.tie,
+    rules.points.noResult,
+    rules.points.loss,
+  ];
+  if (
+    !values.every(
+      (value) => typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100,
+    )
+  ) {
     return false;
   }
   return rules.tieBreakers.every((value) =>
