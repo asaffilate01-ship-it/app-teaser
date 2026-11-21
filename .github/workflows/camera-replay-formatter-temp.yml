@@ -1,0 +1,43 @@
+name: Camera replay formatting (temporary)
+on:
+  push:
+    branches:
+      - feat/criclume-p3-recording-replay-reliability-20261121
+permissions:
+  contents: write
+jobs:
+  format-replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Format changed camera source
+        run: |
+          bunx prettier --write \
+            src/lib/camera-review.ts \
+            src/lib/camera-review-cloud.ts \
+            src/components/CameraReplayLibrary.tsx \
+            'src/routes/camera.$roomId.tsx' \
+            'src/routes/director.$roomId.tsx' \
+            tests/camera-review.test.ts
+      - name: Commit formatting only
+        run: |
+          if ! git diff --quiet -- \
+            src/lib/camera-review.ts \
+            src/lib/camera-review-cloud.ts \
+            src/components/CameraReplayLibrary.tsx \
+            'src/routes/camera.$roomId.tsx' \
+            'src/routes/director.$roomId.tsx' \
+            tests/camera-review.test.ts; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add src/lib/camera-review.ts src/lib/camera-review-cloud.ts \
+              src/components/CameraReplayLibrary.tsx \
+              'src/routes/camera.$roomId.tsx' 'src/routes/director.$roomId.tsx' \
+              tests/camera-review.test.ts
+            git commit -m 'style(camera): format upload and replay feature'
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
