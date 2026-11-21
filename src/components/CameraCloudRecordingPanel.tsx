@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { CameraImportApproval } from "@/components/CameraImportApproval";
 import { cameraArchiveStatusLabel } from "@/lib/camera-archive-policy";
 import { Cloud, CircleStop, RefreshCw, Radio, ShieldAlert } from "lucide-react";
 import {
@@ -139,6 +140,12 @@ export function CameraCloudRecordingPanel({
                     recording.archive_object_bytes !== null &&
                     " · " + Math.round(recording.archive_object_bytes / 1024) + " KiB"}
                 </p>
+              )}
+              {recording && (
+                <CameraImportApproval
+                  recording={recording}
+                  onSubmitted={refresh}
+                />
               )}
               {unavailable[device.id] && (
                 <p role="alert" className="mt-2 flex items-start gap-2 text-xs text-rose-200">
