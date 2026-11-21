@@ -3,6 +3,8 @@ import { BarChart3, Download } from "lucide-react";
 import { buildLeagueStandings, leagueStandingsCsv } from "@/lib/league-standings";
 import type { CompetitionRecord, FixtureRecord, TeamRecord } from "@/lib/platform-cloud";
 
+const columnTitles: Record<string, string> = { NRR: "Net run rate", NR: "No result" };
+
 export function LeagueStandings({
   competition,
   fixtures,
@@ -41,9 +43,7 @@ export function LeagueStandings({
           </div>
           <p className="mt-2 max-w-3xl text-xs leading-relaxed text-slate-400">
             Based only on explicitly signed-off fixture results under the current rule version.
-            CricLume does not infer winners or scores from incomplete fixtures.
-            NRR uses recorded legal balls and may require adjustments for all-outs and rain.
-            This preview does not publish official results.
+            Only signed-off results are counted. NRR is indicative; all-outs and rain need review.
           </p>
         </div>
         <button
@@ -88,7 +88,7 @@ export function LeagueStandings({
                     key={label}
                     scope="col"
                     className="px-3 py-2 font-semibold"
-                    title={label === "NRR" ? "Net run rate" : label === "NR" ? "No result" : undefined}
+                    title={columnTitles[label]}
                   >
                     {label}
                   </th>
