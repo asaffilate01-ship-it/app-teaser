@@ -33,6 +33,24 @@ create policy video_assets_capture_insert on public.video_assets
     )
   );
 
+-- Returning the new asset ID after INSERT requires SELECT under RLS.
+-- Paired operators may read ONLY the video assets they themselves created.
+drop policy if exists video_assets_member_select on public.video_assets;
+create policy video_assets_member_select on public.video_assets
+  for select to authenticated
+  using (
+    public.is_org_member(organisation_id)
+    or (
+      created_by = (select auth.uid())
+      and exists (
+        select 1 from public.camera_devices d
+        where d.id = video_assets.device_id
+          and d.room_id = video_assets.room_id
+          and d.user_id = (select auth.uid())
+      )
+    )
+  );
+
 -- Deliberately security definer: paired camera operators may not belong to the
 -- club membership table, while direct video_assets UPDATE is restricted.
 -- This function can ONLY set the fixed storage_path and uploaded status of a
