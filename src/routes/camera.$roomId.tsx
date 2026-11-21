@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 import { connectLiveCamera, type LiveCameraSession } from "@/lib/camera-live";
+import { storageVideoMimeType } from "@/lib/camera-review";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import {
   getCloudClient,
@@ -376,8 +377,9 @@ function MatchCamera() {
   const saveRecording = async (blob: Blob, startedAt: string, endedAt: string) => {
     if (!device || !session) return;
     setUploadProgress(0);
-    setMessage("Preparing encrypted cloud upload…");
+    setMessage("Preparing private cloud upload…");
     try {
+      const storageContentType = storageVideoMimeType(blob.type);
       const { data: room, error: roomError } = await getCloudClient()
         .from("camera_rooms")
         .select("id, matches!inner(owner_organisation_id)")
@@ -394,7 +396,7 @@ function MatchCamera() {
           organisation_id: match.owner_organisation_id,
           room_id: roomId,
           device_id: device.id,
-          content_type: blob.type,
+          content_type: storageContentType,
           size_bytes: blob.size,
           started_at: startedAt,
           ended_at: endedAt,
@@ -414,14 +416,14 @@ function MatchCamera() {
         organisationId: match.owner_organisation_id,
         assetId: asset.id,
         file: blob,
-        contentType: blob.type,
+        contentType: storageContentType,
         onProgress: (uploaded, total) =>
           setUploadProgress(total ? Math.round((uploaded / total) * 100) : 0),
       });
-      const { error: saveError } = await getCloudClient()
-        .from("video_assets")
-        .update({ storage_path: path, status: "uploaded" })
-        .eq("id", asset.id);
+      const { error: saveError } = await getCloudClient().rpc(
+        "complete_camera_asset_upload",
+        { p_asset_id: asset.id, p_storage_path: path },
+      );
       if (saveError) throw saveError;
       setUploadProgress(100);
       setMessage("Upload saved. Requesting processing…");
