@@ -73,6 +73,7 @@ import {
 } from "@/lib/cricket";
 import { loadCloudMatchSnapshot, readPendingEvents, startCloudInnings } from "@/lib/cloud";
 import { reviewCloudBootstrap, reviewRemoteScorerSnapshot } from "@/lib/scorer-reconciliation";
+import { describeScorerSyncRecovery } from "@/lib/scorer-sync-status";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 
 export const Route = createFileRoute("/app")({
@@ -814,6 +815,7 @@ function LiveMatch({
     [cloudConflict, match, onSave],
   );
   const cloudSync = useMatchCloudSync(cloudMatchId, acceptRemoteMatch, Boolean(cloudConflict));
+  const syncRecovery = describeScorerSyncRecovery(cloudSync.status, cloudSync.pendingCount);
   const saveAndSync = (next: CricketMatch, eventType = "match.snapshot") => {
     if (cloudConflict) return;
     onSave(next);
@@ -983,6 +985,33 @@ function LiveMatch({
           <p className="mb-4 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-200">
             {cloudActionError}
           </p>
+        )}
+        {cloudSync.enabled && syncRecovery.show && !cloudConflict && (
+          <section
+            role="status"
+            aria-live="polite"
+            aria-label="Cloud scoring recovery"
+            className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/35 bg-amber-300/[0.06] p-4"
+          >
+            <div className="min-w-0">
+              <h2 className="font-bold text-amber-200">{syncRecovery.title}</h2>
+              <p className="mt-1 text-xs leading-relaxed text-slate-300">{syncRecovery.detail}</p>
+            </div>
+            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+              {syncRecovery.canRetry && (
+                <button
+                  type="button"
+                  className="action-primary min-h-11"
+                  onClick={() => void cloudSync.retry()}
+                >
+                  Retry cloud sync
+                </button>
+              )}
+              <button type="button" className="workspace-nav-item min-h-11" onClick={exportMatch}>
+                Export device backup
+              </button>
+            </div>
+          </section>
         )}
         {cloudConflict && (
           <section
