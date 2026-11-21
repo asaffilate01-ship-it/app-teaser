@@ -10,6 +10,8 @@ import {
   type CoachingAnnotation,
 } from "@/lib/coaching";
 import { getCloudClient } from "@/lib/cloud";
+import { signedRoomClipUrl } from "@/lib/camera-review-cloud";
+import type { CameraClip } from "@/lib/camera-review";
 import type { DeliveryEvidence, Discipline } from "@/lib/analysis";
 export type EvidenceFile = {
   id: string;
@@ -187,22 +189,17 @@ export async function removeEvidence(file: EvidenceFile) {
 }
 export async function clipUrl(id: string) {
   const db = getCloudClient();
-  const r = await db
+  const result = await db
     .from("video_assets")
-    .select("storage_path,status,recording_consent,retention_expires_at")
+    .select(
+      "id,device_id,started_at,ended_at,storage_path,status,recording_consent,retention_expires_at,blur_mode",
+    )
     .eq("id", id)
     .single();
-  if (
-    r.error ||
-    !r.data.storage_path ||
-    r.data.recording_consent !== "granted" ||
-    ["deleted", "quarantined"].includes(r.data.status) ||
-    Date.parse(r.data.retention_expires_at) <= Date.now()
-  )
-    throw new Error("Clip unavailable or consent expired.");
-  const s = await db.storage.from("match-video").createSignedUrl(r.data.storage_path, 60);
-  if (s.error) throw s.error;
-  return s.data.signedUrl;
+  if (result.error || !result.data) {
+    throw new Error("Recording unavailable or access was denied.");
+  }
+  return signedRoomClipUrl(result.data as CameraClip);
 }
 export async function saveNote(
   org: string,
