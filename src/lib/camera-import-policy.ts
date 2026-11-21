@@ -2,12 +2,7 @@
 export const privateImportMaxBytes = 32 * 1024 * 1024;
 export const privateImportRetentionDays = 30;
 
-export const cloudImportStates = [
-  "approved",
-  "importing",
-  "imported",
-  "manual_review",
-] as const;
+export const cloudImportStates = ["approved", "importing", "imported", "manual_review"] as const;
 
 export type CloudImportState = (typeof cloudImportStates)[number];
 

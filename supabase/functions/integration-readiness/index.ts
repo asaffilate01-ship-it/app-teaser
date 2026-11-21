@@ -104,14 +104,16 @@ Deno.serve(async (request) => {
     checks.push({
       id: "private-media-import",
       label: "Private cloud media library ingestion",
-      status: Deno.env.get("CRICLUME_PRIVATE_IMPORT_ENABLED") !== "true"
-        ? "disabled"
-        : [...cloudCaptureKeys.slice(3), "CRON_SECRET"].every((key) =>
-            Boolean(Deno.env.get(key)?.trim()),
-          )
-          ? "configured"
-          : "missing",
-      detail: "A human safeguarding review, verified private source, and separately scheduled worker are required. Large files need an external transfer worker.",
+      status:
+        Deno.env.get("CRICLUME_PRIVATE_IMPORT_ENABLED") !== "true"
+          ? "disabled"
+          : [...cloudCaptureKeys.slice(3), "CRON_SECRET"].every((key) =>
+                Boolean(Deno.env.get(key)?.trim()),
+              )
+            ? "configured"
+            : "missing",
+      detail:
+        "A human safeguarding review, verified private source, and separately scheduled worker are required. Large files need an external transfer worker.",
     });
     checks.push({
       id: "paid-ai",

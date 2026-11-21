@@ -35,14 +35,18 @@ export function CameraImportApproval({
   if (
     recording.state !== "provider_completed" ||
     recording.archive_check_status !== "object_confirmed"
-  ) return null;
+  )
+    return null;
 
   const submit = async () => {
     if (!recordingPermission || (includesJunior && !guardianPermission) || busy) return;
-    if (!window.confirm(
-      "Approve a private transfer of this confirmed recording? " +
-      "It will not be public or playable until privacy processing is approved.",
-    )) return;
+    if (
+      !window.confirm(
+        "Approve a private transfer of this confirmed recording? " +
+          "It will not be public or playable until privacy processing is approved.",
+      )
+    )
+      return;
     setBusy(true);
     setError("");
     setSuccess("");
@@ -116,8 +120,16 @@ export function CameraImportApproval({
       >
         <CloudUpload className="size-4" /> {busy ? "Submitting review…" : "Approve private import"}
       </button>
-      {success && <p role="status" className="mt-2 text-xs text-emerald-200">{success}</p>}
-      {error && <p role="alert" className="mt-2 text-xs text-rose-200">{error}</p>}
+      {success && (
+        <p role="status" className="mt-2 text-xs text-emerald-200">
+          {success}
+        </p>
+      )}
+      {error && (
+        <p role="alert" className="mt-2 text-xs text-rose-200">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

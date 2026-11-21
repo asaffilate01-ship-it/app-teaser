@@ -38,7 +38,8 @@ test("import requires a completed, confirmed private file plus live consent and 
     { reviewerStillAuthorised: false },
     { approval: { ...eligible.approval, recordingPermissionAttested: false } },
     { approval: { ...eligible.approval, guardianPermissionAttested: false } },
-  ]) assert.equal(cloudImportEligible({ ...eligible, ...variant }), false);
+  ])
+    assert.equal(cloudImportEligible({ ...eligible, ...variant }), false);
   assert.equal(
     cloudImportEligible({
       ...eligible,
@@ -65,7 +66,10 @@ test("private upload paths are derived from canonical IDs, not caller-provided S
     "bb000000-0000-4000-8000-000000000001",
     "cc000000-0000-4000-8000-000000000001",
   ];
-  assert.equal(cloudImportStoragePath(...(ids as [string, string, string])), ids.join("/") + "/source.mp4");
+  assert.equal(
+    cloudImportStoragePath(...(ids as [string, string, string])),
+    ids.join("/") + "/source.mp4",
+  );
   assert.throws(() => cloudImportStoragePath(ids[0], "../other", ids[2]));
   assert.throws(() => cloudImportStoragePath(ids[0], ids[1], "bad"));
 });
