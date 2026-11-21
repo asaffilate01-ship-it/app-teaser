@@ -12,6 +12,7 @@ import {
   Video,
 } from "lucide-react";
 import { useCloudSession } from "@/hooks/use-cloud-session";
+import { CameraReplayLibrary } from "@/components/CameraReplayLibrary";
 import { getCloudClient, isCloudConfigured, type CameraPresence } from "@/lib/cloud";
 import {
   connectLiveCamera,
@@ -61,6 +62,7 @@ function CameraDirector() {
   const [view, setView] = useState<ViewMode>("four");
   const [focus, setFocus] = useState<string | null>(null);
   const [soundDevice, setSoundDevice] = useState<string | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const liveRef = useRef<Map<string, LiveCameraSession>>(new Map());
@@ -452,6 +454,27 @@ function CameraDirector() {
           })}
         </div>
 
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            aria-expanded={reviewOpen}
+            onClick={() => setReviewOpen((value) => !value)}
+            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-300/40 px-4 text-sm font-semibold text-amber-200"
+          >
+            <Video className="size-4" />
+            {reviewOpen ? "Hide recorded replays" : "Review recorded match clips"}
+          </button>
+          <span className="text-xs text-slate-400">
+            Private, consented clips and estimated ball-by-ball cue points
+          </span>
+        </div>
+        {reviewOpen && (
+          <CameraReplayLibrary
+            roomId={roomId}
+            matchId={room.match_id}
+            devices={devices}
+          />
+        )}
         {devices.length === 0 && (
           <div className="mt-6 rounded-xl border border-white/15 p-8 text-center text-sm text-slate-300">
             No paired cameras yet. Pair a phone through the club Capture dashboard, then enable its
