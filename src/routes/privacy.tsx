@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Mail, ShieldCheck } from "lucide-react";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
+import { canonicalUrl } from "@/lib/seo";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/privacy")({
         content: "How CricLume handles account, match, video, coaching and device data.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://app-teaser.lovable.app/privacy" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/privacy") }],
   }),
   component: PrivacyPage,
 });
@@ -21,19 +22,19 @@ function PrivacyPage() {
     <LegalPage title="Privacy notice" subtitle="Effective 25 August 2026">
       <p>
         CricLume is a product of iTechLounge Ltd. This notice explains how the public website,
-        device scoring preview and cloud services for enrolled clubs, schools, academies and leagues
+        device scorer and connected services for clubs, schools, academies and leagues
         handle information. A participating organisation may also give you its own notice explaining
         its responsibilities for player and member information.
       </p>
 
-      <h2>Information handled by the scoring preview</h2>
+      <h2>Information handled by the on-device scorer</h2>
       <p>
         Team names, player names, grounds, weather, delivery records, timestamps, notes and match
         settings are saved in your browser&apos;s local storage. They stay on the device unless you
         choose to export the match as a JSON file. CricLume does not receive this local match data.
       </p>
       <p>
-        Videos selected in the coaching lab are opened locally through your browser. The preview
+        Videos selected in the coaching lab are opened locally through your browser. The local review
         does not upload those videos unless you deliberately join a cloud camera room and confirm an
         upload. Closing or refreshing a local-only review ends that temporary session.
       </p>
@@ -59,15 +60,15 @@ function PrivacyPage() {
 
       <h2>Website and regional pricing data</h2>
       <p>
-        The pricing page asks ipapi.co for a country code so it can suggest a region and currency.
-        That request exposes your IP address to ipapi.co under its own privacy terms. You may
-        manually select a region. Our hosting provider may process standard security and access
-        logs, such as IP address, browser type, requested page and request time.
+        The pricing page uses your browser language settings to suggest a country and currency,
+        without sending your address to a separate geolocation service. You may manually select
+        another region. Our hosting provider may process standard security and access logs, such as
+        IP address, browser type, requested page and request time.
       </p>
 
-      <h2>Contact and pilot requests</h2>
+      <h2>Contact and account enquiries</h2>
       <p>
-        If you email us to request a club or league pilot, we use your name, email address and
+        If you email us to enquire about a club or league account, we use your name, email address and
         message to answer the request and manage the prospective relationship. We keep that
         correspondence only as long as needed for the enquiry, our legitimate business records and
         applicable legal requirements.
