@@ -23,6 +23,25 @@ export const en = {
     { k: "Video review", v: "Frame-by-frame tools" },
   ],
   home: {
+    workflowKicker: "How CricLume works",
+    workflowTitle: "From the first ball to the next training session",
+    workflowSteps: [
+      {
+        title: "Score the match",
+        body:
+          "Record runs, wickets, extras and corrections on your device, including during temporary signal loss.",
+      },
+      {
+        title: "Review recorded footage",
+        body:
+          "Open videos on your device to use slow motion, frame stepping and drawing tools during coaching review.",
+      },
+      {
+        title: "Organise your club",
+        body:
+          "Use the private club workspace for teams and fixtures. Connected services require an authorised setup.",
+      },
+    ],
     matchDayKicker: "Match day",
     matchDayTitle: "Built for match day",
     allFeatures: "All features",
@@ -279,6 +298,25 @@ export const de: Content = {
     { k: "Videoanalyse", v: "Bild-für-Bild-Werkzeuge" },
   ],
   home: {
+    workflowKicker: "So funktioniert CricLume",
+    workflowTitle: "Vom ersten Ball zur nächsten Trainingseinheit",
+    workflowSteps: [
+      {
+        title: "Spiel erfassen",
+        body:
+          "Erfasse Runs, Wickets, Extras und Korrekturen auf deinem Gerät, auch bei kurzzeitigem Netzausfall.",
+      },
+      {
+        title: "Aufnahmen prüfen",
+        body:
+          "Prüfe lokale Videos in Zeitlupe, Bild für Bild und mit Zeichenwerkzeugen.",
+      },
+      {
+        title: "Verein organisieren",
+        body:
+          "Nutze den privaten Vereinsbereich für Teams und Spiele. Cloud-Dienste müssen autorisiert eingerichtet sein.",
+      },
+    ],
     matchDayKicker: "Spieltag",
     matchDayTitle: "Für den Spieltag gebaut",
     allFeatures: "Alle Funktionen",
@@ -537,6 +575,25 @@ export const nl: Content = {
     { k: "Videoreview", v: "Beeld voor beeld" },
   ],
   home: {
+    workflowKicker: "Zo werkt CricLume",
+    workflowTitle: "Van de eerste bal tot de volgende training",
+    workflowSteps: [
+      {
+        title: "Wedstrijd scoren",
+        body:
+          "Leg runs, wickets, extra's en correcties vast op je apparaat, ook bij tijdelijke verbindingsproblemen.",
+      },
+      {
+        title: "Opnamen terugkijken",
+        body:
+          "Bekijk lokale video's in slow motion, beeld voor beeld en met tekengereedschap.",
+      },
+      {
+        title: "Club organiseren",
+        body:
+          "Gebruik de privéclubomgeving voor teams en wedstrijden. Clouddiensten vereisen een toegestane inrichting.",
+      },
+    ],
     matchDayKicker: "Wedstrijddag",
     matchDayTitle: "Gebouwd voor de wedstrijddag",
     allFeatures: "Alle functies",
@@ -793,6 +850,25 @@ export const af: Content = {
     { k: "Video-oorsig", v: "Raampie vir raampie" },
   ],
   home: {
+    workflowKicker: "Hoe CricLume werk",
+    workflowTitle: "Van die eerste bal tot die volgende oefensessie",
+    workflowSteps: [
+      {
+        title: "Teken die wedstryd aan",
+        body:
+          "Teken lopies, paaltjies, ekstras en regstellings op jou toestel aan, selfs wanneer die sein kortliks wegval.",
+      },
+      {
+        title: "Hersien opnames",
+        body:
+          "Kyk plaaslike video's in stadige aksie, raam vir raam, en gebruik tekengereedskap.",
+      },
+      {
+        title: "Organiseer jou klub",
+        body:
+          "Gebruik die private klubwerkruimte vir spanne en wedstryde. Wolkdienste vereis gemagtigde opstelling.",
+      },
+    ],
     matchDayKicker: "Wedstryddag",
     matchDayTitle: "Gebou vir wedstryddag",
     allFeatures: "Alle kenmerke",
@@ -1052,6 +1128,25 @@ export const fr: Content = {
     { k: "Revue vidéo", v: "Image par image" },
   ],
   home: {
+    workflowKicker: "Comment fonctionne CricLume",
+    workflowTitle: "De la première balle à la prochaine séance",
+    workflowSteps: [
+      {
+        title: "Marquer le match",
+        body:
+          "Enregistrez runs, guichets, extras et corrections sur votre appareil, même pendant une coupure temporaire de réseau.",
+      },
+      {
+        title: "Revoir les vidéos",
+        body:
+          "Examinez des vidéos locales au ralenti, image par image, avec des outils de dessin.",
+      },
+      {
+        title: "Organiser le club",
+        body:
+          "Gérez équipes et rencontres dans l'espace privé du club. Les services cloud nécessitent une configuration autorisée.",
+      },
+    ],
     matchDayKicker: "Jour de match",
     matchDayTitle: "Conçu pour le jour de match",
     allFeatures: "Toutes les fonctions",
