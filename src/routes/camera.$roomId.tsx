@@ -538,12 +538,38 @@ function MatchCamera() {
                     </button>
                   )}
                 </div>
+                {previewing && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => liveSharing ? stopLiveSharing() : void startLiveSharing()}
+                      className={
+                        "rounded-md px-4 py-2.5 text-xs font-bold " +
+                        (liveSharing ? "border border-rose-400 text-rose-200" : "bg-amber-300 text-black")
+                      }
+                    >
+                      {liveSharing ? "Stop private live share" : "Share live view with director"}
+                    </button>
+                    <span className="text-[11px] text-slate-400">
+                      {liveSharing ? "Private feed active" : "Camera preview is local until sharing is enabled"}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
             {message && (
               <div className="mt-3 rounded-md border border-amber-300/15 bg-amber-300/[0.06] px-3 py-2 text-xs text-amber-100">
                 {message}
               </div>
+            )}
+            {failedSegments > 0 && (
+              <button
+                type="button"
+                onClick={downloadFailedSegments}
+                className="mt-3 rounded-md border border-rose-400/50 px-3 py-2 text-xs font-semibold text-rose-200"
+              >
+                Download {failedSegments} unsaved recording clip{failedSegments === 1 ? "" : "s"}
+              </button>
             )}
             {uploadProgress !== null && (
               <div className="mt-3">
@@ -571,10 +597,26 @@ function MatchCamera() {
               <input
                 type="checkbox"
                 checked={consent}
-                onChange={(event) => setConsent(event.target.checked)}
+                onChange={(event) => {
+                  setConsent(event.target.checked);
+                  if (!event.target.checked && autoRecordArmed) void setArmed(false);
+                }}
                 className="mt-1 accent-amber-300"
               />
               <span>I confirm the club has recorded permission to capture this match.</span>
+            </label>
+            <label className="mt-3 flex items-start gap-3 text-xs leading-5 text-slate-300">
+              <input
+                type="checkbox"
+                checked={autoRecordArmed}
+                disabled={!device || !consent}
+                onChange={(event) => void setArmed(event.target.checked)}
+                className="mt-1 accent-amber-300"
+              />
+              <span>
+                Arm automatic recording when the match goes live, or when the authorised
+                director requests it. This phone must stay on with its preview running.
+              </span>
             </label>
             <label className="mt-3 flex items-center gap-3 text-xs text-slate-300">
               <input
