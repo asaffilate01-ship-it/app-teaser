@@ -20,10 +20,7 @@ test("missing queue is empty, but an empty or corrupt stored value is not", () =
   assert.deepEqual(parsePendingScorerQueue(null, matchId), []);
   assert.deepEqual(parsePendingScorerQueue("[]", matchId), []);
   for (const raw of ["", "{malformed", "null", "{}", "false", "0", '"empty"']) {
-    assert.throws(
-      () => parsePendingScorerQueue(raw, matchId),
-      /original queue was preserved/i,
-    );
+    assert.throws(() => parsePendingScorerQueue(raw, matchId), /original queue was preserved/i);
   }
 });
 
@@ -32,10 +29,7 @@ test("valid queued scores retain their order and unknown future fields", () => {
     { ...event, forwardCompatibleData: { version: 12 } },
     { ...event, clientEventId: "event-2", eventType: "match.snapshot" },
   ];
-  assert.deepEqual(
-    parsePendingScorerQueue(JSON.stringify(original), matchId),
-    original,
-  );
+  assert.deepEqual(parsePendingScorerQueue(JSON.stringify(original), matchId), original);
 });
 
 test("an unreadable, cross-match or duplicate pending event fails closed", () => {
