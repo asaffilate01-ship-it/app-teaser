@@ -50,11 +50,7 @@ function validatedResult(fixture: FixtureRecord): CompletedFixture | null {
   if (!result || typeof result !== "object" || Array.isArray(result)) return null;
   const camelWinner = result["winnerTeamId"];
   const snakeWinner = result["winner_team_id"];
-  if (
-    camelWinner !== undefined &&
-    snakeWinner !== undefined &&
-    camelWinner !== snakeWinner
-  ) {
+  if (camelWinner !== undefined && snakeWinner !== undefined && camelWinner !== snakeWinner) {
     return null;
   }
   const winner = camelWinner ?? snakeWinner;
@@ -109,9 +105,9 @@ function validatedResult(fixture: FixtureRecord): CompletedFixture | null {
   };
 }
 
-function validRules(rules: CompetitionRecord["rules"]): rules is NonNullable<
-  CompetitionRecord["rules"]
-> {
+function validRules(
+  rules: CompetitionRecord["rules"],
+): rules is NonNullable<CompetitionRecord["rules"]> {
   if (!rules || !Number.isInteger(rules.ballsPerOver) || rules.ballsPerOver < 1) return false;
   if (
     rules.ballsPerOver > 12 ||
@@ -121,12 +117,7 @@ function validRules(rules: CompetitionRecord["rules"]): rules is NonNullable<
     return false;
   }
   if (!rules.points) return false;
-  const values = [
-    rules.points.win,
-    rules.points.tie,
-    rules.points.noResult,
-    rules.points.loss,
-  ];
+  const values = [rules.points.win, rules.points.tie, rules.points.noResult, rules.points.loss];
   if (
     !values.every(
       (value) => typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100,
@@ -154,9 +145,7 @@ export function buildLeagueStandings(input: LeagueInput): LeagueStandingsPreview
     ...new Set(visible.flatMap((fixture) => [fixture.homeTeamId, fixture.awayTeamId])),
   ].filter((id) => knownTeams.has(id));
   const unique = [...new Map(visible.map((fixture) => [fixture.id, fixture])).values()];
-  const recorded = unique.filter((fixture) =>
-    recordedStatuses.has(fixture.status.toLowerCase()),
-  );
+  const recorded = unique.filter((fixture) => recordedStatuses.has(fixture.status.toLowerCase()));
   const base = {
     rows: [] as TableRow[],
     counted: 0,
