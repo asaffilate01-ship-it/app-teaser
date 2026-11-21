@@ -21,24 +21,33 @@ test("only bounded and addressed live camera messages are accepted", () => {
 });
 
 test("live-video SDP and ICE candidates must be bounded, typed and non-empty", () => {
-  assert.equal(isCameraSignal({
-    kind: "offer",
-    from: "camera",
-    to: "director",
-    description: { type: "offer", sdp: "v=0" },
-  }), true);
-  assert.equal(isCameraSignal({
-    kind: "answer",
-    from: "director",
-    to: "camera",
-    description: { type: "answer", sdp: "v=0" },
-  }), true);
-  assert.equal(isCameraSignal({
-    kind: "ice",
-    from: "camera",
-    to: "director",
-    candidate: { candidate: "candidate:sample", sdpMLineIndex: 0 },
-  }), true);
+  assert.equal(
+    isCameraSignal({
+      kind: "offer",
+      from: "camera",
+      to: "director",
+      description: { type: "offer", sdp: "v=0" },
+    }),
+    true,
+  );
+  assert.equal(
+    isCameraSignal({
+      kind: "answer",
+      from: "director",
+      to: "camera",
+      description: { type: "answer", sdp: "v=0" },
+    }),
+    true,
+  );
+  assert.equal(
+    isCameraSignal({
+      kind: "ice",
+      from: "camera",
+      to: "director",
+      candidate: { candidate: "candidate:sample", sdpMLineIndex: 0 },
+    }),
+    true,
+  );
   for (const value of [
     { kind: "offer", from: "camera" },
     { kind: "offer", from: "camera", description: { type: "answer", sdp: "v=0" } },

@@ -96,7 +96,12 @@ export async function connectLiveCamera(options: LiveCameraOptions): Promise<Liv
     };
     connection.onconnectionstatechange = () => {
       const state = connection.connectionState;
-      if (state === "connected" || state === "connecting" || state === "disconnected" || state === "failed") {
+      if (
+        state === "connected" ||
+        state === "connecting" ||
+        state === "disconnected" ||
+        state === "failed"
+      ) {
         onStatus?.(remoteId, state);
       }
       if (state === "failed" || state === "closed") release(remoteId);

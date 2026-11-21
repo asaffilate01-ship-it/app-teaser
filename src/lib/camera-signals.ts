@@ -8,14 +8,7 @@ export interface CameraSignal {
   candidate?: RTCIceCandidateInit;
 }
 
-const kinds = new Set<CameraSignalKind>([
-  "ready",
-  "watch",
-  "offer",
-  "answer",
-  "ice",
-  "leave",
-]);
+const kinds = new Set<CameraSignalKind>(["ready", "watch", "offer", "answer", "ice", "leave"]);
 
 export function isCameraSignal(value: unknown): value is CameraSignal {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -26,21 +19,23 @@ export function isCameraSignal(value: unknown): value is CameraSignal {
     typeof message["from"] !== "string" ||
     message["from"].length === 0 ||
     message["from"].length > 120
-  ) return false;
+  )
+    return false;
   if (
     message["to"] !== undefined &&
-    (typeof message["to"] !== "string" ||
-      message["to"].length === 0 ||
-      message["to"].length > 120)
-  ) return false;
+    (typeof message["to"] !== "string" || message["to"].length === 0 || message["to"].length > 120)
+  )
+    return false;
   if (kind === "offer" || kind === "answer") {
     const description = message["description"];
     if (!description || typeof description !== "object" || Array.isArray(description)) return false;
     const data = description as Record<string, unknown>;
-    return data["type"] === kind &&
+    return (
+      data["type"] === kind &&
       typeof data["sdp"] === "string" &&
       data["sdp"].length > 0 &&
-      data["sdp"].length <= 65_536;
+      data["sdp"].length <= 65_536
+    );
   }
   if (kind === "ice") {
     const candidate = message["candidate"];

@@ -112,8 +112,10 @@ function MatchCamera() {
     const paired = data as PairedDevice;
     setDevice(paired);
     const { data: savedArm } = await getCloudClient()
-      .from("camera_recording_arms").select("armed")
-      .eq("device_id", paired.id).maybeSingle();
+      .from("camera_recording_arms")
+      .select("armed")
+      .eq("device_id", paired.id)
+      .maybeSingle();
     setAutoRecordArmed(Boolean(savedArm?.armed));
     const presence: CameraPresence = {
       deviceId: paired.id,
@@ -170,21 +172,28 @@ function MatchCamera() {
       setMessage("Confirm match recording permission before arming automatic capture.");
       return;
     }
-    const { error } = await getCloudClient().from("camera_recording_arms").upsert({
-      device_id: device.id,
-      room_id: roomId,
-      user_id: session.user.id,
-      armed,
-      consent_confirmed: armed && consent,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "device_id" });
+    const { error } = await getCloudClient()
+      .from("camera_recording_arms")
+      .upsert(
+        {
+          device_id: device.id,
+          room_id: roomId,
+          user_id: session.user.id,
+          armed,
+          consent_confirmed: armed && consent,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "device_id" },
+      );
     if (error) {
       setMessage("Could not save auto-record preference: " + error.message);
     } else {
       setAutoRecordArmed(armed);
-      setMessage(armed
-        ? "Automatic recording armed. Keep this phone awake and its camera preview running."
-        : "Automatic recording disarmed.");
+      setMessage(
+        armed
+          ? "Automatic recording armed. Keep this phone awake and its camera preview running."
+          : "Automatic recording disarmed.",
+      );
       if (!armed && recordingRef.current) stopRecording();
     }
   };
@@ -272,7 +281,9 @@ function MatchCamera() {
       } catch (error) {
         recordingRef.current = false;
         setRecording(false);
-        setMessage(error instanceof Error ? error.message : "Could not start this camera recording.");
+        setMessage(
+          error instanceof Error ? error.message : "Could not start this camera recording.",
+        );
       }
     };
     recordingRef.current = true;
@@ -307,16 +318,24 @@ function MatchCamera() {
     if (!device) return;
     const channel = getCloudClient()
       .channel("camera:" + roomId, { config: { private: true } })
-      .on("postgres_changes",
-        { event: "INSERT", schema: "public", table: "camera_recording_commands",
-          filter: "room_id=eq." + roomId },
-        (payload) => commandHandlerRef.current(payload.new as Record<string, unknown>))
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "camera_recording_commands",
+          filter: "room_id=eq." + roomId,
+        },
+        (payload) => commandHandlerRef.current(payload.new as Record<string, unknown>),
+      )
       .subscribe((status) => {
         if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
           setMessage("Automatic recording channel is offline; use the local record button.");
         }
       });
-    return () => { void getCloudClient().removeChannel(channel); };
+    return () => {
+      void getCloudClient().removeChannel(channel);
+    };
   }, [roomId, device]);
 
   // If the camera is armed after the match started, make a single live-status
@@ -324,14 +343,19 @@ function MatchCamera() {
   useEffect(() => {
     if (!device || !autoRecordArmed || !consent || !previewing) return;
     let active = true;
-    void getCloudClient().from("camera_rooms")
-      .select("matches!inner(status)").eq("id", roomId).single()
+    void getCloudClient()
+      .from("camera_rooms")
+      .select("matches!inner(status)")
+      .eq("id", roomId)
+      .single()
       .then(({ data, error }) => {
         if (error || !active) return;
         const match = data?.matches as unknown as { status: string } | undefined;
         if (match?.status === "live" && !recordingRef.current) startRecording();
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
     // Only arming and camera availability should trigger this initial status check.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device, autoRecordArmed, consent, previewing, roomId]);
@@ -416,7 +440,7 @@ function MatchCamera() {
       setFailedSegments(failedSegmentsRef.current.length);
       setMessage(
         (error instanceof Error ? error.message : "Upload failed.") +
-        " Recording is still on this device. Download unsaved clips before closing the page.",
+          " Recording is still on this device. Download unsaved clips before closing the page.",
       );
     }
   };
@@ -426,8 +450,14 @@ function MatchCamera() {
       const url = URL.createObjectURL(segment.blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "criclume-" + roomId + "-" + segment.startedAt.replaceAll(":", "-") +
-        "-" + index + (segment.blob.type.includes("mp4") ? ".mp4" : ".webm");
+      link.download =
+        "criclume-" +
+        roomId +
+        "-" +
+        segment.startedAt.replaceAll(":", "-") +
+        "-" +
+        index +
+        (segment.blob.type.includes("mp4") ? ".mp4" : ".webm");
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 30_000);
     });
@@ -540,16 +570,20 @@ function MatchCamera() {
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => liveSharing ? stopLiveSharing() : void startLiveSharing()}
+                      onClick={() => (liveSharing ? stopLiveSharing() : void startLiveSharing())}
                       className={
                         "rounded-md px-4 py-2.5 text-xs font-bold " +
-                        (liveSharing ? "border border-rose-400 text-rose-200" : "bg-amber-300 text-black")
+                        (liveSharing
+                          ? "border border-rose-400 text-rose-200"
+                          : "bg-amber-300 text-black")
                       }
                     >
                       {liveSharing ? "Stop private live share" : "Share live view with director"}
                     </button>
                     <span className="text-[11px] text-slate-400">
-                      {liveSharing ? "Private feed active" : "Camera preview is local until sharing is enabled"}
+                      {liveSharing
+                        ? "Private feed active"
+                        : "Camera preview is local until sharing is enabled"}
                     </span>
                   </div>
                 )}
@@ -612,8 +646,8 @@ function MatchCamera() {
                 className="mt-1 accent-amber-300"
               />
               <span>
-                Arm automatic recording when the match goes live, or when the authorised
-                director requests it. This phone must stay on with its preview running.
+                Arm automatic recording when the match goes live, or when the authorised director
+                requests it. This phone must stay on with its preview running.
               </span>
             </label>
             <label className="mt-3 flex items-center gap-3 text-xs text-slate-300">

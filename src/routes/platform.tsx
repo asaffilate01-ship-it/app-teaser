@@ -1519,11 +1519,17 @@ function Capture({
                   ))}
                 </div>
                 <div className="mt-3 flex flex-wrap gap-4">
-                  <a href={`/camera/${room.id}`} className="inline-flex text-xs font-bold text-amber-200">
+                  <a
+                    href={`/camera/${room.id}`}
+                    className="inline-flex text-xs font-bold text-amber-200"
+                  >
                     Open phone camera
                   </a>
                   {(can(role, "video.capture") || can(role, "match.score")) && (
-                    <a href={`/director/${room.id}`} className="inline-flex text-xs font-bold text-emerald-300">
+                    <a
+                      href={`/director/${room.id}`}
+                      className="inline-flex text-xs font-bold text-emerald-300"
+                    >
                       Open live director
                     </a>
                   )}
