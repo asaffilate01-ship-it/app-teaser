@@ -70,11 +70,7 @@ test("the advisory window is bounded; missing durations do not imply a clash", (
 
 test("duplicated records are not counted twice", () => {
   const result = reviewFixtureSchedule(
-    [
-      first,
-      { ...first },
-      { ...first, id: "f2", startsAt: "2026-12-10T15:00:00Z" },
-    ],
+    [first, { ...first }, { ...first, id: "f2", startsAt: "2026-12-10T15:00:00Z" }],
     now,
   );
   assert.equal(result.alerts.length, 1);
