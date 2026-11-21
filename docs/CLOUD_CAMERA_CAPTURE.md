@@ -37,7 +37,7 @@ Apply the generated cloud camera migration after existing P3 camera migrations. 
 - For juniors or uncertain age, access remains restricted; provider output is not automatically reviewable or publishable. Guardian permissions, withdrawal response and reliable remote-stop orchestration require real-world testing.
 - Turning off consent on the phone stops local tracks, private live sharing and cloud publishing; it also asks the backend to stop any active provider egress. Offline browser closure cannot guarantee immediate server revocation, so directors need operational incident controls and a provider dashboard.
 - Server token time-to-live is five minutes for new joins; room and camera identity are server-derived. Token expiry by itself is not a guarantee that an already-established connection is revoked.
-- Recording sessions start **manually** from the director panel. Match-state triggered cloud egress automation, eventual-consistency reconciliation, automatic archival verification, replay synchronization and durable scheduled stop are separate, future gates.
+- Director-started recording remains available. Automatic match-state recording is implemented in source behind a **separate, disabled-by-default** platform switch and each phone's explicit adult-only opt-in. Verified archival ingestion, calibrated replay and highlights remain separate gates.
 
 ## Real-ground acceptance checklist
 
@@ -50,3 +50,31 @@ Apply the generated cloud camera migration after existing P3 camera migrations. 
 7. Only after sign-off enable paid provider usage, budget monitoring, server-side event-driven auto-start/stop and verified media ingestion.
 
 References: LiveKit JS server SDK v2, LiveKit Egress API, Supabase Storage/RLS and Edge Function docs.
+
+
+## Next phase: match-status auto-recording and fail-safe reconciliation
+
+The new **camera-cloud-auto** Edge Function is an internal **CRON_SECRET-authenticated** worker. It never accepts browser actions or match IDs in request bodies. It is deliberately **not scheduled by default**. The new cloud_camera_match_auto migration must be deployed **only to CricLume's approved Supabase project**, after staging tests and backup.
+
+Safeguards implemented in source:
+
+- **Two switches:** the operator must explicitly enable *Automatic cloud recording* and attest that footage is **adult-only**, while the backend must have CRICLUME_CLOUD_AUTO_ENABLED=true. Local recording arming alone does not trigger paid server recording. A director cannot opt in on an operator's behalf.
+- The phone must still explicitly select **Publish to cloud recorder**, sending its camera to the private LiveKit room. The worker verifies the actual publisher, a **live** match, an **open** room, and valid local recording consent and arming.
+- Each room/device can issue **only one automatic recording attempt per match**. That prevents endless chargeable restarts after failure, a manual stop or the hard duration limit.
+- On each invocation, the worker checks active **manual and automatic** provider sessions before starting anything. It attempts to stop recordings on match end, room closure, disarm or consent withdrawal; it also stops automatic recordings on opt-out or loss of adult-only attestation.
+- The default cost ceiling is **four concurrent active provider jobs** and **120 minutes per job**. Server settings can adjust this within 1–8 concurrent jobs and 5–240 minutes. A duration-limit stop does not automatically restart.
+- A job without a confirmed provider egress ID remains pending rather than being marked as stopped. Provider completion is NOT proof of verified archival storage.
+- No cloud footage is automatically published to public scoreboards or the private clip library; junior or uncertain-age footage is ineligible for auto-start.
+- A phone's consent withdrawal disconnects its local publisher immediately, but an offline phone cannot guarantee provider revocation; the scheduled stop process must be audited and monitored.
+
+### Activation checklist
+
+1. Connect to **CricLume, not Dishbee**, apply the generated cloud_camera_match_auto migration after the existing LiveKit egress migration, and run isolated SQL/RLS security tests.
+2. Deploy camera-cloud, camera-cloud-webhook and camera-cloud-auto with the approved CricLume project. The worker has verify_jwt=false but requires an unguessable, server-only x-cron-secret matching CRON_SECRET.
+3. Validate the real LiveKit and private S3 connection, backup, consent and retention rules before setting CRICLUME_CLOUD_CAPTURE_ENABLED=true. Automatic matches require a second, separately authorised CRICLUME_CLOUD_AUTO_ENABLED=true.
+4. Configure a trusted scheduler to send POST to /functions/v1/camera-cloud-auto every minute with x-cron-secret set to CRON_SECRET. Do not put this secret into app bundles or source control. Avoid overlapping schedulers; uniqueness indexes are defense in depth.
+5. Optionally use CRICLUME_CLOUD_AUTO_MAX_ACTIVE=4 and CRICLUME_CLOUD_MAX_MINUTES=120 to bound provider charges.
+6. Pilot one consenting adult-only phone. Start a real live match, verify the actual LiveKit publisher and provider egress ID, private S3 output, stop on match completion, and signed callback.
+7. Negatively test missing consent, junior footage, disconnected phone, another club, duplicate workers, provider outage, revoked operator, delayed callbacks and cost cap, then test four phones on mobile data. Do not claim production readiness before real-ground acceptance.
+
+**No production scheduler, provider account or migration has been deployed in this repository update.** Phone publishers must remain active for the provider to capture frames.
