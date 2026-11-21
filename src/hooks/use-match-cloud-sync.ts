@@ -285,5 +285,13 @@ export function useMatchCloudSync(
     : status === "synced" && pendingCount > 0
       ? "queued"
       : status;
-  return { enabled, status: visibleStatus, lastSequence, pendingCount, queueUnreadable, publish, retry };
+  return {
+    enabled,
+    status: visibleStatus,
+    lastSequence,
+    pendingCount,
+    queueUnreadable,
+    publish,
+    retry,
+  };
 }
