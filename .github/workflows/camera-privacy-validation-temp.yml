@@ -1,0 +1,54 @@
+name: CricLume camera security validation (temporary)
+on:
+  push:
+    branches:
+      - fix/criclume-camera-privacy-and-consent-20261121
+permissions:
+  contents: read
+  security-events: write
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: bun install --frozen-lockfile
+      - run: bun run test:database
+      - run: bun run typecheck
+      - run: bun run test
+      - run: bun run lint
+      - run: bun run build
+  source-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun audit --production
+  sql-security:
+    concurrency:
+      group: criclume-local-database-lint
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 3.2.0
+      - run: supabase start -x studio,imgproxy,mailpit,logflare,vector,supavisor
+      - run: supabase db lint --local --level warning
+      - run: supabase test db
+      - if: always()
+        run: supabase stop --no-backup
+  codeql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/analyze@v3
