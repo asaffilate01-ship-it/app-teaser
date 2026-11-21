@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CricketMatch } from "@/lib/cricket";
+import { readScorerSnapshot } from "@/lib/scorer-storage";
 import {
   battingCard,
   bowlingCard,
@@ -124,8 +125,14 @@ export function useMatchCloudSync(
         const hasPending = readPendingEvents(cloudMatchId).length > 0;
         if (event.deviceId !== deviceId && !hasPending) {
           const snapshot = event.payload["matchSnapshot"];
-          if (snapshot && typeof snapshot === "object") {
-            if (onRemoteMatch(snapshot as CricketMatch) === false) {
+          if (snapshot !== undefined && snapshot !== null) {
+            const validMatch = readScorerSnapshot(snapshot, cloudMatchId);
+            if (!validMatch) {
+              // An incomplete remote event must not crash or replace the scorer.
+              setStatus("error");
+              return;
+            }
+            if (onRemoteMatch(validMatch) === false) {
               setStatus("conflict");
               return;
             }
