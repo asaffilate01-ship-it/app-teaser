@@ -82,6 +82,7 @@ const tabMeta: { id: TabId; icon: typeof Home; key: keyof Content["nav"] }[] = [
 ];
 
 const featureIcons = [Zap, Video, Activity, BarChart3, Smartphone, Users, Eye];
+const workflowIcons = [Zap, Video, Users];
 const screenImages = [
   { src: shotDashboard, w: 1600, h: 1008 },
   { src: shotScoreboard, w: 1600, h: 1008 },
@@ -214,37 +215,6 @@ function Header({
   );
 }
 
-const fixtures = [
-  {
-    date: "Sat 12 Sep",
-    time: "13:00",
-    home: "Riverside CC",
-    away: "Northgate CC",
-    tag: "league" as const,
-  },
-  {
-    date: "Sun 13 Sep",
-    time: "11:30",
-    home: "Ashford Academy",
-    away: "Kings XI",
-    tag: "academy" as const,
-  },
-  {
-    date: "Wed 16 Sep",
-    time: "18:00",
-    home: "Old Mill CC",
-    away: "Harbour CC",
-    tag: "cup" as const,
-  },
-];
-
-const leaderboard = [
-  { pos: 1, name: "Riverside CC", played: 11, won: 9, pts: 36 },
-  { pos: 2, name: "Northgate CC", played: 11, won: 7, pts: 30 },
-  { pos: 3, name: "Old Mill CC", played: 10, won: 6, pts: 26 },
-  { pos: 4, name: "Harbour CC", played: 11, won: 4, pts: 18 },
-];
-
 function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
   const { t } = useI18n();
   const highlights = [0, 1, 6];
@@ -288,7 +258,7 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
               {t.hero.previewLabel}
             </span>
             <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Riverside CC 148/4
+              {t.screensTab.items[1]!.label}
             </span>
           </div>
           <img
@@ -334,71 +304,25 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         </div>
       </section>
 
-      {/* Illustration only: these fixtures, results and club names are not live data. */}
-      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <p className="rounded-xl border border-border/70 bg-card/70 px-4 py-2 text-xs leading-relaxed text-muted-foreground lg:col-span-2">
-          {t.home.sampleNotice}
-        </p>
-        <div className="space-y-4">
-          <SectionHeader kicker={t.home.fixturesKicker}>{t.home.fixturesTitle}</SectionHeader>
-          <div className="space-y-3">
-            {fixtures.map((f) => (
-              <article
-                key={f.home + f.away}
-                className="surface-card lift-card grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 p-4"
-              >
-                <div className="min-w-0">
-                  <span className="text-xs font-bold uppercase tracking-[0.12em] text-gold">
-                    {t.home.tags[f.tag]}
-                  </span>
-                  <h3 className="truncate font-display text-lg font-bold leading-tight md:text-xl">
-                    {f.home} <span className="text-muted-foreground">{t.home.vs}</span> {f.away}
-                  </h3>
-
-                  <p className="text-sm text-muted-foreground">
-                    {f.date} • {f.time}
-                  </p>
-                </div>
-                <span className="skew-tag shrink-0 px-3 py-1.5 text-primary-foreground">
-                  <span className="text-xs font-bold uppercase tracking-widest">
-                    {t.home.scoring}
-                  </span>
-                </span>
-              </article>
-            ))}
-          </div>
+      {/* Guide visitors through real, clearly scoped workflows. */}
+      <section className="space-y-4 md:space-y-6">
+        <SectionHeader kicker={t.home.workflowKicker}>{t.home.workflowTitle}</SectionHeader>
+        <div className="space-y-3 md:grid md:grid-cols-3 md:gap-5 md:space-y-0">
+          {t.home.workflowSteps.map((step, i) => (
+            <FeatureRow
+              key={step.title}
+              icon={workflowIcons[i]!}
+              title={step.title}
+              body={step.body}
+            />
+          ))}
         </div>
-
-        <div className="space-y-4">
-          <SectionHeader kicker={t.home.seasonKicker}>{t.home.seasonTitle}</SectionHeader>
-          <div className="surface-card overflow-hidden">
-            <table className="w-full text-left text-sm">
-              <thead className="dark-band">
-                <tr className="text-xs uppercase tracking-[0.1em]">
-                  <th className="px-4 py-2.5 font-bold">{t.home.tablePos}</th>
-                  <th className="px-2 py-2.5 font-bold">{t.home.tableClub}</th>
-                  <th className="px-2 py-2.5 font-bold">{t.home.tableP}</th>
-                  <th className="px-2 py-2.5 font-bold">{t.home.tableW}</th>
-                  <th className="px-4 py-2.5 text-right font-bold">{t.home.tablePts}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaderboard.map((r) => (
-                  <tr key={r.name} className="border-t border-border/60">
-                    <td className="px-4 py-3 font-display font-bold text-gold">{r.pos}</td>
-                    <td className="px-2 py-3 font-semibold">{r.name}</td>
-                    <td className="px-2 py-3 text-muted-foreground">{r.played}</td>
-                    <td className="px-2 py-3 text-muted-foreground">{r.won}</td>
-                    <td className="px-4 py-3 text-right font-display text-base font-bold">
-                      {r.pts}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-sm text-muted-foreground">{t.home.standingsNote}</p>
-        </div>
+        <Link
+          to="/platform"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-gold/50 px-5 py-3 text-sm font-bold text-gold hover:bg-gold/10"
+        >
+          {t.login.requestInvite} <ArrowRight className="size-4" aria-hidden="true" />
+        </Link>
       </section>
 
       {/* Dark call-to-action band */}
