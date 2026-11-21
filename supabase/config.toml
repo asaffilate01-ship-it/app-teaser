@@ -78,3 +78,8 @@ verify_jwt = true
 # not a browser JWT or CORS. Never expose this endpoint as a client action.
 [functions.camera-cloud-webhook]
 verify_jwt = false
+
+# Called only by a trusted scheduled job using x-cron-secret/CRON_SECRET.
+# No browser JWT or CORS; the function performs server-side authorisation.
+[functions.camera-cloud-auto]
+verify_jwt = false
