@@ -84,8 +84,7 @@ Deno.serve(async (request) => {
     const { data, error } = await db
       .from("camera_cloud_recordings")
       .select(
-        "id,room_id,device_id,object_path,provider_egress_id,state,ended_at," +
-          "archive_check_status,archive_check_attempts",
+        "id,room_id,device_id,object_path,provider_egress_id,state,ended_at,archive_check_status,archive_check_attempts",
       )
       .eq("state", "provider_completed")
       .in("archive_check_status", retryable)
