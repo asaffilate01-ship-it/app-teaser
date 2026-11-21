@@ -28,7 +28,10 @@ test("public homepage translations exclude internal commercial strategy and fabr
     assert.ok(copy.home.workflowKicker.length > 5, `${language}: workflow heading is required`);
     assert.equal(copy.home.workflowSteps.length, 3, `${language}: explain three core workflows`);
     for (const step of copy.home.workflowSteps) {
-      assert.ok(step.title.length > 3 && step.body.length > 30, `${language}: avoid empty workflow cards`);
+      assert.ok(
+        step.title.length > 3 && step.body.length > 30,
+        `${language}: avoid empty workflow cards`,
+      );
     }
     assert.ok(copy.hero.previewLabel.length > 5, `${language}: screenshot needs preview label`);
     assert.ok(
@@ -70,7 +73,10 @@ test("free scoring and paid Club enquiries are distinct public journeys", () => 
 
 test("homepage does not advertise stale fictional fixtures or invented results", () => {
   const route = readFileSync("src/routes/index.tsx", "utf8");
-  assert.doesNotMatch(route, /const fixtures\s*=|const leaderboard\s*=|Sat 12 Sep|Riverside CC 148\/4/);
+  assert.doesNotMatch(
+    route,
+    /const fixtures\s*=|const leaderboard\s*=|Sat 12 Sep|Riverside CC 148\/4/,
+  );
   assert.match(route, /t\.home\.workflowSteps\.map/);
   assert.match(route, /t\.hero\.previewLabel/);
 });
