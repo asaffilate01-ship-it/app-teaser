@@ -4,6 +4,7 @@ import {
   type OrganisationDraft,
 } from "@/lib/onboarding-request";
 import { SectionNavigation } from "@/components/SectionNavigation";
+import { validateCloudMatchSetup } from "@/lib/match-setup";
 import { fixtureCalendarIcs } from "@/lib/fixture-calendar";
 import { readSection, platformSections } from "@/lib/navigation";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -707,8 +708,22 @@ function CreateMatchPanel({ data, run }: { data: PlatformDashboardData; run: Run
   const [created, setCreated] = useState<{ matchId: string; scoreboardSlug: string | null } | null>(
     null,
   );
+  const [error, setError] = useState<string | null>(null);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (busy) return;
+    setError(null);
+    const validation = validateCloudMatchSetup({
+      homeTeamId: home,
+      awayTeamId: away,
+      battingFirstTeamId: battingFirst,
+      overs,
+      teams: data.teams,
+    });
+    if (!validation.ok) {
+      setError(validation.error);
+      return;
+    }
     setBusy(true);
     try {
       const result = await run(() =>
@@ -721,7 +736,7 @@ function CreateMatchPanel({ data, run }: { data: PlatformDashboardData; run: Run
           scheduledAt,
           visibility,
           battingFirstTeamId: battingFirst,
-          oversPerInnings: Number(overs),
+          oversPerInnings: validation.oversPerInnings,
           inningsPerSide: 1,
           ballsPerOver: 6,
           weather,
@@ -734,6 +749,8 @@ function CreateMatchPanel({ data, run }: { data: PlatformDashboardData; run: Run
       );
       setCreated(result);
       setOpen(false);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not create this match.");
     } finally {
       setBusy(false);
     }
@@ -831,6 +848,8 @@ function CreateMatchPanel({ data, run }: { data: PlatformDashboardData; run: Run
               required
               type="number"
               min="1"
+              max="100"
+              step="1"
               value={overs}
               onChange={(event) => setOvers(event.target.value)}
               className="scorer-input"
@@ -844,6 +863,11 @@ function CreateMatchPanel({ data, run }: { data: PlatformDashboardData; run: Run
               placeholder="Dry, light cloud"
             />
           </Field>
+          {error && (
+            <p role="alert" className="text-sm text-rose-200 md:col-span-2 xl:col-span-4">
+              {error}
+            </p>
+          )}
           <div className="flex items-end">
             <button
               disabled={busy || home === away || !battingFirst}

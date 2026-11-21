@@ -45,6 +45,7 @@ import {
   X,
 } from "lucide-react";
 import { useCricketStore } from "@/hooks/use-cricket-store";
+import { validateDeviceMatchSetup } from "@/lib/match-setup";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { useMatchCloudSync } from "@/hooks/use-match-cloud-sync";
 import {
@@ -92,34 +93,6 @@ export const Route = createFileRoute("/app")({
 
 type AppScreen = "dashboard" | "setup" | "match";
 type MatchTab = "score" | "timeline" | "scorecard" | "analysis" | "video";
-
-const defaultHomePlayers = [
-  "A. Morgan",
-  "J. Patel",
-  "S. Williams",
-  "T. Khan",
-  "M. Davies",
-  "R. Singh",
-  "L. Brown",
-  "D. Clarke",
-  "N. Shah",
-  "P. Evans",
-  "K. James",
-].join("\n");
-
-const defaultAwayPlayers = [
-  "O. Smith",
-  "B. Taylor",
-  "C. Ahmed",
-  "H. Wilson",
-  "F. Ali",
-  "G. Thomas",
-  "I. Roberts",
-  "E. Walker",
-  "V. Kumar",
-  "W. Jones",
-  "Y. Lewis",
-].join("\n");
 
 const fieldZones: FieldZone[] = [
   "Fine leg",
@@ -571,13 +544,13 @@ function MatchSetup({
   const [format, setFormat] = useState<MatchFormat>("T20");
   const [overs, setOvers] = useState("20");
   const [inningsPerSide, setInningsPerSide] = useState<1 | 2>(1);
-  const [homeName, setHomeName] = useState("Riverside CC");
-  const [awayName, setAwayName] = useState("Northgate CC");
-  const [homePlayers, setHomePlayers] = useState(defaultHomePlayers);
-  const [awayPlayers, setAwayPlayers] = useState(defaultAwayPlayers);
+  const [homeName, setHomeName] = useState("");
+  const [awayName, setAwayName] = useState("");
+  const [homePlayers, setHomePlayers] = useState("");
+  const [awayPlayers, setAwayPlayers] = useState("");
   const [battingFirst, setBattingFirst] = useState<"home" | "away">("home");
-  const [ground, setGround] = useState("The Riverside Ground");
-  const [weather, setWeather] = useState("Dry, light cloud");
+  const [ground, setGround] = useState("");
+  const [weather, setWeather] = useState("");
   const [error, setError] = useState("");
 
   const changeFormat = (next: MatchFormat) => {
@@ -599,28 +572,29 @@ function MatchSetup({
   };
 
   const submit = () => {
-    const homeLineup = homePlayers
-      .split("\n")
-      .map((name) => name.trim())
-      .filter(Boolean);
-    const awayLineup = awayPlayers
-      .split("\n")
-      .map((name) => name.trim())
-      .filter(Boolean);
-    if (!homeName.trim() || !awayName.trim() || homeLineup.length < 2 || awayLineup.length < 2) {
-      setError("Add both team names and at least two players for each team.");
+    setError("");
+    const parsed = validateDeviceMatchSetup({
+      homeName,
+      awayName,
+      homePlayers,
+      awayPlayers,
+      overs,
+      format,
+    });
+    if (!parsed.ok) {
+      setError(parsed.error);
       return;
     }
     onCreate(
       createMatch({
-        homeTeamName: homeName,
-        awayTeamName: awayName,
-        homePlayers: homeLineup,
-        awayPlayers: awayLineup,
+        homeTeamName: homeName.trim(),
+        awayTeamName: awayName.trim(),
+        homePlayers: parsed.homeLineup,
+        awayPlayers: parsed.awayLineup,
         battingFirst,
         settings: {
           format,
-          oversPerInnings: overs ? Math.max(1, Number(overs)) : null,
+          oversPerInnings: parsed.oversPerInnings,
           inningsPerSide,
           ballsPerOver: 6,
           ground: ground.trim(),
@@ -641,8 +615,8 @@ function MatchSetup({
         <p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-300">Match setup</p>
         <h1 className="mt-1 font-display text-4xl font-bold md:text-5xl">Set the game up once</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-400">
-          The start time is automatic. You can change the striker, bowler and end at any point while
-          scoring.
+          Add your actual teams and playing lineups before starting. The start time is automatic,
+          and you can change the striker, bowler and end while scoring.
         </p>
       </div>
 
@@ -667,7 +641,7 @@ function MatchSetup({
               type="number"
               min="1"
               className="scorer-input disabled:opacity-40"
-              placeholder="No limit"
+              placeholder={format === "Multi-day" ? "No limit" : "e.g. 20"}
             />
           </Field>
           <Field label="Innings / side">
@@ -686,6 +660,7 @@ function MatchSetup({
             value={ground}
             onChange={(event) => setGround(event.target.value)}
             className="scorer-input"
+            placeholder="Optional — match ground"
           />
         </Field>
         <Field label="Weather">
@@ -693,6 +668,7 @@ function MatchSetup({
             value={weather}
             onChange={(event) => setWeather(event.target.value)}
             className="scorer-input"
+            placeholder="Optional — actual conditions"
           />
         </Field>
       </section>
@@ -729,6 +705,7 @@ function MatchSetup({
                 value={team.name}
                 onChange={(event) => team.setName(event.target.value)}
                 className="scorer-input"
+                placeholder={team.side === "home" ? "Enter home team" : "Enter away team"}
               />
             </Field>
             <Field label="Playing XI — one player per line">
@@ -737,6 +714,9 @@ function MatchSetup({
                 onChange={(event) => team.setPlayers(event.target.value)}
                 rows={11}
                 className="scorer-input min-h-60 py-3 leading-7"
+                placeholder={
+                  "Enter the players in batting order, one per line\nAt least 2, maximum 11"
+                }
               />
             </Field>
             <label
@@ -755,7 +735,10 @@ function MatchSetup({
       </section>
 
       {error && (
-        <p className="rounded-2xl border border-rose-400/30 bg-rose-400/10 p-4 text-sm text-rose-200">
+        <p
+          role="alert"
+          className="rounded-2xl border border-rose-400/30 bg-rose-400/10 p-4 text-sm text-rose-200"
+        >
           {error}
         </p>
       )}
