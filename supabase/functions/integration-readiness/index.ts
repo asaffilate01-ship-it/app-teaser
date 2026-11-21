@@ -88,6 +88,18 @@ Deno.serve(async (request) => {
         "private S3 and a separately installed one-minute scheduled invocation. Not a live test.",
     });
     checks.push({
+      id: "cloud-archive-check",
+      label: "Private cloud recording object inspection",
+      status: Deno.env.get("CRICLUME_CLOUD_ARCHIVE_CHECK_ENABLED") !== "true"
+        ? "disabled"
+        : [...cloudCaptureKeys.slice(3), "CRON_SECRET"].every((key) =>
+            Boolean(Deno.env.get(key)?.trim()),
+          )
+          ? "configured"
+          : "missing",
+      detail: "Configuration check only. Object presence and MP4 header validation are not a safeguarding or publication approval.",
+    });
+    checks.push({
       id: "paid-ai",
       label: "Paid AI switch",
       status: Deno.env.get("OMNIQORA_CRICLUME_PAID_ENABLED") === "true" ? "configured" : "disabled",
