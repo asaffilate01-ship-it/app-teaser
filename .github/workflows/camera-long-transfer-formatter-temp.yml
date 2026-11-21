@@ -28,7 +28,8 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add workers/camera-long-transfer/package-lock.json src/lib/camera-long-transfer-policy.ts tests/camera-long-transfer-policy.test.ts src/components/CameraImportApproval.tsx workers/camera-long-transfer/index.mjs
+          git add -f workers/camera-long-transfer/package-lock.json
+          git add src/lib/camera-long-transfer-policy.ts tests/camera-long-transfer-policy.test.ts src/components/CameraImportApproval.tsx workers/camera-long-transfer/index.mjs
           if ! git diff --cached --quiet; then
             git commit -m 'build(camera): lock isolated S3 worker dependencies and format source'
             git push origin "HEAD:$GITHUB_REF_NAME"
