@@ -10,6 +10,7 @@ export interface CameraCloudRecording {
   device_id: string;
   state: CameraCloudState;
   provider_status: number | null;
+  start_source?: "director" | "match_state";
   created_at: string;
   updated_at: string;
   ended_at: string | null;
