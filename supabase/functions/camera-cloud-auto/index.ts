@@ -40,7 +40,9 @@ const activeStates = ["starting", "recording", "stopping"];
 // Supabase's untyped relation payload can be a nested array or a single record;
 // normalize both shapes and fail closed when the match is missing.
 function normalizeRoom(value: {
-  id: string; status: string; match_id: string;
+  id: string;
+  status: string;
+  match_id: string;
   matches: MatchInfo | MatchInfo[] | null;
 }): RoomRow {
   const joined = Array.isArray(value.matches) ? value.matches[0] : value.matches;
@@ -51,7 +53,6 @@ function normalizeRoom(value: {
     matches: joined ?? { status: "unavailable", owner_organisation_id: "" },
   };
 }
-
 
 function provider() {
   const ws = Deno.env.get("LIVEKIT_URL") ?? "";
