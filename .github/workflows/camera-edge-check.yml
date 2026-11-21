@@ -19,7 +19,7 @@ jobs:
           deno-version: v2.x
       - name: Typecheck authenticated camera cloud endpoint and provider webhooks
         run: |
-          deno check \
+          deno check --node-modules-dir=auto \
             supabase/functions/camera-cloud/index.ts \
             supabase/functions/camera-cloud-webhook/index.ts \
             supabase/functions/integration-readiness/index.ts
