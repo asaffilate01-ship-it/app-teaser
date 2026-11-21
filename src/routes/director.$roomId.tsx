@@ -469,11 +469,7 @@ function CameraDirector() {
           </span>
         </div>
         {reviewOpen && (
-          <CameraReplayLibrary
-            roomId={roomId}
-            matchId={room.match_id}
-            devices={devices}
-          />
+          <CameraReplayLibrary roomId={roomId} matchId={room.match_id} devices={devices} />
         )}
         {devices.length === 0 && (
           <div className="mt-6 rounded-xl border border-white/15 p-8 text-center text-sm text-slate-300">

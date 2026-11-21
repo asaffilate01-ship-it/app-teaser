@@ -1,9 +1,5 @@
 import { getCloudClient } from "@/lib/cloud";
-import {
-  isReviewableClip,
-  type CameraClip,
-  type CameraDelivery,
-} from "@/lib/camera-review";
+import { isReviewableClip, type CameraClip, type CameraDelivery } from "@/lib/camera-review";
 
 export interface RoomReviewData {
   clips: CameraClip[];

@@ -46,13 +46,13 @@ export function isReviewableClip(clip: CameraClip, nowMs: number): boolean {
   const start = Date.parse(clip.started_at);
   return Boolean(
     clip.id &&
-      clip.device_id &&
-      clip.storage_path &&
-      ["uploaded", "processing", "ready"].includes(clip.status) &&
-      clip.recording_consent === "granted" &&
-      Number.isFinite(start) &&
-      Number.isFinite(until) &&
-      until > nowMs,
+    clip.device_id &&
+    clip.storage_path &&
+    ["uploaded", "processing", "ready"].includes(clip.status) &&
+    clip.recording_consent === "granted" &&
+    Number.isFinite(start) &&
+    Number.isFinite(until) &&
+    until > nowMs,
   );
 }
 

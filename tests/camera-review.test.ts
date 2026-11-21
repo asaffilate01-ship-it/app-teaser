@@ -86,6 +86,9 @@ test("overlapping camera angles retain separate cues in canonical ball order", (
     now,
   );
   assert.equal(result.length, 4);
-  assert.deepEqual(result.map((cue) => cue.deliverySequence), [8, 8, 9, 9]);
+  assert.deepEqual(
+    result.map((cue) => cue.deliverySequence),
+    [8, 8, 9, 9],
+  );
   assert.match(result[3]!.label, /WICKET/);
 });

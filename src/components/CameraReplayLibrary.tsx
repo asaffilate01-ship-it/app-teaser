@@ -1,13 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CirclePlay, Clock3, RefreshCw, ShieldCheck, Video } from "lucide-react";
-import {
-  estimateDeliveryCues,
-  type CameraClip,
-} from "@/lib/camera-review";
-import {
-  loadCameraRoomReview,
-  signedRoomClipUrl,
-} from "@/lib/camera-review-cloud";
+import { estimateDeliveryCues, type CameraClip } from "@/lib/camera-review";
+import { loadCameraRoomReview, signedRoomClipUrl } from "@/lib/camera-review-cloud";
 
 interface DeviceLabel {
   id: string;
@@ -53,9 +47,7 @@ export function CameraReplayLibrary({
       );
     } catch (reason) {
       setError(
-        reason instanceof Error
-          ? reason.message
-          : "Private recording library could not be loaded.",
+        reason instanceof Error ? reason.message : "Private recording library could not be loaded.",
       );
     } finally {
       setLoading(false);
@@ -123,8 +115,8 @@ export function CameraReplayLibrary({
           </h2>
           <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-400">
             Access-restricted stored recordings and estimated ball cue points based on device
-            timestamps. These are not verified frame-level synchronization, speed measurements,
-            or automated scoring decisions.
+            timestamps. These are not verified frame-level synchronization, speed measurements, or
+            automated scoring decisions.
           </p>
         </div>
         <button
@@ -136,9 +128,24 @@ export function CameraReplayLibrary({
           <RefreshCw className="size-4" /> Refresh clips
         </button>
       </div>
-      {error && <p role="alert" className="mt-3 rounded-md border border-rose-500/30 p-3 text-sm text-rose-200">{error}</p>}
-      {message && <p role="status" className="mt-3 text-xs text-amber-200">{message}</p>}
-      {loading && <p role="status" className="mt-3 text-sm text-slate-300">Loading club video records…</p>}
+      {error && (
+        <p
+          role="alert"
+          className="mt-3 rounded-md border border-rose-500/30 p-3 text-sm text-rose-200"
+        >
+          {error}
+        </p>
+      )}
+      {message && (
+        <p role="status" className="mt-3 text-xs text-amber-200">
+          {message}
+        </p>
+      )}
+      {loading && (
+        <p role="status" className="mt-3 text-sm text-slate-300">
+          Loading club video records…
+        </p>
+      )}
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <div className="min-w-0">
@@ -159,8 +166,8 @@ export function CameraReplayLibrary({
                 <div>
                   <div className="text-sm font-bold">{deviceName(selectedClip.device_id)}</div>
                   <div className="text-xs text-slate-400">
-                    {new Date(selectedClip.started_at).toLocaleString()} ·
-                    {" "}{selectedClip.blur_mode === "none" ? "Private footage" : "Blurred derivative"}
+                    {new Date(selectedClip.started_at).toLocaleString()} ·{" "}
+                    {selectedClip.blur_mode === "none" ? "Private footage" : "Blurred derivative"}
                   </div>
                 </div>
                 <label className="flex items-center gap-2 text-xs text-slate-300">
@@ -187,9 +194,9 @@ export function CameraReplayLibrary({
           )}
           <p className="mt-3 flex items-start gap-2 text-xs leading-5 text-slate-400">
             <ShieldCheck className="mt-0.5 size-4 shrink-0 text-amber-300" />
-            Only current, consented files are listed. If privacy blurring was requested,
-            playback is blocked until its processed blurred variant is ready.
-            Playback links expire; refresh or reopen the clip if needed.
+            Only current, consented files are listed. If privacy blurring was requested, playback is
+            blocked until its processed blurred variant is ready. Playback links expire; refresh or
+            reopen the clip if needed.
           </p>
         </div>
 
@@ -248,8 +255,8 @@ export function CameraReplayLibrary({
               <Clock3 className="size-4" /> Estimated delivery cues ({cues.length})
             </h3>
             <p className="mt-1 text-xs text-slate-500">
-              Matches the scorer’s recorded time with camera segment times; check the footage
-              before relying on the cue.
+              Matches the scorer’s recorded time with camera segment times; check the footage before
+              relying on the cue.
             </p>
             <div className="mt-2 max-h-64 space-y-1 overflow-auto">
               {cues.slice(0, 100).map((cue) => {

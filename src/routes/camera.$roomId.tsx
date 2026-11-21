@@ -420,10 +420,10 @@ function MatchCamera() {
         onProgress: (uploaded, total) =>
           setUploadProgress(total ? Math.round((uploaded / total) * 100) : 0),
       });
-      const { error: saveError } = await getCloudClient().rpc(
-        "complete_camera_asset_upload",
-        { p_asset_id: asset.id, p_storage_path: path },
-      );
+      const { error: saveError } = await getCloudClient().rpc("complete_camera_asset_upload", {
+        p_asset_id: asset.id,
+        p_storage_path: path,
+      });
       if (saveError) throw saveError;
       setUploadProgress(100);
       setMessage("Upload saved. Requesting processing…");
