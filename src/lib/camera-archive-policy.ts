@@ -50,17 +50,14 @@ export function inspectCameraMp4(
 ): "object_confirmed" | "invalid_object" {
   const mime = contentType?.split(";")[0]?.trim().toLowerCase() ?? "";
   const allowedMime = !mime || mime === "video/mp4" || mime === "application/octet-stream";
-  const header = firstBytes.length >= 12 &&
+  const header =
+    firstBytes.length >= 12 &&
     firstBytes[4] === 0x66 &&
     firstBytes[5] === 0x74 &&
     firstBytes[6] === 0x79 &&
     firstBytes[7] === 0x70;
-  if (
-    !Number.isSafeInteger(length) ||
-    (length ?? 0) < 1024 ||
-    !allowedMime ||
-    !header
-  ) return "invalid_object";
+  if (!Number.isSafeInteger(length) || (length ?? 0) < 1024 || !allowedMime || !header)
+    return "invalid_object";
   return "object_confirmed";
 }
 

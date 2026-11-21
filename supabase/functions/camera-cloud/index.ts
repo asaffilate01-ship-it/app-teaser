@@ -185,7 +185,9 @@ Deno.serve(async (request) => {
     if (body.action === "status") {
       const { data, error } = await client
         .from("camera_cloud_recordings")
-        .select("id,device_id,state,provider_status,created_at,updated_at,ended_at,start_source,archive_check_status,archive_check_attempts,archive_object_bytes,archive_checked_at")
+        .select(
+          "id,device_id,state,provider_status,created_at,updated_at,ended_at,start_source,archive_check_status,archive_check_attempts,archive_object_bytes,archive_checked_at",
+        )
         .eq("room_id", body.roomId)
         .eq("device_id", body.deviceId)
         .order("created_at", { ascending: false })

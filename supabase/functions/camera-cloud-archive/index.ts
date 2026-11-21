@@ -1,10 +1,6 @@
 // Cron-only, disabled-by-default private archive inspector.
 // A confirmed S3 MP4 object does NOT constitute publication or safeguarding approval.
-import {
-  GetObjectCommand,
-  HeadObjectCommand,
-  S3Client,
-} from "npm:@aws-sdk/client-s3@3.840.0";
+import { GetObjectCommand, HeadObjectCommand, S3Client } from "npm:@aws-sdk/client-s3@3.840.0";
 import {
   expectedCameraArchiveKey,
   inspectCameraMp4,
@@ -36,13 +32,24 @@ function archiveStorage() {
   const key = Deno.env.get("CRICLUME_CAPTURE_S3_ACCESS_KEY") ?? "";
   const secret = Deno.env.get("CRICLUME_CAPTURE_S3_SECRET_KEY") ?? "";
   let parsed: URL;
-  try { parsed = new URL(endpoint); }
-  catch { throw new Error("Cloud archive storage is not configured."); }
+  try {
+    parsed = new URL(endpoint);
+  } catch {
+    throw new Error("Cloud archive storage is not configured.");
+  }
   if (
-    parsed.protocol !== "https:" || parsed.username || parsed.password ||
-    parsed.search || parsed.hash || !bucket || !region || !key || !secret ||
+    parsed.protocol !== "https:" ||
+    parsed.username ||
+    parsed.password ||
+    parsed.search ||
+    parsed.hash ||
+    !bucket ||
+    !region ||
+    !key ||
+    !secret ||
     !/^[a-z0-9][a-z0-9.-]{2,62}$/.test(bucket)
-  ) throw new Error("Private archive storage configuration is invalid.");
+  )
+    throw new Error("Private archive storage configuration is invalid.");
   return {
     bucket,
     client: new S3Client({
@@ -58,9 +65,11 @@ function archiveStorage() {
 function missingKey(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
   const candidate = error as { $metadata?: { httpStatusCode?: number }; name?: string };
-  return candidate.$metadata?.httpStatusCode === 404 ||
+  return (
+    candidate.$metadata?.httpStatusCode === 404 ||
     candidate.name === "NoSuchKey" ||
-    candidate.name === "NotFound";
+    candidate.name === "NotFound"
+  );
 }
 
 Deno.serve(async (request) => {
@@ -76,7 +85,7 @@ Deno.serve(async (request) => {
       .from("camera_cloud_recordings")
       .select(
         "id,room_id,device_id,object_path,provider_egress_id,state,ended_at," +
-        "archive_check_status,archive_check_attempts",
+          "archive_check_status,archive_check_attempts",
       )
       .eq("state", "provider_completed")
       .in("archive_check_status", retryable)
@@ -93,17 +102,26 @@ Deno.serve(async (request) => {
     let errors = 0;
     try {
       for (const candidate of (data ?? []) as ArchiveCandidate[]) {
-        if (!mayCheckCameraArchive(
-          candidate.state, candidate.archive_check_status, candidate.archive_check_attempts,
-        )) continue;
+        if (
+          !mayCheckCameraArchive(
+            candidate.state,
+            candidate.archive_check_status,
+            candidate.archive_check_attempts,
+          )
+        )
+          continue;
 
         let result: CameraArchiveStatus = "review_required";
         let byteSize: number | null = null;
         let etag: string | null = null;
         try {
-          if (!candidate.ended_at || !candidate.provider_egress_id ||
-              !uuid.test(candidate.id) || !uuid.test(candidate.room_id) ||
-              !uuid.test(candidate.device_id)) {
+          if (
+            !candidate.ended_at ||
+            !candidate.provider_egress_id ||
+            !uuid.test(candidate.id) ||
+            !uuid.test(candidate.room_id) ||
+            !uuid.test(candidate.device_id)
+          ) {
             result = "review_required";
           } else {
             const { data: room, error: roomError } = await db
@@ -113,7 +131,8 @@ Deno.serve(async (request) => {
               .maybeSingle();
             const joined = room?.matches as MatchOwner | MatchOwner[] | null | undefined;
             const organisationId = Array.isArray(joined)
-              ? joined[0]?.owner_organisation_id : joined?.owner_organisation_id;
+              ? joined[0]?.owner_organisation_id
+              : joined?.owner_organisation_id;
             const { data: device, error: deviceError } = await db
               .from("camera_devices")
               .select("id,room_id")
@@ -124,7 +143,10 @@ Deno.serve(async (request) => {
               result = "review_required";
             } else {
               const expected = expectedCameraArchiveKey(
-                organisationId, candidate.room_id, candidate.device_id, candidate.id,
+                organisationId,
+                candidate.room_id,
+                candidate.device_id,
+                candidate.id,
               );
               if (expected !== candidate.object_path) {
                 // Never send an attacker-provided S3 path to a credentialed client.
@@ -182,7 +204,10 @@ Deno.serve(async (request) => {
           .select("id")
           .maybeSingle();
 
-        if (saveError) { errors++; continue; }
+        if (saveError) {
+          errors++;
+          continue;
+        }
         if (!changed) continue; // Another worker already processed the same object.
         checked++;
         if (result === "object_confirmed") confirmed++;

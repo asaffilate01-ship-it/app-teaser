@@ -339,10 +339,11 @@ await db.query("update public.camera_cloud_recordings set state='provider_comple
 // A provider completion cannot become a confirmed private archive without
 // object evidence from a trusted server-side S3 inspection.
 await assert.rejects(
-  () => db.query(
-    "update public.camera_cloud_recordings set archive_check_status='object_confirmed' where id=$1",
-    [cloudJob],
-  ),
+  () =>
+    db.query(
+      "update public.camera_cloud_recordings set archive_check_status='object_confirmed' where id=$1",
+      [cloudJob],
+    ),
   (error) => error.code === "23514",
 );
 await db.query(
