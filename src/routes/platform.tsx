@@ -1026,9 +1026,9 @@ function Competitions({
         >
           <h3 className="text-lg font-bold text-amber-200">Fixture timing to review</h3>
           <p className="mt-2 text-sm text-slate-300">
-            These fixtures start less than four hours apart with a team or ground in common.
-            Cricket match durations are not recorded, so these are possible scheduling
-            conflicts—not confirmed double bookings. Check the fixtures before match day.
+            These fixtures start less than four hours apart with a team or ground in common. Cricket
+            match durations are not recorded, so these are possible scheduling conflicts—not
+            confirmed double bookings. Check the fixtures before match day.
           </p>
           <ul className="mt-3 space-y-3 text-sm">
             {scheduling.alerts.map((item) => (
@@ -1047,10 +1047,16 @@ function Competitions({
                   Scheduled starts are {item.minutesApart} minutes apart.
                 </p>
                 <div className="mt-2 flex flex-wrap gap-4">
-                  <a className="font-semibold text-amber-200 underline" href={`#fixture-${item.firstFixtureId}`}>
+                  <a
+                    className="font-semibold text-amber-200 underline"
+                    href={`#fixture-${item.firstFixtureId}`}
+                  >
                     View first fixture
                   </a>
-                  <a className="font-semibold text-amber-200 underline" href={`#fixture-${item.secondFixtureId}`}>
+                  <a
+                    className="font-semibold text-amber-200 underline"
+                    href={`#fixture-${item.secondFixtureId}`}
+                  >
                     View second fixture
                   </a>
                 </div>
