@@ -30,7 +30,6 @@ function getDeviceId(): string {
   return next;
 }
 
-
 export function useMatchCloudSync(
   cloudMatchId: string | null,
   onRemoteMatch: (match: CricketMatch) => boolean | void,
