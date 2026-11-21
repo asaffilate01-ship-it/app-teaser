@@ -6,6 +6,7 @@ import {
 import { SectionNavigation } from "@/components/SectionNavigation";
 import { validateCloudMatchSetup } from "@/lib/match-setup";
 import { fixtureCalendarIcs } from "@/lib/fixture-calendar";
+import { reviewFixtureSchedule } from "@/lib/fixture-scheduling";
 import { readSection, platformSections } from "@/lib/navigation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
@@ -1013,10 +1014,56 @@ function Competitions({
   role: PlatformRole;
   run: RunAction;
 }) {
+  const scheduling = reviewFixtureSchedule(data.fixtures);
   return (
     <div className="space-y-5">
       {can(role, "competition.manage") && <CompetitionForm data={data} run={run} />}
       {can(role, "fixtures.manage") && <FixtureForm data={data} run={run} />}
+      {scheduling.alerts.length > 0 && (
+        <section
+          aria-label="Potential fixture schedule overlaps"
+          className="rounded-2xl border border-amber-300/30 bg-amber-300/[0.05] p-5"
+        >
+          <h3 className="text-lg font-bold text-amber-200">Fixture timing to review</h3>
+          <p className="mt-2 text-sm text-slate-300">
+            These fixtures start less than four hours apart with a team or ground in common.
+            Cricket match durations are not recorded, so these are possible scheduling
+            conflicts—not confirmed double bookings. Check the fixtures before match day.
+          </p>
+          <ul className="mt-3 space-y-3 text-sm">
+            {scheduling.alerts.map((item) => (
+              <li
+                key={`${item.firstFixtureId}-${item.secondFixtureId}`}
+                className="rounded-xl border border-amber-300/20 bg-black/20 p-3"
+              >
+                <p className="font-semibold text-amber-100">
+                  {item.sharedTeamIds.length > 0
+                    ? `Team: ${item.sharedTeamIds.map((id) => teamName(data, id)).join(", ")}`
+                    : ""}
+                  {item.sharedTeamIds.length > 0 && item.sharedGroundId ? " · " : ""}
+                  {item.sharedGroundId ? `Ground: ${groundName(data, item.sharedGroundId)}` : ""}
+                </p>
+                <p className="mt-1 text-slate-300">
+                  Scheduled starts are {item.minutesApart} minutes apart.
+                </p>
+                <div className="mt-2 flex flex-wrap gap-4">
+                  <a className="font-semibold text-amber-200 underline" href={`#fixture-${item.firstFixtureId}`}>
+                    View first fixture
+                  </a>
+                  <a className="font-semibold text-amber-200 underline" href={`#fixture-${item.secondFixtureId}`}>
+                    View second fixture
+                  </a>
+                </div>
+              </li>
+            ))}
+          </ul>
+          {scheduling.truncated && (
+            <p className="mt-3 text-xs text-amber-200">
+              Showing the first 30 possible scheduling conflicts. Review the full fixture list.
+            </p>
+          )}
+        </section>
+      )}
       <Panel
         title="Competitions and fixtures"
         description="All rows below come from the selected organisation's database records."
@@ -1073,7 +1120,8 @@ function Competitions({
                     .map((fixture) => (
                       <div
                         key={fixture.id}
-                        className="rounded-lg border border-white/8 bg-black/10 p-3"
+                        id={`fixture-${fixture.id}`}
+                        className="scroll-mt-28 rounded-lg border border-white/8 bg-black/10 p-3"
                       >
                         <div className="text-[10px] font-bold uppercase text-amber-200">
                           {fixture.roundName ?? "Fixture"} · {formatDate(fixture.startsAt)}
