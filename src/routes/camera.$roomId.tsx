@@ -13,6 +13,11 @@ import {
 } from "lucide-react";
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 import { connectLiveCamera, type LiveCameraSession } from "@/lib/camera-live";
+import {
+  nextCameraCommand,
+  reportCameraCommandResult,
+  type CameraCommandCursor,
+} from "@/lib/camera-command-receipts";
 import { storageVideoMimeType } from "@/lib/camera-review";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import {
@@ -67,7 +72,7 @@ function MatchCamera() {
   const failedSegmentsRef = useRef<Array<{ blob: Blob; startedAt: string; endedAt: string }>>([]);
   const liveRef = useRef<LiveCameraSession | null>(null);
   const commandHandlerRef = useRef<(command: Record<string, unknown>) => void>(() => {});
-  const seenCommandIdRef = useRef<string | null>(null);
+  const lastAppliedCommandRef = useRef<CameraCommandCursor | null>(null);
   const presenceHeartbeatRef = useRef<() => void>(() => {});
   const presenceRef = useRef<Awaited<ReturnType<typeof joinCameraPresence>> | null>(null);
   const [email, setEmail] = useState("");
@@ -306,20 +311,54 @@ function MatchCamera() {
     void updatePresence(false);
   };
 
-  // Commands are durable server-authorised rows, not spoofable broadcast payloads.
-  commandHandlerRef.current = (command) => {
-    if (!device || command["device_id"] !== device.id) return;
-    const timestamp = Date.parse(String(command["created_at"] ?? ""));
-    if (!Number.isFinite(timestamp) || Math.abs(Date.now() - timestamp) > 120_000) return;
-    const id = String(command["id"] ?? "");
-    if (id && seenCommandIdRef.current === id) return;
-    if (id) seenCommandIdRef.current = id;
-    if (command["action"] === "stop") {
-      stopRecording();
-    } else if (command["action"] === "start") {
-      if (consent && autoRecordArmed && previewing) startRecording();
-      else setMessage("Auto-record requested, but preview, permission or arming is missing.");
+  // The device records a single immutable, phone-reported outcome for each
+  // recent command. This proves neither successful upload nor ongoing capture.
+  commandHandlerRef.current = (payload) => {
+    if (!device || !session) return;
+    const next = nextCameraCommand(payload, device.id, lastAppliedCommandRef.current, Date.now());
+    if (!next) return;
+    lastAppliedCommandRef.current = next.cursor;
+
+    const before = recordingRef.current;
+    let captureThrew = false;
+    try {
+      if (next.command.action === "stop") {
+        stopRecording();
+      } else if (consent && autoRecordArmed && previewing) {
+        startRecording();
+      } else {
+        setMessage("Recording request blocked: check consent, arming and camera preview.");
+      }
+    } catch {
+      captureThrew = true;
+      setMessage("Camera recorder failed to carry out the requested command.");
     }
+    const result = captureThrew
+      ? { outcome: "failed" as const, reason_code: "capture_failed" as const }
+      : reportCameraCommandResult({
+          action: next.command.action,
+          before,
+          after: recordingRef.current,
+          consent,
+          armed: autoRecordArmed,
+          previewing,
+        });
+
+    void getCloudClient()
+      .from("camera_command_receipts")
+      .insert({
+        command_id: next.command.id,
+        room_id: roomId,
+        device_id: device.id,
+        reported_by: session.user.id,
+        outcome: result.outcome,
+        reason_code: result.reason_code,
+      })
+      .then(({ error }) => {
+        if (error && error.code !== "23505") {
+          setMessage("Recording status could not be confirmed to the director.");
+        }
+      });
   };
 
   // A realtime event can be missed while a phone changes networks or resumes.
