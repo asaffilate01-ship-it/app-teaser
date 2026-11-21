@@ -4,9 +4,7 @@ export type MatchSetupResult =
   | { ok: true; homeLineup: string[]; awayLineup: string[]; oversPerInnings: number | null }
   | { ok: false; error: string };
 
-export type CloudSetupResult =
-  | { ok: true; oversPerInnings: number }
-  | { ok: false; error: string };
+export type CloudSetupResult = { ok: true; oversPerInnings: number } | { ok: false; error: string };
 
 /**
  * Never coerce empty, fractional, negative, scientific-notation or non-finite
@@ -52,7 +50,10 @@ export function validateDeviceMatchSetup(input: {
   if (home.length < 2 || away.length < 2 || home.length > 120 || away.length > 120) {
     return { ok: false, error: "Enter two team names between 2 and 120 characters." };
   }
-  if (home.normalize("NFKC").toLocaleLowerCase("en") === away.normalize("NFKC").toLocaleLowerCase("en")) {
+  if (
+    home.normalize("NFKC").toLocaleLowerCase("en") ===
+    away.normalize("NFKC").toLocaleLowerCase("en")
+  ) {
     return { ok: false, error: "Home and away teams must have different names." };
   }
   const homeLineup = namesForTeam(input.homePlayers);
@@ -85,7 +86,10 @@ export function validateCloudMatchSetup(input: {
   }
   for (const team of [home, away]) {
     if (new Set(team.playerIds).size < 2) {
-      return { ok: false, error: "Each team needs at least two registered players before scoring." };
+      return {
+        ok: false,
+        error: "Each team needs at least two registered players before scoring.",
+      };
     }
   }
   const oversPerInnings = parseOvers(input.overs, false);
