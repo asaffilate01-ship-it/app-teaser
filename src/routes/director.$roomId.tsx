@@ -12,7 +12,7 @@ import {
   Video,
 } from "lucide-react";
 import { useCloudSession } from "@/hooks/use-cloud-session";
-import { getCloudClient, isCloudConfigured } from "@/lib/cloud";
+import { getCloudClient, isCloudConfigured, type CameraPresence } from "@/lib/cloud";
 import {
   connectLiveCamera,
   type LiveCameraSession,
@@ -57,6 +57,7 @@ function CameraDirector() {
   const [arms, setArms] = useState<RecordingArm[]>([]);
   const [streams, setStreams] = useState<Record<string, MediaStream>>({});
   const [states, setStates] = useState<Record<string, LiveConnectionState>>({});
+  const [presence, setPresence] = useState<Record<string, CameraPresence>>({});
   const [view, setView] = useState<ViewMode>("four");
   const [focus, setFocus] = useState<string | null>(null);
   const [soundDevice, setSoundDevice] = useState<string | null>(null);
@@ -123,6 +124,7 @@ function CameraDirector() {
     if (!configured || !session) return;
     const client = getCloudClient();
     activeRef.current = true;
+    let presenceChannel: ReturnType<typeof client.channel> | null = null;
     const load = async () => {
       try {
         const access = await client.rpc("can_direct_camera_room", { p_room_id: roomId });
@@ -131,6 +133,18 @@ function CameraDirector() {
         setAuthorised(access.data === true);
         if (access.data !== true) return;
 
+        await client.realtime.setAuth();
+        presenceChannel = client.channel("camera:" + roomId, { config: { private: true } })
+          .on("presence", { event: "sync" }, () => {
+            if (!activeRef.current || !presenceChannel) return;
+            const members = Object.values(presenceChannel.presenceState())
+              .flat() as unknown as CameraPresence[];
+            setPresence(Object.fromEntries(
+              members.filter((member) => Boolean(member.deviceId))
+                .map((member) => [member.deviceId, member]),
+            ));
+          })
+          .subscribe();
         const [roomResult, deviceResult, armResult] = await Promise.all([
           client.from("camera_rooms").select("id,name,status,match_id").eq("id", roomId).single(),
           client.from("camera_devices").select("id,label,angle").eq("room_id", roomId),
@@ -157,6 +171,7 @@ function CameraDirector() {
     void load();
     return () => {
       activeRef.current = false;
+      if (presenceChannel) void client.removeChannel(presenceChannel);
       for (const connection of liveRef.current.values()) connection.close();
       liveRef.current.clear();
     };
@@ -249,6 +264,7 @@ function CameraDirector() {
   const armedDevices = devices.filter((device) =>
     arms.some((arm) => arm.device_id === device.id && arm.armed && arm.consent_confirmed),
   );
+  const recordingCount = devices.filter((device) => presence[device.id]?.recording).length;
   const displayed =
     view === "one"
       ? devices.filter((device) => device.id === (focus ?? devices[0]?.id))
@@ -275,8 +291,8 @@ function CameraDirector() {
             </span>
             <h1 className="mt-2 text-2xl font-bold md:text-4xl">{room.name}</h1>
             <p className="mt-2 text-sm text-slate-400">
-              {devices.length} paired angles · {armedDevices.length} auto-record armed · room{" "}
-              {room.status}
+              {devices.length} paired angles · {armedDevices.length} auto-record armed ·
+              {" "}{recordingCount} reporting recording · room {room.status}
             </p>
           </div>
           <button
@@ -387,6 +403,8 @@ function CameraDirector() {
                       {device.angle.replaceAll("_", " ")} · {states[device.id] ?? "offline"}
                       {" · "}
                       {armed ? "Auto-record armed" : "Not armed"}
+                      {" · "}{presence[device.id]?.recording ? "Phone reports REC" :
+                        presence[device.id] ? "Phone not recording" : "Phone offline/unverified"}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
