@@ -18,8 +18,7 @@ const excludedStatuses = new Set(["cancelled", "canceled", "abandoned", "complet
 function absoluteStart(value: string | null): number | null {
   if (
     !value ||
-    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/i.test(
-      value)
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/i.test(value)
   ) {
     return null;
   }
