@@ -37,6 +37,22 @@ type SessionRow = {
 };
 const activeStates = ["starting", "recording", "stopping"];
 
+// Supabase's untyped relation payload can be a nested array or a single record;
+// normalize both shapes and fail closed when the match is missing.
+function normalizeRoom(value: {
+  id: string; status: string; match_id: string;
+  matches: MatchInfo | MatchInfo[] | null;
+}): RoomRow {
+  const joined = Array.isArray(value.matches) ? value.matches[0] : value.matches;
+  return {
+    id: value.id,
+    status: value.status,
+    match_id: value.match_id,
+    matches: joined ?? { status: "unavailable", owner_organisation_id: "" },
+  };
+}
+
+
 function provider() {
   const ws = Deno.env.get("LIVEKIT_URL") ?? "";
   const key = Deno.env.get("LIVEKIT_API_KEY") ?? "";
@@ -155,7 +171,7 @@ Deno.serve(async (request) => {
     ]);
     if (roomResult.error || armResult.error || optResult.error)
       throw new Error("Active camera eligibility could not be verified.");
-    const byRoom = new Map((roomResult.data ?? []).map((r) => [r.id, r as RoomRow]));
+    const byRoom = new Map((roomResult.data ?? []).map((r) => [r.id, normalizeRoom(r)]));
     const byArm = new Map((armResult.data ?? []).map((a) => [a.device_id, a as ArmRow]));
     const byOpt = new Map((optResult.data ?? []).map((o) => [o.device_id, o as OptInRow]));
 
@@ -232,7 +248,7 @@ Deno.serve(async (request) => {
           activeCount.error
         )
           throw new Error("Cloud candidate verification unavailable.");
-        const rooms = new Map((candidateRooms.data ?? []).map((r) => [r.id, r as RoomRow]));
+        const rooms = new Map((candidateRooms.data ?? []).map((r) => [r.id, normalizeRoom(r)]));
         const arms = new Map((candidateArms.data ?? []).map((a) => [a.device_id, a as ArmRow]));
         const devices = new Map((candidateDevices.data ?? []).map((d) => [d.id, d]));
         let available = Math.max(0, maxActive - (activeCount.count ?? maxActive));
