@@ -77,6 +77,9 @@ export interface FixtureRecord {
   status: string;
   roundName: string | null;
   result: Record<string, unknown>;
+  ruleVersionId?: string | null;
+  signedOffAt?: string | null;
+  signedOffBy?: string | null;
 }
 
 export interface MatchRecord {
@@ -298,7 +301,7 @@ export async function loadOrganisationDashboard(
       client
         .from("fixtures")
         .select(
-          "id,competition_id,rule_version_id,home_team_id,away_team_id,ground_id,round_name,starts_at,status,result",
+          "id,competition_id,rule_version_id,home_team_id,away_team_id,ground_id,round_name,starts_at,status,result,signed_off_at,signed_off_by",
         )
         .order("starts_at", { ascending: true }),
     ),
@@ -523,6 +526,9 @@ export async function loadOrganisationDashboard(
       status: String(row["status"]),
       roundName: row["round_name"] ? String(row["round_name"]) : null,
       result: (row["result"] ?? {}) as Record<string, unknown>,
+      ruleVersionId: row["rule_version_id"] ? String(row["rule_version_id"]) : null,
+      signedOffAt: row["signed_off_at"] ? String(row["signed_off_at"]) : null,
+      signedOffBy: row["signed_off_by"] ? String(row["signed_off_by"]) : null,
     })),
     matches: matchRows.map((row) => {
       const id = String(row["id"]);
