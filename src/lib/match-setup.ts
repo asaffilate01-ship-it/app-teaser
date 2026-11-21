@@ -19,6 +19,12 @@ function parseOvers(value: string, allowUnlimited: boolean): number | null {
   return Number.isSafeInteger(overs) && overs >= 1 && overs <= 100 ? overs : Number.NaN;
 }
 
+/** Reuse the scorer's bounded rules for competition setup. */
+export function readLimitedOvers(value: string): number | null {
+  const parsed = parseOvers(value, false);
+  return parsed !== null && Number.isFinite(parsed) ? parsed : null;
+}
+
 function namesForTeam(value: string): string[] {
   return value
     .split(/\r?\n/)
