@@ -2,12 +2,8 @@ import { Room, RoomEvent, Track } from "livekit-client";
 import { getCloudClient } from "@/lib/cloud";
 
 export type CameraCloudAction = "token" | "start" | "stop" | "status";
-export type CameraCloudState =
-  | "starting"
-  | "recording"
-  | "stopping"
-  | "provider_completed"
-  | "failed";
+import { type CameraCloudState } from "@/lib/camera-cloud-status";
+export { cameraCloudLabel, cameraCloudActive } from "@/lib/camera-cloud-status";
 
 export interface CameraCloudRecording {
   id: string;
@@ -47,16 +43,6 @@ export const cameraCloudStart = (roomId: string, deviceId: string) =>
 
 export const cameraCloudStop = (roomId: string, deviceId: string) =>
   cameraCloudRequest<ControlResponse>("stop", roomId, deviceId);
-
-export function cameraCloudLabel(state: CameraCloudState): string {
-  switch (state) {
-    case "starting": return "Provider starting; recording not yet confirmed";
-    case "recording": return "Provider reports recording active";
-    case "stopping": return "Provider finalising the recording";
-    case "provider_completed": return "Provider completed; private archive not yet verified";
-    case "failed": return "Cloud recording failed; inspect provider";
-  }
-}
 
 export interface CameraCloudPublisher {
   close: () => Promise<void>;
