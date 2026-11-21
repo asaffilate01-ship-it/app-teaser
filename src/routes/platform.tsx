@@ -527,7 +527,7 @@ function OperationalPlatform({
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto max-w-7xl px-4 pt-6 pb-28 md:px-8 md:pt-9 lg:pb-9"
+        className="mx-auto w-full max-w-[1600px] px-4 pt-6 pb-28 md:px-8 md:pt-9 lg:pb-9"
       >
         <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
           <div>
@@ -552,14 +552,24 @@ function OperationalPlatform({
             Refresh
           </button>
         </div>
-        <SectionNavigation
-          label="Workspace section"
-          value={tab}
-          onChange={setTab}
-          items={tabDefinitions}
-          mobilePrimary={["overview", "competitions", "capture", "analysis"]}
-        />
-        {dashboard.error && <ErrorNotice message={dashboard.error} />}
+        <div className="lg:grid lg:grid-cols-[230px_minmax(0,1fr)] lg:items-start lg:gap-6 xl:grid-cols-[246px_minmax(0,1fr)]">
+          <aside className="min-w-0 lg:sticky lg:top-[92px] lg:max-h-[calc(100vh-110px)] lg:overflow-y-auto">
+            <SectionNavigation
+              label="Workspace section"
+              value={tab}
+              onChange={setTab}
+              items={tabDefinitions}
+              mobilePrimary={["overview", "competitions", "capture", "analysis"]}
+              desktopGroups={[
+                { label: "Match day", keys: ["overview", "competitions", "capture"] },
+                { label: "Club & academy", keys: ["players", "academy", "safety"] },
+                { label: "Performance", keys: ["analysis", "intelligence"] },
+                { label: "Administration", keys: ["operations"] },
+              ]}
+            />
+          </aside>
+          <div className="min-w-0">
+            {dashboard.error && <ErrorNotice message={dashboard.error} />}
         {!dashboard.loading && !dashboard.data && dashboard.error ? (
           <section className="workspace-empty" role="status">
             <h2>Let’s get your workspace back</h2>
@@ -626,6 +636,8 @@ function OperationalPlatform({
             )}
           </>
         )}
+          </div>
+        </div>
       </main>
     </PageFrame>
   );
