@@ -1,18 +1,10 @@
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { getCloudClient } from "@/lib/cloud";
+import { isCameraSignal, type CameraSignal } from "@/lib/camera-signals";
 
 // This transport is for private, small-team live review; server-side SFU/egress is
 // required before public broadcast or unattended recording can be advertised.
 export type LiveConnectionState = "connecting" | "connected" | "disconnected" | "failed";
-
-type SignalKind = "ready" | "watch" | "offer" | "answer" | "ice" | "leave";
-interface CameraSignal {
-  kind: SignalKind;
-  from: string;
-  to?: string;
-  description?: RTCSessionDescriptionInit;
-  candidate?: RTCIceCandidateInit;
-}
 
 export interface LiveCameraSession {
   watch: (deviceId: string) => Promise<void>;
@@ -34,29 +26,6 @@ export interface LiveCameraOptions {
 interface Peer {
   connection: RTCPeerConnection;
   candidates: RTCIceCandidateInit[];
-}
-
-const supportedKinds = new Set<SignalKind>([
-  "ready",
-  "watch",
-  "offer",
-  "answer",
-  "ice",
-  "leave",
-]);
-
-export function isCameraSignal(value: unknown): value is CameraSignal {
-  if (!value || typeof value !== "object") return false;
-  const message = value as Record<string, unknown>;
-  return (
-    typeof message["kind"] === "string" &&
-    supportedKinds.has(message["kind"] as SignalKind) &&
-    typeof message["from"] === "string" &&
-    message["from"].length > 0 &&
-    message["from"].length <= 120 &&
-    (message["to"] === undefined ||
-      (typeof message["to"] === "string" && message["to"].length <= 120))
-  );
 }
 
 function getIceServers(): RTCIceServer[] {
