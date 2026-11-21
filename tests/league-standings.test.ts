@@ -19,9 +19,7 @@ const teams = [
   { id: "west", name: "West" },
 ];
 
-function resultFixture(
-  patch: Partial<FixtureRecord> = {},
-): FixtureRecord {
+function resultFixture(patch: Partial<FixtureRecord> = {}): FixtureRecord {
   return {
     id: "f1",
     competitionId: "cup",
