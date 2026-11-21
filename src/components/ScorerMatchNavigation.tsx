@@ -67,9 +67,7 @@ export function ScorerMatchNavigation({
                 aria-label={`${label} section`}
                 onClick={() => onChange(id)}
                 className={`flex min-h-[62px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-200 ${
-                  selected
-                    ? "bg-amber-300/15 text-amber-200"
-                    : "text-slate-300 active:bg-white/10"
+                  selected ? "bg-amber-300/15 text-amber-200" : "text-slate-300 active:bg-white/10"
                 }`}
               >
                 <Icon className="size-5 shrink-0" aria-hidden="true" />
