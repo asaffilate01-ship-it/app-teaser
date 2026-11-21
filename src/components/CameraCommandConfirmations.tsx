@@ -55,7 +55,10 @@ export function CameraCommandConfirmations({
         const receipts = await client
           .from("camera_command_receipts")
           .select("command_id,device_id,outcome,reason_code,reported_at")
-          .in("command_id", rows.map((row) => row.id));
+          .in(
+            "command_id",
+            rows.map((row) => row.id),
+          );
         if (receipts.error) throw receipts.error;
         receiptRows.push(...((receipts.data ?? []) as ReceiptRow[]));
       }
@@ -104,8 +107,8 @@ export function CameraCommandConfirmations({
         <div>
           <h2 className="font-bold">Recording command acknowledgments</h2>
           <p className="mt-1 text-xs text-slate-400">
-            Signed-in phones report command outcomes. Acknowledgment is not evidence that
-            footage was saved or uploaded; check recordings separately.
+            Signed-in phones report command outcomes. Acknowledgment is not evidence that footage
+            was saved or uploaded; check recordings separately.
           </p>
         </div>
         <button
@@ -116,8 +119,16 @@ export function CameraCommandConfirmations({
           <RefreshCw className="size-4" /> Check responses
         </button>
       </div>
-      {loading && <p role="status" className="mt-3 text-xs text-slate-300">Checking camera responses…</p>}
-      {error && <p role="alert" className="mt-3 text-xs text-amber-200">{error}</p>}
+      {loading && (
+        <p role="status" className="mt-3 text-xs text-slate-300">
+          Checking camera responses…
+        </p>
+      )}
+      {error && (
+        <p role="alert" className="mt-3 text-xs text-amber-200">
+          {error}
+        </p>
+      )}
       <div className="mt-4 grid gap-2 md:grid-cols-2">
         {devices.map((device) => {
           const status = latest[device.id];
@@ -125,12 +136,11 @@ export function CameraCommandConfirmations({
           const response = status
             ? commandReceiptLabel(status.command.action, receipt?.outcome, receipt?.reason_code)
             : "No recent recording requests";
-          const positive = receipt && [
-            "started",
-            "already_recording",
-            "stopped",
-            "already_stopped",
-          ].includes(receipt.outcome);
+          const positive =
+            receipt &&
+            ["started", "already_recording", "stopped", "already_stopped"].includes(
+              receipt.outcome,
+            );
           return (
             <div key={device.id} className="rounded-lg border border-white/10 p-3 text-xs">
               <div className="flex items-center gap-2 font-semibold text-white">
@@ -148,8 +158,9 @@ export function CameraCommandConfirmations({
                 <p className="mt-1 text-slate-500">
                   Last request: {status.command.action} ·{" "}
                   {new Date(status.command.created_at).toLocaleTimeString()}
-                  {receipt ? " · Phone response: " +
-                    new Date(receipt.reported_at).toLocaleTimeString() : ""}
+                  {receipt
+                    ? " · Phone response: " + new Date(receipt.reported_at).toLocaleTimeString()
+                    : ""}
                 </p>
               )}
             </div>

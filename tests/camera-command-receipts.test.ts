@@ -23,8 +23,8 @@ test("recent, addressed commands have a monotonic cursor", () => {
   assert.equal(initial.command.action, "start");
   assert.equal(nextCameraCommand(valid, deviceId, initial.cursor, now), null);
   assert.equal(
-    nextCameraCommand({ ...valid, id: idB, action: "stop" }, deviceId, initial.cursor, now)
-      ?.command.action,
+    nextCameraCommand({ ...valid, id: idB, action: "stop" }, deviceId, initial.cursor, now)?.command
+      .action,
     "stop",
   );
   assert.equal(

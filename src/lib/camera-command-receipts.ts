@@ -1,19 +1,10 @@
 /** Reconciles private camera commands without silently replaying old START requests. */
 export type CameraRecordingAction = "start" | "stop";
 export type CameraCommandOutcome =
-  | "started"
-  | "already_recording"
-  | "stopped"
-  | "already_stopped"
-  | "blocked"
-  | "failed";
+  "started" | "already_recording" | "stopped" | "already_stopped" | "blocked" | "failed";
 
 export type CameraCommandReason =
-  | "none"
-  | "missing_consent"
-  | "not_armed"
-  | "preview_off"
-  | "capture_failed";
+  "none" | "missing_consent" | "not_armed" | "preview_off" | "capture_failed";
 
 export interface CameraCommand {
   id: string;
@@ -50,19 +41,22 @@ export function nextCameraCommand(
     candidate["device_id"] !== deviceId ||
     (candidate["action"] !== "start" && candidate["action"] !== "stop") ||
     typeof candidate["created_at"] !== "string"
-  ) return null;
+  )
+    return null;
   const timestampMs = Date.parse(candidate["created_at"]);
   if (
     !Number.isFinite(nowMs) ||
     !Number.isFinite(timestampMs) ||
     timestampMs > nowMs + 5000 ||
     nowMs - timestampMs > commandMaxAgeMs
-  ) return null;
+  )
+    return null;
   if (
     last &&
     (timestampMs < last.timestampMs ||
       (timestampMs === last.timestampMs && candidate["id"] <= last.id))
-  ) return null;
+  )
+    return null;
   return {
     command: {
       id: candidate["id"],
