@@ -1074,7 +1074,11 @@ function LiveMatch({
                 Export device backup
               </button>
               {cloudSync.queueUnreadable && (
-                <button type="button" className="workspace-nav-item min-h-11" onClick={exportPreservedQueue}>
+                <button
+                  type="button"
+                  className="workspace-nav-item min-h-11"
+                  onClick={exportPreservedQueue}
+                >
                   Export preserved queue
                 </button>
               )}
