@@ -1,8 +1,5 @@
 import { BarChart3, Download, Gauge, History, Trophy, Video } from "lucide-react";
-import {
-  scorerDestinations,
-  type ScorerDestination,
-} from "@/lib/scorer-navigation";
+import { scorerDestinations, type ScorerDestination } from "@/lib/scorer-navigation";
 
 const icons = {
   score: Gauge,
@@ -59,7 +56,7 @@ export function ScorerMatchNavigation({
         className="fixed inset-x-0 bottom-0 z-50 border-t border-amber-200/15 bg-[#17111f]/95 px-2 pt-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl md:hidden"
       >
         <div className="mx-auto grid w-full max-w-lg grid-cols-5 gap-1">
-          {scorerDestinations.map(({ id, mobileLabel }) => {
+          {scorerDestinations.map(({ id, label, mobileLabel }) => {
             const Icon = icons[id];
             const selected = active === id;
             return (
@@ -67,7 +64,7 @@ export function ScorerMatchNavigation({
                 key={id}
                 type="button"
                 aria-current={selected ? "page" : undefined}
-                aria-label={`${mobileLabel === "Balls" ? "Ball timeline" : mobileLabel === "Card" ? "Scorecard" : mobileLabel} section`}
+                aria-label={`${label} section`}
                 onClick={() => onChange(id)}
                 className={`flex min-h-[62px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-200 ${
                   selected
