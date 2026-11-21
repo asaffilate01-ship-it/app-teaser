@@ -30,6 +30,14 @@ function getDeviceId(): string {
   return next;
 }
 
+function safeQueueCount(matchId: string): number | null {
+  try {
+    return readPendingEvents(matchId).length;
+  } catch {
+    return null;
+  }
+}
+
 export function useMatchCloudSync(
   cloudMatchId: string | null,
   onRemoteMatch: (match: CricketMatch) => boolean | void,
