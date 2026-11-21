@@ -39,3 +39,13 @@ test("invalid event counts cannot produce misleading negative or infinite claims
   assert.equal(describeScorerSyncRecovery("queued", Number.POSITIVE_INFINITY).canRetry, false);
   assert.equal(describeScorerSyncRecovery("local", 0).show, false);
 });
+
+test("unreadable saved queues block retry and clearly explain preservation", () => {
+  const message = describeScorerSyncRecovery("error", 0, true);
+  assert.equal(message.show, true);
+  assert.equal(message.canRetry, false);
+  assert.match(message.title, /needs recovery/);
+  assert.match(message.detail, /No|not cleared/i);
+  assert.match(message.detail, /backup/);
+  assert.equal(describeScorerSyncRecovery("synced", 0, true).canRetry, false);
+});
