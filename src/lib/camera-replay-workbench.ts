@@ -95,6 +95,7 @@ export function canMarkPrivateHighlight(
     seconds >= 0 &&
     duration !== null &&
     seconds < duration &&
+    seconds * 1000 + durationMs <= duration * 1000 &&
     Number.isInteger(durationMs) &&
     durationMs >= 1000 &&
     durationMs <= maxHighlightDurationMs
