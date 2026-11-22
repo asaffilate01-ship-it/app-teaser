@@ -292,7 +292,7 @@ export async function loadCloudMatchSnapshot(matchId: string): Promise<CricketMa
 
   const liveState = (match.live_state ?? {}) as Record<string, unknown>;
   const liveSettings = (liveState["settings"] ?? {}) as Record<string, unknown>;
-  const ruleSettings = ((ruleResult.data?.rules ?? {}) as Record<string, unknown>) ?? {};
+  const ruleSettings = (ruleResult.data?.rules ?? {}) as Record<string, unknown>;
   const rawOvers = liveSettings["oversPerInnings"] ?? ruleSettings["oversPerInnings"];
   const oversPerInnings = rawOvers == null ? null : positiveInteger(rawOvers, 20);
   const inningsPerSide =
