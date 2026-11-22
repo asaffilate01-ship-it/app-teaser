@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CirclePlay, Clock3, RefreshCw, ShieldCheck, Video } from "lucide-react";
+import { CameraReplayWorkbench } from "@/components/CameraReplayWorkbench";
 import { estimateDeliveryCues, type CameraClip } from "@/lib/camera-review";
 import { loadCameraRoomReview, signedRoomClipUrl } from "@/lib/camera-review-cloud";
 
@@ -284,6 +285,12 @@ export function CameraReplayLibrary({
           </div>
         </div>
       </div>
+      <CameraReplayWorkbench
+        roomId={roomId}
+        clips={clips}
+        deliveries={deliveries}
+        devices={devices}
+      />
     </section>
   );
 }
