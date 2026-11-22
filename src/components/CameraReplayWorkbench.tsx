@@ -50,9 +50,7 @@ export function CameraReplayWorkbench({
   const right = clips.find((clip) => clip.id === rightId);
   const label = (deviceId: string) =>
     devices.find((item) => item.id === deviceId)?.label ?? "Camera " + deviceId.slice(0, 6);
-  const availablePairs = clips.some(
-    (a) => clips.some((b) => b.device_id !== a.device_id),
-  );
+  const availablePairs = clips.some((a) => clips.some((b) => b.device_id !== a.device_id));
 
   useEffect(() => {
     if (clips.length === 0) {
@@ -61,9 +59,7 @@ export function CameraReplayWorkbench({
       setUrls(null);
       return;
     }
-    setLeftId((current) =>
-      clips.some((clip) => clip.id === current) ? current : clips[0].id,
-    );
+    setLeftId((current) => (clips.some((clip) => clip.id === current) ? current : clips[0].id));
     setRightId((current) => {
       const first = clips.find((clip) => clip.id === leftId) ?? clips[0];
       return clips.some((clip) => clip.id === current && clip.device_id !== first.device_id)
@@ -81,7 +77,10 @@ export function CameraReplayWorkbench({
           .from("camera_clip_calibrations")
           .select("asset_id,offset_ms")
           .eq("room_id", roomId)
-          .in("asset_id", clips.map((clip) => clip.id)),
+          .in(
+            "asset_id",
+            clips.map((clip) => clip.id),
+          ),
         client
           .from("camera_highlight_candidates")
           .select("id,asset_id,delivery_id,at_ms,duration_ms,kind,note,created_by,created_at")
@@ -124,7 +123,9 @@ export function CameraReplayWorkbench({
         signedRoomClipUrl(right),
       ]);
       setUrls({ left: leftUrl, right: rightUrl });
-      setMessage("Two private camera sources authorised. Timing is an estimate until manually reviewed.");
+      setMessage(
+        "Two private camera sources authorised. Timing is an estimate until manually reviewed.",
+      );
     } catch (reason) {
       setUrls(null);
       setError(reason instanceof Error ? reason.message : "Private replay was denied.");
@@ -138,7 +139,11 @@ export function CameraReplayWorkbench({
     const primary = leftRef.current;
     const secondary = rightRef.current;
     const seconds = syncedSecondarySeconds(
-      left, right, primary.currentTime, offsets[left.id] ?? 0, offsets[right.id] ?? 0,
+      left,
+      right,
+      primary.currentTime,
+      offsets[left.id] ?? 0,
+      offsets[right.id] ?? 0,
     );
     if (seconds === null) {
       setOverlap(false);
@@ -151,7 +156,9 @@ export function CameraReplayWorkbench({
     secondary.playbackRate = primary.playbackRate;
     if (primary.paused && !secondary.paused) secondary.pause();
     if (!primary.paused && secondary.paused)
-      void secondary.play().catch(() => setError("Second angle could not autoplay. Use video controls."));
+      void secondary
+        .play()
+        .catch(() => setError("Second angle could not autoplay. Use video controls."));
   };
 
   const saveOffset = async (clip: CameraClip) => {
@@ -165,25 +172,25 @@ export function CameraReplayWorkbench({
     try {
       const { data: auth, error: authError } = await getCloudClient().auth.getUser();
       if (authError || !auth.user) throw new Error("Sign in to calibrate a recording.");
-      const { error: saveError } = await getCloudClient()
-        .from("camera_clip_calibrations")
-        .upsert(
-          {
-            asset_id: clip.id,
-            room_id: roomId,
-            offset_ms: offset,
-            calibrated_by: auth.user.id,
-            calibrated_at: new Date().toISOString(),
-            method: "manual_review",
-          },
-          { onConflict: "asset_id" },
-        );
+      const { error: saveError } = await getCloudClient().from("camera_clip_calibrations").upsert(
+        {
+          asset_id: clip.id,
+          room_id: roomId,
+          offset_ms: offset,
+          calibrated_by: auth.user.id,
+          calibrated_at: new Date().toISOString(),
+          method: "manual_review",
+        },
+        { onConflict: "asset_id" },
+      );
       if (saveError) throw saveError;
       setSavedOffsets((value) => ({ ...value, [clip.id]: offset }));
       setMessage("Manual camera clock offset saved. This does not certify frame accuracy.");
       align();
     } catch {
-      setError("Cannot save calibration. You must have director access and ownership of this calibration.");
+      setError(
+        "Cannot save calibration. You must have director access and ownership of this calibration.",
+      );
     } finally {
       setBusy(false);
     }
@@ -240,14 +247,22 @@ export function CameraReplayWorkbench({
         <div>
           <h3 className="text-base font-bold">Two-angle replay and private highlight desk</h3>
           <p className="mt-1 text-xs leading-5 text-slate-400">
-            Timeline matching uses recorded device times. Adjust each clip offset to align a
-            visible event; saved calibration remains manually estimated, not frame certified.
-            Only authorised, consented and privacy-processed footage can play.
+            Timeline matching uses recorded device times. Adjust each clip offset to align a visible
+            event; saved calibration remains manually estimated, not frame certified. Only
+            authorised, consented and privacy-processed footage can play.
           </p>
         </div>
       </div>
-      {error && <p role="alert" className="mt-3 text-xs text-rose-200">{error}</p>}
-      {message && <p role="status" className="mt-3 text-xs text-amber-200">{message}</p>}
+      {error && (
+        <p role="alert" className="mt-3 text-xs text-rose-200">
+          {error}
+        </p>
+      )}
+      {message && (
+        <p role="status" className="mt-3 text-xs text-amber-200">
+          {message}
+        </p>
+      )}
       {!availablePairs ? (
         <p className="mt-4 text-sm text-slate-400">
           Two distinct paired camera angles with eligible private clips are needed for comparison.
@@ -258,7 +273,7 @@ export function CameraReplayWorkbench({
             {(["left", "right"] as const).map((side) => {
               const clip = side === "left" ? left : right;
               const selectedId = side === "left" ? leftId : rightId;
-              const offset = clip ? offsets[clip.id] ?? 0 : 0;
+              const offset = clip ? (offsets[clip.id] ?? 0) : 0;
               return (
                 <div key={side} className="min-w-0">
                   <label className="grid gap-1 text-xs text-slate-300">
@@ -273,12 +288,11 @@ export function CameraReplayWorkbench({
                     >
                       <option value="">Choose a clip</option>
                       {clips
-                        .filter((item) =>
-                          side === "left" || item.device_id !== left?.device_id,
-                        )
+                        .filter((item) => side === "left" || item.device_id !== left?.device_id)
                         .map((item) => (
                           <option value={item.id} key={item.id}>
-                            {label(item.device_id)} · {new Date(item.started_at).toLocaleTimeString()}
+                            {label(item.device_id)} ·{" "}
+                            {new Date(item.started_at).toLocaleTimeString()}
                           </option>
                         ))}
                     </select>
@@ -359,7 +373,9 @@ export function CameraReplayWorkbench({
             </button>
             <span className="text-xs text-slate-400">
               {urls
-                ? overlap ? "Estimated overlapping footage" : "No overlapping footage at this playhead"
+                ? overlap
+                  ? "Estimated overlapping footage"
+                  : "No overlapping footage at this playhead"
                 : "No private video loaded"}
             </span>
           </div>
@@ -375,27 +391,30 @@ export function CameraReplayWorkbench({
             These are timestamp-based cues and should be checked against the actual video.
           </p>
           <div className="mt-2 max-h-48 space-y-1 overflow-auto">
-            {left && deliveries.slice(0, 120).map((delivery) => {
-              const second = syncedDeliverySeconds(left, delivery, offsets[left.id] ?? 0);
-              if (second === null) return null;
-              return (
-                <button
-                  key={delivery.id}
-                  disabled={!urls}
-                  onClick={() => {
-                    if (leftRef.current) leftRef.current.currentTime = second;
-                    setLinkedDelivery(delivery.id);
-                    align();
-                  }}
-                  className="flex min-h-10 w-full items-center justify-between gap-3 rounded-md bg-white/[0.05] px-3 text-left text-xs hover:bg-white/[0.09] disabled:opacity-40"
-                >
-                  <span>Over {delivery.over_number + 1} · Ball {delivery.ball_in_over}</span>
-                  <span className="text-amber-200">
-                    {delivery.wicket ? "WICKET" : delivery.total_runs + " runs"}
-                  </span>
-                </button>
-              );
-            })}
+            {left &&
+              deliveries.slice(0, 120).map((delivery) => {
+                const second = syncedDeliverySeconds(left, delivery, offsets[left.id] ?? 0);
+                if (second === null) return null;
+                return (
+                  <button
+                    key={delivery.id}
+                    disabled={!urls}
+                    onClick={() => {
+                      if (leftRef.current) leftRef.current.currentTime = second;
+                      setLinkedDelivery(delivery.id);
+                      align();
+                    }}
+                    className="flex min-h-10 w-full items-center justify-between gap-3 rounded-md bg-white/[0.05] px-3 text-left text-xs hover:bg-white/[0.09] disabled:opacity-40"
+                  >
+                    <span>
+                      Over {delivery.over_number + 1} · Ball {delivery.ball_in_over}
+                    </span>
+                    <span className="text-amber-200">
+                      {delivery.wicket ? "WICKET" : delivery.total_runs + " runs"}
+                    </span>
+                  </button>
+                );
+              })}
           </div>
         </div>
         <div>
@@ -485,7 +504,9 @@ export function CameraReplayWorkbench({
                   setLeftId(clip.id);
                   setLinkedDelivery(item.delivery_id ?? "");
                   setKind(item.kind);
-                  setMessage("Bookmark selected. Reopen private angles before seeking this timestamp.");
+                  setMessage(
+                    "Bookmark selected. Reopen private angles before seeking this timestamp.",
+                  );
                 }}
                 className="flex min-h-11 w-full items-center justify-between gap-3 rounded-md bg-white/[0.05] px-3 py-2 text-left text-xs"
               >

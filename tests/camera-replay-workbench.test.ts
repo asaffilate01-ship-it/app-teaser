@@ -68,7 +68,8 @@ test("private highlight candidates require a current consented recording", () =>
     { storage_path: null },
     { status: "uploading" },
     { retention_expires_at: "2026-11-22T11:00:00Z" },
-  ]) assert.equal(canMarkPrivateHighlight({ ...base, ...change }, 15, 6000, now), false);
+  ])
+    assert.equal(canMarkPrivateHighlight({ ...base, ...change }, 15, 6000, now), false);
   for (const seconds of [-1, 60, Number.NaN]) {
     assert.equal(canMarkPrivateHighlight(base, seconds, 6000, now), false);
   }

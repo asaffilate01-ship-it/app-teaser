@@ -49,7 +49,8 @@ export function syncedSecondarySeconds(
     !Number.isFinite(startB) ||
     !Number.isFinite(primarySeconds) ||
     primarySeconds < 0
-  ) return null;
+  )
+    return null;
   const second = (startA + primarySeconds * 1000 - startB) / 1000;
   const duration = clipDurationSeconds(secondary);
   if (duration === null || second < 0 || second >= duration) return null;
@@ -72,8 +73,7 @@ export function syncedDeliverySeconds(
   const start = clipClockStart(clip, offsetMs);
   const deliveryAt = Date.parse(delivery.occurred_at);
   const duration = clipDurationSeconds(clip);
-  if (!Number.isFinite(start) || !Number.isFinite(deliveryAt) || duration === null)
-    return null;
+  if (!Number.isFinite(start) || !Number.isFinite(deliveryAt) || duration === null) return null;
   const cue = (deliveryAt - start - preRollMs) / 1000;
   if (cue < 0 || cue >= duration) return null;
   return cue;

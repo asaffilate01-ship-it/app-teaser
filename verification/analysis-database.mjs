@@ -452,9 +452,11 @@ await asUser(a, () =>
   ),
 );
 assert.equal(
-  (await asUser(a, () => db.query(
-    "select offset_ms from public.camera_clip_calibrations where asset_id=$1", [asset],
-  ))).rows[0].offset_ms,
+  (
+    await asUser(a, () =>
+      db.query("select offset_ms from public.camera_clip_calibrations where asset_id=$1", [asset]),
+    )
+  ).rows[0].offset_ms,
   -250,
 );
 assert.equal(
@@ -462,16 +464,22 @@ assert.equal(
   0,
 );
 await assert.rejects(
-  () => asUser(b, () => db.query(
-    "insert into public.camera_clip_calibrations(asset_id,room_id,offset_ms,calibrated_by) values($1,$2,0,$3)",
-    [asset, room, b],
-  )),
+  () =>
+    asUser(b, () =>
+      db.query(
+        "insert into public.camera_clip_calibrations(asset_id,room_id,offset_ms,calibrated_by) values($1,$2,0,$3)",
+        [asset, room, b],
+      ),
+    ),
   (e) => e.code === "42501",
 );
 await assert.rejects(
-  () => asUser(a, () => db.query(
-    "update public.camera_clip_calibrations set offset_ms=40000 where asset_id=$1", [asset],
-  )),
+  () =>
+    asUser(a, () =>
+      db.query("update public.camera_clip_calibrations set offset_ms=40000 where asset_id=$1", [
+        asset,
+      ]),
+    ),
   (e) => e.code === "23514",
 );
 await asUser(a, () =>
@@ -485,17 +493,23 @@ assert.equal(
   0,
 );
 await assert.rejects(
-  () => asUser(b, () => db.query(
-    "insert into public.camera_highlight_candidates(room_id,asset_id,at_ms,duration_ms,kind,created_by) values($1,$2,500,6000,'other',$3)",
-    [room, asset, b],
-  )),
+  () =>
+    asUser(b, () =>
+      db.query(
+        "insert into public.camera_highlight_candidates(room_id,asset_id,at_ms,duration_ms,kind,created_by) values($1,$2,500,6000,'other',$3)",
+        [room, asset, b],
+      ),
+    ),
   (e) => e.code === "42501",
 );
 await assert.rejects(
-  () => asUser(a, () => db.query(
-    "insert into public.camera_highlight_candidates(room_id,asset_id,at_ms,duration_ms,kind,created_by) values($1,$2,500,600000,'other',$3)",
-    [room, asset, a],
-  )),
+  () =>
+    asUser(a, () =>
+      db.query(
+        "insert into public.camera_highlight_candidates(room_id,asset_id,at_ms,duration_ms,kind,created_by) values($1,$2,500,600000,'other',$3)",
+        [room, asset, a],
+      ),
+    ),
   (e) => e.code === "23514",
 );
 assert.equal(
