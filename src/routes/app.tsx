@@ -14,7 +14,6 @@ import {
 } from "react";
 import {
   Activity,
-  ArrowLeft,
   Camera,
   Check,
   ChevronRight,
@@ -27,6 +26,7 @@ import {
   Flag,
   History,
   ListPlus,
+  MoreHorizontal,
   Pause,
   Play,
   Plus,
@@ -79,7 +79,8 @@ import {
 } from "@/lib/cloud";
 import { reviewCloudBootstrap, reviewRemoteScorerSnapshot } from "@/lib/scorer-reconciliation";
 import { describeScorerSyncRecovery } from "@/lib/scorer-sync-status";
-import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
+import { AppHeader } from "@/components/app-shell/AppHeader";
+import { AppTabBar } from "@/components/app-shell/AppTabBar";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
@@ -265,52 +266,34 @@ export function CricketApp() {
 
   return (
     <div className="min-h-screen bg-[#0f0d17] text-slate-100">
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0f0d17]/95 px-4 py-3 backdrop-blur-xl md:px-8">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 md:gap-3">
-          <div className="flex items-center gap-3">
-            {screen !== "dashboard" && (
-              <button
-                type="button"
-                onClick={() => setScreen(screen === "match" ? "dashboard" : "dashboard")}
-                className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5"
-                aria-label="Back to matches"
-              >
-                <ArrowLeft className="size-4" />
-              </button>
-            )}
-            <Link to="/" aria-label="CricLume home">
-              <img src={logoAsset.url} alt="CricLume" className="h-9 w-auto md:h-11" />
-            </Link>
-            <span className="hidden rounded-full border border-amber-300/30 bg-amber-300/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-amber-200 sm:inline">
-              Scorer preview
-            </span>
-          </div>
-          <div className="flex shrink-0 items-center gap-2 text-xs text-slate-400 md:gap-3">
-            <Link
-              to="/platform"
-              aria-label="Club workspace"
-              className="flex size-10 items-center justify-center rounded-lg border border-white/15 font-bold text-slate-300 hover:text-white sm:h-auto sm:w-auto sm:px-3 sm:py-2"
+      <AppHeader
+        area="Scorer"
+        {...(screen !== "dashboard"
+          ? { onBack: () => setScreen("dashboard"), backLabel: "Back to matches" }
+          : {})}
+        right={
+          <>
+            <span
+              className="flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-2 text-xs text-slate-300"
+              role="status"
             >
-              <Users className="size-4 sm:hidden" aria-hidden="true" />
-              <span className="hidden sm:inline">Club workspace</span>
-            </Link>
-            <span className="flex items-center gap-2">
               {cloudLinked ? (
-                <Cloud className="size-3.5 text-amber-300" />
+                <Cloud className="size-3.5 text-amber-300" aria-hidden="true" />
+              ) : saved ? (
+                <Check className="size-3.5 text-emerald-300" aria-hidden="true" />
               ) : (
-                <CloudOff className="size-3.5 text-amber-300" />
+                <CloudOff className="size-3.5 text-amber-300" aria-hidden="true" />
               )}
-              <span className="hidden sm:inline">
-                {cloudLinked
-                  ? "Cloud match linked"
-                  : saved
-                    ? "Saved on this device"
-                    : "Device save pending"}
+              <span className={screen === "match" ? "" : "hidden sm:inline"}>
+                {cloudLinked ? "Cloud match linked" : saved ? "Saved" : "Saving…"}
               </span>
             </span>
-          </div>
-        </div>
-      </header>
+            <Link to="/platform" className="app-chip-button hidden lg:inline-flex">
+              Club workspace
+            </Link>
+          </>
+        }
+      />
 
       {storageIssue && (
         <section
@@ -397,16 +380,34 @@ export function CricketApp() {
           onCloudConflictResolved={() => setBootstrapConflict(null)}
         />
       ) : (
-        <Dashboard
-          matches={matches}
-          onNew={() => setScreen("setup")}
-          onOpen={openMatch}
-          onDelete={removeMatch}
-          onImport={cloudLinked ? undefined : importMatches}
-        />
+        <>
+          <Dashboard
+            matches={matches}
+            onNew={() => setScreen("setup")}
+            onOpen={openMatch}
+            onDelete={removeMatch}
+            onImport={cloudLinked ? undefined : importMatches}
+          />
+          <div className="app-tabbar-spacer" aria-hidden="true" />
+          <AppTabBar
+            label="Scorer menu"
+            tabs={[
+              { id: "matches", label: "Matches", icon: ListPlus, active: true, onSelect: () => window.scrollTo({ top: 0, behavior: "smooth" }) },
+              { id: "new", label: "New match", icon: Plus, emphasis: true, onSelect: () => setScreen("setup") },
+              { id: "club", label: "Club", icon: Users, to: "/platform" },
+              { id: "more", label: "More", icon: MoreHorizontal, onSelect: openMoreSection },
+            ]}
+          />
+        </>
       )}
     </div>
   );
+}
+
+function openMoreSection() {
+  const section = document.getElementById("scorer-more");
+  if (section instanceof HTMLDetailsElement) section.open = true;
+  section?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function Dashboard({
@@ -451,8 +452,6 @@ function Dashboard({
           <Plus className="size-5" /> New match
         </button>
       </section>
-
-      {onImport && <ScorerBackupImport onImport={onImport} />}
 
       <section className="space-y-4">
         <div className="flex items-end justify-between gap-3">
@@ -537,6 +536,31 @@ function Dashboard({
           </div>
         )}
       </section>
+
+      <details id="scorer-more" className="scorer-more group rounded-2xl border border-white/10 bg-white/[0.03]">
+        <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-5 text-sm font-bold">
+          More options
+          <ChevronRight className="size-4 transition-transform group-open:rotate-90" aria-hidden="true" />
+        </summary>
+        <div className="space-y-5 border-t border-white/10 p-5">
+          {onImport && (
+            <div>
+              <h2 className="text-base font-bold">Restore from a backup</h2>
+              <div className="mt-2">
+                <ScorerBackupImport onImport={onImport} />
+              </div>
+            </div>
+          )}
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Link to="/" className="app-chip-button">
+              CricLume website
+            </Link>
+            <Link to="/privacy" className="app-chip-button">
+              Privacy
+            </Link>
+          </div>
+        </div>
+      </details>
 
       <section className="grid gap-3 sm:grid-cols-3">
         {[

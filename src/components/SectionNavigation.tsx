@@ -19,12 +19,15 @@ export function SectionNavigation<T extends string>({
   onChange,
   items,
   mobilePrimary,
+  layout = "pills",
 }: {
   label: string;
   value: T;
   onChange: (value: T) => void;
   items: Array<readonly [T, LucideIcon, string]>;
   mobilePrimary?: readonly T[];
+  /** "rail" renders a sticky vertical side menu on large screens. */
+  layout?: "pills" | "rail";
 }) {
   const primary = items.filter(([id]) =>
     mobilePrimary ? mobilePrimary.includes(id) : items.slice(0, 4).some(([key]) => key === id),
@@ -37,9 +40,12 @@ export function SectionNavigation<T extends string>({
     <div className="workspace-nav">
       <div className="flex items-center justify-between gap-3 lg:hidden">
         <p className="min-w-0 text-sm font-bold text-slate-100">{currentLabel}</p>
-        <span className="shrink-0 text-xs text-slate-400">Navigate below</span>
+        <span className="shrink-0 text-xs text-slate-400">Menu at the bottom</span>
       </div>
-      <nav aria-label={label} className="hidden flex-wrap gap-2 lg:flex">
+      <nav
+        aria-label={label}
+        className={layout === "rail" ? "workspace-rail hidden lg:flex" : "hidden flex-wrap gap-2 lg:flex"}
+      >
         {items.map(([key, Icon, text]) => (
           <button
             key={key}
@@ -55,7 +61,7 @@ export function SectionNavigation<T extends string>({
       </nav>
       <nav
         aria-label={`${label} quick navigation`}
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-white/15 bg-[#17111f]/95 px-2 pt-1 shadow-[0_-12px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl pb-[env(safe-area-inset-bottom)] lg:hidden"
+        className="app-tabbar lg:hidden"
       >
         <div className="mx-auto flex max-w-lg items-stretch justify-around gap-1">
           {primary.map(([key, Icon, text]) => (
@@ -64,13 +70,11 @@ export function SectionNavigation<T extends string>({
               type="button"
               onClick={() => onChange(key)}
               aria-current={value === key ? "page" : undefined}
-              className={`flex min-h-[62px] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] font-bold transition-colors ${
-                value === key
-                  ? "bg-amber-300/15 text-amber-200"
-                  : "text-slate-300 hover:bg-white/10"
-              }`}
+              className={`app-tab ${value === key ? "app-tab-active" : ""}`}
             >
-              <Icon className="size-5 shrink-0" aria-hidden="true" />
+              <span className="app-tab-icon">
+                <Icon className="size-5 shrink-0" aria-hidden="true" />
+              </span>
               <span className="max-w-full truncate">
                 {text === "Analysis room" ? "Analysis" : text}
               </span>
@@ -87,13 +91,11 @@ export function SectionNavigation<T extends string>({
                       ? `More sections, viewing ${currentLabel}`
                       : "More workspace sections"
                   }
-                  className={`flex min-h-[62px] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] font-bold transition-colors ${
-                    moreSelected
-                      ? "bg-amber-300/15 text-amber-200"
-                      : "text-slate-300 hover:bg-white/10"
-                  }`}
+                  className={`app-tab ${moreSelected ? "app-tab-active" : ""}`}
                 >
-                  <MoreHorizontal className="size-5" aria-hidden="true" />
+                  <span className="app-tab-icon">
+                    <MoreHorizontal className="size-5" aria-hidden="true" />
+                  </span>
                   <span>More</span>
                 </button>
               </DropdownMenuTrigger>

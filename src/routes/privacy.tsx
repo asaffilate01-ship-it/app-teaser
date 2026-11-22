@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Mail, ShieldCheck } from "lucide-react";
-import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
+import logoAsset from "@/assets/criclume-logo-on-dark.png.asset.json";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({

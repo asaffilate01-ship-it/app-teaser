@@ -1,4 +1,5 @@
-import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
+import type { Session, SupabaseClient } from "@supabase/supabase-js";
+import { supabase as generatedSupabase } from "@/integrations/supabase/client";
 import * as tus from "tus-js-client";
 import type { CricketMatch, Delivery, FieldZone, Innings, MatchFormat, Team } from "@/lib/cricket";
 import type { PlatformRole } from "@/lib/platform";
@@ -90,12 +91,9 @@ export function getCloudClient(): SupabaseClient {
       "CricLume Cloud is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.",
     );
   }
-  if (!browserClient) {
-    browserClient = createClient(configuration.url, configuration.publishableKey, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
-      realtime: { params: { eventsPerSecond: 20 } },
-    });
-  }
+  // Share the generated Lovable Cloud client so Google sign-in, email links and
+  // every data call use one session and the publishable-key request shim.
+  if (!browserClient) browserClient = generatedSupabase as unknown as SupabaseClient;
   return browserClient;
 }
 

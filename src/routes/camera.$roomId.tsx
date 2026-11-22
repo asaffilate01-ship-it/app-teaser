@@ -11,7 +11,7 @@ import {
   Smartphone,
   Video,
 } from "lucide-react";
-import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
+import logoAsset from "@/assets/criclume-logo-on-dark.png.asset.json";
 import { connectLiveCamera, type LiveCameraSession } from "@/lib/camera-live";
 import {
   cameraCloudStop,

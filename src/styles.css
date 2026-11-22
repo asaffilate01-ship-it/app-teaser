@@ -498,6 +498,220 @@
   color: oklch(0.8 0.01 85);
   line-height: 1.6;
 }
+
+/* ---------- App shell: shared header, phone bottom menu, sign-in ---------- */
+:root {
+  --shell-bg: oklch(0.16 0.02 300 / 0.92);
+  --shell-border: oklch(1 0 0 / 0.1);
+  --shell-tab-active: oklch(0.82 0.15 84);
+  --shell-tab-active-bg: oklch(0.82 0.15 84 / 0.14);
+  --shell-tab-text: oklch(0.82 0.012 85);
+  --gradient-cta: linear-gradient(100deg, oklch(0.55 0.25 330), oklch(0.64 0.22 15) 55%, oklch(0.8 0.16 75));
+  --shadow-tabbar: 0 -14px 36px oklch(0 0 0 / 0.38);
+  --google-bg: #131314;
+  --google-border: #8e918f;
+  --google-text: #e3e3e3;
+}
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--shell-border);
+  background: var(--shell-bg);
+  padding: 0.7rem 1rem;
+  padding-top: calc(0.7rem + env(safe-area-inset-top));
+  backdrop-filter: blur(18px);
+}
+@media (min-width: 768px) {
+  .app-header {
+    padding-inline: 2rem;
+  }
+}
+.app-icon-button {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--shell-border);
+  background: oklch(1 0 0 / 0.05);
+  transition: background-color 150ms ease, transform 120ms ease;
+}
+.app-icon-button:hover {
+  background: oklch(1 0 0 / 0.1);
+}
+.app-icon-button:active {
+  transform: scale(0.94);
+}
+.app-area-pill {
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid oklch(0.82 0.15 84 / 0.28);
+  background: oklch(0.82 0.15 84 / 0.1);
+  padding: 0.25rem 0.65rem;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: oklch(0.88 0.1 84);
+}
+.app-tabbar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 45;
+  border-top: 1px solid var(--shell-border);
+  background: var(--shell-bg);
+  padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom));
+  box-shadow: var(--shadow-tabbar);
+  backdrop-filter: blur(20px);
+}
+.app-tab {
+  display: flex;
+  min-height: 56px;
+  min-width: 0;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  border-radius: 0.9rem;
+  padding: 0.3rem 0.25rem;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--shell-tab-text);
+  transition: color 150ms ease, transform 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.app-tab:active {
+  transform: scale(0.95);
+}
+.app-tab-icon {
+  display: inline-flex;
+  height: 1.9rem;
+  width: 3.2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  transition: background-color 180ms ease;
+}
+.app-tab-active {
+  color: var(--shell-tab-active);
+}
+.app-tab-active .app-tab-icon {
+  background: var(--shell-tab-active-bg);
+}
+.app-tab-emphasis .app-tab-icon {
+  background: var(--gradient-cta);
+  color: oklch(0.99 0 0);
+  box-shadow: 0 8px 20px oklch(0.55 0.22 15 / 0.35);
+}
+.app-tabbar-spacer {
+  height: calc(76px + env(safe-area-inset-bottom));
+}
+@media (min-width: 1024px) {
+  .app-tabbar-spacer {
+    display: none;
+  }
+}
+.google-button {
+  display: flex;
+  height: 3rem;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--google-border);
+  background: var(--google-bg);
+  padding-inline: 12px;
+  color: var(--google-text);
+  font-family: "Google Sans", var(--font-sans, system-ui), sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  transition: filter 150ms ease;
+}
+.google-button:hover {
+  filter: brightness(1.15);
+}
+.google-button:disabled {
+  opacity: 0.6;
+}
+.cta-gradient {
+  background: var(--gradient-cta);
+}
+.workspace-rail {
+  position: sticky;
+  top: 5.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.6rem;
+  border: 1px solid var(--shell-border);
+  border-radius: 1rem;
+  background: var(--gradient-surface);
+}
+
+.setup-card {
+  border: 1px solid oklch(0.82 0.15 84 / 0.25);
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, oklch(0.82 0.15 84 / 0.09), oklch(0.6 0.2 15 / 0.06) 60%, transparent);
+}
+.setup-ring-track {
+  fill: none;
+  stroke: oklch(1 0 0 / 0.1);
+  stroke-width: 6;
+}
+.setup-ring-value {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 600ms ease;
+}
+.setup-step {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--shell-border);
+  background: oklch(1 0 0 / 0.035);
+  padding: 0.75rem;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+.setup-step:not(:disabled):hover {
+  border-color: oklch(0.82 0.15 84 / 0.45);
+  background: oklch(1 0 0 / 0.06);
+}
+.setup-step-next {
+  border-color: oklch(0.82 0.15 84 / 0.5);
+}
+.setup-step-done {
+  opacity: 0.7;
+}
+.setup-step-dot {
+  display: inline-flex;
+  width: 1.6rem;
+  height: 1.6rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid oklch(1 0 0 / 0.2);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.setup-step-done .setup-step-dot {
+  border-color: transparent;
+  background: var(--gold);
+  color: var(--gold-foreground);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -514,5 +728,43 @@
   }
   .ticker-track > [aria-hidden="true"] {
     display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .workspace-nav:has(> .workspace-rail) {
+    position: sticky;
+    top: 5.5rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  .workspace-rail .workspace-nav-item {
+    width: 100%;
+  }
+}
+
+@layer components {
+  .app-chip-button {
+    display: inline-flex;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+    border-radius: 999px;
+    border: 1px solid var(--shell-border);
+    background: oklch(1 0 0 / 0.05);
+    padding: 0 0.95rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    transition: background-color 150ms ease, transform 120ms ease;
+  }
+  .app-chip-button:hover {
+    background: oklch(1 0 0 / 0.1);
+  }
+  .app-chip-button:active {
+    transform: scale(0.96);
   }
 }

@@ -45,13 +45,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Try ball-by-ball cricket scoring and local video review on CricLume. Explore club and league tools, with additional cloud features under pilot testing.",
+          "Ball-by-ball cricket scoring with phone cameras linked to every delivery, live scores for clubs and leagues, and coaching review.",
       },
       { property: "og:title", content: "CricLume — See every ball. Shape every game." },
       {
         property: "og:description",
         content:
-          "Ball-by-ball cricket scoring and local video review, with additional cloud club features under pilot testing.",
+          "Ball-by-ball scoring, multi-angle phone video and live scores for cricket clubs and leagues.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://app-teaser.lovable.app/" },

@@ -12,7 +12,7 @@ export const en = {
     l1: "Every ball.",
     l2: "Every angle.",
     l3: "Every advantage.",
-    body: "Score cricket matches ball by ball, including when the signal drops. Review local videos on your device; connected club and multi-phone features are being tested in the cloud pilot.",
+    body: "Score every ball, even when the signal drops. Link phone cameras to each delivery, share live scores with your club and league, and review the moments that decide matches.",
     ctaPrimary: "Start scoring",
     ctaSecondary: "See the screens",
     previewLabel: "Example scorecard",
@@ -98,7 +98,7 @@ export const en = {
     title: "Features",
     intro:
       "The scorer and local video tools are available to try. Club cloud viewing and advanced integrations are being tested.",
-    watchTitle: "Cloud viewing options (pilot)",
+    watchTitle: "Who can watch live",
     watchBody:
       "Private, opposition, league and public viewing rules require a configured club cloud workspace; they are not features of the device-only scorer.",
     watchOptions: [
@@ -284,7 +284,7 @@ export const de: Content = {
     l1: "Jeder Ball.",
     l2: "Jeder Winkel.",
     l3: "Jeder Vorteil.",
-    body: "Erfasse Cricketspiele Ball für Ball, auch bei schwachem Empfang. Lokale Videos kannst du auf deinem Gerät prüfen; Cloud- und Mehrkamerafunktionen werden im Pilot getestet.",
+    body: "Erfasse jeden Ball, auch bei schwachem Empfang. Verknüpfe Handykameras mit jeder Lieferung, teile Live-Spielstände mit Verein und Liga und analysiere die entscheidenden Momente.",
     ctaPrimary: "Scoring starten",
     ctaSecondary: "Ansichten entdecken",
     previewLabel: "Beispiel-Spielstand",
@@ -370,7 +370,7 @@ export const de: Content = {
     title: "Funktionen",
     intro:
       "Scoring und lokale Videoanalyse sind ausprobierbar. Club-Cloud-Ansichten und erweiterte Integrationen werden getestet.",
-    watchTitle: "Cloud-Zugriffe (Pilot)",
+    watchTitle: "Wer live zuschauen kann",
     watchBody:
       "Private, gegnerische, Liga- und öffentliche Ansichten brauchen einen eingerichteten Club-Cloud-Zugang und sind nicht Teil des lokalen Scorers.",
     watchOptions: [
@@ -558,7 +558,7 @@ export const nl: Content = {
     l1: "Elke bal.",
     l2: "Elke hoek.",
     l3: "Elk voordeel.",
-    body: "Registreer cricketwedstrijden bal voor bal, ook bij slecht bereik. Bekijk lokale video's op je apparaat; cloud- en multi-telefoonfuncties worden getest.",
+    body: "Registreer elke bal, ook bij slecht bereik. Koppel telefooncamera's aan elke bal, deel live scores met je club en competitie en bekijk de momenten die wedstrijden beslissen.",
     ctaPrimary: "Begin met scoren",
     ctaSecondary: "Bekijk de schermen",
     previewLabel: "Voorbeeldscore",
@@ -645,7 +645,7 @@ export const nl: Content = {
     title: "Functies",
     intro:
       "De scorer en lokale videofuncties zijn te proberen. Cloudweergaven en geavanceerde koppelingen worden getest.",
-    watchTitle: "Cloudtoegang (pilot)",
+    watchTitle: "Wie live kan meekijken",
     watchBody:
       "Privé-, tegenstander-, competitie- en openbare weergaven vragen een ingestelde clubcloud en zijn geen onderdeel van de lokale scorer.",
     watchOptions: [
@@ -830,7 +830,7 @@ export const af: Content = {
     l1: "Elke bal.",
     l2: "Elke hoek.",
     l3: "Elke voordeel.",
-    body: "Teken krieketwedstryde bal vir bal aan, ook met swak sein. Hersien plaaslike video op jou toestel; wolk- en meervoudige foonfunksies word getoets.",
+    body: "Teken elke bal aan, selfs met swak sein. Koppel foonkameras aan elke aflewering, deel regstreekse tellings met jou klub en liga en hersien die oomblikke wat wedstryde beslis.",
     ctaPrimary: "Begin tel",
     ctaSecondary: "Sien die skerms",
     previewLabel: "Voorbeeldtelbord",
@@ -917,7 +917,7 @@ export const af: Content = {
     title: "Kenmerke",
     intro:
       "Die tellingblad en plaaslike video-oorsig kan getoets word. Klubwolkaansigte en ander integrasies word nog getoets.",
-    watchTitle: "Wolktoegang (loods)",
+    watchTitle: "Wie regstreeks kan kyk",
     watchBody:
       "Private, teenstander-, liga- en openbare aansigte vereis 'n opgestelde klubwolkdiens; dit is nie deel van die plaaslike tellingblad nie.",
     watchOptions: [
@@ -1105,7 +1105,7 @@ export const fr: Content = {
     l1: "Chaque balle.",
     l2: "Chaque angle.",
     l3: "Chaque avantage.",
-    body: "Notez chaque balle, même avec une connexion limitée. Revoyez les vidéos locales sur votre appareil ; les fonctions cloud et multi-téléphones sont testées en pilote.",
+    body: "Notez chaque balle, même avec une connexion limitée. Reliez les caméras de téléphone à chaque lancer, partagez le score en direct avec votre club et votre ligue, et revoyez les moments décisifs.",
     ctaPrimary: "Commencer le marquage",
     ctaSecondary: "Voir les écrans",
     previewLabel: "Score d'exemple",
@@ -1192,7 +1192,7 @@ export const fr: Content = {
     title: "Fonctions",
     intro:
       "Le marqueur et la revue vidéo locale sont disponibles à l'essai. Les vues cloud et les intégrations avancées sont en pilote.",
-    watchTitle: "Accès cloud (pilote)",
+    watchTitle: "Qui peut suivre en direct",
     watchBody:
       "Les vues privées, adversaires, ligues et publiques nécessitent un espace cloud configuré; elles ne font pas partie du marqueur local.",
     watchOptions: [

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Upload } from "lucide-react";
 import type { CricketMatch } from "@/lib/cricket";
 import { copyBackupMatches, maxBackupBytes, parseScorerBackup } from "@/lib/scorer-storage";
 
@@ -50,25 +51,21 @@ export function ScorerBackupImport({ onImport }: { onImport: (matches: CricketMa
     }
   };
   return (
-    <section
-      aria-label="Import scorer backup"
-      className="rounded-2xl border border-white/15 bg-white/[0.03] p-5 space-y-3"
-    >
-      <h2 className="text-lg font-bold">Restore from a backup</h2>
+    <section aria-label="Import scorer backup" className="space-y-3">
       <p id="backup-help" className="text-sm text-slate-300">
-        Choose a CricLume JSON match export or backup (up to 10 MB and 100 matches). Review it
-        before importing new local copies. Existing matches stay unchanged; this does not restore
-        cloud scores.
+        Bring back matches from a CricLume backup file (.json, up to 10 MB). You’ll see what’s
+        inside before anything is added, and your current matches stay as they are.
       </p>
-      <label className="grid gap-2 text-sm">
-        Backup file
+      <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 text-sm font-bold transition hover:bg-white/10 focus-within:ring-2 focus-within:ring-amber-300/60">
+        <Upload className="size-4" aria-hidden="true" />
+        {filename ? "Choose a different file" : "Choose backup file"}
         <input
           ref={input}
           type="file"
           accept=".json,application/json"
           aria-describedby={error ? "backup-help backup-error" : "backup-help"}
           aria-invalid={Boolean(error)}
-          className="w-full min-w-0 rounded-lg border border-white/15 p-3"
+          className="sr-only"
           onChange={(event) => void read(event.target.files?.[0])}
         />
       </label>

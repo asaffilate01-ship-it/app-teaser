@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Clock3, MapPin, Radio, RotateCw } from "lucide-react";
-import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
+import logoAsset from "@/assets/criclume-logo-on-dark.png.asset.json";
 import { getCloudClient, isCloudConfigured } from "@/lib/cloud";
 
 export const Route = createFileRoute("/scoreboard/$slug")({

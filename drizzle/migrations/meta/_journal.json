@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1795360974662,
+      "tag": "0000_criclume_platform_core_part1",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795361096366,
+      "tag": "0001_criclume_platform_core_part2",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795361180302,
+      "tag": "0002_criclume_live_control_centre",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795361269193,
+      "tag": "0003_criclume_october_updates",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795361333908,
+      "tag": "0004_criclume_camera_privacy_and_director",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795361407680,
+      "tag": "0005_criclume_camera_uploads_cloud_and_highlights",
+      "breakpoints": true
+    }
+  ]
+}

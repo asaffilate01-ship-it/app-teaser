@@ -48,7 +48,10 @@ import {
   Video,
   type LucideIcon,
 } from "lucide-react";
-import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
+import { AppHeader } from "@/components/app-shell/AppHeader";
+import { GoogleButton } from "@/components/app-shell/GoogleButton";
+import { SetupChecklist } from "@/components/SetupChecklist";
+import scoreboardShot from "@/assets/shot-scoreboard.jpg";
 import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPanel";
 import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace";
 import { AcademyDashboard } from "@/components/AcademyDashboard";
@@ -298,6 +301,8 @@ function SignInPanel({
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setBusy(true);
@@ -310,27 +315,75 @@ function SignInPanel({
       setBusy(false);
     }
   };
+  const signInWithGoogle = async () => {
+    setGoogleBusy(true);
+    setGoogleError(null);
+    try {
+      const { lovable } = await import("@/integrations/lovable");
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: `${window.location.origin}/platform`,
+      });
+      if (result.error) setGoogleError("Google sign-in didn’t finish. Please try again.");
+    } catch {
+      setGoogleError("Google sign-in didn’t finish. Please try again.");
+    } finally {
+      setGoogleBusy(false);
+    }
+  };
+  const message = googleError ?? error;
   return (
-    <PageFrame>
+    <PageFrame
+      right={
+        <Link to="/" className="app-chip-button">
+          Back to site
+        </Link>
+      }
+    >
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto flex min-h-[calc(100vh-74px)] max-w-xl items-center px-4 py-12"
+        className="mx-auto grid min-h-[calc(100vh-74px)] max-w-6xl items-center gap-10 px-4 py-10 md:px-8 lg:grid-cols-[1.05fr_1fr]"
       >
+        <section className="hidden lg:block" aria-hidden="true">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-gold">Club workspace</p>
+          <h2 className="mt-3 font-display text-5xl font-bold leading-[1.02]">
+            Your whole club,
+            <br />
+            ball by ball.
+          </h2>
+          <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">
+            Fixtures, live scoring, camera rooms, player records and safeguarding — one place for
+            everyone who runs match day.
+          </p>
+          <img
+            src={scoreboardShot}
+            alt=""
+            className="mt-8 w-full max-w-lg rounded-2xl border border-white/10 shadow-2xl shadow-black/40"
+          />
+        </section>
         <form
           onSubmit={(event) => void submit(event)}
-          className="w-full rounded-3xl border border-white/10 bg-white/[0.04] p-6 md:p-9"
+          className="w-full rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/20 md:p-9"
         >
-          <LockKeyhole className="size-9 text-amber-300" />
-          <h1 className="mt-5 text-3xl font-bold">Sign in to your club or league</h1>
+          <span className="flex size-12 items-center justify-center rounded-2xl bg-amber-300/10 text-amber-300">
+            <LockKeyhole className="size-6" />
+          </span>
+          <h1 className="mt-5 font-display text-3xl font-bold">Sign in to your club or league</h1>
           <p className="mt-2 text-sm leading-6 text-slate-400">
-            CricLume sends a secure magic link. Database row-level security applies your assigned
-            role.
+            New here? Signing in creates your account — then we’ll help you set up your club in a
+            few steps.
           </p>
-          <Field label="Email address" className="mt-6">
+          <div className="mt-6">
+            <GoogleButton onClick={() => void signInWithGoogle()} busy={googleBusy} />
+          </div>
+          <div className="my-5 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
+            <span className="h-px flex-1 bg-white/10" /> or use email <span className="h-px flex-1 bg-white/10" />
+          </div>
+          <Field label="Email address">
             <input
               required
               type="email"
+              autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               className="scorer-input"
@@ -339,17 +392,23 @@ function SignInPanel({
           </Field>
           <button
             disabled={busy}
-            className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-400 text-sm font-extrabold disabled:opacity-50"
+            className="cta-gradient mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-extrabold disabled:opacity-50"
           >
-            {busy && <LoaderCircle className="size-4 animate-spin" />} Send secure link
+            {busy ? <LoaderCircle className="size-4 animate-spin" /> : <Mail className="size-4" />}{" "}
+            Email me a sign-in link
           </button>
-          {(sent || error) && (
+          {(sent || message) && (
             <p
-              className={`mt-4 rounded-xl p-3 text-xs ${error ? "bg-rose-400/10 text-rose-200" : "bg-amber-300/10 text-amber-200"}`}
+              role={message ? "alert" : "status"}
+              className={`mt-4 rounded-xl p-3 text-xs ${message ? "bg-rose-400/10 text-rose-200" : "bg-amber-300/10 text-amber-200"}`}
             >
-              {error ?? "Check your inbox and return using the CricLume link."}
+              {message ?? `We’ve sent a sign-in link to ${email.trim()}. Open it on this device to continue.`}
             </p>
           )}
+          <p className="mt-6 flex items-center gap-2 text-xs text-slate-500">
+            <ShieldCheck className="size-4 text-amber-300/80" /> Everyone only sees what their club
+            role allows.
+          </p>
         </form>
       </main>
     </PageFrame>
@@ -512,13 +571,13 @@ function OperationalPlatform({
               ))}
             </select>
           )}
-          <Link to="/app" className="rounded-md border border-white/10 px-3 py-2 text-xs font-bold">
+          <Link to="/app" className="app-chip-button">
             Scorer
           </Link>
           <button
             type="button"
             onClick={() => void signOut()}
-            className="rounded-md bg-white/10 px-3 py-2 text-xs font-bold"
+            className="app-chip-button"
           >
             Sign out
           </button>
@@ -553,13 +612,16 @@ function OperationalPlatform({
             Refresh
           </button>
         </div>
+        <div className="lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start lg:gap-8">
         <SectionNavigation
           label="Workspace section"
           value={tab}
           onChange={setTab}
           items={tabDefinitions}
           mobilePrimary={["overview", "competitions", "capture", "analysis"]}
+          layout="rail"
         />
+        <div className="min-w-0 lg:pt-6">
         {dashboard.error && <ErrorNotice message={dashboard.error} />}
         {!dashboard.loading && !dashboard.data && dashboard.error ? (
           <section className="workspace-empty" role="status">
@@ -578,7 +640,12 @@ function OperationalPlatform({
         ) : (
           <>
             {tab === "overview" && (
-              <Overview data={dashboard.data} role={membership.role} run={dashboard.run} />
+              <Overview
+                data={dashboard.data}
+                role={membership.role}
+                run={dashboard.run}
+                onOpenSection={setTab}
+              />
             )}
             {tab === "competitions" && (
               <Competitions data={dashboard.data} role={membership.role} run={dashboard.run} />
@@ -627,6 +694,8 @@ function OperationalPlatform({
             )}
           </>
         )}
+        </div>
+        </div>
       </main>
     </PageFrame>
   );
@@ -636,10 +705,12 @@ function Overview({
   data,
   role,
   run,
+  onOpenSection,
 }: {
   data: PlatformDashboardData;
   role: PlatformRole;
   run: RunAction;
+  onOpenSection: (section: PlatformTab) => void;
 }) {
   const liveMatches = data.matches.filter((match) => match.status === "live");
   const upcoming = data.matches.filter((match) => ["draft", "scheduled"].includes(match.status));
@@ -668,6 +739,17 @@ function Overview({
   ] as const;
   return (
     <div className="space-y-5">
+      {can(role, "match.manage") && (
+        <SetupChecklist
+          counts={{
+            teams: data.teams.length,
+            players: data.players.length,
+            members: data.members.length,
+            matches: data.matches.length,
+          }}
+          onOpen={onOpenSection}
+        />
+      )}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map(([Icon, label, value, detail]) => (
           <MetricCard key={label} icon={Icon} label={label} value={value} detail={detail} />
@@ -2150,19 +2232,7 @@ function Operations({
 function PageFrame({ children, right }: { children: ReactNode; right?: ReactNode }) {
   return (
     <div className="min-h-screen bg-[#0f0d17] text-slate-100">
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0f0d17]/95 px-4 py-3 backdrop-blur-xl md:px-8">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link to="/" aria-label="CricLume home">
-              <img src={logoAsset.url} alt="CricLume" className="h-9 w-auto md:h-11" />
-            </Link>
-            <span className="hidden rounded-full border border-amber-300/25 bg-amber-300/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-amber-200 sm:inline">
-              Cloud control centre
-            </span>
-          </div>
-          {right}
-        </div>
-      </header>
+      <AppHeader area="Club workspace" right={right} />
       {children}
     </div>
   );
