@@ -61,9 +61,7 @@ export function CameraReplayWorkbench({
     }
     const initialClip = clips[0];
     if (!initialClip) return;
-    setLeftId((current) =>
-      clips.some((clip) => clip.id === current) ? current : initialClip.id,
-    );
+    setLeftId((current) => (clips.some((clip) => clip.id === current) ? current : initialClip.id));
     setRightId((current) => {
       const first = clips.find((clip) => clip.id === leftId) ?? initialClip;
       return clips.some((clip) => clip.id === current && clip.device_id !== first.device_id)
