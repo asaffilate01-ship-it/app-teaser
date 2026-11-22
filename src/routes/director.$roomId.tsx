@@ -251,21 +251,25 @@ function CameraDirector() {
       );
     };
     return (
-      <main className="mx-auto max-w-lg px-4 py-16 text-white">
-        <h1 className="text-2xl font-bold">Private camera director</h1>
-        <p className="mt-3 text-sm text-slate-300">Sign in using your authorised club account.</p>
-        <form onSubmit={signIn} className="mt-5 flex gap-2">
+      <main className="scoreboard-stage flex min-h-screen items-center justify-center px-4 py-16">
+        <div className="broadcast-panel w-full max-w-md p-6 md:p-8">
+        <span className="hero-chip"><Video className="size-3.5" aria-hidden="true" /> Camera director</span>
+        <h1 className="mt-4 font-display text-2xl font-bold">Private camera director</h1>
+        <p className="scoreboard-muted mt-2 text-sm">Sign in with your club account to watch and control this match's cameras.</p>
+        <form onSubmit={signIn} className="mt-5 flex flex-col gap-2 sm:flex-row">
           <input
             type="email"
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="Club email"
-            className="min-w-0 flex-1 rounded-md border border-white/20 bg-slate-900 p-3"
+            aria-label="Club email"
+            className="scorer-input min-w-0 flex-1"
           />
-          <button className="rounded-md bg-amber-300 px-4 font-bold text-black">Sign in</button>
+          <button className="action-primary min-h-12">Email me a link</button>
         </form>
-        {message && <p className="mt-3 text-sm text-amber-200">{message}</p>}
+        {message && <p role="status" className="hero-ribbon text-left">{message}</p>}
+        </div>
       </main>
     );
   }
@@ -287,51 +291,54 @@ function CameraDirector() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="min-h-screen bg-[#0e1017] px-4 py-6 text-white md:px-8"
+      className="scoreboard-stage min-h-screen px-4 py-5 md:px-8 md:py-6"
     >
       <div className="mx-auto max-w-7xl">
         <Link
           to="/platform"
           search={{ section: "capture" }}
-          className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white"
+          className="app-chip-button"
         >
-          <ArrowLeft className="size-4" /> Club control centre
+          <ArrowLeft className="size-4" /> Club workspace
         </Link>
         <header className="mt-5 flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-300">
-              <Video className="size-4" /> Private live director
+          <div className="min-w-0">
+            <span className="panel-kicker inline-flex items-center gap-2">
+              <Video className="size-4" aria-hidden="true" /> Private live director
             </span>
-            <h1 className="mt-2 text-2xl font-bold md:text-4xl">{room.name}</h1>
-            <p className="mt-2 text-sm text-slate-400">
-              {devices.length} paired angles · {armedDevices.length} auto-record armed ·{" "}
-              {recordingCount} reporting recording · room {room.status}
-            </p>
+            <h1 className="mt-2 font-display text-3xl font-bold md:text-5xl">{room.name}</h1>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="hero-chip"><Camera className="size-3.5" aria-hidden="true" />{devices.length} angles</span>
+              <span className="hero-chip">{armedDevices.length} armed</span>
+              <span className={`hero-chip ${recordingCount > 0 ? "hero-chip-live" : ""}`}>
+                {recordingCount > 0 && <span className="live-dot" aria-hidden="true" />}
+                {recordingCount} recording
+              </span>
+              <span className="hero-chip">Room {room.status}</span>
+            </div>
           </div>
           <button
             onClick={() => void refresh()}
-            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-white/20 px-4 text-sm"
+            className="action-secondary min-h-11"
           >
             <RefreshCw className="size-4" /> Refresh devices
           </button>
         </header>
 
-        <div className="mt-6 flex flex-wrap items-center gap-2">
+        <div className="director-toolbar mt-6">
+          <div className="insights-toggle" role="group" aria-label="Camera layout">
           {(["one", "two", "four"] as const).map((mode) => (
             <button
               key={mode}
+              type="button"
               onClick={() => setView(mode)}
               aria-pressed={view === mode}
-              className={
-                "min-h-11 rounded-md px-4 text-sm font-semibold " +
-                (view === mode
-                  ? "bg-amber-300 text-black"
-                  : "border border-white/20 text-slate-300")
-              }
+              className={view === mode ? "is-active" : ""}
             >
               {mode === "one" ? "Focus" : mode === "two" ? "2 cameras" : "Grid"}
             </button>
           ))}
+          </div>
           <button
             disabled={busy || armedDevices.length === 0}
             onClick={() =>
@@ -340,7 +347,7 @@ function CameraDirector() {
                 armedDevices.map((device) => device.id),
               )
             }
-            className="ml-auto inline-flex min-h-11 items-center gap-2 rounded-md bg-rose-600 px-4 text-sm font-bold disabled:opacity-50"
+            className="action-primary min-h-11 sm:ml-auto"
           >
             <Radio className="size-4" /> Record armed cameras
           </button>
@@ -352,7 +359,7 @@ function CameraDirector() {
                 devices.map((device) => device.id),
               )
             }
-            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-white/20 px-4 text-sm font-bold disabled:opacity-50"
+            className="action-secondary min-h-11"
           >
             <CircleStop className="size-4" /> Stop recordings
           </button>
@@ -360,7 +367,7 @@ function CameraDirector() {
         {message && (
           <p
             role="status"
-            className="mt-3 rounded-md border border-amber-300/30 px-3 py-2 text-sm text-amber-200"
+            className="hero-ribbon mt-3 text-left"
           >
             {message}
           </p>
@@ -383,13 +390,13 @@ function CameraDirector() {
             return (
               <section
                 key={device.id}
-                className="overflow-hidden rounded-xl border border-white/10 bg-[#161a25]"
+                className={`camera-tile ${presence[device.id]?.recording ? "camera-tile-rec" : ""}`}
               >
-                <div className="relative aspect-video bg-black">
+                <div className="camera-tile-screen">
                   <DirectorVideo stream={stream} muted={soundDevice !== device.id} />
                   {!stream && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-slate-400">
-                      <Camera className="size-9" />
+                    <div className="scoreboard-muted absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm">
+                      <Camera className="size-9 text-gold" aria-hidden="true" />
                       <span>
                         {states[device.id] === "failed"
                           ? "Live connection failed"
@@ -402,22 +409,27 @@ function CameraDirector() {
                             connectDevice(device.id)
                           ).catch((error: unknown) => setMessage(String(error)))
                         }
-                        className="rounded-md border border-white/20 px-3 py-2 text-xs"
+                        className="action-secondary min-h-9 text-xs"
                       >
-                        Reconnect
+                        <RefreshCw className="size-3.5" aria-hidden="true" /> Reconnect
                       </button>
                     </div>
                   )}
                   {stream && (
-                    <span className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-rose-600/90 px-3 py-1 text-xs font-semibold">
-                      <span className="size-2 rounded-full bg-white" /> LIVE
+                    <span className="hero-chip hero-chip-live camera-tile-badge">
+                      <span className="live-dot" aria-hidden="true" /> Live
+                    </span>
+                  )}
+                  {presence[device.id]?.recording && (
+                    <span className="hero-chip hero-chip-live camera-tile-badge camera-tile-badge-right">
+                      <CircleStop className="size-3" aria-hidden="true" /> Rec
                     </span>
                   )}
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 p-3">
                   <div>
-                    <h2 className="text-sm font-bold">{device.label}</h2>
-                    <p className="text-xs capitalize text-slate-400">
+                    <h2 className="font-display text-base font-bold">{device.label}</h2>
+                    <p className="scoreboard-muted text-xs capitalize">
                       {device.angle.replaceAll("_", " ")} · {states[device.id] ?? "offline"}
                       {" · "}
                       {armed ? "Auto-record armed" : "Not armed"}
@@ -432,7 +444,7 @@ function CameraDirector() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setSoundDevice(soundDevice === device.id ? null : device.id)}
-                      className="rounded-md border border-white/20 px-3 py-2 text-xs"
+                      className="action-secondary min-h-9 text-xs"
                       aria-label={
                         soundDevice === device.id ? "Mute this camera" : "Unmute this camera"
                       }
@@ -444,7 +456,7 @@ function CameraDirector() {
                         setFocus(device.id);
                         setView("one");
                       }}
-                      className="rounded-md border border-white/20 px-3 py-2 text-xs"
+                      className="action-secondary min-h-9 text-xs"
                       aria-label={"Focus camera " + device.label}
                     >
                       <Maximize2 className="size-4" />
@@ -453,7 +465,7 @@ function CameraDirector() {
                       <button
                         disabled={busy}
                         onClick={() => void command("start", [device.id])}
-                        className="rounded-md border border-rose-400/50 px-3 py-2 text-xs text-rose-200"
+                        className="action-primary min-h-9 text-xs"
                       >
                         <Radio className="inline size-4" /> Record
                       </button>
@@ -470,7 +482,7 @@ function CameraDirector() {
             type="button"
             aria-expanded={cloudRecordingOpen}
             onClick={() => setCloudRecordingOpen((open) => !open)}
-            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-300/40 px-4 text-sm font-semibold text-amber-200"
+            className="action-secondary min-h-11"
           >
             <Cloud className="size-4" />
             {cloudRecordingOpen ? "Hide cloud recording" : "Server-side cloud recording"}
@@ -479,12 +491,12 @@ function CameraDirector() {
             type="button"
             aria-expanded={reviewOpen}
             onClick={() => setReviewOpen((value) => !value)}
-            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-300/40 px-4 text-sm font-semibold text-amber-200"
+            className="action-secondary min-h-11"
           >
             <Video className="size-4" />
             {reviewOpen ? "Hide recorded replays" : "Review recorded match clips"}
           </button>
-          <span className="text-xs text-slate-400">
+          <span className="scoreboard-muted text-xs">
             Private, consented clips and estimated ball-by-ball cue points
           </span>
         </div>
@@ -499,19 +511,19 @@ function CameraDirector() {
           <CameraReplayLibrary roomId={roomId} matchId={room.match_id} devices={devices} />
         )}
         {devices.length === 0 && (
-          <div className="mt-6 rounded-xl border border-white/15 p-8 text-center text-sm text-slate-300">
+          <div className="broadcast-panel scoreboard-muted mt-6 p-8 text-center text-sm">
             No paired cameras yet. Pair a phone through the club Capture dashboard, then enable its
             live share.
           </div>
         )}
-        <p className="mt-6 flex max-w-4xl items-start gap-2 text-xs leading-5 text-slate-400">
-          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-amber-300" />
+        <p className="scoreboard-muted mt-6 flex max-w-4xl items-start gap-2 text-xs leading-5">
+          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden="true" />
           Private club review only. Each phone must explicitly enable camera sharing and consent to
           recording. Auto-record requests work while that phone is online and its browser is
           running. This browser peer-to-peer preview requires approved TURN connectivity for
           reliable access across networks; it is not a public broadcast or a server-recorded match.
         </p>
-        <p className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+        <p className="scoreboard-muted mt-3 flex items-center gap-2 text-xs">
           <Check className="size-4" /> Camera controls are checked and audited by the server.
         </p>
       </div>
@@ -544,16 +556,16 @@ function DirectorVideo({ stream, muted }: { stream: MediaStream | null; muted: b
 
 function DirectorGate({ text }: { text: string }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#0e1017] px-5 text-center text-slate-200">
-      <div>
-        <Camera className="mx-auto mb-4 size-10 text-amber-300" />
+    <main className="scoreboard-stage flex min-h-screen items-center justify-center px-5 text-center">
+      <div className="broadcast-panel max-w-md p-8">
+        <Camera className="mx-auto mb-4 size-10 text-gold" aria-hidden="true" />
         <p>{text}</p>
         <Link
           to="/platform"
           search={{ section: "capture" }}
-          className="mt-4 inline-block text-sm text-amber-300 underline"
+          className="action-secondary mt-5"
         >
-          Return to CricLume club dashboard
+          Back to club workspace
         </Link>
       </div>
     </main>

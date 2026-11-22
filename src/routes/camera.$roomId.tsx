@@ -664,7 +664,7 @@ function MatchCamera() {
     return (
       <CameraMessage
         title="Camera cloud not configured"
-        detail="Connect Supabase before pairing phones to a camera room."
+        detail="Live cameras aren't switched on for this club yet. Ask your club admin to finish setup."
       />
     );
   if (loading)
@@ -679,37 +679,37 @@ function MatchCamera() {
     );
 
   return (
-    <div className="min-h-screen bg-[#0f0d17] text-white">
-      <header className="border-b border-white/10 px-4 py-3">
+    <div className="scoreboard-stage min-h-screen">
+      <header className="scoreboard-topbar px-4 py-3">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <Link to="/">
             <img src={logoAsset.url} alt="CricLume" className="h-9 w-auto" />
           </Link>
-          <span className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">
-            <Smartphone className="size-3.5 text-amber-300" />
-            Match camera
+          <span className={`hero-chip ${recording ? "hero-chip-live" : ""}`}>
+            {recording ? <span className="live-dot" aria-hidden="true" /> : <Smartphone className="size-3.5" aria-hidden="true" />}
+            {recording ? "Recording" : "Match camera"}
           </span>
         </div>
       </header>
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto grid max-w-5xl gap-5 px-4 py-6 lg:grid-cols-[1.4fr_1fr]"
+        className="mx-auto grid max-w-5xl gap-4 px-3 py-4 md:px-4 md:py-6 lg:grid-cols-[1.4fr_1fr]"
       >
-        <section className="overflow-hidden rounded-xl border border-white/10 bg-black/30">
-          <div className="relative aspect-video bg-black">
+        <section className={`camera-tile ${recording ? "camera-tile-rec" : ""}`}>
+          <div className="camera-tile-screen">
             <video ref={videoRef} muted playsInline className="h-full w-full object-cover" />
             {!previewing && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500">
-                <Camera className="size-10" />
+              <div className="scoreboard-muted absolute inset-0 flex flex-col items-center justify-center">
+                <Camera className="size-10 text-gold" aria-hidden="true" />
                 <span className="mt-3 text-xs">Camera preview is off</span>
               </div>
             )}
             {recording && (
-              <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-black/70 px-3 py-1.5 text-[10px] font-black uppercase">
-                <span className="size-2 animate-pulse rounded-full bg-rose-500" />
-                Recording
-              </div>
+              <span className="hero-chip hero-chip-live camera-tile-badge">
+                <span className="live-dot" aria-hidden="true" />
+                Rec
+              </span>
             )}
           </div>
           <div className="p-4">
@@ -727,38 +727,39 @@ function MatchCamera() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm font-bold">{device.label}</div>
-                    <div className="text-[11px] capitalize text-slate-500">
+                    <div className="font-display text-lg font-bold">{device.label}</div>
+                    <div className="scoreboard-muted text-[11px] capitalize">
                       {device.angle.replaceAll("_", " ")}
                     </div>
                   </div>
-                  <span className="flex items-center gap-1.5 text-[10px] font-bold text-amber-200">
-                    <Check className="size-3.5" />
+                  <span className="hero-chip">
+                    <Check className="size-3.5" aria-hidden="true" />
                     Paired
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div>
                   {!previewing ? (
                     <button
                       onClick={() => void startPreview()}
-                      className="rounded-md bg-white px-4 py-2.5 text-xs font-bold text-[#160f18]"
+                      className="action-secondary min-h-14 w-full text-sm"
                     >
+                      <Camera className="size-4" aria-hidden="true" />
                       Start preview
                     </button>
                   ) : !recording ? (
                     <button
                       onClick={startRecording}
-                      className="flex items-center gap-2 rounded-md bg-rose-500 px-4 py-2.5 text-xs font-bold"
+                      className="wicket-bar"
                     >
-                      <Radio className="size-4" />
+                      <Radio className="size-5" aria-hidden="true" />
                       Record
                     </button>
                   ) : (
                     <button
                       onClick={stopRecording}
-                      className="flex items-center gap-2 rounded-md bg-white px-4 py-2.5 text-xs font-bold text-[#160f18]"
+                      className="action-secondary min-h-16 w-full text-base"
                     >
-                      <CircleStop className="size-4" />
+                      <CircleStop className="size-5" aria-hidden="true" />
                       Stop & upload
                     </button>
                   )}
@@ -771,7 +772,7 @@ function MatchCamera() {
                       onClick={() =>
                         void (cloudPublishing ? stopCloudPublisher() : startCloudPublisher())
                       }
-                      className="inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-300/40 px-3 text-xs font-bold text-amber-200 disabled:opacity-40"
+                      className="action-secondary min-h-11 text-xs"
                     >
                       <Cloud className="size-4" />
                       {cloudConnecting
@@ -783,16 +784,11 @@ function MatchCamera() {
                     <button
                       type="button"
                       onClick={() => (liveSharing ? stopLiveSharing() : void startLiveSharing())}
-                      className={
-                        "rounded-md px-4 py-2.5 text-xs font-bold " +
-                        (liveSharing
-                          ? "border border-rose-400 text-rose-200"
-                          : "bg-amber-300 text-black")
-                      }
+                      className={`${liveSharing ? "action-secondary" : "action-primary"} min-h-11 text-xs`}
                     >
                       {liveSharing ? "Stop private live share" : "Share live view with director"}
                     </button>
-                    <span className="text-[11px] text-slate-400">
+                    <span className="scoreboard-muted text-[11px]">
                       {liveSharing
                         ? "Private feed active"
                         : "Camera preview is local until sharing is enabled"}
@@ -802,7 +798,7 @@ function MatchCamera() {
               </div>
             )}
             {message && (
-              <div className="mt-3 rounded-md border border-amber-300/15 bg-amber-300/[0.06] px-3 py-2 text-xs text-amber-100">
+              <div role="status" className="hero-ribbon mt-3 text-left text-xs">
                 {message}
               </div>
             )}
@@ -810,20 +806,20 @@ function MatchCamera() {
               <button
                 type="button"
                 onClick={downloadFailedSegments}
-                className="mt-3 rounded-md border border-rose-400/50 px-3 py-2 text-xs font-semibold text-rose-200"
+                className="action-secondary mt-3 min-h-10 text-xs"
               >
                 Download {failedSegments} unsaved recording clip{failedSegments === 1 ? "" : "s"}
               </button>
             )}
             {uploadProgress !== null && (
               <div className="mt-3">
-                <div className="mb-1 flex justify-between text-[10px] text-slate-400">
+                <div className="scoreboard-muted mb-1 flex justify-between text-[10px]">
                   <span>Cloud upload</span>
                   <span>{uploadProgress}%</span>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div className="camera-progress">
                   <div
-                    className="h-full bg-gradient-to-r from-rose-500 to-amber-300"
+                    className="camera-progress-bar"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
@@ -832,12 +828,12 @@ function MatchCamera() {
           </div>
         </section>
         <aside className="space-y-4">
-          <section className="rounded-xl border border-white/10 bg-white/[0.035] p-4">
-            <h2 className="flex items-center gap-2 text-sm font-bold">
-              <ShieldCheck className="size-4 text-amber-300" />
+          <section className="broadcast-panel">
+            <h2 className="panel-kicker flex items-center gap-2">
+              <ShieldCheck className="size-4" aria-hidden="true" />
               Capture safeguards
             </h2>
-            <label className="mt-4 flex items-start gap-3 text-xs leading-5 text-slate-300">
+            <label className="mt-4 flex items-start gap-3 text-xs leading-5">
               <input
                 type="checkbox"
                 checked={consent}
@@ -860,24 +856,24 @@ function MatchCamera() {
                     );
                   }
                 }}
-                className="mt-1 accent-amber-300"
+                className="mt-1 camera-check"
               />
               <span>I confirm the club has recorded permission to capture this match.</span>
             </label>
-            <label className="mt-3 flex items-start gap-3 text-xs leading-5 text-slate-300">
+            <label className="mt-3 flex items-start gap-3 text-xs leading-5">
               <input
                 type="checkbox"
                 checked={autoRecordArmed}
                 disabled={!device || !consent}
                 onChange={(event) => void setArmed(event.target.checked)}
-                className="mt-1 accent-amber-300"
+                className="mt-1 camera-check"
               />
               <span>
                 Arm automatic recording when the match goes live, or when the authorised director
                 requests it. This phone must stay on with its preview running.
               </span>
             </label>
-            <label className="mt-4 flex items-start gap-3 text-xs leading-5 text-amber-100">
+            <label className="mt-4 flex items-start gap-3 text-xs leading-5">
               <input
                 type="checkbox"
                 checked={cloudAutoEnabled}
@@ -885,16 +881,16 @@ function MatchCamera() {
                   !device || !consent || !autoRecordArmed || includesJunior || cloudAutoBusy
                 }
                 onChange={(event) => void setCloudAutoEnabledByOperator(event.target.checked)}
-                className="mt-1 accent-amber-300"
+                className="mt-1 camera-check"
               />
               <span>
-                Opt in to **server-side automatic cloud recording** for an adult-only match when it
+                Opt in to <strong>server-side automatic cloud recording</strong> for an adult-only match when it
                 goes live. By enabling this I confirm all recorded participants are adults and the
                 club has authorised this camera's cloud recording. Publishing to LiveKit is a
                 separate button; the platform's auto-cloud switch must also be enabled.
               </span>
             </label>
-            <label className="mt-3 flex items-center gap-3 text-xs text-slate-300">
+            <label className="mt-3 flex items-center gap-3 text-xs">
               <input
                 type="checkbox"
                 checked={includesJunior}
@@ -907,17 +903,17 @@ function MatchCamera() {
                     if (autoRecordArmed) void setArmed(false);
                   }
                 }}
-                className="accent-amber-300"
+                className="camera-check"
               />
               This recording includes junior players
             </label>
-            <label className="mt-4 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <label className="scoreboard-muted mt-4 block text-[10px] font-bold uppercase tracking-wider">
               Privacy processing
               <select
                 value={blurMode}
                 disabled={recording}
                 onChange={(event) => setBlurMode(event.target.value as typeof blurMode)}
-                className="mt-2 w-full rounded-md border border-white/10 bg-[#191621] p-2.5 text-xs normal-case tracking-normal text-white"
+                className="scorer-input mt-2 normal-case tracking-normal"
               >
                 <option value="none">No automatic blur</option>
                 <option value="faces">Blur faces</option>
@@ -925,33 +921,33 @@ function MatchCamera() {
               </select>
             </label>
           </section>
-          <section className="rounded-xl border border-white/10 bg-white/[0.035] p-4">
-            <h2 className="flex items-center gap-2 text-sm font-bold">
-              <Video className="size-4 text-amber-300" />
-              Room devices <span className="ml-auto text-xs text-slate-500">{devices.length}</span>
+          <section className="broadcast-panel">
+            <h2 className="panel-kicker flex items-center gap-2">
+              <Video className="size-4" aria-hidden="true" />
+              Room devices <span className="hero-chip ml-auto">{devices.length}</span>
             </h2>
             <div className="mt-3 space-y-2">
               {devices.length === 0 ? (
-                <p className="text-xs text-slate-500">Pair this phone to join the room.</p>
+                <p className="scoreboard-muted text-xs">Pair this phone to join the room.</p>
               ) : (
                 devices.map((item) => (
                   <div
                     key={item.deviceId}
-                    className="flex items-center justify-between rounded-md border border-white/8 p-2.5"
+                    className="camera-device-row"
                   >
                     <div>
                       <div className="text-xs font-bold">{item.label}</div>
-                      <div className="text-[10px] capitalize text-slate-500">
+                      <div className="scoreboard-muted text-[10px] capitalize">
                         {item.angle.replaceAll("_", " ")}
                       </div>
                     </div>
                     <div className="text-right">
                       <div
-                        className={`text-[10px] font-bold ${item.recording ? "text-rose-300" : "text-amber-200"}`}
+                        className={`text-[10px] font-bold uppercase tracking-wider ${item.recording ? "scoreboard-wickets" : "text-gold"}`}
                       >
                         {item.recording ? "Recording" : "Ready"}
                       </div>
-                      <div className="mt-1 flex items-center gap-1 text-[9px] text-slate-600">
+                      <div className="scoreboard-muted mt-1 flex items-center justify-end gap-1 text-[10px]">
                         <BatteryCharging className="size-3" />
                         {item.batteryPercent ?? "—"}%
                       </div>
@@ -961,8 +957,8 @@ function MatchCamera() {
               )}
             </div>
           </section>
-          <div className="flex items-center gap-2 rounded-lg border border-white/8 p-3 text-[10px] text-slate-500">
-            <CloudUpload className="size-4 text-amber-300" />
+          <div className="broadcast-panel scoreboard-muted flex items-center gap-2 text-[11px]">
+            <CloudUpload className="size-4 shrink-0 text-gold" aria-hidden="true" />
             Resumable upload retries safely when the connection drops.
           </div>
         </aside>
@@ -990,26 +986,26 @@ function PairingForm({
 }) {
   return (
     <form onSubmit={pair} className="space-y-3">
-      <div className="text-sm font-bold">Pair this phone</div>
+      <div className="panel-kicker">Pair this phone</div>
       <div className="grid gap-2 sm:grid-cols-3">
         <input
           required
           value={token}
           onChange={(event) => setToken(event.target.value)}
           placeholder="Pairing code"
-          className="rounded-md border border-white/10 bg-white/5 px-3 py-2.5 text-xs outline-none"
+          className="scorer-input"
         />
         <input
           required
           value={label}
           onChange={(event) => setLabel(event.target.value)}
           placeholder="Phone label"
-          className="rounded-md border border-white/10 bg-white/5 px-3 py-2.5 text-xs outline-none"
+          className="scorer-input"
         />
         <select
           value={angle}
           onChange={(event) => setAngle(event.target.value as CameraAngle)}
-          className="rounded-md border border-white/10 bg-[#191621] px-3 py-2.5 text-xs"
+          className="scorer-input"
         >
           <option value="pavilion_end">Pavilion end</option>
           <option value="far_end">Far end</option>
@@ -1019,7 +1015,7 @@ function PairingForm({
           <option value="other">Other</option>
         </select>
       </div>
-      <button className="rounded-md bg-gradient-to-r from-rose-500 to-amber-400 px-4 py-2.5 text-xs font-bold">
+      <button className="action-primary min-h-12 w-full">
         Pair phone
       </button>
     </form>
@@ -1036,17 +1032,17 @@ function CameraLogin({
   submit: () => void;
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0f0d17] px-4 text-white">
+    <div className="scoreboard-stage flex min-h-screen items-center justify-center px-4">
       <form
         onSubmit={(event) => {
           event.preventDefault();
           submit();
         }}
-        className="w-full max-w-md rounded-xl border border-white/10 bg-white/[0.04] p-6"
+        className="broadcast-panel w-full max-w-md p-6 md:p-8"
       >
-        <Smartphone className="size-8 text-amber-300" />
-        <h1 className="mt-4 text-2xl font-bold">Sign in to pair this phone</h1>
-        <p className="mt-2 text-sm text-slate-400">
+        <span className="hero-chip"><Smartphone className="size-3.5" aria-hidden="true" /> Match camera</span>
+        <h1 className="mt-4 font-display text-2xl font-bold">Sign in to pair this phone</h1>
+        <p className="scoreboard-muted mt-2 text-sm">
           Camera-room access is temporary and recorded in the match audit.
         </p>
         <input
@@ -1055,9 +1051,10 @@ function CameraLogin({
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@club.org"
-          className="mt-5 w-full rounded-md border border-white/10 bg-black/20 px-3 py-3 text-sm"
+          aria-label="Email"
+          className="scorer-input mt-5"
         />
-        <button className="mt-3 w-full rounded-md bg-gradient-to-r from-rose-500 to-amber-400 px-4 py-3 text-sm font-bold">
+        <button className="action-primary mt-3 min-h-12 w-full">
           Email sign-in link
         </button>
       </form>
@@ -1067,16 +1064,16 @@ function CameraLogin({
 
 function CameraMessage({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0f0d17] px-4 text-center text-white">
-      <div>
-        <Camera className="mx-auto size-8 text-amber-300" />
-        <h1 className="mt-4 text-2xl font-bold">{title}</h1>
-        <p className="mt-2 max-w-md text-sm text-slate-400">{detail}</p>
+    <div className="scoreboard-stage flex min-h-screen items-center justify-center px-4 text-center">
+      <div className="broadcast-panel max-w-md p-8">
+        <Camera className="mx-auto size-8 text-gold" aria-hidden="true" />
+        <h1 className="mt-4 font-display text-2xl font-bold">{title}</h1>
+        <p className="scoreboard-muted mt-2 text-sm">{detail}</p>
         <Link
           to="/platform"
-          className="mt-6 inline-flex rounded-md bg-white px-4 py-2 text-xs font-bold text-[#160f18]"
+          className="action-secondary mt-6"
         >
-          Open control centre
+          Open club workspace
         </Link>
       </div>
     </div>

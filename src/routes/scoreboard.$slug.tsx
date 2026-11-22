@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Clock3, MapPin, Radio, RotateCw } from "lucide-react";
 import logoAsset from "@/assets/criclume-logo-on-dark.png.asset.json";
 import { getCloudClient, isCloudConfigured } from "@/lib/cloud";
+import { TeamCrest } from "@/components/scorer/Broadcast";
+import { chaseState } from "@/lib/match-broadcast";
 
 export const Route = createFileRoute("/scoreboard/$slug")({
   head: () => ({
@@ -12,6 +14,13 @@ export const Route = createFileRoute("/scoreboard/$slug")({
         name: "description",
         content: "Live cricket score, innings state and recent deliveries powered by CricLume.",
       },
+      { property: "og:title", content: "Live cricket score — CricLume" },
+      {
+        property: "og:description",
+        content: "Follow the score ball by ball: runs, wickets, run rate and the chase, live from the ground.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: PublicScoreboard,
@@ -37,9 +46,30 @@ interface ScoreboardData {
     bowler?: { name: string; wickets: number; runs: number; overs: string };
     recent?: Array<{ label: string; kind?: string }>;
     message?: string;
+    settings?: { oversPerInnings?: number; ballsPerOver?: number };
   };
   updatedAt: string;
   sponsor?: { name?: string };
+}
+
+type BallKind = "boundary" | "wicket" | "extra" | "dot" | "run";
+
+function ballKind(ball: { label: string; kind?: string }): BallKind {
+  if (ball.kind === "wicket" || ball.label === "W") return "wicket";
+  if (ball.kind === "boundary") return "boundary";
+  if (ball.label === "Wd" || ball.label === "Nb") return "extra";
+  if (ball.label === "·" || ball.label === "0") return "dot";
+  return "run";
+}
+
+function legalBallsFromOvers(overs: string | undefined, ballsPerOver: number) {
+  const match = /^(\d+)\.(\d+)$/.exec(overs ?? "");
+  if (!match) return 0;
+  return Number(match[1]) * ballsPerOver + Number(match[2]);
+}
+
+function strikeRate(runs: number, balls: number) {
+  return balls > 0 ? ((runs * 100) / balls).toFixed(1) : "—";
 }
 
 function PublicScoreboard() {
@@ -75,8 +105,8 @@ function PublicScoreboard() {
   if (!isCloudConfigured()) {
     return (
       <ScoreboardMessage
-        title="Cloud scoreboard not configured"
-        detail="Connect the Supabase environment, publish a match and enable its public scoreboard."
+        title="Live scores aren't connected yet"
+        detail="Publish a match from your club workspace and switch on its public scoreboard."
       />
     );
   }
@@ -95,164 +125,222 @@ function PublicScoreboard() {
       />
     );
 
-  const batting =
-    scoreboard.liveState.battingTeamId === scoreboard.homeTeam.id
-      ? scoreboard.homeTeam
-      : scoreboard.awayTeam;
+  const state = scoreboard.liveState;
+  const batting = state.battingTeamId === scoreboard.homeTeam.id ? scoreboard.homeTeam : scoreboard.awayTeam;
   const bowling = batting.id === scoreboard.homeTeam.id ? scoreboard.awayTeam : scoreboard.homeTeam;
+  const ballsPerOver = state.settings?.ballsPerOver ?? 6;
+  const runs = state.runs ?? 0;
+  const wickets = state.wickets ?? 0;
+  const legalBalls = legalBallsFromOvers(state.overs, ballsPerOver);
+  const runRate = legalBalls > 0 ? (runs * ballsPerOver) / legalBalls : 0;
+  const chase = chaseState(state.target ?? null, runs, legalBalls, state.settings?.oversPerInnings ?? null, ballsPerOver);
+  const isLive = scoreboard.status === "live" || scoreboard.status === "innings_break";
+  const ribbon =
+    chase && chase.runsNeeded > 0
+      ? `${batting.name} need ${chase.runsNeeded} ${chase.runsNeeded === 1 ? "run" : "runs"}${chase.ballsLeft != null ? ` from ${chase.ballsLeft} balls` : ""}`
+      : chase
+        ? `${batting.name} have reached the target`
+        : (state.message ?? `${batting.name} batting`);
+  const recent = state.recent ?? [];
+  const updated = new Date(scoreboard.updatedAt).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
   return (
-    <div className="min-h-screen overflow-hidden bg-[#0f0d17] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(244,63,94,0.15),transparent_35%),radial-gradient(circle_at_80%_70%,rgba(251,191,36,0.12),transparent_38%)]" />
-      <header className="relative border-b border-white/10 px-4 py-4 md:px-8">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <Link to="/">
-            <img src={logoAsset.url} alt="CricLume" className="h-10 w-auto" />
+    <div className="scoreboard-stage min-h-screen pb-24">
+      <header className="scoreboard-topbar">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:px-8">
+          <Link to="/" aria-label="CricLume home">
+            <img src={logoAsset.url} alt="CricLume" className="h-9 w-auto md:h-10" />
           </Link>
-          <div className="flex items-center gap-2 rounded-full border border-rose-400/25 bg-rose-400/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-rose-300">
-            <span className="size-2 animate-pulse rounded-full bg-rose-400" />
-            Live scoreboard
-          </div>
-        </div>
-      </header>
-      <main
-        id="main-content"
-        tabIndex={-1}
-        className="relative mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-14"
-      >
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
-          <div className="flex flex-wrap gap-4">
-            <span className="flex items-center gap-1.5">
-              <MapPin className="size-3.5 text-amber-300" />
-              {scoreboard.ground?.name ?? "Ground to be confirmed"}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Clock3 className="size-3.5 text-amber-300" />
-              Updated{" "}
-              {new Date(scoreboard.updatedAt).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-              })}
-            </span>
-          </div>
-          <span>{scoreboard.weather?.summary}</span>
-        </div>
-        <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-5 shadow-2xl shadow-black/40 md:p-9">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <div className="text-xs font-bold uppercase tracking-[0.18em] text-amber-200">
-                {batting.name} batting
-              </div>
-              <div className="mt-3 flex items-end gap-3">
-                <span className="text-6xl font-bold tracking-tight md:text-8xl">
-                  {scoreboard.liveState.runs ?? 0}/{scoreboard.liveState.wickets ?? 0}
-                </span>
-                <span className="pb-2 text-lg font-bold text-slate-400">
-                  {scoreboard.liveState.overs ?? "0.0"} ov
-                </span>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-xs text-slate-500">v {bowling.name}</div>
-              {scoreboard.liveState.target && (
-                <div className="mt-2 text-sm font-bold">Target {scoreboard.liveState.target}</div>
-              )}
-            </div>
-          </div>
-          {scoreboard.liveState.message && (
-            <div className="mt-6 rounded-lg border border-amber-300/20 bg-amber-300/[0.06] px-4 py-3 text-sm font-bold text-amber-100">
-              {scoreboard.liveState.message}
-            </div>
-          )}
-          <div className="mt-7 grid gap-4 md:grid-cols-2">
-            <PlayerLine
-              label="Batters"
-              primary={
-                scoreboard.liveState.striker
-                  ? `Striker ${scoreboard.liveState.striker.runs}* (${scoreboard.liveState.striker.balls})`
-                  : "Awaiting striker"
-              }
-              secondary={
-                scoreboard.liveState.nonStriker
-                  ? `Non-striker ${scoreboard.liveState.nonStriker.runs} (${scoreboard.liveState.nonStriker.balls})`
-                  : "Awaiting non-striker"
-              }
-            />
-            <PlayerLine
-              label="Bowler"
-              primary={
-                scoreboard.liveState.bowler
-                  ? `Bowler ${scoreboard.liveState.bowler.wickets}/${scoreboard.liveState.bowler.runs}`
-                  : "Awaiting bowler"
-              }
-              secondary={
-                scoreboard.liveState.bowler ? `${scoreboard.liveState.bowler.overs} overs` : ""
-              }
-            />
-          </div>
-          <p className="mt-3 text-xs text-slate-400">
-            Player names are withheld on public scoreboards until publication permission can be
-            independently verified.
-          </p>
-          <div className="mt-7">
-            <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
-              Recent deliveries
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {(scoreboard.liveState.recent ?? []).map((ball, index) => (
-                <span
-                  key={`${ball.label}-${index}`}
-                  className={`flex size-10 items-center justify-center rounded-full border text-sm font-black ${ball.kind === "wicket" ? "border-rose-400 bg-rose-500 text-white" : ball.kind === "boundary" ? "border-amber-300 bg-amber-300 text-[#160f18]" : "border-white/10 bg-white/5"}`}
-                >
-                  {ball.label}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
-        <div className="mt-5 flex items-center justify-between text-[10px] uppercase tracking-[0.16em] text-slate-600">
-          <span>Powered by CricLume</span>
-          <span className="flex items-center gap-1">
-            <RotateCw className="size-3" />
-            Auto-refreshes every 10 seconds
+          <span className={`hero-chip ${isLive ? "hero-chip-live" : ""}`}>
+            {isLive && <span className="live-dot" aria-hidden="true" />}
+            {isLive ? "Live" : scoreboard.status.replaceAll("_", " ")}
           </span>
         </div>
-      </main>
-    </div>
-  );
-}
+      </header>
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-3 py-4 md:px-8 md:py-8">
+        <section className="scoreboard-frame">
+          <div className="scoreboard-meta">
+            <span className="inline-flex min-w-0 items-center gap-1.5">
+              <MapPin className="size-3.5 shrink-0 text-gold" aria-hidden="true" />
+              <span className="truncate">{scoreboard.ground?.name ?? "Ground to be confirmed"}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock3 className="size-3.5 text-gold" aria-hidden="true" />
+              Updated {updated}
+            </span>
+          </div>
 
-function PlayerLine({
-  label,
-  primary,
-  secondary,
-}: {
-  label: string;
-  primary: string;
-  secondary: string;
-}) {
-  return (
-    <div className="rounded-lg border border-white/8 bg-black/15 p-4">
-      <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">
-        {label}
-      </div>
-      <div className="mt-2 text-base font-bold">{primary}</div>
-      <div className="mt-1 text-xs text-slate-400">{secondary}</div>
+          <div className="scoreboard-hero">
+            <div className="flex min-w-0 flex-col items-center gap-2 text-center md:flex-row md:text-left">
+              <TeamCrest name={batting.name} size="lg" />
+              <div className="min-w-0">
+                <p className="scoreboard-team-tag">Batting</p>
+                <p className="scoreboard-team">{batting.name}</p>
+              </div>
+            </div>
+            <div className="flex flex-col items-center">
+              <p className="scoreboard-score">
+                {runs}
+                <span>/{wickets}</span>
+              </p>
+              <p className="scoreboard-overs">
+                <strong>{state.overs ?? "0.0"}</strong> overs
+                {state.settings?.oversPerInnings ? ` of ${state.settings.oversPerInnings}` : ""}
+              </p>
+            </div>
+            <div className="flex min-w-0 flex-col items-center gap-2 text-center md:flex-row-reverse md:text-right">
+              <TeamCrest name={bowling.name} size="lg" />
+              <div className="min-w-0">
+                <p className="scoreboard-team-tag">Bowling</p>
+                <p className="scoreboard-team">{bowling.name}</p>
+              </div>
+            </div>
+          </div>
+
+          <p className="hero-ribbon scoreboard-ribbon">{ribbon}</p>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <div className="broadcast-panel">
+              <table className="scoreboard-table">
+                <caption className="sr-only">Batters at the crease</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" className="panel-kicker">Batters</th>
+                    <th scope="col">R</th>
+                    <th scope="col">B</th>
+                    <th scope="col">SR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { key: "striker", label: "Striker", line: state.striker, onStrike: true },
+                    { key: "non", label: "Non-striker", line: state.nonStriker, onStrike: false },
+                  ].map((row) => (
+                    <tr key={row.key}>
+                      <th scope="row">
+                        <span className="inline-flex items-center gap-2">
+                          {row.onStrike ? <span className="strike-dot" aria-label="On strike" /> : <span className="inline-block w-[0.45rem]" />}
+                          {row.label}
+                        </span>
+                      </th>
+                      <td className="scoreboard-figure">{row.line ? `${row.line.runs}${row.onStrike ? "*" : ""}` : "—"}</td>
+                      <td>{row.line?.balls ?? "—"}</td>
+                      <td>{row.line ? strikeRate(row.line.runs, row.line.balls) : "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="broadcast-panel">
+              <table className="scoreboard-table">
+                <caption className="sr-only">Current bowler</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" className="panel-kicker">Bowler</th>
+                    <th scope="col">O</th>
+                    <th scope="col">R</th>
+                    <th scope="col">W</th>
+                    <th scope="col">Econ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Bowler</th>
+                    <td>{state.bowler?.overs ?? "—"}</td>
+                    <td>{state.bowler?.runs ?? "—"}</td>
+                    <td className="scoreboard-wickets">{state.bowler?.wickets ?? "—"}</td>
+                    <td>
+                      {state.bowler
+                        ? (() => {
+                            const balls = legalBallsFromOvers(state.bowler.overs, ballsPerOver);
+                            return balls > 0 ? ((state.bowler.runs * ballsPerOver) / balls).toFixed(2) : "—";
+                          })()
+                        : "—"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="broadcast-panel mt-3">
+            <p className="panel-kicker">Recent balls</p>
+            {recent.length === 0 ? (
+              <p className="scoreboard-muted mt-3 text-sm">The first ball hasn't been bowled yet.</p>
+            ) : (
+              <ol className="mt-3 flex flex-wrap gap-2 md:gap-3">
+                {recent.map((ball, index) => (
+                  <li key={`${ball.label}-${index}`}>
+                    <span className="ball-chip md:size-12" data-tone={ballKind(ball)}>
+                      {ball.label}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3">
+            <div className="broadcast-panel scoreboard-stat">
+              <p className="panel-kicker">Run rate</p>
+              <p className="scoreboard-stat-value">{runRate.toFixed(2)}</p>
+              <p className="scoreboard-muted text-[11px] uppercase tracking-wider">Current</p>
+            </div>
+            <div className="broadcast-panel scoreboard-stat">
+              <p className="panel-kicker">{chase?.requiredRate != null ? "Required" : "Target"}</p>
+              <p className="scoreboard-stat-value text-gold">
+                {chase?.requiredRate != null ? chase.requiredRate.toFixed(2) : (state.target ?? "—")}
+              </p>
+              <p className="scoreboard-muted text-[11px] uppercase tracking-wider">
+                {chase?.requiredRate != null ? "Run rate" : state.target ? "To win" : "First innings"}
+              </p>
+            </div>
+            <div className="broadcast-panel scoreboard-stat col-span-2 md:col-span-1">
+              <p className="panel-kicker">Wickets in hand</p>
+              <p className="scoreboard-stat-value">{Math.max(0, 10 - wickets)}</p>
+              <p className="scoreboard-muted text-[11px] uppercase tracking-wider">of 10</p>
+            </div>
+          </div>
+
+          <p className="scoreboard-muted mt-4 text-center text-[11px]">
+            Player names stay hidden on public scoreboards until the club confirms they can be shown.
+          </p>
+        </section>
+      </main>
+
+      <footer className="scoreboard-ticker" aria-label="Score summary">
+        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5 md:px-8">
+          <span className="font-display text-sm font-bold uppercase tracking-wider">
+            {batting.shortName || batting.name}
+          </span>
+          <span className="font-display text-lg font-bold tabular-nums text-gold">
+            {runs}/{wickets}
+          </span>
+          <span className="scoreboard-muted text-xs tabular-nums">{state.overs ?? "0.0"}</span>
+          <span className="scoreboard-ticker-msg hidden min-w-0 flex-1 truncate text-center text-xs font-bold uppercase tracking-wider sm:block">
+            {ribbon}
+          </span>
+          <span className="scoreboard-muted ml-auto inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.14em]">
+            <RotateCw className="size-3" aria-hidden="true" /> Every 10s
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }
 
 function ScoreboardMessage({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0f0d17] px-4 text-center text-white">
-      <div>
-        <Radio className="mx-auto size-8 text-amber-300" />
-        <h1 className="mt-4 text-2xl font-bold">{title}</h1>
-        <p className="mt-2 max-w-md text-sm text-slate-400">{detail}</p>
-        <Link
-          to="/"
-          className="mt-6 inline-flex rounded-md bg-white px-4 py-2 text-xs font-bold text-[#160f18]"
-        >
+    <div className="scoreboard-stage flex min-h-screen items-center justify-center px-4 text-center">
+      <div className="broadcast-panel max-w-md p-8">
+        <Radio className="mx-auto size-8 text-gold" aria-hidden="true" />
+        <h1 className="mt-4 font-display text-2xl font-bold">{title}</h1>
+        <p className="scoreboard-muted mt-2 text-sm">{detail}</p>
+        <Link to="/" className="action-primary mt-6 inline-flex">
           CricLume home
         </Link>
       </div>

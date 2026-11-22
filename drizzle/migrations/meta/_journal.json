@@ -50,6 +50,13 @@
       "when": 1795362857950,
       "tag": "0006_scope_analysis_evidence_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795363443047,
+      "tag": "0007_tighten_analysis_evidence_access",
+      "breakpoints": true
     }
   ]
 }

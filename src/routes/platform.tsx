@@ -51,6 +51,7 @@ import {
 import { AppHeader } from "@/components/app-shell/AppHeader";
 import { GoogleButton } from "@/components/app-shell/GoogleButton";
 import { SetupChecklist } from "@/components/SetupChecklist";
+import { ClubMatchInsights } from "@/components/club/ClubMatchInsights";
 import { TeamCrest } from "@/components/scorer/Broadcast";
 import scoreboardShot from "@/assets/shot-scoreboard.jpg";
 import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPanel";
@@ -756,6 +757,7 @@ function Overview({
           <MetricCard key={label} icon={Icon} label={label} value={value} detail={detail} />
         ))}
       </div>
+      <ClubMatchInsights data={data} />
       {can(role, "match.manage") && <CreateMatchPanel data={data} run={run} />}
       <Panel
         title="Matches"

@@ -1,0 +1,77 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import {
+  overProgression,
+  topBatters,
+  topBowlers,
+  wagonWheel,
+  type InsightBall,
+} from "../src/lib/match-insights.ts";
+
+const ball = (over: number, patch: Partial<InsightBall> = {}): InsightBall => ({
+  over,
+  legal: true,
+  batterRuns: 0,
+  wide: 0,
+  noBall: 0,
+  bye: 0,
+  legBye: 0,
+  strikerId: "a",
+  bowlerId: "x",
+  fieldZone: "Not recorded",
+  dismissalType: null,
+  ...patch,
+});
+
+test("run rate is cumulative runs per completed six-ball over", () => {
+  const balls = [
+    ...Array.from({ length: 6 }, () => ball(0, { batterRuns: 1 })),
+    ball(1, { batterRuns: 4 }),
+    ball(1, { legal: false, wide: 1 }),
+    ...Array.from({ length: 5 }, () => ball(1)),
+  ];
+  const points = overProgression(balls);
+  assert.deepEqual(
+    points.map((point) => [point.over, point.runs, point.totalRuns, point.runRate]),
+    [
+      [1, 6, 6, 6],
+      [2, 5, 11, 5.5],
+    ],
+  );
+});
+
+test("wagon wheel counts bat runs only and keeps unplaced runs separate", () => {
+  const wheel = wagonWheel([
+    ball(0, { batterRuns: 4, fieldZone: "Cover" }),
+    ball(0, { batterRuns: 2, fieldZone: "Cover" }),
+    ball(0, { batterRuns: 2, fieldZone: "Square leg" }),
+    ball(0, { batterRuns: 3, fieldZone: "Not recorded" }),
+    ball(0, { legBye: 1, fieldZone: "Fine leg" }),
+  ]);
+  assert.equal(wheel.placedRuns, 8);
+  assert.equal(wheel.unplacedRuns, 3);
+  assert.equal(wheel.zones.find((zone) => zone.zone === "Cover")?.share, 75);
+  assert.equal(wheel.zones.find((zone) => zone.zone === "Fine leg")?.runs, 0);
+});
+
+test("top batters rank by runs, wides are not balls faced", () => {
+  const [first, second] = topBatters([
+    ball(0, { strikerId: "a", batterRuns: 6 }),
+    ball(0, { strikerId: "a", legal: false, wide: 1 }),
+    ball(0, { strikerId: "b", batterRuns: 4 }),
+    ball(0, { strikerId: "b", dismissalType: "bowled" }),
+  ]);
+  assert.deepEqual([first?.playerId, first?.runs, first?.balls, first?.sixes], ["a", 6, 1, 1]);
+  assert.deepEqual([second?.playerId, second?.out], ["b", true]);
+});
+
+test("bowlers are not credited with run outs and are not charged byes", () => {
+  const [first, second] = topBowlers([
+    ball(0, { bowlerId: "x", dismissalType: "caught" }),
+    ball(0, { bowlerId: "x", bye: 4 }),
+    ball(0, { bowlerId: "y", dismissalType: "run-out" }),
+    ball(0, { bowlerId: "y", legal: false, noBall: 1, batterRuns: 2 }),
+  ]);
+  assert.deepEqual([first?.playerId, first?.wickets, first?.runs, first?.overs], ["x", 1, 0, "0.2"]);
+  assert.deepEqual([second?.playerId, second?.wickets, second?.runs], ["y", 0, 3]);
+});

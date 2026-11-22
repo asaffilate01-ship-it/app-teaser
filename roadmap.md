@@ -6,8 +6,8 @@
 - [x] Desktop side menu in the club workspace
 - [x] Scorer: move backup restore into "More options"
 - [x] Live scoring screen + match cards restyled to match the demo screenshots
-- [ ] Club overview restyled like the demo dashboard (run-rate chart, wagon wheel, top performers)
+- [x] Club overview restyled like the demo dashboard (run-rate chart, wagon wheel, top performers)
 - [ ] Public live scoreboard, camera and director screens restyled to match
 - [ ] Verify signed-in club workspace end-to-end — blocked: test sign-in was cancelled twice
-- [ ] Security follow-ups (awaiting user's go-ahead): evidence delete by ex-members; junior evidence visible to coaches
+- [x] Security follow-ups: evidence delete/upload limited to current staff; junior evidence limited to owners, safeguarding officers and the uploader
 - [ ] Go-live (needs user): payments live keys, email sending, custom domain, legal/safeguarding sign-off
