@@ -86,6 +86,8 @@ import { describeScorerSyncRecovery } from "@/lib/scorer-sync-status";
 import { AppHeader } from "@/components/app-shell/AppHeader";
 import { AppTabBar } from "@/components/app-shell/AppTabBar";
 import { BallTrail, CreaseStrip, RateStrip, ScoreHero, TeamCrest } from "@/components/scorer/Broadcast";
+import { FielderChips, OutcomeChips, ShotSummary, ShotZonePicker } from "@/components/scorer/ShotEntry";
+import { lastFielderInZone, orderFielders, outcomeAfterZone } from "@/lib/shot-entry";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
@@ -103,21 +105,6 @@ export const Route = createFileRoute("/app")({
 });
 
 type AppScreen = "dashboard" | "setup" | "match";
-
-const fieldZones: FieldZone[] = [
-  "Fine leg",
-  "Square leg",
-  "Mid-wicket",
-  "Long on",
-  "Straight",
-  "Long off",
-  "Cover",
-  "Point",
-  "Third",
-  "Keeper",
-  "Bowler",
-  "Not recorded",
-];
 
 const deliveryStyles: DeliveryStyle[] = [
   "Fast",
@@ -1244,7 +1231,29 @@ function ScoringPad({
     };
     onSave(recordDelivery(match, input), "delivery.recorded");
     setNote("");
+    clearShot();
   };
+
+  const clearShot = () => {
+    setFieldZone("Not recorded");
+    setFielderId("");
+    setOutcome("hit-no-run");
+  };
+
+  const chooseZone = (zone: FieldZone) => {
+    setFieldZone(zone);
+    setOutcome((current) => outcomeAfterZone(zone, current));
+    setFielderId(zone === "Not recorded" ? "" : (lastFielderInZone(innings.deliveries, zone) ?? ""));
+  };
+
+  const suggestedFielderId = lastFielderInZone(innings.deliveries, fieldZone);
+  const orderedFielders = orderFielders(
+    bowlingTeam.players.map((player) => player.id),
+    innings.deliveries,
+    fieldZone,
+  )
+    .map((id) => bowlingTeam.players.find((player) => player.id === id))
+    .filter((player): player is NonNullable<typeof player> => Boolean(player));
 
   const resetDetailedRuns = () => {
     setDetailBatterRuns(0);
@@ -1287,7 +1296,7 @@ function ScoringPad({
 
   return (
     <div className="grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
-      <section className="broadcast-panel order-2 space-y-5 md:p-6 lg:order-1" aria-label="Ball details">
+      <section className="broadcast-panel order-2 space-y-5 self-start md:p-6 lg:order-1" aria-label="Ball details">
         <h2 className="panel-kicker">Ball details</h2>
         <div className="grid grid-cols-2 gap-3">
           <div className="hidden lg:block">
@@ -1325,33 +1334,6 @@ function ScoringPad({
           <RotateCcw className="size-3.5" /> Swap batters
         </button>
 
-        <div>
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
-            What happened?
-          </p>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2">
-            {[
-              ["hit-no-run", "Hit, no run"],
-              ["hit", "Shot played"],
-              ["left", "Left"],
-              ["missed", "Missed"],
-            ].map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setOutcome(value as ShotOutcome)}
-                className={`rounded-xl border px-3 py-3 text-xs font-bold ${outcome === value ? "border-amber-300 bg-amber-300/10 text-amber-200" : "border-white/10 text-slate-400"}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <FieldMap value={fieldZone} onChange={setFieldZone} />
-        <Field label="Fielder who stopped it">
-          <PlayerSelect team={bowlingTeam} value={fielderId} onChange={setFielderId} allowNone />
-        </Field>
 
         <button
           type="button"
@@ -1415,6 +1397,35 @@ function ScoringPad({
           <Field label="Bowler">
             <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} />
           </Field>
+        </div>
+
+        <div className="broadcast-panel shot-card" aria-label="Where did the ball go?">
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <h2 className="panel-kicker">Where did it go?</h2>
+            <span className="text-[11px] text-muted-foreground">Optional</span>
+          </div>
+          <div className="shot-card-grid">
+            <ShotZonePicker value={fieldZone} onChange={chooseZone} />
+            <div className="space-y-4">
+              {fieldZone !== "Not recorded" ? (
+                <FielderChips
+                  label="Who fielded it?"
+                  players={orderedFielders}
+                  value={fielderId}
+                  onChange={setFielderId}
+                  suggestedId={suggestedFielderId}
+                />
+              ) : (
+                <p className="shot-summary-hint">Pick an area on the field to choose the fielder.</p>
+              )}
+              <OutcomeChips value={outcome} onChange={setOutcome} />
+            </div>
+          </div>
+          <ShotSummary
+            zone={fieldZone}
+            fielderName={fielderId ? findPlayer(match, fielderId)?.name : undefined}
+            onClear={clearShot}
+          />
         </div>
 
         <div>
@@ -1555,7 +1566,7 @@ function ScoringPad({
               </select>
             </Field>
             {["caught", "stumped", "run-out"].includes(dismissalType) && (
-              <Field
+              <FielderChips
                 label={
                   dismissalType === "caught"
                     ? "Catcher"
@@ -1563,16 +1574,17 @@ function ScoringPad({
                       ? "Wicketkeeper"
                       : "Fielder responsible"
                 }
-              >
-                <PlayerSelect
-                  team={bowlingTeam}
-                  value={dismissalFielderId}
-                  onChange={setDismissalFielderId}
-                />
-              </Field>
+                players={orderedFielders}
+                value={dismissalFielderId}
+                onChange={setDismissalFielderId}
+                allowNone={false}
+              />
             )}
             {dismissalType === "caught" && (
-              <FieldMap value={fieldZone} onChange={setFieldZone} compact />
+              <div>
+                <p className="shot-step-label">Catch location</p>
+                <ShotZonePicker value={fieldZone} onChange={chooseZone} label="Catch location" />
+              </div>
             )}
             <DetailedDeliveryFields
               batterRuns={detailBatterRuns}
@@ -1717,36 +1729,6 @@ function QuickButton({
       <strong className="block text-sm">{label}</strong>
       <span className="text-[10px] text-slate-500">{detail}</span>
     </button>
-  );
-}
-
-function FieldMap({
-  value,
-  onChange,
-  compact = false,
-}: {
-  value: FieldZone;
-  onChange: (zone: FieldZone) => void;
-  compact?: boolean;
-}) {
-  return (
-    <div>
-      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
-        {compact ? "Catch location" : "Shot / stop location"}
-      </p>
-      <div className="grid grid-cols-3 gap-1.5 rounded-[2rem] border border-white/10 bg-[#17131f] p-3">
-        {fieldZones.map((zone) => (
-          <button
-            key={zone}
-            type="button"
-            onClick={() => onChange(zone)}
-            className={`min-h-10 rounded-xl px-1.5 py-2 text-[10px] font-bold leading-tight ${value === zone ? "bg-amber-300 text-[#1d1520]" : "bg-white/[0.04] text-slate-400"}`}
-          >
-            {zone}
-          </button>
-        ))}
-      </div>
-    </div>
   );
 }
 

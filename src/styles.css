@@ -1540,3 +1540,173 @@
   width: 1.05rem;
   height: 1.05rem;
 }
+
+/* Scorer: tap-the-field shot area, fielder chips */
+.shot-card {
+  padding: 1rem;
+}
+.shot-card-grid {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .shot-card-grid {
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+.zone-picker-wrap {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 17rem;
+}
+.zone-picker {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.zone-boundary {
+  fill: oklch(0.34 0.07 150 / 0.55);
+  stroke: oklch(0.97 0.01 84 / 0.55);
+  stroke-width: 2;
+}
+.zone-wedge {
+  cursor: pointer;
+  outline: none;
+}
+.zone-wedge path {
+  fill: oklch(0.42 0.08 150 / 0.55);
+  stroke: oklch(0.2 0.04 150);
+  stroke-width: 2;
+  transition: fill 140ms ease;
+}
+.zone-wedge:nth-of-type(even) path {
+  fill: oklch(0.38 0.08 150 / 0.55);
+}
+.zone-wedge:hover path {
+  fill: oklch(0.5 0.09 150 / 0.7);
+}
+.zone-wedge:focus-visible path {
+  stroke: var(--gold);
+  stroke-width: 3;
+}
+.zone-wedge[aria-pressed="true"] path {
+  fill: var(--gold);
+}
+.zone-inner path {
+  fill: oklch(0.52 0.07 110 / 0.7);
+}
+.zone-label {
+  pointer-events: none;
+  fill: oklch(0.97 0.01 84);
+  font-size: 13px;
+  font-weight: 700;
+}
+.zone-label-small {
+  font-size: 11px;
+}
+.zone-wedge[aria-pressed="true"] .zone-label {
+  fill: oklch(0.2 0.04 15);
+}
+.zone-pitch {
+  pointer-events: none;
+  fill: oklch(0.82 0.06 80);
+  stroke: oklch(0.97 0.01 84 / 0.8);
+}
+.zone-side {
+  fill: oklch(0.8 0.02 280);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+.shot-step-label {
+  margin-bottom: 0.5rem;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: oklch(0.75 0.02 280);
+}
+.fielder-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.outcome-chips {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+.fielder-chip {
+  display: inline-flex;
+  min-height: 2.6rem;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--broadcast-border);
+  background: oklch(1 0 0 / 0.04);
+  padding: 0 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: oklch(0.85 0.02 280);
+  transition: background 140ms ease, border-color 140ms ease, transform 110ms ease;
+}
+.fielder-chip:active {
+  transform: scale(0.96);
+}
+.fielder-chip:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.fielder-chip[aria-pressed="true"] {
+  border-color: var(--gold);
+  background: oklch(0.82 0.15 84 / 0.16);
+  color: oklch(0.92 0.1 84);
+}
+.fielder-chip-none {
+  color: oklch(0.7 0.02 280);
+}
+.fielder-chip-hint {
+  border-radius: 999px;
+  background: oklch(0.82 0.15 84 / 0.2);
+  padding: 0.1rem 0.45rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: oklch(0.9 0.12 84);
+}
+.shot-summary {
+  margin-top: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-radius: 0.9rem;
+  background: oklch(0.82 0.15 84 / 0.1);
+  padding: 0.6rem 0.85rem;
+  font-size: 0.8rem;
+  color: oklch(0.88 0.03 84);
+}
+.shot-summary strong {
+  color: oklch(0.95 0.1 84);
+}
+.shot-summary-clear {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--broadcast-border);
+  padding: 0.3rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+.shot-summary-hint {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: oklch(0.72 0.02 280);
+}
