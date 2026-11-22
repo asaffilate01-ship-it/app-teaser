@@ -5,6 +5,8 @@ import {
   type Discipline,
 } from "./analysis.ts";
 
+import { zoneArea } from "./field-positions.ts";
+
 // Schematic reference positions, not measured player or ball coordinates.
 export const groundZones = [
   { name: "Fine leg", x: -21, z: 27 },
@@ -40,7 +42,8 @@ export function summarizeGround(rows: DeliveryEvidence[], discipline: Discipline
     const name = normalizeAnalysisZone(
       discipline === "fielding" ? row.fielding_zone : row.shot_zone,
     );
-    const zone = zones.find((zone) => zone.name.toLowerCase() === name);
+    const area = zoneArea(name)?.toLowerCase() ?? name;
+    const zone = zones.find((zone) => zone.name.toLowerCase() === area);
     if (!zone) {
       unmapped++;
       continue;

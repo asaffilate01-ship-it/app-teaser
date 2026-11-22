@@ -1,29 +1,26 @@
 import type { FieldZone, ShotOutcome } from "./cricket.ts";
-
-/** Outfield wedges, clockwise from just right of the keeper (right-handed batter view). */
-export const pickerZones = [
-  "Fine leg",
-  "Square leg",
-  "Mid-wicket",
-  "Long on",
-  "Straight",
-  "Long off",
-  "Cover",
-  "Point",
-  "Third",
-] as const satisfies readonly FieldZone[];
+import { zoneArea } from "./field-positions.ts";
 
 interface FieldedBall {
   fieldZone: FieldZone;
   fielderId?: string | undefined;
 }
 
-/** The fielder who most recently stopped a ball in this zone, if any. */
+/**
+ * The fielder who most recently stopped a ball at this position.
+ * Falls back to the last fielder anywhere in the same broad area (e.g. Cover → Extra cover).
+ */
 export function lastFielderInZone(balls: readonly FieldedBall[], zone: FieldZone): string | undefined {
   if (zone === "Not recorded") return undefined;
   for (let index = balls.length - 1; index >= 0; index -= 1) {
     const ball = balls[index];
     if (ball && ball.fieldZone === zone && ball.fielderId) return ball.fielderId;
+  }
+  const area = zoneArea(zone);
+  if (!area) return undefined;
+  for (let index = balls.length - 1; index >= 0; index -= 1) {
+    const ball = balls[index];
+    if (ball && ball.fielderId && zoneArea(ball.fieldZone) === area) return ball.fielderId;
   }
   return undefined;
 }
@@ -42,6 +39,16 @@ export function orderFielders(
   for (let index = balls.length - 1; index >= 0; index -= 1) add(balls[index]?.fielderId);
   playerIds.forEach(add);
   return order;
+}
+
+/** Most recently used positions, newest first, without repeats — for one-tap re-use. */
+export function recentZones(balls: readonly FieldedBall[], limit = 4): FieldZone[] {
+  const zones: FieldZone[] = [];
+  for (let index = balls.length - 1; index >= 0 && zones.length < limit; index -= 1) {
+    const zone = balls[index]?.fieldZone;
+    if (zone && zone !== "Not recorded" && !zones.includes(zone)) zones.push(zone);
+  }
+  return zones;
 }
 
 /** Picking a field area means the bat found the ball, so "left" or "missed" no longer fits. */

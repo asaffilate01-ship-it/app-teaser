@@ -1,22 +1,10 @@
 import { z } from "zod";
 import type { CricketMatch } from "./cricket";
+import { allFieldZones } from "./field-positions.ts";
 export const scorerStorageKey = "criclume.matches.v1";
 const text = z.string();
 const count = z.number().int().nonnegative();
-const zone = z.enum([
-  "Fine leg",
-  "Square leg",
-  "Mid-wicket",
-  "Long on",
-  "Straight",
-  "Long off",
-  "Cover",
-  "Point",
-  "Third",
-  "Keeper",
-  "Bowler",
-  "Not recorded",
-]);
+const zone = z.enum(allFieldZones);
 const end = z.enum(["Pavilion", "Far"]);
 const team = z.looseObject({
   id: text,

@@ -87,7 +87,9 @@ import { AppHeader } from "@/components/app-shell/AppHeader";
 import { AppTabBar } from "@/components/app-shell/AppTabBar";
 import { BallTrail, CreaseStrip, RateStrip, ScoreHero, TeamCrest } from "@/components/scorer/Broadcast";
 import { FielderChips, OutcomeChips, ShotSummary, ShotZonePicker } from "@/components/scorer/ShotEntry";
-import { lastFielderInZone, orderFielders, outcomeAfterZone } from "@/lib/shot-entry";
+import { lastFielderInZone, orderFielders, outcomeAfterZone, recentZones } from "@/lib/shot-entry";
+
+const batterHandKey = "criclume.batter-hands.v1";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
@@ -1198,6 +1200,7 @@ function ScoringPad({
   const [dismissalType, setDismissalType] = useState<DismissalType>("bowled");
   const [dismissedBatterId, setDismissedBatterId] = useState(innings.strikerId);
   const [dismissalFielderId, setDismissalFielderId] = useState("");
+  const [leftHanders, setLeftHanders] = useState<Record<string, boolean>>({});
   const invalidDetailedExtras = detailExtras.wide > 0 && detailExtras.noBall > 0;
 
   useEffect(() => {
@@ -1214,6 +1217,28 @@ function ScoringPad({
     innings.bowlerId,
     innings.end,
   ]);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(batterHandKey) ?? "{}") as unknown;
+      if (saved && typeof saved === "object") setLeftHanders(saved as Record<string, boolean>);
+    } catch {
+      /* ignore unreadable preference */
+    }
+  }, []);
+
+  const setBatterHand = (playerId: string, left: boolean) => {
+    setLeftHanders((current) => {
+      const next = { ...current, [playerId]: left };
+      try {
+        window.localStorage.setItem(batterHandKey, JSON.stringify(next));
+      } catch {
+        /* storage may be unavailable */
+      }
+      return next;
+    });
+  };
+  const recentPositions = recentZones(innings.deliveries);
 
   const saveBall = (partial: Partial<RecordDeliveryInput>) => {
     const input: RecordDeliveryInput = {
@@ -1402,10 +1427,18 @@ function ScoringPad({
         <div className="broadcast-panel shot-card" aria-label="Where did the ball go?">
           <div className="mb-3 flex items-baseline justify-between gap-3">
             <h2 className="panel-kicker">Where did it go?</h2>
-            <span className="text-[11px] text-muted-foreground">Optional</span>
+            <span className="text-[11px] text-muted-foreground">
+              Optional · {findPlayer(match, strikerId)?.name ?? "Striker"} on strike
+            </span>
           </div>
           <div className="shot-card-grid">
-            <ShotZonePicker value={fieldZone} onChange={chooseZone} />
+            <ShotZonePicker
+              value={fieldZone}
+              onChange={chooseZone}
+              leftHanded={Boolean(leftHanders[strikerId])}
+              onHandChange={(left) => setBatterHand(strikerId, left)}
+              recent={recentPositions}
+            />
             <div className="space-y-4">
               {fieldZone !== "Not recorded" ? (
                 <FielderChips
@@ -1416,7 +1449,7 @@ function ScoringPad({
                   suggestedId={suggestedFielderId}
                 />
               ) : (
-                <p className="shot-summary-hint">Pick an area on the field to choose the fielder.</p>
+                <p className="shot-summary-hint">Pick a fielding position to choose the fielder.</p>
               )}
               <OutcomeChips value={outcome} onChange={setOutcome} />
             </div>
@@ -1583,7 +1616,12 @@ function ScoringPad({
             {dismissalType === "caught" && (
               <div>
                 <p className="shot-step-label">Catch location</p>
-                <ShotZonePicker value={fieldZone} onChange={chooseZone} label="Catch location" />
+                <ShotZonePicker
+                  value={fieldZone}
+                  onChange={chooseZone}
+                  label="Catch location"
+                  leftHanded={Boolean(leftHanders[dismissedBatterId])}
+                />
               </div>
             )}
             <DetailedDeliveryFields

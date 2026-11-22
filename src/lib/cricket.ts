@@ -5,19 +5,8 @@ export type InningsStatus = "live" | "completed";
 export type DeliveryEnd = "Pavilion" | "Far";
 export type DeliveryStyle = "Fast" | "Medium" | "Off spin" | "Leg spin" | "Left-arm spin" | "Other";
 export type ShotOutcome = "hit" | "hit-no-run" | "left" | "missed" | "wicket";
-export type FieldZone =
-  | "Fine leg"
-  | "Square leg"
-  | "Mid-wicket"
-  | "Long on"
-  | "Straight"
-  | "Long off"
-  | "Cover"
-  | "Point"
-  | "Third"
-  | "Keeper"
-  | "Bowler"
-  | "Not recorded";
+export type { FieldZone } from "./field-positions.ts";
+import type { FieldZone } from "./field-positions.ts";
 
 export type DismissalType =
   "bowled" | "caught" | "lbw" | "stumped" | "run-out" | "hit-wicket" | "obstructing-the-field";

@@ -1,3 +1,4 @@
+import { zoneArea } from "./field-positions.ts";
 import {
   coachingKeys,
   matchesCoaching,
@@ -58,6 +59,12 @@ export const defaultAnalysisFilters: AnalysisFilters = {
 export function normalizeAnalysisZone(value: string | null | undefined): string {
   return (value ?? "").trim().replace(/\s+/g, " ").toLowerCase();
 }
+/** A recorded position matches its own name or the broad area it rolls up into. */
+export function zoneMatches(recorded: string | null | undefined, wanted: string): boolean {
+  const key = normalizeAnalysisZone(wanted);
+  const value = normalizeAnalysisZone(recorded);
+  return value === key || normalizeAnalysisZone(zoneArea(recorded)) === key;
+}
 export function filterDeliveries(
   rows: DeliveryEvidence[],
   f: AnalysisFilters,
@@ -87,8 +94,7 @@ export function filterDeliveries(
       (!f.innings || d.innings_id === f.innings) &&
       (!f.style || d.delivery_style === f.style) &&
       (!f.zone ||
-        normalizeAnalysisZone(f.discipline === "fielding" ? d.fielding_zone : d.shot_zone) ===
-          normalizeAnalysisZone(f.zone)) &&
+        zoneMatches(f.discipline === "fielding" ? d.fielding_zone : d.shot_zone, f.zone)) &&
       (!f.outcome ||
         (f.outcome === "wickets"
           ? d.wicket

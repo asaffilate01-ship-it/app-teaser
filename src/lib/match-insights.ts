@@ -1,4 +1,5 @@
 import { isBowlerWicket, type DismissalType, type FieldZone } from "./cricket.ts";
+import { fieldAreas, zoneArea } from "./field-positions.ts";
 
 /** One recorded ball, reduced to what the club dashboard charts need. */
 export interface InsightBall {
@@ -55,17 +56,7 @@ export function overProgression(balls: InsightBall[], ballsPerOver = 6): OverPoi
 }
 
 /** Wagon wheel segments, clockwise from just right of the keeper (right-handed batter view). */
-export const wheelZones = [
-  "Fine leg",
-  "Square leg",
-  "Mid-wicket",
-  "Long on",
-  "Straight",
-  "Long off",
-  "Cover",
-  "Point",
-  "Third",
-] as const satisfies readonly FieldZone[];
+export const wheelZones = fieldAreas;
 
 export type WheelZone = (typeof wheelZones)[number];
 
@@ -75,13 +66,13 @@ export interface WagonWheel {
   unplacedRuns: number;
 }
 
-/** Bat runs by field zone. Runs without a recorded outfield zone are counted as unplaced. */
+/** Bat runs by broad field area (specific positions roll up). Runs without a recorded outfield zone are counted as unplaced. */
 export function wagonWheel(balls: InsightBall[]): WagonWheel {
   const totals = new Map<WheelZone, number>(wheelZones.map((zone) => [zone, 0]));
   let unplacedRuns = 0;
   for (const ball of balls) {
     if (ball.batterRuns <= 0) continue;
-    const zone = ball.fieldZone as WheelZone;
+    const zone = zoneArea(ball.fieldZone) as WheelZone;
     if (totals.has(zone)) totals.set(zone, (totals.get(zone) ?? 0) + ball.batterRuns);
     else unplacedRuns += ball.batterRuns;
   }
