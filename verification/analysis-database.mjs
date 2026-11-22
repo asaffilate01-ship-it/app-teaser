@@ -442,6 +442,62 @@ await db.query(
 await db.query(
   "insert into storage.objects(bucket_id,name) values('match-video','fixture-source.webm')",
 );
+
+// RLS: only a director with valid asset review rights can calibrate or mark
+// a private highlight. Cross-club users and unowned calibration updates fail.
+await asUser(a, () =>
+  db.query(
+    "insert into public.camera_clip_calibrations(asset_id,room_id,offset_ms,calibrated_by) values($1,$2,-250,$3)",
+    [asset, room, a],
+  ),
+);
+assert.equal(
+  (await asUser(a, () => db.query(
+    "select offset_ms from public.camera_clip_calibrations where asset_id=$1", [asset],
+  ))).rows[0].offset_ms,
+  -250,
+);
+assert.equal(
+  (await asUser(b, () => db.query("select * from public.camera_clip_calibrations"))).rows.length,
+  0,
+);
+await assert.rejects(
+  () => asUser(b, () => db.query(
+    "insert into public.camera_clip_calibrations(asset_id,room_id,offset_ms,calibrated_by) values($1,$2,0,$3)",
+    [asset, room, b],
+  )),
+  (e) => e.code === "42501",
+);
+await assert.rejects(
+  () => asUser(a, () => db.query(
+    "update public.camera_clip_calibrations set offset_ms=40000 where asset_id=$1", [asset],
+  )),
+  (e) => e.code === "23514",
+);
+await asUser(a, () =>
+  db.query(
+    "insert into public.camera_highlight_candidates(room_id,asset_id,at_ms,duration_ms,kind,note,created_by) values($1,$2,500,6000,'boundary','Candidate only',$3)",
+    [room, asset, a],
+  ),
+);
+assert.equal(
+  (await asUser(b, () => db.query("select * from public.camera_highlight_candidates"))).rows.length,
+  0,
+);
+await assert.rejects(
+  () => asUser(b, () => db.query(
+    "insert into public.camera_highlight_candidates(room_id,asset_id,at_ms,duration_ms,kind,created_by) values($1,$2,500,6000,'other',$3)",
+    [room, asset, b],
+  )),
+  (e) => e.code === "42501",
+);
+await assert.rejects(
+  () => asUser(a, () => db.query(
+    "insert into public.camera_highlight_candidates(room_id,asset_id,at_ms,duration_ms,kind,created_by) values($1,$2,500,600000,'other',$3)",
+    [room, asset, a],
+  )),
+  (e) => e.code === "23514",
+);
 assert.equal(
   (
     await db.query(
