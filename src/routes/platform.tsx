@@ -51,6 +51,7 @@ import {
 import { AppHeader } from "@/components/app-shell/AppHeader";
 import { GoogleButton } from "@/components/app-shell/GoogleButton";
 import { SetupChecklist } from "@/components/SetupChecklist";
+import { TeamCrest } from "@/components/scorer/Broadcast";
 import scoreboardShot from "@/assets/shot-scoreboard.jpg";
 import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPanel";
 import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace";
@@ -1017,25 +1018,34 @@ function MatchCard({
     }
   };
   return (
-    <article className="rounded-xl border border-white/10 bg-black/15 p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <StatusBadge value={match.status} />
-          <h3 className="mt-2 text-lg font-bold">
-            {teamName(data, match.homeTeamId)} v {teamName(data, match.awayTeamId)}
-          </h3>
-          <p className="mt-1 text-xs text-slate-500">
-            {groundName(data, match.groundId)} · {formatDate(match.scheduledAt)}
-          </p>
+    <article className="match-card">
+      <div className="flex items-center justify-between gap-3">
+        <StatusBadge value={match.status} />
+        <span className="truncate text-xs text-slate-400">
+          {groundName(data, match.groundId)} · {formatDate(match.scheduledAt)}
+        </span>
+      </div>
+      <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <TeamCrest name={teamName(data, match.homeTeamId)} />
+          <span className="line-clamp-1 text-xs font-bold uppercase tracking-wider">
+            {teamName(data, match.homeTeamId)}
+          </span>
         </div>
-        <div className="text-right">
-          <div className="text-2xl font-bold">
+        <div className="flex flex-col items-center">
+          <span className="font-display text-3xl font-bold tabular-nums text-gold">
             {runs}/{wickets}
-          </div>
-          <div className="text-xs text-slate-500">{overs} ov</div>
+          </span>
+          <span className="text-[11px] uppercase tracking-wider text-slate-400">{overs} overs</span>
+        </div>
+        <div className="flex flex-col items-center gap-2 text-center">
+          <TeamCrest name={teamName(data, match.awayTeamId)} />
+          <span className="line-clamp-1 text-xs font-bold uppercase tracking-wider">
+            {teamName(data, match.awayTeamId)}
+          </span>
         </div>
       </div>
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap justify-center gap-2 border-t border-white/10 pt-4">
         <a href={`/app?cloudMatch=${match.id}`} className="action-primary">
           Open scorer <ChevronRight className="size-3.5" />
         </a>
@@ -2423,7 +2433,8 @@ function FullPanelStatus({ title }: { title: string }) {
 }
 function StatusBadge({ value }: { value: string }) {
   return (
-    <span className="rounded-full bg-rose-500/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-rose-300">
+    <span className={`hero-chip ${value === "live" || value === "in_progress" ? "hero-chip-live" : ""}`}>
+      {(value === "live" || value === "in_progress") && <span className="live-dot" aria-hidden="true" />}
       {value.replaceAll("_", " ")}
     </span>
   );
