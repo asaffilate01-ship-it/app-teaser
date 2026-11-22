@@ -18,7 +18,18 @@ grant all on public.camera_clip_calibrations to service_role;
 
 create policy camera_calibration_private_read on public.camera_clip_calibrations
   for select to authenticated using (
-    public.can_direct_camera_room(room_id)
+    (
+      public.can_direct_camera_room(room_id)
+      or exists (
+        select 1 from public.video_assets review_asset
+        where review_asset.id = asset_id
+          and review_asset.room_id = room_id
+          and public.has_org_role(
+            review_asset.organisation_id,
+            array['owner','league_admin','club_admin','coach','safeguarding_officer']::public.platform_role[]
+          )
+      )
+    )
     and public.can_review_camera_asset(asset_id)
     and exists (
       select 1 from public.video_assets a
@@ -31,7 +42,18 @@ create policy camera_calibration_author_insert on public.camera_clip_calibration
   for insert to authenticated with check (
     calibrated_by = (select auth.uid())
     and method = 'manual_review'
-    and public.can_direct_camera_room(room_id)
+    and (
+      public.can_direct_camera_room(room_id)
+      or exists (
+        select 1 from public.video_assets review_asset
+        where review_asset.id = asset_id
+          and review_asset.room_id = room_id
+          and public.has_org_role(
+            review_asset.organisation_id,
+            array['owner','league_admin','club_admin','coach','safeguarding_officer']::public.platform_role[]
+          )
+      )
+    )
     and public.can_review_camera_asset(asset_id)
     and exists (
       select 1 from public.video_assets a
@@ -44,13 +66,35 @@ create policy camera_calibration_author_update on public.camera_clip_calibration
   for update to authenticated
   using (
     calibrated_by = (select auth.uid())
-    and public.can_direct_camera_room(room_id)
+    and (
+      public.can_direct_camera_room(room_id)
+      or exists (
+        select 1 from public.video_assets review_asset
+        where review_asset.id = asset_id
+          and review_asset.room_id = room_id
+          and public.has_org_role(
+            review_asset.organisation_id,
+            array['owner','league_admin','club_admin','coach','safeguarding_officer']::public.platform_role[]
+          )
+      )
+    )
     and public.can_review_camera_asset(asset_id)
   )
   with check (
     calibrated_by = (select auth.uid())
     and method = 'manual_review'
-    and public.can_direct_camera_room(room_id)
+    and (
+      public.can_direct_camera_room(room_id)
+      or exists (
+        select 1 from public.video_assets review_asset
+        where review_asset.id = asset_id
+          and review_asset.room_id = room_id
+          and public.has_org_role(
+            review_asset.organisation_id,
+            array['owner','league_admin','club_admin','coach','safeguarding_officer']::public.platform_role[]
+          )
+      )
+    )
     and public.can_review_camera_asset(asset_id)
     and exists (
       select 1 from public.video_assets a
@@ -83,7 +127,18 @@ grant all on public.camera_highlight_candidates to service_role;
 
 create policy camera_highlight_private_read on public.camera_highlight_candidates
   for select to authenticated using (
-    public.can_direct_camera_room(room_id)
+    (
+      public.can_direct_camera_room(room_id)
+      or exists (
+        select 1 from public.video_assets review_asset
+        where review_asset.id = asset_id
+          and review_asset.room_id = room_id
+          and public.has_org_role(
+            review_asset.organisation_id,
+            array['owner','league_admin','club_admin','coach','safeguarding_officer']::public.platform_role[]
+          )
+      )
+    )
     and public.can_review_camera_asset(asset_id)
     and exists (
       select 1 from public.video_assets a
@@ -96,7 +151,18 @@ create policy camera_highlight_director_insert on public.camera_highlight_candid
   for insert to authenticated with check (
     created_by = (select auth.uid())
     and source = 'manual'
-    and public.can_direct_camera_room(room_id)
+    and (
+      public.can_direct_camera_room(room_id)
+      or exists (
+        select 1 from public.video_assets review_asset
+        where review_asset.id = asset_id
+          and review_asset.room_id = room_id
+          and public.has_org_role(
+            review_asset.organisation_id,
+            array['owner','league_admin','club_admin','coach','safeguarding_officer']::public.platform_role[]
+          )
+      )
+    )
     and public.can_review_camera_asset(asset_id)
     and exists (
       select 1
