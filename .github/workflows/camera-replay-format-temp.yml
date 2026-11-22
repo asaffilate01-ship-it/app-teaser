@@ -1,0 +1,49 @@
+name: CricLume replay migration and source formatter (temporary)
+on:
+  push:
+    branches:
+      - feat/criclume-p3-dual-replay-highlight-review-20261122
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: oven-sh/setup-bun@v2
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 3.2.0
+      - name: Generate migration and format replay implementation
+        run: |
+          bun install --frozen-lockfile
+          supabase migration new --help >/dev/null
+          if ! find supabase/migrations -maxdepth 1 -name '*_camera_replay_calibration_highlights.sql' | grep -q .; then
+            supabase migration new camera_replay_calibration_highlights
+            generated="$(find supabase/migrations -maxdepth 1 -name '*_camera_replay_calibration_highlights.sql' | sort | tail -n 1)"
+            test -n "$generated"
+            cp verification/camera-replay-workbench-migration-source.sql "$generated"
+          fi
+          bunx prettier --write \
+            src/lib/camera-replay-workbench.ts \
+            tests/camera-replay-workbench.test.ts \
+            src/components/CameraReplayWorkbench.tsx \
+            src/components/CameraReplayLibrary.tsx \
+            verification/analysis-database.mjs
+      - name: Commit formatted implementation and generated migration
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add supabase/migrations/*_camera_replay_calibration_highlights.sql \
+            src/lib/camera-replay-workbench.ts \
+            tests/camera-replay-workbench.test.ts \
+            src/components/CameraReplayWorkbench.tsx \
+            src/components/CameraReplayLibrary.tsx \
+            verification/analysis-database.mjs
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(replay): generate private workbench migration and format source'
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
