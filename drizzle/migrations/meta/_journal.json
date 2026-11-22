@@ -43,6 +43,13 @@
       "when": 1795361407680,
       "tag": "0005_criclume_camera_uploads_cloud_and_highlights",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795362857950,
+      "tag": "0006_scope_analysis_evidence_reads",
+      "breakpoints": true
     }
   ]
 }
