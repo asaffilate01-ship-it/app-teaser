@@ -59,9 +59,13 @@ export function CameraReplayWorkbench({
       setUrls(null);
       return;
     }
-    setLeftId((current) => (clips.some((clip) => clip.id === current) ? current : clips[0].id));
+    const initialClip = clips[0];
+    if (!initialClip) return;
+    setLeftId((current) =>
+      clips.some((clip) => clip.id === current) ? current : initialClip.id,
+    );
     setRightId((current) => {
-      const first = clips.find((clip) => clip.id === leftId) ?? clips[0];
+      const first = clips.find((clip) => clip.id === leftId) ?? initialClip;
       return clips.some((clip) => clip.id === current && clip.device_id !== first.device_id)
         ? current
         : (clips.find((clip) => clip.device_id !== first.device_id)?.id ?? "");
