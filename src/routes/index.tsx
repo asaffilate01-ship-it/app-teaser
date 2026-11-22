@@ -54,18 +54,18 @@ export const Route = createFileRoute("/")({
           "Ball-by-ball scoring, multi-angle phone video and live scores for cricket clubs and leagues.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://app-teaser.lovable.app/" },
+      { property: "og:url", content: "https://criclume.com/" },
       {
         property: "og:image",
-        content: `https://app-teaser.lovable.app${fullLogoAsset.url}`,
+        content: `https://criclume.com${fullLogoAsset.url}`,
       },
       { name: "twitter:card", content: "summary_large_image" },
       {
         name: "twitter:image",
-        content: `https://app-teaser.lovable.app${fullLogoAsset.url}`,
+        content: `https://criclume.com${fullLogoAsset.url}`,
       },
     ],
-    links: [{ rel: "canonical", href: "https://app-teaser.lovable.app/" }],
+    links: [{ rel: "canonical", href: "https://criclume.com/" }],
   }),
   component: HomepageRoot,
 });

@@ -10,7 +10,7 @@ export const Route = createFileRoute("/terms")({
         content: "Terms for using the CricLume cricket scoring, competition and coaching platform.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://app-teaser.lovable.app/terms" }],
+    links: [{ rel: "canonical", href: "https://criclume.com/terms" }],
   }),
   component: TermsPage,
 });

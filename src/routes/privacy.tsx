@@ -11,7 +11,7 @@ export const Route = createFileRoute("/privacy")({
         content: "How CricLume handles account, match, video, coaching and device data.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://app-teaser.lovable.app/privacy" }],
+    links: [{ rel: "canonical", href: "https://criclume.com/privacy" }],
   }),
   component: PrivacyPage,
 });
