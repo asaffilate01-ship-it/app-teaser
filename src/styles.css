@@ -1119,8 +1119,8 @@
   stroke-width: 1;
 }
 .chart-label {
-  fill: oklch(0.7 0.02 280);
-  font-size: 10px;
+  fill: oklch(0.72 0.02 280);
+  font-size: 11px;
 }
 .chart-bar {
   fill: oklch(0.82 0.15 84 / 0.45);
@@ -1353,12 +1353,13 @@
 .scoreboard-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
+  align-items: start;
   gap: 0.75rem;
   padding: 1.25rem 0 1rem;
 }
 @media (min-width: 768px) {
   .scoreboard-hero {
+    align-items: center;
     gap: 2rem;
     padding: 2rem 0 1.5rem;
   }

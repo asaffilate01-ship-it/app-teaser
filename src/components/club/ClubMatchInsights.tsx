@@ -357,16 +357,17 @@ function RunRateChart({ points, maxOvers }: { points: OverPoint[]; maxOvers: num
   const width = 520;
   const height = 240;
   const pad = { left: 30, right: 10, top: 12, bottom: 26 };
-  const overs = Math.max(maxOvers ?? 0, points.at(-1)?.over ?? 1, 1);
+  // Without a known match length, leave room for a few more overs so bars keep a sensible width.
+  const overs = Math.max(maxOvers ?? (points.at(-1)?.over ?? 0) + 3, points.at(-1)?.over ?? 1, 5);
   const top = Math.max(6, ...points.map((point) => point.runs), ...points.map((point) => point.runRate));
   const yMax = Math.ceil(top / 2) * 2;
   const plotW = width - pad.left - pad.right;
   const plotH = height - pad.top - pad.bottom;
   const x = (over: number) => pad.left + ((over - 0.5) / overs) * plotW;
   const y = (value: number) => pad.top + plotH - (value / yMax) * plotH;
-  const barW = Math.max(3, (plotW / overs) * 0.55);
+  const barW = Math.min(26, Math.max(3, (plotW / overs) * 0.55));
   const ticks = Array.from({ length: yMax / 2 + 1 }, (_, index) => index * 2).filter((_, index, all) => all.length <= 8 || index % 2 === 0);
-  const xStep = overs > 20 ? 10 : overs > 10 ? 5 : 2;
+  const xStep = overs > 50 ? 10 : overs > 20 ? 5 : overs > 10 ? 2 : 1;
   const line = points.map((point, index) => `${index === 0 ? "M" : "L"}${x(point.over).toFixed(1)},${y(point.runRate).toFixed(1)}`).join(" ");
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="insights-chart" role="img" aria-label={`Run rate chart over ${points.length} overs`}>

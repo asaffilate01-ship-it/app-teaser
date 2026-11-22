@@ -34,6 +34,12 @@ export function publicLiveState(match: CricketMatch): Record<string, unknown> {
     wickets: summary.wickets,
     overs: summary.overs,
     target,
+    // Match length is not personal data and keeps chase/projection maths right on other devices.
+    settings: {
+      oversPerInnings: match.settings.oversPerInnings,
+      inningsPerSide: match.settings.inningsPerSide,
+      ballsPerOver: match.settings.ballsPerOver,
+    },
     striker: striker
       ? { name: "Striker", runs: strikerFigures?.runs ?? 0, balls: strikerFigures?.balls ?? 0 }
       : null,

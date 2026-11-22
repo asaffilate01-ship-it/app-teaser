@@ -101,7 +101,7 @@ export function CameraCommandConfirmations({
   return (
     <section
       aria-label="Camera recording command acknowledgments"
-      className="mt-5 rounded-xl border border-white/10 bg-[#151b26] p-4"
+      className="broadcast-panel mt-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -114,7 +114,7 @@ export function CameraCommandConfirmations({
         <button
           type="button"
           onClick={() => void refresh()}
-          className="inline-flex min-h-11 items-center gap-2 rounded-md border border-white/20 px-3 text-xs"
+          className="action-secondary min-h-11 text-xs"
         >
           <RefreshCw className="size-4" /> Check responses
         </button>

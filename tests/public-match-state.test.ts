@@ -64,3 +64,13 @@ test("names withheld for completed matches as well", () => {
   assert.equal(text.includes("Junior Name Withheld"), false);
   assert.match(text, /Match completed/);
 });
+
+test("shared live score keeps the match length so other devices can show overs left", () => {
+  const match = privateMatch();
+  const live = publicLiveState(match);
+  assert.deepEqual(live["settings"], {
+    oversPerInnings: match.settings.oversPerInnings,
+    inningsPerSide: match.settings.inningsPerSide,
+    ballsPerOver: match.settings.ballsPerOver,
+  });
+});
