@@ -14,6 +14,10 @@ import {
 } from "react";
 import {
   Activity,
+  Ban,
+  Columns3,
+  Footprints,
+  MoveHorizontal,
   Camera,
   Check,
   ChevronRight,
@@ -81,6 +85,7 @@ import { reviewCloudBootstrap, reviewRemoteScorerSnapshot } from "@/lib/scorer-r
 import { describeScorerSyncRecovery } from "@/lib/scorer-sync-status";
 import { AppHeader } from "@/components/app-shell/AppHeader";
 import { AppTabBar } from "@/components/app-shell/AppTabBar";
+import { BallTrail, CreaseStrip, RateStrip, ScoreHero, TeamCrest } from "@/components/scorer/Broadcast";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
@@ -488,18 +493,21 @@ function Dashboard({
               const batting = findTeam(match, innings.battingTeamId);
               const bowling = findTeam(match, innings.bowlingTeamId);
               return (
-                <article
-                  key={match.id}
-                  className="rounded-3xl border border-white/10 bg-white/[0.045] p-5"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="rounded-full bg-rose-500/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-rose-300">
-                      {match.status.replace("-", " ")}
+                <article key={match.id} className="match-card group">
+                  <div className="flex items-center justify-between gap-3">
+                    <span
+                      className={`hero-chip ${match.status === "live" ? "hero-chip-live" : ""}`}
+                    >
+                      {match.status === "live" && <span className="live-dot" aria-hidden="true" />}
+                      {match.status === "completed" ? "Completed" : match.status.replace("-", " ")}
                     </span>
                     <button
                       type="button"
-                      onClick={() => onDelete(match.id)}
-                      className="text-slate-500 transition hover:text-rose-300"
+                      onClick={() => {
+                        if (window.confirm(`Delete ${batting.name} v ${bowling.name} from this device?`))
+                          onDelete(match.id);
+                      }}
+                      className="app-icon-button size-9 text-slate-400 hover:text-rose-300"
                       aria-label={`Delete ${batting.name} versus ${bowling.name}`}
                     >
                       <Trash2 className="size-4" />
@@ -508,28 +516,46 @@ function Dashboard({
                   {match.id.startsWith("restored-") && (
                     <p className="mt-3 text-xs font-semibold text-amber-200">Restored local copy</p>
                   )}
-                  <h3 className="mt-4 font-display text-xl font-bold">
-                    {batting.name} v {bowling.name}
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-400">
-                    {match.settings.ground || "Ground not set"} • {match.settings.format}
-                  </p>
-                  <div className="mt-5 flex items-end justify-between">
-                    <div>
-                      <span className="font-display text-4xl font-bold">
-                        {summary.runs}/{summary.wickets}
-                      </span>
-                      <span className="ml-2 text-sm text-slate-400">({summary.overs})</span>
+                  <button
+                    type="button"
+                    onClick={() => onOpen(match.id)}
+                    className="mt-4 block w-full text-left"
+                    aria-label={`Open ${batting.name} versus ${bowling.name}`}
+                  >
+                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <TeamCrest name={batting.name} />
+                        <span className="line-clamp-1 text-xs font-bold uppercase tracking-wider">
+                          {batting.name}
+                        </span>
+                        <span className="font-display text-3xl font-bold tabular-nums text-gold">
+                          {summary.runs}/{summary.wickets}
+                        </span>
+                        <span className="text-[11px] uppercase tracking-wider text-slate-400">
+                          {summary.overs} overs
+                        </span>
+                      </div>
+                      <span className="hero-vs">v</span>
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <TeamCrest name={bowling.name} />
+                        <span className="line-clamp-1 text-xs font-bold uppercase tracking-wider">
+                          {bowling.name}
+                        </span>
+                        <span className="font-display text-xl text-slate-400">
+                          {match.innings.length > 1 ? "Batted" : "Yet to bat"}
+                        </span>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => onOpen(match.id)}
-                      className="flex size-11 items-center justify-center rounded-full bg-amber-300 text-[#1d1520]"
-                      aria-label="Open match"
-                    >
-                      <ChevronRight className="size-5" />
-                    </button>
-                  </div>
+                    <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-3 text-xs text-slate-400">
+                      <span className="truncate">
+                        {match.settings.ground || "Ground not set"} · {match.settings.format}
+                      </span>
+                      <span className="inline-flex shrink-0 items-center gap-1 font-bold text-gold transition group-hover:translate-x-0.5">
+                        {match.status === "completed" ? "View" : "Resume"}{" "}
+                        <ChevronRight className="size-4" />
+                      </span>
+                    </div>
+                  </button>
                 </article>
               );
             })}
@@ -992,42 +1018,17 @@ function LiveMatch({
       tabIndex={-1}
       className="mx-auto w-full max-w-7xl pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-8 md:py-8"
     >
-      <section className="border-b border-white/10 bg-gradient-to-br from-[#2c1429] via-[#17111f] to-[#2a210e] px-4 py-6 md:rounded-3xl md:border md:px-8 md:py-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.13em] text-amber-300">
-              <span className="rounded-full bg-rose-500/20 px-2 py-1 text-rose-300">
-                {match.status.replace("-", " ")}
-              </span>
-              <span>Innings {innings.number}</span>
-              <span>•</span>
-              <span>{match.settings.format}</span>
-              {cloudSync.enabled && (
-                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-slate-300">
-                  Cloud {cloudSync.status}
-                  {cloudSync.lastSequence ? ` · #${cloudSync.lastSequence}` : ""}
-                </span>
-              )}
-            </div>
-            <h1 className="mt-2 font-display text-2xl font-bold md:text-4xl">
-              {battingTeam.name} <span className="text-slate-500">v</span> {bowlingTeam.name}
-            </h1>
-            <p className="mt-1 text-xs text-slate-400 md:text-sm">
-              {match.settings.ground} • {match.settings.weather}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="font-display text-5xl font-bold md:text-6xl">
-              {summary.runs}
-              <span className="text-2xl text-slate-400">/{summary.wickets}</span>
-            </p>
-            <p className="text-xs text-slate-400">
-              {summary.overs} overs • RR {summary.runRate.toFixed(2)}
-              {target ? ` • Target ${target}` : ""}
-            </p>
-          </div>
-        </div>
-      </section>
+      <ScoreHero
+        match={match}
+        sync={
+          cloudSync.enabled ? (
+            <span className="hero-chip">
+              Cloud {cloudSync.status}
+              {cloudSync.lastSequence ? ` · #${cloudSync.lastSequence}` : ""}
+            </span>
+          ) : undefined
+        }
+      />
 
       <ScorerMatchNavigation active={tab} onChange={changeTab} onExport={exportMatch} />
 
@@ -1286,7 +1287,8 @@ function ScoringPad({
 
   return (
     <div className="grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
-      <section className="order-2 space-y-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4 md:p-6 lg:order-1">
+      <section className="broadcast-panel order-2 space-y-5 md:p-6 lg:order-1" aria-label="Ball details">
+        <h2 className="panel-kicker">Ball details</h2>
         <div className="grid grid-cols-2 gap-3">
           <div className="hidden lg:block">
             <Field label="Striker">
@@ -1398,25 +1400,15 @@ function ScoringPad({
         )}
       </section>
 
-      <section className="order-1 space-y-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4 md:p-6 lg:order-2">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-amber-300">
-              Record delivery
-            </p>
-            <h2 className="font-display text-2xl font-bold">Runs & extras</h2>
-          </div>
-          <div className="text-right text-xs text-slate-400">
-            Next ball
-            <br />
-            <strong className="text-slate-100">
-              {Math.floor(summary.legalBalls / match.settings.ballsPerOver)}.
-              {(summary.legalBalls % match.settings.ballsPerOver) + 1}
-            </strong>
-          </div>
-        </div>
+      <section className="order-1 space-y-5 lg:order-2" aria-label="Record delivery">
+        <CreaseStrip
+          match={match}
+          strikerId={strikerId}
+          nonStrikerId={nonStrikerId}
+          bowlerId={bowlerId}
+        />
 
-        <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-black/20 p-3 lg:hidden">
+        <div className="grid grid-cols-2 gap-3 lg:hidden">
           <Field label="Striker">
             <PlayerSelect team={battingTeam} value={strikerId} onChange={setStrikerId} />
           </Field>
@@ -1425,67 +1417,100 @@ function ScoringPad({
           </Field>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
-          {[0, 1, 2, 3, 4, 5, 6].map((runs) => (
-            <button
-              key={runs}
-              type="button"
-              onClick={() => saveBall({ batterRuns: runs, outcome: runs ? "hit" : outcome })}
-              className={`aspect-square rounded-2xl border text-xl font-extrabold transition active:scale-95 ${runs === 4 || runs === 6 ? "border-amber-300/60 bg-amber-300/15 text-amber-200" : "border-white/10 bg-white/[0.04]"}`}
-            >
-              {runs}
-            </button>
-          ))}
+        <div>
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <h2 className="panel-kicker">Select runs</h2>
+            <p className="text-xs text-muted-foreground">
+              Ball{" "}
+              <strong className="tabular-nums text-foreground">
+                {Math.floor(summary.legalBalls / match.settings.ballsPerOver)}.
+                {(summary.legalBalls % match.settings.ballsPerOver) + 1}
+              </strong>
+            </p>
+          </div>
+          <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
+            {[0, 1, 2, 3, 4, 5, 6].map((runs) => (
+              <button
+                key={runs}
+                type="button"
+                aria-label={`${runs} ${runs === 1 ? "run" : "runs"}`}
+                onClick={() => {
+                  navigator.vibrate?.(12);
+                  saveBall({ batterRuns: runs, outcome: runs ? "hit" : outcome });
+                }}
+                className={`run-ring ${runs === 4 || runs === 6 ? "run-ring-boundary" : ""}`}
+              >
+                {runs}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <QuickButton
-            label="Wide"
-            detail="+1, not legal"
-            onClick={() => saveBall({ extras: { wide: 1 }, outcome: "missed" })}
-          />
-          <QuickButton
-            label="No ball"
-            detail="+1, not legal"
-            onClick={() => saveBall({ extras: { noBall: 1 } })}
-          />
-          <QuickButton
-            label="Bye"
-            detail="+1 bye"
-            onClick={() => saveBall({ extras: { bye: 1 }, outcome: "missed" })}
-          />
-          <QuickButton
-            label="Leg bye"
-            detail="+1 leg bye"
-            onClick={() => saveBall({ extras: { legBye: 1 }, outcome: "missed" })}
-          />
-        </div>
-        <button
-          type="button"
-          onClick={() => setShowWicket(true)}
-          className="flex h-16 w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-rose-700 to-rose-500 text-base font-extrabold uppercase tracking-wider shadow-lg shadow-rose-950/30"
-        >
-          <X className="size-5" /> Wicket
-        </button>
 
-        <div className="flex flex-wrap gap-2 border-t border-white/10 pt-4">
+        <div>
+          <h2 className="panel-kicker mb-3">Extras</h2>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {(
+              [
+                ["No ball", Ban, () => saveBall({ extras: { noBall: 1 } })],
+                ["Wide", MoveHorizontal, () => saveBall({ extras: { wide: 1 }, outcome: "missed" })],
+                ["Bye", CircleDot, () => saveBall({ extras: { bye: 1 }, outcome: "missed" })],
+                ["Leg bye", Footprints, () => saveBall({ extras: { legBye: 1 }, outcome: "missed" })],
+              ] as const
+            ).map(([label, Icon, action]) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => {
+                  navigator.vibrate?.(12);
+                  action();
+                }}
+                className="extra-tile"
+              >
+                <Icon className="size-4 text-gold" aria-hidden="true" /> {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h2 className="panel-kicker mb-3">Wicket</h2>
+          <button
+            type="button"
+            onClick={() => {
+              navigator.vibrate?.([20, 40, 20]);
+              setShowWicket(true);
+            }}
+            className="wicket-bar"
+          >
+            <Columns3 className="size-6" aria-hidden="true" /> Wicket
+          </button>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Choose how out on the next step
+          </p>
+        </div>
+
+        <BallTrail match={match} />
+        <RateStrip match={match} />
+
+        <div className="flex flex-wrap justify-center gap-2">
           <button
             type="button"
             disabled={!innings.deliveries.length}
             onClick={() => onSave(undoLastDelivery(match), "delivery.voided")}
-            className="inline-flex h-10 items-center gap-2 rounded-full border border-white/10 px-4 text-xs font-bold disabled:opacity-30"
+            className="app-chip-button disabled:opacity-30"
           >
             <Undo2 className="size-4" /> Undo last ball
           </button>
           <button
             type="button"
-            onClick={() => onSave(endCurrentInnings(match))}
-            className="inline-flex h-10 items-center gap-2 rounded-full border border-white/10 px-4 text-xs font-bold"
+            onClick={() => {
+              if (window.confirm("End this innings now?")) onSave(endCurrentInnings(match));
+            }}
+            className="app-chip-button"
           >
             <Flag className="size-4" /> End innings
           </button>
         </div>
-
-        <RecentBalls match={match} />
       </section>
 
       {showWicket && (
