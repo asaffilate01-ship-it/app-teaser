@@ -106,3 +106,9 @@
 - [x] Automatic resend on weak signal, after sign-in renewal, and when the app comes back to the screen
 - [x] Close the scorer offline, reopen online: saved balls still send
 - [x] Plain sync wording on the scorer ("Offline · saved on phone · 5 changes to send", "All sent")
+
+## Scoring permissions and split duties (new ask)
+- [x] Only signed-in people with the right job for that match can score it (checked by the server)
+- [x] Jobs per match: Lead scorer, Batting & runs, Bowling & fielding, Video feed
+- [x] Bowling & fielding screen: bowler for the next ball, fielder / position / ball type on recorded balls
+- [x] "Your job" strip and scoring team list; club admins (and the lead scorer, for helpers) hand out jobs

@@ -2877,6 +2877,38 @@ export type Database = {
           },
         ]
       }
+      match_scoring_duties: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          duty: string
+          match_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          duty: string
+          match_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          duty?: string
+          match_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_scoring_duties_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_squads: {
         Row: {
           batting_position: number | null
@@ -4215,6 +4247,7 @@ export type Database = {
         Args: { p_name: string }
         Returns: boolean
       }
+      can_record_balls: { Args: { p_match_id: string }; Returns: boolean }
       can_request_booking: { Args: { p_org: string }; Returns: boolean }
       can_review_camera_asset: {
         Args: { p_asset_id: string }
@@ -4351,6 +4384,10 @@ export type Database = {
           wicket: boolean
         }[]
       }
+      has_match_duty: {
+        Args: { p_duties: string[]; p_match_id: string }
+        Returns: boolean
+      }
       has_org_role: {
         Args: {
           p_organisation_id: string
@@ -4366,6 +4403,7 @@ export type Database = {
       is_event_manager: { Args: { p_org: string }; Returns: boolean }
       is_finance_manager: { Args: { p_org: string }; Returns: boolean }
       is_guardian_manager: { Args: { p_org: string }; Returns: boolean }
+      is_match_manager: { Args: { p_match_id: string }; Returns: boolean }
       is_org_member: { Args: { p_organisation_id: string }; Returns: boolean }
       is_ride_driver: { Args: { p_ride_id: string }; Returns: boolean }
       is_site_editor: { Args: { p_org: string }; Returns: boolean }
@@ -4382,6 +4420,17 @@ export type Database = {
           timezone: string
         }[]
       }
+      match_scoring_team: {
+        Args: { p_match_id: string }
+        Returns: {
+          always_full: boolean
+          club_role: string
+          display_name: string
+          duties: string[]
+          user_id: string
+        }[]
+      }
+      my_match_duties: { Args: { p_match_id: string }; Returns: string[] }
       pair_camera_device: {
         Args: {
           p_angle: string
@@ -4556,6 +4605,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_match_scoring_duty: {
+        Args: {
+          p_duty: string
+          p_enabled: boolean
+          p_match_id: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       set_selection_role: {
         Args: { p_event_id: string; p_field: string; p_player_id: string }
         Returns: undefined
@@ -4585,6 +4643,35 @@ export type Database = {
           p_match_id: string
           p_match_snapshot: Json
           p_occurred_at: string
+        }
+        Returns: {
+          client_event_id: string
+          device_id: string
+          event_type: string
+          id: string
+          match_id: string
+          occurred_at: string
+          payload: Json
+          recorded_at: string
+          recorded_by: string
+          sequence: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "match_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      tag_delivery_v1: {
+        Args: {
+          p_client_event_id: string
+          p_delivery_id: string
+          p_device_id: string
+          p_innings_id: string
+          p_match_id: string
+          p_occurred_at: string
+          p_tag: Json
         }
         Returns: {
           client_event_id: string

@@ -139,3 +139,15 @@ test("reopening with unsent changes carries on only when no other phone scored s
   assert.equal(canResumeQueuedScoring({ ...base, pendingEvents: 0, latestCloudDeviceId: "phone-a" }), false);
   assert.equal(canResumeQueuedScoring({ ...base, hasLocalCopy: false, latestCloudDeviceId: "phone-a" }), false);
 });
+
+test("fielding notes or a new bowler from the bowling & fielding scorer are not a conflict", () => {
+  const local = addBall(fixture(), 2);
+  const remote = structuredClone(local);
+  remote.innings[0]!.deliveries[0]!.fieldZone = "Point";
+  remote.innings[0]!.deliveries[0]!.deliveryStyle = "Off spin";
+  remote.innings[0]!.bowlerId = remote.teams[1]!.players[2]!.id;
+  assert.equal(reviewRemoteScorerSnapshot(local, remote).safe, true);
+  // ...but runs still are.
+  remote.innings[0]!.deliveries[0]!.batterRuns = 3;
+  assert.equal(reviewRemoteScorerSnapshot(local, remote).safe, false);
+});

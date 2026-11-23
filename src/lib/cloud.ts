@@ -1,4 +1,12 @@
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
+import {
+  isScoringDuty,
+  patchEventTypes,
+  readPatchEvent,
+  type ScoringDuty,
+  type ScoringPatch,
+  type ScoringTeamMember,
+} from "./scoring-duties";
 import { supabase as generatedSupabase } from "@/integrations/supabase/client";
 import * as tus from "tus-js-client";
 import type { CricketMatch, Delivery, FieldZone, Innings, MatchFormat, Team } from "@/lib/cricket";
@@ -389,22 +397,6 @@ export async function loadCloudMatchSnapshot(matchId: string): Promise<CricketMa
   return validated;
 }
 
-export async function startCloudInnings(input: {
-  matchId: string;
-  inningsNumber: number;
-  battingTeamId: string;
-  bowlingTeamId: string;
-}): Promise<string> {
-  const { data, error } = await getCloudClient().rpc("start_match_innings", {
-    p_match_id: input.matchId,
-    p_innings_number: input.inningsNumber,
-    p_batting_team_id: input.battingTeamId,
-    p_bowling_team_id: input.bowlingTeamId,
-  });
-  if (error) throw error;
-  return data as string;
-}
-
 function storageQueueKey(matchId: string): string {
   return `criclume:cloud-queue:${matchId}`;
 }
@@ -532,6 +524,20 @@ export async function appendMatchEvent(event: PendingMatchEvent): Promise<MatchE
         liveState: liveState as Record<string, unknown>,
         occurredAt: event.occurredAt,
       });
+    }
+    if (event.eventType === "delivery.tagged") {
+      // Bowling & fielding scorer: the server checks the duty, the ball and the fielder.
+      const { data, error } = await getCloudClient().rpc("tag_delivery_v1", {
+        p_match_id: event.matchId,
+        p_innings_id: String(event.payload["inningsId"]),
+        p_delivery_id: String(event.payload["deliveryId"]),
+        p_client_event_id: event.clientEventId,
+        p_device_id: event.deviceId,
+        p_tag: (event.payload["tag"] ?? {}) as never,
+        p_occurred_at: event.occurredAt,
+      });
+      if (error) throw error;
+      return matchEventEnvelope(data as Record<string, unknown>);
     }
     const inningsStart = event.payload["inningsStart"] as Record<string, unknown> | undefined;
     if (event.eventType === "innings.started" && inningsStart && typeof inningsStart === "object") {
@@ -749,4 +755,64 @@ function cloudRain(value: unknown) {
     abandoned: raw["abandoned"] === true,
     minOversForResult: finiteOrNull(raw["minOversForResult"]),
   };
+}
+
+/* ---------- Scoring duties (who does what for one match) ---------- */
+
+/** The signed-in person's duties for this match, as the server sees them. */
+export async function fetchMyMatchDuties(matchId: string): Promise<ScoringDuty[]> {
+  const { data, error } = await getCloudClient().rpc("my_match_duties", { p_match_id: matchId });
+  if (error) throw error;
+  return ((data as unknown[] | null) ?? []).filter(isScoringDuty);
+}
+
+/** Scoring team for a match plus club members who could be added. Scoring team members only. */
+export async function fetchScoringTeam(matchId: string): Promise<ScoringTeamMember[]> {
+  const { data, error } = await getCloudClient().rpc("match_scoring_team", { p_match_id: matchId });
+  if (error) throw error;
+  return ((data as Record<string, unknown>[] | null) ?? []).map((row) => ({
+    userId: String(row["user_id"]),
+    name: String(row["display_name"] ?? "Club member"),
+    clubRole: String(row["club_role"] ?? ""),
+    duties: ((row["duties"] as unknown[] | null) ?? []).filter(isScoringDuty),
+    alwaysFull: Boolean(row["always_full"]),
+  }));
+}
+
+export async function setScoringDuty(input: {
+  matchId: string;
+  userId: string;
+  duty: ScoringDuty;
+  enabled: boolean;
+}): Promise<void> {
+  const { error } = await getCloudClient().rpc("set_match_scoring_duty", {
+    p_match_id: input.matchId,
+    p_user_id: input.userId,
+    p_duty: input.duty,
+    p_enabled: input.enabled,
+  });
+  if (error) throw error;
+}
+
+/** Bowling & fielding notes the cloud accepted after a given point (used to catch up after a gap). */
+export async function loadScoringPatches(matchId: string, afterSequence = 0): Promise<ScoringPatch[]> {
+  const { data, error } = await getCloudClient()
+    .from("match_events")
+    .select("sequence,event_type,payload,occurred_at")
+    .eq("match_id", matchId)
+    .in("event_type", [...patchEventTypes])
+    .gt("sequence", afterSequence)
+    .order("sequence", { ascending: true })
+    .limit(1000);
+  if (error) throw error;
+  return ((data as Record<string, unknown>[] | null) ?? [])
+    .map((row) =>
+      readPatchEvent({
+        eventType: String(row["event_type"]),
+        sequence: Number(row["sequence"]),
+        occurredAt: String(row["occurred_at"]),
+        payload: (row["payload"] ?? {}) as Record<string, unknown>,
+      }),
+    )
+    .filter((patch): patch is ScoringPatch => patch !== null);
 }

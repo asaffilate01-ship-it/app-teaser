@@ -190,6 +190,20 @@
       "when": 1795433437856,
       "tag": "0026_offline_innings_start",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1795435228885,
+      "tag": "0027_match_scoring_duties",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1795435295609,
+      "tag": "0028_fix_set_match_scoring_duty",
+      "breakpoints": true
     }
   ]
 }

@@ -51,6 +51,19 @@ import { useCricketStore } from "@/hooks/use-cricket-store";
 import { validateDeviceMatchSetup } from "@/lib/match-setup";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { useMatchCloudSync } from "@/hooks/use-match-cloud-sync";
+import { cachedDuties, useMatchDuties } from "@/hooks/use-match-duties";
+import { FieldingDesk } from "@/components/scorer/FieldingDesk";
+import { ScoringTeamStrip, VideoDutyCard } from "@/components/scorer/ScoringTeam";
+import {
+  applyPatch,
+  applyPatches,
+  bowlingHandledByOther,
+  dutyAccess,
+  isPatchEventType,
+  readPatchEvent,
+  type DeliveryTag,
+  type ScoringPatch,
+} from "@/lib/scoring-duties";
 import { MatchRulesFields } from "@/components/scorer/MatchRulesFields";
 import { RainPanel } from "@/components/scorer/RainPanel";
 import { DayPanel } from "@/components/scorer/DayPanel";
@@ -223,7 +236,8 @@ export function CricketApp() {
       .then(async (match) => {
         let pendingEvents = 0;
         try {
-          pendingEvents = readPendingEvents(cloudMatchId).length;
+          // Fielding notes waiting to send never conflict with the score.
+          pendingEvents = readPendingEvents(cloudMatchId).filter((event) => !isPatchEventType(event.eventType)).length;
         } catch {
           if (!local) {
             setCloudBootstrap({
@@ -269,6 +283,17 @@ export function CricketApp() {
             setCloudBootstrap({ status: "ready" });
             return;
           }
+        }
+        const userId = cloudSession.session?.user.id;
+        const saved = userId ? cachedDuties(cloudMatchId, userId) : null;
+        if (!review.safe && pendingEvents === 0 && saved && !dutyAccess(saved).recordBalls) {
+          // Bowling & fielding or video helpers only follow the ball scorer's copy: take the cloud's.
+          upsertMatch(match);
+          setBootstrapConflict(null);
+          setSelectedId(match.id);
+          setScreen("match");
+          setCloudBootstrap({ status: "ready" });
+          return;
         }
         if (!review.safe) {
           if (!local) {
@@ -953,21 +978,83 @@ function LiveMatch({
     if (typeof window === "undefined") return null;
     return new URLSearchParams(window.location.search).get("cloudMatch");
   }, []);
+  const cloudSession = useCloudSession();
+  const myUserId = cloudSession.session?.user.id ?? null;
+  const dutyState = useMatchDuties(cloudMatchId, myUserId);
+  // Until the first check finishes (or for a match only on this phone) the screen offers everything;
+  // the server still refuses anything this person isn't allowed to do.
+  const access = dutyAccess(dutyState.duties ?? ["lead"]);
+  const bowlingByOther = Boolean(cloudMatchId) && bowlingHandledByOther(dutyState.team, myUserId);
+  // People who don't record balls follow the batting scorer's score and never send their own.
+  const follower = Boolean(cloudMatchId) && !access.recordBalls;
+
+  // Bowling & fielding notes, kept so they survive a newer score arriving from the ball scorer.
+  const matchRef = useRef(match);
+  matchRef.current = match;
+  const ledger = useRef(new Map<string, ScoringPatch>());
+  const remember = useCallback((patch: ScoringPatch) => {
+    const key = patch.kind === "delivery.tagged" ? `ball:${patch.deliveryId}` : `bowler:${patch.inningsId}`;
+    const previous = ledger.current.get(key);
+    if (!previous || previous.sequence <= patch.sequence) ledger.current.set(key, patch);
+  }, []);
+  useEffect(() => {
+    if (!cloudMatchId) return;
+    try {
+      // This phone's own unsent notes (e.g. after reopening offline) are newest of all.
+      for (const event of readPendingEvents(cloudMatchId)) {
+        if (!isPatchEventType(event.eventType)) continue;
+        const patch = readPatchEvent({ ...event, sequence: Number.MAX_SAFE_INTEGER });
+        if (patch) remember(patch);
+      }
+    } catch {
+      /* unreadable queue is reported by the sync status */
+    }
+  }, [cloudMatchId, remember]);
+  const acceptRemotePatch = useCallback(
+    (patch: ScoringPatch) => {
+      remember(patch);
+      const next = applyPatch(matchRef.current, patch);
+      if (next !== matchRef.current) onSave(next);
+    },
+    [onSave, remember],
+  );
   const acceptRemoteMatch = useCallback(
     (remote: CricketMatch): boolean => {
       if (remote.id !== match.id || cloudConflict) return false;
-      const review = reviewRemoteScorerSnapshot(match, remote);
-      if (!review.safe) {
-        setCloudConflict(review.reason);
-        setBackupRequested(false);
-        return false;
+      const merged = applyPatches(remote, ledger.current.values());
+      if (!follower) {
+        const review = reviewRemoteScorerSnapshot(match, merged);
+        if (!review.safe) {
+          setCloudConflict(review.reason);
+          setBackupRequested(false);
+          return false;
+        }
       }
-      onSave(remote);
+      onSave(merged);
       return true;
     },
-    [cloudConflict, match, onSave],
+    [cloudConflict, follower, match, onSave],
   );
-  const cloudSync = useMatchCloudSync(cloudMatchId, acceptRemoteMatch, Boolean(cloudConflict));
+  const cloudSync = useMatchCloudSync(cloudMatchId, acceptRemoteMatch, Boolean(cloudConflict), acceptRemotePatch);
+  const sendOwnPatch = (patch: ScoringPatch, payload: Record<string, unknown>) => {
+    remember(patch);
+    onSave(applyPatch(match, patch));
+    cloudSync.publishPatch(patch.kind, payload);
+  };
+  const sendBowler = (bowlerId: string, end: DeliveryEnd) => {
+    const inningsId = currentInnings(match).id;
+    sendOwnPatch(
+      { kind: "bowling.updated", sequence: Number.MAX_SAFE_INTEGER, occurredAt: new Date().toISOString(), inningsId, bowlerId, end },
+      { inningsId, bowlerId, end },
+    );
+  };
+  const sendTag = (ball: { id: string }, tag: DeliveryTag) => {
+    const inningsId = currentInnings(match).id;
+    sendOwnPatch(
+      { kind: "delivery.tagged", sequence: Number.MAX_SAFE_INTEGER, occurredAt: new Date().toISOString(), inningsId, deliveryId: ball.id, tag },
+      { inningsId, deliveryId: ball.id, tag },
+    );
+  };
   const syncRecovery = describeScorerSyncRecovery(
     cloudSync.status,
     cloudSync.pendingCount,
@@ -980,6 +1067,10 @@ function LiveMatch({
   });
   const saveAndSync = (next: CricketMatch, eventType = "match.snapshot", extraPayload?: Record<string, unknown>) => {
     if (cloudConflict) return;
+    if (follower) {
+      setCloudActionError("Only the batting & runs scorer (or the lead scorer) can change the score for this match.");
+      return;
+    }
     onSave(next);
     void cloudSync.publish(next, eventType, extraPayload);
     // Fans' phone alerts: best-effort and live-only — a late wicket alert after reconnecting would mislead.
@@ -1237,18 +1328,43 @@ function LiveMatch({
             </p>
           </section>
         )}
+        {cloudMatchId && dutyState.duties && access.onTeam && (
+          <ScoringTeamStrip
+            matchId={cloudMatchId}
+            duties={dutyState.duties}
+            team={dutyState.team}
+            myUserId={myUserId}
+            onChanged={() => void dutyState.refresh()}
+          />
+        )}
+        {cloudMatchId && dutyState.duties && !access.onTeam && (
+          <section role="status" className="broadcast-panel mb-5 text-sm text-slate-200">
+            <h2 className="font-bold text-amber-200">You're not on this match's scoring team</h2>
+            <p className="mt-1 text-slate-300">
+              You can follow the score here, but only the people the club named for this match can score it.
+              Ask a club admin or the lead scorer to give you a job.
+            </p>
+          </section>
+        )}
         <div hidden={tab !== "score"}>
-          {!cloudConflict && <DayPanel match={match} onSave={saveAndSync} />}
-          {!cloudConflict && !match.days?.atStumps && (
+          {!cloudConflict && access.recordBalls && <DayPanel match={match} onSave={saveAndSync} />}
+          {!cloudConflict && access.recordBalls && !match.days?.atStumps && (
             <ScoringPad
               match={match}
               onSave={saveAndSync}
               onAdvanceInnings={(options) => advanceInnings(options)}
               onExit={onExit}
+              bowlingByOther={bowlingByOther}
             />
           )}
+          {!cloudConflict && !access.recordBalls && access.bowlingFielding && (
+            <FieldingDesk match={match} onBowler={sendBowler} onTag={sendTag} />
+          )}
+          {!cloudConflict && !access.recordBalls && !access.bowlingFielding && access.video && cloudMatchId && (
+            <VideoDutyCard matchId={cloudMatchId} />
+          )}
         </div>
-        {tab === "score" && !cloudConflict && (
+        {tab === "score" && !cloudConflict && access.recordBalls && (
           <div className="mt-5 space-y-5">
             <MatchPredictorPanel match={match} onSave={saveAndSync} />
             <LiveRulesPanel match={match} onSave={saveAndSync} />
@@ -1258,7 +1374,12 @@ function LiveMatch({
         {tab === "timeline" && <Timeline match={match} onSave={saveAndSync} />}
         {tab === "scorecard" && <Scorecard match={match} onSave={saveAndSync} />}
         {tab === "analysis" && <Analysis match={match} />}
-        {tab === "video" && <VideoLab />}
+        {tab === "video" && (
+          <div className="space-y-5">
+            {cloudMatchId && access.video && <VideoDutyCard matchId={cloudMatchId} />}
+            <VideoLab />
+          </div>
+        )}
       </div>
     </main>
   );
@@ -1269,11 +1390,14 @@ function ScoringPad({
   onSave,
   onAdvanceInnings,
   onExit,
+  bowlingByOther = false,
 }: {
   match: CricketMatch;
   onSave: (match: CricketMatch, eventType?: string) => void;
   onAdvanceInnings: (options?: { followOn?: boolean }) => void;
   onExit: () => void;
+  /** Another phone has the bowling & fielding job: bowler comes from them, fielding is theirs. */
+  bowlingByOther?: boolean;
 }) {
   const innings = currentInnings(match);
   const battingTeam = findTeam(match, innings.battingTeamId);
@@ -1493,11 +1617,12 @@ function ScoringPad({
           </Field>
           <div className="hidden lg:block">
             <Field label="Bowler">
-              <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} />
+              <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} disabled={bowlingByOther} />
             </Field>
           </div>
           <Field label="Bowling end">
             <select
+              disabled={bowlingByOther}
               value={end}
               onChange={(event) => setEnd(event.target.value as DeliveryEnd)}
               className="scorer-input"
@@ -1530,6 +1655,7 @@ function ScoringPad({
           <div className="space-y-3">
             <Field label="Ball type">
               <select
+                disabled={bowlingByOther}
                 value={deliveryStyle}
                 onChange={(event) => setDeliveryStyle(event.target.value as DeliveryStyle)}
                 className="scorer-input"
@@ -1579,10 +1705,23 @@ function ScoringPad({
             <PlayerSelect team={battingTeam} value={strikerId} onChange={setStrikerId} />
           </Field>
           <Field label="Bowler">
-            <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} />
+            <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} disabled={bowlingByOther} />
           </Field>
         </div>
+        {bowlingByOther && (
+          <p className="text-[11px] text-slate-400">
+            The bowler and end are set by the bowling & fielding scorer.
+          </p>
+        )}
 
+        {bowlingByOther ? (
+          <div className="broadcast-panel space-y-3" aria-label="How was the ball played?">
+            <p className="text-xs text-slate-300">
+              Fielding positions and fielders are added by the bowling & fielding scorer.
+            </p>
+            <OutcomeChips value={outcome} onChange={setOutcome} />
+          </div>
+        ) : (
         <div className="broadcast-panel shot-card" aria-label="Where did the ball go?">
           <div className="mb-3 flex items-baseline justify-between gap-3">
             <h2 className="panel-kicker">Where did it go?</h2>
@@ -1619,6 +1758,7 @@ function ScoringPad({
             onClear={clearShot}
           />
         </div>
+        )}
 
         {(freeHit || superOver) && (
           <div className="rule-banner" role="status">
@@ -1848,17 +1988,20 @@ function PlayerSelect({
   value,
   onChange,
   allowNone = false,
+  disabled = false,
 }: {
   team: ReturnType<typeof findTeam>;
   value: string;
   onChange: (value: string) => void;
   allowNone?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <select
+      disabled={disabled}
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className="scorer-input"
+      className="scorer-input disabled:cursor-not-allowed disabled:opacity-60"
     >
       {allowNone && <option value="">Not recorded</option>}
       {team.players.map((player) => (
