@@ -204,6 +204,13 @@
       "when": 1795435295609,
       "tag": "0028_fix_set_match_scoring_duty",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1795436217924,
+      "tag": "0029_ad_banners_and_revenue_share",
+      "breakpoints": true
     }
   ]
 }

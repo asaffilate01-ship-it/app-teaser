@@ -99,6 +99,8 @@ import {
   type MatchRecord,
   type PlatformDashboardData,
 } from "@/lib/platform-cloud";
+import { PromoSlot } from "@/components/promo/PromoSlot";
+import { usePromos } from "@/hooks/use-promos";
 import { assignableRoles, can, platformRoles, roleLabels, type PlatformRole } from "@/lib/platform";
 
 export const Route = createFileRoute("/platform")({
@@ -559,6 +561,7 @@ function OperationalPlatform({
     void navigate({ search: { section }, resetScroll: true });
   const dashboard = usePlatformDashboard(membership.organisationId, membership.role);
   const [leagueStart, setLeagueStart] = useState<"live" | "stats">("live");
+  const { promos, onPlay } = usePromos({ surface: "app", member: { organisationId: membership.organisationId } });
   return (
     <PageFrame
       right={
@@ -645,6 +648,7 @@ function OperationalPlatform({
           <FullPanelStatus title="Loading operational data…" />
         ) : (
           <>
+            {tab === "overview" && <PromoSlot items={promos.top} slot="top" onPlay={onPlay} className="mb-5" />}
             {tab === "overview" && (
               <Overview
                 data={dashboard.data}

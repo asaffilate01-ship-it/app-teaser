@@ -3464,3 +3464,25 @@
 .desk-reports dd { font-size: 0.9rem; font-weight: 600; }
 .desk-side { border: 1px solid var(--border); border-radius: 0.9rem; padding: 0.5rem 0.75rem 0.75rem; min-width: 0; }
 .desk-side legend { padding: 0 0.35rem; font-weight: 800; font-size: 0.9rem; }
+
+/* CricLume ad banners (top + side). Named "promo" so the layout survives common blockers' cosmetic rules. */
+.promo-slot { position: relative; display: block; overflow: hidden; border-radius: 0.9rem; border: 1px solid oklch(1 0 0 / 0.1); background: oklch(0.12 0.02 262 / 0.7); }
+.promo-media { display: block; width: 100%; height: 100%; }
+.promo-media img, .promo-media video { display: block; width: 100%; height: 100%; object-fit: contain; background: oklch(0.1 0.02 262); }
+.promo-tag { position: absolute; top: 0.35rem; right: 0.35rem; padding: 0.05rem 0.4rem; border-radius: 0.3rem; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: oklch(0.1 0.02 262 / 0.75); color: oklch(0.95 0.01 90); pointer-events: none; }
+.promo-page.promo-slot-top { width: 100%; max-width: 64rem; margin-inline: auto; aspect-ratio: 8 / 1; min-height: 3rem; max-height: 8rem; }
+.promo-page.promo-slot-side { width: 100%; aspect-ratio: 1 / 2; max-height: 34rem; }
+.promo-side-rail { display: none; }
+@media (min-width: 1024px) {
+  .promo-with-side { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: 1.25rem; align-items: start; }
+  .promo-side-rail { display: block; position: sticky; top: 5.5rem; }
+}
+/* Ground big screen: banners scale with the 16:9 stage */
+.gs-promo-top { display: flex; justify-content: center; padding: 1cqh 3cqw 0; }
+.promo-ground.promo-slot-top { height: 9cqh; aspect-ratio: 8 / 1; border-radius: 1cqh; }
+.gs-body-split { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2.5cqw; min-height: 0; }
+.gs-body-split > .gs-body { padding-right: 0; }
+.gs-promo-side { display: flex; align-items: center; padding: 3cqh 3cqw 3cqh 0; min-height: 0; }
+.promo-ground.promo-slot-side { height: 100%; aspect-ratio: 1 / 2; border-radius: 1cqh; }
+.promo-ground .promo-tag { font-size: 1.4cqh; top: 0.8cqh; right: 0.8cqh; }
+.gs-stage-promo { grid-template-rows: auto auto 1fr auto; }

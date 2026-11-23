@@ -16,6 +16,8 @@ import {
 import { fetchGroundNames, fetchGroundSettings, fetchPublicBoard, loadGroundControl, type GroundControlRow } from "@/lib/ground-screen-cloud";
 import { GroundPage } from "@/components/ground/GroundPages";
 import { GroundReplay } from "@/components/ground/GroundReplay";
+import { PromoSlot } from "@/components/promo/PromoSlot";
+import { usePromos } from "@/hooks/use-promos";
 
 export const Route = createFileRoute("/ground/$slug")({
   head: () => ({
@@ -45,6 +47,7 @@ function GroundScreen() {
   const [local, setLocal] = useState<{ page: GroundPageId; until: number } | null>(null);
   const [chrome, setChrome] = useState(true);
   const [replayNote, setReplayNote] = useState("");
+  const { promos, onPlay } = usePromos({ surface: "ground", slug });
 
   useEffect(() => {
     if (!isCloudConfigured()) {
@@ -160,7 +163,7 @@ function GroundScreen() {
 
   return (
     <main className="gs-viewport" aria-live="polite">
-      <div className="gs-stage">
+      <div className={`gs-stage ${promos.top.length > 0 ? "gs-stage-promo" : ""}`}>
         <header className="gs-head">
           <div className="gs-head-teams">
             <strong>{view.homeTeam}</strong>
@@ -178,9 +181,25 @@ function GroundScreen() {
             )}
           </div>
         </header>
-        <section className="gs-body" key={page}>
-          <GroundPage page={page} board={view} state={state} />
-        </section>
+        {promos.top.length > 0 && (
+          <div className="gs-promo-top">
+            <PromoSlot items={promos.top} slot="top" variant="ground" onPlay={onPlay} />
+          </div>
+        )}
+        {promos.side.length > 0 ? (
+          <div className="gs-body-split">
+            <section className="gs-body" key={page}>
+              <GroundPage page={page} board={view} state={state} />
+            </section>
+            <div className="gs-promo-side">
+              <PromoSlot items={promos.side} slot="side" variant="ground" onPlay={onPlay} />
+            </div>
+          </div>
+        ) : (
+          <section className="gs-body" key={page}>
+            <GroundPage page={page} board={view} state={state} />
+          </section>
+        )}
         <footer className="gs-foot">
           <div className="gs-dots" aria-hidden="true">
             {rotation.map((id) => (

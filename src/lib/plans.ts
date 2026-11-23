@@ -29,7 +29,17 @@ export function canUseFeature(
   return false;
 }
 
-/** Only the free plan carries advertising. */
-export function showsAds(plan: PlanId): boolean {
-  return plan === "starter";
+/** Every plan shows CricLume ad banners: they pay for the free plan and earn paid clubs a share. */
+export function showsAds(_plan: PlanId): boolean {
+  return true;
+}
+
+/**
+ * Share of ad money from a club's own screens that goes to the club.
+ * Free: 0% (ads cover CricLume's costs). Paid plan: 30%. Paid plan with the video add-on ("full system"): 50%.
+ * Must match the database function `promo_share_percent`, which is what payouts use.
+ */
+export function adRevenueSharePercent(plan: PlanId, options: { videoAddon?: boolean } = {}): number {
+  if (plan === "starter") return 0;
+  return options.videoAddon === true ? 50 : 30;
 }

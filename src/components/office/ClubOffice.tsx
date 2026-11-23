@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Banknote, Car, ClipboardList, KeyRound, LoaderCircle, MapPin, Shirt, UsersRound } from "lucide-react";
+import { Banknote, Car, Coins, ClipboardList, KeyRound, LoaderCircle, MapPin, Shirt, UsersRound } from "lucide-react";
 import type { PlatformRole } from "@/lib/platform";
 import type { PlatformDashboardData } from "@/lib/platform-cloud";
 import { friendly, loadClubOffice, type ClubOfficeData } from "@/lib/club-office-cloud";
@@ -11,6 +11,7 @@ import { BookingsPanel } from "./BookingsPanel";
 import { TravelPanel } from "./TravelPanel";
 import { StorePanel } from "./StorePanel";
 import { AccessPanel } from "./AccessPanel";
+import { AdEarningsPanel } from "./AdEarningsPanel";
 import type { OfficeProps } from "./ui";
 
 const tabs = [
@@ -20,6 +21,7 @@ const tabs = [
   ["bookings", "Bookings", MapPin],
   ["travel", "Travel", Car],
   ["store", "Kit and shop", Shirt],
+  ["ads", "Ad earnings", Coins],
   ["access", "Access", KeyRound],
 ] as const;
 type Tab = (typeof tabs)[number][0];
@@ -96,6 +98,7 @@ export function ClubOffice({ organisationId, role, club }: { organisationId: str
           {tab === "bookings" && <BookingsPanel {...props} />}
           {tab === "travel" && <TravelPanel {...props} />}
           {tab === "store" && <StorePanel {...props} />}
+          {tab === "ads" && <AdEarningsPanel organisationId={organisationId} role={role} />}
           {tab === "access" && <AccessPanel {...props} />}
         </div>
       )}

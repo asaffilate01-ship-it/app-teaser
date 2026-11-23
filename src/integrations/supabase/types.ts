@@ -3198,6 +3198,21 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_admin_emails: {
+        Row: {
+          created_at: string
+          email: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+        }
+        Relationships: []
+      }
       player_consents: {
         Row: {
           biometric_analysis: Database["public"]["Enums"]["consent_state"]
@@ -3415,6 +3430,176 @@ export type Database = {
           id?: string
           timezone?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      promo_campaigns: {
+        Row: {
+          advertiser: string
+          cities: string[]
+          click_url: string | null
+          countries: string[]
+          created_at: string
+          created_by: string | null
+          currency: string
+          ends_on: string | null
+          id: string
+          name: string
+          price_amount: number
+          regions: string[]
+          starts_on: string
+          status: string
+          surfaces: string[]
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          advertiser: string
+          cities?: string[]
+          click_url?: string | null
+          countries?: string[]
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          ends_on?: string | null
+          id?: string
+          name: string
+          price_amount?: number
+          regions?: string[]
+          starts_on?: string
+          status?: string
+          surfaces?: string[]
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          advertiser?: string
+          cities?: string[]
+          click_url?: string | null
+          countries?: string[]
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          ends_on?: string | null
+          id?: string
+          name?: string
+          price_amount?: number
+          regions?: string[]
+          starts_on?: string
+          status?: string
+          surfaces?: string[]
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: []
+      }
+      promo_creatives: {
+        Row: {
+          active: boolean
+          alt_text: string
+          campaign_id: string
+          created_at: string
+          duration_seconds: number
+          id: string
+          media_kind: string
+          media_path: string
+          slot: string
+        }
+        Insert: {
+          active?: boolean
+          alt_text?: string
+          campaign_id: string
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          media_kind: string
+          media_path: string
+          slot: string
+        }
+        Update: {
+          active?: boolean
+          alt_text?: string
+          campaign_id?: string
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          media_kind?: string
+          media_path?: string
+          slot?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_creatives_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "promo_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promo_play_counts: {
+        Row: {
+          campaign_id: string
+          day: string
+          organisation_id: string | null
+          plays: number
+          share_percent: number
+          slot: string
+          surface: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          day: string
+          organisation_id?: string | null
+          plays?: number
+          share_percent?: number
+          slot: string
+          surface: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          day?: string
+          organisation_id?: string | null
+          plays?: number
+          share_percent?: number
+          slot?: string
+          surface?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_play_counts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "promo_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_play_counts_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promo_play_guard: {
+        Row: {
+          bucket: string
+          creative_id: string
+          viewer_hash: string
+        }
+        Insert: {
+          bucket: string
+          creative_id: string
+          viewer_hash: string
+        }
+        Update: {
+          bucket?: string
+          creative_id?: string
+          viewer_hash?: string
         }
         Relationships: []
       }
@@ -3944,6 +4129,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       video_annotations: {
         Row: {
           asset_id: string
@@ -4197,6 +4403,35 @@ export type Database = {
       }
     }
     Functions: {
+      admin_club_plans: {
+        Args: never
+        Returns: {
+          kind: string
+          organisation_id: string
+          organisation_name: string
+          plan: string
+          status: string
+          video_addon: boolean
+        }[]
+      }
+      admin_promo_payouts: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          currency: string
+          estimated_earnings: number
+          organisation_id: string
+          organisation_name: string
+          plays: number
+        }[]
+      }
+      admin_set_club_plan: {
+        Args: {
+          p_organisation_id: string
+          p_plan: string
+          p_video_addon: boolean
+        }
+        Returns: undefined
+      }
       append_match_event: {
         Args: {
           p_client_event_id: string
@@ -4293,6 +4528,18 @@ export type Database = {
         Returns: Json
       }
       clean_fixture_result: { Args: { p_result: Json }; Returns: Json }
+      club_promo_earnings: {
+        Args: { p_from: string; p_organisation_id: string; p_to: string }
+        Returns: {
+          advertiser: string
+          campaign_id: string
+          campaign_name: string
+          club_plays: number
+          currency: string
+          estimated_earnings: number
+          share_percent: number
+        }[]
+      }
       club_site_file_public: { Args: { p_name: string }; Returns: boolean }
       club_site_path_org: { Args: { p_name: string }; Returns: string }
       complete_camera_asset_upload: {
@@ -4395,6 +4642,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_approved_driver: {
         Args: { p_org: string; p_user: string }
         Returns: boolean
@@ -4418,6 +4672,24 @@ export type Database = {
           organisation_id: string
           organisation_name: string
           timezone: string
+        }[]
+      }
+      list_live_promos: {
+        Args: { p_surface: string }
+        Returns: {
+          advertiser: string
+          alt_text: string
+          campaign_id: string
+          cities: string[]
+          click_url: string
+          countries: string[]
+          creative_id: string
+          duration_seconds: number
+          media_kind: string
+          media_path: string
+          regions: string[]
+          slot: string
+          weight: number
         }[]
       }
       match_scoring_team: {
@@ -4462,6 +4734,10 @@ export type Database = {
       player_allows_public_highlights: {
         Args: { p_player_id: string }
         Returns: boolean
+      }
+      promo_share_percent: {
+        Args: { p_organisation_id: string }
+        Returns: number
       }
       record_delivery_v1: {
         Args: {
@@ -4551,6 +4827,15 @@ export type Database = {
           p_recording: Database["public"]["Enums"]["consent_state"]
         }
         Returns: string
+      }
+      record_promo_plays: {
+        Args: {
+          p_creative_ids: string[]
+          p_organisation_id: string
+          p_surface: string
+          p_viewer_hash: string
+        }
+        Returns: number
       }
       remove_camera_device: {
         Args: { p_device_id: string }
@@ -4723,6 +5008,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin"
       consent_state: "pending" | "granted" | "denied" | "withdrawn"
       fixture_status:
         | "draft"
@@ -4897,6 +5183,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin"],
       consent_state: ["pending", "granted", "denied", "withdrawn"],
       fixture_status: [
         "draft",

@@ -82,6 +82,15 @@ function PrivacyPage() {
         request time, with unnecessary personal data excluded.
       </p>
 
+      <h2>Ad banners</h2>
+      <p>
+        Scoreboards, big screens and the app show ad banners sold by CricLume. Ads are chosen by the
+        rough area your connection comes from (country, region or city) as supplied by our hosting
+        network; we do not look up or store your address or build an advertising profile. To count
+        how often an ad is shown, the server keeps a one-way, salted code made from your connection
+        details for the current day only, and only counts one showing per ad per minute.
+      </p>
+
       <h2>Payments, providers and retention</h2>
       <p>
         Stripe processes subscription and payment details; CricLume stores customer, subscription,

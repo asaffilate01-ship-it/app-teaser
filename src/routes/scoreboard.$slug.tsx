@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MatchAlerts } from "@/components/scoreboard/MatchAlerts";
+import { PromoSlot } from "@/components/promo/PromoSlot";
+import { usePromos } from "@/hooks/use-promos";
 import { useEffect, useState } from "react";
 import { Clock3, MapPin, Radio, RotateCw } from "lucide-react";
 import logoAsset from "@/assets/criclume-logo-on-dark.png.asset.json";
@@ -99,6 +101,7 @@ function PublicScoreboard() {
   const [loading, setLoading] = useState(isCloudConfigured());
   const [error, setError] = useState<string | null>(null);
   const [panel, setPanel] = useState<"live" | "commentary">("live");
+  const { promos, onPlay } = usePromos({ surface: "scoreboard", slug });
 
   useEffect(() => {
     if (!isCloudConfigured()) return;
@@ -226,7 +229,9 @@ function PublicScoreboard() {
         </div>
       </header>
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-3 py-4 md:px-8 md:py-8">
-        <section className="scoreboard-frame">
+        <PromoSlot items={promos.top} slot="top" onPlay={onPlay} className="mb-4" />
+        <div className={promos.side.length > 0 ? "promo-with-side" : ""}>
+        <section className="scoreboard-frame min-w-0">
           <div className="scoreboard-meta">
             <span className="inline-flex min-w-0 items-center gap-1.5">
               <MapPin className="size-3.5 shrink-0 text-gold" aria-hidden="true" />
@@ -410,6 +415,12 @@ function PublicScoreboard() {
             Player names stay hidden on public scoreboards until the club confirms they can be shown.
           </p>
         </section>
+        {promos.side.length > 0 && (
+          <div className="promo-side-rail">
+            <PromoSlot items={promos.side} slot="side" onPlay={onPlay} />
+          </div>
+        )}
+        </div>
       </main>
 
       <footer className="scoreboard-ticker" aria-label="Score summary">

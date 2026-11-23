@@ -112,3 +112,10 @@
 - [x] Jobs per match: Lead scorer, Batting & runs, Bowling & fielding, Video feed
 - [x] Bowling & fielding screen: bowler for the next ball, fielder / position / ball type on recorded balls
 - [x] "Your job" strip and scoring team list; club admins (and the lead scorer, for helpers) hand out jobs
+
+## Ad banners and revenue share
+- [x] Rotating top + side banners (image, GIF, MP4) on ground big screen, public scoreboard, scorer app and club overview
+- [x] Ads targeted by country / region / city
+- [x] Club revenue share: free 0%, paid 30%, paid + video add-on 50% (club office → Ad earnings)
+- [x] CricLume ads desk (/sponsor-desk) for media@criclume.com: campaigns, uploads, place check, payouts, club plans
+- [x] Pricing page + FAQ in five languages say paid clubs show ads and earn a share

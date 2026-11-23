@@ -50,6 +50,8 @@ import {
 import { useCricketStore } from "@/hooks/use-cricket-store";
 import { validateDeviceMatchSetup } from "@/lib/match-setup";
 import { useCloudSession } from "@/hooks/use-cloud-session";
+import { useAppPromos } from "@/hooks/use-app-promos";
+import { PromoSlot } from "@/components/promo/PromoSlot";
 import { useMatchCloudSync } from "@/hooks/use-match-cloud-sync";
 import { cachedDuties, useMatchDuties } from "@/hooks/use-match-duties";
 import { FieldingDesk } from "@/components/scorer/FieldingDesk";
@@ -503,12 +505,16 @@ function Dashboard({
   onDelete: (id: string) => void;
   onImport: ((matches: CricketMatch[]) => void) | undefined;
 }) {
+  const { promos, onPlay } = useAppPromos();
   return (
     <main
       id="main-content"
       tabIndex={-1}
       className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 md:px-8 md:py-12"
     >
+      <PromoSlot items={promos.top} slot="top" onPlay={onPlay} />
+      <div className={promos.side.length > 0 ? "promo-with-side" : ""}>
+      <div className="min-w-0 space-y-8">
       <section className="grid gap-6 overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#2a1427] via-[#17111f] to-[#2b220e] p-6 shadow-2xl md:grid-cols-[1fr_auto] md:items-end md:p-10">
         <div className="space-y-4">
           <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-amber-300">
@@ -684,6 +690,13 @@ function Dashboard({
           );
         })}
       </section>
+      </div>
+      {promos.side.length > 0 && (
+        <div className="promo-side-rail">
+          <PromoSlot items={promos.side} slot="side" onPlay={onPlay} />
+        </div>
+      )}
+      </div>
     </main>
   );
 }
@@ -981,6 +994,8 @@ function LiveMatch({
   const cloudSession = useCloudSession();
   const myUserId = cloudSession.session?.user.id ?? null;
   const dutyState = useMatchDuties(cloudMatchId, myUserId);
+  // Ads sit above the score, away from the scoring buttons.
+  const { promos, onPlay } = useAppPromos(cloudMatchId);
   // Until the first check finishes (or for a match only on this phone) the screen offers everything;
   // the server still refuses anything this person isn't allowed to do.
   const access = dutyAccess(dutyState.duties ?? ["lead"]);
@@ -1192,6 +1207,7 @@ function LiveMatch({
       tabIndex={-1}
       className="mx-auto w-full max-w-7xl pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-8 md:py-8"
     >
+      <PromoSlot items={promos.top} slot="top" onPlay={onPlay} className="mx-3 mb-3 mt-3 md:mx-auto md:mt-0" />
       <ScoreHero
         match={match}
         sync={

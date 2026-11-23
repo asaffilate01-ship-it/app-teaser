@@ -198,7 +198,7 @@ export const en = {
         period: "per team / month",
         blurb: "Full scoring analytics for clubs running several sides.",
         perks: [
-          "Everything in Starter, with no ads",
+          "Everything in Starter — plus 30% of the ad money from your own screens",
           "Unlimited teams and fixtures",
           "Wagon wheels, pitch maps and run-rate charts",
           "Win predictor and ball-by-ball commentary",
@@ -230,6 +230,7 @@ export const en = {
       period: "quoted per club",
       perks: [
         "Multi-phone camera room — up to 16 phones per match",
+        "Raises your club's ad revenue share to 50%",
         "Every ball recorded and linked to the scorecard, with slow motion",
         "Coaching review, tagging and player video analysis",
         "Highlight reels and clip export",
@@ -280,6 +281,10 @@ export const en = {
       {
         q: "Is there a free option?",
         a: "Yes. Basic scoring is free: score ball by ball, even offline, and download a backup. The free plan shows ads and doesn't include analytics or video — full scoring analytics come with a Club or League plan, and video is an extra add-on.",
+      },
+      {
+        q: "Do clubs earn from the ads?",
+        a: "Yes. CricLume sells the top and side banners on your big screen, public scoreboard and app, and ads can be aimed at your area. On the free plan they help cover running costs; on a Club or League plan your club earns 30% of the ad money from your own screens, and 50% with the video add-on.",
       },
       {
         q: "How do I get access?",
@@ -519,7 +524,7 @@ export const de: Content = {
         period: "pro Team / Monat",
         blurb: "Vollständige Scoring-Analyse für Clubs mit mehreren Teams.",
         perks: [
-          "Alles aus Starter, ohne Werbung",
+          "Alles aus Starter – plus 30 % der Werbeeinnahmen von euren eigenen Bildschirmen",
           "Unbegrenzte Teams und Spiele",
           "Wagon Wheels, Pitch Maps und Run-Rate-Grafiken",
           "Siegprognose und Ball-für-Ball-Kommentar",
@@ -552,6 +557,7 @@ export const de: Content = {
       period: "Angebot pro Club",
       perks: [
         "Mehr-Handy-Kameraraum – bis zu 16 Handys pro Spiel",
+        "Erhöht euren Anteil an den Werbeeinnahmen auf 50 %",
         "Jeder Ball aufgenommen und mit der Scorecard verknüpft, mit Zeitlupe",
         "Trainer-Analyse, Tagging und Spieler-Videoanalyse",
         "Highlight-Reels und Clip-Export",
@@ -602,6 +608,10 @@ export const de: Content = {
       {
         q: "Gibt es eine kostenlose Option?",
         a: "Ja. Einfaches Scoring ist kostenlos: Erfasse Ball für Ball, auch offline, und lade eine Sicherung herunter. Der kostenlose Tarif zeigt Werbung und enthält keine Analysen oder Videos – die vollständige Scoring-Analyse gibt es mit einem Club- oder Liga-Abo, Video ist ein zusätzliches Add-on.",
+      },
+      {
+        q: "Verdienen Vereine an der Werbung mit?",
+        a: "Ja. CricLume verkauft die Banner oben und an der Seite auf eurer Großleinwand, der öffentlichen Anzeigetafel und in der App; Werbung kann gezielt in eurer Region laufen. Beim kostenlosen Tarif decken die Anzeigen die Betriebskosten; mit einem Club- oder Liga-Abo erhält euer Verein 30 % der Werbeeinnahmen von den eigenen Bildschirmen, mit dem Video-Add-on 50 %.",
       },
       {
         q: "Wie bekomme ich Zugang?",
@@ -836,7 +846,7 @@ export const nl: Content = {
         period: "per team / maand",
         blurb: "Volledige score-analyse voor clubs met meerdere teams.",
         perks: [
-          "Alles uit Starter, zonder advertenties",
+          "Alles uit Starter – plus 30% van de advertentie-inkomsten van je eigen schermen",
           "Onbeperkt teams en wedstrijden",
           "Wagon wheels, pitch maps en run-rategrafieken",
           "Winstvoorspeller en bal-voor-bal commentaar",
@@ -869,6 +879,7 @@ export const nl: Content = {
       period: "offerte per club",
       perks: [
         "Camerakamer met meerdere telefoons – tot 16 per wedstrijd",
+        "Verhoogt het aandeel van je club in de advertentie-inkomsten naar 50%",
         "Elke bal opgenomen en gekoppeld aan de scorekaart, met slow motion",
         "Coachingreview, tagging en videoanalyse per speler",
         "Highlightvideo's en clipexport",
@@ -919,6 +930,10 @@ export const nl: Content = {
       {
         q: "Is er een gratis optie?",
         a: "Ja. Basis scoren is gratis: scoor bal voor bal, ook offline, en download een back-up. Het gratis abonnement toont advertenties en bevat geen analyses of video – de volledige score-analyse krijg je met een club- of competitieabonnement en video is een extra add-on.",
+      },
+      {
+        q: "Verdienen clubs mee aan de advertenties?",
+        a: "Ja. CricLume verkoopt de banners boven en aan de zijkant op je grote scherm, het openbare scorebord en in de app, en advertenties kunnen op jouw regio gericht worden. Bij het gratis abonnement helpen ze de kosten te dekken; met een club- of competitieabonnement krijgt je club 30% van de advertentie-inkomsten van de eigen schermen, en 50% met de video-add-on.",
       },
       {
         q: "Hoe krijg ik toegang?",
@@ -1155,7 +1170,7 @@ export const af: Content = {
         period: "per span / maand",
         blurb: "Volledige telling-ontleding vir klubs met verskeie spanne.",
         perks: [
-          "Alles in Starter, sonder advertensies",
+          "Alles in Starter – plus 30% van die advertensiegeld van julle eie skerms",
           "Onbeperkte spanne en wedstryde",
           "Wagon wheels, pitch maps en lopietempo-grafieke",
           "Wenvoorspeller en bal-vir-bal kommentaar",
@@ -1188,6 +1203,7 @@ export const af: Content = {
       period: "kwotasie per klub",
       perks: [
         "Kamerakamer met meer fone – tot 16 fone per wedstryd",
+        "Verhoog julle klub se deel van die advertensie-inkomste na 50%",
         "Elke bal opgeneem en aan die telkaart gekoppel, met stadige aksie",
         "Afrigtingsoorsig, merking en spelervideo-ontleding",
         "Hoogtepunt-video's en knipsel-uitvoer",
@@ -1238,6 +1254,10 @@ export const af: Content = {
       {
         q: "Is daar 'n gratis opsie?",
         a: "Ja. Basiese aantekening is gratis: teken bal vir bal aan, selfs vanlyn, en laai 'n rugsteun af. Die gratis plan wys advertensies en sluit nie ontleding of video in nie – volledige telling-ontleding kom met 'n Klub- of Ligaplan, en video is 'n ekstra byvoeging.",
+      },
+      {
+        q: "Verdien klubs uit die advertensies?",
+        a: "Ja. CricLume verkoop die baniere bo en aan die kant op julle groot skerm, openbare telbord en in die app, en advertensies kan op julle area gemik word. Op die gratis plan help dit lopende koste dek; op 'n Klub- of Ligaplan kry julle klub 30% van die advertensiegeld van julle eie skerms, en 50% met die videobyvoeging.",
       },
       {
         q: "Hoe kry ek toegang?",
@@ -1475,7 +1495,7 @@ export const fr: Content = {
         period: "par équipe / mois",
         blurb: "Analyse complète du marquage pour les clubs à plusieurs équipes.",
         perks: [
-          "Tout Starter, sans publicité",
+          "Tout Starter – plus 30 % des recettes publicitaires de vos propres écrans",
           "Équipes et matchs illimités",
           "Wagon wheels, pitch maps et graphiques de run rate",
           "Prédicteur de victoire et commentaire balle par balle",
@@ -1508,6 +1528,7 @@ export const fr: Content = {
       period: "devis par club",
       perks: [
         "Salle caméra multi-téléphones – jusqu'à 16 téléphones par match",
+        "Porte la part de votre club dans les recettes publicitaires à 50 %",
         "Chaque balle filmée et liée à la feuille de score, avec ralenti",
         "Revue d'entraînement, marquage et analyse vidéo par joueur",
         "Résumés vidéo et export de clips",
@@ -1558,6 +1579,10 @@ export const fr: Content = {
       {
         q: "Existe-t-il une offre gratuite ?",
         a: "Oui. Le marquage de base est gratuit : saisissez chaque balle, même hors ligne, et téléchargez une sauvegarde. L'offre gratuite affiche de la publicité et n'inclut ni analyses ni vidéo – l'analyse complète du marquage vient avec une offre Club ou Ligue, et la vidéo est une option supplémentaire.",
+      },
+      {
+        q: "Les clubs touchent-ils une part de la publicité ?",
+        a: "Oui. CricLume vend les bannières du haut et du côté sur votre grand écran, votre tableau des scores public et l'application, et les annonces peuvent cibler votre région. Avec l'offre gratuite, elles aident à couvrir les frais ; avec une offre Club ou Ligue, votre club reçoit 30 % des recettes publicitaires de ses propres écrans, et 50 % avec l'option vidéo.",
       },
       {
         q: "Comment obtenir un accès ?",
