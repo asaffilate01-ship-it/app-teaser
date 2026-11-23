@@ -2254,3 +2254,101 @@
   font-weight: 700;
   color: var(--gold);
 }
+
+/* League hub */
+.hub-tile {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  transition: transform 140ms ease, border-color 140ms ease;
+}
+.hub-tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold);
+}
+.hub-tile:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.hub-table {
+  grid-template-columns: minmax(0, 1fr) 2rem 2rem 2rem 2.6rem;
+}
+@media (min-width: 640px) {
+  .hub-table {
+    grid-template-columns: minmax(0, 1fr) 2.6rem 2.6rem 2.6rem 3.2rem 4rem 3.2rem;
+  }
+}
+.hub-live-badge {
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: oklch(0.82 0.15 84 / 0.16);
+  padding: 0.05rem 0.45rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.hub-stats {
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.hub-stats th,
+.hub-stats td {
+  border-top: 1px solid oklch(1 0 0 / 0.06);
+  padding: 0.55rem 0.6rem;
+  text-align: right;
+  white-space: nowrap;
+  color: oklch(0.78 0.02 280);
+}
+.hub-stats thead th {
+  border-top: 0;
+  background: oklch(1 0 0 / 0.05);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hub-stats thead th button[aria-pressed="true"] {
+  color: var(--gold);
+}
+.hub-stats th[scope="row"],
+.hub-stats thead th:first-child {
+  position: sticky;
+  left: 0;
+  max-width: 11rem;
+  background: oklch(0.2 0.03 300);
+  text-align: left;
+}
+.hub-stats th[scope="row"] span {
+  font-weight: 700;
+  color: oklch(0.95 0.01 280);
+}
+.hub-stats th[scope="row"] small {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: oklch(0.62 0.02 280);
+}
+.hub-sorted {
+  font-weight: 800;
+  color: var(--gold) !important;
+}
+.hub-live-dot {
+  flex-shrink: 0;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--gold);
+}
+.hub-live-dot.is-win {
+  background: oklch(0.78 0.16 155);
+}
+.hub-live-dot.is-loss {
+  background: oklch(0.68 0.19 20);
+}
+@media (min-width: 640px) {
+  .hub-live-dot {
+    display: none;
+  }
+}

@@ -2,6 +2,7 @@ export const publicSections = ["home", "features", "screens", "pricing", "faq", 
 export const platformSections = [
   "overview",
   "competitions",
+  "league",
   "capture",
   "players",
   "academy",

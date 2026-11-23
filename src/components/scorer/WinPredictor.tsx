@@ -109,7 +109,7 @@ export function WinPredictor({
   onConditionsChange?: ((conditions: MatchConditions) => void) | undefined;
   homeName?: string;
   awayName?: string;
-  unavailableReason?: string;
+  unavailableReason?: string | undefined;
 }) {
   const [open, setOpen] = useState(false);
   if (firstWin == null) {
@@ -121,6 +121,7 @@ export function WinPredictor({
         <p className="scoreboard-muted mt-2 text-sm">
           {unavailableReason ?? "The win predictor works for limited-overs matches with one innings each."}
         </p>
+        <Worm points={timeline} firstName={firstName} />
       </section>
     );
   }

@@ -17,8 +17,8 @@
 - [x] Scorecard: compact mobile layout without long scrolling
 - [x] Ball-by-ball text commentary, optional for audiences (templates default)
 - [x] AI over summary button (optional, uses AI credits)
-- [ ] League hub: simultaneous live match cards with drill-in
-- [ ] League hub: live table projected from current match situations
-- [ ] League hub: historic scorecards
-- [ ] League stats: batting (runs, avg, SR, 50s, 100s, HS) and bowling (wkts, avg, econ, SR, best, 5-fors, 10-in-match)
+- [x] League hub: simultaneous live match cards with drill-in
+- [x] League hub: live table projected from current match situations
+- [x] League hub: historic scorecards
+- [x] League stats: batting (runs, avg, SR, 50s, 100s, HS) and bowling (wkts, avg, econ, SR, best, 5-fors, 10-in-match)
 - [ ] Go-live (needs user): payments live keys, email sending, legal/safeguarding sign-off

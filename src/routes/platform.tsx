@@ -58,6 +58,7 @@ import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPane
 import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace";
 import { AcademyDashboard } from "@/components/AcademyDashboard";
 import { LeagueStandings } from "@/components/LeagueStandings";
+import { LeagueHub } from "@/components/league/LeagueHub";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { usePlatformDashboard } from "@/hooks/use-platform-dashboard";
@@ -105,6 +106,7 @@ export const Route = createFileRoute("/platform")({
 type PlatformTab =
   | "overview"
   | "competitions"
+  | "league"
   | "capture"
   | "players"
   | "academy"
@@ -117,6 +119,7 @@ type RunAction = <T>(action: () => Promise<T>) => Promise<T>;
 const tabDefinitions: Array<[PlatformTab, LucideIcon, string]> = [
   ["overview", Gauge, "Overview"],
   ["competitions", Trophy, "Competitions"],
+  ["league", Radio, "League hub"],
   ["capture", Camera, "Capture"],
   ["players", Users, "Players"],
   ["academy", GraduationCap, "Academy"],
@@ -620,7 +623,7 @@ function OperationalPlatform({
           value={tab}
           onChange={setTab}
           items={tabDefinitions}
-          mobilePrimary={["overview", "competitions", "capture", "analysis"]}
+          mobilePrimary={["overview", "league", "competitions", "capture"]}
           layout="rail"
         />
         <div className="min-w-0 lg:pt-6">
@@ -651,6 +654,9 @@ function OperationalPlatform({
             )}
             {tab === "competitions" && (
               <Competitions data={dashboard.data} role={membership.role} run={dashboard.run} />
+            )}
+            {tab === "league" && (
+              <LeagueHub data={dashboard.data} onRefresh={() => void dashboard.refresh()} refreshing={dashboard.refreshing} />
             )}
             {tab === "capture" && (
               <Capture data={dashboard.data} role={membership.role} run={dashboard.run} />
