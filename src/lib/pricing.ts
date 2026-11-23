@@ -5,6 +5,13 @@ export type Region = {
   clubPrice: string;
   period: string;
   note: string;
+  /** Set only where a league price is published; otherwise the page says "Custom". */
+  leaguePrice?: string;
+  leaguePeriod?: string;
+  leagueNote?: string;
+  /** Set only where the video add-on is priced; otherwise the page says "quoted per club". */
+  addonPrice?: string;
+  addonPeriod?: string;
 };
 
 // Locally relevant, affordable pricing per market (Club plan, per team / month).
@@ -37,9 +44,14 @@ export const regions: Region[] = [
     code: "PK",
     country: "Pakistan",
     currency: "PKR",
-    clubPrice: "₨2,500",
-    period: "per team / month",
-    note: "Local pricing for Pakistan clubs.",
+    clubPrice: "₨25,000",
+    period: "per team / year",
+    note: "Yearly prices for Pakistan clubs and leagues.",
+    leaguePrice: "from ₨15,000",
+    leaguePeriod: "per team / year",
+    leagueNote: "Teams 1–10: ₨20,000 each · teams 11–20: ₨17,500 · teams 21+ (divisions): ₨15,000. Each band is charged only on the teams in it.",
+    addonPrice: "₨25,000",
+    addonPeriod: "per club team / year (₨50,000 with the Club plan) · ₨20,000 per league team",
   },
   {
     code: "IN",
@@ -211,4 +223,36 @@ export function browserLocales(): string[] {
   } catch {
     return [];
   }
+}
+
+/** Pakistan yearly prices (PKR). Must match the Pakistan entry in `regions`. */
+export const pakistanPrices = {
+  clubPerTeam: 25_000,
+  clubVideoPerTeam: 25_000,
+  leagueBands: [
+    { upTo: 10, perTeam: 20_000 },
+    { upTo: 20, perTeam: 17_500 },
+    { upTo: Infinity, perTeam: 15_000 },
+  ],
+  leagueVideoPerTeam: 20_000,
+} as const;
+
+/** A Pakistan club's yearly fee: per team, video doubles it. */
+export function pakistanClubFee(teams: number, options: { video?: boolean } = {}): number {
+  const count = Math.max(0, Math.floor(teams));
+  return count * (pakistanPrices.clubPerTeam + (options.video ? pakistanPrices.clubVideoPerTeam : 0));
+}
+
+/** A Pakistan league's yearly fee: each price band applies only to the teams inside it, plus video per team. */
+export function pakistanLeagueFee(teams: number, options: { video?: boolean } = {}): number {
+  const count = Math.max(0, Math.floor(teams));
+  let total = 0;
+  let from = 0;
+  for (const band of pakistanPrices.leagueBands) {
+    const inBand = Math.max(0, Math.min(count, band.upTo) - from);
+    total += inBand * band.perTeam;
+    from = band.upTo;
+    if (count <= from) break;
+  }
+  return total + (options.video ? count * pakistanPrices.leagueVideoPerTeam : 0);
 }

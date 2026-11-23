@@ -44,9 +44,12 @@ function TermsPage() {
 
       <h2>Accounts, roles and subscriptions</h2>
       <p>
-        Keep sign-in links and devices secure and use only the role assigned to you. Organisation
-        owners control member invitations, permissions and public match visibility. Paid plans renew
-        according to the checkout terms shown by Stripe until cancelled. Store-platform billing may
+        Keep sign-in links and devices secure and use only the role assigned to you. Each login is
+        for one person: do not share it with another club, team or person. One login can be signed
+        in on up to two devices at once; signing in on another device signs out the oldest (camera
+        phones and ground screens are not counted). Organisation owners control member invitations,
+        permissions and public match visibility. Paid plans are charged per team and renew according
+        to the checkout terms shown when you subscribe until cancelled. Store-platform billing may
         apply separately to a future native app. Loss of an entitlement must not remove an
         organisation&apos;s lawful access to export its records.
       </p>

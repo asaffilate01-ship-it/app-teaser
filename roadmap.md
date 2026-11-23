@@ -21,7 +21,7 @@
 - [x] League hub: live table projected from current match situations
 - [x] League hub: historic scorecards
 - [x] League stats: batting (runs, avg, SR, 50s, 100s, HS) and bowling (wkts, avg, econ, SR, best, 5-fors, 10-in-match)
-- [ ] Go-live (needs user): payments live keys, email sending, legal/safeguarding sign-off
+- [ ] Go-live: card payments via Paddle (waiting on owner's yes, then Paddle approval), email sender domain (owner opens email setup), legal/safeguarding sign-off (checklist in Files)
 - [x] Demo-style dashboards: League hub match dashboard + club home closer to demo
 - [x] Promo page: show more dashboard screenshots (league hub, match dashboard, stats)
 
@@ -55,13 +55,14 @@
 
 ## Pakistan pricing + CricScoreboard (new ask)
 - [x] Review CricScoreboard and compare with the proposed PKR prices
-- [ ] Proposed PKR plans: team Basic 25k/yr (scoring + basic video), team Advanced 50k/yr (live streaming, coaching, analytics); leagues ≤10 teams 20k/team/yr, 10+ teams 17.5k/team/yr; +20k/team/yr for full system — waiting on user's go-ahead before changing site prices
+- [x] Pakistan yearly prices on the pricing page: Club ₨25k/team/yr (₨50k with video), league bands ₨20k / 17.5k / 15k per team, video +₨20k per league team (built with suggested answer; owner confirming)
 - [x] Offline scoring with reliable resync after internet loss: checked (17 tests pass, automatic resend when back online)
 - [x] Streaming guide covers Facebook, YouTube and TikTok
-- [ ] League bands proposal: teams 1–10 at 20k, teams 11–20 at 17.5k, teams 21+ (multi-division) at 15k, each band charged only on the teams in it; analytics/full system +20k per team. Waiting on user's yes
-- [ ] Dashboards and analysis: where to build them in (plans vs more app screens) — waiting on user's answer
-- [ ] Club team policy (unlimited teams per club vs per team vs bundle) — waiting on user's answer
-- [ ] Login-sharing protections (club branding, two devices per login, suspicious-club flags, scorers locked to teams) — waiting on user's pick
+- [x] League bands 1–10 / 11–20 / 21+ charged only on the teams in each band (tested)
+- [x] Dashboards: simple on free, full on paid (current behaviour; owner confirming)
+- [x] Club team policy: paid clubs pay per team (suggested answer; owner confirming)
+- [x] Login sharing: two devices per login (oldest signed out, Devices list in the workspace), club name on the scorer, terms say one login per person; scorers already locked per match
+- [ ] Suspicious-club flags — only if owner picks it
 - [x] Remove "features are in development" footer line (all five languages)
 - [x] Regional competitor research (Pakistan, Afghanistan, Gulf, East/Southern Africa, Hong Kong, South Asia, North America, England, EU, Australia/NZ, Far East) with ways to be the best
 - [x] Camera setup review: how many phones at once for live streaming, recording, playback and coaching analysis; fix any limits that contradict the site
@@ -82,7 +83,8 @@
 
 ## Plan structure (new ask)
 - [x] Free = basic scoring only (with ads); Club/League = full scoring analytics; video & video analytics = extra add-on (pricing page, comparison table, FAQs, all five languages)
-- [ ] Video add-on price — waiting on user's answer (page shows "quoted per club" meanwhile)
+- [x] Video add-on price in Pakistan: ₨25k per club team / ₨20k per league team per year
+- [ ] Video add-on price outside Pakistan — waiting on owner (page shows "quoted per club")
 - [x] Paid-plan note on Analysis room, AI Intelligence and Capture (owner: "whatever is best" → badges now)
 - [ ] Switch the plan lock on at go-live (one switch in the plan rules) and add matching database checks for camera rooms — waits on live payments
 
@@ -143,7 +145,7 @@
 - [x] Clubs ask to join a league; league approves; either side can end it
 - [x] Team types (1st/2nd XI, age groups, ladies, veterans); free plan 1 team, paid unlimited (enforced in database)
 - [x] Clubs/leagues invite other clubs to tournaments and leagues; invited club accepts with its teams; teams appear in fixtures
-- [ ] Waiting on answers: free-plan team count, and whether free clubs can host competitions
+- [x] Free plan: 1 team; free clubs can host competitions (suggested answer; owner confirming)
 
 ## Competitor gaps round 4 (report in Files)
 - [x] Round 4 gap report: scoring, analysis, training, video, scoreboards, leagues, players, awards, umpires, admin

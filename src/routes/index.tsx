@@ -312,8 +312,8 @@ function HomeTab({ onNavigate, region }: { onNavigate: (t: TabId) => void; regio
   const heroPlans = [
     { name: t.pricing.plans[0]!.name, price: t.pricing.free, period: t.pricing.plans[0]!.period, icon: Zap },
     { name: t.pricing.plans[1]!.name, price: region.clubPrice, period: region.period, icon: Building2, featured: true },
-    { name: t.pricing.plans[2]!.name, price: t.pricing.custom, period: t.pricing.plans[2]!.period, icon: Trophy },
-    { name: t.hero.addonName, price: t.pricing.addon.price, period: t.pricing.addon.period, icon: Video },
+    { name: t.pricing.plans[2]!.name, price: region.leaguePrice ?? t.pricing.custom, period: region.leaguePeriod ?? t.pricing.plans[2]!.period, icon: Trophy },
+    { name: t.hero.addonName, price: region.addonPrice ? `+${region.addonPrice}` : t.pricing.addon.price, period: region.addonPrice ? "per team / year" : t.pricing.addon.period, icon: Video },
   ];
 
   return (
@@ -717,8 +717,9 @@ function PricingTab({ regionState }: { regionState: RegionState }) {
   const { region, setRegion, detected } = regionState;
 
   const priceFor = (i: number) =>
-    i === 0 ? t.pricing.free : i === 1 ? region.clubPrice : t.pricing.custom;
-  const periodFor = (i: number) => (i === 1 ? region.period : t.pricing.plans[i]!.period);
+    i === 0 ? t.pricing.free : i === 1 ? region.clubPrice : (region.leaguePrice ?? t.pricing.custom);
+  const periodFor = (i: number) =>
+    i === 1 ? region.period : i === 2 && region.leaguePeriod ? region.leaguePeriod : t.pricing.plans[i]!.period;
 
   return (
     <div className="space-y-8 md:space-y-12">
@@ -775,6 +776,11 @@ function PricingTab({ regionState }: { regionState: RegionState }) {
                   {periodFor(i)}
                 </span>
               </div>
+              {i === 2 && region.leagueNote && (
+                <p className="rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+                  {region.leagueNote}
+                </p>
+              )}
               <div className="hairline h-px w-full" />
               <ul className="space-y-2">
                 {p.perks.map((perk) => (
@@ -820,10 +826,10 @@ function PricingTab({ regionState }: { regionState: RegionState }) {
           <div className="flex items-end gap-2">
             <Plus className="mb-1 size-5 text-gold" strokeWidth={3} />
             <span className="font-display text-3xl font-bold leading-none">
-              {t.pricing.addon.price}
+              {region.addonPrice ?? t.pricing.addon.price}
             </span>
             <span className="pb-1 text-xs uppercase tracking-wide text-muted-foreground">
-              {t.pricing.addon.period}
+              {region.addonPeriod ?? t.pricing.addon.period}
             </span>
           </div>
           <button

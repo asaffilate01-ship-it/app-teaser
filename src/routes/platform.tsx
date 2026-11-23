@@ -126,6 +126,7 @@ import {
 } from "@/lib/platform-cloud";
 import { PromoSlot } from "@/components/promo/PromoSlot";
 import { RemindersBell } from "@/components/reminders/RemindersBell";
+import { DeviceLimitGuard, DevicesButton } from "@/components/devices/DeviceLimit";
 import { usePromos } from "@/hooks/use-promos";
 import { assignableRoles, can, platformRoles, roleLabels, type PlatformRole } from "@/lib/platform";
 
@@ -187,6 +188,16 @@ const tabDefinitions: Array<[PlatformTab, LucideIcon, string]> = [
 ];
 
 export function Platform() {
+  const { session } = useCloudSession();
+  return (
+    <>
+      <DeviceLimitGuard session={session} />
+      <PlatformWorkspace />
+    </>
+  );
+}
+
+function PlatformWorkspace() {
   const {
     configured,
     session,
@@ -690,6 +701,7 @@ function OperationalPlatform({
             Check scoring
           </Link>
           <RemindersBell />
+          <DevicesButton />
           <button
             type="button"
             onClick={() => void signOut()}

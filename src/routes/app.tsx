@@ -123,6 +123,8 @@ import { canResumeQueuedScoring, reviewCloudBootstrap, reviewRemoteScorerSnapsho
 import { describeScorerSyncRecovery } from "@/lib/scorer-sync-status";
 import { syncChipLabel } from "@/lib/sync-retry";
 import { AppHeader } from "@/components/app-shell/AppHeader";
+import { ClubNameChip } from "@/components/devices/ClubNameChip";
+import { DeviceLimitGuard } from "@/components/devices/DeviceLimit";
 import { AppTabBar } from "@/components/app-shell/AppTabBar";
 import { BallTrail, CreaseStrip, RateStrip, ScoreHero, TeamCrest } from "@/components/scorer/Broadcast";
 import { FielderChips, OutcomeChips, ShotSummary, ShotZonePicker } from "@/components/scorer/ShotEntry";
@@ -358,6 +360,7 @@ export function CricketApp() {
 
   return (
     <div className="min-h-screen bg-background text-slate-100">
+      <DeviceLimitGuard session={cloudSession.session} />
       <AppHeader
         area="Scorer"
         {...(screen !== "dashboard"
@@ -365,6 +368,7 @@ export function CricketApp() {
           : {})}
         right={
           <>
+            <ClubNameChip session={cloudSession.session} />
             <span
               className="flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-2 text-xs text-slate-300"
               role="status"

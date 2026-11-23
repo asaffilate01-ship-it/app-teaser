@@ -3944,6 +3944,42 @@ export type Database = {
           },
         ]
       }
+      login_devices: {
+        Row: {
+          device_key: string
+          first_seen_at: string
+          id: string
+          label: string
+          last_seen_at: string
+          revoked_at: string | null
+          revoked_reason: string | null
+          signed_in_at: string
+          user_id: string
+        }
+        Insert: {
+          device_key: string
+          first_seen_at?: string
+          id?: string
+          label?: string
+          last_seen_at?: string
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          signed_in_at?: string
+          user_id: string
+        }
+        Update: {
+          device_key?: string
+          first_seen_at?: string
+          id?: string
+          label?: string
+          last_seen_at?: string
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          signed_in_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       match_assignments: {
         Row: {
           assigned_by: string
@@ -7057,6 +7093,7 @@ export type Database = {
         Args: { p_code: string; p_org: string }
         Returns: Json
       }
+      check_login_device: { Args: { p_device_key: string }; Returns: string }
       check_scoring_view: { Args: { p_match_id: string }; Returns: Json }
       claim_criclume_omniqora_run: {
         Args: {
@@ -7067,6 +7104,10 @@ export type Database = {
           _task: string
           _tenant_id: string
         }
+        Returns: Json
+      }
+      claim_login_device: {
+        Args: { p_device_key: string; p_label: string }
         Returns: Json
       }
       claim_umpire_expenses: {
@@ -7383,6 +7424,7 @@ export type Database = {
       }
       list_my_check_matches: { Args: never; Returns: Json }
       list_public_live_matches: { Args: never; Returns: Json }
+      login_device_limit: { Args: never; Returns: number }
       match_away_organisation: { Args: { p_match_id: string }; Returns: string }
       match_scoring_team: {
         Args: { p_match_id: string }
@@ -7739,6 +7781,10 @@ export type Database = {
       }
       sign_off_fixture_result: {
         Args: { p_abandoned?: boolean; p_fixture_id: string; p_result: Json }
+        Returns: undefined
+      }
+      sign_out_login_device: {
+        Args: { p_device_id: string }
         Returns: undefined
       }
       start_match_innings: {

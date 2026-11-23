@@ -330,6 +330,13 @@
       "when": 1795465758727,
       "tag": "0046_club_plan_access",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1795466670977,
+      "tag": "0047_login_device_limit",
+      "breakpoints": true
     }
   ]
 }
