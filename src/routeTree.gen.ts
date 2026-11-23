@@ -17,6 +17,7 @@ import { Route as PromoRouteImport } from './routes/promo'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as CameraRoomIdRouteImport } from './routes/camera.$roomId'
 import { Route as DirectorRoomIdRouteImport } from './routes/director.$roomId'
+import { Route as OverlaySlugRouteImport } from './routes/overlay.$slug'
 import { Route as ScoreboardSlugRouteImport } from './routes/scoreboard.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +60,11 @@ const DirectorRoomIdRoute = DirectorRoomIdRouteImport.update({
   path: '/director/$roomId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OverlaySlugRoute = OverlaySlugRouteImport.update({
+  id: '/overlay/$slug',
+  path: '/overlay/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ScoreboardSlugRoute = ScoreboardSlugRouteImport.update({
   id: '/scoreboard/$slug',
   path: '/scoreboard/$slug',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/director/$roomId': typeof DirectorRoomIdRoute
+  '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/director/$roomId': typeof DirectorRoomIdRoute
+  '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
 }
 export interface FileRoutesById {
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/director/$roomId': typeof DirectorRoomIdRoute
+  '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
 }
 export interface FileRouteTypes {
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/camera/$roomId'
     | '/director/$roomId'
+    | '/overlay/$slug'
     | '/scoreboard/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/camera/$roomId'
     | '/director/$roomId'
+    | '/overlay/$slug'
     | '/scoreboard/$slug'
   id:
     | '__root__'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/camera/$roomId'
     | '/director/$roomId'
+    | '/overlay/$slug'
     | '/scoreboard/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +156,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   CameraRoomIdRoute: typeof CameraRoomIdRoute
   DirectorRoomIdRoute: typeof DirectorRoomIdRoute
+  OverlaySlugRoute: typeof OverlaySlugRoute
   ScoreboardSlugRoute: typeof ScoreboardSlugRoute
 }
 
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DirectorRoomIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/overlay/$slug': {
+      id: '/overlay/$slug'
+      path: '/overlay/$slug'
+      fullPath: '/overlay/$slug'
+      preLoaderRoute: typeof OverlaySlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/scoreboard/$slug': {
       id: '/scoreboard/$slug'
       path: '/scoreboard/$slug'
@@ -224,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   CameraRoomIdRoute: CameraRoomIdRoute,
   DirectorRoomIdRoute: DirectorRoomIdRoute,
+  OverlaySlugRoute: OverlaySlugRoute,
   ScoreboardSlugRoute: ScoreboardSlugRoute,
 }
 export const routeTree = rootRouteImport

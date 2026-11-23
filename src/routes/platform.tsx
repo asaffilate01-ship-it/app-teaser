@@ -25,6 +25,7 @@ import {
   CalendarDays,
   Camera,
   Check,
+  Copy,
   ChevronRight,
   CircleDollarSign,
   Cloud,
@@ -60,6 +61,7 @@ import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace"
 import { AcademyDashboard } from "@/components/AcademyDashboard";
 import { LeagueStandings } from "@/components/LeagueStandings";
 import { LeagueHub } from "@/components/league/LeagueHub";
+import { toast } from "sonner";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { usePlatformDashboard } from "@/hooks/use-platform-dashboard";
@@ -1069,6 +1071,22 @@ function MatchCard({
           <a href={`/scoreboard/${match.scoreboard.slug}`} className="action-secondary">
             Public board <ExternalLink className="size-3.5" />
           </a>
+        )}
+        {match.scoreboard?.enabled && (
+          <button
+            type="button"
+            className="action-secondary"
+            title="Copy a transparent score overlay link for OBS or Streamlabs"
+            onClick={() => {
+              const link = `${window.location.origin}/overlay/${match.scoreboard!.slug}`;
+              void navigator.clipboard
+                .writeText(link)
+                .then(() => toast.success("Stream overlay link copied. Add it as a Browser Source in OBS or Streamlabs."))
+                .catch(() => window.prompt("Copy this overlay link", link));
+            }}
+          >
+            Stream overlay <Copy className="size-3.5" />
+          </button>
         )}
         {can(role, "match.manage") && (
           <button

@@ -2643,3 +2643,78 @@
   justify-content: space-between;
   gap: 0.75rem;
 }
+
+/* Stream overlay (transparent page for OBS / Streamlabs browser sources) */
+.overlay-page,
+.overlay-page body {
+  background: transparent !important;
+}
+.overlay-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+  padding: 2.5vh 2.5vw;
+  font-family: var(--font-body);
+}
+.overlay-bar { align-items: flex-end; justify-content: center; }
+.overlay-corner { align-items: flex-start; justify-content: flex-start; }
+.overlay-bug {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  border-radius: 0.9rem;
+  background: oklch(0.2 0.04 265 / 0.94);
+  color: oklch(0.97 0.01 90);
+  box-shadow: 0 10px 30px oklch(0 0 0 / 0.35);
+  font-size: clamp(14px, 1.6vw, 22px);
+  font-variant-numeric: tabular-nums;
+}
+.overlay-bug > * { display: flex; align-items: center; gap: 0.6em; padding: 0.55em 0.9em; }
+.overlay-waiting { padding: 0.8em 1.2em; font-size: 16px; }
+.overlay-team { background: oklch(0.8 0.15 84); color: oklch(0.18 0.03 30); font-weight: 800; }
+.overlay-crest {
+  display: grid;
+  place-items: center;
+  width: 1.9em;
+  height: 1.9em;
+  border-radius: 999px;
+  background: oklch(0.18 0.03 30);
+  color: oklch(0.85 0.14 84);
+  font-size: 0.75em;
+}
+.overlay-name { font-family: var(--font-display); font-size: 1.15em; letter-spacing: 0.04em; text-transform: uppercase; }
+.overlay-score strong { font-family: var(--font-display); font-size: 1.6em; line-height: 1; }
+.overlay-score span { font-size: 0.8em; color: oklch(0.8 0.02 260); }
+.overlay-crease { border-left: 1px solid oklch(1 0 0 / 0.12); font-size: 0.85em; }
+.overlay-crease span { display: inline-flex; align-items: center; gap: 0.35em; }
+.overlay-strike { width: 0.45em; height: 0.45em; border-radius: 999px; background: oklch(0.8 0.15 84); }
+.overlay-bowler { color: oklch(0.82 0.08 235); }
+.overlay-balls { gap: 0.3em; border-left: 1px solid oklch(1 0 0 / 0.12); }
+.overlay-balls li {
+  display: grid;
+  place-items: center;
+  min-width: 1.7em;
+  height: 1.7em;
+  border-radius: 999px;
+  background: oklch(1 0 0 / 0.1);
+  font-size: 0.75em;
+  font-weight: 700;
+}
+.overlay-balls li.is-boundary { background: oklch(0.8 0.15 84); color: oklch(0.18 0.03 30); }
+.overlay-balls li.is-wicket { background: oklch(0.6 0.22 22); }
+.overlay-info { background: oklch(1 0 0 / 0.07); font-size: 0.85em; font-weight: 700; white-space: nowrap; }
+.overlay-info.is-alert { background: oklch(0.6 0.22 22); color: oklch(0.98 0.01 90); letter-spacing: 0.06em; }
+.overlay-brand {
+  position: absolute;
+  right: 0.5em;
+  top: 0.15em;
+  padding: 0 !important;
+  font-size: 0.5em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: oklch(1 0 0 / 0.4);
+}
+.overlay-corner .overlay-bug { flex-direction: column; align-items: stretch; }
+.overlay-corner .overlay-bug > * { justify-content: space-between; }
