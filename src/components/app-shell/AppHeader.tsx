@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import logoOnDark from "@/assets/criclume-logo-on-dark.png.asset.json";
+import { InstallButton } from "@/components/app-shell/InstallApp";
 
 /**
  * One header for every signed-in or match-day screen. The logo variant is
@@ -38,7 +39,10 @@ export function AppHeader({
           </Link>
           {area && <span className="app-area-pill hidden sm:inline-flex">{area}</span>}
         </div>
-        {right && <div className="flex shrink-0 items-center gap-2">{right}</div>}
+        <div className="flex shrink-0 items-center gap-2">
+          <InstallButton />
+          {right}
+        </div>
       </div>
     </header>
   );

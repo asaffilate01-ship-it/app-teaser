@@ -2898,3 +2898,11 @@
 .qual-status.is-out { border-left-color: oklch(0.6 0.2 22); }
 
 .day-panel-stumps { border-color: color-mix(in oklab, var(--gold) 45%, transparent); }
+
+/* Install the app */
+.install-button { width: auto; gap: 0.4rem; padding-inline: 0.7rem; font-size: 0.8rem; font-weight: 700; }
+.install-banner { position: fixed; inset-inline: 0.75rem; bottom: calc(env(safe-area-inset-bottom) + 5.25rem); z-index: 40; display: flex; align-items: center; gap: 0.75rem; border-radius: 1rem; border: 1px solid color-mix(in oklab, var(--gold) 35%, transparent); background: color-mix(in oklab, var(--background) 92%, transparent); padding: 0.7rem 0.8rem; box-shadow: 0 18px 40px -18px oklch(0 0 0 / 0.6); backdrop-filter: blur(14px); }
+@media (min-width: 768px) { .install-banner { display: none; } }
+.install-steps { display: grid; gap: 0.75rem; counter-reset: step; font-size: 0.9rem; }
+.install-steps li { counter-increment: step; display: flex; gap: 0.6rem; align-items: baseline; }
+.install-steps li::before { content: counter(step); display: grid; place-items: center; flex: none; width: 1.6rem; height: 1.6rem; border-radius: 999px; background: var(--gold); color: var(--gold-foreground); font-weight: 800; font-size: 0.8rem; }

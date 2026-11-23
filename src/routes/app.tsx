@@ -54,6 +54,7 @@ import { useMatchCloudSync } from "@/hooks/use-match-cloud-sync";
 import { MatchRulesFields } from "@/components/scorer/MatchRulesFields";
 import { RainPanel } from "@/components/scorer/RainPanel";
 import { DayPanel } from "@/components/scorer/DayPanel";
+import { InstallBanner } from "@/components/app-shell/InstallApp";
 import {
   allowedDismissals,
   canDeclare,
@@ -304,6 +305,7 @@ export function CricketApp() {
           </>
         }
       />
+      {screen === "dashboard" && <InstallBanner />}
 
       {storageIssue && (
         <section

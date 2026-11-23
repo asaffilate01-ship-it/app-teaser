@@ -1,35 +1,31 @@
 {
-  "name": "CricLume Cricket Scoring",
+  "id": "/app",
+  "name": "CricLume — Cricket Scoring",
   "short_name": "CricLume",
-  "description": "Live cricket scoring, multi-phone capture and coaching review.",
-  "start_url": "/app",
+  "description": "Ball-by-ball cricket scoring, live scoreboards, league tables and multi-camera review for clubs and leagues.",
+  "start_url": "/app?source=installed",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "any",
-  "background_color": "#0f0d17",
-  "theme_color": "#e11d48",
-  "categories": [
-    "sports",
-    "productivity"
-  ],
+  "background_color": "#141a2e",
+  "theme_color": "#141a2e",
+  "categories": ["sports", "productivity"],
   "icons": [
-    {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    }
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Score a match", "short_name": "Score", "url": "/app?source=shortcut", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Club workspace", "short_name": "Club", "url": "/platform?source=shortcut", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ],
+  "screenshots": [
+    { "src": "/screenshots/phone-scoring.jpg", "sizes": "768x1408", "type": "image/jpeg", "form_factor": "narrow", "label": "Ball-by-ball scoring" },
+    { "src": "/screenshots/phone-league.jpg", "sizes": "768x1408", "type": "image/jpeg", "form_factor": "narrow", "label": "Live league table" },
+    { "src": "/screenshots/desktop-dashboard.jpg", "sizes": "1600x1008", "type": "image/jpeg", "form_factor": "wide", "label": "Club dashboard" },
+    { "src": "/screenshots/desktop-scoreboard.jpg", "sizes": "1600x1008", "type": "image/jpeg", "form_factor": "wide", "label": "Public live scoreboard" }
   ]
 }
