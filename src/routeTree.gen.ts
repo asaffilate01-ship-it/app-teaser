@@ -17,8 +17,10 @@ import { Route as PromoRouteImport } from './routes/promo'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as CameraRoomIdRouteImport } from './routes/camera.$roomId'
 import { Route as DirectorRoomIdRouteImport } from './routes/director.$roomId'
+import { Route as GroundSlugRouteImport } from './routes/ground.$slug'
 import { Route as OverlaySlugRouteImport } from './routes/overlay.$slug'
 import { Route as ScoreboardSlugRouteImport } from './routes/scoreboard.$slug'
+import { Route as ApiPublicGroundFeedSlugRouteImport } from './routes/api/public/ground-feed.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -60,6 +62,11 @@ const DirectorRoomIdRoute = DirectorRoomIdRouteImport.update({
   path: '/director/$roomId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GroundSlugRoute = GroundSlugRouteImport.update({
+  id: '/ground/$slug',
+  path: '/ground/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OverlaySlugRoute = OverlaySlugRouteImport.update({
   id: '/overlay/$slug',
   path: '/overlay/$slug',
@@ -68,6 +75,11 @@ const OverlaySlugRoute = OverlaySlugRouteImport.update({
 const ScoreboardSlugRoute = ScoreboardSlugRouteImport.update({
   id: '/scoreboard/$slug',
   path: '/scoreboard/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicGroundFeedSlugRoute = ApiPublicGroundFeedSlugRouteImport.update({
+  id: '/api/public/ground-feed/$slug',
+  path: '/api/public/ground-feed/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -80,8 +92,10 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/director/$roomId': typeof DirectorRoomIdRoute
+  '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
+  '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -92,8 +106,10 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/director/$roomId': typeof DirectorRoomIdRoute
+  '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
+  '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -105,8 +121,10 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/director/$roomId': typeof DirectorRoomIdRoute
+  '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
+  '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -119,8 +137,10 @@ export interface FileRouteTypes {
     | '/terms'
     | '/camera/$roomId'
     | '/director/$roomId'
+    | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
+    | '/api/public/ground-feed/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -131,8 +151,10 @@ export interface FileRouteTypes {
     | '/terms'
     | '/camera/$roomId'
     | '/director/$roomId'
+    | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
+    | '/api/public/ground-feed/$slug'
   id:
     | '__root__'
     | '/'
@@ -143,8 +165,10 @@ export interface FileRouteTypes {
     | '/terms'
     | '/camera/$roomId'
     | '/director/$roomId'
+    | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
+    | '/api/public/ground-feed/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -156,8 +180,10 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   CameraRoomIdRoute: typeof CameraRoomIdRoute
   DirectorRoomIdRoute: typeof DirectorRoomIdRoute
+  GroundSlugRoute: typeof GroundSlugRoute
   OverlaySlugRoute: typeof OverlaySlugRoute
   ScoreboardSlugRoute: typeof ScoreboardSlugRoute
+  ApiPublicGroundFeedSlugRoute: typeof ApiPublicGroundFeedSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -218,6 +244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DirectorRoomIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ground/$slug': {
+      id: '/ground/$slug'
+      path: '/ground/$slug'
+      fullPath: '/ground/$slug'
+      preLoaderRoute: typeof GroundSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/overlay/$slug': {
       id: '/overlay/$slug'
       path: '/overlay/$slug'
@@ -232,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScoreboardSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ground-feed/$slug': {
+      id: '/api/public/ground-feed/$slug'
+      path: '/api/public/ground-feed/$slug'
+      fullPath: '/api/public/ground-feed/$slug'
+      preLoaderRoute: typeof ApiPublicGroundFeedSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -244,8 +284,10 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   CameraRoomIdRoute: CameraRoomIdRoute,
   DirectorRoomIdRoute: DirectorRoomIdRoute,
+  GroundSlugRoute: GroundSlugRoute,
   OverlaySlugRoute: OverlaySlugRoute,
   ScoreboardSlugRoute: ScoreboardSlugRoute,
+  ApiPublicGroundFeedSlugRoute: ApiPublicGroundFeedSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

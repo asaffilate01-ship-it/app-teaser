@@ -1089,6 +1089,17 @@ function MatchCard({
             Stream overlay <Copy className="size-3.5" />
           </button>
         )}
+        {match.scoreboard?.enabled && (
+          <a
+            href={`/ground/${match.scoreboard.slug}`}
+            target="_blank"
+            rel="noreferrer"
+            className="action-secondary"
+            title="Full-screen score for a TV, projector or LED screen at the ground"
+          >
+            Ground screen <ExternalLink className="size-3.5" />
+          </a>
+        )}
         {can(role, "match.manage") && (
           <button
             type="button"

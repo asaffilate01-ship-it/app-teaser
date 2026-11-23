@@ -2842,3 +2842,36 @@
   font-weight: 700;
 }
 .read-aloud[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--gold-foreground); }
+
+/* Ground scoreboard: full-screen, high contrast for TVs, projectors and LED walls */
+.ground-screen {
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  gap: 3vh;
+  padding: 4vh 5vw;
+  background: oklch(0.12 0.02 262);
+  color: oklch(0.98 0.01 90);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.ground-waiting { font-size: 3vw; color: oklch(0.8 0.02 260); }
+.ground-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 2vw; font-family: var(--font-display); text-transform: uppercase; }
+.ground-head > span:first-child { font-size: clamp(28px, 5vw, 96px); color: var(--gold); letter-spacing: 0.04em; }
+.ground-vs { font-size: clamp(18px, 2.6vw, 48px); color: oklch(0.75 0.02 260); }
+.ground-alert { border-radius: 0.4em; background: oklch(0.6 0.22 22); padding: 0.1em 0.5em; font-size: clamp(18px, 2.6vw, 48px); }
+.ground-total { display: flex; align-items: baseline; justify-content: center; gap: 1vw; font-family: var(--font-display); font-size: clamp(96px, 22vw, 420px); line-height: 0.9; }
+.ground-slash { color: oklch(0.6 0.02 260); }
+.ground-cells, .ground-players { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16vw), 1fr)); gap: 1.5vw; }
+.ground-cells > div, .ground-players > div {
+  display: grid;
+  gap: 0.5vh;
+  border-radius: 1vw;
+  background: oklch(1 0 0 / 0.06);
+  padding: 1.6vh 1vw;
+}
+.ground-cells span, .ground-players span { font-size: clamp(12px, 1.4vw, 28px); text-transform: uppercase; letter-spacing: 0.12em; color: oklch(0.75 0.02 260); }
+.ground-cells strong { font-family: var(--font-display); font-size: clamp(28px, 5vw, 110px); line-height: 1; }
+.ground-players strong { font-family: var(--font-display); font-size: clamp(20px, 3vw, 64px); line-height: 1.1; }
+.ground-result { font-family: var(--font-display); font-size: clamp(22px, 3.4vw, 72px); color: var(--gold); }
+.ground-brand { font-size: clamp(10px, 1vw, 18px); letter-spacing: 0.2em; text-transform: uppercase; color: oklch(1 0 0 / 0.35); }
