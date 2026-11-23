@@ -53,7 +53,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Ball-by-ball cricket scoring with phone cameras linked to every delivery, live scores for clubs and leagues, and coaching review.",
+          "Free offline cricket scoring with safe sync, split scoring duties, up to 16 phone cameras, live scoreboards, league tables, club office and websites. Club, League and video plans.",
       },
       { property: "og:title", content: "CricLume — See every ball. Shape every game." },
       {
@@ -111,8 +111,29 @@ function HomepageRoot() {
   );
 }
 
+function useVisitorRegion() {
+  const [region, setRegion] = useState<Region>(defaultRegion);
+  const [detected, setDetected] = useState(false);
+  useEffect(() => {
+    let active = true;
+    detectCountry().then((code) => {
+      if (!active) return;
+      const match = findRegion(code);
+      if (match) setRegion(match);
+      setDetected(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+  return { region, setRegion, detected };
+}
+
+type RegionState = ReturnType<typeof useVisitorRegion>;
+
 function Homepage() {
   const tab = Route.useSearch().section ?? "home";
+  const regionState = useVisitorRegion();
   const navigate = Route.useNavigate();
   const focusSection = (section: TabId) => {
     const target = document.getElementById(`home-${section}`);
@@ -139,7 +160,7 @@ function Homepage() {
         >
           <div className="space-y-16 md:space-y-24">
             <section id="home-home" tabIndex={-1} className="scroll-mt-28">
-              <HomeTab onNavigate={setTab} />
+              <HomeTab onNavigate={setTab} region={regionState.region} />
             </section>
             <section id="home-features" tabIndex={-1} className="scroll-mt-28">
               <FeaturesTab />
@@ -148,7 +169,7 @@ function Homepage() {
               <ScreensTab />
             </section>
             <section id="home-pricing" tabIndex={-1} className="scroll-mt-28">
-              <PricingTab />
+              <PricingTab regionState={regionState} />
             </section>
             <section id="home-faq" tabIndex={-1} className="scroll-mt-28">
               <FaqTab />
@@ -186,7 +207,7 @@ function Header({
           <img
             src={logoAsset.url}
             alt="CricLume"
-            className="h-10 w-auto md:h-12"
+            className="h-10 w-auto lg:h-12"
             width={1600}
             height={600}
           />
@@ -201,7 +222,7 @@ function Header({
                 key={m.id}
                 onClick={() => onChange(m.id)}
                 aria-current={tab === m.id ? "page" : undefined}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                className={`rounded-full px-2.5 py-2 text-sm font-semibold transition-colors lg:px-4 ${
                   tab === m.id
                     ? "bg-primary/10 text-primary"
                     : "text-slate-600 hover:text-slate-900"
@@ -210,16 +231,17 @@ function Header({
                 {t.nav[m.key]}
               </button>
             ))}
-          <LanguageSelect className="ml-2" />
+          <LanguageSelect className="ml-1 lg:ml-2" />
           <ThemeToggle
             className="theme-toggle-light-chrome ml-1"
             labels={{ toLight: t.nav.themeLight, toDark: t.nav.themeDark }}
           />
           <button
             onClick={() => onChange("login")}
-            className="brand-gradient glow ml-2 inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-bold uppercase tracking-wider text-primary-foreground"
+            aria-label={t.nav.login}
+            className="brand-gradient glow ml-1 inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-3.5 text-sm font-bold uppercase tracking-wider text-primary-foreground lg:ml-2 lg:px-5"
           >
-            <Play className="size-3.5" /> {t.nav.login}
+            <Play className="size-3.5" /> <span className="hidden lg:inline">{t.nav.login}</span>
           </button>
         </nav>
 
@@ -235,14 +257,24 @@ function Header({
   );
 }
 
-function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
+function HomeTab({ onNavigate, region }: { onNavigate: (t: TabId) => void; region: Region }) {
   const { t } = useI18n();
   const highlights = [0, 1, 6];
+  const heroPlans = [
+    { name: t.pricing.plans[0]!.name, price: t.pricing.free, period: t.pricing.plans[0]!.period, icon: Zap },
+    { name: t.pricing.plans[1]!.name, price: region.clubPrice, period: region.period, icon: Building2, featured: true },
+    { name: t.pricing.plans[2]!.name, price: t.pricing.custom, period: t.pricing.plans[2]!.period, icon: Trophy },
+    { name: t.hero.addonName, price: t.pricing.addon.price, period: t.pricing.addon.period, icon: Video },
+  ];
 
   return (
     <div className="space-y-10 md:space-y-16">
       <div className="grid gap-7 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-12">
-        <section className="space-y-4 md:space-y-6">
+        <section className="min-w-0 space-y-4 md:space-y-6">
+          <p className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-gold">
+            <span className="size-1.5 rounded-full bg-gold" aria-hidden />
+            {t.hero.kicker}
+          </p>
           <h1 className="text-[2.8rem] font-bold leading-[1.05] tracking-tight md:text-6xl lg:text-[5.2rem]">
             {t.hero.l1}
             <br />
@@ -270,6 +302,23 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
               {t.hero.ctaSecondary}
             </button>
           </div>
+
+          <div className="space-y-2">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+              {t.hero.featuresLabel}
+            </p>
+            <ul className="-mx-5 flex snap-x gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
+              {t.hero.features.map((f) => (
+                <li
+                  key={f}
+                  className="flex shrink-0 snap-start items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground"
+                >
+                  <Check className="size-3.5 text-gold" aria-hidden />
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
 
         <section className="surface-card overflow-hidden">
@@ -290,6 +339,46 @@ function HomeTab({ onNavigate }: { onNavigate: (t: TabId) => void }) {
           />
         </section>
       </div>
+
+      <section aria-labelledby="hero-plans" className="space-y-3">
+        <div className="flex items-end justify-between gap-3">
+          <h2 id="hero-plans" className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+            {t.hero.plansLabel}
+          </h2>
+          <button
+            onClick={() => onNavigate("pricing")}
+            className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-gold"
+          >
+            {t.hero.plansCta} <ArrowRight className="size-3.5" />
+          </button>
+        </div>
+        <div className="grid grid-cols-2 gap-2 md:gap-4 lg:grid-cols-4">
+          {heroPlans.map((plan, i) => {
+            const Icon = plan.icon;
+            return (
+              <button
+                key={plan.name}
+                onClick={() => onNavigate("pricing")}
+                className={`surface-card lift-card flex flex-col items-start gap-2 p-3 text-left md:p-5 ${plan.featured ? "border-gold/50 ring-1 ring-gold/30" : ""}`}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="icon-tile flex size-8 items-center justify-center md:size-9">
+                    <Icon className="size-4 text-gold" aria-hidden />
+                  </span>
+                  <span className="font-display text-base font-bold tracking-tight md:text-lg">{plan.name}</span>
+                </span>
+                <span className="flex flex-wrap items-baseline gap-x-1.5">
+                  <span className="font-display text-xl font-bold leading-none md:text-2xl">{plan.price}</span>
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground md:text-[11px]">
+                    {plan.period}
+                  </span>
+                </span>
+                <span className="text-xs leading-snug text-muted-foreground">{t.hero.planNotes[i]}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
       <section className="grid grid-cols-3 gap-2 text-center md:gap-5">
         {t.stats.map((s) => (
@@ -592,23 +681,9 @@ function ScreensTab() {
   );
 }
 
-function PricingTab() {
+function PricingTab({ regionState }: { regionState: RegionState }) {
   const { t } = useI18n();
-  const [region, setRegion] = useState<Region>(defaultRegion);
-  const [detected, setDetected] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    detectCountry().then((code) => {
-      if (!active) return;
-      const match = findRegion(code);
-      if (match) setRegion(match);
-      setDetected(true);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
+  const { region, setRegion, detected } = regionState;
 
   const priceFor = (i: number) =>
     i === 0 ? t.pricing.free : i === 1 ? region.clubPrice : t.pricing.custom;
