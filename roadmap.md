@@ -48,7 +48,7 @@
 - [x] 7 Phone alerts for wickets, milestones and results (web push) — live site only; needs a real-phone check after publishing
 - [ ] 10 Club / league public website pages: branding, news, gallery, documents, fixtures/results
 - [x] 1 Live streaming via free OBS: Go live guide (YouTube, Facebook, TikTok) with overlay links
-- [ ] 15a Player auction / draft
+- [x] 15a Player auction / draft
 - [ ] 15b Ground and nets booking requests
 - [ ] 15c Match tickets (selling online needs live payments)
 - [ ] 15d Merchandise shop (selling online needs live payments)
@@ -94,10 +94,10 @@
 ## Competitor gaps round 3 (new ask: fill gaps, better phone and desktop)
 - [x] Public club and league websites: about, live now, fixtures/results, league table, news, notices, documents, gallery, sponsors, contact — editor in the workspace
 - [x] Result confirmation by both teams + league "needs action" inbox (overdue, disputed, unconfirmed results)
-- [ ] Umpire appointments per fixture + captain's marks for umpires/pitch and umpire reports
-- [ ] Availability upgrades: reply-by deadline, squad cap with waitlist, add to phone calendar
-- [ ] Volunteer duties (teas, setup, umpiring, scoring) with self sign-up
-- [ ] "Join the club" applications from the public website with an approval queue
+- [x] Umpire appointments per fixture + captain's marks for umpires/pitch and umpire reports
+- [x] Availability upgrades: reply-by deadline, squad cap with waitlist, add to phone calendar
+- [x] Volunteer duties (teas, setup, umpiring, scoring) with self sign-up
+- [x] "Join the club" applications from the public website with an approval queue
 - [x] Updated competitor report (round 3) saved to Files
 
 ## Offline scoring and sync (new ask)
@@ -164,28 +164,28 @@
 - [x] Formats: The Hundred (5-ball sets), tape-ball, indoor 8-a-side
 - [x] Pitch map and beehive tapped by the scorer per ball
 - [x] Phase splits (powerplay/middle/death) and bowler-type splits
-- [ ] Player rankings by town/region/country; compare two players
+- [x] Player rankings by town/region/country; compare two players
 - [x] Stats spreadsheet download
-- [ ] Import old scorecards
-- [ ] Training sessions, drills library, attendance
-- [ ] Player goals, coach feedback timeline, self-review
-- [ ] Fitness tests with progress charts
-- [ ] Draw on a paused clip; two clips side by side
-- [ ] Player clip library on profile
-- [ ] Captain's marks for umpires and pitch; umpire match reports
-- [ ] League registration for teams/players with fees
-- [ ] Transfers, eligibility (played-down, overseas limits), permits
-- [ ] Discipline: cases, fines, suspensions that block selection
-- [ ] Players claim profile, one career across clubs, fans follow
-- [ ] Availability reply-by deadline, squad cap + waiting list, add to calendar
-- [ ] Looking-for-players / looking-for-a-match board
-- [ ] Shareable award cards and certificates
-- [ ] Umpire marks/assessor reports, grade progress
-- [ ] Umpire's own match record from phone
-- [ ] Team chat and announcements with "read by"
-- [ ] "Join the club" form on club website + approval queue
-- [ ] Activity history (who changed what, when)
-- [ ] Player auction / draft for franchise leagues
+- [x] Import old scorecards
+- [x] Training sessions, drills library, attendance
+- [x] Player goals, coach feedback timeline, self-review
+- [x] Fitness tests with progress charts
+- [x] Draw on a paused clip; two clips side by side
+- [x] Player clip library on profile
+- [x] Captain's marks for umpires and pitch; umpire match reports
+- [x] League registration for teams/players with fees
+- [x] Transfers, eligibility (played-down, overseas limits), permits
+- [x] Discipline: cases, fines, suspensions that block selection
+- [x] Players claim profile, one career across clubs, fans follow
+- [x] Availability reply-by deadline, squad cap + waiting list, add to calendar
+- [x] Looking-for-players / looking-for-a-match board
+- [x] Shareable award cards and certificates
+- [x] Umpire marks/assessor reports, grade progress
+- [x] Umpire's own match record from phone
+- [x] Team chat and announcements with "read by"
+- [x] "Join the club" form on club website + approval queue
+- [x] Activity history (who changed what, when)
+- [x] Player auction / draft for franchise leagues
 - [ ] Card payments — waiting on owner's choice
 - [ ] Email / WhatsApp / SMS reminders — waiting on owner's choice
 - [ ] Go live from the app without OBS — waiting on owner's choice (running costs)

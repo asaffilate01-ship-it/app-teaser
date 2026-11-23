@@ -95,7 +95,8 @@ const tableLabels: Record<string, string> = {
   players: "Player", teams: "Team", club_events: "Event", event_selections: "Team selection", matches: "Match", competitions: "Competition",
   organisation_members: "Member", fee_payments: "Fee payment", fee_charges: "Fee", training_sessions: "Training session", discipline_cases: "Discipline case",
   player_transfers: "Transfer", player_claims: "Profile claim", club_join_requests: "Join request", historic_player_stats: "Imported stats",
-  competition_registrations: "Competition entry", umpire_appointments: "Umpire appointment", videos: "Video", video_assets: "Video",
+  competition_registrations: "Competition entry", organisations: "Club details", umpires: "Umpire", subscriptions: "Plan",
+  fee_payment_claims: "Fee payment report", club_payment_accounts: "Payment account", grounds: "Ground", event_availability: "Availability", umpire_appointments: "Umpire appointment", videos: "Video", video_assets: "Video",
 };
 
 /** Which fields changed between two saved versions (ignoring timestamps). */

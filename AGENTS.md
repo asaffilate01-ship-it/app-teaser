@@ -51,3 +51,4 @@
 - Toss/retirements/squad edits/hands/speeds live in the snapshot; cloud adds use `add_match_squad_player`.
 - Fan POTM votes: RPC-only, refs from `get_ground_screen_names`, hashed voter id.
 - Junior bowling limits warn only; point deductions never touch NRR; volunteer places enforced by `volunteer_sign_up`.
+- Event places/waitlist, reply-by, suspensions and earlier-ball fixes (`correct_delivery_v1`) are enforced by DB triggers/RPCs; UI only mirrors them.
