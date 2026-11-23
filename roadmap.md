@@ -12,9 +12,13 @@
 - [x] Security follow-ups: evidence delete/upload limited to current staff; junior evidence limited to owners, safeguarding officers and the uploader
 - [x] Scorer: tap-the-field shot area, one-tap fielder chips with "last here" suggestion, next to the run buttons
 - [x] Scorer: 32 fielding positions (ring, deep, close catchers), left-hand batter view, recent positions
-- [ ] Scorer: many more close fielders (slips 1-4, fly slip, leg gully, short legs, silly mid-on/off, short covers)
-- [ ] Win predictor (WinViz-style %) from score, wickets, balls left and match conditions; competitor check
-- [ ] Scorecard: compact mobile layout without long scrolling
-- [ ] Ball-by-ball text commentary, optional for audiences (templates default)
-- [ ] AI over summary button (optional, uses AI credits)
+- [x] Scorer: many more close fielders (slips 1-4, fly slip, leg gully, short legs, silly mid-on/off, short covers)
+- [x] Win predictor (WinViz-style %) from score, wickets, balls left and match conditions; competitor check
+- [x] Scorecard: compact mobile layout without long scrolling
+- [x] Ball-by-ball text commentary, optional for audiences (templates default)
+- [x] AI over summary button (optional, uses AI credits)
+- [ ] League hub: simultaneous live match cards with drill-in
+- [ ] League hub: live table projected from current match situations
+- [ ] League hub: historic scorecards
+- [ ] League stats: batting (runs, avg, SR, 50s, 100s, HS) and bowling (wkts, avg, econ, SR, best, 5-fors, 10-in-match)
 - [ ] Go-live (needs user): payments live keys, email sending, legal/safeguarding sign-off

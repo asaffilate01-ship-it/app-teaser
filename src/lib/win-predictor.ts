@@ -42,7 +42,7 @@ export interface PredictorState {
   maxWickets?: number;
   /** +1 when the batting side is the home team, −1 when away (for `edge`). */
   battingIsHome?: boolean;
-  conditions?: MatchConditions;
+  conditions?: MatchConditions | undefined;
 }
 
 export interface Prediction {

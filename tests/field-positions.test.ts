@@ -6,8 +6,8 @@ import { wagonWheel } from "../src/lib/match-insights.ts";
 
 test("offers inside-the-ring, deep and close-catcher positions", () => {
   assert.equal(ringSectors.length * 2, 22);
-  assert.equal(closeCatchers.length, 8);
-  for (const name of ["Third man", "Deep mid-wicket", "Extra cover", "Gully", "First slip", "Silly point", "Short leg", "Leg slip", "Keeper", "Bowler"]) {
+  assert.equal(closeCatchers.length, 15);
+  for (const name of ["Third man", "Deep mid-wicket", "Extra cover", "Gully", "First slip", "Second slip", "Third slip", "Fourth slip", "Fly slip", "Silly point", "Silly mid-off", "Silly mid-on", "Short leg", "Backward short leg", "Leg slip", "Leg gully", "Short mid-wicket", "Short extra cover", "Keeper", "Bowler"]) {
     assert.ok(allFieldZones.includes(name as never), name);
   }
 });
@@ -24,6 +24,10 @@ test("ring slices cover the whole ground without gaps", () => {
 test("specific positions roll up into the broad wagon-wheel areas", () => {
   assert.equal(zoneArea("Third man"), "Third");
   assert.equal(zoneArea("Second slip"), "Third");
+  assert.equal(zoneArea("Gully"), "Third");
+  assert.equal(zoneArea("Leg gully"), "Fine leg");
+  assert.equal(zoneInfo("Silly mid-on")?.side, "leg");
+  assert.equal(zoneInfo("Fly slip")?.depth, "close");
   assert.equal(zoneArea("Deep extra cover"), "Cover");
   assert.equal(zoneArea("Deep backward square"), "Square leg");
   assert.equal(zoneArea("deep  mid-wicket"), "Mid-wicket");

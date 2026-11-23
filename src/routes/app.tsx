@@ -52,8 +52,6 @@ import { validateDeviceMatchSetup } from "@/lib/match-setup";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { useMatchCloudSync } from "@/hooks/use-match-cloud-sync";
 import {
-  battingCard,
-  bowlingCard,
   createMatch,
   currentInnings,
   deliveryLabel,
@@ -88,6 +86,12 @@ import { AppTabBar } from "@/components/app-shell/AppTabBar";
 import { BallTrail, CreaseStrip, RateStrip, ScoreHero, TeamCrest } from "@/components/scorer/Broadcast";
 import { FielderChips, OutcomeChips, ShotSummary, ShotZonePicker } from "@/components/scorer/ShotEntry";
 import { lastFielderInZone, orderFielders, outcomeAfterZone, recentZones } from "@/lib/shot-entry";
+import { WinPredictor } from "@/components/scorer/WinPredictor";
+import { CommentaryFeed } from "@/components/scorer/CommentaryFeed";
+import { ScorecardView } from "@/components/scorer/ScorecardView";
+import { commentaryFeed } from "@/lib/commentary";
+import { currentPrediction, winTimeline } from "@/lib/win-timeline";
+import { summariseOver } from "@/lib/over-summary.functions";
 
 const batterHandKey = "criclume.batter-hands.v1";
 
@@ -1154,8 +1158,13 @@ function LiveMatch({
             />
           )}
         </div>
-        {tab === "timeline" && <Timeline match={match} />}
-        {tab === "scorecard" && <Scorecard match={match} />}
+        {tab === "score" && !cloudConflict && (
+          <div className="mt-5">
+            <MatchPredictorPanel match={match} onSave={saveAndSync} />
+          </div>
+        )}
+        {tab === "timeline" && <Timeline match={match} onSave={saveAndSync} />}
+        {tab === "scorecard" && <Scorecard match={match} onSave={saveAndSync} />}
         {tab === "analysis" && <Analysis match={match} />}
         {tab === "video" && <VideoLab />}
       </div>
@@ -1796,7 +1805,136 @@ function RecentBalls({ match }: { match: CricketMatch }) {
   );
 }
 
-function Timeline({ match }: { match: CricketMatch }) {
+function Timeline({
+  match,
+  onSave,
+}: {
+  match: CricketMatch;
+  onSave: (match: CricketMatch, eventType?: string) => void;
+}) {
+  const [view, setView] = useState<"commentary" | "audit">("commentary");
+  return (
+    <section className="space-y-4">
+      <div className="card-tabs max-w-sm" role="tablist" aria-label="Ball by ball view" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+        <button type="button" role="tab" aria-selected={view === "commentary"} onClick={() => setView("commentary")}>
+          Commentary
+        </button>
+        <button type="button" role="tab" aria-selected={view === "audit"} onClick={() => setView("audit")}>
+          Audit trail
+        </button>
+      </div>
+      {view === "commentary" ? <CommentaryPanel match={match} onSave={onSave} /> : <AuditTrail match={match} />}
+    </section>
+  );
+}
+
+function CommentaryPanel({
+  match,
+  onSave,
+}: {
+  match: CricketMatch;
+  onSave: (match: CricketMatch, eventType?: string) => void;
+}) {
+  const innings = currentInnings(match);
+  const battingTeam = findTeam(match, innings.battingTeamId);
+  const bowlingTeam = findTeam(match, innings.bowlingTeamId);
+  const cloudSession = useCloudSession();
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [summarising, setSummarising] = useState(false);
+  const lines = commentaryFeed(innings, match.settings.ballsPerOver, {
+    player: (id) => (id ? findPlayer(match, id)?.name : undefined),
+    battingTeam: battingTeam.name,
+  });
+  const shared = Boolean(match.audience?.commentary);
+  const totals = summarizeInnings(innings, match.settings.ballsPerOver);
+  const target = targetForCurrentInnings(match);
+
+  const writeSummary = async () => {
+    setSummarising(true);
+    setSummaryError(null);
+    try {
+      // Name-free lines only: roles, never player names, go to the AI.
+      const anonymous = commentaryFeed(innings, match.settings.ballsPerOver, { battingTeam: battingTeam.name }, 14)
+        .reverse()
+        .map((line) => `${line.over}: ${line.text}`);
+      const result = await summariseOver({
+        data: {
+          battingTeam: battingTeam.name,
+          bowlingTeam: bowlingTeam.name,
+          score: `${totals.runs}/${totals.wickets} after ${totals.overs} overs`,
+          ...(target ? { chase: `Chasing ${target}, need ${Math.max(0, target - totals.runs)} more` } : {}),
+          lines: anonymous,
+        },
+      });
+      if ("summary" in result) setSummary(result.summary);
+      else setSummaryError(result.error);
+    } catch {
+      setSummaryError("The over summary could not be written right now.");
+    } finally {
+      setSummarising(false);
+    }
+  };
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-start">
+      <div className="broadcast-panel p-4">
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <h2 className="panel-kicker">Ball by ball</h2>
+          <span className="text-[11px] text-muted-foreground">Written automatically from each ball</span>
+        </div>
+        <CommentaryFeed lines={lines} />
+      </div>
+      <div className="space-y-4">
+        <div className="broadcast-panel space-y-3 p-4">
+          <h2 className="panel-kicker">Share with viewers</h2>
+          <label className="flex items-start gap-3 text-sm">
+            <input
+              type="checkbox"
+              className="mt-1 size-4 accent-[var(--gold)]"
+              checked={shared}
+              onChange={(event) =>
+                onSave({
+                  ...match,
+                  audience: { ...match.audience, commentary: event.target.checked },
+                  updatedAt: new Date().toISOString(),
+                })
+              }
+            />
+            <span>
+              <strong className="block">Show ball-by-ball text on the public scoreboard</strong>
+              <span className="text-xs text-muted-foreground">
+                Viewers see roles like "the batter" instead of player names, to keep juniors private.
+              </span>
+            </span>
+          </label>
+        </div>
+        <div className="broadcast-panel space-y-3 p-4">
+          <h2 className="panel-kicker">AI over summary</h2>
+          <p className="text-xs text-muted-foreground">
+            A short write-up of the latest overs, written by Lovable AI. Uses AI credits each time.
+          </p>
+          {cloudSession.session ? (
+            <button
+              type="button"
+              className="action-primary"
+              disabled={summarising || innings.deliveries.length === 0}
+              onClick={() => void writeSummary()}
+            >
+              {summarising ? "Writing summary…" : "Write over summary"}
+            </button>
+          ) : (
+            <p className="text-xs text-amber-200">Sign in to your club account to use AI summaries.</p>
+          )}
+          {summary && <p className="rounded-xl bg-white/[0.05] p-3 text-sm leading-relaxed">{summary}</p>}
+          {summaryError && <p className="text-xs text-rose-300">{summaryError}</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AuditTrail({ match }: { match: CricketMatch }) {
   const innings = currentInnings(match);
   return (
     <section className="space-y-3">
@@ -1858,101 +1996,45 @@ function Timeline({ match }: { match: CricketMatch }) {
   );
 }
 
-function Scorecard({ match }: { match: CricketMatch }) {
-  const [selected, setSelected] = useState(match.innings.length - 1);
-  const innings = match.innings[selected] ?? currentInnings(match);
-  const summary = summarizeInnings(innings, match.settings.ballsPerOver);
-  const batting = battingCard(match, innings);
-  const bowling = bowlingCard(match, innings);
+function MatchPredictorPanel({
+  match,
+  onSave,
+}: {
+  match: CricketMatch;
+  onSave: (match: CricketMatch, eventType?: string) => void;
+}) {
+  const innings = currentInnings(match);
+  const prediction = currentPrediction(match);
+  const [home, away] = match.teams;
+  const battingIsHome = innings.battingTeamId === home.id;
+  const firstWin = prediction ? (battingIsHome ? prediction.battingWin : prediction.bowlingWin) : null;
   return (
-    <section className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-300">Scorecard</p>
-          <h2 className="font-display text-3xl font-bold">
-            {findTeam(match, innings.battingTeamId).name} {summary.runs}/{summary.wickets}
-          </h2>
-        </div>
-        <select
-          value={selected}
-          onChange={(event) => setSelected(Number(event.target.value))}
-          className="scorer-input w-auto"
-        >
-          {match.innings.map((item, index) => (
-            <option key={item.id} value={index}>
-              Innings {item.number}
-            </option>
-          ))}
-        </select>
-      </div>
-      <DataTable
-        headings={["Batter", "Dismissal", "R", "B", "4", "6", "SR"]}
-        rows={batting.map((row) => [
-          row.name,
-          row.dismissal,
-          row.runs,
-          row.balls,
-          row.fours,
-          row.sixes,
-          row.strikeRate.toFixed(1),
-        ])}
-      />
-      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm">
-        <strong>Extras {summary.extras.total}</strong>
-        <span className="ml-2 text-slate-400">
-          ({summary.extras.wide}w, {summary.extras.noBall}nb, {summary.extras.bye}b,{" "}
-          {summary.extras.legBye}lb, {summary.extras.penalty}p)
-        </span>
-      </div>
-      <h3 className="font-display text-2xl font-bold">Bowling</h3>
-      {bowling.length ? (
-        <DataTable
-          headings={["Bowler", "O", "R", "W", "Econ", "Wd", "Nb"]}
-          rows={bowling.map((row) => [
-            row.name,
-            row.overs,
-            row.runs,
-            row.wickets,
-            row.economy.toFixed(2),
-            row.wides,
-            row.noBalls,
-          ])}
-        />
-      ) : (
-        <p className="text-sm text-slate-500">No bowling figures yet.</p>
-      )}
-    </section>
+    <WinPredictor
+      firstName={home.name}
+      secondName={away.name}
+      firstWin={firstWin}
+      prediction={prediction}
+      battingName={findTeam(match, innings.battingTeamId).name}
+      timeline={winTimeline(match)}
+      conditions={match.conditions}
+      onConditionsChange={(conditions) => onSave({ ...match, conditions, updatedAt: new Date().toISOString() })}
+      homeName={home.name}
+      awayName={away.name}
+    />
   );
 }
 
-function DataTable({ headings, rows }: { headings: string[]; rows: (string | number)[][] }) {
+function Scorecard({
+  match,
+  onSave,
+}: {
+  match: CricketMatch;
+  onSave: (match: CricketMatch, eventType?: string) => void;
+}) {
   return (
-    <div className="no-scrollbar overflow-x-auto rounded-2xl border border-white/10">
-      <table className="w-full min-w-[640px] text-left text-xs">
-        <thead className="bg-white/[0.06] text-slate-400">
-          <tr>
-            {headings.map((heading) => (
-              <th key={heading} className="px-4 py-3 font-bold uppercase tracking-wider">
-                {heading}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, index) => (
-            <tr key={`${row[0]}-${index}`} className="border-t border-white/10">
-              {row.map((cell, cellIndex) => (
-                <td
-                  key={cellIndex}
-                  className={`px-4 py-3 ${cellIndex === 0 ? "font-bold text-slate-100" : "text-slate-400"}`}
-                >
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-start">
+      <ScorecardView match={match} />
+      <MatchPredictorPanel match={match} onSave={onSave} />
     </div>
   );
 }

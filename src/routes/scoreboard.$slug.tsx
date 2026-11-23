@@ -5,6 +5,10 @@ import logoAsset from "@/assets/criclume-logo-on-dark.png.asset.json";
 import { getCloudClient, isCloudConfigured } from "@/lib/cloud";
 import { TeamCrest } from "@/components/scorer/Broadcast";
 import { chaseState } from "@/lib/match-broadcast";
+import { WinPredictor } from "@/components/scorer/WinPredictor";
+import { CommentaryFeed } from "@/components/scorer/CommentaryFeed";
+import { predictWin, type MatchConditions } from "@/lib/win-predictor";
+import type { CommentaryLine } from "@/lib/commentary";
 
 export const Route = createFileRoute("/scoreboard/$slug")({
   head: () => ({
@@ -46,7 +50,12 @@ interface ScoreboardData {
     bowler?: { name: string; wickets: number; runs: number; overs: string };
     recent?: Array<{ label: string; kind?: string }>;
     message?: string;
-    settings?: { oversPerInnings?: number; ballsPerOver?: number };
+    settings?: { oversPerInnings?: number | null; inningsPerSide?: number; ballsPerOver?: number };
+    inningsNumber?: number;
+    maxWickets?: number;
+    battingIsHome?: boolean;
+    conditions?: MatchConditions | null;
+    commentary?: CommentaryLine[] | null;
   };
   updatedAt: string;
   sponsor?: { name?: string };
@@ -77,6 +86,7 @@ function PublicScoreboard() {
   const [scoreboard, setScoreboard] = useState<ScoreboardData | null>(null);
   const [loading, setLoading] = useState(isCloudConfigured());
   const [error, setError] = useState<string | null>(null);
+  const [panel, setPanel] = useState<"live" | "commentary">("live");
 
   useEffect(() => {
     if (!isCloudConfigured()) return;
@@ -142,6 +152,22 @@ function PublicScoreboard() {
         ? `${batting.name} have reached the target`
         : (state.message ?? `${batting.name} batting`);
   const recent = state.recent ?? [];
+  const commentary = state.commentary ?? null;
+  const prediction = predictWin({
+    oversPerInnings: state.settings?.oversPerInnings ?? null,
+    inningsPerSide: state.settings?.inningsPerSide ?? 1,
+    ballsPerOver,
+    inningsNumber: state.inningsNumber ?? (state.target ? 2 : 1),
+    runs,
+    wickets,
+    legalBalls,
+    target: state.target ?? null,
+    maxWickets: state.maxWickets ?? 10,
+    battingIsHome: state.battingIsHome ?? batting.id === scoreboard.homeTeam.id,
+    conditions: state.conditions ?? undefined,
+  });
+  const homeBatting = batting.id === scoreboard.homeTeam.id;
+  const homeWin = prediction ? (homeBatting ? prediction.battingWin : prediction.bowlingWin) : null;
   const updated = new Date(scoreboard.updatedAt).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -203,107 +229,140 @@ function PublicScoreboard() {
 
           <p className="hero-ribbon scoreboard-ribbon">{ribbon}</p>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <div className="broadcast-panel">
-              <table className="scoreboard-table">
-                <caption className="sr-only">Batters at the crease</caption>
-                <thead>
-                  <tr>
-                    <th scope="col" className="panel-kicker">Batters</th>
-                    <th scope="col">R</th>
-                    <th scope="col">B</th>
-                    <th scope="col">SR</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { key: "striker", label: "Striker", line: state.striker, onStrike: true },
-                    { key: "non", label: "Non-striker", line: state.nonStriker, onStrike: false },
-                  ].map((row) => (
-                    <tr key={row.key}>
-                      <th scope="row">
-                        <span className="inline-flex items-center gap-2">
-                          {row.onStrike ? <span className="strike-dot" aria-label="On strike" /> : <span className="inline-block w-[0.45rem]" />}
-                          {row.label}
-                        </span>
-                      </th>
-                      <td className="scoreboard-figure">{row.line ? `${row.line.runs}${row.onStrike ? "*" : ""}` : "—"}</td>
-                      <td>{row.line?.balls ?? "—"}</td>
-                      <td>{row.line ? strikeRate(row.line.runs, row.line.balls) : "—"}</td>
+          <div className="mt-4">
+            <WinPredictor
+              firstName={scoreboard.homeTeam.name}
+              secondName={scoreboard.awayTeam.name}
+              firstWin={homeWin}
+              prediction={prediction}
+              battingName={batting.name}
+            />
+          </div>
+
+          {commentary && (
+            <div className="card-tabs mt-4 md:hidden" role="tablist" aria-label="Scoreboard view" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))", top: "64px" }}>
+              <button type="button" role="tab" aria-selected={panel === "live"} onClick={() => setPanel("live")}>
+                Live
+              </button>
+              <button type="button" role="tab" aria-selected={panel === "commentary"} onClick={() => setPanel("commentary")}>
+                Ball by ball
+              </button>
+            </div>
+          )}
+
+          <div className={`mt-4 grid gap-3 ${commentary ? "md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] md:items-start" : ""}`}>
+            <div className={commentary && panel !== "live" ? "hidden md:block" : ""}>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="broadcast-panel">
+                <table className="scoreboard-table">
+                  <caption className="sr-only">Batters at the crease</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col" className="panel-kicker">Batters</th>
+                      <th scope="col">R</th>
+                      <th scope="col">B</th>
+                      <th scope="col">SR</th>
                     </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { key: "striker", label: "Striker", line: state.striker, onStrike: true },
+                      { key: "non", label: "Non-striker", line: state.nonStriker, onStrike: false },
+                    ].map((row) => (
+                      <tr key={row.key}>
+                        <th scope="row">
+                          <span className="inline-flex items-center gap-2">
+                            {row.onStrike ? <span className="strike-dot" aria-label="On strike" /> : <span className="inline-block w-[0.45rem]" />}
+                            {row.label}
+                          </span>
+                        </th>
+                        <td className="scoreboard-figure">{row.line ? `${row.line.runs}${row.onStrike ? "*" : ""}` : "—"}</td>
+                        <td>{row.line?.balls ?? "—"}</td>
+                        <td>{row.line ? strikeRate(row.line.runs, row.line.balls) : "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="broadcast-panel">
+                <table className="scoreboard-table">
+                  <caption className="sr-only">Current bowler</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col" className="panel-kicker">Bowler</th>
+                      <th scope="col">O</th>
+                      <th scope="col">R</th>
+                      <th scope="col">W</th>
+                      <th scope="col">Econ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row">Bowler</th>
+                      <td>{state.bowler?.overs ?? "—"}</td>
+                      <td>{state.bowler?.runs ?? "—"}</td>
+                      <td className="scoreboard-wickets">{state.bowler?.wickets ?? "—"}</td>
+                      <td>
+                        {state.bowler
+                          ? (() => {
+                              const balls = legalBallsFromOvers(state.bowler.overs, ballsPerOver);
+                              return balls > 0 ? ((state.bowler.runs * ballsPerOver) / balls).toFixed(2) : "—";
+                            })()
+                          : "—"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="broadcast-panel mt-3">
+              <p className="panel-kicker">Recent balls</p>
+              {recent.length === 0 ? (
+                <p className="scoreboard-muted mt-3 text-sm">The first ball hasn't been bowled yet.</p>
+              ) : (
+                <ol className="mt-3 flex flex-wrap gap-2 md:gap-3">
+                  {recent.map((ball, index) => (
+                    <li key={`${ball.label}-${index}`}>
+                      <span className="ball-chip md:size-12" data-tone={ballKind(ball)}>
+                        {ball.label}
+                      </span>
+                    </li>
                   ))}
-                </tbody>
-              </table>
+                </ol>
+              )}
             </div>
-            <div className="broadcast-panel">
-              <table className="scoreboard-table">
-                <caption className="sr-only">Current bowler</caption>
-                <thead>
-                  <tr>
-                    <th scope="col" className="panel-kicker">Bowler</th>
-                    <th scope="col">O</th>
-                    <th scope="col">R</th>
-                    <th scope="col">W</th>
-                    <th scope="col">Econ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">Bowler</th>
-                    <td>{state.bowler?.overs ?? "—"}</td>
-                    <td>{state.bowler?.runs ?? "—"}</td>
-                    <td className="scoreboard-wickets">{state.bowler?.wickets ?? "—"}</td>
-                    <td>
-                      {state.bowler
-                        ? (() => {
-                            const balls = legalBallsFromOvers(state.bowler.overs, ballsPerOver);
-                            return balls > 0 ? ((state.bowler.runs * ballsPerOver) / balls).toFixed(2) : "—";
-                          })()
-                        : "—"}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
 
-          <div className="broadcast-panel mt-3">
-            <p className="panel-kicker">Recent balls</p>
-            {recent.length === 0 ? (
-              <p className="scoreboard-muted mt-3 text-sm">The first ball hasn't been bowled yet.</p>
-            ) : (
-              <ol className="mt-3 flex flex-wrap gap-2 md:gap-3">
-                {recent.map((ball, index) => (
-                  <li key={`${ball.label}-${index}`}>
-                    <span className="ball-chip md:size-12" data-tone={ballKind(ball)}>
-                      {ball.label}
-                    </span>
-                  </li>
-                ))}
-              </ol>
+            <div className="mt-3 grid grid-cols-3 gap-2 md:gap-3">
+              <div className="broadcast-panel scoreboard-stat">
+                <p className="panel-kicker">Run rate</p>
+                <p className="scoreboard-stat-value">{runRate.toFixed(2)}</p>
+                <p className="scoreboard-muted text-[11px] uppercase tracking-wider">Current</p>
+              </div>
+              <div className="broadcast-panel scoreboard-stat">
+                <p className="panel-kicker">{chase?.requiredRate != null ? "Required" : "Target"}</p>
+                <p className="scoreboard-stat-value text-gold">
+                  {chase?.requiredRate != null ? chase.requiredRate.toFixed(2) : (state.target ?? "—")}
+                </p>
+                <p className="scoreboard-muted text-[11px] uppercase tracking-wider">
+                  {chase?.requiredRate != null ? "Run rate" : state.target ? "To win" : "First innings"}
+                </p>
+              </div>
+              <div className="broadcast-panel scoreboard-stat">
+                <p className="panel-kicker">Wickets in hand</p>
+                <p className="scoreboard-stat-value">{Math.max(0, 10 - wickets)}</p>
+                <p className="scoreboard-muted text-[11px] uppercase tracking-wider">of 10</p>
+              </div>
+            </div>
+            </div>
+            {commentary && (
+              <div className={`broadcast-panel ${panel !== "commentary" ? "hidden md:block" : ""}`}>
+                <p className="panel-kicker mb-3">Ball by ball</p>
+                <div className="md:max-h-[42rem] md:overflow-y-auto md:pr-1">
+                  <CommentaryFeed lines={commentary} />
+                </div>
+              </div>
             )}
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3">
-            <div className="broadcast-panel scoreboard-stat">
-              <p className="panel-kicker">Run rate</p>
-              <p className="scoreboard-stat-value">{runRate.toFixed(2)}</p>
-              <p className="scoreboard-muted text-[11px] uppercase tracking-wider">Current</p>
-            </div>
-            <div className="broadcast-panel scoreboard-stat">
-              <p className="panel-kicker">{chase?.requiredRate != null ? "Required" : "Target"}</p>
-              <p className="scoreboard-stat-value text-gold">
-                {chase?.requiredRate != null ? chase.requiredRate.toFixed(2) : (state.target ?? "—")}
-              </p>
-              <p className="scoreboard-muted text-[11px] uppercase tracking-wider">
-                {chase?.requiredRate != null ? "Run rate" : state.target ? "To win" : "First innings"}
-              </p>
-            </div>
-            <div className="broadcast-panel scoreboard-stat col-span-2 md:col-span-1">
-              <p className="panel-kicker">Wickets in hand</p>
-              <p className="scoreboard-stat-value">{Math.max(0, 10 - wickets)}</p>
-              <p className="scoreboard-muted text-[11px] uppercase tracking-wider">of 10</p>
-            </div>
           </div>
 
           <p className="scoreboard-muted mt-4 text-center text-[11px]">
