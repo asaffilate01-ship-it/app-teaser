@@ -3,6 +3,7 @@
 @import "tw-animate-css";
 @import "./theme-generated.css";
 @import "./theme.css";
+@import "./theme-light.css";
 
 @custom-variant dark (&:is(.dark *));
 

@@ -34,7 +34,7 @@ export function readSavedTheme(): ThemeMode | null {
   }
 }
 
-const themeColors: Record<ThemeMode, string> = { dark: "#141a2e", light: "#f7f5f0" };
+const themeColors: Record<ThemeMode, string> = { dark: "#141a2e", light: "#f5f6f9" };
 
 export function setTheme(mode: ThemeMode) {
   if (typeof window === "undefined") return;

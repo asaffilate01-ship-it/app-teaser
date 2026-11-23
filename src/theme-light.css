@@ -1,0 +1,296 @@
+/*
+ * Premium light finish for the signed-in app, live centre and public scoreboards.
+ * Only applies under html[data-theme="light"]; dark screens and anything inside .stay-dark are untouched.
+ * Direction: cool porcelain page, crisp white cards with hairline borders and soft layered shadows,
+ * navy ink, crimson for action, deep gold only for small highlights — the same finish as the promo site.
+ */
+html[data-theme="light"] {
+  /* Barely-there tint in the generated neutral scale: no pink/beige cast on panels. */
+  --t-chroma: 0.12;
+
+  --background: oklch(0.975 0.004 255);
+  --foreground: oklch(0.22 0.035 265);
+  --card: oklch(1 0 0);
+  --muted: oklch(0.965 0.005 255);
+  --muted-foreground: oklch(0.47 0.022 262);
+  --secondary: oklch(0.965 0.005 255);
+  --border: oklch(0.915 0.007 260);
+  --input: oklch(0.885 0.01 260);
+  --gold: oklch(0.6 0.13 72);
+  --ring: oklch(0.5 0.19 22);
+
+  --lt-surface: oklch(1 0 0);
+  --lt-sunken: oklch(0.982 0.004 255);
+  --lt-line: oklch(0.915 0.007 260);
+  --lt-line-strong: oklch(0.86 0.01 260);
+  --lt-ink-soft: oklch(0.47 0.022 262);
+  --lt-shadow-1: 0 1px 2px oklch(0.25 0.03 265 / 0.05), 0 6px 18px -10px oklch(0.25 0.03 265 / 0.12);
+  --lt-shadow-2: 0 2px 4px oklch(0.25 0.03 265 / 0.05), 0 22px 44px -24px oklch(0.25 0.03 265 / 0.24);
+  --lt-cta: linear-gradient(105deg, oklch(0.42 0.16 18), oklch(0.52 0.19 22) 55%, oklch(0.68 0.15 62));
+  --lt-cta-shadow: 0 10px 24px -12px oklch(0.45 0.18 22 / 0.55);
+
+  /* Shared app/broadcast tokens */
+  --broadcast-surface: var(--lt-surface);
+  --broadcast-border: var(--lt-line);
+  --shell-bg: oklch(1 0 0 / 0.86);
+  --shell-border: var(--lt-line);
+  --shell-tab-active: oklch(0.5 0.19 22);
+  --shell-tab-active-bg: oklch(0.5 0.19 22 / 0.09);
+  --shell-tab-text: oklch(0.47 0.022 262);
+  --gradient-surface: linear-gradient(180deg, oklch(1 0 0), oklch(0.992 0.002 255));
+  --gradient-cta: var(--lt-cta);
+  --shadow-tabbar: 0 -1px 0 var(--lt-line), 0 -12px 30px -18px oklch(0.25 0.03 265 / 0.18);
+  --tone-dot: oklch(0.9 0.006 260);
+  --tone-run: oklch(0.8 0.012 260);
+
+  /* Warm highlight text (kickers, icons): a calm deep gold instead of orange-brown. */
+  --color-amber-200: oklch(0.52 0.11 68);
+  --color-amber-300: oklch(0.55 0.12 70);
+  --color-amber-400: oklch(0.6 0.13 72);
+  --color-amber-100: oklch(0.45 0.09 66);
+}
+
+/* ---------- Surfaces: white cards, sunken tiles inside them ---------- */
+html[data-theme="light"] :is(
+  .bg-white\/\[0\.025\], .bg-white\/\[0\.03\], .bg-white\/\[0\.035\], .bg-white\/\[\.035\],
+  .bg-white\/\[0\.04\], .bg-white\/\[0\.05\],
+  .broadcast-panel, .crease-strip, .live-card, .workspace-rail, .setup-card
+):not(.stay-dark, .stay-dark *) {
+  background: var(--lt-surface);
+  border-color: var(--lt-line);
+  box-shadow: var(--lt-shadow-1);
+}
+html[data-theme="light"] :is(
+  .bg-white\/\[0\.025\], .bg-white\/\[0\.03\], .bg-white\/\[0\.035\], .bg-white\/\[\.035\],
+  .bg-white\/\[0\.04\], .bg-white\/\[0\.05\], .broadcast-panel, .crease-strip, .live-card, .setup-card, .bg-card
+) :is(
+  .bg-white\/\[0\.025\], .bg-white\/\[0\.03\], .bg-white\/\[0\.035\], .bg-white\/\[\.035\],
+  .bg-white\/\[0\.04\], .bg-white\/\[0\.05\], .broadcast-panel, .crease-strip, .setup-card, .rule-toggle, .setup-step
+):not(.stay-dark *) {
+  background: var(--lt-sunken);
+  box-shadow: none;
+}
+html[data-theme="light"] :is(.rule-toggle, .setup-step):not(.stay-dark *) {
+  background: var(--lt-sunken);
+  border-color: var(--lt-line);
+}
+html[data-theme="light"] .setup-step:not(:disabled):hover:not(.stay-dark *),
+html[data-theme="light"] .rule-toggle:hover:not(.stay-dark *) {
+  background: var(--lt-surface);
+  border-color: var(--lt-line-strong);
+}
+html[data-theme="light"] .setup-step-next:not(.stay-dark *) { border-color: oklch(0.5 0.19 22 / 0.45); }
+html[data-theme="light"] .border-dashed:not(.stay-dark *) { border-color: var(--lt-line-strong); box-shadow: none; }
+html[data-theme="light"] .live-card:hover:not(.stay-dark *),
+html[data-theme="light"] button.bg-white\/\[0\.03\]:hover:not(.stay-dark *) {
+  box-shadow: var(--lt-shadow-2);
+  border-color: var(--lt-line-strong);
+}
+html[data-theme="light"] .live-card[data-flash]:not(.stay-dark *) {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--gold) 22%, transparent), var(--lt-shadow-1);
+}
+/* Soft corner washes read as pink on white: keep them very faint. */
+html[data-theme="light"] .from-primary\/15:not(.stay-dark *) { --tw-gradient-from: oklch(0.5 0.19 22 / 0.05); }
+html[data-theme="light"] .from-fuchsia-950\/30:not(.stay-dark *) { --tw-gradient-from: oklch(0.5 0.19 22 / 0.04); }
+html[data-theme="light"] .setup-card:not(.stay-dark *) {
+  background:
+    radial-gradient(120% 120% at 0% 0%, oklch(0.6 0.13 72 / 0.07), transparent 55%),
+    var(--lt-surface);
+}
+html[data-theme="light"] :is(.shadow-2xl, .shadow-xl):not(.stay-dark, .stay-dark *) {
+  --tw-shadow: 0 1px 2px oklch(0.25 0.03 265 / 0.05), 0 30px 60px -36px oklch(0.25 0.03 265 / 0.28);
+}
+
+/* ---------- Header, bottom menu, filters ---------- */
+html[data-theme="light"] :is(.app-header, .scoreboard-topbar):not(.stay-dark *) {
+  background: oklch(1 0 0 / 0.86);
+  border-color: var(--lt-line);
+  box-shadow: 0 1px 0 oklch(0.25 0.03 265 / 0.02), 0 8px 24px -20px oklch(0.25 0.03 265 / 0.25);
+}
+html[data-theme="light"] .app-tabbar:not(.stay-dark *),
+html[data-theme="light"] .live-bottom-nav:not(.stay-dark *) {
+  background: oklch(1 0 0 / 0.92);
+  border-color: var(--lt-line);
+}
+html[data-theme="light"] .app-tab-active:not(.stay-dark *) { color: var(--shell-tab-active); }
+html[data-theme="light"] .live-bottom-nav button[aria-current="page"]:not(.stay-dark *) { color: var(--foreground); }
+html[data-theme="light"] .live-bottom-nav button[aria-current="page"] .live-bottom-icon:not(.stay-dark *) {
+  background: var(--foreground);
+  color: var(--card);
+}
+html[data-theme="light"] .live-filters:not(.stay-dark *) {
+  background: oklch(1 0 0 / 0.9);
+  border-color: var(--lt-line);
+}
+@media (min-width: 768px) {
+  html[data-theme="light"] .live-filters { box-shadow: var(--lt-shadow-1); }
+}
+
+/* Chips & pills: neutral, with ink for the selected one. */
+html[data-theme="light"] .app-area-pill:not(.stay-dark *) {
+  border-color: var(--lt-line);
+  background: var(--lt-sunken);
+  color: oklch(0.42 0.03 265);
+}
+html[data-theme="light"] .hero-chip:not(.stay-dark *) {
+  border-color: var(--lt-line);
+  background: var(--lt-surface);
+  color: oklch(0.5 0.11 70);
+}
+html[data-theme="light"] .hero-chip-live:not(.stay-dark *) {
+  border-color: oklch(0.55 0.2 22 / 0.28);
+  background: oklch(0.55 0.2 22 / 0.07);
+  color: oklch(0.47 0.18 22);
+}
+html[data-theme="light"] :is(.app-icon-button, .app-chip-button, .action-secondary, .theme-toggle):not(.stay-dark *) {
+  border-color: var(--lt-line);
+  background: var(--lt-surface);
+  box-shadow: 0 1px 2px oklch(0.25 0.03 265 / 0.06);
+}
+html[data-theme="light"] :is(.app-icon-button, .app-chip-button, .action-secondary):hover:not(.stay-dark *) {
+  border-color: var(--lt-line-strong);
+  background: var(--lt-sunken);
+}
+html[data-theme="light"] .live-tabs button[aria-selected="true"]:not(.stay-dark *),
+html[data-theme="light"] .live-segment button[aria-checked="true"]:not(.stay-dark *) {
+  background: var(--foreground);
+  color: var(--card);
+}
+html[data-theme="light"] .live-tabs button[aria-selected="true"] .live-tab-count:not(.stay-dark *) { background: oklch(1 0 0 / 0.18); }
+html[data-theme="light"] .live-segment:not(.stay-dark *) { background: var(--muted); }
+html[data-theme="light"] .live-field:not(.stay-dark *) {
+  border-color: var(--lt-line);
+  background: var(--lt-surface);
+}
+html[data-theme="light"] .live-field:focus-within:not(.stay-dark *) { border-color: var(--ring); box-shadow: 0 0 0 3px oklch(0.5 0.19 22 / 0.1); }
+html[data-theme="light"] .live-toggle:not(.stay-dark *) { background: var(--lt-surface); }
+html[data-theme="light"] .live-toggle[aria-pressed="true"]:not(.stay-dark *) {
+  border-color: oklch(0.6 0.13 72 / 0.55);
+  background: oklch(0.6 0.13 72 / 0.1);
+  color: var(--foreground);
+}
+html[data-theme="light"] .live-open:not(.stay-dark *) { background: var(--lt-surface); color: var(--foreground); }
+
+/* ---------- Form fields ---------- */
+html[data-theme="light"] .scorer-input:not(.stay-dark *) {
+  border-color: var(--input);
+  background: var(--lt-surface);
+  color: var(--foreground);
+  box-shadow: inset 0 1px 2px oklch(0.25 0.03 265 / 0.04);
+}
+html[data-theme="light"] .scorer-input::placeholder:not(.stay-dark *) { color: oklch(0.62 0.015 262); }
+html[data-theme="light"] .scorer-input:hover:not(.stay-dark *) { border-color: oklch(0.8 0.012 260); }
+html[data-theme="light"] .scorer-input:focus:not(.stay-dark *) {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px oklch(0.5 0.19 22 / 0.12);
+}
+html[data-theme="light"] .scorer-input option:not(.stay-dark *) { background: var(--card); color: var(--foreground); }
+
+/* ---------- Primary actions: crimson-to-gold like the promo site, always white text ---------- */
+html[data-theme="light"] :is(.cta-gradient, .from-fuchsia-600.via-rose-500.to-amber-400):not(.stay-dark *) {
+  background: var(--lt-cta);
+  color: oklch(0.99 0.005 90);
+  box-shadow: var(--lt-cta-shadow);
+}
+html[data-theme="light"] :is(.cta-gradient, .from-fuchsia-600.via-rose-500.to-amber-400):hover:not(.stay-dark *) { filter: brightness(1.06); }
+html[data-theme="light"] .app-tab-emphasis .app-tab-icon:not(.stay-dark *) {
+  background: var(--lt-cta);
+  box-shadow: var(--lt-cta-shadow);
+}
+html[data-theme="light"] .action-primary:not(.stay-dark *) { box-shadow: var(--lt-cta-shadow); }
+
+/* ---------- Page stages ---------- */
+html[data-theme="light"] .scoreboard-stage:not(.stay-dark *) {
+  background:
+    radial-gradient(60% 34% at 12% 0%, oklch(0.5 0.19 22 / 0.045), transparent 70%),
+    radial-gradient(50% 34% at 92% 6%, oklch(0.7 0.12 72 / 0.06), transparent 70%),
+    var(--background);
+  color: var(--foreground);
+}
+html[data-theme="light"] .scoreboard-muted:not(.stay-dark *) { color: var(--lt-ink-soft); }
+html[data-theme="light"] .broadcast-hero:not(.stay-dark *) {
+  background:
+    radial-gradient(110% 90% at 50% 0%, oklch(0.5 0.19 22 / 0.05), transparent 70%),
+    var(--lt-surface);
+  border-color: var(--lt-line);
+  box-shadow: var(--lt-shadow-1);
+}
+html[data-theme="light"] .scoreboard-frame:not(.stay-dark *) {
+  background: var(--lt-surface);
+  box-shadow: var(--lt-shadow-2);
+}
+
+
+
+/* ---------- Scoring pad ---------- */
+html[data-theme="light"] .bg-amber-300:not(.stay-dark *) { background-color: oklch(0.83 0.13 82); }
+html[data-theme="light"] .run-ring:not(.stay-dark *) {
+  border: 2px solid oklch(0.6 0.13 72 / 0.5);
+  background: linear-gradient(180deg, oklch(1 0 0), oklch(0.972 0.005 255));
+  color: var(--foreground);
+  box-shadow: inset 0 -2px 0 oklch(0.25 0.03 265 / 0.04), var(--lt-shadow-1);
+}
+html[data-theme="light"] .run-ring:not(.stay-dark *):hover {
+  border-color: oklch(0.6 0.13 72 / 0.85);
+  box-shadow: 0 0 0 4px oklch(0.6 0.13 72 / 0.14), var(--lt-shadow-1);
+}
+html[data-theme="light"] .run-ring-boundary:not(.stay-dark *) {
+  border-color: oklch(0.62 0.13 72);
+  background: linear-gradient(180deg, oklch(0.92 0.08 86), oklch(0.83 0.13 80));
+  color: oklch(0.26 0.05 55);
+}
+html[data-theme="light"] .run-ring:not(.stay-dark *):active {
+  background: oklch(0.5 0.19 22);
+  border-color: oklch(0.5 0.19 22);
+  color: oklch(0.99 0 0);
+}
+html[data-theme="light"] .extra-tile:not(.stay-dark *) {
+  border-color: oklch(0.5 0.19 22 / 0.22);
+  background: var(--lt-surface);
+  color: oklch(0.44 0.16 22);
+  box-shadow: var(--lt-shadow-1);
+}
+html[data-theme="light"] .extra-tile:not(.stay-dark *):hover { background: oklch(0.5 0.19 22 / 0.05); }
+html[data-theme="light"] .wicket-bar:not(.stay-dark *) {
+  border-color: oklch(0.45 0.18 22);
+  background: linear-gradient(180deg, oklch(0.52 0.2 22), oklch(0.44 0.18 20));
+  color: oklch(0.99 0 0);
+  box-shadow: 0 14px 28px -16px oklch(0.45 0.18 22 / 0.6);
+}
+html[data-theme="light"] .ball-chip:not(.stay-dark *) { border-color: var(--lt-line-strong); }
+
+/* Team badges: crisp gold rim on white, light lift instead of a heavy grey blur. */
+html[data-theme="light"] {
+  --crest-fill: oklch(0.99 0.004 85);
+  --crest-rim-a: oklch(0.7 0.13 78);
+  --crest-rim-b: oklch(0.56 0.12 62);
+}
+html[data-theme="light"] .crest:not(.stay-dark *) {
+  color: oklch(0.52 0.11 66);
+  filter: drop-shadow(0 4px 8px oklch(0.25 0.03 265 / 0.14));
+}
+html[data-theme="light"] .hero-ribbon:not(.stay-dark *) {
+  border-color: oklch(0.6 0.13 72 / 0.35);
+  background: oklch(0.6 0.13 72 / 0.06);
+  color: oklch(0.47 0.1 66);
+}
+
+/* Anything that must stay dark keeps its own look. */
+html[data-theme="light"] .stay-dark {
+  --broadcast-surface: oklch(var(--tn-0200) calc(0.035 * var(--t-chroma)) 10 / 0.72);
+  --broadcast-border: oklch(var(--tc-0820) 0.15 84 / 0.18);
+  --shell-bg: oklch(var(--tn-0160) calc(0.02 * var(--t-chroma)) 300 / 0.92);
+  --shell-border: oklch(var(--tn-1000) 0 0 / 0.1);
+  --shell-tab-active: oklch(var(--tc-0820) 0.15 84);
+  --shell-tab-active-bg: oklch(var(--tc-0820) 0.15 84 / 0.14);
+  --shell-tab-text: oklch(var(--tn-0820) 0.012 85);
+  --tone-dot: oklch(var(--tn-0320) 0.01 280);
+  --tone-run: oklch(var(--tn-0400) calc(0.02 * var(--t-chroma)) 280);
+  --crest-rim-a: oklch(var(--tc-0860) 0.15 84);
+  --crest-rim-b: oklch(0.62 0.13 60);
+  --crest-fill: oklch(var(--tn-0220) calc(0.05 * var(--t-chroma)) 15);
+}
+
+html[data-theme="light"] .app-tab-emphasis .app-tab-icon:not(.stay-dark *),
+html[data-theme="light"] .app-tab-emphasis .app-tab-icon:not(.stay-dark *) svg { color: oklch(0.99 0.005 90); }
