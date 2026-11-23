@@ -157,3 +157,36 @@
 - [x] Season MVP points table for every player
 - [x] Volunteer jobs with self sign-up
 - [x] Ball speed from camera clips: free on-phone automatic ball tracking (camera set once per fixed angle), manual tap fallback, saved to the ball
+
+## All remaining round-4 gaps (new ask: "do all the gaps")
+- [ ] Fix any earlier ball (runs, bowler, fielder, dismissal)
+- [ ] Substitutes, concussion replacements, impact player swaps
+- [ ] Formats: The Hundred (5-ball sets), tape-ball, indoor 8-a-side
+- [ ] Pitch map and beehive tapped by the scorer per ball
+- [ ] Phase splits (powerplay/middle/death) and bowler-type splits
+- [ ] Player rankings by town/region/country; compare two players
+- [ ] Stats spreadsheet download
+- [ ] Import old scorecards
+- [ ] Training sessions, drills library, attendance
+- [ ] Player goals, coach feedback timeline, self-review
+- [ ] Fitness tests with progress charts
+- [ ] Draw on a paused clip; two clips side by side
+- [ ] Player clip library on profile
+- [ ] Captain's marks for umpires and pitch; umpire match reports
+- [ ] League registration for teams/players with fees
+- [ ] Transfers, eligibility (played-down, overseas limits), permits
+- [ ] Discipline: cases, fines, suspensions that block selection
+- [ ] Players claim profile, one career across clubs, fans follow
+- [ ] Availability reply-by deadline, squad cap + waiting list, add to calendar
+- [ ] Looking-for-players / looking-for-a-match board
+- [ ] Shareable award cards and certificates
+- [ ] Umpire marks/assessor reports, grade progress
+- [ ] Umpire's own match record from phone
+- [ ] Team chat and announcements with "read by"
+- [ ] "Join the club" form on club website + approval queue
+- [ ] Activity history (who changed what, when)
+- [ ] Player auction / draft for franchise leagues
+- [ ] Card payments — waiting on owner's choice
+- [ ] Email / WhatsApp / SMS reminders — waiting on owner's choice
+- [ ] Go live from the app without OBS — waiting on owner's choice (running costs)
+- [ ] LED scoreboard controller test — needs real hardware
