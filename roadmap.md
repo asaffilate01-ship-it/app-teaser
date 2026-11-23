@@ -52,3 +52,9 @@
 - [ ] 15b Ground and nets booking requests
 - [ ] 15c Match tickets (selling online needs live payments)
 - [ ] 15d Merchandise shop (selling online needs live payments)
+
+## Pakistan pricing + CricScoreboard (new ask)
+- [ ] Review CricScoreboard and compare with the proposed PKR prices
+- [ ] Proposed PKR plans: team Basic 25k/yr (scoring + basic video), team Advanced 50k/yr (live streaming, coaching, analytics); leagues ≤10 teams 20k/team/yr, 10+ teams 17.5k/team/yr; +20k/team/yr for full system — waiting on user's go-ahead before changing site prices
+- [ ] Offline scoring with reliable resync after internet loss: check again
+- [ ] Streaming guide covers Facebook, YouTube and TikTok (part of gap 1)
