@@ -59,3 +59,6 @@
 - [x] Offline scoring with reliable resync after internet loss: checked (17 tests pass, automatic resend when back online)
 - [x] Streaming guide covers Facebook, YouTube and TikTok
 - [ ] League bands proposal: teams 1–10 at 20k, teams 11–20 at 17.5k, teams 21+ (multi-division) at 15k, each band charged only on the teams in it; analytics/full system +20k per team. Waiting on user's yes
+- [ ] Dashboards and analysis: where to build them in (plans vs more app screens) — waiting on user's answer
+- [ ] Club team policy (unlimited teams per club vs per team vs bundle) — waiting on user's answer
+- [ ] Login-sharing protections (club branding, two devices per login, suspicious-club flags, scorers locked to teams) — waiting on user's pick
