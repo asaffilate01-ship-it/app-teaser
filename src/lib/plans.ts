@@ -52,3 +52,33 @@ export function adRevenueSharePercent(plan: PlanId, options: { videoAddon?: bool
 export function teamLimit(plan: PlanId): number | null {
   return plan === "starter" ? 1 : null;
 }
+
+/**
+ * Whether free clubs are actually blocked from paid screens. Off until live payments are switched on:
+ * until then every club is on the free plan, so paid screens show a "Paid plan" badge instead.
+ * Turn on at go-live (and add matching database checks for camera rooms at the same time).
+ */
+export const planLocksEnforced = false;
+
+/** Club workspace sections that belong to a paid feature. Anything not listed is on every plan. */
+export const sectionFeature: Partial<Record<string, PlanFeature>> = {
+  analysis: "scoringAnalytics",
+  intelligence: "scoringAnalytics",
+  capture: "video",
+};
+
+export type PlanGate = "open" | "badge" | "locked";
+
+/** What a club sees on a section: open, open with a "Paid plan" badge (before go-live), or locked. */
+export function planGate(
+  plan: PlanId,
+  feature: PlanFeature | undefined,
+  options: { videoAddon?: boolean; enforced?: boolean } = {},
+): PlanGate {
+  if (!feature || canUseFeature(plan, feature, options)) return "open";
+  return (options.enforced ?? planLocksEnforced) ? "locked" : "badge";
+}
+
+export function readPlanId(value: unknown): PlanId {
+  return value === "club" || value === "league" ? value : "starter";
+}

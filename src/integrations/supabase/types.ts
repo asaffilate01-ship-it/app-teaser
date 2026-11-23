@@ -5871,6 +5871,149 @@ export type Database = {
           },
         ]
       }
+      ticket_listings: {
+        Row: {
+          capacity: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          details: string | null
+          id: string
+          max_per_order: number
+          on_sale: boolean
+          organisation_id: string
+          price_minor: number
+          starts_at: string
+          title: string
+          updated_at: string
+          venue: string | null
+        }
+        Insert: {
+          capacity: number
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          details?: string | null
+          id?: string
+          max_per_order?: number
+          on_sale?: boolean
+          organisation_id: string
+          price_minor?: number
+          starts_at: string
+          title: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Update: {
+          capacity?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          details?: string | null
+          id?: string
+          max_per_order?: number
+          on_sale?: boolean
+          organisation_id?: string
+          price_minor?: number
+          starts_at?: string
+          title?: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_listings_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_orders: {
+        Row: {
+          amount_minor: number
+          buyer_id: string
+          buyer_name: string
+          buyer_phone: string | null
+          checked_in_at: string | null
+          checked_in_by: string | null
+          code: string
+          created_at: string
+          currency: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          listing_id: string
+          method: string | null
+          organisation_id: string
+          quantity: number
+          reference: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_minor: number
+          buyer_id: string
+          buyer_name: string
+          buyer_phone?: string | null
+          checked_in_at?: string | null
+          checked_in_by?: string | null
+          code?: string
+          created_at?: string
+          currency: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          listing_id: string
+          method?: string | null
+          organisation_id: string
+          quantity: number
+          reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_minor?: number
+          buyer_id?: string
+          buyer_name?: string
+          buyer_phone?: string | null
+          checked_in_at?: string | null
+          checked_in_by?: string | null
+          code?: string
+          created_at?: string
+          currency?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          listing_id?: string
+          method?: string | null
+          organisation_id?: string
+          quantity?: number
+          reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_orders_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_orders_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_attendance: {
         Row: {
           effort: number | null
@@ -6901,6 +7044,7 @@ export type Database = {
         Args: { p_booking_id: string }
         Returns: undefined
       }
+      cancel_ticket_order: { Args: { p_order: string }; Returns: undefined }
       cast_potm_vote: {
         Args: { p_ref: string; p_slug: string; p_voter: string }
         Returns: Json
@@ -6908,6 +7052,10 @@ export type Database = {
       charge_fee_schedule: {
         Args: { p_player_ids: string[]; p_schedule_id: string }
         Returns: number
+      }
+      check_in_ticket: {
+        Args: { p_code: string; p_org: string }
+        Returns: Json
       }
       check_scoring_view: { Args: { p_match_id: string }; Returns: Json }
       claim_criclume_omniqora_run: {
@@ -6936,6 +7084,7 @@ export type Database = {
       }
       clean_fixture_result: { Args: { p_result: Json }; Returns: Json }
       club_custom_domain_allowed: { Args: { p_org: string }; Returns: boolean }
+      club_plan_access: { Args: { p_org: string }; Returns: Json }
       club_promo_earnings: {
         Args: { p_from: string; p_organisation_id: string; p_to: string }
         Returns: {
@@ -7065,6 +7214,10 @@ export type Database = {
         Args: { p_decision: string; p_id: string }
         Returns: undefined
       }
+      decide_ticket_order: {
+        Args: { p_confirm: boolean; p_note: string; p_order: string }
+        Returns: undefined
+      }
       end_league_membership: { Args: { p_id: string }; Returns: undefined }
       event_org: { Args: { p_event_id: string }; Returns: string }
       event_selection_published: {
@@ -7100,6 +7253,7 @@ export type Database = {
         }[]
       }
       get_club_site: { Args: { p_slug: string }; Returns: Json }
+      get_club_tickets: { Args: { p_slug: string }; Returns: Json }
       get_ground_screen: { Args: { p_slug: string }; Returns: Json }
       get_ground_screen_names: { Args: { p_slug: string }; Returns: Json }
       get_public_scoreboard: { Args: { p_slug: string }; Returns: Json }
@@ -7170,6 +7324,8 @@ export type Database = {
       is_ride_driver: { Args: { p_ride_id: string }; Returns: boolean }
       is_site_editor: { Args: { p_org: string }; Returns: boolean }
       is_store_manager: { Args: { p_org: string }; Returns: boolean }
+      is_ticket_gate: { Args: { p_org: string }; Returns: boolean }
+      is_ticket_manager: { Args: { p_org: string }; Returns: boolean }
       is_travel_manager: { Args: { p_org: string }; Returns: boolean }
       is_umpire_manager: { Args: { p_org: string }; Returns: boolean }
       is_umpire_payer: { Args: { p_org: string }; Returns: boolean }
@@ -7240,6 +7396,7 @@ export type Database = {
       }
       my_career: { Args: never; Returns: Json }
       my_match_duties: { Args: { p_match_id: string }; Returns: string[] }
+      my_tickets: { Args: never; Returns: Json }
       my_umpire_marks: { Args: never; Returns: Json }
       my_umpire_panels: { Args: never; Returns: Json }
       normalise_club_hostname: { Args: { p_input: string }; Returns: string }
@@ -7487,6 +7644,17 @@ export type Database = {
         Args: { p_club: string; p_league: string }
         Returns: string
       }
+      request_tickets: {
+        Args: {
+          p_listing: string
+          p_method: string
+          p_name: string
+          p_phone: string
+          p_quantity: number
+          p_reference: string
+        }
+        Returns: Json
+      }
       resolve_check_flag: {
         Args: { p_flag_id: string; p_reply: string; p_status: string }
         Returns: undefined
@@ -7660,6 +7828,16 @@ export type Database = {
         Args: { p_competition_id: string; p_team_id: string }
         Returns: Json
       }
+      ticket_payment_options: {
+        Args: { p_listing: string }
+        Returns: {
+          account_number: string
+          account_title: string
+          instructions: string
+          method: string
+        }[]
+      }
+      ticket_site_org: { Args: { p_slug: string }; Returns: string }
       update_my_umpire_details: {
         Args: {
           p_home_area: string

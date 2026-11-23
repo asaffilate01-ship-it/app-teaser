@@ -20,6 +20,7 @@ test("CricLume's own addresses and previews are never treated as club domains", 
 test("clean addresses on a club domain map to that club's website pages and back", () => {
   assert.equal(toInternalPath("/", "riverside"), "/club/riverside");
   assert.equal(toInternalPath("/fixtures", "riverside"), "/club/riverside/fixtures");
+  assert.equal(toInternalPath("/tickets", "riverside"), "/club/riverside/tickets");
   assert.equal(toInternalPath("/news/abc-123", "riverside"), "/club/riverside/news/abc-123");
   assert.equal(toExternalPath("/club/riverside", "riverside"), "/");
   assert.equal(toExternalPath("/club/riverside/gallery", "riverside"), "/gallery");

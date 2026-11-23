@@ -53,3 +53,5 @@
 - Junior bowling limits warn only; point deductions never touch NRR; volunteer places enforced by `volunteer_sign_up`.
 - Event places/waitlist, reply-by, suspensions and earlier-ball fixes (`correct_delivery_v1`) are enforced by DB triggers/RPCs; UI only mirrors them.
 - Reminders: DB builds rows in `notifications` (`queue_reminders_internal`, hourly `/api/public/jobs/reminders` + `send_reminders_now` role-checked, dedupe keys); `reminders.server.ts` claims then delivers per `channelsFor()` in `src/lib/reminders.ts` — one wording for app, push, email, WhatsApp/SMS, no double sends.
+- Match tickets: RPC-only orders (`request_tickets` locks the listing so seats can't oversell, `decide_ticket_order`, `check_in_ticket`); pending holds seats, codes shown to buyers only once confirmed; `src/lib/tickets.ts` mirrors the rules.
+- Paid screens go through `PlanGate` + `planGate()`/`sectionFeature` in plans.ts; `planLocksEnforced` flips badges to locks at go-live (add DB checks then); plan read via `club_plan_access`.

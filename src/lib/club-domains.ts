@@ -1,6 +1,6 @@
 /**
  * Club websites on a club's own domain or a free riverside.criclume.com address (League plan). A visitor to e.g. riversidecc.com sees
- * that club's website at clean addresses (/, /fixtures, /news, /gallery); everything else on
+ * that club's website at clean addresses (/, /fixtures, /tickets, /news, /gallery); everything else on
  * that domain is sent to criclume.com. The edge worker (src/server.ts) looks the domain up and
  * remembers it here; the router (src/router.tsx) maps the clean addresses to /club/<slug>/….
  * In the browser the slug comes from a <meta> tag the server writes into the page.
@@ -44,7 +44,7 @@ export function isPlatformHost(host: string): boolean {
 
 /** Pages a club website has at its own domain. */
 export function isClubSitePath(pathname: string): boolean {
-  return /^\/(?:fixtures|gallery|news(?:\/[A-Za-z0-9-]{1,80})?)?\/?$/.test(pathname);
+  return /^\/(?:fixtures|gallery|tickets|news(?:\/[A-Za-z0-9-]{1,80})?)?\/?$/.test(pathname);
 }
 
 /** Files, server calls and dev-server internals pass straight through on any domain. */

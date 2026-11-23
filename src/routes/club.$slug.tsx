@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound, Outlet, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { CalendarDays, Home, Images, Newspaper } from "lucide-react";
+import { CalendarDays, Home, Images, Newspaper, Ticket } from "lucide-react";
 import { isSiteSlug } from "@/lib/club-site-query";
 import { getClubSite } from "@/lib/club-site.functions";
 import { readAccent, readSocials, socialLabels, type PublicClubSite } from "@/lib/club-site";
@@ -26,6 +26,7 @@ export const Route = createFileRoute("/club/$slug")({
 const nav = [
   { to: "/club/$slug", label: "Home", icon: Home, exact: true },
   { to: "/club/$slug/fixtures", label: "Fixtures", icon: CalendarDays, exact: false },
+  { to: "/club/$slug/tickets", label: "Tickets", icon: Ticket, exact: false },
   { to: "/club/$slug/news", label: "News", icon: Newspaper, exact: false },
   { to: "/club/$slug/gallery", label: "Gallery", icon: Images, exact: false },
 ] as const;

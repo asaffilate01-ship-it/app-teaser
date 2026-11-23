@@ -22,6 +22,7 @@ import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as ScreensRouteImport } from './routes/screens'
 import { Route as SponsorDeskRouteImport } from './routes/sponsor-desk'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TicketsRouteImport } from './routes/tickets'
 import { Route as UmpireRouteImport } from './routes/umpire'
 import { Route as CameraRoomIdRouteImport } from './routes/camera.$roomId'
 import { Route as CheckIndexRouteImport } from './routes/check.index'
@@ -37,6 +38,7 @@ import { Route as ClubSlugIndexRouteImport } from './routes/club.$slug.index'
 import { Route as ClubSlugFixturesRouteImport } from './routes/club.$slug.fixtures'
 import { Route as ClubSlugGalleryRouteImport } from './routes/club.$slug.gallery'
 import { Route as ClubSlugNewsRouteImport } from './routes/club.$slug.news'
+import { Route as ClubSlugTicketsRouteImport } from './routes/club.$slug.tickets'
 import { Route as ApiPublicGroundFeedSlugRouteImport } from './routes/api/public/ground-feed.$slug'
 import { Route as ApiPublicJobsRemindersRouteImport } from './routes/api/public/jobs/reminders'
 import { Route as ApiPublicPushSlugRouteImport } from './routes/api/public/push/$slug'
@@ -105,6 +107,11 @@ const SponsorDeskRoute = SponsorDeskRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TicketsRoute = TicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UmpireRoute = UmpireRouteImport.update({
@@ -182,6 +189,11 @@ const ClubSlugNewsRoute = ClubSlugNewsRouteImport.update({
   path: '/news',
   getParentRoute: () => ClubSlugRoute,
 } as any)
+const ClubSlugTicketsRoute = ClubSlugTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => ClubSlugRoute,
+} as any)
 const ApiPublicGroundFeedSlugRoute = ApiPublicGroundFeedSlugRouteImport.update({
   id: '/api/public/ground-feed/$slug',
   path: '/api/public/ground-feed/$slug',
@@ -217,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/screens': typeof ScreensRoute
   '/sponsor-desk': typeof SponsorDeskRoute
   '/terms': typeof TermsRoute
+  '/tickets': typeof TicketsRoute
   '/umpire': typeof UmpireRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/check/$matchId': typeof CheckMatchIdRoute
@@ -231,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/club/$slug/fixtures': typeof ClubSlugFixturesRoute
   '/club/$slug/gallery': typeof ClubSlugGalleryRoute
   '/club/$slug/news': typeof ClubSlugNewsRouteWithChildren
+  '/club/$slug/tickets': typeof ClubSlugTicketsRoute
   '/club/$slug/': typeof ClubSlugIndexRoute
   '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
   '/api/public/jobs/reminders': typeof ApiPublicJobsRemindersRoute
@@ -251,6 +265,7 @@ export interface FileRoutesByTo {
   '/screens': typeof ScreensRoute
   '/sponsor-desk': typeof SponsorDeskRoute
   '/terms': typeof TermsRoute
+  '/tickets': typeof TicketsRoute
   '/umpire': typeof UmpireRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/check/$matchId': typeof CheckMatchIdRoute
@@ -264,6 +279,7 @@ export interface FileRoutesByTo {
   '/club/$slug/fixtures': typeof ClubSlugFixturesRoute
   '/club/$slug/gallery': typeof ClubSlugGalleryRoute
   '/club/$slug/news': typeof ClubSlugNewsRouteWithChildren
+  '/club/$slug/tickets': typeof ClubSlugTicketsRoute
   '/club/$slug': typeof ClubSlugIndexRoute
   '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
   '/api/public/jobs/reminders': typeof ApiPublicJobsRemindersRoute
@@ -285,6 +301,7 @@ export interface FileRoutesById {
   '/screens': typeof ScreensRoute
   '/sponsor-desk': typeof SponsorDeskRoute
   '/terms': typeof TermsRoute
+  '/tickets': typeof TicketsRoute
   '/umpire': typeof UmpireRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/check/$matchId': typeof CheckMatchIdRoute
@@ -299,6 +316,7 @@ export interface FileRoutesById {
   '/club/$slug/fixtures': typeof ClubSlugFixturesRoute
   '/club/$slug/gallery': typeof ClubSlugGalleryRoute
   '/club/$slug/news': typeof ClubSlugNewsRouteWithChildren
+  '/club/$slug/tickets': typeof ClubSlugTicketsRoute
   '/club/$slug/': typeof ClubSlugIndexRoute
   '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
   '/api/public/jobs/reminders': typeof ApiPublicJobsRemindersRoute
@@ -321,6 +339,7 @@ export interface FileRouteTypes {
     | '/screens'
     | '/sponsor-desk'
     | '/terms'
+    | '/tickets'
     | '/umpire'
     | '/camera/$roomId'
     | '/check/$matchId'
@@ -335,6 +354,7 @@ export interface FileRouteTypes {
     | '/club/$slug/fixtures'
     | '/club/$slug/gallery'
     | '/club/$slug/news'
+    | '/club/$slug/tickets'
     | '/club/$slug/'
     | '/api/public/ground-feed/$slug'
     | '/api/public/jobs/reminders'
@@ -355,6 +375,7 @@ export interface FileRouteTypes {
     | '/screens'
     | '/sponsor-desk'
     | '/terms'
+    | '/tickets'
     | '/umpire'
     | '/camera/$roomId'
     | '/check/$matchId'
@@ -368,6 +389,7 @@ export interface FileRouteTypes {
     | '/club/$slug/fixtures'
     | '/club/$slug/gallery'
     | '/club/$slug/news'
+    | '/club/$slug/tickets'
     | '/club/$slug'
     | '/api/public/ground-feed/$slug'
     | '/api/public/jobs/reminders'
@@ -388,6 +410,7 @@ export interface FileRouteTypes {
     | '/screens'
     | '/sponsor-desk'
     | '/terms'
+    | '/tickets'
     | '/umpire'
     | '/camera/$roomId'
     | '/check/$matchId'
@@ -402,6 +425,7 @@ export interface FileRouteTypes {
     | '/club/$slug/fixtures'
     | '/club/$slug/gallery'
     | '/club/$slug/news'
+    | '/club/$slug/tickets'
     | '/club/$slug/'
     | '/api/public/ground-feed/$slug'
     | '/api/public/jobs/reminders'
@@ -423,6 +447,7 @@ export interface RootRouteChildren {
   ScreensRoute: typeof ScreensRoute
   SponsorDeskRoute: typeof SponsorDeskRoute
   TermsRoute: typeof TermsRoute
+  TicketsRoute: typeof TicketsRoute
   UmpireRoute: typeof UmpireRoute
   CameraRoomIdRoute: typeof CameraRoomIdRoute
   CheckMatchIdRoute: typeof CheckMatchIdRoute
@@ -532,6 +557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tickets': {
+      id: '/tickets'
+      path: '/tickets'
+      fullPath: '/tickets'
+      preLoaderRoute: typeof TicketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/umpire': {
       id: '/umpire'
       path: '/umpire'
@@ -637,6 +669,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClubSlugNewsRouteImport
       parentRoute: typeof ClubSlugRoute
     }
+    '/club/$slug/tickets': {
+      id: '/club/$slug/tickets'
+      path: '/tickets'
+      fullPath: '/club/$slug/tickets'
+      preLoaderRoute: typeof ClubSlugTicketsRouteImport
+      parentRoute: typeof ClubSlugRoute
+    }
     '/api/public/ground-feed/$slug': {
       id: '/api/public/ground-feed/$slug'
       path: '/api/public/ground-feed/$slug'
@@ -684,6 +723,7 @@ interface ClubSlugRouteChildren {
   ClubSlugFixturesRoute: typeof ClubSlugFixturesRoute
   ClubSlugGalleryRoute: typeof ClubSlugGalleryRoute
   ClubSlugNewsRoute: typeof ClubSlugNewsRouteWithChildren
+  ClubSlugTicketsRoute: typeof ClubSlugTicketsRoute
   ClubSlugIndexRoute: typeof ClubSlugIndexRoute
 }
 
@@ -691,6 +731,7 @@ const ClubSlugRouteChildren: ClubSlugRouteChildren = {
   ClubSlugFixturesRoute: ClubSlugFixturesRoute,
   ClubSlugGalleryRoute: ClubSlugGalleryRoute,
   ClubSlugNewsRoute: ClubSlugNewsRouteWithChildren,
+  ClubSlugTicketsRoute: ClubSlugTicketsRoute,
   ClubSlugIndexRoute: ClubSlugIndexRoute,
 }
 
@@ -712,6 +753,7 @@ const rootRouteChildren: RootRouteChildren = {
   ScreensRoute: ScreensRoute,
   SponsorDeskRoute: SponsorDeskRoute,
   TermsRoute: TermsRoute,
+  TicketsRoute: TicketsRoute,
   UmpireRoute: UmpireRoute,
   CameraRoomIdRoute: CameraRoomIdRoute,
   CheckMatchIdRoute: CheckMatchIdRoute,

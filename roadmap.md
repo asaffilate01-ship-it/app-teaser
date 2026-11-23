@@ -50,7 +50,7 @@
 - [x] 1 Live streaming via free OBS: Go live guide (YouTube, Facebook, TikTok) with overlay links
 - [x] 15a Player auction / draft
 - [x] 15b Ground and nets booking requests
-- [ ] 15c Match tickets: owner chose transfers only, so ticket money is requested and recorded by hand (no online card checkout)
+- [x] 15c Match tickets: sold on the club website's Tickets page to anyone with a free account; paid by bank/wallet transfer with a reference, treasurer confirms, fan gets a ticket code, gate check-in once (no card checkout)
 - [x] 15d Merchandise shop: orders taken and recorded by hand, transfers only (no online card checkout)
 
 ## Pakistan pricing + CricScoreboard (new ask)
@@ -83,7 +83,8 @@
 ## Plan structure (new ask)
 - [x] Free = basic scoring only (with ads); Club/League = full scoring analytics; video & video analytics = extra add-on (pricing page, comparison table, FAQs, all five languages)
 - [ ] Video add-on price — waiting on user's answer (page shows "quoted per club" meanwhile)
-- [ ] Lock analytics and camera rooms inside the app by plan — not started; offer to user
+- [x] Paid-plan note on Analysis room, AI Intelligence and Capture (owner: "whatever is best" → badges now)
+- [ ] Switch the plan lock on at go-live (one switch in the plan rules) and add matching database checks for camera rooms — waits on live payments
 
 ## Ground big screen
 - [x] Widescreen HD ground screen with rotating pages: score, batting, bowling, Manhattan, worm, run chase

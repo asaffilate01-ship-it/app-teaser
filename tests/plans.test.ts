@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { adRevenueSharePercent, canUseFeature, showsAds } from "../src/lib/plans.ts";
+import { adRevenueSharePercent, canUseFeature, planGate, planLocksEnforced, sectionFeature, showsAds } from "../src/lib/plans.ts";
 
 test("free plan is basic scoring only, with ads", () => {
   assert.equal(canUseFeature("starter", "basicScoring"), true);
@@ -47,4 +47,19 @@ test("only the League plan gets the co-branded website on the club's own domain"
   assert.equal(canUseFeature("club", "customDomain", { videoAddon: true }), false);
   assert.equal(canUseFeature("league", "customDomain"), true);
   assert.equal(canUseFeature("league", "customDomain", { videoAddon: true }), true);
+});
+
+test("free clubs see a paid-plan badge on analysis and cameras until locks are switched on at go-live", () => {
+  assert.equal(planLocksEnforced, false);
+  assert.equal(planGate("starter", sectionFeature["analysis"]), "badge");
+  assert.equal(planGate("starter", sectionFeature["capture"]), "badge");
+  assert.equal(planGate("starter", sectionFeature["office"]), "open");
+});
+
+test("once locks are on, free clubs are locked out of analysis and cameras; paid clubs need the video add-on for cameras", () => {
+  assert.equal(planGate("starter", "scoringAnalytics", { enforced: true }), "locked");
+  assert.equal(planGate("club", "scoringAnalytics", { enforced: true }), "open");
+  assert.equal(planGate("club", "video", { enforced: true }), "locked");
+  assert.equal(planGate("club", "video", { enforced: true, videoAddon: true }), "open");
+  assert.equal(planGate("league", "video", { enforced: true, videoAddon: true }), "open");
 });

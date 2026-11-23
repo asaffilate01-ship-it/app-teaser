@@ -82,6 +82,8 @@ import { TeamCrest } from "@/components/scorer/Broadcast";
 import scoreboardShot from "@/assets/shot-ground-score.webp";
 import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPanel";
 import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace";
+import { PlanGate } from "@/components/plan/PlanGate";
+import { sectionFeature } from "@/lib/plans";
 import { AcademyDashboard } from "@/components/AcademyDashboard";
 import { LeagueStandings } from "@/components/LeagueStandings";
 import { LeagueHub } from "@/components/league/LeagueHub";
@@ -808,7 +810,9 @@ function OperationalPlatform({
               />
             )}
             {tab === "capture" && (
-              <Capture data={dashboard.data} role={membership.role} run={dashboard.run} />
+              <PlanGate organisationId={membership.organisationId} feature={sectionFeature["capture"]}>
+                <Capture data={dashboard.data} role={membership.role} run={dashboard.run} />
+              </PlanGate>
             )}
             {tab === "players" && (
               <Players data={dashboard.data} role={membership.role} run={dashboard.run} />
@@ -825,21 +829,25 @@ function OperationalPlatform({
               <Safeguarding data={dashboard.data} role={membership.role} run={dashboard.run} />
             )}
             {tab === "analysis" && (
-              <CricketAnalysisWorkspace
-                key={membership.organisationId}
-                organisationId={membership.organisationId}
-                role={membership.role}
-                matches={dashboard.data.matches}
-                players={dashboard.data.players}
-              />
+              <PlanGate organisationId={membership.organisationId} feature={sectionFeature["analysis"]}>
+                <CricketAnalysisWorkspace
+                  key={membership.organisationId}
+                  organisationId={membership.organisationId}
+                  role={membership.role}
+                  matches={dashboard.data.matches}
+                  players={dashboard.data.players}
+                />
+              </PlanGate>
             )}
             {tab === "intelligence" && (
-              <OmniqoraIntelligencePanel
-                key={membership.organisationId}
-                organisationId={membership.organisationId}
-                role={membership.role}
-                matches={dashboard.data.matches}
-              />
+              <PlanGate organisationId={membership.organisationId} feature={sectionFeature["intelligence"]}>
+                <OmniqoraIntelligencePanel
+                  key={membership.organisationId}
+                  organisationId={membership.organisationId}
+                  role={membership.role}
+                  matches={dashboard.data.matches}
+                />
+              </PlanGate>
             )}
             {tab === "operations" && (
               <Operations
