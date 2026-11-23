@@ -95,7 +95,7 @@ export function ScoreHero({ match, sync }: { match: CricketMatch; sync?: ReactNo
         <div className="flex min-w-0 items-center gap-3 md:gap-4">
           <TeamCrest name={batting.name} size="lg" />
           <div className="min-w-0">
-            <p className="truncate text-xs font-bold uppercase tracking-[0.12em] md:text-sm">{batting.name}</p>
+            <p className="line-clamp-2 break-words text-[11px] font-bold uppercase leading-tight tracking-[0.06em] sm:text-xs sm:tracking-[0.12em] md:text-sm">{batting.name}</p>
             <p className="font-display text-4xl font-bold leading-none tabular-nums text-gold md:text-6xl">
               {summary.runs}
               <span className="text-2xl md:text-4xl">/{summary.wickets}</span>
@@ -111,7 +111,7 @@ export function ScoreHero({ match, sync }: { match: CricketMatch; sync?: ReactNo
         <div className="flex min-w-0 flex-row-reverse items-center gap-3 text-right md:gap-4">
           <TeamCrest name={bowling.name} size="lg" />
           <div className="min-w-0">
-            <p className="truncate text-xs font-bold uppercase tracking-[0.12em] md:text-sm">{bowling.name}</p>
+            <p className="line-clamp-2 break-words text-[11px] font-bold uppercase leading-tight tracking-[0.06em] sm:text-xs sm:tracking-[0.12em] md:text-sm">{bowling.name}</p>
             <p className="mt-1 font-display text-lg text-muted-foreground md:text-2xl">
               {bowlingScore ? bowlingScore.join(" & ") : "Yet to bat"}
             </p>

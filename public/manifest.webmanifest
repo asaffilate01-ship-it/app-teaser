@@ -23,9 +23,9 @@
     { "name": "Club workspace", "short_name": "Club", "url": "/platform?source=shortcut", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
   ],
   "screenshots": [
-    { "src": "/screenshots/phone-scoring.jpg", "sizes": "768x1408", "type": "image/jpeg", "form_factor": "narrow", "label": "Ball-by-ball scoring" },
+    { "src": "/screenshots/phone-scoring.jpg", "sizes": "860x1864", "type": "image/jpeg", "form_factor": "narrow", "label": "Ball-by-ball scoring" },
     { "src": "/screenshots/phone-league.jpg", "sizes": "768x1408", "type": "image/jpeg", "form_factor": "narrow", "label": "Live league table" },
-    { "src": "/screenshots/desktop-dashboard.jpg", "sizes": "1600x1008", "type": "image/jpeg", "form_factor": "wide", "label": "Club dashboard" },
-    { "src": "/screenshots/desktop-scoreboard.jpg", "sizes": "1600x1008", "type": "image/jpeg", "form_factor": "wide", "label": "Public live scoreboard" }
+    { "src": "/screenshots/desktop-dashboard.jpg", "sizes": "1600x1000", "type": "image/jpeg", "form_factor": "wide", "label": "Match centre with win predictor" },
+    { "src": "/screenshots/desktop-scoreboard.jpg", "sizes": "1600x900", "type": "image/jpeg", "form_factor": "wide", "label": "Ground big screen" }
   ]
 }

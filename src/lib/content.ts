@@ -134,30 +134,23 @@ export const en = {
   screensTab: {
     kicker: "Product tour",
     title: "Screens",
-    intro: "Illustrative views of scoring, scoreboards, analysis and video review.",
+    intro: "Real CricLume screens from a sample club match — phone scoring, the ground big screen, analysis, video review and league tables.",
+    filters: { all: "All", scoring: "Scoring", screens: "Big screen", analysis: "Analysis & video", league: "Leagues" },
+    enlarge: "Tap to enlarge",
+    close: "Close",
+    chips: ["Live on every screen", "Works offline"],
     items: [
-      {
-        label: "Club dashboard",
-        caption:
-          "Desktop • live, upcoming and completed matches with run-rate and wagon-wheel analytics",
-      },
-      {
-        label: "Live scoreboard",
-        caption: "Broadcast view • score, batters, bowlers, over timeline and fall of wickets",
-      },
-      {
-        label: "Mobile scoring",
-        caption: "Phone • thumb-first scoring pad with extras, dismissals and recent deliveries",
-      },
+      { label: "Ground big screen", caption: "TV or LED screen • score, partnership and last balls, rotating through batting, bowling, Manhattan, worm and run chase" },
+      { label: "Match centre", caption: "Desktop • live score, full scorecard and the win predictor side by side" },
+      { label: "Phone scoring", caption: "Phone • tap where the ball went, pick the fielder, then the runs — one-handed and offline" },
+      { label: "Club match dashboard", caption: "Desktop • run rate against the required rate, colour wagon wheel, Manhattan, worm and partnerships" },
+      { label: "Run chase on the big screen", caption: "Big screen • runs needed, balls left, current and required rate, and live win chances" },
+      { label: "Ball-by-ball commentary", caption: "Phone • written automatically from every ball, ready to share with followers" },
+      { label: "Phone scorecard", caption: "Phone • batting, bowling and fall of wickets, shared as an image, PDF or social post" },
       {
         label: "Coaching review",
         caption:
           "Desktop • phone angles from fixed spots around the ground, frame-by-frame scrubbing and drawing tools",
-      },
-      {
-        label: "Match dashboard",
-        caption:
-          "Desktop • win predictor, run rate against the required rate, colour wagon wheel and top performers",
       },
       {
         label: "League stats",
@@ -174,6 +167,7 @@ export const en = {
       },
     ],
   },
+
   pricing: {
     kicker: "Plans",
     title: "Pricing & subscriptions",
@@ -472,31 +466,23 @@ export const de: Content = {
   screensTab: {
     kicker: "Produkttour",
     title: "Ansichten",
-    intro: "Beispielansichten von Scoring, Scoreboards, Analyse und Videoprüfung.",
+    intro: "Echte CricLume-Ansichten aus einem Beispielspiel – Scoring am Handy, die Großbildleinwand am Platz, Analyse, Videoprüfung und Ligatabellen.",
+    filters: { all: "Alle", scoring: "Scoring", screens: "Großbild", analysis: "Analyse & Video", league: "Ligen" },
+    enlarge: "Zum Vergrößern tippen",
+    close: "Schließen",
+    chips: ["Live auf jedem Bildschirm", "Funktioniert offline"],
     items: [
-      {
-        label: "Club-Dashboard",
-        caption:
-          "Desktop • laufende, kommende und beendete Spiele mit Run-Rate- und Wagon-Wheel-Analysen",
-      },
-      {
-        label: "Live-Anzeigetafel",
-        caption:
-          "Broadcast-Ansicht • Punktestand, Batter, Bowler, Over-Timeline und Wicket-Verlauf",
-      },
-      {
-        label: "Mobiles Scoring",
-        caption: "Handy • daumenfreundliches Scoring-Pad mit Extras, Dismissals und letzten Bällen",
-      },
+      { label: "Großbildleinwand am Platz", caption: "TV- oder LED-Wand • Punktestand, Partnerschaft und letzte Bälle, wechselnd mit Batting, Bowling, Manhattan, Worm und Run Chase" },
+      { label: "Spielzentrale", caption: "Desktop • Live-Stand, vollständige Scorecard und Siegprognose nebeneinander" },
+      { label: "Scoring am Handy", caption: "Handy • tippen, wohin der Ball ging, Fielder wählen, dann die Runs – mit einer Hand und offline" },
+      { label: "Club-Spiel-Dashboard", caption: "Desktop • Run-Rate gegen benötigte Rate, farbiges Wagon Wheel, Manhattan, Worm und Partnerschaften" },
+      { label: "Run Chase auf der Leinwand", caption: "Großbild • benötigte Runs, verbleibende Bälle, aktuelle und benötigte Rate sowie Live-Siegchancen" },
+      { label: "Ball-für-Ball-Kommentar", caption: "Handy • automatisch zu jedem Ball geschrieben, bereit zum Teilen mit Fans" },
+      { label: "Scorecard am Handy", caption: "Handy • Batting, Bowling und Wicket-Verlauf, teilbar als Bild, PDF oder Social-Post" },
       {
         label: "Trainingsanalyse",
         caption:
           "Desktop • Handy-Winkel von festen Plätzen rund ums Feld, Einzelbild-Navigation und Zeichenwerkzeuge",
-      },
-      {
-        label: "Spiel-Dashboard",
-        caption:
-          "Desktop • Siegprognose, Run-Rate gegen benötigte Rate, farbiges Wagon Wheel und Top-Spieler",
       },
       {
         label: "Liga-Statistiken",
@@ -514,6 +500,7 @@ export const de: Content = {
       },
     ],
   },
+
   pricing: {
     kicker: "Tarife",
     title: "Preise & Abos",
@@ -809,30 +796,23 @@ export const nl: Content = {
   screensTab: {
     kicker: "Producttour",
     title: "Schermen",
-    intro: "Illustratieve schermen voor scoren, scoreborden, analyse en videoreview.",
+    intro: "Echte CricLume-schermen uit een voorbeeldwedstrijd – scoren op de telefoon, het grote scherm op de club, analyse, videoreview en standen.",
+    filters: { all: "Alles", scoring: "Scoren", screens: "Groot scherm", analysis: "Analyse & video", league: "Competities" },
+    enlarge: "Tik om te vergroten",
+    close: "Sluiten",
+    chips: ["Live op elk scherm", "Werkt offline"],
     items: [
-      {
-        label: "Clubdashboard",
-        caption:
-          "Desktop • live, komende en afgeronde wedstrijden met run-rate- en wagon-wheel-analyses",
-      },
-      {
-        label: "Live scorebord",
-        caption: "Uitzendweergave • score, batters, bowlers, overtijdlijn en wicketverloop",
-      },
-      {
-        label: "Mobiel scoren",
-        caption: "Telefoon • scorepad voor de duim met extras, dismissals en recente ballen",
-      },
+      { label: "Groot scherm op de club", caption: "Tv- of ledscherm • score, partnership en laatste ballen, wisselend met slag, worp, Manhattan, worm en run chase" },
+      { label: "Wedstrijdcentrum", caption: "Desktop • live score, volledig scorebord en de winvoorspelling naast elkaar" },
+      { label: "Scoren op de telefoon", caption: "Telefoon • tik waar de bal ging, kies de veldspeler en dan de runs – met één hand en offline" },
+      { label: "Clubwedstrijddashboard", caption: "Desktop • run rate tegen de benodigde rate, gekleurd wagon wheel, Manhattan, worm en partnerships" },
+      { label: "Run chase op het grote scherm", caption: "Groot scherm • benodigde runs, resterende ballen, huidige en benodigde rate en live winkansen" },
+      { label: "Bal-voor-bal-commentaar", caption: "Telefoon • automatisch bij elke bal geschreven, klaar om te delen met volgers" },
+      { label: "Scorebord op de telefoon", caption: "Telefoon • slag, worp en wicketverloop, te delen als afbeelding, pdf of social post" },
       {
         label: "Coachingsanalyse",
         caption:
           "Desktop • telefoonhoeken vanaf vaste plekken rond het veld, beeld-voor-beeld scrubben en tekengereedschap",
-      },
-      {
-        label: "Wedstrijddashboard",
-        caption:
-          "Desktop • winvoorspelling, run rate tegen de benodigde rate, gekleurd wagon wheel en topspelers",
       },
       {
         label: "Competitiestatistieken",
@@ -850,6 +830,7 @@ export const nl: Content = {
       },
     ],
   },
+
   pricing: {
     kicker: "Abonnementen",
     title: "Prijzen & abonnementen",
@@ -1148,30 +1129,23 @@ export const af: Content = {
   screensTab: {
     kicker: "Produkttoer",
     title: "Skerms",
-    intro: "Voorbeeldskerms vir telling, telborde, ontleding en videohersiening.",
+    intro: "Regte CricLume-skerms uit ’n voorbeeldwedstryd – aantekening op die foon, die grondskerm, ontleding, videohersiening en punteleers.",
+    filters: { all: "Alles", scoring: "Aantekening", screens: "Grootskerm", analysis: "Ontleding & video", league: "Ligas" },
+    enlarge: "Tik om te vergroot",
+    close: "Maak toe",
+    chips: ["Regstreeks op elke skerm", "Werk vanlyn"],
     items: [
-      {
-        label: "Klubpaneelbord",
-        caption:
-          "Rekenaar • regstreekse, komende en voltooide wedstryde met lopietempo- en wawiel-ontledings",
-      },
-      {
-        label: "Regstreekse telbord",
-        caption: "Uitsaai-aansig • telling, kolwers, bouliers, boulbeurt-tydlyn en paaltjieverlies",
-      },
-      {
-        label: "Mobiele aantekening",
-        caption: "Foon • duimvriendelike aantekenblad met ekstras, uitboorte en onlangse balle",
-      },
+      { label: "Grondskerm", caption: "TV- of LED-skerm • telling, vennootskap en laaste balle, wat afwissel met kolf, boul, Manhattan, wurm en lopiejag" },
+      { label: "Wedstrydsentrum", caption: "Rekenaar • regstreekse telling, volle telkaart en die wenvoorspeller langs mekaar" },
+      { label: "Aantekening op die foon", caption: "Foon • tik waar die bal gegaan het, kies die veldwerker, dan die lopies – met een hand en vanlyn" },
+      { label: "Klubwedstryd-paneelbord", caption: "Rekenaar • lopietempo teen die vereiste tempo, gekleurde wawiel, Manhattan, wurm en vennootskappe" },
+      { label: "Lopiejag op die grootskerm", caption: "Grootskerm • lopies nodig, balle oor, huidige en vereiste tempo, en regstreekse wenkanse" },
+      { label: "Bal-vir-bal-kommentaar", caption: "Foon • outomaties vir elke bal geskryf, gereed om met volgers te deel" },
+      { label: "Telkaart op die foon", caption: "Foon • kolf, boul en paaltjieverlies, deelbaar as prent, PDF of sosiale plasing" },
       {
         label: "Afrigtersontleding",
         caption:
           "Rekenaar • foonhoeke van vaste plekke om die veld, raampie-vir-raampie navigasie en tekengereedskap",
-      },
-      {
-        label: "Wedstryd-dashboard",
-        caption:
-          "Rekenaar • wenvoorspeller, lopietempo teen die vereiste tempo, gekleurde wawielkaart en topspelers",
       },
       {
         label: "Ligastatistiek",
@@ -1188,6 +1162,7 @@ export const af: Content = {
       },
     ],
   },
+
   pricing: {
     kicker: "Planne",
     title: "Pryse en intekening",
@@ -1483,32 +1458,23 @@ export const fr: Content = {
   screensTab: {
     kicker: "Visite du produit",
     title: "Écrans",
-    intro: "Vues illustratives du marquage, des scores, de l'analyse et de la revue vidéo.",
+    intro: "De vrais écrans CricLume tirés d'un match d'exemple – marquage sur téléphone, grand écran du terrain, analyse, revue vidéo et classements.",
+    filters: { all: "Tous", scoring: "Marquage", screens: "Grand écran", analysis: "Analyse & vidéo", league: "Ligues" },
+    enlarge: "Touchez pour agrandir",
+    close: "Fermer",
+    chips: ["En direct sur chaque écran", "Fonctionne hors ligne"],
     items: [
-      {
-        label: "Tableau de bord du club",
-        caption:
-          "Bureau • matchs en direct, à venir et terminés avec analyses de run rate et wagon wheel",
-      },
-      {
-        label: "Tableau de score en direct",
-        caption:
-          "Vue broadcast • score, batteurs, lanceurs, chronologie des overs et chute des guichets",
-      },
-      {
-        label: "Marquage mobile",
-        caption:
-          "Téléphone • pavé de marquage au pouce avec extras, éliminations et balles récentes",
-      },
+      { label: "Grand écran du terrain", caption: "Écran TV ou LED • score, partenariat et dernières balles, en alternance avec batte, lancer, Manhattan, worm et poursuite" },
+      { label: "Centre du match", caption: "Ordinateur • score en direct, feuille de match complète et prédiction de victoire côte à côte" },
+      { label: "Marquage sur téléphone", caption: "Téléphone • touchez où la balle est allée, choisissez le joueur de champ, puis les points – d'une main et hors ligne" },
+      { label: "Tableau de bord du match du club", caption: "Ordinateur • run rate face au taux requis, wagon wheel en couleurs, Manhattan, worm et partenariats" },
+      { label: "Poursuite sur grand écran", caption: "Grand écran • points nécessaires, balles restantes, taux actuel et requis, et chances de victoire en direct" },
+      { label: "Commentaire balle par balle", caption: "Téléphone • écrit automatiquement à chaque balle, prêt à partager avec les supporters" },
+      { label: "Feuille de match sur téléphone", caption: "Téléphone • batte, lancer et chute des guichets, à partager en image, PDF ou publication" },
       {
         label: "Analyse d'entraînement",
         caption:
           "Bureau • angles de téléphones placés à des endroits fixes autour du terrain, navigation image par image et outils de dessin",
-      },
-      {
-        label: "Tableau de bord du match",
-        caption:
-          "Ordinateur • prédiction de victoire, run rate face au taux requis, wagon wheel en couleurs et meilleurs joueurs",
       },
       {
         label: "Statistiques de ligue",
@@ -1527,6 +1493,7 @@ export const fr: Content = {
       },
     ],
   },
+
   pricing: {
     kicker: "Formules",
     title: "Tarifs et abonnements",

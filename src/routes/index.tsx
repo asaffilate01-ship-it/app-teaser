@@ -33,14 +33,18 @@ import { planOrder, featureOrder, planFeatures, type FeatureAccess } from "@/lib
 
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 import fullLogoAsset from "@/assets/criclume-logo-full.png.asset.json";
-import shotDashboard from "@/assets/shot-dashboard.jpg";
-import shotScoreboard from "@/assets/shot-scoreboard.jpg";
-import shotMobile from "@/assets/shot-mobile.jpg";
+import shotGroundScore from "@/assets/shot-ground-score.webp";
+import shotGroundChase from "@/assets/shot-ground-chase.webp";
+import shotMatchCentre from "@/assets/shot-match-centre.webp";
+import shotClubDashboard from "@/assets/shot-club-dashboard.webp";
+import shotPhoneScoring from "@/assets/shot-phone-scoring.webp";
+import shotPhoneScorecard from "@/assets/shot-phone-scorecard.webp";
+import shotPhoneCommentary from "@/assets/shot-phone-commentary.webp";
 import shotReview from "@/assets/shot-review.jpg";
-import shotMatchDashboard from "@/assets/shot-match-dashboard.jpg";
 import shotLeagueStats from "@/assets/shot-league-stats.jpg";
 import shotLeagueLive from "@/assets/shot-league-live.jpg";
 import shotLiveTable from "@/assets/shot-live-table.jpg";
+import { HeroShowcase, ScreensGallery, type ScreenShot } from "@/components/promo/ScreenShowcase";
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): { section?: TabId } => {
@@ -91,15 +95,19 @@ const tabMeta: { id: TabId; icon: typeof Home; key: keyof Content["nav"] }[] = [
 
 const featureIcons = [Zap, Video, Activity, BarChart3, Smartphone, Users, Eye];
 const workflowIcons = [Zap, Video, Users];
-const screenImages = [
-  { src: shotDashboard, w: 1600, h: 1008 },
-  { src: shotScoreboard, w: 1600, h: 1008 },
-  { src: shotMobile, w: 768, h: 1408 },
-  { src: shotReview, w: 1600, h: 1008 },
-  { src: shotMatchDashboard, w: 1600, h: 1008 },
-  { src: shotLeagueStats, w: 1600, h: 1008 },
-  { src: shotLeagueLive, w: 768, h: 1408 },
-  { src: shotLiveTable, w: 768, h: 1408 },
+/** Same order as t.screensTab.items. Real CricLume screens captured from a sample club match. */
+const screenShots: ScreenShot[] = [
+  { src: shotGroundScore, w: 1600, h: 900, kind: "tv", cat: "screens" },
+  { src: shotMatchCentre, w: 1600, h: 1000, kind: "desktop", cat: "scoring", url: "criclume.com/app" },
+  { src: shotPhoneScoring, w: 860, h: 1864, kind: "phone", cat: "scoring" },
+  { src: shotClubDashboard, w: 1600, h: 1000, kind: "desktop", cat: "analysis", url: "criclume.com/platform" },
+  { src: shotGroundChase, w: 1600, h: 900, kind: "tv", cat: "screens" },
+  { src: shotPhoneCommentary, w: 860, h: 1864, kind: "phone", cat: "scoring" },
+  { src: shotPhoneScorecard, w: 860, h: 1864, kind: "phone", cat: "scoring" },
+  { src: shotReview, w: 1600, h: 1008, kind: "desktop", cat: "analysis", url: "criclume.com/app · video lab" },
+  { src: shotLeagueStats, w: 1600, h: 1008, kind: "desktop", cat: "league", url: "criclume.com/platform · league hub" },
+  { src: shotLeagueLive, w: 768, h: 1408, kind: "phone", cat: "league" },
+  { src: shotLiveTable, w: 768, h: 1408, kind: "phone", cat: "league" },
 ];
 const planIcons = [Zap, Building2, Trophy];
 
@@ -269,7 +277,7 @@ function HomeTab({ onNavigate, region }: { onNavigate: (t: TabId) => void; regio
 
   return (
     <div className="space-y-10 md:space-y-16">
-      <div className="grid gap-7 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-12">
+      <div className="grid gap-7 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
         <section className="min-w-0 space-y-4 md:space-y-6">
           <p className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-gold">
             <span className="size-1.5 rounded-full bg-gold" aria-hidden />
@@ -321,21 +329,13 @@ function HomeTab({ onNavigate, region }: { onNavigate: (t: TabId) => void; regio
           </div>
         </section>
 
-        <section className="surface-card overflow-hidden">
-          <div className="flex items-center justify-between gap-3 border-b border-border/60 px-4 py-2.5">
-            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-gold">
-              {t.hero.previewLabel}
-            </span>
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {t.screensTab.items[1]!.label}
-            </span>
-          </div>
-          <img
-            src={shotScoreboard}
-            alt={t.screensTab.items[1]!.caption}
-            width={1600}
-            height={1008}
-            className="w-full"
+        <section aria-label={t.hero.previewLabel} className="min-w-0 lg:-mr-8 xl:-mr-16">
+          <HeroShowcase
+            desktop={screenShots[1]!}
+            phone={screenShots[2]!}
+            desktopAlt={`${t.screensTab.items[1]!.label} — ${t.screensTab.items[1]!.caption}`}
+            phoneAlt={`${t.screensTab.items[2]!.label} — ${t.screensTab.items[2]!.caption}`}
+            chips={t.screensTab.chips}
           />
         </section>
       </div>
@@ -645,38 +645,28 @@ function ScreensTab() {
   return (
     <div className="space-y-5 md:space-y-8">
       <SectionHeader kicker={t.screensTab.kicker}>{t.screensTab.title}</SectionHeader>
-      <p className="text-sm text-muted-foreground md:text-base">{t.screensTab.intro}</p>
-      <div className="space-y-5 md:grid md:grid-cols-2 md:gap-6 md:space-y-0">
-        {t.screensTab.items.map((s, i) => {
-          const img = screenImages[i]!;
-          return (
-            <figure key={s.label} className="surface-card lift-card overflow-hidden">
-              <div className="overflow-x-auto no-scrollbar border-b border-border/60 bg-secondary/40 md:overflow-hidden">
-                <img
-                  src={img.src}
-                  alt={`${s.label} — ${s.caption}`}
-                  width={img.w}
-                  height={img.h}
-                  loading="lazy"
-                  className={
-                    img.w > img.h
-                      ? "h-auto w-[160%] max-w-none md:w-full"
-                      : "h-auto w-full md:mx-auto md:max-w-xs"
-                  }
-                />
-              </div>
-              <figcaption className="space-y-1.5 p-4 md:p-6">
-                <p className="font-display text-lg font-bold leading-tight text-gold md:text-2xl">
-                  {s.label}
-                </p>
-                <p className="text-sm leading-relaxed text-muted-foreground md:text-sm">
-                  {s.caption}
-                </p>
-              </figcaption>
-            </figure>
-          );
-        })}
-      </div>
+      <p className="max-w-3xl text-sm text-muted-foreground md:text-base">{t.screensTab.intro}</p>
+      <ScreensGallery
+        shots={screenShots}
+        items={t.screensTab.items}
+        filters={t.screensTab.filters}
+        enlarge={t.screensTab.enlarge}
+        close={t.screensTab.close}
+        cta={
+          <a
+            href="/app"
+            className="showcase-card brand-gradient glow h-full justify-between gap-6 p-5 text-primary-foreground md:p-7"
+          >
+            <span className="space-y-2">
+              <span className="block text-[11px] font-bold uppercase tracking-[0.14em] opacity-80">{t.screensTab.chips[1]}</span>
+              <span className="block font-display text-2xl font-bold leading-tight md:text-3xl">{t.hero.ctaPrimary}</span>
+            </span>
+            <span className="inline-flex size-11 items-center justify-center rounded-full border border-current/30">
+              <ArrowRight className="size-5" aria-hidden="true" />
+            </span>
+          </a>
+        }
+      />
     </div>
   );
 }

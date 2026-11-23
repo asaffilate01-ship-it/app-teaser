@@ -61,7 +61,7 @@ import { GoogleButton } from "@/components/app-shell/GoogleButton";
 import { SetupChecklist } from "@/components/SetupChecklist";
 import { ClubMatchInsights } from "@/components/club/ClubMatchInsights";
 import { TeamCrest } from "@/components/scorer/Broadcast";
-import scoreboardShot from "@/assets/shot-scoreboard.jpg";
+import scoreboardShot from "@/assets/shot-ground-score.webp";
 import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPanel";
 import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace";
 import { AcademyDashboard } from "@/components/AcademyDashboard";

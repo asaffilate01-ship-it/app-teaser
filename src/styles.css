@@ -3491,3 +3491,157 @@
 .promo-ground.promo-slot-side { height: 100%; aspect-ratio: 1 / 2; border-radius: 1cqh; }
 .promo-ground .promo-tag { font-size: 1.4cqh; top: 0.8cqh; right: 0.8cqh; }
 .gs-stage-promo { grid-template-rows: auto auto 1fr auto; }
+
+/* ---- Promo screenshot showcase: device frames (hardware stays dark in both themes) ---- */
+:root {
+  --device-bezel: oklch(0.17 0.012 285);
+  --device-edge: oklch(0.32 0.014 285);
+  --device-bar: oklch(0.22 0.014 285);
+  --device-bar-text: oklch(0.72 0.012 285);
+}
+.device-browser {
+  overflow: hidden;
+  border-radius: 0.9rem;
+  border: 1px solid var(--device-edge);
+  background: var(--device-bezel);
+  box-shadow:
+    0 30px 60px -28px color-mix(in oklab, var(--device-bezel) 85%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--gold) 10%, transparent);
+}
+.device-browser-bar {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--device-bar);
+  border-bottom: 1px solid var(--device-edge);
+}
+.device-browser-dots { display: inline-flex; gap: 0.35rem; flex: none; }
+.device-browser-dots i { width: 0.55rem; height: 0.55rem; border-radius: 999px; background: var(--device-edge); }
+.device-browser-dots i:first-child { background: color-mix(in oklab, var(--primary) 80%, var(--device-edge)); }
+.device-browser-dots i:nth-child(2) { background: color-mix(in oklab, var(--gold) 75%, var(--device-edge)); }
+.device-browser-url {
+  display: inline-flex; align-items: center; gap: 0.35rem; min-width: 0;
+  margin-inline: auto; padding: 0.2rem 0.8rem; border-radius: 999px;
+  background: var(--device-bezel); color: var(--device-bar-text);
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.device-phone {
+  padding: 0.45rem;
+  border-radius: 2.1rem;
+  background: linear-gradient(160deg, var(--device-edge), var(--device-bezel) 40%);
+  box-shadow:
+    0 30px 60px -24px color-mix(in oklab, var(--device-bezel) 90%, transparent),
+    inset 0 0 0 1px color-mix(in oklab, var(--gold) 14%, transparent);
+}
+.device-phone-screen { position: relative; overflow: hidden; border-radius: 1.7rem; background: var(--device-bezel); }
+.device-phone-island {
+  position: absolute; z-index: 1; top: 0.45rem; left: 50%; transform: translateX(-50%);
+  width: 28%; height: 0.95rem; border-radius: 999px; background: var(--device-bezel);
+}
+.device-tv { display: grid; justify-items: center; }
+.device-tv-screen {
+  width: 100%; overflow: hidden; padding: 0.4rem; border-radius: 0.7rem;
+  background: var(--device-bezel); border: 1px solid var(--device-edge);
+  box-shadow: 0 30px 60px -28px color-mix(in oklab, var(--device-bezel) 85%, transparent);
+}
+.device-tv-screen img { border-radius: 0.3rem; }
+.device-tv-stand {
+  width: 22%; height: 0.55rem; margin-top: -1px;
+  border-radius: 0 0 0.5rem 0.5rem;
+  background: linear-gradient(180deg, var(--device-edge), var(--device-bezel));
+}
+.showcase-stage::before {
+  content: ""; position: absolute; inset: 8% 4% 0; z-index: -1; border-radius: 2rem;
+  background:
+    radial-gradient(60% 60% at 30% 30%, color-mix(in oklab, var(--gold) 22%, transparent), transparent 70%),
+    radial-gradient(50% 50% at 80% 80%, color-mix(in oklab, var(--primary) 20%, transparent), transparent 70%);
+  filter: blur(24px);
+}
+.showcase-stage { isolation: isolate; }
+.showcase-chip {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.35rem 0.75rem; border-radius: 999px;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--card) 82%, transparent);
+  border: 1px solid color-mix(in oklab, var(--gold) 35%, var(--border));
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 24px -14px color-mix(in oklab, var(--device-bezel) 80%, transparent);
+}
+.showcase-filter {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  height: 2.4rem; padding: 0 1rem; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--card);
+  font-size: 0.85rem; font-weight: 700; color: var(--muted-foreground);
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+.showcase-filter:hover { color: var(--foreground); }
+.showcase-filter[aria-pressed="true"] {
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--gold) 65%, var(--border));
+  background: color-mix(in oklab, var(--gold) 12%, var(--card));
+}
+.showcase-filter:focus-visible, .showcase-card:focus-visible, .showcase-nav:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.showcase-filter-count {
+  display: inline-grid; place-items: center; min-width: 1.35rem; height: 1.35rem; padding: 0 0.3rem;
+  border-radius: 999px; font-size: 0.68rem; background: color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+.showcase-filter[aria-pressed="true"] .showcase-filter-count { background: var(--gold); color: var(--background); }
+.showcase-card {
+  display: flex; flex-direction: column; overflow: hidden;
+  border-radius: 1.25rem; border: 1px solid var(--border);
+  background: var(--gradient-surface);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+.showcase-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in oklab, var(--gold) 45%, var(--border));
+  box-shadow: 0 26px 50px -30px color-mix(in oklab, var(--gold) 45%, transparent);
+}
+.showcase-card-stage {
+  position: relative; overflow: hidden;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background:
+    radial-gradient(70% 90% at 50% 0%, color-mix(in oklab, var(--gold) 16%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in oklab, var(--foreground) 4%, transparent), transparent);
+}
+.showcase-card .showcase-card-stage > :first-child { transition: transform 300ms ease; transform-origin: 50% 100%; }
+.showcase-card:hover .showcase-card-stage > :first-child { transform: translateY(-2px) scale(1.012); }
+.showcase-card .device-phone, .showcase-card .device-browser, .showcase-card .device-tv-screen { margin-bottom: -1px; }
+.showcase-card .showcase-card-stage { padding-bottom: 0; }
+.showcase-card .device-phone { border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding-bottom: 0; }
+.showcase-card .device-phone-screen { border-bottom-left-radius: 0; border-bottom-right-radius: 0; max-height: 26rem; }
+.showcase-card .device-browser { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.showcase-card .device-tv { padding-bottom: 1rem; }
+@media (max-width: 1023px) {
+  .showcase-card-lone { display: grid; grid-template-columns: minmax(0, 46%) minmax(0, 1fr); align-items: stretch; }
+  .showcase-card-lone .showcase-card-stage { border-bottom: 0; border-right: 1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+  .showcase-card-lone > :last-child { align-self: center; }
+}
+.showcase-zoom {
+  position: absolute; top: 0.6rem; right: 0.6rem; display: grid; place-items: center;
+  width: 2rem; height: 2rem; border-radius: 999px; opacity: 0;
+  color: var(--foreground); background: color-mix(in oklab, var(--card) 85%, transparent);
+  border: 1px solid var(--border); transition: opacity 180ms ease;
+}
+.showcase-card:hover .showcase-zoom, .showcase-card:focus-visible @media (max-width: 1023px) {
+  .showcase-card-lone { display: grid; grid-template-columns: minmax(0, 46%) minmax(0, 1fr); align-items: stretch; }
+  .showcase-card-lone .showcase-card-stage { border-bottom: 0; border-right: 1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+  .showcase-card-lone > :last-child { align-self: center; }
+}
+.showcase-zoom { opacity: 1; }
+@media (hover: none) { @media (max-width: 1023px) {
+  .showcase-card-lone { display: grid; grid-template-columns: minmax(0, 46%) minmax(0, 1fr); align-items: stretch; }
+  .showcase-card-lone .showcase-card-stage { border-bottom: 0; border-right: 1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+  .showcase-card-lone > :last-child { align-self: center; }
+}
+.showcase-zoom { opacity: 0.9; } }
+.showcase-nav {
+  display: inline-flex; align-items: center; justify-content: center; height: 2.5rem; min-width: 2.5rem;
+  border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--foreground);
+}
+.showcase-nav:hover { border-color: color-mix(in oklab, var(--gold) 55%, var(--border)); }
+@media (prefers-reduced-motion: reduce) {
+  .showcase-card, .showcase-card .showcase-card-stage > :first-child { transition: none; }
+  .showcase-card:hover, .showcase-card:hover .showcase-card-stage > :first-child { transform: none; }
+}
