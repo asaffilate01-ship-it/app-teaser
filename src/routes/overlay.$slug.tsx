@@ -46,7 +46,7 @@ interface OverlayData {
 }
 
 const shortName = (team: { name: string; shortName?: string }) =>
-  (team.shortName && team.shortName.trim()) || teamInitials(team.name);
+  (team.shortName && team.shortName.trim()) || team.name;
 
 /** Transparent score bug for OBS / Streamlabs browser sources. Same public data as the scoreboard, no names. */
 function ScoreOverlay() {
@@ -153,7 +153,7 @@ function ScoreOverlay() {
         <div className={`overlay-info ${state.freeHit || state.superOver ? "is-alert" : ""}`}>
           {state.freeHit ? "FREE HIT" : state.superOver && !state.result ? `SUPER OVER · ${info}` : info}
         </div>
-        <span className="overlay-brand">CricLume</span>
+        {layout === "bar" && <span className="overlay-brand">CricLume</span>}
       </div>
     </div>
   );

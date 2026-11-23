@@ -1,9 +1,10 @@
 import { getCloudClient } from "@/lib/cloud";
-import { isReviewableClip, type CameraClip, type CameraDelivery } from "@/lib/camera-review";
+import { isReviewableClip, type CameraClip } from "@/lib/camera-review";
+import type { ReelDelivery } from "@/lib/highlight-reel";
 
 export interface RoomReviewData {
   clips: CameraClip[];
-  deliveries: CameraDelivery[];
+  deliveries: ReelDelivery[];
 }
 
 export async function loadCameraRoomReview(
@@ -25,7 +26,7 @@ export async function loadCameraRoomReview(
       .limit(120),
     client
       .from("deliveries")
-      .select("id,sequence,over_number,ball_in_over,occurred_at,total_runs,wicket")
+      .select("id,sequence,over_number,ball_in_over,occurred_at,total_runs,wicket,batter_runs,striker_id,bowler_id")
       .eq("match_id", matchId)
       .is("superseded_by", null)
       .is("voided_by_event_id", null)
@@ -38,7 +39,7 @@ export async function loadCameraRoomReview(
     clips: ((assets.data ?? []) as CameraClip[]).filter((clip) =>
       isReviewableClip(clip, Date.now()),
     ),
-    deliveries: (balls.data ?? []) as CameraDelivery[],
+    deliveries: (balls.data ?? []) as ReelDelivery[],
   };
 }
 
@@ -78,4 +79,27 @@ export async function signedRoomClipUrl(clip: CameraClip): Promise<string> {
   if (signed.error) throw signed.error;
   if (!signed.data.signedUrl) throw new Error("Private recording access was denied.");
   return signed.data.signedUrl;
+}
+
+/** Display names for players in a reel list (staff-only screen; RLS decides what is visible). */
+export async function loadReelPlayerNames(ids: readonly string[]): Promise<Record<string, string>> {
+  if (ids.length === 0) return {};
+  const { data, error } = await getCloudClient()
+    .from("players")
+    .select("id,display_name")
+    .in("id", [...ids]);
+  if (error) return {};
+  return Object.fromEntries((data ?? []).map((row) => [row.id, row.display_name]));
+}
+
+/** Manual timing offsets saved in the replay workbench, by clip id. */
+export async function loadClipOffsets(roomId: string, clipIds: readonly string[]): Promise<Record<string, number>> {
+  if (clipIds.length === 0) return {};
+  const { data, error } = await getCloudClient()
+    .from("camera_clip_calibrations")
+    .select("asset_id,offset_ms")
+    .eq("room_id", roomId)
+    .in("asset_id", [...clipIds]);
+  if (error) return {};
+  return Object.fromEntries((data ?? []).map((row) => [row.asset_id, row.offset_ms]));
 }

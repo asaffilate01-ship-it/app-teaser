@@ -31,6 +31,6 @@
 - [x] Share scorecard as image and PDF
 - [x] Fixture builder (round-robin)
 - [x] Head-to-head records (team v team, batter v bowler)
-- [ ] Score overlay link for live streams
+- [x] Score overlay link for live streams
 - [x] Player profiles: career totals, form chart, milestones/badges, Player of the Match
-- [ ] Auto highlight reels from synced cameras (boundaries, wickets, per player)
+- [x] Auto highlight reels from synced cameras (boundaries, wickets, per player)

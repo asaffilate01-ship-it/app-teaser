@@ -18,3 +18,5 @@
 - Ball-by-ball text is template-built in `src/lib/commentary.ts`; public and AI-bound text is generated without a name resolver (roles only) to keep junior players private.
 - Lovable AI calls run only in signed-in server functions (`*.functions.ts` + `ai-gateway.server.ts`) so public visitors cannot spend AI credits.
 - League hub stats and live placings are computed client-side from per-match snapshots (`src/lib/season-stats.ts`, `src/lib/live-table.ts`); live placings never change net run rate or signed-off standings — keeps official results authoritative.
+- Highlight reels are cut client-side from existing camera recordings by `src/lib/highlight-reel.ts` (scorer ball times + device clock + saved calibration); no server video rendering, so reels play in the browser and stay behind the same private-recording access checks.
+- The stream overlay (`/overlay/$slug`) reads the same public scoreboard data as `/scoreboard/$slug` — no names, only works once a club publishes the board.
