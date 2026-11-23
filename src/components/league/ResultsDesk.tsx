@@ -190,10 +190,15 @@ function ResultForm({ fixture, onDone }: { fixture: InboxFixture; onDone: () => 
     else if (outcome === "tie") r.tied = true;
     else if (outcome) r.winnerTeamId = outcome;
     if (outcome !== "nr") {
-      r.homeRuns = toInt(nums.homeRuns);
-      r.awayRuns = toInt(nums.awayRuns);
-      r.homeLegalBalls = oversToBalls(nums.homeOvers);
-      r.awayLegalBalls = oversToBalls(nums.awayOvers);
+      const values = {
+        homeRuns: toInt(nums.homeRuns),
+        awayRuns: toInt(nums.awayRuns),
+        homeLegalBalls: oversToBalls(nums.homeOvers),
+        awayLegalBalls: oversToBalls(nums.awayOvers),
+      };
+      for (const [key, value] of Object.entries(values) as [keyof typeof values, number | undefined][]) {
+        if (value !== undefined) r[key] = value;
+      }
     }
     if (nums.homeBonus) r.homeBonusPoints = Number(nums.homeBonus);
     if (nums.awayBonus) r.awayBonusPoints = Number(nums.awayBonus);

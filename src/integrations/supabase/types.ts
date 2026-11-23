@@ -4231,6 +4231,10 @@ export type Database = {
         Returns: boolean
       }
       can_view_fee_charge: { Args: { p_charge_id: string }; Returns: boolean }
+      can_view_fixture_reports: {
+        Args: { p_fixture_id: string }
+        Returns: boolean
+      }
       can_view_match: { Args: { p_match_id: string }; Returns: boolean }
       cancel_ground_booking: {
         Args: { p_booking_id: string }
