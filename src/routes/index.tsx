@@ -30,7 +30,7 @@ import {
   Plus,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { planOrder, featureOrder, planFeatures, type FeatureAccess } from "@/lib/plans";
+import { planOrder, featureOrder, planFeatures, adRevenueSharePercent, type FeatureAccess } from "@/lib/plans";
 
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 import fullLogoAsset from "@/assets/criclume-logo-full.png.asset.json";
@@ -266,10 +266,12 @@ function Header({
         <div className="flex items-center gap-2 md:hidden">
           <Link
             to="/live"
-            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-slate-200 px-3 text-xs font-bold uppercase tracking-wide text-slate-700"
+            aria-label={t.nav.liveScores}
+            title={t.nav.liveScores}
+            className="inline-flex h-9 min-w-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-slate-200 px-2.5 text-xs font-bold uppercase tracking-wide text-slate-700 min-[440px]:px-3"
           >
             <span className="live-dot" aria-hidden="true" />
-            {t.nav.liveScores}
+            <span className="hidden min-[440px]:inline">{t.nav.liveScores}</span>
           </Link>
           <ThemeToggle
             className="theme-toggle-light-chrome"
@@ -850,6 +852,25 @@ function PricingTab({ regionState }: { regionState: RegionState }) {
                   ))}
                 </tr>
               ))}
+              <tr className="border-b border-border/60 last:border-0">
+                <td className="py-3 pl-4 pr-2 font-semibold text-foreground sm:px-5 md:px-6">
+                  {t.pricing.compare.shareRow}
+                </td>
+                {planOrder.map((plan) => {
+                  const base = adRevenueSharePercent(plan);
+                  const withVideo = adRevenueSharePercent(plan, { videoAddon: true });
+                  return (
+                    <td key={plan} className="px-1 py-3 text-center sm:px-3">
+                      <span className="font-display text-base font-bold text-foreground">{base}%</span>
+                      {withVideo !== base && (
+                        <span className="block text-[11px] leading-tight text-muted-foreground">
+                          {t.pricing.compare.shareWithVideo}
+                        </span>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
             </tbody>
           </table>
         </div>

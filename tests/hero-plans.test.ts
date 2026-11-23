@@ -20,3 +20,14 @@ test("every language lists the same number of hero features", () => {
   const counts = Object.values(languages).map((copy) => copy.hero.features.length);
   assert.ok(counts.every((n) => n === counts[0]));
 });
+
+test("plan cards state the ad share each tier earns, in every language", () => {
+  for (const [language, copy] of Object.entries(languages)) {
+    const [, club, league] = copy.pricing.plans;
+    assert.ok(club!.perks.some((p) => /30\s?%/.test(p)), `${language}: Club card names 30%`);
+    assert.ok(league!.perks.some((p) => /30\s?%/.test(p)), `${language}: League card names 30%`);
+    assert.ok(copy.pricing.addon.perks.some((p) => /50\s?%/.test(p)), `${language}: video add-on names 50%`);
+    assert.ok(copy.pricing.addon.perks.some((p) => /\b16\b/.test(p)), `${language}: video add-on names 16 cameras`);
+    assert.ok(league!.perks.some((p) => /criclume\.com/.test(p)), `${language}: League card offers the free criclume.com address`);
+  }
+});
