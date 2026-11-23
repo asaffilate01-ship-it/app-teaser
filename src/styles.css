@@ -4381,3 +4381,12 @@
 .score-widget-line { font-size: 0.8rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .score-widget-balls { display: flex; gap: 0.25rem; }
 .score-widget-balls span { min-width: 1.5rem; padding: 0.1rem 0.3rem; border-radius: 0.4rem; border: 1px solid var(--w-line); text-align: center; font-size: 0.7rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Pitch map and beehive */
+.ball-track-svg { width: 100%; height: auto; touch-action: manipulation; user-select: none; }
+.ball-track-pitch { fill: color-mix(in oklab, var(--gold) 14%, var(--card)); stroke: var(--border); }
+.ball-track-band { stroke: var(--border); stroke-dasharray: 3 3; }
+.ball-track-crease { stroke: var(--foreground); stroke-opacity: 0.55; stroke-width: 1.2; }
+.ball-track-stump { fill: var(--foreground); fill-opacity: 0.8; }
+.ball-track-label { fill: var(--muted-foreground); font-size: 8px; font-weight: 600; }
+.ball-track-dot { stroke: var(--card); stroke-width: 1.2; }

@@ -159,13 +159,13 @@
 - [x] Ball speed from camera clips: free on-phone automatic ball tracking (camera set once per fixed angle), manual tap fallback, saved to the ball
 
 ## All remaining round-4 gaps (new ask: "do all the gaps")
-- [ ] Fix any earlier ball (runs, bowler, fielder, dismissal)
-- [ ] Substitutes, concussion replacements, impact player swaps
-- [ ] Formats: The Hundred (5-ball sets), tape-ball, indoor 8-a-side
-- [ ] Pitch map and beehive tapped by the scorer per ball
-- [ ] Phase splits (powerplay/middle/death) and bowler-type splits
+- [x] Fix any earlier ball (runs, bowler, fielder, dismissal)
+- [x] Substitutes, concussion replacements, impact player swaps
+- [x] Formats: The Hundred (5-ball sets), tape-ball, indoor 8-a-side
+- [x] Pitch map and beehive tapped by the scorer per ball
+- [x] Phase splits (powerplay/middle/death) and bowler-type splits
 - [ ] Player rankings by town/region/country; compare two players
-- [ ] Stats spreadsheet download
+- [x] Stats spreadsheet download
 - [ ] Import old scorecards
 - [ ] Training sessions, drills library, attendance
 - [ ] Player goals, coach feedback timeline, self-review

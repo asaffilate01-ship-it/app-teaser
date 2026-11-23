@@ -53,7 +53,7 @@ const match = z
     updatedAt: text,
     status: z.enum(["live", "innings-break", "completed"]),
     settings: z.looseObject({
-      format: z.enum(["T10", "T20", "ODI", "School", "Club", "Multi-day", "Custom"]),
+      format: z.enum(["T10", "T20", "ODI", "The Hundred", "Tape-ball", "Indoor", "School", "Club", "Multi-day", "Custom"]),
       oversPerInnings: z.number().positive().nullable(),
       inningsPerSide: z.union([z.literal(1), z.literal(2)]),
       ballsPerOver: z.number().int().positive(),

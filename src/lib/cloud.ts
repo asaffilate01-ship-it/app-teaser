@@ -525,6 +525,27 @@ export async function appendMatchEvent(event: PendingMatchEvent): Promise<MatchE
         occurredAt: event.occurredAt,
       });
     }
+    if (event.eventType === "delivery.corrected") {
+      // A change to an earlier ball: the server checks the scorer's duty and the squad, then updates the totals.
+      const delivery = event.payload["delivery"] as Record<string, unknown> | undefined;
+      if (!delivery || typeof event.payload["inningsId"] !== "string" || typeof delivery["id"] !== "string") {
+        throw new Error("Ball correction event is incomplete.");
+      }
+      const { data, error } = await getCloudClient().rpc("correct_delivery_v1", {
+        p_match_id: event.matchId,
+        p_innings_id: String(event.payload["inningsId"]),
+        p_delivery_id: String(delivery["id"]),
+        p_client_event_id: event.clientEventId,
+        p_device_id: event.deviceId,
+        p_delivery: delivery as never,
+        p_renumber: (event.payload["renumber"] ?? []) as never,
+        p_match_snapshot: event.payload["matchSnapshot"] as never,
+        p_live_state: event.payload["liveState"] as never,
+        p_occurred_at: event.occurredAt,
+      });
+      if (error) throw error;
+      return matchEventEnvelope(data as Record<string, unknown>);
+    }
     if (event.eventType === "delivery.tagged") {
       // Bowling & fielding scorer: the server checks the duty, the ball and the fielder.
       const { data, error } = await getCloudClient().rpc("tag_delivery_v1", {

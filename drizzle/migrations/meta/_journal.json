@@ -267,6 +267,27 @@
       "when": 1795448213289,
       "tag": "0037_quick_wins_league_votes_volunteers",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1795449711573,
+      "tag": "0038_gaps_scoring_training_players",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1795449882506,
+      "tag": "0039_gaps_leagues_umpires_auction",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1795449967106,
+      "tag": "0040_gaps_club_admin_comms",
+      "breakpoints": true
     }
   ]
 }

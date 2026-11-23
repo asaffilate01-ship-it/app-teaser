@@ -72,8 +72,12 @@ import { RainPanel } from "@/components/scorer/RainPanel";
 import { DayPanel } from "@/components/scorer/DayPanel";
 import { StoppagePanel } from "@/components/scorer/StoppagePanel";
 import { InstallBanner } from "@/components/app-shell/InstallApp";
-import { RetirePanel, SquadPanel, TossPanel, WorkloadPanel } from "@/components/scorer/MatchTools";
+import { RetirePanel, SquadPanel, SubstitutePanel, TossPanel, WorkloadPanel } from "@/components/scorer/MatchTools";
 import { BallSpeedTool } from "@/components/scorer/BallSpeedTool";
+import { BallTrackChart, BallTrackPad } from "@/components/scorer/BallTrack";
+import { bowlingTypeSplits, phaseSplits, type SplitRow } from "@/lib/phase-splits";
+import { ballByBallCsv, downloadCsv, scorecardCsv } from "@/lib/stats-export";
+import { FixBallPanel } from "@/components/scorer/FixBall";
 import { canBowlNextOver } from "@/lib/bowling-workload";
 import {
   allowedDismissals,
@@ -95,6 +99,9 @@ import {
   summarizeInnings,
   targetForCurrentInnings,
   undoLastDelivery,
+  formatPreset,
+  canBat,
+  canBowl,
   setPlayerHand,
   undoRetirement,
   undoableRetirement,
@@ -103,6 +110,8 @@ import {
   type DeliveryEnd,
   type DeliveryStyle,
   type DismissalType,
+  type BallPoint,
+  type Delivery,
   type Extras,
   type FieldZone,
   type MatchFormat,
@@ -732,21 +741,16 @@ function MatchSetup({
   const changeFormat = (next: MatchFormat) => {
     setFormat(next);
     setRules(defaultRulesForFormat(next));
-    const presets: Partial<Record<MatchFormat, string>> = {
-      T10: "10",
-      T20: "20",
-      ODI: "50",
-      School: "20",
-      Club: "40",
-    };
     if (next === "Multi-day") {
       setOvers("");
       setInningsPerSide(2);
     } else {
-      setOvers(presets[next] ?? (overs || "20"));
+      const preset = formatPreset(next);
+      setOvers(next === "Custom" ? overs || "20" : String(preset.overs ?? 20));
       setInningsPerSide(1);
     }
   };
+  const preset = formatPreset(format);
 
   const submit = () => {
     setError("");
@@ -773,7 +777,7 @@ function MatchSetup({
           format,
           oversPerInnings: parsed.oversPerInnings,
           inningsPerSide,
-          ballsPerOver: 6,
+          ballsPerOver: preset.ballsPerOver,
           ground: ground.trim(),
           weather: weather.trim(),
           startTime: new Date().toISOString(),
@@ -784,6 +788,8 @@ function MatchSetup({
             followOnLead: inningsPerSide === 2 ? (rules.followOnLead ?? null) : null,
             ...(inningsPerSide === 1 && parsed.oversPerInnings !== null && rules.rainMethod ? { rainMethod: rules.rainMethod } : {}),
             ...(inningsPerSide === 2 && rules.days ? { days: rules.days } : {}),
+            ...(rules.pairs ? { pairs: rules.pairs } : {}),
+            ...(rules.endsChangeEvery ? { endsChangeEvery: rules.endsChangeEvery } : {}),
           },
         },
       }),
@@ -812,10 +818,11 @@ function MatchSetup({
             onChange={(event) => changeFormat(event.target.value as MatchFormat)}
             className="scorer-input"
           >
-            {["T10", "T20", "ODI", "School", "Club", "Multi-day", "Custom"].map((item) => (
+            {["T10", "T20", "ODI", "The Hundred", "Tape-ball", "Indoor", "School", "Club", "Multi-day", "Custom"].map((item) => (
               <option key={item}>{item}</option>
             ))}
           </select>
+          {preset.note && <span className="mt-1 block text-[11px] text-slate-400">{preset.note}</span>}
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Overs / innings">
@@ -1394,6 +1401,7 @@ function LiveMatch({
           <div className="mt-5 space-y-5">
             {match.status === "live" && <RetirePanel match={match} onSave={saveAndSync} />}
             <SquadPanel match={match} onSave={saveAndSync} cloudMatchId={cloudMatchId} />
+            <SubstitutePanel match={match} onSave={saveAndSync} cloudMatchId={cloudMatchId} />
             <TossPanel match={match} onSave={saveAndSync} />
             <WorkloadPanel match={match} onSave={saveAndSync} />
             <MatchPredictorPanel match={match} onSave={saveAndSync} />
@@ -1401,7 +1409,7 @@ function LiveMatch({
             <RainPanel match={match} onSave={saveAndSync} />
           </div>
         )}
-        {tab === "timeline" && <Timeline match={match} onSave={saveAndSync} />}
+        {tab === "timeline" && <Timeline match={match} onSave={saveAndSync} canFix={!follower && !cloudConflict && access.recordBalls} />}
         {tab === "scorecard" && <Scorecard match={match} onSave={saveAndSync} />}
         {tab === "analysis" && <Analysis match={match} />}
         {tab === "video" && (
@@ -1443,6 +1451,8 @@ function ScoringPad({
   const [fieldZone, setFieldZone] = useState<FieldZone>("Not recorded");
   const [fielderId, setFielderId] = useState("");
   const [note, setNote] = useState("");
+  const [pitch, setPitch] = useState<BallPoint | undefined>(undefined);
+  const [beehive, setBeehive] = useState<BallPoint | undefined>(undefined);
   const [showDetails, setShowDetails] = useState(false);
   const [detailBatterRuns, setDetailBatterRuns] = useState(0);
   const [detailExtras, setDetailExtras] = useState<Extras>({
@@ -1513,6 +1523,8 @@ function ScoringPad({
       fieldZone,
       fielderId: fielderId || undefined,
       note,
+      ...(pitch ? { pitch } : {}),
+      ...(beehive ? { beehive } : {}),
       ...partial,
     };
     onSave(recordDelivery(match, input), "delivery.recorded");
@@ -1524,6 +1536,8 @@ function ScoringPad({
     setFieldZone("Not recorded");
     setFielderId("");
     setOutcome("hit-no-run");
+    setPitch(undefined);
+    setBeehive(undefined);
   };
 
   const chooseZone = (zone: FieldZone) => {
@@ -1642,15 +1656,15 @@ function ScoringPad({
         <div className="grid grid-cols-2 gap-3">
           <div className="hidden lg:block">
             <Field label="Striker">
-              <PlayerSelect team={battingTeam} value={strikerId} onChange={setStrikerId} />
+              <PlayerSelect team={battingTeam} value={strikerId} onChange={setStrikerId} role="bat" />
             </Field>
           </div>
           <Field label="Non-striker">
-            <PlayerSelect team={battingTeam} value={nonStrikerId} onChange={setNonStrikerId} />
+            <PlayerSelect team={battingTeam} value={nonStrikerId} onChange={setNonStrikerId} role="bat" />
           </Field>
           <div className="hidden lg:block">
             <Field label="Bowler">
-              <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} disabled={bowlingByOther} />
+              <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} disabled={bowlingByOther} role="bowl" />
             </Field>
           </div>
           <Field label="Bowling end">
@@ -1735,10 +1749,10 @@ function ScoringPad({
 
         <div className="grid grid-cols-2 gap-3 lg:hidden">
           <Field label="Striker">
-            <PlayerSelect team={battingTeam} value={strikerId} onChange={setStrikerId} />
+            <PlayerSelect team={battingTeam} value={strikerId} onChange={setStrikerId} role="bat" />
           </Field>
           <Field label="Bowler">
-            <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} disabled={bowlingByOther} />
+            <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} disabled={bowlingByOther} role="bowl" />
           </Field>
         </div>
         {bowlingByOther && (
@@ -1801,6 +1815,14 @@ function ScoringPad({
           />
         </div>
         )}
+
+        <BallTrackPad
+          pitch={pitch}
+          beehive={beehive}
+          onPitch={setPitch}
+          onBeehive={setBeehive}
+          leftHanded={Boolean(findPlayer(match, strikerId)?.leftHanded ?? leftHanders[strikerId])}
+        />
 
         {(freeHit || superOver) && (
           <div className="rule-banner" role="status">
@@ -2036,13 +2058,21 @@ function PlayerSelect({
   onChange,
   allowNone = false,
   disabled = false,
+  role,
 }: {
   team: ReturnType<typeof findTeam>;
   value: string;
   onChange: (value: string) => void;
   allowNone?: boolean;
   disabled?: boolean;
+  /** Hide players who can't do this job (fielding subs can't bat or bowl; replaced players can't play on). */
+  role?: "bat" | "bowl" | "field";
 }) {
+  const players = team.players.filter(
+    (player) =>
+      player.id === value ||
+      (role === "bat" ? canBat(player) : role === "bowl" ? canBowl(player) : role === "field" ? !player.replacedBy : true),
+  );
   return (
     <select
       disabled={disabled}
@@ -2051,7 +2081,7 @@ function PlayerSelect({
       className="scorer-input disabled:cursor-not-allowed disabled:opacity-60"
     >
       {allowNone && <option value="">Not recorded</option>}
-      {team.players.map((player) => (
+      {players.map((player) => (
         <option key={player.id} value={player.id}>
           {player.name}
         </option>
@@ -2171,9 +2201,11 @@ function RecentBalls({ match }: { match: CricketMatch }) {
 function Timeline({
   match,
   onSave,
+  canFix,
 }: {
   match: CricketMatch;
-  onSave: (match: CricketMatch, eventType?: string) => void;
+  onSave: (match: CricketMatch, eventType?: string, extra?: Record<string, unknown>) => void;
+  canFix: boolean;
 }) {
   const [view, setView] = useState<"commentary" | "audit">("commentary");
   return (
@@ -2186,7 +2218,7 @@ function Timeline({
           Audit trail
         </button>
       </div>
-      {view === "commentary" ? <CommentaryPanel match={match} onSave={onSave} /> : <AuditTrail match={match} />}
+      {view === "commentary" ? <CommentaryPanel match={match} onSave={onSave} /> : <AuditTrail match={match} onSave={onSave} canFix={canFix} />}
     </section>
   );
 }
@@ -2298,13 +2330,23 @@ function CommentaryPanel({
   );
 }
 
-function AuditTrail({ match }: { match: CricketMatch }) {
+function AuditTrail({
+  match,
+  onSave,
+  canFix,
+}: {
+  match: CricketMatch;
+  onSave: (match: CricketMatch, eventType?: string, extra?: Record<string, unknown>) => void;
+  canFix: boolean;
+}) {
   const innings = currentInnings(match);
+  const [fixing, setFixing] = useState<string | null>(null);
   return (
     <section className="space-y-3">
       <div>
         <p className="text-xs font-bold uppercase tracking-wider text-amber-300">Audit trail</p>
         <h2 className="font-display text-3xl font-bold">Every recorded delivery</h2>
+        {canFix && <p className="mt-1 text-xs text-muted-foreground">Tap Fix on any ball to change runs, extras, the bowler, the fielder or the wicket.</p>}
       </div>
       {innings.deliveries.length ? (
         innings.deliveries
@@ -2340,13 +2382,25 @@ function AuditTrail({ match }: { match: CricketMatch }) {
                 )}
                 {ball.note && <p className="mt-1 text-xs italic text-slate-400">“{ball.note}”</p>}
               </div>
-              <time className="text-[10px] text-slate-500">
-                {new Date(ball.recordedAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                })}
-              </time>
+              <div className="flex flex-col items-end gap-2">
+                <time className="text-[10px] text-slate-500">
+                  {new Date(ball.recordedAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })}
+                </time>
+                {canFix && fixing !== ball.id && (
+                  <button type="button" className="app-chip-button" onClick={() => setFixing(ball.id)}>
+                    Fix
+                  </button>
+                )}
+              </div>
+              {fixing === ball.id && (
+                <div className="col-span-3">
+                  <FixBallPanel match={match} delivery={ball} onSave={onSave} onClose={() => setFixing(null)} />
+                </div>
+              )}
             </article>
           ))
       ) : (
@@ -2464,6 +2518,74 @@ function Scorecard({
   );
 }
 
+function SplitTable({ title, rows }: { title: string; rows: SplitRow[] }) {
+  return (
+    <div>
+      <h3 className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">{title}</h3>
+      <table className="w-full text-xs">
+        <thead className="text-muted-foreground">
+          <tr>
+            <th className="py-1 text-left font-semibold"> </th>
+            <th className="text-right font-semibold">Runs</th>
+            <th className="text-right font-semibold">Balls</th>
+            <th className="text-right font-semibold">Wkts</th>
+            <th className="text-right font-semibold">Dots</th>
+            <th className="text-right font-semibold">4s/6s</th>
+            <th className="text-right font-semibold">Rate</th>
+          </tr>
+        </thead>
+        <tbody className="tabular-nums">
+          {rows.map((row) => (
+            <tr key={row.label} className="border-t border-border/60">
+              <td className="py-1.5 font-semibold">{row.label}</td>
+              <td className="text-right">{row.runs}</td>
+              <td className="text-right">{row.balls}</td>
+              <td className="text-right">{row.wickets}</td>
+              <td className="text-right">{row.dots}</td>
+              <td className="text-right">{row.boundaries}</td>
+              <td className="text-right">{row.runRate.toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** Powerplay / middle / death and pace / spin, for the team or one batter, plus a spreadsheet download. */
+function MatchSplits({ match }: { match: CricketMatch }) {
+  const innings = currentInnings(match);
+  const batting = findTeam(match, innings.battingTeamId);
+  const [batterId, setBatterId] = useState("");
+  const filter = (d: Delivery) => !batterId || d.strikerId === batterId;
+  const faced = batting.players.filter((p) => innings.deliveries.some((d) => d.strikerId === p.id));
+  const stamp = new Date(match.createdAt).toISOString().slice(0, 10);
+  const base = `${match.teams[0].name}-v-${match.teams[1].name}-${stamp}`;
+  return (
+    <div className="broadcast-panel space-y-4 p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="panel-kicker">Phases &amp; bowling types</h2>
+        <select className="scorer-input w-auto" value={batterId} onChange={(e) => setBatterId(e.target.value)} aria-label="Whose balls">
+          <option value="">{batting.name} (all)</option>
+          {faced.map((p) => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+      </div>
+      <SplitTable title="By phase" rows={phaseSplits(match, innings, filter)} />
+      <SplitTable title="Against pace and spin" rows={bowlingTypeSplits(innings.deliveries.filter(filter))} />
+      <div className="flex flex-wrap gap-2 border-t border-border pt-3">
+        <button type="button" className="action-secondary" onClick={() => downloadCsv(`${base}-ball-by-ball.csv`, ballByBallCsv(match))}>
+          <Download className="size-4" /> Ball by ball (spreadsheet)
+        </button>
+        <button type="button" className="action-secondary" onClick={() => downloadCsv(`${base}-scorecard.csv`, scorecardCsv(match))}>
+          <Download className="size-4" /> Scorecard (spreadsheet)
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Analysis({ match }: { match: CricketMatch }) {
   const innings = currentInnings(match);
   const summary = summarizeInnings(innings, match.settings.ballsPerOver);
@@ -2492,6 +2614,7 @@ function Analysis({ match }: { match: CricketMatch }) {
       text: `${wideCount} wides recorded (${innings.deliveries.length ? ((wideCount / innings.deliveries.length) * 100).toFixed(1) : "0"}% of entries).`,
     },
   ];
+  const leftHanded = (id: string) => Boolean(findPlayer(match, id)?.leftHanded);
   return (
     <section className="grid gap-5 lg:grid-cols-2">
       <ScorerWagonWheel
@@ -2499,6 +2622,11 @@ function Analysis({ match }: { match: CricketMatch }) {
         innings={innings}
         players={match.teams.flatMap((team) => team.players)}
       />
+      <div className="broadcast-panel space-y-3 p-5">
+        <h2 className="panel-kicker">Pitch map &amp; beehive</h2>
+        <BallTrackChart deliveries={innings.deliveries} leftHanded={leftHanded} />
+      </div>
+      <MatchSplits match={match} />
       <div className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5 md:p-7">
         <div className="flex items-start justify-between gap-3">
           <div>

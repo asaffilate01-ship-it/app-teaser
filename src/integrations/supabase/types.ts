@@ -150,6 +150,137 @@ export type Database = {
           },
         ]
       }
+      auction_lots: {
+        Row: {
+          auction_id: string
+          base_price_minor: number
+          id: string
+          player_name: string
+          role: string | null
+          sold_at: string | null
+          sold_price_minor: number | null
+          sold_team_id: string | null
+          sort: number
+          status: string
+        }
+        Insert: {
+          auction_id: string
+          base_price_minor?: number
+          id?: string
+          player_name: string
+          role?: string | null
+          sold_at?: string | null
+          sold_price_minor?: number | null
+          sold_team_id?: string | null
+          sort?: number
+          status?: string
+        }
+        Update: {
+          auction_id?: string
+          base_price_minor?: number
+          id?: string
+          player_name?: string
+          role?: string | null
+          sold_at?: string | null
+          sold_price_minor?: number | null
+          sold_team_id?: string | null
+          sort?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_lots_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_lots_sold_team_id_fkey"
+            columns: ["sold_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auction_teams: {
+        Row: {
+          auction_id: string
+          team_id: string
+        }
+        Insert: {
+          auction_id: string
+          team_id: string
+        }
+        Update: {
+          auction_id?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_teams_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_teams_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auctions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          currency: string
+          current_lot_id: string | null
+          id: string
+          max_squad: number
+          organisation_id: string
+          purse_minor: number
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          current_lot_id?: string | null
+          id?: string
+          max_squad?: number
+          organisation_id: string
+          purse_minor: number
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          current_lot_id?: string | null
+          id?: string
+          max_squad?: number
+          organisation_id?: string
+          purse_minor?: number
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auctions_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -220,6 +351,71 @@ export type Database = {
           processed_at?: string
         }
         Relationships: []
+      }
+      board_posts: {
+        Row: {
+          contact: string | null
+          country_code: string | null
+          created_at: string
+          created_by: string
+          detail: string | null
+          expires_at: string
+          format: string | null
+          id: string
+          kind: string
+          organisation_id: string | null
+          play_date: string | null
+          poster_name: string
+          region: string | null
+          status: string
+          title: string
+          town: string | null
+        }
+        Insert: {
+          contact?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string
+          detail?: string | null
+          expires_at?: string
+          format?: string | null
+          id?: string
+          kind: string
+          organisation_id?: string | null
+          play_date?: string | null
+          poster_name: string
+          region?: string | null
+          status?: string
+          title: string
+          town?: string | null
+        }
+        Update: {
+          contact?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string
+          detail?: string | null
+          expires_at?: string
+          format?: string | null
+          id?: string
+          kind?: string
+          organisation_id?: string | null
+          play_date?: string | null
+          poster_name?: string
+          region?: string | null
+          status?: string
+          title?: string
+          town?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_posts_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       camera_clip_calibrations: {
         Row: {
@@ -829,7 +1025,9 @@ export type Database = {
           match_id: string | null
           notes: string | null
           organisation_id: string
+          reply_by: string | null
           selection_published_at: string | null
+          squad_cap: number | null
           starts_at: string
           team_id: string | null
           title: string
@@ -850,7 +1048,9 @@ export type Database = {
           match_id?: string | null
           notes?: string | null
           organisation_id: string
+          reply_by?: string | null
           selection_published_at?: string | null
+          squad_cap?: number | null
           starts_at: string
           team_id?: string | null
           title: string
@@ -871,7 +1071,9 @@ export type Database = {
           match_id?: string | null
           notes?: string | null
           organisation_id?: string
+          reply_by?: string | null
           selection_published_at?: string | null
+          squad_cap?: number | null
           starts_at?: string
           team_id?: string | null
           title?: string
@@ -953,6 +1155,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "club_items_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_join_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          email: string
+          id: string
+          interest: string
+          junior: boolean
+          message: string | null
+          name: string
+          organisation_id: string
+          phone: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          email: string
+          id?: string
+          interest: string
+          junior?: boolean
+          message?: string | null
+          name: string
+          organisation_id: string
+          phone?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          email?: string
+          id?: string
+          interest?: string
+          junior?: boolean
+          message?: string | null
+          name?: string
+          organisation_id?: string
+          phone?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_join_requests_organisation_id_fkey"
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "organisations"
@@ -1515,6 +1770,146 @@ export type Database = {
           },
         ]
       }
+      competition_permits: {
+        Row: {
+          competition_id: string
+          created_at: string
+          granted_by: string | null
+          id: string
+          league_id: string
+          player_id: string
+          reason: string
+          team_id: string
+          valid_until: string | null
+        }
+        Insert: {
+          competition_id: string
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          league_id: string
+          player_id: string
+          reason: string
+          team_id: string
+          valid_until?: string | null
+        }
+        Update: {
+          competition_id?: string
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          league_id?: string
+          player_id?: string
+          reason?: string
+          team_id?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_permits_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_permits_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_permits_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_permits_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competition_player_registrations: {
+        Row: {
+          club_id: string
+          competition_id: string
+          created_at: string
+          id: string
+          league_id: string
+          overseas: boolean
+          player_id: string
+          registered_by: string | null
+          status: string
+          team_id: string
+        }
+        Insert: {
+          club_id: string
+          competition_id: string
+          created_at?: string
+          id?: string
+          league_id: string
+          overseas?: boolean
+          player_id: string
+          registered_by?: string | null
+          status?: string
+          team_id: string
+        }
+        Update: {
+          club_id?: string
+          competition_id?: string
+          created_at?: string
+          id?: string
+          league_id?: string
+          overseas?: boolean
+          player_id?: string
+          registered_by?: string | null
+          status?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_player_registrations_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_player_registrations_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_player_registrations_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_player_registrations_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_player_registrations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competition_point_adjustments: {
         Row: {
           competition_id: string
@@ -1553,6 +1948,146 @@ export type Database = {
           },
           {
             foreignKeyName: "competition_point_adjustments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competition_registration_settings: {
+        Row: {
+          closes_at: string | null
+          competition_id: string
+          currency: string
+          open: boolean
+          organisation_id: string
+          overseas_limit: number | null
+          payment_instructions: string | null
+          played_down_limit: number | null
+          player_fee_minor: number
+          registered_only: boolean
+          team_fee_minor: number
+          updated_at: string
+        }
+        Insert: {
+          closes_at?: string | null
+          competition_id: string
+          currency?: string
+          open?: boolean
+          organisation_id: string
+          overseas_limit?: number | null
+          payment_instructions?: string | null
+          played_down_limit?: number | null
+          player_fee_minor?: number
+          registered_only?: boolean
+          team_fee_minor?: number
+          updated_at?: string
+        }
+        Update: {
+          closes_at?: string | null
+          competition_id?: string
+          currency?: string
+          open?: boolean
+          organisation_id?: string
+          overseas_limit?: number | null
+          payment_instructions?: string | null
+          played_down_limit?: number | null
+          player_fee_minor?: number
+          registered_only?: boolean
+          team_fee_minor?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_registration_settings_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: true
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_registration_settings_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competition_registrations: {
+        Row: {
+          club_id: string
+          competition_id: string
+          created_at: string
+          currency: string
+          decided_by: string | null
+          fee_minor: number
+          id: string
+          league_id: string
+          note: string | null
+          paid_confirmed_at: string | null
+          payment_reference: string | null
+          requested_by: string | null
+          status: string
+          team_id: string
+        }
+        Insert: {
+          club_id: string
+          competition_id: string
+          created_at?: string
+          currency?: string
+          decided_by?: string | null
+          fee_minor?: number
+          id?: string
+          league_id: string
+          note?: string | null
+          paid_confirmed_at?: string | null
+          payment_reference?: string | null
+          requested_by?: string | null
+          status?: string
+          team_id: string
+        }
+        Update: {
+          club_id?: string
+          competition_id?: string
+          created_at?: string
+          currency?: string
+          decided_by?: string | null
+          fee_minor?: number
+          id?: string
+          league_id?: string
+          note?: string | null
+          paid_confirmed_at?: string | null
+          payment_reference?: string | null
+          requested_by?: string | null
+          status?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_registrations_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_registrations_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_registrations_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_registrations_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -1914,6 +2449,7 @@ export type Database = {
       deliveries: {
         Row: {
           ball_in_over: number
+          ball_track: Json | null
           batter_runs: number
           bowler_id: string
           delivery_style: string | null
@@ -1944,6 +2480,7 @@ export type Database = {
         }
         Insert: {
           ball_in_over: number
+          ball_track?: Json | null
           batter_runs?: number
           bowler_id: string
           delivery_style?: string | null
@@ -1974,6 +2511,7 @@ export type Database = {
         }
         Update: {
           ball_in_over?: number
+          ball_track?: Json | null
           batter_runs?: number
           bowler_id?: string
           delivery_style?: string | null
@@ -2110,6 +2648,111 @@ export type Database = {
           },
         ]
       }
+      discipline_cases: {
+        Row: {
+          club_id: string
+          competition_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          detail: string | null
+          fine_minor: number
+          fine_paid: boolean
+          fixture_id: string | null
+          id: string
+          incident_on: string | null
+          league_id: string
+          matches_banned: number | null
+          offence: string
+          outcome: string | null
+          player_id: string
+          status: string
+          suspended_from: string | null
+          suspended_until: string | null
+          updated_at: string
+        }
+        Insert: {
+          club_id: string
+          competition_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          detail?: string | null
+          fine_minor?: number
+          fine_paid?: boolean
+          fixture_id?: string | null
+          id?: string
+          incident_on?: string | null
+          league_id: string
+          matches_banned?: number | null
+          offence: string
+          outcome?: string | null
+          player_id: string
+          status?: string
+          suspended_from?: string | null
+          suspended_until?: string | null
+          updated_at?: string
+        }
+        Update: {
+          club_id?: string
+          competition_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          detail?: string | null
+          fine_minor?: number
+          fine_paid?: boolean
+          fixture_id?: string | null
+          id?: string
+          incident_on?: string | null
+          league_id?: string
+          matches_banned?: number | null
+          offence?: string
+          outcome?: string | null
+          player_id?: string
+          status?: string
+          suspended_from?: string | null
+          suspended_until?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discipline_cases_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discipline_cases_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discipline_cases_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discipline_cases_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discipline_cases_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       equipment_loans: {
         Row: {
           condition_note: string | null
@@ -2184,6 +2827,7 @@ export type Database = {
           responded_by: string | null
           status: string
           updated_at: string
+          waitlisted_at: string | null
         }
         Insert: {
           event_id: string
@@ -2194,6 +2838,7 @@ export type Database = {
           responded_by?: string | null
           status: string
           updated_at?: string
+          waitlisted_at?: string | null
         }
         Update: {
           event_id?: string
@@ -2204,6 +2849,7 @@ export type Database = {
           responded_by?: string | null
           status?: string
           updated_at?: string
+          waitlisted_at?: string | null
         }
         Relationships: [
           {
@@ -2543,6 +3189,111 @@ export type Database = {
           },
           {
             foreignKeyName: "fee_schedules_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fitness_results: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          organisation_id: string
+          player_id: string
+          recorded_by: string | null
+          recorded_on: string
+          test: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          organisation_id: string
+          player_id: string
+          recorded_by?: string | null
+          recorded_on?: string
+          test: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          organisation_id?: string
+          player_id?: string
+          recorded_by?: string | null
+          recorded_on?: string
+          test?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fitness_results_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fitness_results_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fixture_marks: {
+        Row: {
+          comments: string | null
+          created_at: string
+          fixture_id: string
+          id: string
+          outfield_mark: number | null
+          pitch_mark: number | null
+          submitted_by: string | null
+          team_id: string
+          umpire_marks: Json
+          updated_at: string
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string
+          fixture_id: string
+          id?: string
+          outfield_mark?: number | null
+          pitch_mark?: number | null
+          submitted_by?: string | null
+          team_id: string
+          umpire_marks?: Json
+          updated_at?: string
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string
+          fixture_id?: string
+          id?: string
+          outfield_mark?: number | null
+          pitch_mark?: number | null
+          submitted_by?: string | null
+          team_id?: string
+          umpire_marks?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fixture_marks_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixture_marks_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -3685,6 +4436,57 @@ export type Database = {
         }
         Relationships: []
       }
+      player_claims: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          message: string | null
+          organisation_id: string
+          player_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          message?: string | null
+          organisation_id: string
+          player_id: string
+          status?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          message?: string | null
+          organisation_id?: string
+          player_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_claims_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_claims_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_consents: {
         Row: {
           biometric_analysis: Database["public"]["Enums"]["consent_state"]
@@ -3741,6 +4543,147 @@ export type Database = {
           },
           {
             foreignKeyName: "player_consents_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_feedback: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          organisation_id: string
+          player_id: string
+          rating: number | null
+          session_id: string | null
+        }
+        Insert: {
+          author_id?: string
+          body: string
+          created_at?: string
+          id?: string
+          kind: string
+          organisation_id: string
+          player_id: string
+          rating?: number | null
+          session_id?: string | null
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          organisation_id?: string
+          player_id?: string
+          rating?: number | null
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_feedback_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_feedback_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_feedback_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "training_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_follows: {
+        Row: {
+          created_at: string
+          player_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          player_id: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          player_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_follows_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_goals: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          detail: string | null
+          id: string
+          organisation_id: string
+          player_id: string
+          progress: number
+          status: string
+          target_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          detail?: string | null
+          id?: string
+          organisation_id: string
+          player_id: string
+          progress?: number
+          status?: string
+          target_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          detail?: string | null
+          id?: string
+          organisation_id?: string
+          player_id?: string
+          progress?: number
+          status?: string
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_goals_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_goals_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
             referencedRelation: "players"
@@ -3830,6 +4773,83 @@ export type Database = {
             columns: ["player_id"]
             isOneToOne: true
             referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_transfers: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          effective_on: string
+          from_club_id: string
+          id: string
+          new_player_id: string | null
+          note: string | null
+          player_id: string
+          player_name: string
+          requested_by: string | null
+          status: string
+          to_club_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          effective_on?: string
+          from_club_id: string
+          id?: string
+          new_player_id?: string | null
+          note?: string | null
+          player_id: string
+          player_name: string
+          requested_by?: string | null
+          status?: string
+          to_club_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          effective_on?: string
+          from_club_id?: string
+          id?: string
+          new_player_id?: string | null
+          note?: string | null
+          player_id?: string
+          player_name?: string
+          requested_by?: string | null
+          status?: string
+          to_club_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_transfers_from_club_id_fkey"
+            columns: ["from_club_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_transfers_new_player_id_fkey"
+            columns: ["new_player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_transfers_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_transfers_to_club_id_fkey"
+            columns: ["to_club_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
             referencedColumns: ["id"]
           },
         ]
@@ -4512,6 +5532,83 @@ export type Database = {
           },
         ]
       }
+      team_message_reads: {
+        Row: {
+          message_id: string
+          read_at: string
+          reader_name: string
+          user_id: string
+        }
+        Insert: {
+          message_id: string
+          read_at?: string
+          reader_name: string
+          user_id?: string
+        }
+        Update: {
+          message_id?: string
+          read_at?: string
+          reader_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_message_reads_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "team_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_messages: {
+        Row: {
+          author_id: string
+          author_name: string
+          body: string
+          created_at: string
+          id: string
+          is_announcement: boolean
+          organisation_id: string
+          team_id: string | null
+        }
+        Insert: {
+          author_id?: string
+          author_name: string
+          body: string
+          created_at?: string
+          id?: string
+          is_announcement?: boolean
+          organisation_id: string
+          team_id?: string | null
+        }
+        Update: {
+          author_id?: string
+          author_name?: string
+          body?: string
+          created_at?: string
+          id?: string
+          is_announcement?: boolean
+          organisation_id?: string
+          team_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_messages_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_messages_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_players: {
         Row: {
           player_id: string
@@ -4591,6 +5688,127 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_attendance: {
+        Row: {
+          effort: number | null
+          note: string | null
+          organisation_id: string
+          player_id: string
+          recorded_by: string | null
+          session_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          effort?: number | null
+          note?: string | null
+          organisation_id: string
+          player_id: string
+          recorded_by?: string | null
+          session_id: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          effort?: number | null
+          note?: string | null
+          organisation_id?: string
+          player_id?: string
+          recorded_by?: string | null
+          session_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_attendance_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_attendance_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_attendance_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "training_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_sessions: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          focus: string | null
+          id: string
+          location: string | null
+          notes: string | null
+          organisation_id: string
+          plan: Json
+          starts_at: string
+          team_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          focus?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          organisation_id: string
+          plan?: Json
+          starts_at: string
+          team_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          focus?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          organisation_id?: string
+          plan?: Json
+          starts_at?: string
+          team_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_sessions_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_sessions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -4764,6 +5982,70 @@ export type Database = {
           },
         ]
       }
+      umpire_assessments: {
+        Row: {
+          appointment_id: string | null
+          assessed_on: string
+          assessor_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          organisation_id: string
+          overall: number
+          recommended_grade: string | null
+          scores: Json
+          umpire_id: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          assessed_on?: string
+          assessor_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organisation_id: string
+          overall: number
+          recommended_grade?: string | null
+          scores?: Json
+          umpire_id: string
+        }
+        Update: {
+          appointment_id?: string | null
+          assessed_on?: string
+          assessor_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organisation_id?: string
+          overall?: number
+          recommended_grade?: string | null
+          scores?: Json
+          umpire_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "umpire_assessments_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "umpire_appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "umpire_assessments_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "umpire_assessments_umpire_id_fkey"
+            columns: ["umpire_id"]
+            isOneToOne: false
+            referencedRelation: "umpires"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       umpire_availability: {
         Row: {
           day: string
@@ -4787,6 +6069,70 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      umpire_match_reports: {
+        Row: {
+          appointment_id: string
+          conduct_concern: boolean
+          created_at: string
+          decisions: Json
+          id: string
+          incidents: string | null
+          organisation_id: string
+          pitch_comment: string | null
+          submitted_at: string | null
+          umpire_id: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_id: string
+          conduct_concern?: boolean
+          created_at?: string
+          decisions?: Json
+          id?: string
+          incidents?: string | null
+          organisation_id: string
+          pitch_comment?: string | null
+          submitted_at?: string | null
+          umpire_id: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string
+          conduct_concern?: boolean
+          created_at?: string
+          decisions?: Json
+          id?: string
+          incidents?: string | null
+          organisation_id?: string
+          pitch_comment?: string | null
+          submitted_at?: string | null
+          umpire_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "umpire_match_reports_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: true
+            referencedRelation: "umpire_appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "umpire_match_reports_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "umpire_match_reports_umpire_id_fkey"
+            columns: ["umpire_id"]
+            isOneToOne: false
+            referencedRelation: "umpires"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       umpire_panel_settings: {
         Row: {
@@ -5258,6 +6604,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      answer_player_transfer: {
+        Args: { p_answer: string; p_id: string }
+        Returns: undefined
+      }
       append_match_event: {
         Args: {
           p_client_event_id: string
@@ -5315,6 +6665,7 @@ export type Database = {
         Args: { p_asset_id: string }
         Returns: boolean
       }
+      can_run_auction: { Args: { p_auction_id: string }; Returns: boolean }
       can_score_match: { Args: { p_match_id: string }; Returns: boolean }
       can_upload_camera_source: { Args: { p_name: string }; Returns: boolean }
       can_upload_video: {
@@ -5325,6 +6676,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      can_view_auction: { Args: { p_auction_id: string }; Returns: boolean }
       can_view_entered_team: { Args: { p_team: string }; Returns: boolean }
       can_view_fee_charge: { Args: { p_charge_id: string }; Returns: boolean }
       can_view_fixture_reports: {
@@ -5414,6 +6766,38 @@ export type Database = {
         Args: { p_match_id: string; p_note: string }
         Returns: undefined
       }
+      correct_delivery_v1: {
+        Args: {
+          p_client_event_id: string
+          p_delivery: Json
+          p_delivery_id: string
+          p_device_id: string
+          p_innings_id: string
+          p_live_state: Json
+          p_match_id: string
+          p_match_snapshot: Json
+          p_occurred_at: string
+          p_renumber: Json
+        }
+        Returns: {
+          client_event_id: string
+          device_id: string
+          event_type: string
+          id: string
+          match_id: string
+          occurred_at: string
+          payload: Json
+          recorded_at: string
+          recorded_by: string
+          sequence: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "match_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_camera_room: {
         Args: { p_match_id: string; p_name?: string }
         Returns: Json
@@ -5462,6 +6846,14 @@ export type Database = {
       }
       decide_league_membership: {
         Args: { p_approve: boolean; p_id: string }
+        Returns: undefined
+      }
+      decide_player_claim: {
+        Args: { p_approve: boolean; p_claim_id: string }
+        Returns: undefined
+      }
+      decide_team_registration: {
+        Args: { p_decision: string; p_id: string }
         Returns: undefined
       }
       end_league_membership: { Args: { p_id: string }; Returns: undefined }
@@ -5621,10 +7013,17 @@ export type Database = {
           user_id: string
         }[]
       }
+      my_career: { Args: never; Returns: Json }
       my_match_duties: { Args: { p_match_id: string }; Returns: string[] }
+      my_umpire_marks: { Args: never; Returns: Json }
       my_umpire_panels: { Args: never; Returns: Json }
       normalise_club_hostname: { Args: { p_input: string }; Returns: string }
+      offer_player_transfer: {
+        Args: { p_note?: string; p_player_id: string; p_to_club: string }
+        Returns: string
+      }
       on_my_umpire_panel: { Args: { p_org: string }; Returns: boolean }
+      open_registrations: { Args: never; Returns: Json }
       pair_camera_device: {
         Args: {
           p_angle: string
@@ -5657,6 +7056,19 @@ export type Database = {
         Args: { p_player_id: string }
         Returns: boolean
       }
+      player_rankings: {
+        Args: {
+          p_country?: string
+          p_limit?: number
+          p_region?: string
+          p_town?: string
+        }
+        Returns: Json
+      }
+      player_suspended_on: {
+        Args: { p_day: string; p_player_id: string }
+        Returns: string
+      }
       potm_vote_tally: { Args: { p_slug: string }; Returns: Json }
       potm_vote_tally_for_match: { Args: { p_match_id: string }; Returns: Json }
       promo_share_percent: {
@@ -5679,6 +7091,7 @@ export type Database = {
         }
         Returns: {
           ball_in_over: number
+          ball_track: Json | null
           batter_runs: number
           bowler_id: string
           delivery_style: string | null
@@ -5765,6 +7178,19 @@ export type Database = {
         }
         Returns: number
       }
+      register_players: {
+        Args: {
+          p_competition_id: string
+          p_overseas?: string[]
+          p_player_ids: string[]
+          p_team_id: string
+        }
+        Returns: number
+      }
+      register_team: {
+        Args: { p_competition_id: string; p_note?: string; p_team_id: string }
+        Returns: string
+      }
       remove_camera_device: {
         Args: { p_device_id: string }
         Returns: undefined
@@ -5846,6 +7272,10 @@ export type Database = {
           town: string
         }[]
       }
+      sell_auction_lot: {
+        Args: { p_lot_id: string; p_price_minor: number; p_team_id: string }
+        Returns: undefined
+      }
       set_camera_room_capacity: {
         Args: { p_max_devices: number; p_room_id: string }
         Returns: number
@@ -5869,6 +7299,10 @@ export type Database = {
           p_match_id: string
           p_user_id: string
         }
+        Returns: undefined
+      }
+      set_player_registration_status: {
+        Args: { p_id: string; p_status: string }
         Returns: undefined
       }
       set_selection_role: {
@@ -5929,6 +7363,18 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      submit_club_join_request: {
+        Args: {
+          p_email: string
+          p_interest: string
+          p_junior: boolean
+          p_message: string
+          p_name: string
+          p_phone: string
+          p_slug: string
+        }
+        Returns: boolean
+      }
       tag_delivery_v1: {
         Args: {
           p_client_event_id: string
@@ -5959,6 +7405,10 @@ export type Database = {
         }
       }
       team_allowance: { Args: { p_org: string }; Returns: Json }
+      team_eligibility_data: {
+        Args: { p_competition_id: string; p_team_id: string }
+        Returns: Json
+      }
       update_my_umpire_details: {
         Args: {
           p_home_area: string

@@ -237,7 +237,7 @@ export function useMatchCloudSync(
       if (!enabled || !cloudMatchId || pausedForReview || queueUnreadable) return;
       const innings = currentInnings(match);
       const delivery = eventType === "delivery.recorded" ? innings.deliveries.at(-1) : null;
-      const canonicalInningsEvent = ["delivery.recorded", "delivery.voided"].includes(eventType);
+      const canonicalInningsEvent = ["delivery.recorded", "delivery.voided", "delivery.corrected"].includes(eventType);
       const liveState = publicLiveState(match, { screenRefSalt: cloudMatchId });
       const event: PendingMatchEvent = {
         matchId: cloudMatchId,

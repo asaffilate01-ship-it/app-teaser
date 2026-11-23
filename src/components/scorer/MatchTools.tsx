@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowDown, ArrowUp, Coins, HeartPulse, Pencil, UserPlus, Users } from "lucide-react";
+import { ArrowDown, ArrowUp, Coins, HeartPulse, Pencil, Repeat, UserPlus, Users } from "lucide-react";
 import {
   addPlayer,
   availableBatters,
@@ -12,8 +12,10 @@ import {
   retireBatter,
   retiredHurtWaiting,
   setPlayerHand,
+  substitutePlayer,
   tossSummary,
   type CricketMatch,
+  type SubstituteKind,
   type RetirementKind,
   type YouthBand,
 } from "@/lib/cricket";
@@ -305,6 +307,109 @@ export function WorkloadPanel({ match, onSave }: { match: CricketMatch; onSave: 
             </li>
           ))}
         </ul>
+      )}
+    </section>
+  );
+}
+
+const subLabels = {
+  fielding: "Fielding substitute",
+  concussion: "Concussion replacement",
+  impact: "Impact player swap",
+} as const;
+
+/** Fielding subs (field only), concussion replacements and impact-player swaps (take over a player's place). */
+export function SubstitutePanel({ match, onSave, cloudMatchId }: { match: CricketMatch; onSave: Save; cloudMatchId: string | null }) {
+  const [open, setOpen] = useState(false);
+  const [teamId, setTeamId] = useState(match.teams[0].id);
+  const [kind, setKind] = useState<SubstituteKind>("fielding");
+  const [outId, setOutId] = useState("");
+  const [name, setName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const team = match.teams.find((item) => item.id === teamId) ?? match.teams[0];
+  const replaceable = team.players.filter((player) => !player.replacedBy && player.substitute !== "fielding");
+  const subs = match.teams.flatMap((item) => item.players.filter((player) => player.substitute).map((player) => ({ player, team: item })));
+  const bring = async () => {
+    setError(null);
+    const check = substitutePlayer(match, team.id, kind, name, kind === "fielding" ? undefined : outId);
+    if ("error" in check) return setError(check.error);
+    setBusy(true);
+    try {
+      const id = cloudMatchId ? await addCloudSquadPlayer(cloudMatchId, team.id, name.trim()) : undefined;
+      const result = substitutePlayer(match, team.id, kind, name, kind === "fielding" ? undefined : outId, id);
+      if ("error" in result) return setError(result.error);
+      onSave(result.match);
+      setName("");
+      setOutId("");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "The substitute could not be added.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <section className="broadcast-panel space-y-3 p-4" aria-label="Substitutes">
+      <button type="button" className="flex w-full items-center justify-between" onClick={() => setOpen(!open)} aria-expanded={open}>
+        <span className="panel-kicker flex items-center gap-2">
+          <Repeat className="size-4" aria-hidden="true" /> Substitutes
+        </span>
+        <span className="text-xs text-muted-foreground">{open ? "Hide" : "Fielding · concussion · impact player"}</span>
+      </button>
+      {open && (
+        <>
+          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Team">
+            {match.teams.map((item) => (
+              <button key={item.id} type="button" role="tab" aria-selected={item.id === team.id} className="app-chip-button" aria-pressed={item.id === team.id} onClick={() => setTeamId(item.id)}>
+                {item.name}
+              </button>
+            ))}
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <label className="block text-xs">
+              Type
+              <select className="scorer-input mt-1" value={kind} onChange={(e) => setKind(e.target.value as SubstituteKind)}>
+                {(Object.keys(subLabels) as SubstituteKind[]).map((value) => (
+                  <option key={value} value={value}>{subLabels[value]}</option>
+                ))}
+              </select>
+            </label>
+            {kind !== "fielding" && (
+              <label className="block text-xs">
+                Replacing
+                <select className="scorer-input mt-1" value={outId} onChange={(e) => setOutId(e.target.value)}>
+                  <option value="">Choose a player</option>
+                  {replaceable.map((player) => (
+                    <option key={player.id} value={player.id}>{player.name}</option>
+                  ))}
+                </select>
+              </label>
+            )}
+            <label className="block text-xs">
+              Substitute's name
+              <input className="scorer-input mt-1" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} />
+            </label>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            {kind === "fielding"
+              ? "Fields only — cannot bat or bowl. Catches and run outs are credited to them."
+              : "Takes over the player's place: can bat and bowl; the replaced player can't. Their earlier runs and wickets stay on the card."}
+          </p>
+          <button type="button" className="action-secondary" disabled={busy} onClick={() => void bring()}>
+            <Repeat className="size-4" /> {busy ? "Adding…" : "Bring on substitute"}
+          </button>
+          {error && <p className="text-xs text-rose-300" role="alert">{error}</p>}
+          {subs.length > 0 && (
+            <ul className="space-y-1 text-xs">
+              {subs.map(({ player, team: item }) => (
+                <li key={player.id} className="rounded-lg border border-border px-3 py-1.5">
+                  <strong>{player.name}</strong> ({item.name}) · {subLabels[player.substitute!].toLowerCase()}
+                  {player.replaces ? ` for ${findPlayer(match, player.replaces)?.name ?? "a player"}` : ""}
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </section>
   );
