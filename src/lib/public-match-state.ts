@@ -53,7 +53,10 @@ export function publicLiveState(match: CricketMatch): Record<string, unknown> {
       lastManStands: Boolean(match.settings.rules?.lastManStands),
       followOnLead: match.settings.rules?.followOnLead ?? null,
       rainMethod: match.settings.rules?.rainMethod ?? null,
+      days: match.settings.rules?.days ?? null,
     },
+    // Multi-day: day number, stumps and close-of-play scores (team names and totals only).
+    days: match.days ?? null,
     // Rain interruption figures (no names): restores the scorer on other devices and shows the par publicly.
     rain: match.rain ?? null,
     // Overs allowed in this innings after Super Over / rain changes, so chases read right everywhere.

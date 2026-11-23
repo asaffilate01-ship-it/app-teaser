@@ -2896,3 +2896,5 @@
 .qual-status span { font-size: 0.75rem; color: oklch(0.75 0.02 260); }
 .qual-status.is-through { border-left-color: oklch(0.7 0.16 150); }
 .qual-status.is-out { border-left-color: oklch(0.6 0.2 22); }
+
+.day-panel-stumps { border-color: color-mix(in oklab, var(--gold) 45%, transparent); }

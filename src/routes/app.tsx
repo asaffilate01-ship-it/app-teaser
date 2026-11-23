@@ -53,6 +53,7 @@ import { useCloudSession } from "@/hooks/use-cloud-session";
 import { useMatchCloudSync } from "@/hooks/use-match-cloud-sync";
 import { MatchRulesFields } from "@/components/scorer/MatchRulesFields";
 import { RainPanel } from "@/components/scorer/RainPanel";
+import { DayPanel } from "@/components/scorer/DayPanel";
 import {
   allowedDismissals,
   canDeclare,
@@ -690,6 +691,8 @@ function MatchSetup({
             lastManStands: Boolean(rules.lastManStands),
             superOver: inningsPerSide === 1 && parsed.oversPerInnings !== null && Boolean(rules.superOver),
             followOnLead: inningsPerSide === 2 ? (rules.followOnLead ?? null) : null,
+            ...(inningsPerSide === 1 && parsed.oversPerInnings !== null && rules.rainMethod ? { rainMethod: rules.rainMethod } : {}),
+            ...(inningsPerSide === 2 && rules.days ? { days: rules.days } : {}),
           },
         },
       }),
@@ -1183,7 +1186,8 @@ function LiveMatch({
           </section>
         )}
         <div hidden={tab !== "score"}>
-          {!cloudConflict && (
+          {!cloudConflict && <DayPanel match={match} onSave={saveAndSync} />}
+          {!cloudConflict && !match.days?.atStumps && (
             <ScoringPad
               match={match}
               onSave={saveAndSync}

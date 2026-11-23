@@ -36,6 +36,8 @@ export interface MatchRules {
   followOnLead?: number | null | undefined;
   /** Rain method for a shortened chase; leagues can set the default for all their matches. */
   rainMethod?: RainMethod | undefined;
+  /** Two-innings matches: scheduled number of days (the match is drawn if time runs out). */
+  days?: number | undefined;
 }
 
 export interface MatchSettings {
@@ -102,6 +104,8 @@ export interface Innings {
   kind?: "regular" | "super-over" | undefined;
   /** The batting captain declared this innings closed. */
   declared?: boolean | undefined;
+  /** Play ran out of time (multi-day) with this innings unfinished. */
+  unfinished?: boolean | undefined;
   /** This innings was batted as an enforced follow-on. */
   followOn?: boolean | undefined;
 }
@@ -120,6 +124,30 @@ export interface CricketMatch {
   audience?: { commentary?: boolean } | undefined;
   /** Rain interruption for the chase (one-innings, limited-overs matches only). */
   rain?: RainState | undefined;
+  /** Multi-day play: which day it is, whether stumps have been drawn, and each day's close-of-play score. */
+  days?: MatchDays | undefined;
+}
+
+export interface CloseOfPlay {
+  day: number;
+  inningsIndex: number;
+  battingTeamId: string;
+  runs: number;
+  wickets: number;
+  overs: string;
+  /** First-innings lead or runs still needed at the close, for the scorecard line. */
+  note?: string | undefined;
+  at: string;
+}
+
+export interface MatchDays {
+  /** The day being played (1-based). */
+  current: number;
+  /** True between "Stumps" and the start of the next day's play. */
+  atStumps: boolean;
+  closes: CloseOfPlay[];
+  /** The match was ended because time ran out. */
+  timeUp?: boolean | undefined;
 }
 
 export interface CreateMatchInput {
@@ -286,7 +314,7 @@ const nextBatter = (team: Team, innings: Innings, activeIds: string[]) => {
 };
 
 export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput): CricketMatch {
-  if (match.status !== "live") return match;
+  if (match.status !== "live" || match.days?.atStumps) return match;
   const innings = currentInnings(match);
   const freeHit = nextBallIsFreeHit(match);
   // On a free hit the batter cannot be bowled, caught, lbw, stumped or out hit wicket.
@@ -789,7 +817,7 @@ export function matchResult(match: CricketMatch): MatchResult | null {
     const twiceRuns = totals.get(twice) ?? 0;
     const otherRuns = totals.get(other) ?? 0;
     const onceInnings = regular.filter((item) => item.battingTeamId === twice).length === 2;
-    if (onceInnings && twiceRuns < otherRuns) {
+    if (onceInnings && twiceRuns < otherRuns && !regular[2]!.unfinished && !match.days?.timeUp) {
       const margin = otherRuns - twiceRuns;
       return { ...base, winnerTeamId: other, text: `${name(other)} won by an innings and ${margin} run${margin === 1 ? "" : "s"}` };
     }

@@ -89,9 +89,9 @@ export function SquadImport({ data, run }: { data: PlatformDashboardData; run: R
       {plan && (
         <div className="mt-4 space-y-3">
           <div className="flex flex-wrap gap-2 text-xs">
-            <span className="hero-chip">{plan.players.length} players to add</span>
-            <span className="hero-chip">{plan.newTeams.length} new teams</span>
-            {plan.skipped.length > 0 && <span className="hero-chip">{plan.skipped.length} rows skipped</span>}
+            <span className="hero-chip">{plan.players.length} player{plan.players.length === 1 ? "" : "s"} to add</span>
+            <span className="hero-chip">{plan.newTeams.length} new team{plan.newTeams.length === 1 ? "" : "s"}</span>
+            {plan.skipped.length > 0 && <span className="hero-chip">{plan.skipped.length} row{plan.skipped.length === 1 ? "" : "s"} skipped</span>}
           </div>
           {plan.newTeams.length > 0 && <p className="text-xs text-slate-300">New teams: {plan.newTeams.map((team) => team.name).join(", ")}</p>}
           {plan.skipped.length > 0 && (

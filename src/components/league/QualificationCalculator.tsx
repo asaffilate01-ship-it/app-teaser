@@ -117,7 +117,7 @@ export function QualificationCalculator({
       {rival && rivalNrr !== null && oversPerInnings && (
         <div className="mt-4 border-t border-white/10 pt-3 text-sm">
           <p className="text-xs text-slate-400">
-            To pass {teamName(rival.teamId)}’s net run rate ({rivalNrr >= 0 ? "+" : ""}
+            {position < spots ? "To stay above" : "To pass"} {teamName(rival.teamId)}’s net run rate ({rivalNrr >= 0 ? "+" : ""}
             {rivalNrr.toFixed(3)}) next game:
           </p>
           <ul className="mt-2 grid gap-1.5">

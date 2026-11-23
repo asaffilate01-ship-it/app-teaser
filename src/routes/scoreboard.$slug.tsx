@@ -65,6 +65,7 @@ interface ScoreboardData {
     oversLimit?: number | null;
     declared?: boolean;
     followOn?: boolean;
+    days?: { current?: number; atStumps?: boolean } | null;
     result?: string | null;
   };
   updatedAt: string;
@@ -202,6 +203,11 @@ function PublicScoreboard() {
             {(state.superOver || state.freeHit) && (
               <span className="hero-chip hero-chip-alert" role="status">
                 {state.freeHit ? "Free hit" : "Super Over"}
+              </span>
+            )}
+            {state.days?.current && (state.settings?.inningsPerSide ?? 1) === 2 && (
+              <span className="hero-chip" role="status">
+                {state.days.atStumps && !state.result ? "Stumps · " : ""}Day {state.days.current}
               </span>
             )}
             {state.par != null && state.target && (

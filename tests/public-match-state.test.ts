@@ -78,6 +78,7 @@ test("shared live score keeps the match length so other devices can show overs l
     lastManStands: false,
     followOnLead: null,
     rainMethod: null,
+    days: null,
   });
 });
 

@@ -346,6 +346,7 @@ export async function loadCloudMatchSnapshot(matchId: string): Promise<CricketMa
     teams,
     innings,
     ...(cloudRain(liveState["rain"]) ? { rain: cloudRain(liveState["rain"])! } : {}),
+    ...(cloudDays(liveState["days"]) ? { days: cloudDays(liveState["days"])! } : {}),
   };
   const validated = readScorerSnapshot(reconstructed, matchId);
   if (!validated) throw new Error("The cloud match contains incomplete scoring data.");
@@ -636,13 +637,40 @@ function cloudRules(live: Record<string, unknown>, league: Record<string, unknow
   const pick = (key: string) => (key in live ? live[key] : league[key]);
   const followOn = finiteOrNull(pick("followOnLead"));
   const rainMethod = asRainMethod(pick("rainMethod")) ?? asRainMethod(league["rain_method"]);
+  const days = finiteOrNull(pick("days"));
   return {
     freeHit: Boolean(pick("freeHit")),
     superOver: Boolean(pick("superOver")),
     lastManStands: Boolean(pick("lastManStands")),
     ...(followOn !== null ? { followOnLead: followOn } : {}),
     ...(rainMethod ? { rainMethod } : {}),
+    ...(days !== null && days >= 1 && days <= 5 ? { days: Math.round(days) } : {}),
   };
+}
+
+/** Multi-day state saved in live state, validated field by field. */
+function cloudDays(value: unknown) {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Record<string, unknown>;
+  const current = finiteOrNull(raw["current"]);
+  if (current === null || current < 1) return null;
+  const closes = (Array.isArray(raw["closes"]) ? raw["closes"] : []).flatMap((item: unknown) => {
+    if (!item || typeof item !== "object") return [];
+    const close = item as Record<string, unknown>;
+    const day = finiteOrNull(close["day"]);
+    const runs = finiteOrNull(close["runs"]);
+    const wickets = finiteOrNull(close["wickets"]);
+    const inningsIndex = finiteOrNull(close["inningsIndex"]);
+    if (day === null || runs === null || wickets === null || inningsIndex === null) return [];
+    return [{
+      day, runs, wickets, inningsIndex,
+      battingTeamId: String(close["battingTeamId"] ?? ""),
+      overs: String(close["overs"] ?? "0.0"),
+      ...(typeof close["note"] === "string" ? { note: close["note"].slice(0, 120) } : {}),
+      at: String(close["at"] ?? ""),
+    }];
+  });
+  return { current, atStumps: raw["atStumps"] === true, closes, ...(raw["timeUp"] === true ? { timeUp: true } : {}) };
 }
 
 /** Rain interruption saved in live state, validated field by field. */

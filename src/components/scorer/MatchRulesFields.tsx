@@ -74,6 +74,27 @@ export function MatchRulesFields({
           </span>
         </label>
       )}
+      {inningsPerSide === 2 && (
+        <label className="rule-toggle">
+          <span className="min-w-0 flex-1">
+            <span className="rule-toggle-title">Days scheduled</span>
+            <span className="rule-toggle-hint">The match is drawn if time runs out after the last day.</span>
+            <select
+              className="scorer-input mt-2 h-10 w-28"
+              aria-label="Days scheduled"
+              value={rules.days ?? ""}
+              onChange={(event) => onChange({ ...rules, days: event.target.value ? Number(event.target.value) : undefined })}
+            >
+              <option value="">Not set</option>
+              {[1, 2, 3, 4, 5].map((day) => (
+                <option key={day} value={day}>
+                  {day} day{day === 1 ? "" : "s"}
+                </option>
+              ))}
+            </select>
+          </span>
+        </label>
+      )}
       {inningsPerSide === 1 && limitedOvers && (
         <label className="rule-toggle">
           <span className="min-w-0 flex-1">
