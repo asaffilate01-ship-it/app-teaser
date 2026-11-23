@@ -16,6 +16,7 @@ import { CameraReplayLibrary } from "@/components/CameraReplayLibrary";
 import { CameraCommandConfirmations } from "@/components/CameraCommandConfirmations";
 import { CameraCloudRecordingPanel } from "@/components/CameraCloudRecordingPanel";
 import { Cloud } from "lucide-react";
+import { directorGridClass, MAX_CAMERA_PHONES } from "@/lib/camera-limits";
 import { getCloudClient, isCloudConfigured, type CameraPresence } from "@/lib/cloud";
 import {
   connectLiveCamera,
@@ -285,7 +286,7 @@ function CameraDirector() {
   const displayed =
     view === "one"
       ? devices.filter((device) => device.id === (focus ?? devices[0]?.id))
-      : devices.slice(0, view === "two" ? 2 : 8);
+      : devices.slice(0, view === "two" ? 2 : MAX_CAMERA_PHONES);
 
   return (
     <main
@@ -381,7 +382,7 @@ function CameraDirector() {
         <div
           className={
             "mt-5 grid gap-4 " +
-            (view === "one" ? "grid-cols-1" : view === "two" ? "md:grid-cols-2" : "md:grid-cols-2")
+            (view === "one" ? "grid-cols-1" : view === "two" ? "md:grid-cols-2" : directorGridClass(displayed.length))
           }
         >
           {displayed.map((device) => {

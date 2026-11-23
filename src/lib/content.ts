@@ -70,7 +70,7 @@ export const en = {
     },
     {
       title: "Multi-phone camera room",
-      body: "Pair up to 8 phones per match — both ends, side-on and roaming — and keep every angle linked to the ball it captured.",
+      body: "Pair up to 16 phones or the club's own cameras per match — behind the bowler, side-on, behind the keeper or in the nets — and keep every fixed angle linked to the ball it captured.",
     },
     {
       title: "Coaching review",
@@ -143,7 +143,7 @@ export const en = {
       {
         label: "Coaching review",
         caption:
-          "Desktop • two synced angles side by side, frame-by-frame scrubbing and drawing tools",
+          "Desktop • phone angles from fixed spots around the ground, frame-by-frame scrubbing and drawing tools",
       },
       {
         label: "Match dashboard",
@@ -229,7 +229,7 @@ export const en = {
       price: "Extra fee",
       period: "quoted per club",
       perks: [
-        "Multi-phone camera room — up to 8 phones per match",
+        "Multi-phone camera room — up to 16 phones per match",
         "Every ball recorded and linked to the scorecard, with slow motion",
         "Coaching review, tagging and player video analysis",
         "Highlight reels and clip export",
@@ -259,7 +259,7 @@ export const en = {
       },
       {
         q: "Do I need special cameras?",
-        a: "No. With the video add-on, ordinary phones work. Pair up to 8 phones per match (4 to start — the club can change it), watch every angle live on the director screen, record each ball and compare two angles side by side in review.",
+        a: "No. With the video add-on, ordinary phones work, or whatever cameras your club already has. Pair up to 16 per match (4 to start — the club can change it), watch every angle live on the director screen, record each ball and compare two angles side by side in review. You see exactly what each phone films from where it is set up — on a tripod, fence or pavilion window — so footage looks like club video, not TV coverage.",
       },
       {
         q: "Can I score without signal?",
@@ -386,7 +386,7 @@ export const de: Content = {
     },
     {
       title: "Kameraraum mit mehreren Handys",
-      body: "Verbinde bis zu 8 Handys pro Spiel – an beiden Enden, seitlich und mobil – und verknüpfe jeden Winkel mit dem Ball, den er zeigt.",
+      body: "Verbinde bis zu 16 Handys oder die eigenen Kameras des Clubs pro Spiel – hinter dem Bowler, seitlich, hinter dem Keeper oder im Netz – und verknüpfe jeden festen Winkel mit dem Ball, den er zeigt.",
     },
     {
       title: "Trainingsanalyse",
@@ -463,7 +463,7 @@ export const de: Content = {
       {
         label: "Trainingsanalyse",
         caption:
-          "Desktop • zwei synchrone Winkel nebeneinander, Einzelbild-Navigation und Zeichenwerkzeuge",
+          "Desktop • Handy-Winkel von festen Plätzen rund ums Feld, Einzelbild-Navigation und Zeichenwerkzeuge",
       },
       {
         label: "Spiel-Dashboard",
@@ -551,7 +551,7 @@ export const de: Content = {
       price: "Aufpreis",
       period: "Angebot pro Club",
       perks: [
-        "Mehr-Handy-Kameraraum – bis zu 8 Handys pro Spiel",
+        "Mehr-Handy-Kameraraum – bis zu 16 Handys pro Spiel",
         "Jeder Ball aufgenommen und mit der Scorecard verknüpft, mit Zeitlupe",
         "Trainer-Analyse, Tagging und Spieler-Videoanalyse",
         "Highlight-Reels und Clip-Export",
@@ -581,7 +581,7 @@ export const de: Content = {
       },
       {
         q: "Brauche ich spezielle Kameras?",
-        a: "Nein. Mit dem Video-Add-on reichen normale Handys. Verbinde bis zu 8 Handys pro Spiel (anfangs 4 – der Club kann das ändern), sieh alle Winkel live im Regie-Bildschirm, nimm jeden Ball auf und vergleiche zwei Winkel nebeneinander.",
+        a: "Nein. Mit dem Video-Add-on reichen normale Handys oder die Kameras, die dein Club schon hat. Verbinde bis zu 16 pro Spiel (anfangs 4 – der Club kann das ändern), sieh alle Winkel live im Regie-Bildschirm, nimm jeden Ball auf und vergleiche zwei Winkel nebeneinander. Du siehst genau, was jedes Handy von seinem Standort filmt – Stativ, Zaun oder Clubhausfenster –, also Clubvideo statt Fernsehbilder.",
       },
       {
         q: "Kann ich ohne Empfang scoren?",
@@ -707,7 +707,7 @@ export const nl: Content = {
     },
     {
       title: "Camerakamer met meerdere telefoons",
-      body: "Koppel tot 8 telefoons per wedstrijd – aan beide kanten, van opzij en los – en koppel elke hoek aan de bal die hij filmde.",
+      body: "Koppel tot 16 telefoons of de eigen camera's van de club per wedstrijd – achter de bowler, van opzij, achter de keeper of in de nets – en koppel elke vaste hoek aan de bal die hij filmde.",
     },
     {
       title: "Coachingsanalyse",
@@ -780,7 +780,7 @@ export const nl: Content = {
       {
         label: "Coachingsanalyse",
         caption:
-          "Desktop • twee gesynchroniseerde hoeken naast elkaar, beeld-voor-beeld scrubben en tekengereedschap",
+          "Desktop • telefoonhoeken vanaf vaste plekken rond het veld, beeld-voor-beeld scrubben en tekengereedschap",
       },
       {
         label: "Wedstrijddashboard",
@@ -868,7 +868,7 @@ export const nl: Content = {
       price: "Meerprijs",
       period: "offerte per club",
       perks: [
-        "Camerakamer met meerdere telefoons – tot 8 per wedstrijd",
+        "Camerakamer met meerdere telefoons – tot 16 per wedstrijd",
         "Elke bal opgenomen en gekoppeld aan de scorekaart, met slow motion",
         "Coachingreview, tagging en videoanalyse per speler",
         "Highlightvideo's en clipexport",
@@ -898,7 +898,7 @@ export const nl: Content = {
       },
       {
         q: "Heb ik speciale camera's nodig?",
-        a: "Nee. Met de video-add-on volstaan gewone telefoons. Koppel tot 8 telefoons per wedstrijd (eerst 4 – de club kan dat aanpassen), bekijk elke hoek live op het regiescherm, neem elke bal op en vergelijk twee hoeken naast elkaar.",
+        a: "Nee. Met de video-add-on volstaan gewone telefoons of de camera's die je club al heeft. Koppel tot 16 per wedstrijd (eerst 4 – de club kan dat aanpassen), bekijk elke hoek live op het regiescherm, neem elke bal op en vergelijk twee hoeken naast elkaar. Je ziet precies wat elke telefoon filmt vanaf zijn plek – statief, hek of clubhuisraam – dus clubvideo, geen tv-beelden.",
       },
       {
         q: "Kan ik scoren zonder bereik?",
@@ -1024,7 +1024,7 @@ export const af: Content = {
     },
     {
       title: "Kamerakamer met verskeie fone",
-      body: "Koppel tot 8 fone per wedstryd – aan albei kante, van die sykant en rondbeweeg – en koppel elke hoek aan die bal wat dit verfilm het.",
+      body: "Koppel tot 16 fone of die klub se eie kameras per wedstryd – agter die bouler, van die sykant, agter die paaltjiewagter of in die nette – en koppel elke vaste hoek aan die bal wat dit verfilm het.",
     },
     {
       title: "Afrigtersontleding",
@@ -1100,7 +1100,7 @@ export const af: Content = {
       {
         label: "Afrigtersontleding",
         caption:
-          "Rekenaar • twee gesinchroniseerde hoeke langs mekaar, raampie-vir-raampie navigasie en tekengereedskap",
+          "Rekenaar • foonhoeke van vaste plekke om die veld, raampie-vir-raampie navigasie en tekengereedskap",
       },
       {
         label: "Wedstryd-dashboard",
@@ -1187,7 +1187,7 @@ export const af: Content = {
       price: "Ekstra fooi",
       period: "kwotasie per klub",
       perks: [
-        "Kamerakamer met meer fone – tot 8 fone per wedstryd",
+        "Kamerakamer met meer fone – tot 16 fone per wedstryd",
         "Elke bal opgeneem en aan die telkaart gekoppel, met stadige aksie",
         "Afrigtingsoorsig, merking en spelervideo-ontleding",
         "Hoogtepunt-video's en knipsel-uitvoer",
@@ -1217,7 +1217,7 @@ export const af: Content = {
       },
       {
         q: "Het ek spesiale kameras nodig?",
-        a: "Nee. Met die video-byvoeging werk gewone fone. Koppel tot 8 fone per wedstryd (aanvanklik 4 – die klub kan dit verander), kyk elke hoek regstreeks op die regieskerm, neem elke bal op en vergelyk twee hoeke langs mekaar.",
+        a: "Nee. Met die video-byvoeging werk gewone fone of die kameras wat jou klub reeds het. Koppel tot 16 per wedstryd (aanvanklik 4 – die klub kan dit verander), kyk elke hoek regstreeks op die regieskerm, neem elke bal op en vergelyk twee hoeke langs mekaar. Jy sien presies wat elke foon verfilm van waar dit opgestel is – driepoot, heining of klubhuisvenster – dus klubvideo, nie TV-beelde nie.",
       },
       {
         q: "Kan ek sonder sein aanteken?",
@@ -1343,7 +1343,7 @@ export const fr: Content = {
     },
     {
       title: "Salle caméra multi-téléphones",
-      body: "Associez jusqu'à 8 téléphones par match – aux deux extrémités, de côté et mobiles – et reliez chaque angle à la balle filmée.",
+      body: "Associez jusqu'à 16 téléphones ou les caméras du club par match – derrière le lanceur, de côté, derrière le gardien ou au filet – et reliez chaque angle fixe à la balle filmée.",
     },
     {
       title: "Analyse d'entraînement",
@@ -1418,7 +1418,7 @@ export const fr: Content = {
       {
         label: "Analyse d'entraînement",
         caption:
-          "Bureau • deux angles synchronisés côte à côte, navigation image par image et outils de dessin",
+          "Bureau • angles de téléphones placés à des endroits fixes autour du terrain, navigation image par image et outils de dessin",
       },
       {
         label: "Tableau de bord du match",
@@ -1507,7 +1507,7 @@ export const fr: Content = {
       price: "Supplément",
       period: "devis par club",
       perks: [
-        "Salle caméra multi-téléphones – jusqu'à 8 téléphones par match",
+        "Salle caméra multi-téléphones – jusqu'à 16 téléphones par match",
         "Chaque balle filmée et liée à la feuille de score, avec ralenti",
         "Revue d'entraînement, marquage et analyse vidéo par joueur",
         "Résumés vidéo et export de clips",
@@ -1537,7 +1537,7 @@ export const fr: Content = {
       },
       {
         q: "Faut-il des caméras spéciales ?",
-        a: "Non. Avec l'option vidéo, de simples téléphones suffisent. Associez jusqu'à 8 téléphones par match (4 au départ – le club peut changer), suivez chaque angle en direct sur l'écran de réalisation, enregistrez chaque balle et comparez deux angles côte à côte.",
+        a: "Non. Avec l'option vidéo, de simples téléphones suffisent, ou les caméras que votre club possède déjà. Associez-en jusqu'à 16 par match (4 au départ – le club peut changer), suivez chaque angle en direct sur l'écran de réalisation, enregistrez chaque balle et comparez deux angles côte à côte. Vous voyez exactement ce que chaque téléphone filme depuis sa place – trépied, clôture ou fenêtre du club-house – donc une vidéo de club, pas des images télé.",
       },
       {
         q: "Puis-je marquer sans réseau ?",

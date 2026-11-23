@@ -58,12 +58,13 @@ test("rain FAQ offers the built rain rules and DLS only from official inputs", (
   }
 });
 
-test("camera copy states the real 8-phone match limit, never unlimited", () => {
+test("camera copy states the real 16-phone match limit, never unlimited", () => {
   for (const [language, copy] of Object.entries(languages)) {
     const text = JSON.stringify(copy);
     assert.doesNotMatch(text, /Unlimited camera|Unbegrenzte Kamera|Onbeperkt camera|Onbeperkte kamera|caméra illimités/i);
     const cameras = copy.faq.items[1]!;
-    assert.match(cameras.a, /\b8\b/, `${language}: camera FAQ names the 8-phone limit`);
+    assert.match(cameras.a, /\b16\b/, `${language}: camera FAQ names the 16-phone limit`);
+    assert.doesNotMatch(text, /\b8 (phones|Handys|telefoons|fone|téléphones)/, `${language}: no leftover 8-phone limit`);
   }
 });
 

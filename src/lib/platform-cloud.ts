@@ -851,7 +851,7 @@ export async function createCameraRoom(input: {
   return data as { roomId: string; pairingToken: string; expiresAt: string };
 }
 
-/** How many phones may join a camera room (1–8). Only camera directors for the match can change it. */
+/** How many phones may join a camera room (1–16). Only camera directors for the match can change it. */
 export async function setCameraRoomCapacity(roomId: string, maxDevices: number): Promise<void> {
   const { error } = await getCloudClient().rpc("set_camera_room_capacity", { p_room_id: roomId, p_max_devices: maxDevices });
   if (error) throw error;

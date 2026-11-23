@@ -120,6 +120,13 @@
       "when": 1795427199549,
       "tag": "0016_office_order_lock_and_captain",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1795429749437,
+      "tag": "0017_camera_rooms_up_to_16_phones",
+      "breakpoints": true
     }
   ]
 }

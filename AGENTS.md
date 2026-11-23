@@ -27,3 +27,4 @@
 - Member fee payments are bank/wallet transfers the member reports with a reference (`fee_payment_claims`); only `decide_fee_claim` (finance roles) turns one into a `fee_payments` row — no live payment gateway is involved, references can't be reused, and claims can't exceed what's owed.
 - What each pricing plan includes (free/paid/add-on) lives in `src/lib/plans.ts`; the pricing page and any in-app checks must read that one table so the rules never drift apart.
 - The root `.env` (publishable backend URL/key only, never secrets) is committed to Git — published builds are made from the repo and lose the backend connection without it.
+- The per-match camera phone limit lives in `src/lib/camera-limits.ts` and must match the `camera_rooms` check constraint and `set_camera_room_capacity` — the database is the real limit; the UI only offers the same choices.

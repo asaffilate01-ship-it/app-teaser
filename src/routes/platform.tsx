@@ -9,6 +9,7 @@ import { fixtureCalendarIcs } from "@/lib/fixture-calendar";
 import { reviewFixtureSchedule } from "@/lib/fixture-scheduling";
 import { FixtureBuilder } from "@/components/league/FixtureBuilder";
 import { readSection, platformSections } from "@/lib/navigation";
+import { cameraLimitChoices } from "@/lib/camera-limits";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   useCallback,
@@ -1661,7 +1662,7 @@ function Capture({
                       value={room.maxDevices}
                       onChange={(event) => void run(() => setCameraRoomCapacity(room.id, Number(event.target.value)))}
                     >
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map((count) => (
+                      {cameraLimitChoices().map((count) => (
                         <option key={count} value={count} disabled={count < room.devices.length}>
                           {count}
                         </option>
