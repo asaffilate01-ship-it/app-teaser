@@ -19,6 +19,8 @@ const dismissalWords: Record<string, string> = {
   "obstructing-the-field": "Obstructing the field",
 };
 
+const stoppageWords: Record<string, string> = { rain: "Rain delay", "bad-light": "Bad light", "wet-outfield": "Wet outfield", other: "Play suspended" };
+
 const ordinal = (n: number) => `${n}${n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd" : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th"}`;
 
 const possessive = (name: string) => (/s$/i.test(name) ? `${name}'` : `${name}'s`);
@@ -76,6 +78,13 @@ export function alertsBetween(prev: CricketMatch, next: CricketMatch): MatchAler
     alerts.push({ kind: "results", title: `Innings ended: ${now.text}`, body: innings.declared ? "Declared" : "Next innings coming up" });
   } else if (next.days?.atStumps && !prev.days?.atStumps) {
     alerts.push({ kind: "results", title: `Stumps, Day ${next.days.current}`, body: now.text });
+  }
+  if (next.status !== "completed") {
+    if (next.stoppage && !prev.stoppage) {
+      alerts.push({ kind: "results", title: `${stoppageWords[next.stoppage.reason] ?? "Play suspended"}`, body: `Play has stopped · ${now.text}` });
+    } else if (!next.stoppage && prev.stoppage) {
+      alerts.push({ kind: "results", title: "Play resumes", body: now.text });
+    }
   }
   return alerts.slice(0, 3);
 }

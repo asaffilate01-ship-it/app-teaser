@@ -239,6 +239,13 @@ function Header({
                 {t.nav[m.key]}
               </button>
             ))}
+          <Link
+            to="/live"
+            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 lg:px-4"
+          >
+            <span className="live-dot" aria-hidden="true" />
+            {t.nav.liveScores}
+          </Link>
           <LanguageSelect className="ml-1 lg:ml-2" />
           <ThemeToggle
             className="theme-toggle-light-chrome ml-1"
@@ -254,6 +261,13 @@ function Header({
         </nav>
 
         <div className="flex items-center gap-2 md:hidden">
+          <Link
+            to="/live"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-slate-200 px-3 text-xs font-bold uppercase tracking-wide text-slate-700"
+          >
+            <span className="live-dot" aria-hidden="true" />
+            {t.nav.liveScores}
+          </Link>
           <ThemeToggle
             className="theme-toggle-light-chrome"
             labels={{ toLight: t.nav.themeLight, toDark: t.nav.themeDark }}

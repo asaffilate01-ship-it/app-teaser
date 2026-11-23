@@ -126,6 +126,14 @@ export interface CricketMatch {
   rain?: RainState | undefined;
   /** Multi-day play: which day it is, whether stumps have been drawn, and each day's close-of-play score. */
   days?: MatchDays | undefined;
+  /** Play stopped for rain, bad light or another reason (scoring paused until it resumes). */
+  stoppage?: PlayStoppage | null | undefined;
+}
+
+export type StoppageReason = "rain" | "bad-light" | "wet-outfield" | "other";
+export interface PlayStoppage {
+  reason: StoppageReason;
+  since: string;
 }
 
 export interface CloseOfPlay {

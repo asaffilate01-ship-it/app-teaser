@@ -3217,6 +3217,7 @@ export type Database = {
       }
       organisations: {
         Row: {
+          country_code: string | null
           created_at: string
           created_by: string
           creation_request_id: string | null
@@ -3224,11 +3225,13 @@ export type Database = {
           id: string
           kind: Database["public"]["Enums"]["organisation_kind"]
           name: string
+          region: string | null
           settings: Json
           slug: string
           updated_at: string
         }
         Insert: {
+          country_code?: string | null
           created_at?: string
           created_by: string
           creation_request_id?: string | null
@@ -3236,11 +3239,13 @@ export type Database = {
           id?: string
           kind: Database["public"]["Enums"]["organisation_kind"]
           name: string
+          region?: string | null
           settings?: Json
           slug: string
           updated_at?: string
         }
         Update: {
+          country_code?: string | null
           created_at?: string
           created_by?: string
           creation_request_id?: string | null
@@ -3248,6 +3253,7 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["organisation_kind"]
           name?: string
+          region?: string | null
           settings?: Json
           slug?: string
           updated_at?: string
@@ -5078,6 +5084,7 @@ export type Database = {
           weight: number
         }[]
       }
+      list_public_live_matches: { Args: never; Returns: Json }
       match_scoring_team: {
         Args: { p_match_id: string }
         Returns: {

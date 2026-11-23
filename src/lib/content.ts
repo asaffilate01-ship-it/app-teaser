@@ -9,6 +9,7 @@ export const en = {
     login: "Get started",
     themeLight: "Switch to light mode",
     themeDark: "Switch to dark mode",
+    liveScores: "Live scores",
   },
   hero: {
     l1: "Every ball.",
@@ -338,6 +339,7 @@ export const de: Content = {
     login: "Loslegen",
     themeLight: "Zum hellen Modus wechseln",
     themeDark: "Zum dunklen Modus wechseln",
+    liveScores: "Live-Ergebnisse",
   },
   hero: {
     l1: "Jeder Ball.",
@@ -670,6 +672,7 @@ export const nl: Content = {
     login: "Aan de slag",
     themeLight: "Naar lichte modus",
     themeDark: "Naar donkere modus",
+    liveScores: "Live scores",
   },
   hero: {
     l1: "Elke bal.",
@@ -1000,6 +1003,7 @@ export const af: Content = {
     login: "Begin hier",
     themeLight: "Skakel na ligte modus",
     themeDark: "Skakel na donker modus",
+    liveScores: "Lewendige tellings",
   },
   hero: {
     l1: "Elke bal.",
@@ -1332,6 +1336,7 @@ export const fr: Content = {
     login: "Commencer",
     themeLight: "Passer en mode clair",
     themeDark: "Passer en mode sombre",
+    liveScores: "Scores en direct",
   },
   hero: {
     l1: "Chaque balle.",

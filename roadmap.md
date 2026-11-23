@@ -135,3 +135,4 @@
 - [x] Logistics per appointment: report time, venue, meeting point, contact, travel notes
 - [x] Payments: fee + travel expenses, due → approved → paid with reference (treasurer or admin), voluntary umpires
 - [x] Umpire dashboard (/umpire): accept/decline, availability calendar, earnings and money owed, logistics, check expiries — across every panel they're on
+- [x] Public Live scores page (/live): filters by country/region/competition, many scores at once, alerts for wickets/4s/6s/rain delays/results; scorer "Stop play" button; club "Where you play" setting

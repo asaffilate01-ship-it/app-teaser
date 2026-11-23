@@ -69,6 +69,7 @@ import {
 import { MatchRulesFields } from "@/components/scorer/MatchRulesFields";
 import { RainPanel } from "@/components/scorer/RainPanel";
 import { DayPanel } from "@/components/scorer/DayPanel";
+import { StoppagePanel } from "@/components/scorer/StoppagePanel";
 import { InstallBanner } from "@/components/app-shell/InstallApp";
 import {
   allowedDismissals,
@@ -1364,7 +1365,8 @@ function LiveMatch({
         )}
         <div hidden={tab !== "score"}>
           {!cloudConflict && access.recordBalls && <DayPanel match={match} onSave={saveAndSync} />}
-          {!cloudConflict && access.recordBalls && !match.days?.atStumps && (
+          {!cloudConflict && access.recordBalls && <StoppagePanel match={match} onSave={saveAndSync} />}
+          {!cloudConflict && access.recordBalls && !match.days?.atStumps && !match.stoppage && (
             <ScoringPad
               match={match}
               onSave={saveAndSync}

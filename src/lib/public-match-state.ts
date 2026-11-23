@@ -162,6 +162,8 @@ export function publicLiveState(match: CricketMatch, options: PublicStateOptions
     days: match.days ?? null,
     // Rain interruption figures (no names): restores the scorer on other devices and shows the par publicly.
     rain: match.rain ?? null,
+    // Rain delay / bad light: reason and start time only, so viewers know play has stopped.
+    stoppage: match.status === "completed" ? null : (match.stoppage ?? null),
     // Overs allowed in this innings after Super Over / rain changes, so chases read right everywhere.
     oversLimit: inningsOversLimit(match, innings),
     par: liveParScore(match),

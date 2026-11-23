@@ -232,6 +232,13 @@
       "when": 1795439730160,
       "tag": "0032_club_criclume_addresses",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1795441079675,
+      "tag": "0033_public_live_centre",
+      "breakpoints": true
     }
   ]
 }

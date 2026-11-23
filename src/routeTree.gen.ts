@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as LiveRouteImport } from './routes/live'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PromoRouteImport } from './routes/promo'
@@ -40,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LiveRoute = LiveRouteImport.update({
+  id: '/live',
+  path: '/live',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformRoute = PlatformRouteImport.update({
@@ -146,6 +152,7 @@ const ClubSlugNewsPostIdRoute = ClubSlugNewsPostIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
+  '/live': typeof LiveRoute
   '/platform': typeof PlatformRoute
   '/privacy': typeof PrivacyRoute
   '/promo': typeof PromoRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
+  '/live': typeof LiveRoute
   '/platform': typeof PlatformRoute
   '/privacy': typeof PrivacyRoute
   '/promo': typeof PromoRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRoute
+  '/live': typeof LiveRoute
   '/platform': typeof PlatformRoute
   '/privacy': typeof PrivacyRoute
   '/promo': typeof PromoRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/live'
     | '/platform'
     | '/privacy'
     | '/promo'
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/app'
+    | '/live'
     | '/platform'
     | '/privacy'
     | '/promo'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/live'
     | '/platform'
     | '/privacy'
     | '/promo'
@@ -292,6 +304,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRoute
+  LiveRoute: typeof LiveRoute
   PlatformRoute: typeof PlatformRoute
   PrivacyRoute: typeof PrivacyRoute
   PromoRoute: typeof PromoRoute
@@ -323,6 +336,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/live': {
+      id: '/live'
+      path: '/live'
+      fullPath: '/live'
+      preLoaderRoute: typeof LiveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform': {
@@ -501,6 +521,7 @@ const ClubSlugRouteWithChildren = ClubSlugRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRoute,
+  LiveRoute: LiveRoute,
   PlatformRoute: PlatformRoute,
   PrivacyRoute: PrivacyRoute,
   PromoRoute: PromoRoute,

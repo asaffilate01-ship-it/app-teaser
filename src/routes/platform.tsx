@@ -1,3 +1,4 @@
+import { LiveListingPanel } from "@/components/club/LiveListingPanel";
 import {
   readOrganisationDraft,
   storeOrganisationDraft,
@@ -801,6 +802,7 @@ function Overview({
         ))}
       </div>
       <ClubMatchInsights data={data} onViewStats={onViewStats} />
+      {can(role, "organisation.manage") && <LiveListingPanel organisationId={data.organisationId} />}
       {can(role, "match.manage") && <CreateMatchPanel data={data} run={run} />}
       <Panel
         title="Matches"
