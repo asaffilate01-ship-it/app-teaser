@@ -1,4 +1,6 @@
 import { MatchCharts } from "@/components/club/MatchCharts";
+import { WagonWheelField } from "@/components/WagonWheelField";
+import type { WheelBall } from "@/lib/wagon-geometry";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, MapPin, Trophy, Target, Activity, Users } from "lucide-react";
@@ -11,11 +13,9 @@ import {
   topAllRounders,
   topBatters,
   topBowlers,
-  wagonWheel,
-  wheelZones,
+  type InsightBall,
   type InsightInningsData,
   type OverPoint,
-  type WagonWheel,
 } from "@/lib/match-insights";
 import { teamInitials } from "@/lib/match-broadcast";
 
@@ -291,7 +291,7 @@ export function InningsDashboard({
   onViewStats?: (() => void) | undefined;
 }) {
   const points = overProgression(innings.balls, perOver);
-  const wheel = wagonWheel(innings.balls);
+  const wheelBalls = toWheelBalls(innings.balls);
   const batters = topBatters(innings.balls);
   const bowlers = topBowlers(innings.balls, perOver);
   const allRounders = topAllRounders(allInnings.flatMap((item) => item.balls), perOver);
@@ -333,15 +333,9 @@ export function InningsDashboard({
             </dl>
           </div>
         </article>
-        <article className="broadcast-panel lg:col-span-2">
-          <h3 className="panel-kicker">Wagon wheel</h3>
-          <WagonWheelChart wheel={wheel} overs={oversText(legalBalls)} />
-          {wheel.unplacedRuns > 0 && (
-            <p className="insights-muted mt-2 text-center text-[11px]">
-              {wheel.unplacedRuns} run{wheel.unplacedRuns === 1 ? "" : "s"} without a recorded field zone
-            </p>
-          )}
-        </article>
+        <div className="lg:col-span-2">
+          <WagonWheelField balls={wheelBalls} playerName={nameOfPlayer} kicker={`${oversText(legalBalls)} overs · shot map`} compact />
+        </div>
       </div>
       <MatchCharts
         innings={innings}
@@ -483,49 +477,23 @@ function RunRateChart({
   );
 }
 
-function wedgePath(cx: number, cy: number, r0: number, r1: number, start: number, end: number) {
-  const point = (r: number, angle: number) => {
-    const rad = ((angle - 90) * Math.PI) / 180;
-    return `${(cx + r * Math.cos(rad)).toFixed(2)},${(cy + r * Math.sin(rad)).toFixed(2)}`;
-  };
-  return `M${point(r0, start)} L${point(r1, start)} A${r1},${r1} 0 0 1 ${point(r1, end)} L${point(r0, end)} A${r0},${r0} 0 0 0 ${point(r0, start)} Z`;
-}
 
-function WagonWheelChart({ wheel, overs }: { wheel: WagonWheel; overs: string }) {
-  const size = 300;
-  const c = size / 2;
-  const inner = 42;
-  const outer = 108;
-  const step = 360 / wheelZones.length;
-  const maxShare = Math.max(1, ...wheel.zones.map((zone) => zone.share));
-  return (
-    <svg viewBox={`0 0 ${size} ${size}`} className="wagon-wheel" role="img" aria-label={`Wagon wheel: ${wheel.placedRuns} runs placed`}>
-      {wheel.zones.map((zone, index) => {
-        const start = index * step;
-        const end = start + step;
-        const mid = ((start + step / 2 - 90) * Math.PI) / 180;
-        const labelR = (inner + outer) / 2 + 4;
-        const nameR = outer + 18;
-        const intensity = zone.runs > 0 ? 0.35 + (zone.share / maxShare) * 0.55 : 0.12;
-        return (
-          <g key={zone.zone}>
-            <path
-              d={wedgePath(c, c, inner, outer, start, end)}
-              className={`wheel-wedge wheel-wedge-${index}`}
-              style={{ fillOpacity: intensity }}
-            >
-              <title>{`${zone.zone}: ${zone.runs} runs (${zone.share}%)`}</title>
-            </path>
-            <text x={c + labelR * Math.cos(mid)} y={c + labelR * Math.sin(mid) - 2} textAnchor="middle" className="wheel-runs">{zone.runs}</text>
-            <text x={c + labelR * Math.cos(mid)} y={c + labelR * Math.sin(mid) + 11} textAnchor="middle" className="wheel-share">{zone.share}%</text>
-            <text x={c + nameR * Math.cos(mid)} y={c + nameR * Math.sin(mid) + 3} textAnchor="middle" className="wheel-name">{zone.zone}</text>
-          </g>
-        );
-      })}
-      <circle cx={c} cy={c} r={inner - 4} className="wheel-hub" />
-      <text x={c} y={c - 10} textAnchor="middle" className="wheel-hub-kicker">Total</text>
-      <text x={c} y={c + 10} textAnchor="middle" className="wheel-hub-runs">{wheel.placedRuns}</text>
-      <text x={c} y={c + 24} textAnchor="middle" className="wheel-hub-kicker">{overs} ov</text>
-    </svg>
-  );
+
+/** Club dashboard balls in the wagon wheel's shape (ball number counted within each over). */
+function toWheelBalls(balls: InsightBall[]): WheelBall[] {
+  const inOver = new Map<number, number>();
+  return balls.map((ball, index) => {
+    const n = (inOver.get(ball.over) ?? 0) + (ball.legal ? 1 : 0);
+    inOver.set(ball.over, n);
+    return {
+      id: `b${index}`,
+      over: ball.over,
+      ball: Math.max(1, n),
+      strikerId: ball.strikerId,
+      bowlerId: ball.bowlerId,
+      batterRuns: ball.batterRuns,
+      fieldZone: ball.fieldZone,
+      wicket: Boolean(ball.dismissalType),
+    };
+  });
 }
