@@ -224,22 +224,29 @@ export function ShotZonePicker({
         )}
       </div>
 
-      <div>
-        <p className="shot-step-label">Close in</p>
-        <div className="zone-chips">
-          {closeCatchers.map((catcher) => (
-            <button
-              key={catcher.name}
-              type="button"
-              aria-pressed={value === catcher.name}
-              aria-label={catcher.name}
-              onClick={() => pick(catcher.name)}
-              className="zone-chip"
-            >
-              {catcher.label}
-            </button>
-          ))}
-        </div>
+      <div className="zone-close">
+        {(leftHanded ? (["leg", "off"] as const) : (["off", "leg"] as const)).map((side) => (
+          <div key={side} role="group" aria-label={`Close in, ${side} side`}>
+            <p className="shot-step-label">Close in · {side} side</p>
+            <div className="zone-chips">
+              {closeCatchers
+                .filter((catcher) => catcher.side === side)
+                .map((catcher) => (
+                  <button
+                    key={catcher.name}
+                    type="button"
+                    aria-pressed={value === catcher.name}
+                    aria-label={catcher.name}
+                    title={catcher.name}
+                    onClick={() => pick(catcher.name)}
+                    className="zone-chip"
+                  >
+                    {catcher.label}
+                  </button>
+                ))}
+            </div>
+          </div>
+        ))}
       </div>
 
       {recentShown.length > 0 && (

@@ -1869,3 +1869,7 @@
 .outcome-chips .fielder-chip {
   padding: 0 0.9rem;
 }
+.zone-close {
+  display: grid;
+  gap: 0.6rem;
+}

@@ -7,6 +7,7 @@ export type DeliveryStyle = "Fast" | "Medium" | "Off spin" | "Leg spin" | "Left-
 export type ShotOutcome = "hit" | "hit-no-run" | "left" | "missed" | "wicket";
 export type { FieldZone } from "./field-positions.ts";
 import type { FieldZone } from "./field-positions.ts";
+import type { MatchConditions } from "./win-predictor.ts";
 
 export type DismissalType =
   "bowled" | "caught" | "lbw" | "stumped" | "run-out" | "hit-wicket" | "obstructing-the-field";
@@ -89,6 +90,10 @@ export interface CricketMatch {
   settings: MatchSettings;
   teams: [Team, Team];
   innings: Innings[];
+  /** Pitch, outfield and weather used by the win predictor. */
+  conditions?: MatchConditions | undefined;
+  /** What viewers of the public scoreboard may see beyond the score. */
+  audience?: { commentary?: boolean } | undefined;
 }
 
 export interface CreateMatchInput {

@@ -1,4 +1,5 @@
 import type { CricketMatch } from "./cricket.ts";
+import { commentaryFeed } from "./commentary.ts";
 import {
   battingCard,
   bowlingCard,
@@ -70,6 +71,15 @@ export function publicLiveState(match: CricketMatch): Record<string, unknown> {
               : "·",
       kind: delivery.dismissal ? "wicket" : delivery.batterRuns >= 4 ? "boundary" : "normal",
     })),
+    // Win predictor inputs: conditions and match shape only, nothing personal.
+    inningsNumber: match.innings.length,
+    maxWickets: Math.min(10, Math.max(1, (batting?.players.length ?? 11) - 1)),
+    battingIsHome: innings.battingTeamId === match.teams[0].id,
+    conditions: match.conditions ?? null,
+    // Ball-by-ball text only when the scorer switches it on; built without a name resolver, so roles only.
+    commentary: match.audience?.commentary
+      ? commentaryFeed(innings, match.settings.ballsPerOver, { battingTeam: batting?.name }, 24)
+      : null,
     message:
       match.status === "completed"
         ? "Match completed"

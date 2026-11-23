@@ -29,19 +29,26 @@ export const ringSectors = [
   { start: 228, end: 261, area: "Cover", inner: "Extra cover", innerLabel: ["Extra", "cover"], deep: "Deep extra cover", deepLabel: ["Deep", "ex cover"] },
   { start: 261, end: 294, area: "Cover", inner: "Cover", innerLabel: ["Cover"], deep: "Deep cover", deepLabel: ["Deep", "cover"] },
   { start: 294, end: 327, area: "Point", inner: "Point", innerLabel: ["Point"], deep: "Deep point", deepLabel: ["Deep", "point"] },
-  { start: 327, end: 360, area: "Third", inner: "Gully", innerLabel: ["Gully"], deep: "Third man", deepLabel: ["Third", "man"] },
+  { start: 327, end: 360, area: "Third", inner: "Short third", innerLabel: ["Short", "third"], deep: "Third man", deepLabel: ["Third", "man"] },
 ] as const;
 
-/** Close catchers sit too near the bat to tap on a small drawing, so they are offered as buttons. */
+/** Close catchers sit too near the bat to tap on a small drawing, so they are offered as buttons, grouped by side. */
 export const closeCatchers = [
-  { name: "First slip", label: "1st slip", area: "Third" },
-  { name: "Second slip", label: "2nd slip", area: "Third" },
-  { name: "Third slip", label: "3rd slip", area: "Third" },
-  { name: "Silly point", label: "Silly point", area: "Point" },
-  { name: "Silly mid-off", label: "Silly mid-off", area: "Long off" },
-  { name: "Silly mid-on", label: "Silly mid-on", area: "Long on" },
-  { name: "Short leg", label: "Short leg", area: "Square leg" },
-  { name: "Leg slip", label: "Leg slip", area: "Fine leg" },
+  { name: "First slip", label: "1st slip", area: "Third", side: "off" },
+  { name: "Second slip", label: "2nd slip", area: "Third", side: "off" },
+  { name: "Third slip", label: "3rd slip", area: "Third", side: "off" },
+  { name: "Fourth slip", label: "4th slip", area: "Third", side: "off" },
+  { name: "Fly slip", label: "Fly slip", area: "Third", side: "off" },
+  { name: "Gully", label: "Gully", area: "Third", side: "off" },
+  { name: "Silly point", label: "Silly point", area: "Point", side: "off" },
+  { name: "Short extra cover", label: "Short cover", area: "Cover", side: "off" },
+  { name: "Silly mid-off", label: "Silly mid-off", area: "Long off", side: "off" },
+  { name: "Leg slip", label: "Leg slip", area: "Fine leg", side: "leg" },
+  { name: "Leg gully", label: "Leg gully", area: "Fine leg", side: "leg" },
+  { name: "Backward short leg", label: "Bat-pad (back)", area: "Square leg", side: "leg" },
+  { name: "Short leg", label: "Short leg", area: "Square leg", side: "leg" },
+  { name: "Short mid-wicket", label: "Short mid-wkt", area: "Mid-wicket", side: "leg" },
+  { name: "Silly mid-on", label: "Silly mid-on", area: "Long on", side: "leg" },
 ] as const;
 
 type RingPosition = (typeof ringSectors)[number]["inner" | "deep"];
@@ -75,8 +82,7 @@ for (const sector of ringSectors) {
   info.set(sector.deep.toLowerCase(), { area: sector.area, depth: "deep", side: sideOf(sector.start) });
 }
 for (const catcher of closeCatchers) {
-  const side = ["Third", "Point", "Long off"].includes(catcher.area) ? "off" : "leg";
-  info.set(catcher.name.toLowerCase(), { area: catcher.area, depth: "close", side });
+  info.set(catcher.name.toLowerCase(), { area: catcher.area, depth: "close", side: catcher.side });
 }
 info.set("keeper", { area: "Keeper", depth: "centre", side: "centre" });
 info.set("bowler", { area: "Bowler", depth: "centre", side: "centre" });
