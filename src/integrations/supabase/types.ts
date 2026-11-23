@@ -960,6 +960,53 @@ export type Database = {
           },
         ]
       }
+      club_payment_accounts: {
+        Row: {
+          account_number: string
+          account_title: string
+          active: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          instructions: string | null
+          method: string
+          organisation_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_number: string
+          account_title: string
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          instructions?: string | null
+          method: string
+          organisation_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string
+          account_title?: string
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          instructions?: string | null
+          method?: string
+          organisation_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_payment_accounts_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competition_awards: {
         Row: {
           category: string
@@ -1852,6 +1899,82 @@ export type Database = {
             columns: ["schedule_id"]
             isOneToOne: false
             referencedRelation: "fee_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_payment_claims: {
+        Row: {
+          amount_minor: number
+          charge_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          method: string
+          note: string | null
+          organisation_id: string
+          paid_on: string
+          payment_id: string | null
+          reference: string
+          status: string
+          submitted_by: string
+        }
+        Insert: {
+          amount_minor: number
+          charge_id: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          method: string
+          note?: string | null
+          organisation_id: string
+          paid_on?: string
+          payment_id?: string | null
+          reference: string
+          status?: string
+          submitted_by?: string
+        }
+        Update: {
+          amount_minor?: number
+          charge_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          method?: string
+          note?: string | null
+          organisation_id?: string
+          paid_on?: string
+          payment_id?: string | null
+          reference?: string
+          status?: string
+          submitted_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_payment_claims_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "fee_charges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payment_claims_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payment_claims_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "fee_payments"
             referencedColumns: ["id"]
           },
         ]
@@ -3826,6 +3949,7 @@ export type Database = {
       }
       can_direct_camera_room: { Args: { p_room_id: string }; Returns: boolean }
       can_operate_camera_room: { Args: { p_room_id: string }; Returns: boolean }
+      can_pay_charge: { Args: { p_charge_id: string }; Returns: boolean }
       can_read_camera_storage_path: {
         Args: { p_name: string }
         Returns: boolean
@@ -3850,6 +3974,10 @@ export type Database = {
       cancel_ground_booking: {
         Args: { p_booking_id: string }
         Returns: undefined
+      }
+      charge_fee_schedule: {
+        Args: { p_player_ids: string[]; p_schedule_id: string }
+        Returns: number
       }
       claim_criclume_omniqora_run: {
         Args: {
@@ -3915,6 +4043,10 @@ export type Database = {
           p_request_id: string
         }
         Returns: string
+      }
+      decide_fee_claim: {
+        Args: { p_claim_id: string; p_confirm: boolean; p_note: string }
+        Returns: undefined
       }
       event_org: { Args: { p_event_id: string }; Returns: string }
       event_selection_published: {
@@ -4101,6 +4233,10 @@ export type Database = {
       set_camera_room_capacity: {
         Args: { p_max_devices: number; p_room_id: string }
         Returns: number
+      }
+      set_selection_role: {
+        Args: { p_event_id: string; p_field: string; p_player_id: string }
+        Returns: undefined
       }
       start_match_innings: {
         Args: {

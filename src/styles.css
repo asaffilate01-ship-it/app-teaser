@@ -645,13 +645,20 @@
 .workspace-rail {
   position: sticky;
   top: 5.5rem;
-  display: flex;
+  /* Phones and tablets use the bottom menu; the side list only shows on wide screens. */
+  display: none;
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.6rem;
   border: 1px solid var(--shell-border);
   border-radius: 1rem;
   background: var(--gradient-surface);
+}
+
+@media (min-width: 64rem) {
+  .workspace-rail {
+    display: flex;
+  }
 }
 
 .setup-card {

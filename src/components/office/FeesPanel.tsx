@@ -5,10 +5,12 @@ import { currencyDigits, feeTotals, formatMoney, isOverdue, maxPayment, toMinor,
 import { office, type FeeCharge, type FeeSchedule } from "@/lib/club-office-cloud";
 import { findRegion, regionFromLocale } from "@/lib/pricing";
 import { Empty, OfficeCard, OfficeField, Pill, currencies, day, nameOfPlayer, type OfficeProps } from "./ui";
+import { ClaimsQueue, HowToPay, MyClaims, PaymentAccounts, PayForm } from "./FeePayments";
 
 const methods = [
   ["cash", "Cash"],
   ["bank_transfer", "Bank transfer"],
+  ["raast", "Raast"],
   ["jazzcash", "JazzCash"],
   ["easypaisa", "Easypaisa"],
   ["mpesa", "M-Pesa"],
@@ -49,11 +51,28 @@ function statusPill(charge: FeeCharge) {
 export function FeesPanel(props: OfficeProps) {
   const { data, club, role } = props;
   const manager = can(role, "fees.manage");
-  if (!manager) {
+  if (!manager) return <MemberFees {...props} />;
+  return (
+    <div className="space-y-4">
+      <Totals charges={data.charges} />
+      <ClaimsQueue {...props} />
+      <NewSchedule {...props} />
+      <Schedules {...props} />
+      <Charges {...props} />
+      <PaymentAccounts {...props} />
+    </div>
+  );
+}
+
+function MemberFees(props: OfficeProps) {
+  const { data, club } = props;
+  const [paying, setPaying] = useState<string | null>(null);
+  {
     const mine = data.charges;
     return (
       <div className="space-y-4">
-        <OfficeCard title="My fees" description="Only you, your family and the club's treasurer can see these. Pay the treasurer by cash, bank or mobile money — they'll mark it paid here.">
+        {mine.some((charge) => maxPayment(asCharge(charge)) > 0) && <HowToPay {...props} />}
+        <OfficeCard title="My fees" description="Only you, your family and the club's treasurer can see these.">
           {mine.length === 0 ? (
             <Empty>Nothing to pay right now.</Empty>
           ) : (
@@ -67,26 +86,25 @@ export function FeesPanel(props: OfficeProps) {
                       {charge.due_on ? ` · due ${day(charge.due_on)}` : ""}
                     </span>
                   </span>
-                  <span className="flex items-center gap-2">
+                  <span className="flex flex-wrap items-center gap-2">
                     {formatMoney(maxPayment(asCharge(charge)), charge.currency)} left {statusPill(charge)}
+                    {maxPayment(asCharge(charge)) > 0 && (
+                      <button type="button" className="action-primary" onClick={() => setPaying(paying === charge.id ? null : charge.id)}>
+                        I've paid
+                      </button>
+                    )}
                   </span>
+                  {paying === charge.id && <PayForm {...props} charge={charge} onDone={() => setPaying(null)} />}
                 </div>
               ))}
             </div>
           )}
         </OfficeCard>
+        <MyClaims {...props} />
         <FeeList schedules={data.schedules} />
       </div>
     );
   }
-  return (
-    <div className="space-y-4">
-      <Totals charges={data.charges} />
-      <NewSchedule {...props} />
-      <Schedules {...props} />
-      <Charges {...props} />
-    </div>
-  );
 }
 
 function FeeList({ schedules }: { schedules: FeeSchedule[] }) {

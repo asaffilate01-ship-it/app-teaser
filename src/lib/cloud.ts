@@ -118,9 +118,14 @@ export async function signOutCloud(): Promise<void> {
 }
 
 export async function listOrganisationMemberships(): Promise<OrganisationMembership[]> {
-  const { data, error } = await getCloudClient()
+  const client = getCloudClient();
+  const { data: auth } = await client.auth.getUser();
+  if (!auth.user) return [];
+  // Members can see their club-mates' rows, so only take the signed-in person's own memberships.
+  const { data, error } = await client
     .from("organisation_members")
     .select("organisation_id, role, organisations!inner(name, kind)")
+    .eq("user_id", auth.user.id)
     .eq("status", "active");
   if (error) throw error;
   return (data ?? []).map((row) => {

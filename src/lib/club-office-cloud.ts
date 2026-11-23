@@ -16,6 +16,8 @@ export type ClubItem = Tables["club_items"]["Row"];
 export type ItemOrder = Tables["item_orders"]["Row"];
 export type EquipmentLoan = Tables["equipment_loans"]["Row"];
 export type GuardianLink = Tables["player_guardians"]["Row"];
+export type PaymentAccount = Tables["club_payment_accounts"]["Row"];
+export type PaymentClaim = Tables["fee_payment_claims"]["Row"];
 export interface BookableGround {
   ground_id: string;
   ground_name: string;
@@ -44,6 +46,8 @@ export interface ClubOfficeData {
   schedules: FeeSchedule[];
   charges: FeeCharge[];
   payments: FeePayment[];
+  paymentAccounts: PaymentAccount[];
+  claims: PaymentClaim[];
   grounds: OwnGround[];
   bookings: GroundBooking[];
   bookableGrounds: BookableGround[];
@@ -65,7 +69,7 @@ export async function loadClubOffice(organisationId: string): Promise<ClubOffice
   if (!userId) throw new Error("Sign in again to open the club office.");
   const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
   const org = organisationId;
-  const [events, myPlayers, guardians, schedules, charges, payments, grounds, bookings, bookable, items, orders, loans, drivers, approved] =
+  const [events, myPlayers, guardians, schedules, charges, payments, grounds, bookings, bookable, items, orders, loans, drivers, approved, accounts, claims] =
     await Promise.all([
       supabase.from("club_events").select("*").eq("organisation_id", org).gte("starts_at", since).order("starts_at").limit(200),
       supabase.from("players").select("id").eq("organisation_id", org).eq("linked_user_id", userId),
@@ -87,6 +91,8 @@ export async function loadClubOffice(organisationId: string): Promise<ClubOffice
       supabase.from("equipment_loans").select("*").eq("organisation_id", org).order("issued_at", { ascending: false }).limit(300),
       supabase.from("travel_drivers").select("*").eq("organisation_id", org),
       supabase.rpc("approved_driver_ids", { p_org: org }),
+      supabase.from("club_payment_accounts").select("*").eq("organisation_id", org).order("created_at"),
+      supabase.from("fee_payment_claims").select("*").eq("organisation_id", org).order("created_at", { ascending: false }).limit(500),
     ]);
   const eventRows = must(events) as ClubEvent[];
   const eventIds = eventRows.map((event) => event.id);
@@ -121,6 +127,8 @@ export async function loadClubOffice(organisationId: string): Promise<ClubOffice
     schedules: must(schedules) as FeeSchedule[],
     charges: must(charges) as FeeCharge[],
     payments: must(payments) as FeePayment[],
+    paymentAccounts: must(accounts) as PaymentAccount[],
+    claims: must(claims) as PaymentClaim[],
     grounds: must(grounds) as OwnGround[],
     bookings: must(bookings) as GroundBooking[],
     bookableGrounds: ((bookable.data ?? []) as BookableGround[]).filter((ground) => ground.organisation_id !== org),
@@ -139,6 +147,7 @@ function check(result: { error: { message: string } | null }) {
 export function friendly(message: string): string {
   if (/row-level security/i.test(message)) return "Your role doesn't allow that.";
   if (/ground_bookings_no_double/i.test(message)) return "That time clashes with another approved booking.";
+  if (/fee_payment_claims_reference_once/i.test(message)) return "That transaction reference has already been sent.";
   if (/duplicate key/i.test(message)) return "That's already been added.";
   return message.replace(/^.*?ERROR:\s*/i, "");
 }
@@ -165,10 +174,7 @@ export const office = {
     check(await supabase.from("event_selections").delete().eq("event_id", eventId).eq("player_id", playerId));
   },
   async setRole(eventId: string, playerId: string, field: "captain" | "wicketkeeper") {
-    const off = field === "captain" ? { captain: false } : { wicketkeeper: false };
-    const on = field === "captain" ? { captain: true } : { wicketkeeper: true };
-    check(await supabase.from("event_selections").update(off).eq("event_id", eventId).eq(field, true));
-    check(await supabase.from("event_selections").update(on).eq("event_id", eventId).eq("player_id", playerId));
+    check(await supabase.rpc("set_selection_role", { p_event_id: eventId, p_player_id: playerId, p_field: field }));
   },
   async offerRide(input: Tables["ride_offers"]["Insert"]) {
     check(await supabase.from("ride_offers").insert(input));
@@ -203,23 +209,33 @@ export const office = {
   },
   async chargePlayers(schedule: FeeSchedule, playerIds: string[]) {
     if (!playerIds.length) return;
-    check(
-      await supabase.from("fee_charges").upsert(
-        playerIds.map((playerId) => ({
-          organisation_id: schedule.organisation_id,
-          schedule_id: schedule.id,
-          player_id: playerId,
-          description: schedule.name,
-          amount_minor: schedule.amount_minor,
-          currency: schedule.currency,
-          due_on: schedule.due_on,
-        })),
-        { onConflict: "schedule_id,player_id,due_on", ignoreDuplicates: true },
-      ),
-    );
+    check(await supabase.rpc("charge_fee_schedule", { p_schedule_id: schedule.id, p_player_ids: playerIds }));
   },
   async recordPayment(input: Tables["fee_payments"]["Insert"]) {
     check(await supabase.from("fee_payments").insert(input));
+  },
+  async addPaymentAccount(input: Tables["club_payment_accounts"]["Insert"]) {
+    check(await supabase.from("club_payment_accounts").insert(input));
+  },
+  async setPaymentAccount(id: string, active: boolean) {
+    check(await supabase.from("club_payment_accounts").update({ active }).eq("id", id));
+  },
+  async submitClaim(input: { organisationId: string; chargeId: string; userId: string; amountMinor: number; method: string; reference: string; paidOn: string; note: string }) {
+    check(
+      await supabase.from("fee_payment_claims").insert({
+        organisation_id: input.organisationId,
+        charge_id: input.chargeId,
+        submitted_by: input.userId,
+        amount_minor: input.amountMinor,
+        method: input.method,
+        reference: input.reference,
+        paid_on: input.paidOn,
+        note: input.note || null,
+      }),
+    );
+  },
+  async decideClaim(id: string, confirm: boolean, note: string) {
+    check(await supabase.rpc("decide_fee_claim", { p_claim_id: id, p_confirm: confirm, p_note: note }));
   },
   async waive(id: string, reason: string) {
     check(await supabase.from("fee_charges").update({ status: "waived", waived_reason: reason || null }).eq("id", id));

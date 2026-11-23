@@ -2,7 +2,7 @@ do $$
 declare
   o uuid := gen_random_uuid(); a uuid := gen_random_uuid(); t uuid := gen_random_uuid(); c uuid := gen_random_uuid();
   p uuid := gen_random_uuid(); d1 uuid := gen_random_uuid(); d2 uuid := gen_random_uuid(); x uuid := gen_random_uuid();
-  org1 uuid; org2 uuid; j uuid; ap uuid; g uuid; fs uuid; ch uuid; b1 uuid; b2 uuid; ev uuid; r1 uuid; r2 uuid; bk uuid; it uuid; ord uuid;
+  org1 uuid; org2 uuid; j uuid; ap uuid; g uuid; fs uuid; ch uuid; b1 uuid; b2 uuid; ev uuid; r1 uuid; r2 uuid; bk uuid; it uuid; ord uuid; cl uuid;
   n int; s text; log text := '';
   u uuid;
 begin
@@ -134,11 +134,45 @@ begin
   exception when others then log := log||'29 ok cannot lend more than stock; '; end;
   execute 'reset role';
 
+  -- Transfer payments (Raast / Easypaisa / JazzCash with a reference)
+  perform pg_temp.act(t);
+  insert into public.club_payment_accounts (organisation_id, method, account_title, account_number) values (org1, 'raast', 'Test CC', '03001234567');
+  select public.charge_fee_schedule(fs, array[j, ap]) into n; log := log||'31 charged new='||n||' (j skipped); ';
+  execute 'reset role';
+  perform pg_temp.act(c);
+  begin perform public.charge_fee_schedule(fs, array[ap]); select count(*) into n from public.fee_charges where schedule_id=fs; log := log||'32 coach charge rows='||n||'; ';
+  exception when others then log := log||'32 ok coach cannot charge; '; end;
+  select count(*) into n from public.fee_payment_claims; log := log||'33 coach sees claims='||n||'; ';
+  execute 'reset role';
+  perform pg_temp.act(p);
+  select count(*) into n from public.club_payment_accounts where organisation_id=org1; log := log||'34 parent sees accounts='||n||'; ';
+  insert into public.fee_payment_claims (organisation_id, charge_id, amount_minor, method, reference) values (org1, ch, 1000000, 'raast', ' TID 111 ') returning id into cl;
+  log := log||'35 ok parent sent claim; ';
+  begin insert into public.fee_payment_claims (organisation_id, charge_id, amount_minor, method, reference) values (org1, ch, 1000000, 'easypaisa', 'EP 222'); log := log||'36 BAD overclaim; ';
+  exception when others then log := log||'36 ok overclaim refused; '; end;
+  begin insert into public.fee_payment_claims (organisation_id, charge_id, amount_minor, method, reference) values (org1, ch, 100, 'raast', 'tid 111'); log := log||'37 BAD reused reference; ';
+  exception when others then log := log||'37 ok reused reference refused; '; end;
+  begin perform public.decide_fee_claim(cl, true, ''); log := log||'38 BAD parent confirmed own payment; ';
+  exception when others then log := log||'38 ok parent cannot confirm; '; end;
+  begin update public.fee_payment_claims set status='confirmed' where id=cl; get diagnostics n = row_count; log := log||'39 parent direct update rows='||n||'; ';
+  exception when others then log := log||'39 ok parent cannot edit claim; '; end;
+  execute 'reset role';
+  perform pg_temp.act(d1);
+  begin insert into public.fee_payment_claims (organisation_id, charge_id, amount_minor, method, reference) values (org1, ch, 100, 'jazzcash', 'JC 333'); log := log||'40 BAD non-family claimed; ';
+  exception when others then log := log||'40 ok non-family refused; '; end;
+  execute 'reset role';
+  perform pg_temp.act(t);
+  perform public.decide_fee_claim(cl, true, '');
+  select status||' paid='||paid_minor into s from public.fee_charges where id=ch; log := log||'41 after confirm '||s;
+  select status into s from public.fee_payment_claims where id=cl; log := log||' claim='||s||'; ';
+  execute 'reset role';
   -- Outsider
   perform pg_temp.act(x);
   select count(*) into n from public.fee_charges where organisation_id = org1; log := log||'30 outsider fees='||n;
   select count(*) into n from public.club_events where organisation_id = org1; log := log||' events='||n;
-  select count(*) into n from public.ride_offers where organisation_id = org1; log := log||' rides='||n||'; ';
+  select count(*) into n from public.ride_offers where organisation_id = org1; log := log||' rides='||n;
+  select count(*) into n from public.fee_payment_claims where organisation_id = org1; log := log||' claims='||n;
+  select count(*) into n from public.club_payment_accounts where organisation_id = org1; log := log||' accounts='||n||'; ';
   execute 'reset role';
 
   raise exception 'ROLLBACK RESULT: %', log;

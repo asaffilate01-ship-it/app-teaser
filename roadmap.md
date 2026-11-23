@@ -69,12 +69,13 @@
 - [x] Scouting reports: coaches/managers share full player reports (strengths, weaknesses, scoring shots, fielding, bowling, analytics) with bigger teams — needs player/guardian consent
 
 ## Club office (role-based)
-- [ ] New roles: treasurer and team manager
-- [ ] Fees and subs: charges, payments recorded by treasurer, balances; members see only their own
-- [ ] Ground and nets bookings: own club + requests from other clubs, no double-booking
-- [ ] Events calendar with player availability (players and parents answer)
-- [ ] Team selection per event, hidden until published
-- [ ] Travel: official meet point/time, ride sharing with seat limits; juniors only with approved drivers and parent consent
-- [ ] Merchandise orders and equipment loans
-- [ ] Parent/guardian links so parents act for junior players
-- [ ] Who-can-do-what access table on screen; database rules enforce it
+- [x] New roles: treasurer and team manager
+- [x] Fees and subs: charges, payments recorded by treasurer, balances; members see only their own
+- [x] Ground and nets bookings: own club + requests from other clubs, no double-booking
+- [x] Events calendar with player availability (players and parents answer)
+- [x] Team selection per event, hidden until published
+- [x] Travel: official meet point/time, ride sharing with seat limits; juniors only with approved drivers and parent consent
+- [x] Merchandise orders and equipment loans
+- [x] Parent/guardian links so parents act for junior players
+- [x] Who-can-do-what access table on screen; database rules enforce it
+- [x] Members pay fees in the app by Raast / Easypaisa / JazzCash / bank transfer with a reference; club shows its payment details; treasurer confirms each one

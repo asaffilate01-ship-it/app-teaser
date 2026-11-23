@@ -102,3 +102,18 @@ test("team sheet warnings: wrong side size, no captain, unavailable pick", () =>
   assert.ok(warnings.includes("No captain chosen."));
   assert.ok(warnings.some((w) => w.includes("can't make it")));
 });
+
+import { claimableAmount, cleanReference } from "../src/lib/club-office.ts";
+
+test("members can't claim more than is owed, counting payments waiting to be checked", () => {
+  const charge = { amountMinor: 2500000, paidMinor: 1000000, currency: "PKR", status: "part_paid" as const, dueOn: null };
+  assert.equal(claimableAmount(charge, []), 1500000);
+  assert.equal(claimableAmount(charge, [1000000]), 500000);
+  assert.equal(claimableAmount(charge, [1500000]), 0);
+});
+
+test("a transfer reference is required and trimmed", () => {
+  assert.equal(cleanReference("  RAAST 123456  "), "RAAST 123456");
+  assert.equal(cleanReference("ab"), null);
+  assert.equal(cleanReference("   "), null);
+});

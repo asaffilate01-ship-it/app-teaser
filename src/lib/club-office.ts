@@ -168,3 +168,25 @@ export function officeAccess(role: PlatformRole): Record<OfficeArea, AccessLevel
   }
   return result;
 }
+
+/** Transaction references are trimmed and must be 3–120 characters (same as the database). */
+export function cleanReference(value: string): string | null {
+  const trimmed = value.trim().replace(/\s+/g, " ");
+  return trimmed.length >= 3 && trimmed.length <= 120 ? trimmed : null;
+}
+
+/** Most a member can say they've paid: what's owed minus payments still waiting to be checked. */
+export function claimableAmount(charge: ChargeLike, pendingClaims: number[]): number {
+  return Math.max(0, maxPayment(charge) - pendingClaims.reduce((sum, value) => sum + value, 0));
+}
+
+export const transferMethods = [
+  ["raast", "Raast"],
+  ["easypaisa", "Easypaisa"],
+  ["jazzcash", "JazzCash"],
+  ["bank_transfer", "Bank transfer"],
+  ["mpesa", "M-Pesa"],
+  ["upi", "UPI"],
+  ["bkash", "bKash"],
+  ["other", "Other"],
+] as const;

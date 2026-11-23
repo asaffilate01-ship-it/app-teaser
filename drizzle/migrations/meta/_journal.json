@@ -99,6 +99,27 @@
       "when": 1795419233100,
       "tag": "0013_club_office",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795426776670,
+      "tag": "0014_fee_payment_claims",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1795427011118,
+      "tag": "0015_charge_fee_schedule",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1795427199549,
+      "tag": "0016_office_order_lock_and_captain",
+      "breakpoints": true
     }
   ]
 }
