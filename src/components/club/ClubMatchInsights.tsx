@@ -1,3 +1,4 @@
+import { MatchCharts } from "@/components/club/MatchCharts";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, MapPin, Trophy, Target, Activity, Users } from "lucide-react";
@@ -342,6 +343,14 @@ export function InningsDashboard({
           )}
         </article>
       </div>
+      <MatchCharts
+        innings={innings}
+        allInnings={allInnings}
+        ballsPerOver={perOver}
+        maxOvers={maxOvers}
+        teamName={nameOfTeam}
+        playerName={nameOfPlayer}
+      />
       <article className="broadcast-panel">
         <div className="flex items-center justify-between gap-2">
           <h3 className="panel-kicker">Top performers</h3>

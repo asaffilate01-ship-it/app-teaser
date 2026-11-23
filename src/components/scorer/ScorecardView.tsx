@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { bowlingCard, findTeam, type CricketMatch } from "@/lib/cricket";
+import { ScorecardShare } from "@/components/scorer/ScorecardShare";
+import { bowlingCard, findTeam, isSuperOver, type CricketMatch } from "@/lib/cricket";
 import { battingSplit, fallOfWickets, inningsHeadline } from "@/lib/scorecard";
 
 type View = "batting" | "bowling" | "wickets";
 
 /** Mobile-first scorecard: innings switcher, batting/bowling/wickets tabs, no sideways scrolling. */
-export function ScorecardView({ match }: { match: CricketMatch }) {
+export function ScorecardView({ match, shareable = true }: { match: CricketMatch; shareable?: boolean }) {
   const [selected, setSelected] = useState(match.innings.length - 1);
   const [view, setView] = useState<View>("batting");
   const innings = match.innings[selected] ?? match.innings.at(-1)!;
@@ -41,7 +42,11 @@ export function ScorecardView({ match }: { match: CricketMatch }) {
 
       <div className="card-summary">
         <div className="min-w-0">
-          <p className="panel-kicker">Innings {innings.number}</p>
+          <p className="panel-kicker">
+            {isSuperOver(innings) ? "Super Over" : `Innings ${innings.number}`}
+            {innings.followOn ? " · follow-on" : ""}
+            {innings.declared ? " · declared" : ""}
+          </p>
           <h2 className="truncate font-display text-2xl font-bold">{team.name}</h2>
         </div>
         <div className="text-right">
@@ -162,6 +167,7 @@ export function ScorecardView({ match }: { match: CricketMatch }) {
           ))}
         </ol>
       )}
+      {shareable && <ScorecardShare match={match} />}
     </section>
   );
 }

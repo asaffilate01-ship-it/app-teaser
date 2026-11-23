@@ -768,6 +768,39 @@ export async function createFixture(input: {
   return data.id as string;
 }
 
+/** Insert a whole set of generated fixtures in one request (all or nothing). */
+export async function createFixtures(input: {
+  competition: CompetitionRecord;
+  fixtures: readonly {
+    homeTeamId: string;
+    awayTeamId: string;
+    groundId: string | null;
+    startsAt: string | null;
+    roundName: string;
+  }[];
+}): Promise<number> {
+  if (!input.competition.ruleVersionId) throw new Error("Competition has no active rule version.");
+  if (input.fixtures.length === 0) return 0;
+  if (input.fixtures.length > 400) throw new Error("Create at most 400 fixtures at once.");
+  const { error, count } = await getCloudClient()
+    .from("fixtures")
+    .insert(
+      input.fixtures.map((fixture) => ({
+        competition_id: input.competition.id,
+        rule_version_id: input.competition.ruleVersionId,
+        home_team_id: fixture.homeTeamId,
+        away_team_id: fixture.awayTeamId,
+        ground_id: fixture.groundId,
+        starts_at: fixture.startsAt,
+        round_name: fixture.roundName.slice(0, 120),
+        status: fixture.startsAt ? "scheduled" : "draft",
+      })),
+      { count: "exact" },
+    );
+  if (error) throw error;
+  return count ?? input.fixtures.length;
+}
+
 export async function createMatchWorkspace(input: {
   organisationId: string;
   homeTeamId: string;

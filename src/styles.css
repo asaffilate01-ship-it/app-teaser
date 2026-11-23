@@ -2427,3 +2427,219 @@
   color: oklch(0.8 0.15 155);
   font-weight: 700;
 }
+
+/* Extra match charts: Manhattan, worm and partnerships */
+.series-a { --series: oklch(0.82 0.15 84); }
+.series-b { --series: oklch(0.66 0.13 235); }
+.series-c { --series: oklch(0.7 0.14 160); }
+.series-d { --series: oklch(0.68 0.16 330); }
+.legend-swatch {
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.55rem;
+  border-radius: 2px;
+  background: var(--series);
+}
+.legend-wicket {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: oklch(0.65 0.22 22);
+}
+.chart-series { fill: var(--series); fill-opacity: 0.85; }
+.chart-worm {
+  fill: none;
+  stroke: var(--series);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.chart-wicket-dot {
+  fill: oklch(0.65 0.22 22);
+  stroke: oklch(0.18 0.03 20);
+  stroke-width: 1.2;
+}
+.partnership-bar {
+  margin-top: 0.4rem;
+  display: flex;
+  height: 0.55rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: oklch(1 0 0 / 0.05);
+}
+.partnership-bar span { display: block; height: 100%; background: var(--series); }
+
+/* Scorecard sharing */
+.card-share {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  border-top: 1px solid var(--broadcast-border);
+  padding-top: 1rem;
+}
+.card-share-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.card-share-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: oklch(0.78 0.02 260);
+}
+.card-share-toggle input { accent-color: var(--gold); width: 1rem; height: 1rem; }
+
+/* Fixture builder */
+.builder-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: oklch(0.74 0.02 260);
+}
+.builder-team {
+  min-height: 2.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--broadcast-border);
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: oklch(0.8 0.02 260);
+}
+.builder-team[aria-pressed="true"] {
+  border-color: var(--gold);
+  background: oklch(0.8 0.15 84 / 0.14);
+  color: oklch(0.95 0.04 84);
+}
+.builder-preview {
+  display: grid;
+  gap: 0.75rem;
+  max-height: 26rem;
+  overflow-y: auto;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  padding-right: 0.25rem;
+}
+.builder-round {
+  border-radius: 0.9rem;
+  border: 1px solid var(--broadcast-border);
+  background: oklch(1 0 0 / 0.03);
+  padding: 0.75rem;
+}
+.builder-round-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.builder-round-head span { font-weight: 500; color: oklch(0.74 0.02 260); }
+.builder-round ul { margin-top: 0.5rem; display: grid; gap: 0.35rem; font-size: 0.8rem; }
+.builder-round li { display: flex; flex-direction: column; min-width: 0; }
+.builder-round small { font-size: 0.7rem; color: oklch(0.7 0.02 260); }
+
+/* Head to head */
+.h2h-row { grid-template-columns: minmax(0, 1fr) 2.6rem 2.6rem 2.2rem 2.6rem; }
+.h2h-score {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  text-align: center;
+}
+.h2h-score > div {
+  display: grid;
+  min-width: 0;
+  border-radius: 0.9rem;
+  border: 1px solid var(--broadcast-border);
+  background: oklch(1 0 0 / 0.03);
+  padding: 0.75rem 0.5rem;
+}
+.h2h-score strong { font-family: var(--font-display); font-size: 2rem; line-height: 1; color: var(--gold); }
+.h2h-score span { margin-top: 0.3rem; font-size: 0.7rem; color: oklch(0.75 0.02 260); }
+.hub-player-link {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-weight: 700;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: oklch(0.8 0.15 84 / 0.45);
+  text-underline-offset: 3px;
+}
+.hub-player-link:hover, .hub-player-link:focus-visible { color: var(--gold); }
+
+/* Player profile */
+.profile-head { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 2px solid var(--gold);
+  background: oklch(0.8 0.15 84 / 0.12);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.profile-potm {
+  display: grid;
+  justify-items: center;
+  gap: 0.1rem;
+  border-radius: 1rem;
+  background: var(--gold);
+  color: var(--gold-foreground);
+  padding: 0.6rem 0.9rem;
+  text-align: center;
+}
+.profile-potm strong { font-family: var(--font-display); font-size: 1.5rem; line-height: 1; }
+.profile-potm span { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.profile-form {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 0.4rem;
+  align-items: end;
+  height: 11rem;
+}
+.profile-form-col { display: grid; grid-template-rows: auto 1fr auto auto; height: 100%; min-width: 0; text-align: center; gap: 0.2rem; }
+.profile-form-value { font-size: 0.75rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.profile-form-track { position: relative; display: flex; align-items: flex-end; justify-content: center; }
+.profile-form-bar {
+  display: block;
+  width: min(1.4rem, 80%);
+  min-height: 3px;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, var(--gold), oklch(0.6 0.13 70));
+}
+.profile-form-wkts { min-height: 1rem; font-size: 0.7rem; font-weight: 700; color: oklch(0.72 0.18 22); }
+.profile-form-label { font-size: 0.6rem; color: oklch(0.65 0.02 260); white-space: nowrap; overflow: hidden; }
+.profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--broadcast-border);
+  background: oklch(1 0 0 / 0.03);
+  padding: 0.55rem 0.75rem;
+}
+.profile-badge-icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 0.6rem;
+  background: oklch(0.8 0.15 84 / 0.15);
+  color: var(--gold);
+}
+.potm-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}

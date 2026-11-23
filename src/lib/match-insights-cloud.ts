@@ -21,7 +21,7 @@ export async function loadMatchInsights(matchId: string): Promise<InsightInnings
     client
       .from("deliveries")
       .select(
-        "innings_id,sequence,over_number,legal_ball,batter_runs,extras,striker_id,bowler_id,fielding_zone,dismissal",
+        "innings_id,sequence,over_number,legal_ball,batter_runs,extras,striker_id,non_striker_id,bowler_id,fielding_zone,dismissal",
       )
       .eq("match_id", matchId)
       .is("superseded_by", null)
@@ -33,7 +33,7 @@ export async function loadMatchInsights(matchId: string): Promise<InsightInnings
   const ballsByInnings = new Map<string, InsightBall[]>();
   for (const row of (deliveriesResult.data ?? []) as Record<string, unknown>[]) {
     const extras = (row["extras"] ?? {}) as Record<string, unknown>;
-    const dismissal = row["dismissal"] as { type?: DismissalType } | null;
+    const dismissal = row["dismissal"] as { type?: DismissalType; batterId?: string } | null;
     const ball: InsightBall = {
       over: Number(row["over_number"] ?? 0),
       legal: Boolean(row["legal_ball"]),
@@ -43,6 +43,8 @@ export async function loadMatchInsights(matchId: string): Promise<InsightInnings
       bye: count(extras["bye"]),
       legBye: count(extras["legBye"]),
       strikerId: String(row["striker_id"]),
+      nonStrikerId: row["non_striker_id"] ? String(row["non_striker_id"]) : undefined,
+      dismissedId: dismissal?.batterId,
       bowlerId: String(row["bowler_id"]),
       fieldZone: ((row["fielding_zone"] as FieldZone | null) ?? "Not recorded") as FieldZone,
       dismissalType: dismissal?.type ?? null,

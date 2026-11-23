@@ -14,6 +14,10 @@ export interface InsightBall {
   bowlerId: string;
   fieldZone: FieldZone;
   dismissalType: DismissalType | null;
+  /** Optional: needed to pair batters for partnerships. */
+  nonStrikerId?: string | undefined;
+  /** Optional: the batter who was out (can be the non-striker, e.g. run out). */
+  dismissedId?: string | undefined;
 }
 
 export interface OverPoint {
@@ -193,9 +197,11 @@ export function insightsFromMatch(match: CricketMatch): InsightInningsData[] {
         bye: ball.extras.bye,
         legBye: ball.extras.legBye,
         strikerId: ball.strikerId,
+        nonStrikerId: ball.nonStrikerId,
         bowlerId: ball.bowlerId,
         fieldZone: ball.fieldZone,
         dismissalType: ball.dismissal?.type ?? null,
+        dismissedId: ball.dismissal?.batterId,
       })),
     };
   });
@@ -245,4 +251,90 @@ export function topAllRounders(balls: InsightBall[], ballsPerOver = 6, limit = 3
     })
     .sort((a, b) => b.runs + b.wickets * 20 - (a.runs + a.wickets * 20) || a.runsConceded - b.runsConceded)
     .slice(0, limit);
+}
+
+export interface ManhattanOver {
+  over: number;
+  /** One entry per innings, in innings order; null when that innings has no ball in this over. */
+  innings: ({ runs: number; wickets: number } | null)[];
+}
+
+/** Runs and wickets per over for each innings side by side (the "Manhattan" chart). */
+export function manhattan(inningsBalls: InsightBall[][], ballsPerOver = 6): ManhattanOver[] {
+  const series = inningsBalls.map((balls) => overProgression(balls, ballsPerOver));
+  const lastOver = Math.max(0, ...series.map((points) => points.at(-1)?.over ?? 0));
+  return Array.from({ length: lastOver }, (_, index) => {
+    const over = index + 1;
+    return {
+      over,
+      innings: series.map((points) => {
+        const point = points.find((item) => item.over === over);
+        return point ? { runs: point.runs, wickets: point.wickets } : null;
+      }),
+    };
+  });
+}
+
+export interface WormPoint {
+  over: number;
+  total: number;
+  /** Wickets that fell in this over. */
+  wickets: number;
+}
+
+/** Cumulative score at the end of every over, starting from 0 at over 0 (the "worm"). */
+export function worm(balls: InsightBall[], ballsPerOver = 6): WormPoint[] {
+  return [
+    { over: 0, total: 0, wickets: 0 },
+    ...overProgression(balls, ballsPerOver).map((point) => ({ over: point.over, total: point.totalRuns, wickets: point.wickets })),
+  ];
+}
+
+export interface Partnership {
+  /** 1 for the opening stand, 2 after the first wicket, … */
+  wicket: number;
+  batters: [string, string | null];
+  /** Runs off the bat by each batter in `batters` order. */
+  contributions: [number, number];
+  /** Every run scored during the stand, extras included. */
+  runs: number;
+  balls: number;
+  unbroken: boolean;
+}
+
+/**
+ * Partnerships in batting order. Each stand ends with a wicket. When the non-striker was not recorded
+ * (older cloud balls) the pair is taken from the strikers seen during the stand.
+ */
+export function partnerships(balls: InsightBall[]): Partnership[] {
+  const result: Partnership[] = [];
+  let current: { order: string[]; runs: Map<string, number>; total: number; balls: number } | null = null;
+  const start = () => ({ order: [] as string[], runs: new Map<string, number>(), total: 0, balls: 0 });
+  const close = (unbroken: boolean) => {
+    if (!current || (current.balls === 0 && current.total === 0 && unbroken)) return;
+    const [a, b] = current.order;
+    result.push({
+      wicket: result.length + 1,
+      batters: [a ?? "", b ?? null],
+      contributions: [current.runs.get(a ?? "") ?? 0, b ? (current.runs.get(b) ?? 0) : 0],
+      runs: current.total,
+      balls: current.balls,
+      unbroken,
+    });
+  };
+  for (const ball of balls) {
+    current ??= start();
+    for (const id of [ball.strikerId, ball.nonStrikerId]) {
+      if (id && !current.order.includes(id) && current.order.length < 2) current.order.push(id);
+    }
+    current.runs.set(ball.strikerId, (current.runs.get(ball.strikerId) ?? 0) + ball.batterRuns);
+    current.total += ballTotal(ball);
+    if (ball.legal) current.balls += 1;
+    if (ball.dismissalType) {
+      close(false);
+      current = null;
+    }
+  }
+  close(true);
+  return result.filter((stand) => stand.batters[0] !== "");
 }

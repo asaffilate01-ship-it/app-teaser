@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  manhattan,
   overProgression,
+  partnerships,
+  worm,
   requiredRateByOver,
   topAllRounders,
   topBatters,
@@ -113,4 +116,31 @@ test("all-rounders must bat and bowl and rank by runs plus 20 per wicket", () =>
       ["c", 25, 0],
     ],
   );
+});
+
+test("Manhattan lines up each innings' runs per over side by side", () => {
+  const first = [ball(0, { batterRuns: 4 }), ball(1, { batterRuns: 1, dismissalType: "bowled" })];
+  const second = [ball(0, { batterRuns: 2 })];
+  const overs = manhattan([first, second]);
+  assert.equal(overs.length, 2);
+  assert.deepEqual(overs[0]?.innings, [{ runs: 4, wickets: 0 }, { runs: 2, wickets: 0 }]);
+  assert.deepEqual(overs[1]?.innings, [{ runs: 1, wickets: 1 }, null]);
+});
+
+test("worm starts at zero and accumulates runs at the end of each over", () => {
+  const points = worm([ball(0, { batterRuns: 4 }), ball(0, { wide: 1, legal: false }), ball(1, { batterRuns: 6 })]);
+  assert.deepEqual(points.map((point) => point.total), [0, 5, 11]);
+});
+
+test("partnerships split at each wicket, include extras and credit each batter's bat runs", () => {
+  const stands = partnerships([
+    ball(0, { strikerId: "a", nonStrikerId: "b", batterRuns: 4 }),
+    ball(0, { strikerId: "b", nonStrikerId: "a", batterRuns: 1 }),
+    ball(0, { strikerId: "a", nonStrikerId: "b", wide: 1, legal: false }),
+    ball(0, { strikerId: "a", nonStrikerId: "b", dismissalType: "bowled", dismissedId: "a" }),
+    ball(0, { strikerId: "c", nonStrikerId: "b", batterRuns: 2 }),
+  ]);
+  assert.equal(stands.length, 2);
+  assert.deepEqual(stands[0], { wicket: 1, batters: ["a", "b"], contributions: [4, 1], runs: 6, balls: 3, unbroken: false });
+  assert.deepEqual(stands[1], { wicket: 2, batters: ["c", "b"], contributions: [2, 0], runs: 2, balls: 1, unbroken: true });
 });

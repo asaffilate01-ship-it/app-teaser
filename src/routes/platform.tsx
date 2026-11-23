@@ -7,6 +7,7 @@ import { SectionNavigation } from "@/components/SectionNavigation";
 import { readLimitedOvers, validateCloudMatchSetup } from "@/lib/match-setup";
 import { fixtureCalendarIcs } from "@/lib/fixture-calendar";
 import { reviewFixtureSchedule } from "@/lib/fixture-scheduling";
+import { FixtureBuilder } from "@/components/league/FixtureBuilder";
 import { readSection, platformSections } from "@/lib/navigation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
@@ -1126,6 +1127,7 @@ function Competitions({
   return (
     <div className="space-y-5">
       {can(role, "competition.manage") && <CompetitionForm data={data} run={run} />}
+      {can(role, "fixtures.manage") && <FixtureBuilder data={data} run={run} />}
       {can(role, "fixtures.manage") && <FixtureForm data={data} run={run} />}
       {scheduling.alerts.length > 0 && (
         <section

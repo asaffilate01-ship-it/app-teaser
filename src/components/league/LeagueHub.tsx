@@ -8,7 +8,10 @@ import { CommentaryFeed } from "@/components/scorer/CommentaryFeed";
 import { WinPredictor } from "@/components/scorer/WinPredictor";
 import { loadCloudMatchSnapshot } from "@/lib/cloud";
 import { commentaryFeed } from "@/lib/commentary";
-import { currentInnings, findPlayer, findTeam, type CricketMatch } from "@/lib/cricket";
+import { currentInnings, findPlayer, findTeam, isSuperOver, matchResult, type CricketMatch } from "@/lib/cricket";
+import { HeadToHead } from "@/components/league/HeadToHead";
+import { PlayerProfileView } from "@/components/league/PlayerProfileView";
+import { playerOfTheMatch } from "@/lib/player-profile";
 import { buildLeagueStandings } from "@/lib/league-standings";
 import { projectLiveTable, readLiveSituation, type LiveMatchSituation } from "@/lib/live-table";
 import type { MatchRecord, PlatformDashboardData } from "@/lib/platform-cloud";
@@ -16,6 +19,7 @@ import { figures, seasonStats, type SeasonStats } from "@/lib/season-stats";
 import { currentPrediction, winTimeline } from "@/lib/win-timeline";
 
 type HubView = "live" | "table" | "results" | "stats";
+type StatsTab = "batting" | "bowling" | "fielding" | "h2h";
 type DetailView = "dashboard" | "card" | "balls";
 const liveStatuses = new Set(["live", "innings_break"]);
 
@@ -224,13 +228,29 @@ function MatchDashboard({ match }: { match: CricketMatch }) {
     return <p className="broadcast-panel p-4 text-sm text-slate-400">Charts fill in as soon as the first ball is scored.</p>;
   }
   const teamOf = (id: string) => findTeam(match, id).name;
+  const result = matchResult(match);
+  const star = playerOfTheMatch(match);
   return (
     <div className="space-y-3">
+      {result && (
+        <div className="broadcast-panel potm-banner" role="status">
+          <p className="font-display text-xl font-bold text-gold">{result.text}</p>
+          {star && (
+            <p className="inline-flex items-center gap-2 text-sm">
+              <Trophy className="size-4 text-gold" aria-hidden="true" />
+              Player of the Match: <strong>{star.name}</strong>
+              <span className="text-xs text-slate-400">
+                ({star.runs} runs{star.wickets ? `, ${star.wickets} wkts` : ""})
+              </span>
+            </p>
+          )}
+        </div>
+      )}
       {innings.length > 1 && (
         <div className="insights-toggle" role="tablist" aria-label="Innings">
           {innings.map((item) => (
             <button key={item.id} type="button" role="tab" aria-selected={current.id === item.id} className={current.id === item.id ? "is-active" : ""} onClick={() => setChosen(item.id)}>
-              {teamOf(item.battingTeamId)} innings
+              {teamOf(item.battingTeamId)} {match.innings.find((inn) => inn.id === item.id && isSuperOver(inn)) ? "Super Over" : "innings"}
             </button>
           ))}
         </div>
@@ -336,10 +356,11 @@ function LiveTable({
   );
 }
 
-type StatsTab = "batting" | "bowling" | "fielding";
 
 function StatsBoard({ matches }: { matches: MatchRecord[] }) {
   const [stats, setStats] = useState<SeasonStats | null>(null);
+  const [loadedMatches, setLoadedMatches] = useState<CricketMatch[]>([]);
+  const [playerId, setPlayerId] = useState<string | null>(null);
   const [failed, setFailed] = useState(0);
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState<StatsTab>("batting");
@@ -357,6 +378,7 @@ function StatsBoard({ matches }: { matches: MatchRecord[] }) {
       if (!active) return;
       const loaded = results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
       setFailed(results.length - loaded.length);
+      setLoadedMatches(loaded);
       setStats(seasonStats(loaded));
       setLoading(false);
     });
@@ -367,6 +389,7 @@ function StatsBoard({ matches }: { matches: MatchRecord[] }) {
   }, [key]);
 
   if (!stats) return <p className="text-sm text-slate-400">{loading ? "Adding up every scorecard…" : "No stats yet."}</p>;
+  if (playerId) return <PlayerProfileView matches={loadedMatches} playerId={playerId} onBack={() => setPlayerId(null)} />;
   const topRuns = stats.batting[0];
   const topScore = [...stats.batting].sort((a, b) => b.highScore - a.highScore)[0];
   const topWickets = stats.bowling[0];
@@ -397,10 +420,17 @@ function StatsBoard({ matches }: { matches: MatchRecord[] }) {
           </div>
         ))}
       </div>
-      <div className="card-tabs max-w-md" role="tablist" aria-label="Stats type" style={{ position: "static" }}>
-        {(["batting", "bowling", "fielding"] as StatsTab[]).map((item) => (
-          <button key={item} type="button" role="tab" aria-selected={tab === item} onClick={() => setTab(item)} className="capitalize">
-            {item}
+      <div className="card-tabs max-w-xl" role="tablist" aria-label="Stats type" style={{ position: "static", gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+        {(
+          [
+            ["batting", "Batting"],
+            ["bowling", "Bowling"],
+            ["fielding", "Fielding"],
+            ["h2h", "Head to head"],
+          ] as [StatsTab, string][]
+        ).map(([item, label]) => (
+          <button key={item} type="button" role="tab" aria-selected={tab === item} onClick={() => setTab(item)}>
+            {label}
           </button>
         ))}
       </div>
@@ -409,8 +439,9 @@ function StatsBoard({ matches }: { matches: MatchRecord[] }) {
           label="Batting averages"
           headings={["Batter", "M", "Inn", "NO", "Runs", "HS", "Avg", "SR", "50s", "100s", "4s", "6s"]}
           mobile={[4, 5, 6, 7]}
+          onPlayer={setPlayerId}
           rows={stats.batting.map((row) => [
-            [row.name, row.team],
+            [row.name, row.team, row.playerId],
             row.matches, row.innings, row.notOuts, row.runs, `${row.highScore}${row.highScoreNotOut ? "*" : ""}`,
             row.average ?? "–", row.balls ? row.strikeRate.toFixed(1) : "–", row.fifties, row.hundreds, row.fours, row.sixes,
           ])}
@@ -421,8 +452,9 @@ function StatsBoard({ matches }: { matches: MatchRecord[] }) {
           label="Bowling averages"
           headings={["Bowler", "M", "O", "Mdn", "R", "W", "BBI", "BBM", "Avg", "Econ", "SR", "4w", "5w", "10m"]}
           mobile={[5, 6, 8, 9]}
+          onPlayer={setPlayerId}
           rows={stats.bowling.map((row) => [
-            [row.name, row.team],
+            [row.name, row.team, row.playerId],
             row.matches, row.overs, row.maidens, row.runs, row.wickets, figures(row.best), figures(row.bestMatch),
             row.average ?? "–", row.economy ?? "–", row.strikeRate ?? "–", row.fourWickets, row.fiveWickets, row.tenWicketMatches,
           ])}
@@ -433,9 +465,12 @@ function StatsBoard({ matches }: { matches: MatchRecord[] }) {
           label="Fielding"
           headings={["Fielder", "Ct", "St", "RO", "Total"]}
           mobile={[1, 2, 3, 4]}
-          rows={stats.fielding.map((row) => [[row.name, row.team], row.catches, row.stumpings, row.runOuts, row.catches + row.stumpings + row.runOuts])}
+          onPlayer={setPlayerId}
+          rows={stats.fielding.map((row) => [[row.name, row.team, row.playerId], row.catches, row.stumpings, row.runOuts, row.catches + row.stumpings + row.runOuts])}
         />
       )}
+      {tab === "h2h" && <HeadToHead matches={loadedMatches} onPlayer={setPlayerId} />}
+      {tab !== "h2h" && <p className="text-[11px] text-slate-500">Tap a name to open the player's profile.</p>}
     </div>
   );
 }
@@ -445,10 +480,12 @@ function StatsTable({
   headings,
   rows,
   mobile,
+  onPlayer,
 }: {
   label: string;
   headings: string[];
-  rows: Array<[[string, string], ...(string | number)[]]>;
+  rows: Array<[[string, string, string], ...(string | number)[]]>;
+  onPlayer?: (playerId: string) => void;
   /** Column indexes shown on phones; the rest appear from tablet width. */
   mobile: number[];
 }) {
@@ -485,8 +522,14 @@ function StatsTable({
               {row.map((cell, index) =>
                 index === 0 ? (
                   <th key={index} scope="row">
-                    <span className="block truncate">{(cell as [string, string])[0]}</span>
-                    <small>{(cell as [string, string])[1]}</small>
+                    {onPlayer ? (
+                      <button type="button" className="hub-player-link block" onClick={() => onPlayer((cell as [string, string, string])[2])}>
+                        {(cell as [string, string, string])[0]}
+                      </button>
+                    ) : (
+                      <span className="block truncate">{(cell as [string, string, string])[0]}</span>
+                    )}
+                    <small>{(cell as [string, string, string])[1]}</small>
                   </th>
                 ) : (
                   <td key={index} className={!mobile.includes(index) ? "hidden md:table-cell" : sort === index ? "hub-sorted" : ""}>

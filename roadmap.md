@@ -27,10 +27,10 @@
 
 ## Competitor gaps (all four groups)
 - [x] Rules: free hit after no-ball, Super Over on a tie, last man stands, multi-day declare and follow-on
-- [ ] Charts: Manhattan, worm (both innings), partnerships
-- [ ] Share scorecard as image and PDF
-- [ ] Fixture builder (round-robin)
-- [ ] Head-to-head records (team v team, batter v bowler)
+- [x] Charts: Manhattan, worm (both innings), partnerships
+- [x] Share scorecard as image and PDF
+- [x] Fixture builder (round-robin)
+- [x] Head-to-head records (team v team, batter v bowler)
 - [ ] Score overlay link for live streams
-- [ ] Player profiles: career totals, form chart, milestones/badges, Player of the Match
+- [x] Player profiles: career totals, form chart, milestones/badges, Player of the Match
 - [ ] Auto highlight reels from synced cameras (boundaries, wickets, per player)
