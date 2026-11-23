@@ -18,8 +18,8 @@ dist-ssr
 .nitro
 *.local
 
-# Environment files. Keep only the documented template in Git.
-.env
+# Environment files. The root .env holds only publishable backend values and
+# must stay in Git so published builds can reach the backend.
 .env.*
 !.env.example
 
