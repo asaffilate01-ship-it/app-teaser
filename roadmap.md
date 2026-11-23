@@ -24,3 +24,13 @@
 - [ ] Go-live (needs user): payments live keys, email sending, legal/safeguarding sign-off
 - [x] Demo-style dashboards: League hub match dashboard + club home closer to demo
 - [x] Promo page: show more dashboard screenshots (league hub, match dashboard, stats)
+
+## Competitor gaps (all four groups)
+- [x] Rules: free hit after no-ball, Super Over on a tie, last man stands, multi-day declare and follow-on
+- [ ] Charts: Manhattan, worm (both innings), partnerships
+- [ ] Share scorecard as image and PDF
+- [ ] Fixture builder (round-robin)
+- [ ] Head-to-head records (team v team, batter v bowler)
+- [ ] Score overlay link for live streams
+- [ ] Player profiles: career totals, form chart, milestones/badges, Player of the Match
+- [ ] Auto highlight reels from synced cameras (boundaries, wickets, per player)

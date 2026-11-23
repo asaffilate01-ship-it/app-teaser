@@ -6,6 +6,9 @@ import {
   currentInnings,
   findPlayer,
   findTeam,
+  isSuperOver,
+  matchResult,
+  nextBallIsFreeHit,
   summarizeInnings,
   targetForCurrentInnings,
 } from "./cricket.ts";
@@ -29,6 +32,8 @@ export function publicLiveState(match: CricketMatch): Record<string, unknown> {
   const bowlerFigures = bowlers.find((row) => row.playerId === bowler?.id);
   const batting = findTeam(match, innings.battingTeamId);
   const target = targetForCurrentInnings(match);
+  const result = matchResult(match);
+  const batterAlone = innings.strikerId === innings.nonStrikerId;
   return {
     battingTeamId: batting?.id,
     runs: summary.runs,
@@ -40,11 +45,20 @@ export function publicLiveState(match: CricketMatch): Record<string, unknown> {
       oversPerInnings: match.settings.oversPerInnings,
       inningsPerSide: match.settings.inningsPerSide,
       ballsPerOver: match.settings.ballsPerOver,
+      // Rules are not personal; the database reads superOver to allow tie-break innings.
+      freeHit: Boolean(match.settings.rules?.freeHit),
+      superOver: Boolean(match.settings.rules?.superOver),
+      lastManStands: Boolean(match.settings.rules?.lastManStands),
     },
+    superOver: isSuperOver(innings),
+    freeHit: match.status === "live" && nextBallIsFreeHit(match),
+    declared: Boolean(innings.declared),
+    followOn: Boolean(innings.followOn),
+    result: result?.text ?? null,
     striker: striker
       ? { name: "Striker", runs: strikerFigures?.runs ?? 0, balls: strikerFigures?.balls ?? 0 }
       : null,
-    nonStriker: nonStriker
+    nonStriker: nonStriker && !batterAlone
       ? {
           name: "Non-striker",
           runs: nonStrikerFigures?.runs ?? 0,
@@ -78,11 +92,18 @@ export function publicLiveState(match: CricketMatch): Record<string, unknown> {
     conditions: match.conditions ?? null,
     // Ball-by-ball text only when the scorer switches it on; built without a name resolver, so roles only.
     commentary: match.audience?.commentary
-      ? commentaryFeed(innings, match.settings.ballsPerOver, { battingTeam: batting?.name }, 24)
+      ? commentaryFeed(
+          innings,
+          match.settings.ballsPerOver,
+          { battingTeam: batting?.name, freeHits: Boolean(match.settings.rules?.freeHit) },
+          24,
+        )
       : null,
     message:
       match.status === "completed"
-        ? "Match completed"
-        : `${batting?.name ?? "Batting side"} innings in progress`,
+        ? (result?.text ?? "Match completed")
+        : isSuperOver(innings)
+          ? `Super Over: ${batting?.name ?? "Batting side"} batting`
+          : `${batting?.name ?? "Batting side"} innings in progress`,
   };
 }

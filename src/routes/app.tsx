@@ -51,19 +51,29 @@ import { useCricketStore } from "@/hooks/use-cricket-store";
 import { validateDeviceMatchSetup } from "@/lib/match-setup";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { useMatchCloudSync } from "@/hooks/use-match-cloud-sync";
+import { MatchRulesFields } from "@/components/scorer/MatchRulesFields";
 import {
+  allowedDismissals,
+  canDeclare,
   createMatch,
   currentInnings,
+  declareInnings,
+  defaultRulesForFormat,
   deliveryLabel,
   endCurrentInnings,
   findPlayer,
   findTeam,
+  isSuperOver,
+  matchResult,
+  nextBallIsFreeHit,
+  nextInningsPlan,
   recordDelivery,
   startNextInnings,
   summarizeInnings,
   targetForCurrentInnings,
   undoLastDelivery,
   type CricketMatch,
+  type MatchRules,
   type DeliveryEnd,
   type DeliveryStyle,
   type DismissalType,
@@ -623,10 +633,12 @@ function MatchSetup({
   const [battingFirst, setBattingFirst] = useState<"home" | "away">("home");
   const [ground, setGround] = useState("");
   const [weather, setWeather] = useState("");
+  const [rules, setRules] = useState<MatchRules>(() => defaultRulesForFormat("T20"));
   const [error, setError] = useState("");
 
   const changeFormat = (next: MatchFormat) => {
     setFormat(next);
+    setRules(defaultRulesForFormat(next));
     const presets: Partial<Record<MatchFormat, string>> = {
       T10: "10",
       T20: "20",
@@ -672,6 +684,12 @@ function MatchSetup({
           ground: ground.trim(),
           weather: weather.trim(),
           startTime: new Date().toISOString(),
+          rules: {
+            freeHit: Boolean(rules.freeHit),
+            lastManStands: Boolean(rules.lastManStands),
+            superOver: inningsPerSide === 1 && parsed.oversPerInnings !== null && Boolean(rules.superOver),
+            followOnLead: inningsPerSide === 2 ? (rules.followOnLead ?? null) : null,
+          },
         },
       }),
     );
@@ -743,6 +761,21 @@ function MatchSetup({
             placeholder="Optional — actual conditions"
           />
         </Field>
+      </section>
+
+      <section className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5 md:p-8" aria-label="Match rules">
+        <div>
+          <h2 className="font-display text-xl font-bold">Match rules</h2>
+          <p className="mt-1 text-xs text-slate-400">
+            Set for this format. You can change them during the match from the scoring screen.
+          </p>
+        </div>
+        <MatchRulesFields
+          rules={rules}
+          onChange={setRules}
+          inningsPerSide={inningsPerSide}
+          limitedOvers={format !== "Multi-day" && overs.trim() !== ""}
+        />
       </section>
 
       <section className="grid gap-6 md:grid-cols-2">
@@ -896,10 +929,10 @@ function LiveMatch({
     onSave(next);
     void cloudSync.publish(next, eventType);
   };
-  const advanceInnings = async () => {
+  const advanceInnings = async (options: { followOn?: boolean } = {}) => {
     if (cloudConflict) return;
     setCloudActionError(null);
-    let next = startNextInnings(match);
+    let next = startNextInnings(match, options);
     if (next.innings.length === match.innings.length || !cloudMatchId) {
       saveAndSync(next, next.status === "completed" ? "match.completed" : "innings.started");
       return;
@@ -1153,14 +1186,15 @@ function LiveMatch({
             <ScoringPad
               match={match}
               onSave={saveAndSync}
-              onAdvanceInnings={() => void advanceInnings()}
+              onAdvanceInnings={(options) => void advanceInnings(options)}
               onExit={onExit}
             />
           )}
         </div>
         {tab === "score" && !cloudConflict && (
-          <div className="mt-5">
+          <div className="mt-5 space-y-5">
             <MatchPredictorPanel match={match} onSave={saveAndSync} />
+            <LiveRulesPanel match={match} onSave={saveAndSync} />
           </div>
         )}
         {tab === "timeline" && <Timeline match={match} onSave={saveAndSync} />}
@@ -1180,7 +1214,7 @@ function ScoringPad({
 }: {
   match: CricketMatch;
   onSave: (match: CricketMatch, eventType?: string) => void;
-  onAdvanceInnings: () => void;
+  onAdvanceInnings: (options?: { followOn?: boolean }) => void;
   onExit: () => void;
 }) {
   const innings = currentInnings(match);
@@ -1211,6 +1245,9 @@ function ScoringPad({
   const [dismissalFielderId, setDismissalFielderId] = useState("");
   const [leftHanders, setLeftHanders] = useState<Record<string, boolean>>({});
   const invalidDetailedExtras = detailExtras.wide > 0 && detailExtras.noBall > 0;
+  const freeHit = match.status === "live" && nextBallIsFreeHit(match);
+  const allowedOut = allowedDismissals(match);
+  const superOver = isSuperOver(innings);
 
   useEffect(() => {
     setStrikerId(innings.strikerId);
@@ -1303,24 +1340,79 @@ function ScoringPad({
     resetDetailedRuns();
   };
 
-  if (match.status === "innings-break") {
-    const totalInnings = match.settings.inningsPerSide * 2;
-    const finished = match.innings.length >= totalInnings;
+  if (match.status === "innings-break" || match.status === "completed") {
+    const plan = match.status === "completed" ? null : nextInningsPlan(match);
+    const result = matchResult(match);
+    const nextTeam = (id: string) => findTeam(match, id).name;
+    const firstName = plan?.kind === "regular" ? nextTeam(plan.battingTeamId) : "";
     return (
-      <section className="mx-auto max-w-xl space-y-5 rounded-3xl border border-amber-300/30 bg-amber-300/10 p-7 text-center md:p-10">
+      <section
+        className="mx-auto max-w-xl space-y-5 rounded-3xl border border-amber-300/30 bg-amber-300/10 p-7 text-center md:p-10"
+        aria-live="polite"
+      >
         <Flag className="mx-auto size-10 text-amber-300" />
-        <h2 className="font-display text-3xl font-bold">Innings complete</h2>
+        <h2 className="font-display text-3xl font-bold">
+          {result ? "Match result" : plan?.kind === "super-over" ? "Super Over" : "Innings complete"}
+        </h2>
         <p className="text-sm text-slate-300">
-          {findTeam(match, innings.battingTeamId).name} finished on {summary.runs}/{summary.wickets}{" "}
-          from {summary.overs} overs.
+          {findTeam(match, innings.battingTeamId).name} {superOver ? "scored" : "finished on"}{" "}
+          {summary.runs}/{summary.wickets} from {summary.overs} overs
+          {innings.declared ? " (declared)" : ""}
+          {superOver ? " in the Super Over" : ""}.
         </p>
-        <button
-          type="button"
-          onClick={onAdvanceInnings}
-          className="h-12 rounded-full bg-amber-300 px-7 text-sm font-extrabold uppercase tracking-wider text-[#1d1520]"
-        >
-          {finished ? "Complete match" : "Start next innings"}
-        </button>
+        {result && <p className="font-display text-2xl font-bold text-amber-200">{result.text}</p>}
+        {plan?.kind === "super-over" && (
+          <p className="text-sm text-slate-200">
+            {match.innings.filter(isSuperOver).length % 2 === 0
+              ? "Scores are level. "
+              : ""}
+            {nextTeam(plan.battingTeamId)} bat next: one over, two wickets.
+          </p>
+        )}
+        {plan?.kind === "regular" && plan.followOnTeamId && (
+          <p className="text-sm text-slate-200">
+            {nextTeam(plan.battingTeamId)} lead by {plan.lead} runs and can make{" "}
+            {nextTeam(plan.followOnTeamId)} follow on.
+          </p>
+        )}
+        {plan && plan.kind !== "complete" ? (
+          <div className="flex flex-col items-center gap-3">
+            {plan.kind === "regular" && plan.followOnTeamId && (
+              <button
+                type="button"
+                onClick={() => onAdvanceInnings({ followOn: true })}
+                className="h-12 rounded-full bg-amber-300 px-7 text-sm font-extrabold uppercase tracking-wider text-[#1d1520]"
+              >
+                Enforce follow-on
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => onAdvanceInnings()}
+              className={
+                plan.kind === "regular" && plan.followOnTeamId
+                  ? "h-12 rounded-full border border-amber-300/50 px-7 text-sm font-bold text-amber-100"
+                  : "h-12 rounded-full bg-amber-300 px-7 text-sm font-extrabold uppercase tracking-wider text-[#1d1520]"
+              }
+            >
+              {plan.kind === "super-over"
+                ? "Start Super Over"
+                : plan.followOnTeamId
+                  ? `${firstName} bat again`
+                  : "Start next innings"}
+            </button>
+          </div>
+        ) : (
+          match.status === "innings-break" && (
+            <button
+              type="button"
+              onClick={() => onAdvanceInnings()}
+              className="h-12 rounded-full bg-amber-300 px-7 text-sm font-extrabold uppercase tracking-wider text-[#1d1520]"
+            >
+              Complete match
+            </button>
+          )
+        )}
         <button type="button" onClick={onExit} className="block w-full text-sm text-slate-400">
           Return to matches
         </button>
@@ -1470,6 +1562,17 @@ function ScoringPad({
           />
         </div>
 
+        {(freeHit || superOver) && (
+          <div className="rule-banner" role="status">
+            <strong>{freeHit ? "Free hit" : "Super Over"}</strong>
+            <span>
+              {freeHit
+                ? "Only a run out (or obstructing the field) can dismiss the batter."
+                : "One over, two wickets. Highest score wins."}
+            </span>
+          </div>
+        )}
+
         <div>
           <div className="mb-3 flex items-baseline justify-between gap-3">
             <h2 className="panel-kicker">Select runs</h2>
@@ -1531,6 +1634,7 @@ function ScoringPad({
             type="button"
             onClick={() => {
               navigator.vibrate?.([20, 40, 20]);
+              if (!allowedOut.includes(dismissalType)) setDismissalType(allowedOut[0]!);
               setShowWicket(true);
             }}
             className="wicket-bar"
@@ -1538,7 +1642,7 @@ function ScoringPad({
             <Columns3 className="size-6" aria-hidden="true" /> Wicket
           </button>
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            Choose how out on the next step
+            {freeHit ? "Free hit: run out only" : "Choose how out on the next step"}
           </p>
         </div>
 
@@ -1563,6 +1667,17 @@ function ScoringPad({
           >
             <Flag className="size-4" /> End innings
           </button>
+          {canDeclare(match) && (
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm(`Declare ${battingTeam.name}'s innings closed?`)) onSave(declareInnings(match));
+              }}
+              className="app-chip-button"
+            >
+              <Flag className="size-4" /> Declare
+            </button>
+          )}
         </div>
       </section>
 
@@ -1590,7 +1705,7 @@ function ScoringPad({
                 onChange={(event) => setDismissalType(event.target.value as DismissalType)}
                 className="scorer-input"
               >
-                {dismissalTypes.map((type) => (
+                {dismissalTypes.filter((type) => allowedOut.includes(type.value)).map((type) => (
                   <option key={type.value} value={type.value}>
                     {type.label}
                   </option>
@@ -1845,6 +1960,7 @@ function CommentaryPanel({
   const lines = commentaryFeed(innings, match.settings.ballsPerOver, {
     player: (id) => (id ? findPlayer(match, id)?.name : undefined),
     battingTeam: battingTeam.name,
+    freeHits: Boolean(match.settings.rules?.freeHit),
   });
   const shared = Boolean(match.audience?.commentary);
   const totals = summarizeInnings(innings, match.settings.ballsPerOver);
@@ -2021,6 +2137,62 @@ function MatchPredictorPanel({
       homeName={home.name}
       awayName={away.name}
     />
+  );
+}
+
+/** Change free hit, Super Over, last man stands and follow-on during a match (works for cloud matches too). */
+function LiveRulesPanel({
+  match,
+  onSave,
+}: {
+  match: CricketMatch;
+  onSave: (match: CricketMatch, eventType?: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rules = match.settings.rules ?? {};
+  const active = [
+    rules.freeHit && "Free hit",
+    rules.superOver && "Super Over",
+    rules.lastManStands && "Last man stands",
+    rules.followOnLead != null && `Follow-on ${rules.followOnLead}`,
+  ].filter(Boolean);
+  return (
+    <section className="broadcast-panel" aria-label="Match rules">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between gap-3 text-left"
+      >
+        <span>
+          <span className="panel-kicker block">Match rules</span>
+          <span className="mt-1 block text-xs text-muted-foreground">
+            {active.length ? active.join(" · ") : "Standard rules only"}
+          </span>
+        </span>
+        <span className="text-sm font-bold text-gold">{open ? "Close" : "Change"}</span>
+      </button>
+      {open && (
+        <div className="mt-4">
+          <MatchRulesFields
+            rules={rules}
+            inningsPerSide={match.settings.inningsPerSide}
+            limitedOvers={match.settings.oversPerInnings !== null}
+            locked={{
+              superOver: match.innings.some(isSuperOver),
+              followOn: match.innings.length > 2,
+            }}
+            onChange={(next) =>
+              onSave({
+                ...match,
+                settings: { ...match.settings, rules: next },
+                updatedAt: new Date().toISOString(),
+              })
+            }
+          />
+        </div>
+      )}
+    </section>
   );
 }
 

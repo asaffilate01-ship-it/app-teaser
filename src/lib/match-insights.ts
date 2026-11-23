@@ -1,4 +1,4 @@
-import { isBowlerWicket, type CricketMatch, type DismissalType, type FieldZone } from "./cricket.ts";
+import { inningsTarget, isBowlerWicket, isSuperOver, type CricketMatch, type DismissalType, type FieldZone } from "./cricket.ts";
 import { fieldAreas, zoneArea } from "./field-positions.ts";
 
 /** One recorded ball, reduced to what the club dashboard charts need. */
@@ -182,7 +182,8 @@ export function insightsFromMatch(match: CricketMatch): InsightInningsData[] {
       number: innings.number,
       battingTeamId: innings.battingTeamId,
       bowlingTeamId: innings.bowlingTeamId,
-      target: index === 1 && match.settings.inningsPerSide === 1 ? previousRuns + 1 : null,
+      // Super Overs have their own one-over target; the chart's required-rate line only suits full innings.
+      target: isSuperOver(innings) ? null : inningsTarget(match, index),
       balls: innings.deliveries.map((ball) => ({
         over: ball.over,
         legal: ball.legal,

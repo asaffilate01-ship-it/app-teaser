@@ -824,6 +824,51 @@
   background: oklch(0.55 0.2 22 / 0.18);
   color: oklch(0.85 0.09 22);
 }
+.hero-chip-alert {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: var(--gold-foreground);
+}
+/* Free hit / Super Over notice above the run buttons */
+.rule-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid var(--gold);
+  background: oklch(0.8 0.15 84 / 0.12);
+  padding: 0.7rem 1rem;
+  font-size: 0.8rem;
+  color: oklch(0.92 0.06 84);
+}
+.rule-banner strong {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-family: var(--font-display, inherit);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.rule-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid var(--broadcast-border);
+  background: oklch(1 0 0 / 0.03);
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+}
+.rule-toggle input {
+  margin-top: 0.2rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--gold);
+}
+.rule-toggle-title { display: block; font-size: 0.875rem; font-weight: 700; }
+.rule-toggle-hint { display: block; margin-top: 0.15rem; font-size: 0.75rem; color: oklch(0.75 0.02 260); }
 .live-dot,
 .strike-dot {
   display: inline-block;

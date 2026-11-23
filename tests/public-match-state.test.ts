@@ -62,7 +62,8 @@ test("names withheld for completed matches as well", () => {
   match.status = "completed";
   const text = JSON.stringify(publicLiveState(match));
   assert.equal(text.includes("Junior Name Withheld"), false);
-  assert.match(text, /Match completed/);
+  // Only the first innings was played, so the public message carries the result, not names.
+  assert.match(text, /No result/);
 });
 
 test("shared live score keeps the match length so other devices can show overs left", () => {
@@ -72,5 +73,8 @@ test("shared live score keeps the match length so other devices can show overs l
     oversPerInnings: match.settings.oversPerInnings,
     inningsPerSide: match.settings.inningsPerSide,
     ballsPerOver: match.settings.ballsPerOver,
+    freeHit: false,
+    superOver: false,
+    lastManStands: false,
   });
 });

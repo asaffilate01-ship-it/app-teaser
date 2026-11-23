@@ -7,10 +7,17 @@ import {
   deliveryLabel,
   findPlayer,
   findTeam,
+  isSuperOver,
+  matchResult,
+  nextBallIsFreeHit,
   summarizeInnings,
   targetForCurrentInnings,
   type CricketMatch,
 } from "@/lib/cricket";
+
+/** Over limit for the current innings: a Super Over is one over. */
+const oversLimit = (match: CricketMatch) =>
+  isSuperOver(currentInnings(match)) ? 1 : match.settings.oversPerInnings;
 import { ballCaption, ballTone, chaseState, projectedScore, teamInitials } from "@/lib/match-broadcast";
 
 /** Shield crest with the team's monogram — used wherever a team logo would go. */
@@ -46,20 +53,28 @@ export function ScoreHero({ match, sync }: { match: CricketMatch; sync?: ReactNo
   const batting = findTeam(match, innings.battingTeamId);
   const bowling = findTeam(match, innings.bowlingTeamId);
   const target = targetForCurrentInnings(match);
-  const chase = chaseState(target, summary.runs, summary.legalBalls, match.settings.oversPerInnings, bpo);
-  const earlier = match.innings.filter((item) => item.battingTeamId === bowling.id && item.id !== innings.id);
+  const superOver = isSuperOver(innings);
+  const chase = chaseState(target, summary.runs, summary.legalBalls, oversLimit(match), bpo);
+  const result = matchResult(match);
+  const freeHit = match.status === "live" && nextBallIsFreeHit(match);
+  const earlier = match.innings.filter(
+    (item) => item.battingTeamId === bowling.id && item.id !== innings.id && isSuperOver(item) === superOver,
+  );
   const bowlingScore = earlier.length
     ? earlier.map((item) => {
         const s = summarizeInnings(item, bpo);
         return `${s.runs}/${s.wickets}`;
       })
     : null;
-  const ribbon =
-    chase && chase.runsNeeded > 0
+  const ribbon = result
+    ? result.text
+    : chase && chase.runsNeeded > 0
       ? `${batting.name} need ${chase.runsNeeded} ${chase.runsNeeded === 1 ? "run" : "runs"}${chase.ballsLeft != null ? ` from ${chase.ballsLeft} balls` : ""}`
       : chase
         ? `${batting.name} have reached the target`
-        : `${batting.name} batting · Innings ${innings.number}`;
+        : superOver
+          ? `${batting.name} batting · Super Over`
+          : `${batting.name} batting · Innings ${innings.number}${innings.followOn ? " (follow-on)" : ""}`;
   const live = match.status === "live";
 
   return (
@@ -70,6 +85,8 @@ export function ScoreHero({ match, sync }: { match: CricketMatch; sync?: ReactNo
           {match.status.replace("-", " ")}
         </span>
         <span className="hero-chip">{match.settings.format}</span>
+        {superOver && <span className="hero-chip hero-chip-alert">Super Over</span>}
+        {freeHit && <span className="hero-chip hero-chip-alert">Free hit</span>}
         {match.settings.ground && <span className="hero-chip hidden sm:inline-flex">{match.settings.ground}</span>}
         {sync}
       </div>
@@ -85,7 +102,8 @@ export function ScoreHero({ match, sync }: { match: CricketMatch; sync?: ReactNo
             </p>
             <p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground md:text-xs">
               {summary.overs}
-              {match.settings.oversPerInnings ? ` / ${match.settings.oversPerInnings}` : ""} overs
+              {oversLimit(match) ? ` / ${oversLimit(match)}` : ""} {oversLimit(match) === 1 ? "over" : "overs"}
+              {innings.declared ? " · dec" : ""}
             </p>
           </div>
         </div>
@@ -189,8 +207,8 @@ export function RateStrip({ match }: { match: CricketMatch }) {
   const bpo = match.settings.ballsPerOver;
   const summary = summarizeInnings(innings, bpo);
   const target = targetForCurrentInnings(match);
-  const chase = chaseState(target, summary.runs, summary.legalBalls, match.settings.oversPerInnings, bpo);
-  const projected = projectedScore(summary.runs, summary.legalBalls, match.settings.oversPerInnings, bpo);
+  const chase = chaseState(target, summary.runs, summary.legalBalls, oversLimit(match), bpo);
+  const projected = projectedScore(summary.runs, summary.legalBalls, oversLimit(match), bpo);
   const items = [
     { icon: Gauge, label: "Run rate", value: summary.runRate.toFixed(2) },
     chase?.requiredRate != null

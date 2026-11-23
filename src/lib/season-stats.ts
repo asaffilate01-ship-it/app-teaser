@@ -1,4 +1,4 @@
-import { bowlingCard, type CricketMatch } from "./cricket.ts";
+import { bowlingCard, isSuperOver, type CricketMatch } from "./cricket.ts";
 import { battingSplit } from "./scorecard.ts";
 
 export interface BattingStat {
@@ -75,6 +75,8 @@ export function seasonStats(matches: readonly CricketMatch[]): SeasonStats {
     const bpo = match.settings.ballsPerOver;
     const teamOf = (id: string) => match.teams.find((team) => team.players.some((player) => player.id === id));
     for (const innings of match.innings) {
+      // Super Over runs and wickets never count towards career records.
+      if (isSuperOver(innings)) continue;
       const team = match.teams.find((item) => item.id === innings.battingTeamId)?.name ?? "";
       const bowlingTeam = match.teams.find((item) => item.id === innings.bowlingTeamId)?.name ?? "";
       for (const row of battingSplit(match, innings).batted) {

@@ -15,6 +15,8 @@ export interface CommentaryNames {
   /** Resolve a player id to a display name. Return undefined to fall back to the role. */
   player?: ((id: string | undefined) => string | undefined) | undefined;
   battingTeam?: string | undefined;
+  /** The match plays free hits after no-balls. */
+  freeHits?: boolean | undefined;
 }
 
 const roles = { striker: "the batter", bowler: "the bowler", fielder: "the fielder", nonStriker: "the non-striker" };
@@ -62,7 +64,7 @@ export function describeBall(ball: Delivery, names: CommentaryNames = {}): Comme
       "hit-wicket": `HIT WICKET! ${capital(out)} treads on the stumps.`,
       "obstructing-the-field": `OUT, obstructing the field. ${capital(out)} has to go.`,
     }[ball.dismissal.type];
-    return { ...base, text: `${lead}. ${text}`, tone: "wicket" };
+    return { ...base, text: `${ball.freeHit ? "Free hit. " : ""}${lead}. ${text}`, tone: "wicket" };
   }
 
   const { wide, noBall, bye, legBye, penalty } = ball.extras;
@@ -72,7 +74,7 @@ export function describeBall(ball: Delivery, names: CommentaryNames = {}): Comme
   }
   if (noBall) {
     const hit = ball.batterRuns === 6 ? "SIX off it!" : ball.batterRuns === 4 ? "FOUR off it!" : ball.batterRuns ? `${ball.batterRuns} off the bat.` : "";
-    return { ...base, text: `${lead}. No-ball, overstepped. ${hit} Free hit to come.`.replace(/\s+/g, " ").trim(), tone: "extra" };
+    return { ...base, text: `${lead}. No-ball, overstepped. ${hit}${names.freeHits ? " Free hit to come." : ""}`.replace(/\s+/g, " ").trim(), tone: "extra" };
   }
   if (bye || legBye) {
     const runs = bye || legBye;
@@ -81,10 +83,10 @@ export function describeBall(ball: Delivery, names: CommentaryNames = {}): Comme
   if (penalty) return { ...base, text: `${lead}. ${penalty} penalty runs awarded.`, tone: "extra" };
 
   if (ball.batterRuns === 6) {
-    return { ...base, text: `${lead}. ${pick(["SIX! Launched", "SIX! Clean strike, sent", "SIX! That's huge, deposited"], seed)}${place || " into the crowd"}.`, tone: "six" };
+    return { ...base, text: `${ball.freeHit ? "Free hit! " : ""}${lead}. ${pick(["SIX! Launched", "SIX! Clean strike, sent", "SIX! That's huge, deposited"], seed)}${place || " into the crowd"}.`, tone: "six" };
   }
   if (ball.batterRuns === 4) {
-    return { ...base, text: `${lead}. ${pick(["FOUR! Timed beautifully", "FOUR! Finds the gap", "FOUR! Races away"], seed)}${place}.`, tone: "four" };
+    return { ...base, text: `${ball.freeHit ? "Free hit! " : ""}${lead}. ${pick(["FOUR! Timed beautifully", "FOUR! Finds the gap", "FOUR! Races away"], seed)}${place}.`, tone: "four" };
   }
   if (ball.batterRuns > 0) {
     const run = ball.batterRuns === 1 ? "single" : ball.batterRuns === 2 ? "couple" : `${ball.batterRuns} runs`;
@@ -92,7 +94,9 @@ export function describeBall(ball: Delivery, names: CommentaryNames = {}): Comme
     return { ...base, text: `${lead}. ${capital(ball.batterRuns === 1 ? "a single" : ball.batterRuns === 2 ? "two runs" : run)}, ${verb}${place}${fielder ? `, ${fielder} fields` : ""}.`, tone: "run" };
   }
   const dot =
-    ball.outcome === "left"
+    ball.freeHit && ball.batterRuns === 0
+      ? "Free hit, but no run from it."
+      : ball.outcome === "left"
       ? "Left alone outside off."
       : ball.outcome === "missed"
         ? pick(["Beaten! Plays and misses.", "Past the edge."], seed)

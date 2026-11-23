@@ -56,6 +56,11 @@ interface ScoreboardData {
     battingIsHome?: boolean;
     conditions?: MatchConditions | null;
     commentary?: CommentaryLine[] | null;
+    superOver?: boolean;
+    freeHit?: boolean;
+    declared?: boolean;
+    followOn?: boolean;
+    result?: string | null;
   };
   updatedAt: string;
   sponsor?: { name?: string };
@@ -143,10 +148,12 @@ function PublicScoreboard() {
   const wickets = state.wickets ?? 0;
   const legalBalls = legalBallsFromOvers(state.overs, ballsPerOver);
   const runRate = legalBalls > 0 ? (runs * ballsPerOver) / legalBalls : 0;
-  const chase = chaseState(state.target ?? null, runs, legalBalls, state.settings?.oversPerInnings ?? null, ballsPerOver);
+  const oversLimit = state.superOver ? 1 : (state.settings?.oversPerInnings ?? null);
+  const chase = chaseState(state.target ?? null, runs, legalBalls, oversLimit, ballsPerOver);
   const isLive = scoreboard.status === "live" || scoreboard.status === "innings_break";
-  const ribbon =
-    chase && chase.runsNeeded > 0
+  const ribbon = state.result
+    ? state.result
+    : chase && chase.runsNeeded > 0
       ? `${batting.name} need ${chase.runsNeeded} ${chase.runsNeeded === 1 ? "run" : "runs"}${chase.ballsLeft != null ? ` from ${chase.ballsLeft} balls` : ""}`
       : chase
         ? `${batting.name} have reached the target`
@@ -181,10 +188,17 @@ function PublicScoreboard() {
           <Link to="/" aria-label="CricLume home">
             <img src={logoAsset.url} alt="CricLume" className="h-9 w-auto md:h-10" />
           </Link>
-          <span className={`hero-chip ${isLive ? "hero-chip-live" : ""}`}>
-            {isLive && <span className="live-dot" aria-hidden="true" />}
-            {isLive ? "Live" : scoreboard.status.replaceAll("_", " ")}
-          </span>
+          <div className="flex items-center gap-2">
+            {(state.superOver || state.freeHit) && (
+              <span className="hero-chip hero-chip-alert" role="status">
+                {state.freeHit ? "Free hit" : "Super Over"}
+              </span>
+            )}
+            <span className={`hero-chip ${isLive ? "hero-chip-live" : ""}`}>
+              {isLive && <span className="live-dot" aria-hidden="true" />}
+              {isLive ? "Live" : scoreboard.status.replaceAll("_", " ")}
+            </span>
+          </div>
         </div>
       </header>
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-3 py-4 md:px-8 md:py-8">

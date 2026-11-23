@@ -177,6 +177,7 @@ function MatchDetailBody({
   const lines = commentaryFeed(innings, match.settings.ballsPerOver, {
     player: (id) => (id ? findPlayer(match, id)?.name : undefined),
     battingTeam: findTeam(match, innings.battingTeamId).name,
+    freeHits: Boolean(match.settings.rules?.freeHit),
   });
   return (
     <>

@@ -23,6 +23,18 @@ export interface Team {
   players: Player[];
 }
 
+/** Optional playing regulations. Absent rules are off, so older saved matches behave as before. */
+export interface MatchRules {
+  /** The ball after a no-ball is a free hit: the batter can only be out run out or obstructing the field. */
+  freeHit?: boolean | undefined;
+  /** A tied one-innings, limited-overs match is decided by a Super Over (one over, two wickets). */
+  superOver?: boolean | undefined;
+  /** The last batter may carry on alone after the second-last wicket falls. */
+  lastManStands?: boolean | undefined;
+  /** Two-innings matches: first-innings lead (runs) that lets the side batting first enforce the follow-on. */
+  followOnLead?: number | null | undefined;
+}
+
 export interface MatchSettings {
   format: MatchFormat;
   oversPerInnings: number | null;
@@ -31,6 +43,7 @@ export interface MatchSettings {
   ground: string;
   weather: string;
   startTime: string;
+  rules?: MatchRules | undefined;
 }
 
 export interface Extras {
@@ -67,6 +80,8 @@ export interface Delivery {
   fielderId?: string | undefined;
   dismissal?: Dismissal | undefined;
   note?: string | undefined;
+  /** This ball was a free hit (only run out or obstructing the field can dismiss the batter). */
+  freeHit?: boolean | undefined;
 }
 
 export interface Innings {
@@ -80,6 +95,12 @@ export interface Innings {
   end: DeliveryEnd;
   status: InningsStatus;
   deliveries: Delivery[];
+  /** "super-over" innings decide a tie; they never count towards career statistics. */
+  kind?: "regular" | "super-over" | undefined;
+  /** The batting captain declared this innings closed. */
+  declared?: boolean | undefined;
+  /** This innings was batted as an enforced follow-on. */
+  followOn?: boolean | undefined;
 }
 
 export interface CricketMatch {
@@ -164,7 +185,13 @@ const makePlayers = (teamPrefix: string, names: string[]): Player[] =>
     .filter(Boolean)
     .map((name, index) => ({ id: `${teamPrefix}-p${index + 1}-${makeId("player")}`, name }));
 
-const createInnings = (number: number, battingTeam: Team, bowlingTeam: Team): Innings => ({
+const createInnings = (
+  number: number,
+  battingTeam: Team,
+  bowlingTeam: Team,
+  extra: Pick<Innings, "kind" | "followOn"> = {},
+): Innings => ({
+  ...extra,
   id: makeId("innings"),
   number,
   battingTeamId: battingTeam.id,
@@ -256,6 +283,9 @@ const nextBatter = (team: Team, innings: Innings, activeIds: string[]) => {
 export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput): CricketMatch {
   if (match.status !== "live") return match;
   const innings = currentInnings(match);
+  const freeHit = nextBallIsFreeHit(match);
+  // On a free hit the batter cannot be bowled, caught, lbw, stumped or out hit wicket.
+  if (freeHit && input.dismissal && !freeHitDismissals.includes(input.dismissal.type)) return match;
   const summaryBefore = summarizeInnings(innings, match.settings.ballsPerOver);
   const extras = { ...emptyExtras(), ...input.extras };
   const legal = extras.wide === 0 && extras.noBall === 0;
@@ -278,6 +308,7 @@ export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput):
     fielderId: input.fielderId || undefined,
     dismissal: input.dismissal,
     note: input.note?.trim() || undefined,
+    ...(freeHit ? { freeHit: true } : {}),
   };
 
   const deliveries = [...innings.deliveries, delivery];
@@ -293,18 +324,25 @@ export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput):
     if (replacement) {
       if (input.dismissal.batterId === nonStrikerId) nonStrikerId = replacement;
       else strikerId = replacement;
+    } else if (lastManStandsApplies(match, innings) && strikerId !== nonStrikerId) {
+      // Last man stands: the survivor carries on alone and keeps the strike.
+      const survivor = input.dismissal.batterId === strikerId ? nonStrikerId : strikerId;
+      strikerId = survivor;
+      nonStrikerId = survivor;
     }
   }
 
+  const batterAlone = strikerId === nonStrikerId;
   const completedRunningRuns =
     delivery.batterRuns +
     delivery.extras.bye +
     delivery.extras.legBye +
     Math.max(0, delivery.extras.wide - 1);
-  if (completedRunningRuns % 2 === 1) [strikerId, nonStrikerId] = [nonStrikerId, strikerId];
+  if (!batterAlone && completedRunningRuns % 2 === 1)
+    [strikerId, nonStrikerId] = [nonStrikerId, strikerId];
 
   const legalBallsAfter = summaryBefore.legalBalls + (legal ? 1 : 0);
-  if (legal && legalBallsAfter % match.settings.ballsPerOver === 0) {
+  if (!batterAlone && legal && legalBallsAfter % match.settings.ballsPerOver === 0) {
     [strikerId, nonStrikerId] = [nonStrikerId, strikerId];
   }
 
@@ -317,17 +355,13 @@ export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput):
     deliveries,
   };
   const summaryAfter = summarizeInnings(updatedInnings, match.settings.ballsPerOver);
-  const maximumBalls = match.settings.oversPerInnings
-    ? match.settings.oversPerInnings * match.settings.ballsPerOver
-    : null;
-  const allOut = summaryAfter.wickets >= Math.max(1, battingTeam.players.length - 1);
+  const maximumBalls = inningsBallLimit(match, innings);
+  const allOut = summaryAfter.wickets >= inningsWicketLimit(match, innings);
   const oversComplete = maximumBalls !== null && summaryAfter.legalBalls >= maximumBalls;
-  // In a single-innings match the chase finishes as soon as the target is reached.
-  // Do not apply this shortcut to two-innings-per-side cricket.
-  const chaseWon =
-    match.settings.inningsPerSide === 1 &&
-    match.innings.length === 2 &&
-    summaryAfter.runs > summarizeInnings(match.innings[0]!, match.settings.ballsPerOver).runs;
+  // A chase (one-innings second innings, fourth innings, or second half of a Super Over)
+  // finishes as soon as the target is reached.
+  const target = targetForCurrentInnings(match);
+  const chaseWon = target !== null && summaryAfter.runs >= target;
   const inningsComplete = allOut || oversComplete || chaseWon;
   updatedInnings.status = inningsComplete ? "completed" : "live";
 
@@ -339,35 +373,57 @@ export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput):
   };
 }
 
-export function endCurrentInnings(match: CricketMatch): CricketMatch {
+export function endCurrentInnings(
+  match: CricketMatch,
+  options: { declared?: boolean } = {},
+): CricketMatch {
   if (match.status === "completed") return match;
   const innings = currentInnings(match);
   return {
     ...match,
     updatedAt: new Date().toISOString(),
     status: "innings-break",
-    innings: [...match.innings.slice(0, -1), { ...innings, status: "completed" }],
+    innings: [
+      ...match.innings.slice(0, -1),
+      { ...innings, status: "completed", ...(options.declared ? { declared: true } : {}) },
+    ],
   };
 }
 
-export function startNextInnings(match: CricketMatch): CricketMatch {
+/** Declarations are only part of two-innings (multi-day style) cricket. */
+export const canDeclare = (match: CricketMatch) =>
+  match.status === "live" &&
+  match.settings.inningsPerSide === 2 &&
+  !isSuperOver(currentInnings(match));
+
+export function declareInnings(match: CricketMatch): CricketMatch {
+  return canDeclare(match) ? endCurrentInnings(match, { declared: true }) : match;
+}
+
+export function startNextInnings(
+  match: CricketMatch,
+  options: { followOn?: boolean } = {},
+): CricketMatch {
   // Prevent creating another innings while the current one is still in progress.
   if (match.status !== "innings-break") return match;
-  const totalInnings = match.settings.inningsPerSide * 2;
-  if (match.innings.length >= totalInnings) {
+  const plan = nextInningsPlan(match);
+  if (plan.kind === "complete") {
     return { ...match, status: "completed", updatedAt: new Date().toISOString() };
   }
-  const firstBattingTeamId = match.innings[0]!.battingTeamId;
-  const firstBattingTeam = findTeam(match, firstBattingTeamId);
-  const firstBowlingTeam = match.teams.find((team) => team.id !== firstBattingTeamId)!;
-  const nextNumber = match.innings.length + 1;
-  const battingTeam = nextNumber % 2 === 1 ? firstBattingTeam : firstBowlingTeam;
-  const bowlingTeam = nextNumber % 2 === 1 ? firstBowlingTeam : firstBattingTeam;
+  const followOn = plan.kind === "regular" && options.followOn === true && plan.followOnTeamId !== null;
+  const battingTeamId = followOn ? plan.followOnTeamId! : plan.battingTeamId;
+  const battingTeam = findTeam(match, battingTeamId);
+  const bowlingTeam = match.teams.find((team) => team.id !== battingTeamId)!;
+  const extra: Pick<Innings, "kind" | "followOn"> =
+    plan.kind === "super-over" ? { kind: "super-over" } : followOn ? { followOn: true } : {};
   return {
     ...match,
     status: "live",
     updatedAt: new Date().toISOString(),
-    innings: [...match.innings, createInnings(nextNumber, battingTeam, bowlingTeam)],
+    innings: [
+      ...match.innings,
+      createInnings(match.innings.length + 1, battingTeam, bowlingTeam, extra),
+    ],
   };
 }
 
@@ -485,8 +541,251 @@ export function bowlingCard(match: CricketMatch, innings: Innings): BowlerRow[] 
 }
 
 export function targetForCurrentInnings(match: CricketMatch): number | null {
-  if (match.settings.inningsPerSide !== 1 || match.innings.length !== 2) return null;
-  return summarizeInnings(match.innings[0]!, match.settings.ballsPerOver).runs + 1;
+  return inningsTarget(match, match.innings.length - 1);
+}
+
+// ---------------------------------------------------------------------------
+// Playing regulations: free hit, last man stands, Super Over, follow-on, results.
+// ---------------------------------------------------------------------------
+
+export const SUPER_OVER_WICKETS = 2;
+/** Repeated Super Overs stop after this many; a tie then stands. */
+export const MAX_SUPER_OVERS = 3;
+export const freeHitDismissals: readonly DismissalType[] = ["run-out", "obstructing-the-field"];
+
+export const isSuperOver = (innings: Innings) => innings.kind === "super-over";
+
+const regularInnings = (match: CricketMatch) => match.innings.filter((item) => !isSuperOver(item));
+const superOvers = (match: CricketMatch) => match.innings.filter(isSuperOver);
+const runsOf = (match: CricketMatch, innings: Innings) =>
+  summarizeInnings(innings, match.settings.ballsPerOver).runs;
+
+/** Law 21.19-style free hit: true when the previous ball was a no-ball (a wide on a free hit carries it on). */
+export function nextBallIsFreeHit(match: CricketMatch): boolean {
+  if (!match.settings.rules?.freeHit) return false;
+  let free = false;
+  for (const delivery of currentInnings(match).deliveries) {
+    if (delivery.extras.noBall > 0) free = true;
+    else if (delivery.extras.wide > 0) continue;
+    else free = false;
+  }
+  return free;
+}
+
+/** Dismissals the scorer may record on the next ball. */
+export function allowedDismissals(match: CricketMatch): readonly DismissalType[] {
+  return nextBallIsFreeHit(match)
+    ? freeHitDismissals
+    : ["bowled", "caught", "lbw", "stumped", "run-out", "hit-wicket", "obstructing-the-field"];
+}
+
+const lastManStandsApplies = (match: CricketMatch, innings: Innings) =>
+  Boolean(match.settings.rules?.lastManStands) && !isSuperOver(innings);
+
+/** Wickets that end this innings: 2 in a Super Over, every batter with last man stands, otherwise all but one. */
+export function inningsWicketLimit(match: CricketMatch, innings: Innings): number {
+  const players = findTeam(match, innings.battingTeamId).players.length;
+  if (isSuperOver(innings)) return Math.max(1, Math.min(SUPER_OVER_WICKETS, players - 1));
+  if (lastManStandsApplies(match, innings)) return Math.max(1, players);
+  return Math.max(1, players - 1);
+}
+
+/** Legal balls allowed in this innings, or null when unlimited. A Super Over is one over. */
+export function inningsBallLimit(match: CricketMatch, innings: Innings): number | null {
+  if (isSuperOver(innings)) return match.settings.ballsPerOver;
+  return match.settings.oversPerInnings
+    ? match.settings.oversPerInnings * match.settings.ballsPerOver
+    : null;
+}
+
+/** Total runs per team across its regular (non Super Over) innings. */
+export function teamTotals(match: CricketMatch): Map<string, number> {
+  const totals = new Map<string, number>(match.teams.map((team) => [team.id, 0]));
+  for (const innings of regularInnings(match)) {
+    totals.set(innings.battingTeamId, (totals.get(innings.battingTeamId) ?? 0) + runsOf(match, innings));
+  }
+  return totals;
+}
+
+/** Runs needed to win for the innings at `index`, or null when it is not a chase. */
+export function inningsTarget(match: CricketMatch, index: number): number | null {
+  const innings = match.innings[index];
+  if (!innings) return null;
+  if (isSuperOver(innings)) {
+    const position = match.innings.slice(0, index).filter(isSuperOver).length;
+    if (position % 2 === 0) return null;
+    return runsOf(match, match.innings[index - 1]!) + 1;
+  }
+  if (match.settings.inningsPerSide === 1) {
+    return index === 1 ? runsOf(match, match.innings[0]!) + 1 : null;
+  }
+  if (index !== 3) return null;
+  const before = match.innings.slice(0, 3);
+  const own = before
+    .filter((item) => item.battingTeamId === innings.battingTeamId)
+    .reduce((sum, item) => sum + runsOf(match, item), 0);
+  const theirs = before
+    .filter((item) => item.battingTeamId === innings.bowlingTeamId)
+    .reduce((sum, item) => sum + runsOf(match, item), 0);
+  return theirs - own + 1;
+}
+
+export type NextInningsPlan =
+  | { kind: "complete" }
+  | {
+      kind: "regular";
+      number: number;
+      battingTeamId: string;
+      /** When set, the side batting first may make this team follow on instead. */
+      followOnTeamId: string | null;
+      lead: number;
+    }
+  | { kind: "super-over"; number: number; battingTeamId: string };
+
+/** What happens after the current innings break, following the match rules. */
+export function nextInningsPlan(match: CricketMatch): NextInningsPlan {
+  const regular = regularInnings(match);
+  const supers = superOvers(match);
+  const number = match.innings.length + 1;
+  const regularCount = match.settings.inningsPerSide * 2;
+  const last = match.innings.at(-1)!;
+
+  if (supers.length === 0 && regular.length < regularCount) {
+    // One-innings chase already won (or tied/lost) at the end of innings two is handled below.
+    if (match.settings.inningsPerSide === 1 || regular.length === 1) {
+      return { kind: "regular", number, battingTeamId: last.bowlingTeamId, followOnTeamId: null, lead: 0 };
+    }
+    const first = regular[0]!;
+    const second = regular[1]!;
+    if (regular.length === 2) {
+      const lead = runsOf(match, first) - runsOf(match, second);
+      const threshold = match.settings.rules?.followOnLead;
+      const followOnTeamId =
+        threshold != null && threshold > 0 && lead >= threshold ? second.battingTeamId : null;
+      return { kind: "regular", number, battingTeamId: first.battingTeamId, followOnTeamId, lead };
+    }
+    // Before the fourth innings: if the side that has batted twice is still behind, it has lost by an innings.
+    const fourthBattingTeamId = match.teams.find(
+      (team) => regular.filter((item) => item.battingTeamId === team.id).length === 1,
+    )?.id;
+    if (!fourthBattingTeamId) return { kind: "complete" };
+    const totals = teamTotals(match);
+    const twiceTeamId = match.teams.find((team) => team.id !== fourthBattingTeamId)!.id;
+    if ((totals.get(twiceTeamId) ?? 0) < (totals.get(fourthBattingTeamId) ?? 0)) return { kind: "complete" };
+    return { kind: "regular", number, battingTeamId: fourthBattingTeamId, followOnTeamId: null, lead: 0 };
+  }
+
+  const superOverAllowed =
+    Boolean(match.settings.rules?.superOver) &&
+    match.settings.inningsPerSide === 1 &&
+    match.settings.oversPerInnings !== null &&
+    regular.length === 2;
+  if (!superOverAllowed) return { kind: "complete" };
+  if (supers.length === 0) {
+    if (runsOf(match, regular[0]!) !== runsOf(match, regular[1]!)) return { kind: "complete" };
+    // The side that batted second in the match bats first in the Super Over.
+    return { kind: "super-over", number, battingTeamId: regular[1]!.battingTeamId };
+  }
+  if (supers.length % 2 === 1) {
+    return { kind: "super-over", number, battingTeamId: supers.at(-1)!.bowlingTeamId };
+  }
+  const [a, b] = supers.slice(-2) as [Innings, Innings];
+  if (runsOf(match, a) !== runsOf(match, b) || supers.length / 2 >= MAX_SUPER_OVERS) {
+    return { kind: "complete" };
+  }
+  // In a repeat Super Over, the side that batted second last time bats first.
+  return { kind: "super-over", number, battingTeamId: b.battingTeamId };
+}
+
+export interface MatchResult {
+  winnerTeamId: string | null;
+  tied: boolean;
+  drawn: boolean;
+  noResult: boolean;
+  decidedBySuperOver: boolean;
+  text: string;
+}
+
+/**
+ * The result once no more cricket is due (match completed, or an innings break with nothing left to play).
+ * Returns null while the match can still continue.
+ */
+export function matchResult(match: CricketMatch): MatchResult | null {
+  if (match.status === "live") return null;
+  if (match.status === "innings-break" && nextInningsPlan(match).kind !== "complete") return null;
+  const name = (id: string) => findTeam(match, id).name;
+  const base = { tied: false, drawn: false, noResult: false, decidedBySuperOver: false };
+  const regular = regularInnings(match);
+  const supers = superOvers(match);
+  const bpo = match.settings.ballsPerOver;
+
+  if (supers.length >= 2) {
+    const complete = supers.length % 2 === 0 ? supers : supers.slice(0, -1);
+    const [a, b] = complete.slice(-2) as [Innings, Innings];
+    const aRuns = runsOf(match, a);
+    const bRuns = runsOf(match, b);
+    if (aRuns === bRuns) {
+      return { ...base, winnerTeamId: null, tied: true, text: "Match tied (Super Over tied)" };
+    }
+    const winner = aRuns > bRuns ? a.battingTeamId : b.battingTeamId;
+    return { ...base, winnerTeamId: winner, decidedBySuperOver: true, text: `${name(winner)} won the Super Over` };
+  }
+
+  if (match.settings.inningsPerSide === 1) {
+    if (regular.length < 2) return { ...base, winnerTeamId: null, noResult: true, text: "No result" };
+    const [first, second] = regular as [Innings, Innings];
+    const target = runsOf(match, first) + 1;
+    const summary = summarizeInnings(second, bpo);
+    if (summary.runs >= target) {
+      const wicketsLeft = inningsWicketLimit(match, second) - summary.wickets;
+      const limit = inningsBallLimit(match, second);
+      const ballsLeft = limit !== null ? limit - summary.legalBalls : 0;
+      return {
+        ...base,
+        winnerTeamId: second.battingTeamId,
+        text: `${name(second.battingTeamId)} won by ${wicketsLeft} wicket${wicketsLeft === 1 ? "" : "s"}${ballsLeft > 0 ? ` (${ballsLeft} ball${ballsLeft === 1 ? "" : "s"} left)` : ""}`,
+      };
+    }
+    if (summary.runs === target - 1) return { ...base, winnerTeamId: null, tied: true, text: "Match tied" };
+    const margin = target - 1 - summary.runs;
+    return { ...base, winnerTeamId: first.battingTeamId, text: `${name(first.battingTeamId)} won by ${margin} run${margin === 1 ? "" : "s"}` };
+  }
+
+  // Two innings per side.
+  const totals = teamTotals(match);
+  if (regular.length === 3) {
+    const twice = regular[2]!.battingTeamId;
+    const other = match.teams.find((team) => team.id !== twice)!.id;
+    const twiceRuns = totals.get(twice) ?? 0;
+    const otherRuns = totals.get(other) ?? 0;
+    const onceInnings = regular.filter((item) => item.battingTeamId === twice).length === 2;
+    if (onceInnings && twiceRuns < otherRuns) {
+      const margin = otherRuns - twiceRuns;
+      return { ...base, winnerTeamId: other, text: `${name(other)} won by an innings and ${margin} run${margin === 1 ? "" : "s"}` };
+    }
+  }
+  if (regular.length === 4) {
+    const fourth = regular[3]!;
+    const target = inningsTarget(match, match.innings.indexOf(fourth)) ?? 0;
+    const summary = summarizeInnings(fourth, bpo);
+    if (summary.runs >= target) {
+      const wicketsLeft = inningsWicketLimit(match, fourth) - summary.wickets;
+      return { ...base, winnerTeamId: fourth.battingTeamId, text: `${name(fourth.battingTeamId)} won by ${wicketsLeft} wicket${wicketsLeft === 1 ? "" : "s"}` };
+    }
+    const allOut = summary.wickets >= inningsWicketLimit(match, fourth);
+    if (allOut && summary.runs === target - 1) return { ...base, winnerTeamId: null, tied: true, text: "Match tied" };
+    if (allOut) {
+      const margin = target - 1 - summary.runs;
+      return { ...base, winnerTeamId: fourth.bowlingTeamId, text: `${name(fourth.bowlingTeamId)} won by ${margin} run${margin === 1 ? "" : "s"}` };
+    }
+  }
+  return { ...base, winnerTeamId: null, drawn: true, text: "Match drawn" };
+}
+
+/** Rules a new match starts with for a format: free hits in limited-overs cricket, Super Overs in T10/T20. */
+export function defaultRulesForFormat(format: MatchFormat): MatchRules {
+  if (format === "Multi-day") return { followOnLead: 150 };
+  return { freeHit: true, superOver: format === "T10" || format === "T20" };
 }
 
 export function deliveryLabel(delivery: Delivery) {
