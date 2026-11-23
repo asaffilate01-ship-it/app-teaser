@@ -276,7 +276,7 @@ export const en = {
     copyright: "CricLume. See every ball. Shape every game.",
   },
   footer: {
-    desc: "Try on-device cricket scoring and local video review. Club, league and cloud features are in development.",
+    desc: "Ball-by-ball scoring, multi-camera video, live scoreboards and league tools for cricket clubs and leagues.",
     explore: "Explore",
     access: "Access",
     accessLine1: "Scoring is open to everyone",
@@ -572,7 +572,7 @@ export const de: Content = {
     copyright: "CricLume. Jeder Ball. Jeder Vorteil.",
   },
   footer: {
-    desc: "Cricket-Scoring auf deinem Gerät und lokale Videoanalyse. Club-, Liga- und Cloud-Funktionen sind in Entwicklung.",
+    desc: "Ball-für-Ball-Scoring, Video mit mehreren Kameras, Live-Anzeigetafeln und Liga-Tools für Cricket-Clubs und -Ligen.",
     explore: "Entdecken",
     access: "Zugang",
     accessLine1: "Scoring steht allen offen",
@@ -864,7 +864,7 @@ export const nl: Content = {
     copyright: "CricLume. Elke bal. Elk voordeel.",
   },
   footer: {
-    desc: "Probeer cricket scoren en lokale videoreview. Club-, competitie- en cloudfuncties zijn in ontwikkeling.",
+    desc: "Bal-voor-bal scoren, video met meerdere camera's, live scoreborden en competitietools voor cricketclubs en -competities.",
     explore: "Ontdek",
     access: "Toegang",
     accessLine1: "Scoren is voor iedereen toegankelijk",
@@ -1159,7 +1159,7 @@ export const af: Content = {
     copyright: "CricLume. Elke bal. Elke voordeel.",
   },
   footer: {
-    desc: "Probeer telling op jou toestel en plaaslike videohersiening. Klub-, liga- en wolkfunksies word ontwikkel.",
+    desc: "Bal-vir-bal telling, video met veelvuldige kameras, regstreekse telborde en ligahulpmiddels vir krieketklubs en -ligas.",
     explore: "Verken",
     access: "Toegang",
     accessLine1: "Telling is oop vir almal",
@@ -1453,7 +1453,7 @@ export const fr: Content = {
     copyright: "CricLume. Chaque balle. Chaque avantage.",
   },
   footer: {
-    desc: "Essayez le marquage sur appareil et la revue vidéo locale. Les fonctions club, ligue et cloud sont en développement.",
+    desc: "Marquage balle par balle, vidéo multi-caméras, tableaux de score en direct et outils de ligue pour clubs et ligues de cricket.",
     explore: "Explorer",
     access: "Accès",
     accessLine1: "Le marquage est ouvert à tous",
