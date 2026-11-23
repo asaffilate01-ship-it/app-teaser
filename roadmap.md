@@ -79,3 +79,8 @@
 - [x] Parent/guardian links so parents act for junior players
 - [x] Who-can-do-what access table on screen; database rules enforce it
 - [x] Members pay fees in the app by Raast / Easypaisa / JazzCash / bank transfer with a reference; club shows its payment details; treasurer confirms each one
+
+## Plan structure (new ask)
+- [x] Free = basic scoring only (with ads); Club/League = full scoring analytics; video & video analytics = extra add-on (pricing page, comparison table, FAQs, all five languages)
+- [ ] Video add-on price — waiting on user's answer (page shows "quoted per club" meanwhile)
+- [ ] Lock analytics and camera rooms inside the app by plan — not started; offer to user

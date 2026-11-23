@@ -25,7 +25,10 @@ import {
   Tag,
   Building2,
   Trophy,
+  Minus,
+  Plus,
 } from "lucide-react";
+import { planOrder, featureOrder, planFeatures, type FeatureAccess } from "@/lib/plans";
 
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 import fullLogoAsset from "@/assets/criclume-logo-full.png.asset.json";
@@ -687,8 +690,111 @@ function PricingTab() {
         })}
       </div>
 
+      <div className="surface-card relative grid gap-6 border-gold/40 p-5 md:grid-cols-[1fr_1.4fr] md:p-8">
+        <div className="flex flex-col gap-4">
+          <span className="w-fit rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-gold">
+            {t.pricing.addon.badge}
+          </span>
+          <div className="flex items-center gap-3">
+            <div className="icon-tile flex size-11 shrink-0 items-center justify-center">
+              <Video className="size-5 text-gold" />
+            </div>
+            <p className="font-display text-2xl font-bold tracking-tight">{t.pricing.addon.name}</p>
+          </div>
+          <p className="text-sm leading-relaxed text-muted-foreground">{t.pricing.addon.blurb}</p>
+          <div className="flex items-end gap-2">
+            <Plus className="mb-1 size-5 text-gold" strokeWidth={3} />
+            <span className="font-display text-3xl font-bold leading-none">
+              {t.pricing.addon.price}
+            </span>
+            <span className="pb-1 text-xs uppercase tracking-wide text-muted-foreground">
+              {t.pricing.addon.period}
+            </span>
+          </div>
+          <button
+            onClick={() =>
+              window.location.assign("mailto:hello@criclume.com?subject=CricLume%20video%20add-on")
+            }
+            className="mt-auto h-11 w-full rounded-full border border-border bg-secondary text-sm font-bold uppercase tracking-wider text-foreground transition-transform active:scale-[0.98] md:w-auto md:px-8"
+          >
+            {t.pricing.addon.cta}
+          </button>
+        </div>
+        <ul className="grid content-start gap-3 sm:grid-cols-2">
+          {t.pricing.addon.perks.map((perk) => (
+            <li key={perk} className="flex items-start gap-2 text-sm leading-relaxed">
+              <Check className="mt-0.5 size-4 shrink-0 text-gold" />
+              <span className="text-muted-foreground">{perk}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="surface-card overflow-hidden">
+        <p className="px-5 pt-5 font-display text-xl font-bold tracking-tight md:px-6">
+          {t.pricing.compare.title}
+        </p>
+        <div className="overflow-x-auto">
+          <table className="mt-3 w-full text-xs sm:text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                <th className="py-3 pl-4 pr-2 font-semibold sm:px-5 md:px-6">{t.pricing.compare.plan}</th>
+                {planOrder.map((plan, i) => (
+                  <th key={plan} className="px-1 py-3 text-center font-semibold sm:px-3">
+                    {t.pricing.plans[i]!.name}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {featureOrder.map((feature, row) => (
+                <tr key={feature} className="border-b border-border/60 last:border-0">
+                  <td className="py-3 pl-4 pr-2 font-semibold text-foreground sm:px-5 md:px-6">
+                    {t.pricing.compare.rows[row]}
+                  </td>
+                  {planOrder.map((plan) => (
+                    <td key={plan} className="px-1 py-3 text-center sm:px-3">
+                      <AccessMark access={planFeatures[plan][feature]} labels={t.pricing.compare} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <p className="text-xs leading-relaxed text-muted-foreground">{t.pricing.footnote}</p>
     </div>
+  );
+}
+
+function AccessMark({
+  access,
+  labels,
+}: {
+  access: FeatureAccess;
+  labels: Content["pricing"]["compare"];
+}) {
+  if (access === "included")
+    return (
+      <span className="inline-flex items-center justify-center" title={labels.included}>
+        <Check className="size-5 text-gold" strokeWidth={3} aria-hidden />
+        <span className="sr-only">{labels.included}</span>
+      </span>
+    );
+  if (access === "addon")
+    return (
+      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[10px] sm:px-2.5 sm:text-[11px] font-bold uppercase tracking-wide text-gold">
+        <Plus className="size-3" strokeWidth={3} aria-hidden />
+        {labels.addon}
+      </span>
+    );
+  return (
+    <span className="inline-flex items-center justify-center" title={labels.notIncluded}>
+      <Minus className="size-5 text-muted-foreground/60" aria-hidden />
+      <span className="sr-only">{labels.notIncluded}</span>
+    </span>
   );
 }
 

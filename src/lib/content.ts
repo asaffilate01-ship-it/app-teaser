@@ -142,7 +142,8 @@ export const en = {
       },
       {
         label: "Coaching review",
-        caption: "Desktop • two synced angles side by side, frame-by-frame scrubbing and drawing tools",
+        caption:
+          "Desktop • two synced angles side by side, frame-by-frame scrubbing and drawing tools",
       },
       {
         label: "Match dashboard",
@@ -156,13 +157,11 @@ export const en = {
       },
       {
         label: "League live",
-        caption:
-          "Phone • every live match in the competition side by side with win chances",
+        caption: "Phone • every live match in the competition side by side with win chances",
       },
       {
         label: "Live league table",
-        caption:
-          "Phone • where teams would finish if every match ended now, with movers marked",
+        caption: "Phone • where teams would finish if every match ended now, with movers marked",
       },
     ],
   },
@@ -170,7 +169,7 @@ export const en = {
     kicker: "Plans",
     title: "Pricing & subscriptions",
     intro:
-      "Start free with one team. Move to a club or league subscription when you want more angles, longer video retention and competition-wide control.",
+      "Basic scoring is free. Club and League plans unlock full scoring analytics. Video and video analytics are an extra add-on on top of a paid plan.",
     showing: "Showing prices for",
     detecting: "Detecting your region…",
     selectLabel: "Select your country",
@@ -182,46 +181,71 @@ export const en = {
     plans: [
       {
         name: "Starter",
-        period: "one team",
-        blurb: "Score and export matches without a club subscription.",
+        period: "basic scoring",
+        blurb: "Free basic scoring for one team, supported by ads.",
         perks: [
           "Ball-by-ball scoring for 1 team",
-          "On-device scorecards and match exports",
-          "No camera room — upgrade to add angles",
-          "Basic batting & bowling stats",
-          "Downloadable JSON match backup",
+          "Works offline — syncs when signal returns",
+          "Scorecard and live score",
+          "Match export and backup download",
+          "Supported by ads",
+          "No analytics or video",
         ],
         cta: "Start free",
       },
       {
         name: "Club",
         period: "per team / month",
-        blurb: "The full match-day kit for clubs running several sides.",
+        blurb: "Full scoring analytics for clubs running several sides.",
         perks: [
+          "Everything in Starter, with no ads",
           "Unlimited teams and fixtures",
-          "Up to 8 camera phones per match",
-          "90-day video retention + clip export",
-          "Coaching review with slow-motion tagging",
-          "Share live scoring with opposition clubs",
-          "Season-long club analytics",
+          "Wagon wheels, pitch maps and run-rate charts",
+          "Win predictor and ball-by-ball commentary",
+          "Player profiles, averages and season stats",
+          "Share live scoring with opposition clubs and the league",
         ],
         cta: "Ask about Club",
       },
       {
         name: "League",
         period: "per competition / season",
-        blurb: "Competition-wide scoring, standings and governance.",
+        blurb: "Full scoring analytics across the whole competition.",
         perks: [
           "Every club in the competition included",
-          "League standings, results and admin console",
+          "Live scorecards from every match side by side",
+          "Live league table, standings and results",
+          "Season averages, strike rates and milestones",
           "Default visibility rules across fixtures",
-          "12-month video retention",
-          "Sponsor branding on live streams",
           "Data export and priority support",
         ],
         cta: "Talk to us",
       },
     ],
+    addon: {
+      badge: "Add-on",
+      name: "Video & video analytics",
+      blurb: "Add to any Club or League plan for an extra fee. Not available on the free plan.",
+      price: "Extra fee",
+      period: "quoted per club",
+      perks: [
+        "Multi-phone camera room — up to 8 phones per match",
+        "Every ball recorded and linked to the scorecard, with slow motion",
+        "Coaching review, tagging and player video analysis",
+        "Highlight reels and clip export",
+        "Live streaming with the score overlay",
+        "90-day video storage (12 months for leagues)",
+      ],
+      cta: "Ask about video",
+    },
+    compare: {
+      title: "What each plan includes",
+      plan: "Feature",
+      rows: ["Basic scoring", "Full scoring analytics", "Video & video analytics"],
+      included: "Included",
+      notIncluded: "Not included",
+      addon: "Add-on",
+    },
     footnote:
       "Prices shown are for your country. Taxes and billing terms are confirmed before you subscribe.",
   },
@@ -235,7 +259,7 @@ export const en = {
       },
       {
         q: "Do I need special cameras?",
-        a: "No. Ordinary phones work. Pair up to 8 phones per match (4 to start — the club can change it), watch every angle live on the director screen, record each ball and compare two angles side by side in review.",
+        a: "No. With the video add-on, ordinary phones work. Pair up to 8 phones per match (4 to start — the club can change it), watch every angle live on the director screen, record each ball and compare two angles side by side in review.",
       },
       {
         q: "Can I score without signal?",
@@ -255,7 +279,7 @@ export const en = {
       },
       {
         q: "Is there a free option?",
-        a: "Yes. The scorer lets you record a match and download a backup without an account. A public live scoreboard and managed cloud services need separate club setup.",
+        a: "Yes. Basic scoring is free: score ball by ball, even offline, and download a backup. The free plan shows ads and doesn't include analytics or video — full scoring analytics come with a Club or League plan, and video is an extra add-on.",
       },
       {
         q: "How do I get access?",
@@ -438,7 +462,8 @@ export const de: Content = {
       },
       {
         label: "Trainingsanalyse",
-        caption: "Desktop • zwei synchrone Winkel nebeneinander, Einzelbild-Navigation und Zeichenwerkzeuge",
+        caption:
+          "Desktop • zwei synchrone Winkel nebeneinander, Einzelbild-Navigation und Zeichenwerkzeuge",
       },
       {
         label: "Spiel-Dashboard",
@@ -452,8 +477,7 @@ export const de: Content = {
       },
       {
         label: "Liga live",
-        caption:
-          "Handy • alle Live-Spiele des Wettbewerbs nebeneinander mit Siegchancen",
+        caption: "Handy • alle Live-Spiele des Wettbewerbs nebeneinander mit Siegchancen",
       },
       {
         label: "Live-Tabelle",
@@ -466,7 +490,7 @@ export const de: Content = {
     kicker: "Tarife",
     title: "Preise & Abos",
     intro:
-      "Starte kostenlos mit einem Team. Wechsle zu einem Club- oder Liga-Abo, wenn du mehr Winkel, längere Videospeicherung und wettbewerbsweite Kontrolle willst.",
+      "Einfaches Scoring ist kostenlos. Club- und Liga-Abos schalten die vollständige Scoring-Analyse frei. Video und Videoanalyse sind ein zusätzliches Add-on zu einem bezahlten Abo.",
     showing: "Preise für",
     detecting: "Region wird erkannt…",
     selectLabel: "Land auswählen",
@@ -478,46 +502,72 @@ export const de: Content = {
     plans: [
       {
         name: "Starter",
-        period: "ein Team",
-        blurb: "Starte mit Scoring ohne Club-Abonnement.",
+        period: "einfaches Scoring",
+        blurb: "Kostenloses Scoring für ein Team, finanziert durch Werbung.",
         perks: [
           "Scoring Ball für Ball für 1 Team",
-          "Lokale Scorecards und Spielexporte",
-          "Kein Kameraraum — Upgrade für Winkel",
-          "Basis-Statistiken für Batting & Bowling",
-          "JSON-Sicherung des Spiels herunterladen",
+          "Funktioniert offline – synchronisiert bei Empfang",
+          "Scorecard und Live-Spielstand",
+          "Spielsicherung herunterladen",
+          "Mit Werbung",
+          "Keine Analysen und kein Video",
         ],
         cta: "Kostenlos starten",
       },
       {
         name: "Club",
         period: "pro Team / Monat",
-        blurb: "Die komplette Spieltags-Ausrüstung für Clubs mit mehreren Teams.",
+        blurb: "Vollständige Scoring-Analyse für Clubs mit mehreren Teams.",
         perks: [
+          "Alles aus Starter, ohne Werbung",
           "Unbegrenzte Teams und Spiele",
-          "Bis zu 8 Kamera-Handys pro Spiel",
-          "90 Tage Videospeicherung + Clip-Export",
-          "Analyse mit Zeitlupen-Tagging",
-          "Live-Scoring mit Gegnern teilen",
-          "Club-Analysen für die ganze Saison",
+          "Wagon Wheels, Pitch Maps und Run-Rate-Grafiken",
+          "Siegprognose und Ball-für-Ball-Kommentar",
+          "Spielerprofile, Durchschnitte und Saisonstatistiken",
+          "Live-Scoring mit Gegnern und der Liga teilen",
         ],
         cta: "Club anfragen",
       },
       {
         name: "Liga",
         period: "pro Wettbewerb / Saison",
-        blurb: "Scoring, Tabellen und Verwaltung für den gesamten Wettbewerb.",
+        blurb: "Vollständige Scoring-Analyse für den gesamten Wettbewerb.",
         perks: [
           "Alle Clubs des Wettbewerbs enthalten",
-          "Ligatabellen, Ergebnisse und Admin-Konsole",
+          "Live-Scorecards aller Spiele nebeneinander",
+          "Live-Tabelle, Platzierungen und Ergebnisse",
+          "Saison-Durchschnitte, Strike Rates und Meilensteine",
           "Standard-Sichtbarkeitsregeln für alle Spiele",
-          "12 Monate Videospeicherung",
-          "Sponsoren-Branding auf Live-Streams",
           "Datenexport und Priority-Support",
         ],
         cta: "Kontakt aufnehmen",
       },
     ],
+    addon: {
+      badge: "Add-on",
+      name: "Video & Videoanalyse",
+      blurb:
+        "Gegen Aufpreis zu jedem Club- oder Liga-Abo hinzufügen. Im kostenlosen Tarif nicht verfügbar.",
+      price: "Aufpreis",
+      period: "Angebot pro Club",
+      perks: [
+        "Mehr-Handy-Kameraraum – bis zu 8 Handys pro Spiel",
+        "Jeder Ball aufgenommen und mit der Scorecard verknüpft, mit Zeitlupe",
+        "Trainer-Analyse, Tagging und Spieler-Videoanalyse",
+        "Highlight-Reels und Clip-Export",
+        "Livestreams mit Spielstand-Einblendung",
+        "90 Tage Videospeicherung (12 Monate für Ligen)",
+      ],
+      cta: "Video anfragen",
+    },
+    compare: {
+      title: "Was jeder Tarif enthält",
+      plan: "Funktion",
+      rows: ["Einfaches Scoring", "Vollständige Scoring-Analyse", "Video & Videoanalyse"],
+      included: "Enthalten",
+      notIncluded: "Nicht enthalten",
+      addon: "Add-on",
+    },
     footnote:
       "Die Preise gelten für dein Land. Steuern und Zahlungsbedingungen werden vor Abschluss bestätigt.",
   },
@@ -531,7 +581,7 @@ export const de: Content = {
       },
       {
         q: "Brauche ich spezielle Kameras?",
-        a: "Nein. Normale Handys reichen. Verbinde bis zu 8 Handys pro Spiel (anfangs 4 – der Club kann das ändern), sieh alle Winkel live im Regie-Bildschirm, nimm jeden Ball auf und vergleiche zwei Winkel nebeneinander.",
+        a: "Nein. Mit dem Video-Add-on reichen normale Handys. Verbinde bis zu 8 Handys pro Spiel (anfangs 4 – der Club kann das ändern), sieh alle Winkel live im Regie-Bildschirm, nimm jeden Ball auf und vergleiche zwei Winkel nebeneinander.",
       },
       {
         q: "Kann ich ohne Empfang scoren?",
@@ -551,7 +601,7 @@ export const de: Content = {
       },
       {
         q: "Gibt es eine kostenlose Option?",
-        a: "Ja. Du kannst ein Spiel kostenlos auf deinem Gerät erfassen und exportieren. Öffentliche Live-Anzeigetafeln und Cloud-Dienste brauchen eine separate Einrichtung.",
+        a: "Ja. Einfaches Scoring ist kostenlos: Erfasse Ball für Ball, auch offline, und lade eine Sicherung herunter. Der kostenlose Tarif zeigt Werbung und enthält keine Analysen oder Videos – die vollständige Scoring-Analyse gibt es mit einem Club- oder Liga-Abo, Video ist ein zusätzliches Add-on.",
       },
       {
         q: "Wie bekomme ich Zugang?",
@@ -744,8 +794,7 @@ export const nl: Content = {
       },
       {
         label: "Competitie live",
-        caption:
-          "Telefoon • alle live wedstrijden van de competitie naast elkaar met winkansen",
+        caption: "Telefoon • alle live wedstrijden van de competitie naast elkaar met winkansen",
       },
       {
         label: "Live stand",
@@ -758,7 +807,7 @@ export const nl: Content = {
     kicker: "Abonnementen",
     title: "Prijzen & abonnementen",
     intro:
-      "Begin gratis met één team. Stap over op een club- of competitieabonnement voor meer hoeken, langere videobewaring en controle over de hele competitie.",
+      "Basis scoren is gratis. Club- en competitieabonnementen ontgrendelen de volledige score-analyse. Video en videoanalyse zijn een extra add-on bovenop een betaald abonnement.",
     showing: "Prijzen voor",
     detecting: "Regio detecteren…",
     selectLabel: "Kies je land",
@@ -770,46 +819,72 @@ export const nl: Content = {
     plans: [
       {
         name: "Starter",
-        period: "één team",
-        blurb: "Begin met scoren zonder clubabonnement.",
+        period: "basis scoren",
+        blurb: "Gratis basis scoren voor één team, met advertenties.",
         perks: [
           "Bal voor bal scoren voor 1 team",
-          "Lokale scorekaarten en wedstrijdexport",
-          "Geen camerakamer — upgrade voor hoeken",
-          "Basisstatistieken batting & bowling",
-          "JSON-back-up van de wedstrijd downloaden",
+          "Werkt offline – synchroniseert zodra er bereik is",
+          "Scorekaart en live stand",
+          "Wedstrijdback-up downloaden",
+          "Met advertenties",
+          "Geen analyses of video",
         ],
         cta: "Gratis beginnen",
       },
       {
         name: "Club",
         period: "per team / maand",
-        blurb: "De volledige wedstrijduitrusting voor clubs met meerdere teams.",
+        blurb: "Volledige score-analyse voor clubs met meerdere teams.",
         perks: [
+          "Alles uit Starter, zonder advertenties",
           "Onbeperkt teams en wedstrijden",
-          "Tot 8 cameratelefoons per wedstrijd",
-          "90 dagen videobewaring + clipexport",
-          "Analyse met slow-motion tagging",
-          "Live scoren delen met tegenstanders",
-          "Clubanalyses voor het hele seizoen",
+          "Wagon wheels, pitch maps en run-rategrafieken",
+          "Winstvoorspeller en bal-voor-bal commentaar",
+          "Spelersprofielen, gemiddelden en seizoensstatistieken",
+          "Live scoren delen met tegenstanders en de competitie",
         ],
         cta: "Vraag naar Club",
       },
       {
         name: "Competitie",
         period: "per competitie / seizoen",
-        blurb: "Scoren, standen en beheer voor de hele competitie.",
+        blurb: "Volledige score-analyse voor de hele competitie.",
         perks: [
           "Alle clubs in de competitie inbegrepen",
-          "Standen, uitslagen en beheerconsole",
+          "Live scorekaarten van alle wedstrijden naast elkaar",
+          "Live stand, klassement en uitslagen",
+          "Seizoensgemiddelden, strike rates en mijlpalen",
           "Standaard zichtbaarheidsregels voor alle wedstrijden",
-          "12 maanden videobewaring",
-          "Sponsorbranding op live streams",
           "Data-export en prioriteitssupport",
         ],
         cta: "Neem contact op",
       },
     ],
+    addon: {
+      badge: "Add-on",
+      name: "Video & videoanalyse",
+      blurb:
+        "Voeg toe aan elk club- of competitieabonnement tegen meerprijs. Niet beschikbaar in het gratis abonnement.",
+      price: "Meerprijs",
+      period: "offerte per club",
+      perks: [
+        "Camerakamer met meerdere telefoons – tot 8 per wedstrijd",
+        "Elke bal opgenomen en gekoppeld aan de scorekaart, met slow motion",
+        "Coachingreview, tagging en videoanalyse per speler",
+        "Highlightvideo's en clipexport",
+        "Livestreams met score-overlay",
+        "90 dagen videobewaring (12 maanden voor competities)",
+      ],
+      cta: "Vraag naar video",
+    },
+    compare: {
+      title: "Wat elk abonnement bevat",
+      plan: "Functie",
+      rows: ["Basis scoren", "Volledige score-analyse", "Video & videoanalyse"],
+      included: "Inbegrepen",
+      notIncluded: "Niet inbegrepen",
+      addon: "Add-on",
+    },
     footnote:
       "De prijzen gelden voor jouw land. Belastingen en betaalvoorwaarden worden bevestigd voordat je je aanmeldt.",
   },
@@ -823,7 +898,7 @@ export const nl: Content = {
       },
       {
         q: "Heb ik speciale camera's nodig?",
-        a: "Nee. Gewone telefoons volstaan. Koppel tot 8 telefoons per wedstrijd (eerst 4 – de club kan dat aanpassen), bekijk elke hoek live op het regiescherm, neem elke bal op en vergelijk twee hoeken naast elkaar.",
+        a: "Nee. Met de video-add-on volstaan gewone telefoons. Koppel tot 8 telefoons per wedstrijd (eerst 4 – de club kan dat aanpassen), bekijk elke hoek live op het regiescherm, neem elke bal op en vergelijk twee hoeken naast elkaar.",
       },
       {
         q: "Kan ik scoren zonder bereik?",
@@ -843,7 +918,7 @@ export const nl: Content = {
       },
       {
         q: "Is er een gratis optie?",
-        a: "Ja. Je kunt een wedstrijd gratis op je apparaat registreren en exporteren. Openbare live scoreborden en clouddiensten vereisen aparte inrichting.",
+        a: "Ja. Basis scoren is gratis: scoor bal voor bal, ook offline, en download een back-up. Het gratis abonnement toont advertenties en bevat geen analyses of video – de volledige score-analyse krijg je met een club- of competitieabonnement en video is een extra add-on.",
       },
       {
         q: "Hoe krijg ik toegang?",
@@ -1039,13 +1114,11 @@ export const af: Content = {
       },
       {
         label: "Liga regstreeks",
-        caption:
-          "Foon • elke regstreekse wedstryd in die kompetisie langs mekaar met wenkanse",
+        caption: "Foon • elke regstreekse wedstryd in die kompetisie langs mekaar met wenkanse",
       },
       {
         label: "Regstreekse punteleer",
-        caption:
-          "Foon • waar spanne sou eindig as elke wedstryd nou klaarmaak, met stygers gemerk",
+        caption: "Foon • waar spanne sou eindig as elke wedstryd nou klaarmaak, met stygers gemerk",
       },
     ],
   },
@@ -1053,7 +1126,7 @@ export const af: Content = {
     kicker: "Planne",
     title: "Pryse en intekening",
     intro:
-      "Begin gratis met een span. Gaan oor na 'n klub- of ligaplan wanneer jy meer hoeke, langer videoberging en kompetisiewye beheer wil hê.",
+      "Basiese aantekening is gratis. Klub- en ligaplanne ontsluit volledige telling-ontleding. Video en video-ontleding is 'n ekstra byvoeging bo-op 'n betaalde plan.",
     showing: "Pryse vir",
     detecting: "Streek word bepaal…",
     selectLabel: "Kies jou land",
@@ -1065,46 +1138,72 @@ export const af: Content = {
     plans: [
       {
         name: "Starter",
-        period: "een span",
-        blurb: "Begin telling sonder klubintekening.",
+        period: "basiese aantekening",
+        blurb: "Gratis basiese aantekening vir een span, met advertensies.",
         perks: [
           "Bal-vir-bal aantekening vir 1 span",
-          "Plaaslike telkaarte en uitvoer",
-          "Geen kamerakamer nie — opgradeer vir hoeke",
-          "Basiese kolf- en boulstatistieke",
-          "Laai 'n JSON-rugsteun af",
+          "Werk vanlyn – sinkroniseer wanneer die sein terug is",
+          "Telkaart en regstreekse telling",
+          "Wedstryduitvoer en rugsteun aflaai",
+          "Met advertensies",
+          "Geen ontleding of video nie",
         ],
         cta: "Begin gratis",
       },
       {
         name: "Klub",
         period: "per span / maand",
-        blurb: "Die volle wedstryddagpakket vir klubs met verskeie spanne.",
+        blurb: "Volledige telling-ontleding vir klubs met verskeie spanne.",
         perks: [
+          "Alles in Starter, sonder advertensies",
           "Onbeperkte spanne en wedstryde",
-          "Tot 8 kamerafone per wedstryd",
-          "90 dae videoberging + knipsel-uitvoer",
-          "Ontleding met stadige-aksie merking",
-          "Deel regstreekse aantekening met teenstanders",
-          "Klubontledings vir die hele seisoen",
+          "Wagon wheels, pitch maps en lopietempo-grafieke",
+          "Wenvoorspeller en bal-vir-bal kommentaar",
+          "Spelerprofiele, gemiddeldes en seisoenstatistieke",
+          "Deel regstreekse aantekening met teenstanders en die liga",
         ],
         cta: "Vra oor Klub",
       },
       {
         name: "Liga",
         period: "per kompetisie / seisoen",
-        blurb: "Kompetisiewye aantekening, ranglyste en bestuur.",
+        blurb: "Volledige telling-ontleding oor die hele kompetisie.",
         perks: [
           "Elke klub in die kompetisie ingesluit",
-          "Ligaranglyste, uitslae en admin-konsole",
+          "Regstreekse telkaarte van elke wedstryd langs mekaar",
+          "Regstreekse ranglys, posisies en uitslae",
+          "Seisoengemiddeldes, trefsyfers en mylpale",
           "Verstek sigbaarheidsreëls oor alle wedstryde",
-          "12 maande videoberging",
-          "Borgbemarking op regstreekse strome",
           "Data-uitvoer en voorkeurondersteuning",
         ],
         cta: "Praat met ons",
       },
     ],
+    addon: {
+      badge: "Byvoeging",
+      name: "Video en video-ontleding",
+      blurb:
+        "Voeg by enige Klub- of Ligaplan teen 'n ekstra fooi. Nie op die gratis plan beskikbaar nie.",
+      price: "Ekstra fooi",
+      period: "kwotasie per klub",
+      perks: [
+        "Kamerakamer met meer fone – tot 8 fone per wedstryd",
+        "Elke bal opgeneem en aan die telkaart gekoppel, met stadige aksie",
+        "Afrigtingsoorsig, merking en spelervideo-ontleding",
+        "Hoogtepunt-video's en knipsel-uitvoer",
+        "Regstreekse strome met telling-oorleg",
+        "90 dae videoberging (12 maande vir ligas)",
+      ],
+      cta: "Vra oor video",
+    },
+    compare: {
+      title: "Wat elke plan insluit",
+      plan: "Funksie",
+      rows: ["Basiese aantekening", "Volledige telling-ontleding", "Video en video-ontleding"],
+      included: "Ingesluit",
+      notIncluded: "Nie ingesluit nie",
+      addon: "Byvoeging",
+    },
     footnote:
       "Die pryse geld vir jou land. Belasting en betaalvoorwaardes word bevestig voordat jy inteken.",
   },
@@ -1118,7 +1217,7 @@ export const af: Content = {
       },
       {
         q: "Het ek spesiale kameras nodig?",
-        a: "Nee. Gewone fone werk. Koppel tot 8 fone per wedstryd (aanvanklik 4 – die klub kan dit verander), kyk elke hoek regstreeks op die regieskerm, neem elke bal op en vergelyk twee hoeke langs mekaar.",
+        a: "Nee. Met die video-byvoeging werk gewone fone. Koppel tot 8 fone per wedstryd (aanvanklik 4 – die klub kan dit verander), kyk elke hoek regstreeks op die regieskerm, neem elke bal op en vergelyk twee hoeke langs mekaar.",
       },
       {
         q: "Kan ek sonder sein aanteken?",
@@ -1138,7 +1237,7 @@ export const af: Content = {
       },
       {
         q: "Is daar 'n gratis opsie?",
-        a: "Ja. Jy kan 'n wedstryd gratis op jou toestel aanteken en uitvoer. Openbare telborde en wolkdienste vereis aparte opstelling.",
+        a: "Ja. Basiese aantekening is gratis: teken bal vir bal aan, selfs vanlyn, en laai 'n rugsteun af. Die gratis plan wys advertensies en sluit nie ontleding of video in nie – volledige telling-ontleding kom met 'n Klub- of Ligaplan, en video is 'n ekstra byvoeging.",
       },
       {
         q: "Hoe kry ek toegang?",
@@ -1347,7 +1446,7 @@ export const fr: Content = {
     kicker: "Formules",
     title: "Tarifs et abonnements",
     intro:
-      "Commencez gratuitement avec une équipe. Passez à un abonnement club ou ligue pour plus d'angles, une conservation vidéo plus longue et un contrôle sur toute la compétition.",
+      "Le marquage de base est gratuit. Les offres Club et Ligue débloquent l'analyse complète du marquage. La vidéo et l'analyse vidéo sont une option supplémentaire, en plus d'une offre payante.",
     showing: "Tarifs pour",
     detecting: "Détection de votre région…",
     selectLabel: "Choisissez votre pays",
@@ -1359,46 +1458,72 @@ export const fr: Content = {
     plans: [
       {
         name: "Starter",
-        period: "une équipe",
-        blurb: "Commencez le marquage sans abonnement club.",
+        period: "marquage de base",
+        blurb: "Marquage de base gratuit pour une équipe, financé par la publicité.",
         perks: [
           "Marquage balle par balle pour 1 équipe",
-          "Feuilles de score et exports locaux",
-          "Pas de salle caméra — passez à l'offre supérieure",
-          "Statistiques de base batting et bowling",
-          "Télécharger la sauvegarde JSON",
+          "Fonctionne hors ligne – se synchronise au retour du réseau",
+          "Feuille de score et score en direct",
+          "Télécharger la sauvegarde du match",
+          "Avec publicité",
+          "Sans analyses ni vidéo",
         ],
         cta: "Commencer gratuitement",
       },
       {
         name: "Club",
         period: "par équipe / mois",
-        blurb: "L'équipement complet du jour de match pour les clubs à plusieurs équipes.",
+        blurb: "Analyse complète du marquage pour les clubs à plusieurs équipes.",
         perks: [
+          "Tout Starter, sans publicité",
           "Équipes et matchs illimités",
-          "Jusqu'à 8 téléphones caméra par match",
-          "90 jours de conservation vidéo + export de clips",
-          "Analyse avec marquage au ralenti",
-          "Partage du direct avec les clubs adverses",
-          "Analyses du club sur toute la saison",
+          "Wagon wheels, pitch maps et graphiques de run rate",
+          "Prédicteur de victoire et commentaire balle par balle",
+          "Profils joueurs, moyennes et statistiques de saison",
+          "Partage du direct avec les clubs adverses et la ligue",
         ],
         cta: "Demander Club",
       },
       {
         name: "Ligue",
         period: "par compétition / saison",
-        blurb: "Marquage, classements et gouvernance pour toute la compétition.",
+        blurb: "Analyse complète du marquage sur toute la compétition.",
         perks: [
           "Tous les clubs de la compétition inclus",
-          "Classements, résultats et console d'administration",
+          "Feuilles de score en direct de tous les matchs côte à côte",
+          "Classement en direct, positions et résultats",
+          "Moyennes de saison, strike rates et records",
           "Règles de visibilité par défaut sur tous les matchs",
-          "12 mois de conservation vidéo",
-          "Marque du sponsor sur les diffusions",
           "Export des données et support prioritaire",
         ],
         cta: "Nous contacter",
       },
     ],
+    addon: {
+      badge: "Option",
+      name: "Vidéo et analyse vidéo",
+      blurb:
+        "À ajouter à toute offre Club ou Ligue, avec supplément. Non disponible dans l'offre gratuite.",
+      price: "Supplément",
+      period: "devis par club",
+      perks: [
+        "Salle caméra multi-téléphones – jusqu'à 8 téléphones par match",
+        "Chaque balle filmée et liée à la feuille de score, avec ralenti",
+        "Revue d'entraînement, marquage et analyse vidéo par joueur",
+        "Résumés vidéo et export de clips",
+        "Diffusion en direct avec incrustation du score",
+        "90 jours de conservation vidéo (12 mois pour les ligues)",
+      ],
+      cta: "Demander la vidéo",
+    },
+    compare: {
+      title: "Ce que comprend chaque offre",
+      plan: "Fonction",
+      rows: ["Marquage de base", "Analyse complète du marquage", "Vidéo et analyse vidéo"],
+      included: "Inclus",
+      notIncluded: "Non inclus",
+      addon: "Option",
+    },
     footnote:
       "Les prix affichés sont ceux de votre pays. Taxes et conditions de paiement sont confirmées avant l'inscription.",
   },
@@ -1412,7 +1537,7 @@ export const fr: Content = {
       },
       {
         q: "Faut-il des caméras spéciales ?",
-        a: "Non. De simples téléphones suffisent. Associez jusqu'à 8 téléphones par match (4 au départ – le club peut changer), suivez chaque angle en direct sur l'écran de réalisation, enregistrez chaque balle et comparez deux angles côte à côte.",
+        a: "Non. Avec l'option vidéo, de simples téléphones suffisent. Associez jusqu'à 8 téléphones par match (4 au départ – le club peut changer), suivez chaque angle en direct sur l'écran de réalisation, enregistrez chaque balle et comparez deux angles côte à côte.",
       },
       {
         q: "Puis-je marquer sans réseau ?",
@@ -1432,7 +1557,7 @@ export const fr: Content = {
       },
       {
         q: "Existe-t-il une offre gratuite ?",
-        a: "Oui. Vous pouvez saisir et exporter gratuitement un match sur votre appareil. Les tableaux de score publics et services cloud nécessitent une configuration distincte.",
+        a: "Oui. Le marquage de base est gratuit : saisissez chaque balle, même hors ligne, et téléchargez une sauvegarde. L'offre gratuite affiche de la publicité et n'inclut ni analyses ni vidéo – l'analyse complète du marquage vient avec une offre Club ou Ligue, et la vidéo est une option supplémentaire.",
       },
       {
         q: "Comment obtenir un accès ?",
