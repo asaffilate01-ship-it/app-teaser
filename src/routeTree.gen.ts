@@ -38,6 +38,7 @@ import { Route as ClubSlugFixturesRouteImport } from './routes/club.$slug.fixtur
 import { Route as ClubSlugGalleryRouteImport } from './routes/club.$slug.gallery'
 import { Route as ClubSlugNewsRouteImport } from './routes/club.$slug.news'
 import { Route as ApiPublicGroundFeedSlugRouteImport } from './routes/api/public/ground-feed.$slug'
+import { Route as ApiPublicJobsRemindersRouteImport } from './routes/api/public/jobs/reminders'
 import { Route as ApiPublicPushSlugRouteImport } from './routes/api/public/push/$slug'
 import { Route as ClubSlugNewsPostIdRouteImport } from './routes/club.$slug.news.$postId'
 
@@ -186,6 +187,11 @@ const ApiPublicGroundFeedSlugRoute = ApiPublicGroundFeedSlugRouteImport.update({
   path: '/api/public/ground-feed/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsRemindersRoute = ApiPublicJobsRemindersRouteImport.update({
+  id: '/api/public/jobs/reminders',
+  path: '/api/public/jobs/reminders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPushSlugRoute = ApiPublicPushSlugRouteImport.update({
   id: '/api/public/push/$slug',
   path: '/api/public/push/$slug',
@@ -227,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/club/$slug/news': typeof ClubSlugNewsRouteWithChildren
   '/club/$slug/': typeof ClubSlugIndexRoute
   '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
+  '/api/public/jobs/reminders': typeof ApiPublicJobsRemindersRoute
   '/api/public/push/$slug': typeof ApiPublicPushSlugRoute
   '/club/$slug/news/$postId': typeof ClubSlugNewsPostIdRoute
 }
@@ -259,6 +266,7 @@ export interface FileRoutesByTo {
   '/club/$slug/news': typeof ClubSlugNewsRouteWithChildren
   '/club/$slug': typeof ClubSlugIndexRoute
   '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
+  '/api/public/jobs/reminders': typeof ApiPublicJobsRemindersRoute
   '/api/public/push/$slug': typeof ApiPublicPushSlugRoute
   '/club/$slug/news/$postId': typeof ClubSlugNewsPostIdRoute
 }
@@ -293,6 +301,7 @@ export interface FileRoutesById {
   '/club/$slug/news': typeof ClubSlugNewsRouteWithChildren
   '/club/$slug/': typeof ClubSlugIndexRoute
   '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
+  '/api/public/jobs/reminders': typeof ApiPublicJobsRemindersRoute
   '/api/public/push/$slug': typeof ApiPublicPushSlugRoute
   '/club/$slug/news/$postId': typeof ClubSlugNewsPostIdRoute
 }
@@ -328,6 +337,7 @@ export interface FileRouteTypes {
     | '/club/$slug/news'
     | '/club/$slug/'
     | '/api/public/ground-feed/$slug'
+    | '/api/public/jobs/reminders'
     | '/api/public/push/$slug'
     | '/club/$slug/news/$postId'
   fileRoutesByTo: FileRoutesByTo
@@ -360,6 +370,7 @@ export interface FileRouteTypes {
     | '/club/$slug/news'
     | '/club/$slug'
     | '/api/public/ground-feed/$slug'
+    | '/api/public/jobs/reminders'
     | '/api/public/push/$slug'
     | '/club/$slug/news/$postId'
   id:
@@ -393,6 +404,7 @@ export interface FileRouteTypes {
     | '/club/$slug/news'
     | '/club/$slug/'
     | '/api/public/ground-feed/$slug'
+    | '/api/public/jobs/reminders'
     | '/api/public/push/$slug'
     | '/club/$slug/news/$postId'
   fileRoutesById: FileRoutesById
@@ -423,6 +435,7 @@ export interface RootRouteChildren {
   ScoutTokenRoute: typeof ScoutTokenRoute
   CheckIndexRoute: typeof CheckIndexRoute
   ApiPublicGroundFeedSlugRoute: typeof ApiPublicGroundFeedSlugRoute
+  ApiPublicJobsRemindersRoute: typeof ApiPublicJobsRemindersRoute
   ApiPublicPushSlugRoute: typeof ApiPublicPushSlugRoute
 }
 
@@ -631,6 +644,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicGroundFeedSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/reminders': {
+      id: '/api/public/jobs/reminders'
+      path: '/api/public/jobs/reminders'
+      fullPath: '/api/public/jobs/reminders'
+      preLoaderRoute: typeof ApiPublicJobsRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/push/$slug': {
       id: '/api/public/push/$slug'
       path: '/api/public/push/$slug'
@@ -704,6 +724,7 @@ const rootRouteChildren: RootRouteChildren = {
   ScoutTokenRoute: ScoutTokenRoute,
   CheckIndexRoute: CheckIndexRoute,
   ApiPublicGroundFeedSlugRoute: ApiPublicGroundFeedSlugRoute,
+  ApiPublicJobsRemindersRoute: ApiPublicJobsRemindersRoute,
   ApiPublicPushSlugRoute: ApiPublicPushSlugRoute,
 }
 export const routeTree = rootRouteImport

@@ -52,3 +52,4 @@
 - Fan POTM votes: RPC-only, refs from `get_ground_screen_names`, hashed voter id.
 - Junior bowling limits warn only; point deductions never touch NRR; volunteer places enforced by `volunteer_sign_up`.
 - Event places/waitlist, reply-by, suspensions and earlier-ball fixes (`correct_delivery_v1`) are enforced by DB triggers/RPCs; UI only mirrors them.
+- Reminders: DB builds rows in `notifications` (`queue_reminders_internal`, hourly `/api/public/jobs/reminders` + `send_reminders_now` role-checked, dedupe keys); `reminders.server.ts` claims then delivers per `channelsFor()` in `src/lib/reminders.ts` — one wording for app, push, email, WhatsApp/SMS, no double sends.

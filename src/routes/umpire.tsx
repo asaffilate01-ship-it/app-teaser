@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { RemindersBell } from "@/components/reminders/RemindersBell";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "sonner";
 import { CalendarDays, Car, Clock, Coins, Gavel, LoaderCircle, MapPin, Phone, ShieldCheck, Check, X } from "lucide-react";
@@ -58,6 +59,7 @@ function UmpireDashboard() {
               <Link to="/platform" className="app-chip-button hidden sm:inline-flex">
                 My club
               </Link>
+              <RemindersBell />
               <button type="button" className="app-chip-button" onClick={() => void signOut()}>
                 Sign out
               </button>

@@ -123,6 +123,7 @@ import {
   type PlatformDashboardData,
 } from "@/lib/platform-cloud";
 import { PromoSlot } from "@/components/promo/PromoSlot";
+import { RemindersBell } from "@/components/reminders/RemindersBell";
 import { usePromos } from "@/hooks/use-promos";
 import { assignableRoles, can, platformRoles, roleLabels, type PlatformRole } from "@/lib/platform";
 
@@ -686,6 +687,7 @@ function OperationalPlatform({
           <Link to="/check" className="app-chip-button hidden sm:inline-flex">
             Check scoring
           </Link>
+          <RemindersBell />
           <button
             type="button"
             onClick={() => void signOut()}

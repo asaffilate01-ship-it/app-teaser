@@ -187,6 +187,8 @@
 - [x] Activity history (who changed what, when)
 - [x] Player auction / draft for franchise leagues
 - [x] Card payments — owner chose transfers only (no card gateway, no card fees; treasurer keeps confirming references)
-- [ ] Email / WhatsApp / SMS reminders — waiting on owner's choice
-- [ ] Go live from the app without OBS — waiting on owner's choice (running costs)
+- [x] Reminders for availability, fees and umpire jobs: in-app bell, phone alerts, hourly automatic + "Send now"
+- [ ] Email reminders — waiting on owner setting up the criclume.com sending address
+- [ ] WhatsApp/SMS reminders — built; waiting on owner connecting a Twilio account (and a Meta-approved WhatsApp template); who can use them waiting on owner's answer (using: paid plans only)
+- [x] Go live from the app without OBS — owner chose to skip for now; free OBS overlay and guide stay
 - [ ] LED scoreboard controller test — needs real hardware

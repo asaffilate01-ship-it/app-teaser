@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from "react";
-import { CalendarCheck, CalendarPlus } from "lucide-react";
+import { BellRing, CalendarCheck, CalendarPlus } from "lucide-react";
+import { toast } from "sonner";
 import { can } from "@/lib/platform";
 import { availabilitySummary, eventIcs, repliesClosed, type Availability } from "@/lib/club-office";
 import { office, type ClubEvent } from "@/lib/club-office-cloud";
+import { remindNow } from "./RemindersPanel";
 import { Empty, OfficeCard, OfficeField, Pill, fromLocal, nameOfPlayer, upcoming, when, type OfficeProps } from "./ui";
 
 const kinds = [
@@ -100,6 +102,15 @@ export function EventsPanel(props: OfficeProps) {
                   <Pill tone="bad">{summary.unavailable} can't</Pill>
                   {summary.waitlist > 0 && <Pill tone="warn">{summary.waitlist} waiting</Pill>}
                   <Pill>{summary.noReply.length} no reply</Pill>
+                  {event.availability_open && summary.noReply.length > 0 && (
+                    <button
+                      type="button"
+                      className="app-chip-button"
+                      onClick={() => void remindNow(organisationId, "availability", event.id).catch((error: unknown) => toast.error(error instanceof Error ? error.message : "Reminders could not be sent."))}
+                    >
+                      <BellRing className="size-3.5" /> Remind no-replies
+                    </button>
+                  )}
                   <button type="button" className="app-chip-button" onClick={() => setOpen(open === event.id ? null : event.id)}>
                     {open === event.id ? "Hide answers" : "See answers"}
                   </button>

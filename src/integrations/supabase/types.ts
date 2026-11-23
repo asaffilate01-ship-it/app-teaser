@@ -4366,14 +4366,57 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          availability: boolean
+          email: boolean
+          fees: boolean
+          phone: string | null
+          push: boolean
+          sms: boolean
+          umpire_jobs: boolean
+          updated_at: string
+          user_id: string
+          whatsapp: boolean
+        }
+        Insert: {
+          availability?: boolean
+          email?: boolean
+          fees?: boolean
+          phone?: string | null
+          push?: boolean
+          sms?: boolean
+          umpire_jobs?: boolean
+          updated_at?: string
+          user_id: string
+          whatsapp?: boolean
+        }
+        Update: {
+          availability?: boolean
+          email?: boolean
+          fees?: boolean
+          phone?: string | null
+          push?: boolean
+          sms?: boolean
+          umpire_jobs?: boolean
+          updated_at?: string
+          user_id?: string
+          whatsapp?: boolean
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           channel: string
           created_at: string
+          dedupe_key: string | null
           delivered_at: string | null
+          deliveries: Json
           failed_at: string | null
           failure_reason: string | null
           id: string
+          kind: string | null
+          link: string | null
           organisation_id: string | null
           payload: Json
           read_at: string | null
@@ -4384,10 +4427,14 @@ export type Database = {
         Insert: {
           channel: string
           created_at?: string
+          dedupe_key?: string | null
           delivered_at?: string | null
+          deliveries?: Json
           failed_at?: string | null
           failure_reason?: string | null
           id?: string
+          kind?: string | null
+          link?: string | null
           organisation_id?: string | null
           payload?: Json
           read_at?: string | null
@@ -4398,10 +4445,14 @@ export type Database = {
         Update: {
           channel?: string
           created_at?: string
+          dedupe_key?: string | null
           delivered_at?: string | null
+          deliveries?: Json
           failed_at?: string | null
           failure_reason?: string | null
           id?: string
+          kind?: string | null
+          link?: string | null
           organisation_id?: string | null
           payload?: Json
           read_at?: string | null
@@ -5314,6 +5365,50 @@ export type Database = {
             columns: ["rule_version_id"]
             isOneToOne: false
             referencedRelation: "competition_rule_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reminder_settings: {
+        Row: {
+          availability: boolean
+          availability_hours: number
+          fee_days: number
+          fees: boolean
+          organisation_id: string
+          texts: boolean
+          umpire_jobs: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          availability?: boolean
+          availability_hours?: number
+          fee_days?: number
+          fees?: boolean
+          organisation_id: string
+          texts?: boolean
+          umpire_jobs?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          availability?: boolean
+          availability_hours?: number
+          fee_days?: number
+          fees?: boolean
+          organisation_id?: string
+          texts?: boolean
+          umpire_jobs?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_settings_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: true
+            referencedRelation: "organisations"
             referencedColumns: ["id"]
           },
         ]
@@ -6348,6 +6443,36 @@ export type Database = {
           },
         ]
       }
+      user_push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          failures: number
+          id: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          failures?: number
+          id?: string
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          failures?: number
+          id?: string
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -7124,6 +7249,7 @@ export type Database = {
       }
       on_my_umpire_panel: { Args: { p_org: string }; Returns: boolean }
       open_registrations: { Args: never; Returns: Json }
+      org_on_paid_plan: { Args: { p_org: string }; Returns: boolean }
       pair_camera_device: {
         Args: {
           p_angle: string
@@ -7173,6 +7299,16 @@ export type Database = {
       potm_vote_tally_for_match: { Args: { p_match_id: string }; Returns: Json }
       promo_share_percent: {
         Args: { p_organisation_id: string }
+        Returns: number
+      }
+      queue_due_reminders: { Args: never; Returns: number }
+      queue_reminders_internal: {
+        Args: {
+          p_kind: string
+          p_manual: boolean
+          p_org: string
+          p_target: string
+        }
         Returns: number
       }
       raise_check_flag: {
@@ -7291,6 +7427,13 @@ export type Database = {
         Args: { p_competition_id: string; p_note?: string; p_team_id: string }
         Returns: string
       }
+      reminder_contacts: {
+        Args: { p_user_ids: string[] }
+        Returns: {
+          email: string
+          user_id: string
+        }[]
+      }
       remove_camera_device: {
         Args: { p_device_id: string }
         Returns: undefined
@@ -7357,6 +7500,10 @@ export type Database = {
         Args: { p_accept: boolean; p_id: string; p_note?: string }
         Returns: undefined
       }
+      save_push_device: {
+        Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
+        Returns: undefined
+      }
       scouting_consent_granted: {
         Args: { p_organisation_id: string; p_player_id: string }
         Returns: boolean
@@ -7375,6 +7522,10 @@ export type Database = {
       sell_auction_lot: {
         Args: { p_lot_id: string; p_price_minor: number; p_team_id: string }
         Returns: undefined
+      }
+      send_reminders_now: {
+        Args: { p_kind: string; p_organisation_id: string; p_target?: string }
+        Returns: number
       }
       set_camera_room_capacity: {
         Args: { p_max_devices: number; p_room_id: string }

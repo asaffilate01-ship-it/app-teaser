@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Banknote, Car, Coins, ClipboardList, Gavel, HandHeart, History, KeyRound, LoaderCircle, MapPin, Shirt, UserPlus, UsersRound } from "lucide-react";
+import { BellRing, Banknote, Car, Coins, ClipboardList, Gavel, HandHeart, History, KeyRound, LoaderCircle, MapPin, Shirt, UserPlus, UsersRound } from "lucide-react";
 import { can } from "@/lib/platform";
 import type { PlatformRole } from "@/lib/platform";
 import type { PlatformDashboardData } from "@/lib/platform-cloud";
@@ -17,6 +17,7 @@ import { ClubPromosPanel } from "./ClubPromosPanel";
 import { UmpiresPanel } from "./UmpiresPanel";
 import { VolunteersPanel } from "./VolunteersPanel";
 import { ActivityPanel, PeoplePanel } from "./PeoplePanel";
+import { RemindersPanel } from "./RemindersPanel";
 import type { OfficeProps } from "./ui";
 
 const tabs = [
@@ -28,12 +29,16 @@ const tabs = [
   ["store", "Kit and shop", Shirt],
   ["volunteers", "Volunteers", HandHeart],
   ["umpires", "Umpires", Gavel],
+  ["reminders", "Reminders", BellRing],
   ["people", "Join requests", UserPlus],
   ["ads", "Ad earnings", Coins],
   ["access", "Access", KeyRound],
   ["activity", "Activity", History],
 ] as const;
 type Tab = (typeof tabs)[number][0];
+
+const remindersVisible = (role: PlatformRole) =>
+  role === "owner" || role === "club_admin" || role === "league_admin" || can(role, "events.manage") || can(role, "fees.manage") || can(role, "umpires.manage");
 
 export function ClubOffice({ organisationId, role, club }: { organisationId: string; role: PlatformRole; club: PlatformDashboardData }) {
   const [tab, setTab] = useState<Tab>("events");
@@ -80,7 +85,7 @@ export function ClubOffice({ organisationId, role, club }: { organisationId: str
         <p className="office-meta">Events, availability, selection, fees, bookings, lifts, kit, volunteers and umpires — each person sees only what their role allows.</p>
       </div>
       <div className="office-tabs" role="tablist" aria-label="Club office">
-        {tabs.filter(([value]) => value !== "umpires" || can(role, "umpires.pay")).map(([value, label, Icon]) => (
+        {tabs.filter(([value]) => (value !== "umpires" || can(role, "umpires.pay")) && (value !== "reminders" || remindersVisible(role))).map(([value, label, Icon]) => (
           <button key={value} type="button" role="tab" aria-selected={tab === value} className="office-tab" onClick={() => setTab(value)}>
             <Icon className="size-4" /> {label}
           </button>
@@ -116,6 +121,7 @@ export function ClubOffice({ organisationId, role, club }: { organisationId: str
             </div>
           )}
           {tab === "access" && <AccessPanel {...props} />}
+          {tab === "reminders" && remindersVisible(role) && <RemindersPanel key={organisationId} {...props} />}
           {tab === "people" && <PeoplePanel key={organisationId} {...props} />}
           {tab === "activity" && <ActivityPanel key={organisationId} {...props} />}
         </div>
