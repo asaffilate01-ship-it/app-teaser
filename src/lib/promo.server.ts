@@ -1,5 +1,5 @@
 import { getRequest, getRequestHeader, getRequestIP } from "@tanstack/react-start/server";
-import { choosePromos, readVisitorPlace, type PromoItem, type PromoSlot, type PromoSurface, type VisitorPlace } from "./promo-targeting";
+import { choosePromos, readVisitorPlace, type PromoItem, type PromoSlot, type PromoSource, type PromoSurface, type VisitorPlace } from "./promo-targeting";
 import { sha256Hex } from "./sha256";
 
 type Admin = (typeof import("@/integrations/supabase/client.server"))["supabaseAdmin"];
@@ -64,43 +64,85 @@ export async function organisationForBoard(slug: string): Promise<string | null>
   return row?.enabled && row.matches ? row.matches.owner_organisation_id : null;
 }
 
-/** Ads running today on this kind of screen that suit the visitor's place, with six-hour file links. */
-export async function promosFor(surface: PromoSurface): Promise<Record<PromoSlot, PromoItem[]>> {
-  const empty = { top: [], side: [] };
+type SignedRow = {
+  id: string;
+  slot: string;
+  media_path: string;
+  media_kind: string;
+  duration_seconds: number;
+  alt_text: string;
+  advertiser: string;
+  click_url: string | null;
+};
+
+/** Six-hour file links that open from the visitor's browser (public backend address). */
+async function signRows(bucket: string, rows: SignedRow[], source: PromoSource): Promise<PromoItem[]> {
+  const paths = [...new Set(rows.map((row) => row.media_path))];
+  if (paths.length === 0) return [];
   const db = await admin();
-  const { data, error } = await db.rpc("list_live_promos", { p_surface: surface });
-  if (error || !data?.length) return empty;
-  const chosen = choosePromos(
-    data.map((row) => ({ ...row, slot: (row.slot === "side" ? "side" : "top") as PromoSlot })),
-    visitorPlace(),
-  );
-  const paths = [...new Set([...chosen.top, ...chosen.side].map((row) => row.media_path))];
-  if (paths.length === 0) return empty;
-  const { data: signed } = await db.storage.from("promo-media").createSignedUrls(paths, 6 * 3600);
+  const { data: signed } = await db.storage.from(bucket).createSignedUrls(paths, 6 * 3600);
   const links = new Map<string, string>();
-  // Links the visitor's browser opens must use the public backend address.
   const serverBase = process.env["SUPABASE_URL"] ?? "";
   const browserBase = (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) ?? serverBase;
   for (const row of signed ?? []) {
     if (row.path && row.signedUrl) links.set(row.path, serverBase ? row.signedUrl.replace(serverBase, browserBase) : row.signedUrl);
   }
-  const toItem = (row: (typeof chosen.top)[number]): PromoItem | null => {
+  const items: PromoItem[] = [];
+  for (const row of rows) {
     const url = links.get(row.media_path);
-    if (!url) return null;
-    return {
-      creativeId: row.creative_id,
-      slot: row.slot as PromoSlot,
+    if (!url) continue;
+    items.push({
+      creativeId: row.id,
+      slot: row.slot === "side" ? "side" : "top",
       kind: row.media_kind === "video" ? "video" : "image",
       url,
       durationSeconds: row.duration_seconds,
       advertiser: row.advertiser,
       alt: row.alt_text || `Advert: ${row.advertiser}`,
       clickUrl: row.click_url,
-    };
-  };
+      source,
+    });
+  }
+  return items;
+}
+
+const bySlot = (items: PromoItem[]): Record<PromoSlot, PromoItem[]> => ({
+  top: items.filter((item) => item.slot === "top"),
+  side: items.filter((item) => item.slot === "side"),
+});
+
+/** CricLume-sold adverts running today on this kind of screen that suit the visitor's place. */
+async function paidPromos(surface: PromoSurface): Promise<Record<PromoSlot, PromoItem[]>> {
+  const db = await admin();
+  const { data, error } = await db.rpc("list_live_promos", { p_surface: surface });
+  if (error || !data?.length) return { top: [], side: [] };
+  const chosen = choosePromos(
+    data.map((row) => ({ ...row, slot: (row.slot === "side" ? "side" : "top") as PromoSlot })),
+    visitorPlace(),
+  );
+  const rows = [...chosen.top, ...chosen.side].map((row) => ({ ...row, id: row.creative_id }));
+  return bySlot(await signRows("promo-media", rows, "paid"));
+}
+
+/** The club's own sponsor adverts for this kind of screen. */
+async function clubPromos(organisationId: string, surface: PromoSurface): Promise<Record<PromoSlot, PromoItem[]>> {
+  const db = await admin();
+  const { data, error } = await db.rpc("list_club_promos", { p_organisation_id: organisationId, p_surface: surface });
+  if (error || !data?.length) return { top: [], side: [] };
+  return bySlot(await signRows("club-promo-media", data.map((row) => ({ ...row, advertiser: row.sponsor })), "club"));
+}
+
+/**
+ * Banners for a screen: paid CricLume adverts first; banners with none booked get the club's own
+ * adverts. (iTechLounge house adverts fill anything still empty on the device.)
+ */
+export async function promosFor(surface: PromoSurface, organisationId?: string | null): Promise<Record<PromoSlot, PromoItem[]>> {
+  const paid = await paidPromos(surface).catch(() => ({ top: [], side: [] }) as Record<PromoSlot, PromoItem[]>);
+  if (!organisationId || (paid.top.length > 0 && paid.side.length > 0)) return paid;
+  const club = await clubPromos(organisationId, surface).catch(() => ({ top: [], side: [] }) as Record<PromoSlot, PromoItem[]>);
   return {
-    top: chosen.top.map(toItem).filter((item): item is PromoItem => item !== null),
-    side: chosen.side.map(toItem).filter((item): item is PromoItem => item !== null),
+    top: paid.top.length > 0 ? paid.top : club.top,
+    side: paid.side.length > 0 ? paid.side : club.side,
   };
 }
 

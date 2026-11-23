@@ -3478,6 +3478,25 @@
 .promo-tag { position: absolute; top: 0.35rem; right: 0.35rem; padding: 0.05rem 0.4rem; border-radius: 0.3rem; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: oklch(0.1 0.02 262 / 0.75); color: oklch(0.95 0.01 90); pointer-events: none; }
 .promo-page.promo-slot-top { width: 100%; max-width: 64rem; margin-inline: auto; aspect-ratio: 8 / 1; min-height: 3rem; max-height: 8rem; }
 .promo-page.promo-slot-side { width: 100%; aspect-ratio: 1 / 2; max-height: 34rem; }
+/* iTechLounge house adverts: text cards shown when no paid or club advert is booked */
+.promo-house { display: flex; align-items: center; gap: 0.9rem; width: 100%; height: 100%; padding: 0.5rem 4.5rem 0.5rem 1rem; color: oklch(0.96 0.01 90); background: linear-gradient(110deg, oklch(0.2 0.05 262), oklch(0.26 0.08 262) 55%, oklch(0.32 0.12 20)); text-decoration: none; }
+.promo-house-brand { flex: none; font-family: var(--font-display, inherit); font-weight: 700; letter-spacing: 0.02em; color: oklch(0.84 0.14 85); font-size: 1rem; }
+.promo-house-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; line-height: 1.2; }
+.promo-house-copy strong { font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.promo-house-copy span { font-size: 0.75rem; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.promo-house-cta { flex: none; border-radius: 999px; padding: 0.35rem 0.85rem; font-size: 0.75rem; font-weight: 700; background: oklch(0.84 0.14 85); color: oklch(0.2 0.05 262); }
+@media (max-width: 639px) { .promo-house-copy span { display: none; } .promo-house { padding-right: 4.5rem; gap: 0.6rem; } .promo-house-cta { display: none; } .promo-house-brand { display: none; } }
+.promo-slot-side .promo-house { flex-direction: column; justify-content: center; text-align: center; padding: 2.5rem 1.1rem; gap: 1.1rem; background: linear-gradient(170deg, oklch(0.2 0.05 262), oklch(0.26 0.08 262) 60%, oklch(0.32 0.12 20)); }
+.promo-slot-side .promo-house-brand { font-size: 1.3rem; }
+.promo-slot-side .promo-house-copy { gap: 0.5rem; flex: none; }
+.promo-slot-side .promo-house-copy strong { font-size: 1.15rem; white-space: normal; }
+.promo-slot-side .promo-house-copy span { white-space: normal; font-size: 0.85rem; display: block; }
+.promo-ground .promo-house { padding: 0 6cqw 0 2cqw; gap: 2cqw; }
+.promo-ground .promo-house-brand { font-size: 3cqh; }
+.promo-ground .promo-house-copy strong { font-size: 2.8cqh; }
+.promo-ground .promo-house-copy span { font-size: 1.9cqh; display: block; }
+.promo-ground.promo-slot-side .promo-house { padding: 4cqh 1.5cqw; gap: 3cqh; }
+.promo-ground.promo-slot-side .promo-house-copy strong { font-size: 3cqh; }
 .promo-side-rail { display: none; }
 @media (min-width: 1024px) {
   .promo-with-side { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: 1.25rem; align-items: start; }

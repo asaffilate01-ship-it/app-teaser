@@ -57,3 +57,30 @@ test("visitor place comes from the edge network and ignores unknown countries", 
   const place = readVisitorPlace(() => null, { country: "pk", region: "Punjab", regionCode: "PB", city: "Lahore" });
   assert.deepEqual(place, lahore);
 });
+
+import { countsTowardShare, fillPromoSlots, type PromoItem } from "../src/lib/promo-targeting.ts";
+import { housePromos } from "../src/lib/house-promos.ts";
+
+const advert = (id: string, source: PromoItem["source"], slot: PromoItem["slot"] = "top"): PromoItem => ({
+  creativeId: id, slot, kind: "image", url: "x", durationSeconds: 10, advertiser: "a", alt: "a", clickUrl: null, source,
+});
+const noAdverts = { top: [], side: [] };
+
+test("paid adverts win over club adverts", () => {
+  const out = fillPromoSlots({ top: [advert("p", "paid")], side: [] }, { top: [advert("c", "club")], side: [] }, housePromos);
+  assert.deepEqual(out.top.map((i) => i.creativeId), ["p"]);
+});
+test("club adverts fill a banner with no paid advert", () => {
+  const out = fillPromoSlots(noAdverts, { top: [], side: [advert("c", "club", "side")] }, housePromos);
+  assert.deepEqual(out.side.map((i) => i.creativeId), ["c"]);
+});
+test("iTechLounge house adverts fill a banner with no paid or club advert", () => {
+  const out = fillPromoSlots(noAdverts, noAdverts, housePromos);
+  assert.ok(out.top.length > 0 && out.side.length > 0);
+  assert.ok([...out.top, ...out.side].every((i) => i.source === "house"));
+});
+test("only paid adverts count toward a club's revenue share", () => {
+  assert.equal(countsTowardShare(advert("p", "paid")), true);
+  assert.equal(countsTowardShare(advert("c", "club")), false);
+  assert.equal(countsTowardShare(housePromos.top[0]!), false);
+});

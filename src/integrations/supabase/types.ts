@@ -1007,6 +1007,62 @@ export type Database = {
           },
         ]
       }
+      club_promos: {
+        Row: {
+          active: boolean
+          alt_text: string
+          click_url: string | null
+          created_at: string
+          created_by: string | null
+          duration_seconds: number
+          id: string
+          media_kind: string
+          media_path: string
+          organisation_id: string
+          slot: string
+          sponsor: string
+          surfaces: string[]
+        }
+        Insert: {
+          active?: boolean
+          alt_text?: string
+          click_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_seconds?: number
+          id?: string
+          media_kind: string
+          media_path: string
+          organisation_id: string
+          slot: string
+          sponsor: string
+          surfaces?: string[]
+        }
+        Update: {
+          active?: boolean
+          alt_text?: string
+          click_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_seconds?: number
+          id?: string
+          media_kind?: string
+          media_path?: string
+          organisation_id?: string
+          slot?: string
+          sponsor?: string
+          surfaces?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_promos_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       club_site_domains: {
         Row: {
           created_at: string
@@ -5341,6 +5397,19 @@ export type Database = {
           organisation_id: string
           organisation_name: string
           timezone: string
+        }[]
+      }
+      list_club_promos: {
+        Args: { p_organisation_id: string; p_surface: string }
+        Returns: {
+          alt_text: string
+          click_url: string
+          duration_seconds: number
+          id: string
+          media_kind: string
+          media_path: string
+          slot: string
+          sponsor: string
         }[]
       }
       list_live_promos: {

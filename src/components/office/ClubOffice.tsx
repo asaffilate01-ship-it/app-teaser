@@ -13,6 +13,7 @@ import { TravelPanel } from "./TravelPanel";
 import { StorePanel } from "./StorePanel";
 import { AccessPanel } from "./AccessPanel";
 import { AdEarningsPanel } from "./AdEarningsPanel";
+import { ClubPromosPanel } from "./ClubPromosPanel";
 import { UmpiresPanel } from "./UmpiresPanel";
 import type { OfficeProps } from "./ui";
 
@@ -102,7 +103,12 @@ export function ClubOffice({ organisationId, role, club }: { organisationId: str
           {tab === "travel" && <TravelPanel {...props} />}
           {tab === "store" && <StorePanel {...props} />}
           {tab === "umpires" && can(role, "umpires.pay") && <UmpiresPanel key={organisationId} {...props} />}
-          {tab === "ads" && <AdEarningsPanel organisationId={organisationId} role={role} />}
+          {tab === "ads" && (
+            <div className="space-y-4">
+              <AdEarningsPanel organisationId={organisationId} role={role} />
+              <ClubPromosPanel organisationId={organisationId} role={role} />
+            </div>
+          )}
           {tab === "access" && <AccessPanel {...props} />}
         </div>
       )}

@@ -4,7 +4,9 @@
  */
 export type PromoSlot = "top" | "side";
 export type PromoSurface = "ground" | "scoreboard" | "app";
-export type PromoKind = "image" | "video";
+export type PromoKind = "image" | "video" | "house";
+/** Who placed an advert: CricLume-sold (earns clubs a share), the club itself, or iTechLounge's own house adverts. */
+export type PromoSource = "paid" | "club" | "house";
 
 export interface VisitorPlace {
   country: string | null;
@@ -29,6 +31,10 @@ export interface PromoItem {
   advertiser: string;
   alt: string;
   clickUrl: string | null;
+  /** Missing on older payloads: treat as a paid CricLume advert. */
+  source?: PromoSource;
+  /** Text card for house adverts (no media file). */
+  card?: { headline: string; line: string; cta: string };
 }
 
 export const noPlace: VisitorPlace = { country: null, region: null, regionCode: null, city: null };
@@ -148,4 +154,23 @@ export function choosePromos<T extends PromoTarget & { weight: number; slot: Pro
 export function promoDwellMs(item: Pick<PromoItem, "kind" | "durationSeconds">): number {
   const seconds = Math.max(3, Math.min(60, Math.round(item.durationSeconds || 10)));
   return (item.kind === "video" ? 60 : seconds) * 1000;
+}
+
+/**
+ * Fill each banner in order: paid CricLume adverts always win; when none are booked the club's
+ * own adverts run; when the club has none either, iTechLounge's house adverts run.
+ */
+export function fillPromoSlots(
+  paid: Record<PromoSlot, PromoItem[]>,
+  club: Record<PromoSlot, PromoItem[]>,
+  house: Record<PromoSlot, PromoItem[]>,
+): Record<PromoSlot, PromoItem[]> {
+  const pick = (slot: PromoSlot) =>
+    paid[slot].length > 0 ? paid[slot] : club[slot].length > 0 ? club[slot] : house[slot];
+  return { top: pick("top"), side: pick("side") };
+}
+
+/** Only CricLume-sold adverts are counted; club and house adverts earn no revenue share. */
+export function countsTowardShare(item: Pick<PromoItem, "source">): boolean {
+  return (item.source ?? "paid") === "paid";
 }

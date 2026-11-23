@@ -65,6 +65,10 @@ export function AdEarningsPanel({ organisationId, role }: Pick<OfficeProps, "org
             <strong>50%</strong>
           </div>
         </div>
+        <p className="office-meta mt-3">
+          When no paid advert is booked, your own club adverts run first, then CricLume adverts from iTechLounge. No revenue
+          share is due on CricLume adverts or on your own club adverts, and they are not counted below.
+        </p>
       </OfficeCard>
 
       <OfficeCard

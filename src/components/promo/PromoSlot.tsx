@@ -3,7 +3,7 @@ import { promoDwellMs, type PromoItem, type PromoSlot as Slot } from "@/lib/prom
 
 /**
  * One rotating ad banner (top or side). Images and GIFs stay for their set time; MP4s play muted
- * to the end (capped at a minute). Nothing renders when no ads are booked for this place.
+ * to the end (capped at a minute). House adverts are text cards from iTechLounge.
  */
 export function PromoSlot({
   items,
@@ -40,7 +40,16 @@ export function PromoSlot({
   if (!current) return null;
   const skip = () => setFailed((prev) => new Set(prev).add(current.creativeId));
   const media =
-    current.kind === "video" ? (
+    current.kind === "house" && current.card ? (
+      <span key={current.creativeId} className="promo-house">
+        <span className="promo-house-brand">CricLume</span>
+        <span className="promo-house-copy">
+          <strong>{current.card.headline}</strong>
+          <span>{current.card.line}</span>
+        </span>
+        {variant === "page" && <span className="promo-house-cta">{current.card.cta}</span>}
+      </span>
+    ) : current.kind === "video" ? (
       <video
         key={`${current.creativeId}-${index}`}
         src={current.url}
@@ -66,7 +75,7 @@ export function PromoSlot({
       ) : (
         <div className="promo-media">{media}</div>
       )}
-      <span className="promo-tag">Ad</span>
+      <span className="promo-tag">{current.source === "club" ? "Club sponsor" : current.source === "house" ? "CricLume" : "Ad"}</span>
     </aside>
   );
 }

@@ -1,19 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getMemberPromos, getPromos, reportMemberPromoPlays, reportPromoPlays, reportViewerBoardPlays } from "@/lib/promo.functions";
 import { currentCloudSession } from "@/lib/cloud";
-import type { PromoItem, PromoSlot, PromoSurface } from "@/lib/promo-targeting";
+import { countsTowardShare, fillPromoSlots, type PromoItem, type PromoSlot, type PromoSurface } from "@/lib/promo-targeting";
+import { housePromos } from "@/lib/house-promos";
 
 type PromoSet = Record<PromoSlot, PromoItem[]>;
 
 /**
  * Loads CricLume ad banners for a screen and reports plays in small batches.
  * Signed-in app screens pass `member` so plays can credit the person's club.
- * Fails quietly (offline, no ads booked): the banners simply don't appear.
+ * Order per banner: paid CricLume adverts, then the club's own, then iTechLounge house adverts
+ * (also shown offline). Only paid adverts are counted toward a club's revenue share.
  */
 export function usePromos(options: { surface: PromoSurface; slug?: string; member?: { organisationId: string | null } | null }) {
   const { surface, slug, member } = options;
-  const [promos, setPromos] = useState<PromoSet>({ top: [], side: [] });
+  const [loaded, setLoaded] = useState<PromoSet>({ top: [], side: [] });
+  const promos = useMemo(() => fillPromoSlots(loaded, { top: [], side: [] }, housePromos), [loaded]);
   const fetchPublic = useServerFn(getPromos);
   const fetchMember = useServerFn(getMemberPromos);
   const reportPublic = useServerFn(reportPromoPlays);
@@ -30,8 +33,8 @@ export function usePromos(options: { surface: PromoSurface; slug?: string; membe
     const load = async () => {
       if (typeof navigator !== "undefined" && navigator.onLine === false) return;
       try {
-        const next = signedIn ? await fetchMember() : await fetchPublic({ data: slug ? { surface, slug } : { surface } });
-        if (active) setPromos(next);
+        const next = signedIn ? await fetchMember({ data: { organisationId } }) : await fetchPublic({ data: slug ? { surface, slug } : { surface } });
+        if (active) setLoaded(next);
       } catch {
         // No ads is a fine outcome.
       }
@@ -43,7 +46,7 @@ export function usePromos(options: { surface: PromoSurface; slug?: string; membe
       active = false;
       window.clearInterval(timer);
     };
-  }, [surface, slug, signedIn, fetchMember, fetchPublic]);
+  }, [surface, slug, signedIn, organisationId, fetchMember, fetchPublic]);
 
   useEffect(() => {
     if (surface !== "scoreboard" || !slug) return;
@@ -78,9 +81,11 @@ export function usePromos(options: { surface: PromoSurface; slug?: string; membe
   }, [surface, slug, signedIn, viewerSignedIn, organisationId, reportMember, reportPublic, reportViewer]);
 
   const onPlay = useCallback((creativeId: string) => {
+    const item = [...promos.top, ...promos.side].find((entry) => entry.creativeId === creativeId);
+    if (!item || !countsTowardShare(item)) return;
     if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
     queue.current.push(creativeId);
-  }, []);
+  }, [promos]);
 
   return { promos, onPlay };
 }
