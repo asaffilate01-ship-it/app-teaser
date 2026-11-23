@@ -94,3 +94,18 @@ export function reviewCloudBootstrap(
   }
   return local ? reviewRemoteScorerSnapshot(local, remote) : { safe: true, reason: null };
 }
+
+/**
+ * Reopening a cloud match with unsent changes still on this phone: carry on and send them when
+ * the last change the cloud accepted also came from this phone (nobody else scored since), or
+ * the cloud has no changes yet. If another device scored in between, keep the lead-scorer review.
+ */
+export function canResumeQueuedScoring(input: {
+  pendingEvents: number;
+  hasLocalCopy: boolean;
+  thisDeviceId: string;
+  latestCloudDeviceId: string | null;
+}): boolean {
+  if (!input.hasLocalCopy || input.pendingEvents <= 0) return false;
+  return input.latestCloudDeviceId === null || input.latestCloudDeviceId === input.thisDeviceId;
+}

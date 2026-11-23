@@ -99,3 +99,10 @@
 - [ ] Volunteer duties (teas, setup, umpiring, scoring) with self sign-up
 - [ ] "Join the club" applications from the public website with an approval queue
 - [x] Updated competitor report (round 3) saved to Files
+
+## Offline scoring and sync (new ask)
+- [x] Scorer opens and works with no internet (offline app on phones, after one online visit)
+- [x] Start the next innings offline; sent in order later
+- [x] Automatic resend on weak signal, after sign-in renewal, and when the app comes back to the screen
+- [x] Close the scorer offline, reopen online: saved balls still send
+- [x] Plain sync wording on the scorer ("Offline · saved on phone · 5 changes to send", "All sent")

@@ -40,19 +40,19 @@ export function describeScorerSyncRecovery(
   if (status === "offline") {
     return {
       show: true,
-      title: "Offline — cloud sync paused",
+      title: "Offline — keep scoring, it's saved on this phone",
       detail: pending
-        ? `${count} waiting to sync. Keep the scorer open or export a device backup.`
-        : "Cloud updates are unavailable. Check the device save indicator and keep a backup.",
+        ? `${count} waiting to sync. They'll be sent in order as soon as you're back online, even if you close and reopen the scorer.`
+        : "Everything so far reached the cloud. New balls are saved on this phone and sent when you're back online.",
       canRetry: false,
     };
   }
   if (status === "error") {
     return {
       show: true,
-      title: "Cloud sync needs attention",
+      title: pending ? "Not sent yet — trying again automatically" : "Cloud sync needs attention",
       detail: pending
-        ? `${count} waiting to sync. Export a backup and retry when your connection is stable.`
+        ? `${count} waiting to sync. They're kept on this phone and sent in order when the signal holds. You can keep scoring or tap Retry.`
         : "Cloud status could not be verified. Check the score and export a backup.",
       canRetry: pending > 0,
     };

@@ -129,3 +129,13 @@ test("bowling side changes, innings regression and silent striker swaps require 
   completed.innings[0]!.status = "completed";
   assert.match(reviewRemoteScorerSnapshot(completed, local).reason ?? "", /reopen innings/);
 });
+
+test("reopening with unsent changes carries on only when no other phone scored since", async () => {
+  const { canResumeQueuedScoring } = await import("../src/lib/scorer-reconciliation.ts");
+  const base = { pendingEvents: 3, hasLocalCopy: true, thisDeviceId: "phone-a" };
+  assert.equal(canResumeQueuedScoring({ ...base, latestCloudDeviceId: "phone-a" }), true);
+  assert.equal(canResumeQueuedScoring({ ...base, latestCloudDeviceId: null }), true);
+  assert.equal(canResumeQueuedScoring({ ...base, latestCloudDeviceId: "phone-b" }), false);
+  assert.equal(canResumeQueuedScoring({ ...base, pendingEvents: 0, latestCloudDeviceId: "phone-a" }), false);
+  assert.equal(canResumeQueuedScoring({ ...base, hasLocalCopy: false, latestCloudDeviceId: "phone-a" }), false);
+});

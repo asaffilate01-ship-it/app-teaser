@@ -161,6 +161,37 @@ function formatForSettings(overs: number | null, inningsPerSide: number): MatchF
   return "Club";
 }
 
+/** This browser's stable scorer ID; every queued change carries it. */
+export function scoringDeviceId(): string {
+  const key = "criclume:scoring-device-id";
+  try {
+    const existing = localStorage.getItem(key);
+    if (existing) return existing;
+  } catch {
+    // Some mobile browsers block persistent storage: scoring still works in memory.
+  }
+  const next = crypto.randomUUID();
+  try {
+    localStorage.setItem(key, next);
+  } catch {
+    // Do not crash the scorer if browser storage is unavailable.
+  }
+  return next;
+}
+
+/** Which device sent the newest change the cloud accepted for this match (null when none yet). */
+export async function latestCloudEventDevice(matchId: string): Promise<string | null> {
+  const { data, error } = await getCloudClient()
+    .from("match_events")
+    .select("device_id")
+    .eq("match_id", matchId)
+    .order("sequence", { ascending: false })
+    .limit(1);
+  if (error) throw error;
+  const row = (data ?? [])[0] as { device_id?: unknown } | undefined;
+  return typeof row?.device_id === "string" ? row.device_id : null;
+}
+
 export async function loadCloudMatchSnapshot(matchId: string): Promise<CricketMatch> {
   const client = getCloudClient();
   const { data: recentEvents, error: eventError } = await client
@@ -502,6 +533,25 @@ export async function appendMatchEvent(event: PendingMatchEvent): Promise<MatchE
         occurredAt: event.occurredAt,
       });
     }
+    const inningsStart = event.payload["inningsStart"] as Record<string, unknown> | undefined;
+    if (event.eventType === "innings.started" && inningsStart && typeof inningsStart === "object") {
+      // Started on the phone (possibly offline): the server creates the innings with the phone's ID,
+      // so later balls in the queue already point at the right innings.
+      const { data, error } = await getCloudClient().rpc("start_match_innings_v2", {
+        p_match_id: event.matchId,
+        p_innings_id: String(inningsStart["inningsId"]),
+        p_innings_number: Number(inningsStart["inningsNumber"]),
+        p_batting_team_id: String(inningsStart["battingTeamId"]),
+        p_bowling_team_id: String(inningsStart["bowlingTeamId"]),
+        p_client_event_id: event.clientEventId,
+        p_device_id: event.deviceId,
+        p_match_snapshot: event.payload["matchSnapshot"] as never,
+        p_live_state: event.payload["liveState"] as never,
+        p_occurred_at: event.occurredAt,
+      });
+      if (error) throw error;
+      return matchEventEnvelope(data as Record<string, unknown>);
+    }
     const { data, error } = await getCloudClient().rpc("append_match_event", {
       p_match_id: event.matchId,
       p_client_event_id: event.clientEventId,
@@ -519,11 +569,18 @@ export async function appendMatchEvent(event: PendingMatchEvent): Promise<MatchE
 }
 
 // All scorer publishes enqueue first; reconnect and publish share this drain.
-export const flushPendingEvents = createOrderedQueueDrainer<PendingMatchEvent>({
+const drainInThisTab = createOrderedQueueDrainer<PendingMatchEvent>({
   read: readPendingEvents,
   write: persistPendingEvents,
   send: appendMatchEvent,
 });
+
+/** One sender per match across every open tab of this browser, so saved changes go up strictly in order. */
+export function flushPendingEvents(matchId: string): ReturnType<typeof drainInThisTab> {
+  const locks = typeof navigator !== "undefined" ? (navigator as Navigator & { locks?: LockManager }).locks : undefined;
+  if (!locks?.request) return drainInThisTab(matchId);
+  return locks.request(`criclume-sync:${matchId}`, () => drainInThisTab(matchId));
+}
 
 export function subscribeToMatchEvents(
   matchId: string,

@@ -15,6 +15,7 @@
       strong { color: #f4d37d }
       .brand { color: #f4d37d; font-weight: 800; letter-spacing: 0.08em }
       button { min-height: 48px; width: 100%; margin-top: 1rem; border: none; border-radius: 0.8rem; font-weight: 800; font-size: 1rem; background: #f4d37d; color: #241522; cursor: pointer }
+      .scorer { display: block; text-align: center; margin-top: 1rem; padding: 0.9rem; border: 1px solid #f4d37d; border-radius: 0.8rem; color: #f4d37d; font-weight: 800; text-decoration: none }
       button:focus-visible { outline: 3px solid #fff; outline-offset: 3px }
     </style>
   </head>
@@ -22,8 +23,9 @@
     <main>
       <span class="brand">CRICLUME</span>
       <h1>You're offline</h1>
-      <p>The page could not load. <strong>If you are already scoring a match in an open tab, keep that tab open</strong> so its on-device scoring session is preserved.</p>
-      <p>This screen does not mean your scores have synced to the cloud. Reconnect before relying on an updated public scoreboard.</p>
+      <p>This page needs the internet. <strong>The scorer still works offline</strong> — balls you score are saved on this phone and sent in order when you're back online.</p>
+      <p>Until then, the public scoreboard won't show the newest balls.</p>
+      <a class="scorer" href="/app">Open the scorer</a>
       <button type="button" onclick="location.reload()">Try again</button>
     </main>
   </body>

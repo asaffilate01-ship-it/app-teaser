@@ -2,7 +2,7 @@ import { ScorerWagonWheel } from "@/components/ScorerWagonWheel";
 import { ScorerBackupImport } from "@/components/ScorerBackupImport";
 import { ScorerMatchNavigation } from "@/components/ScorerMatchNavigation";
 import { defaultScorerDestination, type ScorerDestination } from "@/lib/scorer-navigation";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useHydrated } from "@tanstack/react-router";
 import {
   useCallback,
   useEffect,
@@ -87,13 +87,15 @@ import {
   type ShotOutcome,
 } from "@/lib/cricket";
 import {
+  latestCloudEventDevice,
   loadCloudMatchSnapshot,
   readPendingEvents,
+  scoringDeviceId,
   readRawPendingEventQueue,
-  startCloudInnings,
 } from "@/lib/cloud";
-import { reviewCloudBootstrap, reviewRemoteScorerSnapshot } from "@/lib/scorer-reconciliation";
+import { canResumeQueuedScoring, reviewCloudBootstrap, reviewRemoteScorerSnapshot } from "@/lib/scorer-reconciliation";
 import { describeScorerSyncRecovery } from "@/lib/scorer-sync-status";
+import { syncChipLabel } from "@/lib/sync-retry";
 import { AppHeader } from "@/components/app-shell/AppHeader";
 import { AppTabBar } from "@/components/app-shell/AppTabBar";
 import { BallTrail, CreaseStrip, RateStrip, ScoreHero, TeamCrest } from "@/components/scorer/Broadcast";
@@ -181,10 +183,14 @@ export function CricketApp() {
     if (typeof window === "undefined") return null;
     return new URLSearchParams(window.location.search).get("cloudMatch");
   }, []);
-  const cloudLinked = Boolean(cloudMatchId);
+  // The server can't see the address's ?cloudMatch, so only show cloud-linked UI after hydration.
+  const hydrated = useHydrated();
+  const cloudLinked = hydrated && Boolean(cloudMatchId);
 
   useEffect(() => {
-    if (!cloudMatchId || !loaded || cloudSession.loading || cloudBootstrap.status !== "idle") {
+    // Offline, don't wait for the sign-in check (it can't finish without internet).
+    const waitingForSession = cloudSession.loading && navigator.onLine;
+    if (!cloudMatchId || !loaded || waitingForSession || cloudBootstrap.status !== "idle") {
       return;
     }
     if (!cloudSession.configured) {
@@ -194,17 +200,27 @@ export function CricketApp() {
       });
       return;
     }
-    if (!cloudSession.session) {
+    const local = matches.find((match) => match.id === cloudMatchId);
+    if (!cloudSession.session || !navigator.onLine) {
+      // Offline, or the sign-in is being renewed: keep scoring the copy saved on this phone.
+      // Changes wait in the queue and are sent once the connection and sign-in are back.
+      if (local) {
+        setSelectedId(local.id);
+        setScreen("match");
+        setCloudBootstrap({ status: "ready" });
+        return;
+      }
       setCloudBootstrap({
         status: "error",
-        message: "Sign in through the cloud control centre before opening this match.",
+        message: !navigator.onLine
+          ? "You're offline and this match isn't saved on this phone yet. Open it once with internet, then you can keep scoring offline."
+          : "Sign in through the cloud control centre before opening this match.",
       });
       return;
     }
-    const local = matches.find((match) => match.id === cloudMatchId);
     setCloudBootstrap({ status: "loading" });
     void loadCloudMatchSnapshot(cloudMatchId)
-      .then((match) => {
+      .then(async (match) => {
         let pendingEvents = 0;
         try {
           pendingEvents = readPendingEvents(cloudMatchId).length;
@@ -229,6 +245,31 @@ export function CricketApp() {
           return;
         }
         const review = reviewCloudBootstrap(local, match, pendingEvents);
+        if (!review.safe && local && pendingEvents > 0) {
+          // Closed the scorer while offline and reopened: if nobody else scored since this
+          // phone's last accepted change, carry on and send the saved changes in order.
+          let latestDevice: string | null | undefined;
+          try {
+            latestDevice = await latestCloudEventDevice(cloudMatchId);
+          } catch {
+            latestDevice = undefined;
+          }
+          if (
+            latestDevice !== undefined &&
+            canResumeQueuedScoring({
+              pendingEvents,
+              hasLocalCopy: true,
+              thisDeviceId: scoringDeviceId(),
+              latestCloudDeviceId: latestDevice,
+            })
+          ) {
+            setBootstrapConflict(null);
+            setSelectedId(local.id);
+            setScreen("match");
+            setCloudBootstrap({ status: "ready" });
+            return;
+          }
+        }
         if (!review.safe) {
           if (!local) {
             setCloudBootstrap({
@@ -932,17 +973,22 @@ function LiveMatch({
     cloudSync.pendingCount,
     cloudSync.queueUnreadable,
   );
-  const saveAndSync = (next: CricketMatch, eventType = "match.snapshot") => {
+  const syncLabel = syncChipLabel({
+    status: cloudSync.status,
+    pending: cloudSync.pendingCount,
+    online: typeof navigator === "undefined" ? true : navigator.onLine,
+  });
+  const saveAndSync = (next: CricketMatch, eventType = "match.snapshot", extraPayload?: Record<string, unknown>) => {
     if (cloudConflict) return;
     onSave(next);
-    void cloudSync.publish(next, eventType);
+    void cloudSync.publish(next, eventType, extraPayload);
     // Fans' phone alerts: best-effort and live-only — a late wicket alert after reconnecting would mislead.
     if (cloudMatchId && navigator.onLine) {
       const alerts = alertsBetween(match, next);
       if (alerts.length) void sendMatchAlerts({ data: { matchId: cloudMatchId, alerts } }).catch(() => undefined);
     }
   };
-  const advanceInnings = async (options: { followOn?: boolean } = {}) => {
+  const advanceInnings = (options: { followOn?: boolean } = {}) => {
     if (cloudConflict) return;
     setCloudActionError(null);
     let next = startNextInnings(match, options);
@@ -950,24 +996,22 @@ function LiveMatch({
       saveAndSync(next, next.status === "completed" ? "match.completed" : "innings.started");
       return;
     }
+    // Works offline: the phone picks the new innings' ID and the start is saved in the queue,
+    // ahead of the balls that follow, and sent in order when the connection is back.
     const nextInnings = currentInnings(next);
-    try {
-      const inningsId = await startCloudInnings({
-        matchId: cloudMatchId,
+    const inningsId = crypto.randomUUID();
+    next = {
+      ...next,
+      innings: [...next.innings.slice(0, -1), { ...nextInnings, id: inningsId }],
+    };
+    saveAndSync(next, "innings.started", {
+      inningsStart: {
+        inningsId,
         inningsNumber: nextInnings.number,
         battingTeamId: nextInnings.battingTeamId,
         bowlingTeamId: nextInnings.bowlingTeamId,
-      });
-      next = {
-        ...next,
-        innings: [...next.innings.slice(0, -1), { ...nextInnings, id: inningsId }],
-      };
-      saveAndSync(next, "innings.started");
-    } catch (reason) {
-      setCloudActionError(
-        reason instanceof Error ? reason.message : "The next cloud innings could not be started.",
-      );
-    }
+      },
+    });
   };
   const innings = currentInnings(match);
   const summary = summarizeInnings(innings, match.settings.ballsPerOver);
@@ -1061,9 +1105,8 @@ function LiveMatch({
         match={match}
         sync={
           cloudSync.enabled ? (
-            <span className="hero-chip">
-              Cloud {cloudSync.status}
-              {cloudSync.lastSequence ? ` · #${cloudSync.lastSequence}` : ""}
+            <span className="hero-chip" role="status" aria-live="polite" data-sync={cloudSync.status}>
+              {syncLabel}
             </span>
           ) : undefined
         }
@@ -1084,7 +1127,7 @@ function LiveMatch({
             </p>
             <p className="text-[11px] text-slate-300">
               {summary.overs} overs ·{" "}
-              {cloudSync.enabled ? `Cloud: ${cloudSync.status}` : "On this device"}
+              {cloudSync.enabled ? syncLabel : "On this device"}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -1200,7 +1243,7 @@ function LiveMatch({
             <ScoringPad
               match={match}
               onSave={saveAndSync}
-              onAdvanceInnings={(options) => void advanceInnings(options)}
+              onAdvanceInnings={(options) => advanceInnings(options)}
               onExit={onExit}
             />
           )}

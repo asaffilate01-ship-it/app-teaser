@@ -4573,6 +4573,38 @@ export type Database = {
         }
         Returns: string
       }
+      start_match_innings_v2: {
+        Args: {
+          p_batting_team_id: string
+          p_bowling_team_id: string
+          p_client_event_id: string
+          p_device_id: string
+          p_innings_id: string
+          p_innings_number: number
+          p_live_state: Json
+          p_match_id: string
+          p_match_snapshot: Json
+          p_occurred_at: string
+        }
+        Returns: {
+          client_event_id: string
+          device_id: string
+          event_type: string
+          id: string
+          match_id: string
+          occurred_at: string
+          payload: Json
+          recorded_at: string
+          recorded_by: string
+          sequence: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "match_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       void_last_delivery_v1: {
         Args: {
           p_client_event_id: string
