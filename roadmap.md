@@ -34,3 +34,21 @@
 - [x] Score overlay link for live streams
 - [x] Player profiles: career totals, form chart, milestones/badges, Player of the Match
 - [x] Auto highlight reels from synced cameras (boundaries, wickets, per player)
+
+## Competitor gaps 1–15 (round 2)
+- [x] 5 Over-by-over comparison (Manhattan already compares both innings)
+- [x] 14 Rain rules: average run rate, most productive overs, DLS (licensed provider or official target entered), manual target; league default
+- [ ] 13 Spoken ball-by-ball commentary on the public scoreboard
+- [ ] 12 Ground scoreboard (LED) feed + big-screen display page
+- [ ] 11 Rivalries and streaks
+- [ ] 9 "What do we need to qualify" calculator + spreadsheet import of teams/players
+- [ ] 8 Multi-day: end of day / stumps
+- [ ] 6 Social post text + result and match-day posters
+- [ ] 3 Installable app: install prompt, iPhone instructions, brand colours (store builds need user's developer accounts)
+- [ ] 7 Phone alerts for wickets, milestones and results (web push)
+- [ ] 10 Club / league public website pages: branding, news, gallery, documents, fixtures/results
+- [ ] 1 Live streaming via free OBS: step-by-step stream setup screen in the club workspace with overlay links (no paid video service)
+- [ ] 15a Player auction / draft
+- [ ] 15b Ground and nets booking requests
+- [ ] 15c Match tickets (selling online needs live payments)
+- [ ] 15d Merchandise shop (selling online needs live payments)

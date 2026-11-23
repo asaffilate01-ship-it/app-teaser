@@ -36,6 +36,9 @@ interface OverlayState {
   superOver?: boolean;
   freeHit?: boolean;
   result?: string | null;
+  rain?: { revisedOvers?: number | null } | null;
+  par?: number | null;
+  oversLimit?: number | null;
 }
 
 interface OverlayData {
@@ -94,12 +97,17 @@ function ScoreOverlay() {
   const bpo = state.settings?.ballsPerOver ?? 6;
   const match = /^(\d+)\.(\d+)$/.exec(state.overs ?? "");
   const legal = match ? Number(match[1]) * bpo + Number(match[2]) : 0;
-  const oversLimit = state.superOver ? 1 : (state.settings?.oversPerInnings ?? null);
+  const oversLimit =
+    state.oversLimit !== undefined
+      ? state.oversLimit
+      : state.superOver
+        ? 1
+        : (state.settings?.oversPerInnings ?? null);
   const chase = chaseState(state.target ?? null, state.runs ?? 0, legal, oversLimit, bpo);
   const info = state.result
     ? state.result
     : chase && chase.runsNeeded > 0
-      ? `Need ${chase.runsNeeded} from ${chase.ballsLeft ?? "–"}${chase.ballsLeft != null ? " balls" : ""}`
+      ? `Need ${chase.runsNeeded} from ${chase.ballsLeft ?? "–"}${chase.ballsLeft != null ? " balls" : ""}${state.par != null ? ` · Par ${state.par}` : ""}`
       : state.target
         ? `Target ${state.target}`
         : `v ${shortName(bowling)}`;

@@ -1,3 +1,4 @@
+import { abandonedOutcome, defaultMinOversForResult, parScore, rainMethodShort, revisedTarget, type ChaseInputs, type RainMethod, type RainState } from "./rain-rules.ts";
 export type MatchFormat = "T10" | "T20" | "ODI" | "School" | "Club" | "Multi-day" | "Custom";
 
 export type MatchStatus = "live" | "innings-break" | "completed";
@@ -33,6 +34,8 @@ export interface MatchRules {
   lastManStands?: boolean | undefined;
   /** Two-innings matches: first-innings lead (runs) that lets the side batting first enforce the follow-on. */
   followOnLead?: number | null | undefined;
+  /** Rain method for a shortened chase; leagues can set the default for all their matches. */
+  rainMethod?: RainMethod | undefined;
 }
 
 export interface MatchSettings {
@@ -115,6 +118,8 @@ export interface CricketMatch {
   conditions?: MatchConditions | undefined;
   /** What viewers of the public scoreboard may see beyond the score. */
   audience?: { commentary?: boolean } | undefined;
+  /** Rain interruption for the chase (one-innings, limited-overs matches only). */
+  rain?: RainState | undefined;
 }
 
 export interface CreateMatchInput {
@@ -593,9 +598,17 @@ export function inningsWicketLimit(match: CricketMatch, innings: Innings): numbe
 /** Legal balls allowed in this innings, or null when unlimited. A Super Over is one over. */
 export function inningsBallLimit(match: CricketMatch, innings: Innings): number | null {
   if (isSuperOver(innings)) return match.settings.ballsPerOver;
+  const revised = match.rain?.revisedOvers;
+  if (revised != null && isRainChase(match, innings)) return Math.round(revised * match.settings.ballsPerOver);
   return match.settings.oversPerInnings
     ? match.settings.oversPerInnings * match.settings.ballsPerOver
     : null;
+}
+
+/** Overs allowed in this innings (Super Over: 1; rain-shortened chase: the revised overs), or null when unlimited. */
+export function inningsOversLimit(match: CricketMatch, innings: Innings): number | null {
+  const balls = inningsBallLimit(match, innings);
+  return balls === null ? null : balls / match.settings.ballsPerOver;
 }
 
 /** Total runs per team across its regular (non Super Over) innings. */
@@ -617,7 +630,10 @@ export function inningsTarget(match: CricketMatch, index: number): number | null
     return runsOf(match, match.innings[index - 1]!) + 1;
   }
   if (match.settings.inningsPerSide === 1) {
-    return index === 1 ? runsOf(match, match.innings[0]!) + 1 : null;
+    if (index !== 1) return null;
+    const inputs = match.rain ? rainChaseInputs(match) : null;
+    const revised = inputs ? revisedTarget(match.rain, inputs) : null;
+    return revised ?? runsOf(match, match.innings[0]!) + 1;
   }
   if (index !== 3) return null;
   const before = match.innings.slice(0, 3);
@@ -734,8 +750,22 @@ export function matchResult(match: CricketMatch): MatchResult | null {
   if (match.settings.inningsPerSide === 1) {
     if (regular.length < 2) return { ...base, winnerTeamId: null, noResult: true, text: "No result" };
     const [first, second] = regular as [Innings, Innings];
-    const target = runsOf(match, first) + 1;
+    const target = inningsTarget(match, match.innings.indexOf(second)) ?? runsOf(match, first) + 1;
     const summary = summarizeInnings(second, bpo);
+    const rain = match.rain;
+    const tag = rain && (rain.revisedOvers != null || rain.officialTarget != null || rain.abandoned) ? ` (${rainMethodShort(rain.method)})` : "";
+    if (rain?.abandoned && summary.runs < target) {
+      const inputs = rainChaseInputs(match)!;
+      const outcome = abandonedOutcome(rain, inputs, { runs: summary.runs, ballsFaced: summary.legalBalls }, rainMinOvers(match));
+      if (outcome.kind === "no-result") return { ...base, winnerTeamId: null, noResult: true, text: "No result (rain)" };
+      if (outcome.kind === "needs-par") return { ...base, winnerTeamId: null, noResult: true, text: "Awaiting official par score" };
+      if (outcome.kind === "tie") return { ...base, winnerTeamId: null, tied: true, text: `Match tied${tag}` };
+      if (outcome.kind === "chasing-won") {
+        const wicketsLeft = inningsWicketLimit(match, second) - summary.wickets;
+        return { ...base, winnerTeamId: second.battingTeamId, text: `${name(second.battingTeamId)} won by ${wicketsLeft} wicket${wicketsLeft === 1 ? "" : "s"}${tag}` };
+      }
+      return { ...base, winnerTeamId: first.battingTeamId, text: `${name(first.battingTeamId)} won by ${outcome.margin} run${outcome.margin === 1 ? "" : "s"}${tag}` };
+    }
     if (summary.runs >= target) {
       const wicketsLeft = inningsWicketLimit(match, second) - summary.wickets;
       const limit = inningsBallLimit(match, second);
@@ -743,12 +773,12 @@ export function matchResult(match: CricketMatch): MatchResult | null {
       return {
         ...base,
         winnerTeamId: second.battingTeamId,
-        text: `${name(second.battingTeamId)} won by ${wicketsLeft} wicket${wicketsLeft === 1 ? "" : "s"}${ballsLeft > 0 ? ` (${ballsLeft} ball${ballsLeft === 1 ? "" : "s"} left)` : ""}`,
+        text: `${name(second.battingTeamId)} won by ${wicketsLeft} wicket${wicketsLeft === 1 ? "" : "s"}${ballsLeft > 0 ? ` (${ballsLeft} ball${ballsLeft === 1 ? "" : "s"} left)` : ""}${tag}`,
       };
     }
-    if (summary.runs === target - 1) return { ...base, winnerTeamId: null, tied: true, text: "Match tied" };
+    if (summary.runs === target - 1) return { ...base, winnerTeamId: null, tied: true, text: `Match tied${tag}` };
     const margin = target - 1 - summary.runs;
-    return { ...base, winnerTeamId: first.battingTeamId, text: `${name(first.battingTeamId)} won by ${margin} run${margin === 1 ? "" : "s"}` };
+    return { ...base, winnerTeamId: first.battingTeamId, text: `${name(first.battingTeamId)} won by ${margin} run${margin === 1 ? "" : "s"}${tag}` };
   }
 
   // Two innings per side.
@@ -785,7 +815,7 @@ export function matchResult(match: CricketMatch): MatchResult | null {
 /** Rules a new match starts with for a format: free hits in limited-overs cricket, Super Overs in T10/T20. */
 export function defaultRulesForFormat(format: MatchFormat): MatchRules {
   if (format === "Multi-day") return { followOnLead: 150 };
-  return { freeHit: true, superOver: format === "T10" || format === "T20" };
+  return { freeHit: true, superOver: format === "T10" || format === "T20", rainMethod: "arr" };
 }
 
 export function deliveryLabel(delivery: Delivery) {
@@ -796,4 +826,58 @@ export function deliveryLabel(delivery: Delivery) {
   if (delivery.extras.bye) return `${delivery.extras.bye}B`;
   if (delivery.extras.legBye) return `${delivery.extras.legBye}Lb`;
   return String(delivery.batterRuns);
+}
+
+/** The chase of a one-innings, limited-overs match: the only innings rain rules adjust. */
+export function isRainChase(match: CricketMatch, innings: Innings): boolean {
+  return (
+    match.settings.inningsPerSide === 1 &&
+    match.settings.oversPerInnings !== null &&
+    !isSuperOver(innings) &&
+    match.innings.indexOf(innings) === 1
+  );
+}
+
+/** First-innings figures the rain methods need, or null before there is a first innings to chase. */
+export function rainChaseInputs(match: CricketMatch): ChaseInputs | null {
+  const first = match.innings[0];
+  const allotted = match.settings.oversPerInnings;
+  if (!first || allotted === null || match.settings.inningsPerSide !== 1) return null;
+  const bpo = match.settings.ballsPerOver;
+  const summary = summarizeInnings(first, bpo);
+  const bowledOut = summary.wickets >= inningsWicketLimit(match, first);
+  const usedUp = summary.legalBalls >= allotted * bpo;
+  // Bowled out or overs used up: the rate is over the full allocation. Otherwise over the overs actually faced.
+  const firstOvers = bowledOut || usedUp ? allotted : summary.legalBalls / bpo;
+  const perOver: number[] = [];
+  for (const ball of first.deliveries) perOver[ball.over] = (perOver[ball.over] ?? 0) + deliveryRuns(ball);
+  return {
+    firstRuns: summary.runs,
+    firstOvers,
+    firstOverRuns: Array.from(perOver, (runs) => runs ?? 0),
+    ballsPerOver: bpo,
+  };
+}
+
+/** Minimum overs the chasing side must face for a rain result. */
+export function rainMinOvers(match: CricketMatch): number {
+  const set = match.rain?.minOversForResult;
+  if (set != null) return set;
+  return defaultMinOversForResult(match.rain?.revisedOvers ?? match.settings.oversPerInnings ?? 20);
+}
+
+/** Live par score during a rain-affected chase, or null. */
+export function liveParScore(match: CricketMatch): number | null {
+  const chase = match.innings[1];
+  if (!match.rain || !chase || !isRainChase(match, chase)) return null;
+  const inputs = rainChaseInputs(match);
+  if (!inputs) return null;
+  return parScore(match.rain, inputs, summarizeInnings(chase, match.settings.ballsPerOver).legalBalls);
+}
+
+/** Calls off the chase for rain: the innings ends and the result is decided on the par score. */
+export function abandonForRain(match: CricketMatch): CricketMatch {
+  const rain: RainState = { ...(match.rain ?? { method: match.settings.rules?.rainMethod ?? "arr" }), abandoned: true };
+  const innings = match.innings.map((item, index) => (index === match.innings.length - 1 ? { ...item, status: "completed" as const } : item));
+  return { ...match, rain, innings, status: "completed", updatedAt: new Date().toISOString() };
 }

@@ -209,7 +209,7 @@ export async function loadCloudMatchSnapshot(matchId: string): Promise<CricketMa
       match.rule_version_id
         ? client
             .from("competition_rule_versions")
-            .select("rules")
+            .select("rules,rain_method")
             .eq("id", match.rule_version_id)
             .maybeSingle()
         : Promise.resolve({ data: null, error: null }),
@@ -290,7 +290,10 @@ export async function loadCloudMatchSnapshot(matchId: string): Promise<CricketMa
 
   const liveState = (match.live_state ?? {}) as Record<string, unknown>;
   const liveSettings = (liveState["settings"] ?? {}) as Record<string, unknown>;
-  const ruleSettings = (ruleResult.data?.rules ?? {}) as Record<string, unknown>;
+  const ruleSettings = {
+    ...((ruleResult.data?.rules ?? {}) as Record<string, unknown>),
+    rain_method: ruleResult.data?.rain_method ?? null,
+  } as Record<string, unknown>;
   const rawOvers = liveSettings["oversPerInnings"] ?? ruleSettings["oversPerInnings"];
   const oversPerInnings = rawOvers == null ? null : positiveInteger(rawOvers, 20);
   const inningsPerSide =
@@ -338,9 +341,11 @@ export async function loadCloudMatchSnapshot(matchId: string): Promise<CricketMa
         (match.started_at as string | null) ??
         (match.scheduled_at as string | null) ??
         (match.created_at as string),
+      rules: cloudRules(liveSettings, ruleSettings),
     },
     teams,
     innings,
+    ...(cloudRain(liveState["rain"]) ? { rain: cloudRain(liveState["rain"])! } : {}),
   };
   const validated = readScorerSnapshot(reconstructed, matchId);
   if (!validated) throw new Error("The cloud match contains incomplete scoring data.");
@@ -617,4 +622,41 @@ export async function invokePlatformFunction<T>(
   const { data, error } = await getCloudClient().functions.invoke(name, { body });
   if (error) throw error;
   return data as T;
+}
+
+const rainMethodIds = ["arr", "mpo", "dls", "manual"] as const;
+type CloudRainMethod = (typeof rainMethodIds)[number];
+const asRainMethod = (value: unknown): CloudRainMethod | undefined =>
+  rainMethodIds.find((id) => id === value);
+const finiteOrNull = (value: unknown): number | null =>
+  typeof value === "number" && Number.isFinite(value) ? value : null;
+
+/** Match rules from the latest live state, falling back to the competition's rules. */
+function cloudRules(live: Record<string, unknown>, league: Record<string, unknown>) {
+  const pick = (key: string) => (key in live ? live[key] : league[key]);
+  const followOn = finiteOrNull(pick("followOnLead"));
+  const rainMethod = asRainMethod(pick("rainMethod")) ?? asRainMethod(league["rain_method"]);
+  return {
+    freeHit: Boolean(pick("freeHit")),
+    superOver: Boolean(pick("superOver")),
+    lastManStands: Boolean(pick("lastManStands")),
+    ...(followOn !== null ? { followOnLead: followOn } : {}),
+    ...(rainMethod ? { rainMethod } : {}),
+  };
+}
+
+/** Rain interruption saved in live state, validated field by field. */
+function cloudRain(value: unknown) {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Record<string, unknown>;
+  const method = asRainMethod(raw["method"]);
+  if (!method) return null;
+  return {
+    method,
+    revisedOvers: finiteOrNull(raw["revisedOvers"]),
+    officialTarget: finiteOrNull(raw["officialTarget"]),
+    officialPar: finiteOrNull(raw["officialPar"]),
+    abandoned: raw["abandoned"] === true,
+    minOversForResult: finiteOrNull(raw["minOversForResult"]),
+  };
 }

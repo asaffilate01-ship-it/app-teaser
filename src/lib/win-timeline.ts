@@ -1,4 +1,4 @@
-import { currentInnings, summarizeInnings, type CricketMatch } from "./cricket.ts";
+import { currentInnings, inningsOversLimit, inningsTarget, summarizeInnings, type CricketMatch } from "./cricket.ts";
 import { predictWin, type Prediction } from "./win-predictor.ts";
 
 export interface WinPoint {
@@ -14,11 +14,11 @@ function stateFor(match: CricketMatch, inningsIndex: number, deliveriesCount: nu
   const summary = summarizeInnings({ ...innings, deliveries: balls }, match.settings.ballsPerOver);
   const battingTeam = match.teams.find((team) => team.id === innings.battingTeamId);
   const target =
-    inningsIndex === 1 ? summarizeInnings(match.innings[0]!, match.settings.ballsPerOver).runs + 1 : null;
+    inningsIndex === 1 ? inningsTarget(match, 1) : null;
   return {
     innings,
     prediction: predictWin({
-      oversPerInnings: match.settings.oversPerInnings,
+      oversPerInnings: inningsOversLimit(match, innings),
       inningsPerSide: match.settings.inningsPerSide,
       ballsPerOver: match.settings.ballsPerOver,
       inningsNumber: inningsIndex + 1,
@@ -35,6 +35,8 @@ function stateFor(match: CricketMatch, inningsIndex: number, deliveriesCount: nu
 
 /** Current prediction for the live innings, from the batting side's point of view. */
 export function currentPrediction(match: CricketMatch): Prediction | null {
+  // A decided match (including a rain result) has no "chance" left to estimate.
+  if (match.status === "completed") return null;
   const index = match.innings.length - 1;
   return stateFor(match, index, currentInnings(match).deliveries.length).prediction;
 }

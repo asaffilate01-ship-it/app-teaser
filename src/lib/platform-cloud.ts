@@ -718,6 +718,7 @@ export async function createCompetition(input: {
   oversPerInnings: number;
   inningsPerSide: number;
   ballsPerOver: number;
+  rainMethod?: "arr" | "mpo" | "dls" | "manual";
 }): Promise<{ competitionId: string; ruleVersionId: string }> {
   const rules: CompetitionRules = {
     version: 1,
@@ -726,6 +727,7 @@ export async function createCompetition(input: {
     ballsPerOver: input.ballsPerOver,
     points: { win: 4, tie: 2, noResult: 2, loss: 0 },
     tieBreakers: ["points", "wins", "net-run-rate"],
+    rainMethod: input.rainMethod ?? "arr",
   };
   const { data, error } = await getCloudClient().rpc("create_competition_workspace", {
     p_organisation_id: input.organisationId,

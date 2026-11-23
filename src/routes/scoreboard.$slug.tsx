@@ -9,6 +9,7 @@ import { WinPredictor } from "@/components/scorer/WinPredictor";
 import { CommentaryFeed } from "@/components/scorer/CommentaryFeed";
 import { predictWin, type MatchConditions } from "@/lib/win-predictor";
 import type { CommentaryLine } from "@/lib/commentary";
+import { rainMethodShort, type RainMethod } from "@/lib/rain-rules";
 
 export const Route = createFileRoute("/scoreboard/$slug")({
   head: () => ({
@@ -58,6 +59,9 @@ interface ScoreboardData {
     commentary?: CommentaryLine[] | null;
     superOver?: boolean;
     freeHit?: boolean;
+    rain?: { method?: string; revisedOvers?: number | null } | null;
+    par?: number | null;
+    oversLimit?: number | null;
     declared?: boolean;
     followOn?: boolean;
     result?: string | null;
@@ -148,7 +152,12 @@ function PublicScoreboard() {
   const wickets = state.wickets ?? 0;
   const legalBalls = legalBallsFromOvers(state.overs, ballsPerOver);
   const runRate = legalBalls > 0 ? (runs * ballsPerOver) / legalBalls : 0;
-  const oversLimit = state.superOver ? 1 : (state.settings?.oversPerInnings ?? null);
+  const oversLimit =
+    state.oversLimit !== undefined
+      ? state.oversLimit
+      : state.superOver
+        ? 1
+        : (state.settings?.oversPerInnings ?? null);
   const chase = chaseState(state.target ?? null, runs, legalBalls, oversLimit, ballsPerOver);
   const isLive = scoreboard.status === "live" || scoreboard.status === "innings_break";
   const ribbon = state.result
@@ -160,8 +169,8 @@ function PublicScoreboard() {
         : (state.message ?? `${batting.name} batting`);
   const recent = state.recent ?? [];
   const commentary = state.commentary ?? null;
-  const prediction = predictWin({
-    oversPerInnings: state.settings?.oversPerInnings ?? null,
+  const prediction = state.result ? null : predictWin({
+    oversPerInnings: oversLimit,
     inningsPerSide: state.settings?.inningsPerSide ?? 1,
     ballsPerOver,
     inningsNumber: state.inningsNumber ?? (state.target ? 2 : 1),
@@ -192,6 +201,12 @@ function PublicScoreboard() {
             {(state.superOver || state.freeHit) && (
               <span className="hero-chip hero-chip-alert" role="status">
                 {state.freeHit ? "Free hit" : "Super Over"}
+              </span>
+            )}
+            {state.par != null && state.target && (
+              <span className="hero-chip" role="status">
+                Par {state.par}
+                {state.rain?.method ? ` · ${rainMethodShort(state.rain.method as RainMethod)}` : ""}
               </span>
             )}
             <span className={`hero-chip ${isLive ? "hero-chip-live" : ""}`}>

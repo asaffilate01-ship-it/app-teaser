@@ -42,7 +42,13 @@ export function readLiveSituation(match: { id: string; homeTeamId: string; awayT
   const state = match.liveState ?? {};
   const settings = (state.settings && typeof state.settings === "object" ? state.settings : {}) as Record<string, unknown>;
   const ballsPerOver = num(settings["ballsPerOver"], 6) || 6;
-  const oversPerInnings = typeof settings["oversPerInnings"] === "number" ? (settings["oversPerInnings"] as number) : null;
+  const limit = (state as Record<string, unknown>)["oversLimit"];
+  const oversPerInnings =
+    typeof limit === "number"
+      ? limit
+      : typeof settings["oversPerInnings"] === "number"
+        ? (settings["oversPerInnings"] as number)
+        : null;
   const overs = typeof state.overs === "string" ? state.overs : "0.0";
   const battingTeamId = typeof state.battingTeamId === "string" ? state.battingTeamId : null;
   const target = typeof state.target === "number" ? state.target : null;

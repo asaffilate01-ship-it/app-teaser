@@ -52,6 +52,7 @@ import { validateDeviceMatchSetup } from "@/lib/match-setup";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { useMatchCloudSync } from "@/hooks/use-match-cloud-sync";
 import { MatchRulesFields } from "@/components/scorer/MatchRulesFields";
+import { RainPanel } from "@/components/scorer/RainPanel";
 import {
   allowedDismissals,
   canDeclare,
@@ -1195,6 +1196,7 @@ function LiveMatch({
           <div className="mt-5 space-y-5">
             <MatchPredictorPanel match={match} onSave={saveAndSync} />
             <LiveRulesPanel match={match} onSave={saveAndSync} />
+            <RainPanel match={match} onSave={saveAndSync} />
           </div>
         )}
         {tab === "timeline" && <Timeline match={match} onSave={saveAndSync} />}
@@ -2136,6 +2138,11 @@ function MatchPredictorPanel({
       onConditionsChange={(conditions) => onSave({ ...match, conditions, updatedAt: new Date().toISOString() })}
       homeName={home.name}
       awayName={away.name}
+      unavailableReason={
+        match.status === "completed"
+          ? `This match has finished. The line shows how ${home.name}'s chances swung.`
+          : undefined
+      }
     />
   );
 }

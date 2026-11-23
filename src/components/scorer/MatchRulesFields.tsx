@@ -1,6 +1,7 @@
 import type { MatchRules } from "@/lib/cricket";
+import { rainMethods, type RainMethod } from "@/lib/rain-rules";
 
-/** Free hit, Super Over, last man stands and follow-on switches, shared by match setup and the live scorer. */
+/** Free hit, Super Over, last man stands, follow-on and rain-rule choices, shared by match setup and the live scorer. */
 export function MatchRulesFields({
   rules,
   onChange,
@@ -70,6 +71,28 @@ export function MatchRulesFields({
                 <span className="text-xs text-muted-foreground">runs</span>
               </span>
             )}
+          </span>
+        </label>
+      )}
+      {inningsPerSide === 1 && limitedOvers && (
+        <label className="rule-toggle">
+          <span className="min-w-0 flex-1">
+            <span className="rule-toggle-title">Rain rule</span>
+            <span className="rule-toggle-hint">
+              {rainMethods.find((item) => item.id === (rules.rainMethod ?? "arr"))?.hint}
+            </span>
+            <select
+              value={rules.rainMethod ?? "arr"}
+              onChange={(event) => onChange({ ...rules, rainMethod: event.target.value as RainMethod })}
+              className="scorer-input mt-2 h-10"
+              aria-label="Rain rule"
+            >
+              {rainMethods.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
           </span>
         </label>
       )}

@@ -97,6 +97,8 @@ export interface CompetitionRules {
     loss: number;
   };
   tieBreakers: Array<"points" | "wins" | "net-run-rate" | "head-to-head">;
+  /** Default rain method for shortened chases in this competition. */
+  rainMethod?: "arr" | "mpo" | "dls" | "manual";
   bonusPoints?: {
     battingAtRuns?: number;
     battingPoints?: number;

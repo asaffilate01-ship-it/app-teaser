@@ -9,6 +9,7 @@ import {
   findTeam,
   isSuperOver,
   matchResult,
+  inningsOversLimit,
   nextBallIsFreeHit,
   summarizeInnings,
   targetForCurrentInnings,
@@ -16,8 +17,7 @@ import {
 } from "@/lib/cricket";
 
 /** Over limit for the current innings: a Super Over is one over. */
-const oversLimit = (match: CricketMatch) =>
-  isSuperOver(currentInnings(match)) ? 1 : match.settings.oversPerInnings;
+const oversLimit = (match: CricketMatch) => inningsOversLimit(match, currentInnings(match));
 import { ballCaption, ballTone, chaseState, projectedScore, teamInitials } from "@/lib/match-broadcast";
 
 /** Shield crest with the team's monogram — used wherever a team logo would go. */

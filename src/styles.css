@@ -2812,3 +2812,20 @@
 .reel-list small { color: oklch(0.72 0.02 260); font-weight: 500; }
 .reel-error { margin-top: 0.75rem; border-radius: 0.5rem; border: 1px solid oklch(0.62 0.22 22 / 0.4); padding: 0.6rem; font-size: 0.82rem; }
 .reel-note { margin-top: 0.75rem; font-size: 0.72rem; color: oklch(0.65 0.02 260); }
+
+/* Rain par score strip on the scoring screen */
+.rain-par {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-radius: 0.6rem;
+  background: oklch(1 0 0 / 0.05);
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
+}
+.rain-par strong { font-family: var(--font-display); font-size: 1.2rem; margin-left: 0.25rem; }
+.rain-par .is-ahead { color: oklch(0.8 0.16 150); font-weight: 700; }
+.rain-par .is-behind { color: oklch(0.72 0.18 25); font-weight: 700; }

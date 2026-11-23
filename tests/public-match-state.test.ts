@@ -76,5 +76,14 @@ test("shared live score keeps the match length so other devices can show overs l
     freeHit: false,
     superOver: false,
     lastManStands: false,
+    followOnLead: null,
+    rainMethod: null,
   });
+});
+
+test("shared live score carries the rain state and par so other devices can show it", () => {
+  const match = { ...privateMatch(), rain: { method: "arr" as const, revisedOvers: 12 } };
+  const live = publicLiveState(match);
+  assert.deepEqual(live["rain"], { method: "arr", revisedOvers: 12 });
+  assert.ok("par" in live);
 });

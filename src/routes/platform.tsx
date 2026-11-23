@@ -62,6 +62,7 @@ import { AcademyDashboard } from "@/components/AcademyDashboard";
 import { LeagueStandings } from "@/components/LeagueStandings";
 import { LeagueHub } from "@/components/league/LeagueHub";
 import { toast } from "sonner";
+import { rainMethods } from "@/lib/rain-rules";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { usePlatformDashboard } from "@/hooks/use-platform-dashboard";
@@ -1291,6 +1292,7 @@ function CompetitionForm({ data, run }: { data: PlatformDashboardData; run: RunA
   const [season, setSeason] = useState(`${new Date().getFullYear()} season`);
   const [format, setFormat] = useState("league");
   const [overs, setOvers] = useState("20");
+  const [rainMethod, setRainMethod] = useState<"arr" | "mpo" | "dls" | "manual">("arr");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const submit = async (event: FormEvent) => {
@@ -1321,6 +1323,7 @@ function CompetitionForm({ data, run }: { data: PlatformDashboardData; run: RunA
           oversPerInnings,
           inningsPerSide: 1,
           ballsPerOver: 6,
+          rainMethod,
         }),
       );
       setName("");
@@ -1335,7 +1338,7 @@ function CompetitionForm({ data, run }: { data: PlatformDashboardData; run: RunA
       title="Create competition"
       description="Creates the season, competition and immutable rule version together."
     >
-      <form onSubmit={(event) => void submit(event)} className="grid gap-3 md:grid-cols-4">
+      <form onSubmit={(event) => void submit(event)} className="grid gap-3 md:grid-cols-5">
         <Field label="Competition">
           <input
             required
@@ -1377,12 +1380,18 @@ function CompetitionForm({ data, run }: { data: PlatformDashboardData; run: RunA
             className="scorer-input"
           />
         </Field>
+        <SelectField
+          label="Rain rule"
+          value={rainMethod}
+          setValue={(value) => setRainMethod(value as typeof rainMethod)}
+          options={rainMethods.map((item) => [item.id, item.label] as [string, string])}
+        />
         {error && (
-          <p role="alert" className="text-sm text-rose-200 md:col-span-4">
+          <p role="alert" className="text-sm text-rose-200 md:col-span-5">
             {error}
           </p>
         )}
-        <button disabled={busy} className="action-primary md:col-span-4 md:justify-self-end">
+        <button disabled={busy} className="action-primary md:col-span-5 md:justify-self-end">
           {busy && <LoaderCircle className="size-4 animate-spin" />} Create competition
         </button>
       </form>
