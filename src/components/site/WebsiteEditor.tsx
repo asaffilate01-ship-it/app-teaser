@@ -28,7 +28,7 @@ const tabs = [
   ["settings", "Website", Settings2],
   ["posts", "News and documents", Newspaper],
   ["photos", "Photos", ImagePlus],
-  ["domain", "Own domain", Globe],
+  ["domain", "Web address", Globe],
 ] as const;
 type Tab = (typeof tabs)[number][0];
 
@@ -127,7 +127,7 @@ export function WebsiteEditor({ organisationId, organisationName, role }: { orga
       )}
       {data && tab === "posts" && <PostsPanel data={data} organisationId={organisationId} editor={editor} act={act} />}
       {data && tab === "photos" && <PhotosPanel data={data} organisationId={organisationId} editor={editor} act={act} />}
-      {data && tab === "domain" && <DomainPanel organisationId={organisationId} editor={editor} published={published} />}
+      {data && tab === "domain" && <DomainPanel organisationId={organisationId} organisationName={organisationName} editor={editor} published={published} />}
     </div>
   );
 }

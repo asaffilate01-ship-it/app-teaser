@@ -29,6 +29,10 @@ export const clubDomainCloud = {
     const { error } = await supabase.rpc("request_club_site_domain", { p_organisation_id: organisationId, p_hostname: hostname });
     fail(error);
   },
+  async requestCriclume(organisationId: string, label: string) {
+    const { error } = await supabase.rpc("request_club_criclume_address", { p_organisation_id: organisationId, p_label: label });
+    fail(error);
+  },
   async remove(organisationId: string) {
     const { error } = await supabase.rpc("remove_club_site_domain", { p_organisation_id: organisationId });
     fail(error);

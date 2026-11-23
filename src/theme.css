@@ -177,6 +177,24 @@ html[data-theme="dark"] .club-cobrand-on-dark { display: block; }
 .domain-perks li { display: flex; align-items: center; gap: 0.5rem; }
 .domain-perks svg { width: 1rem; height: 1rem; color: var(--gold); flex: none; }
 .domain-input { display: flex; align-items: center; gap: 0.4rem; }
+.domain-input > input { min-width: 0; flex: 1; }
+.domain-choice { display: grid; gap: 0.6rem; }
+@media (min-width: 640px) { .domain-choice { grid-template-columns: 1fr 1fr; } }
+.domain-choice button {
+  display: flex; align-items: flex-start; gap: 0.7rem; text-align: left;
+  padding: 0.85rem 1rem; border-radius: 1rem;
+  border: 1px solid var(--border); background: var(--gradient-surface);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.domain-choice button:hover { transform: translateY(-1px); }
+.domain-choice button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.domain-choice button[aria-checked="true"] {
+  border-color: color-mix(in oklab, var(--gold) 70%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--gold) 18%, transparent);
+}
+.domain-choice svg { width: 1.15rem; height: 1.15rem; margin-top: 0.1rem; color: var(--gold); flex: none; }
+.domain-choice strong { display: block; font-size: 0.92rem; }
+.domain-choice small { display: block; color: var(--muted-foreground); font-size: 0.8rem; line-height: 1.4; }
 .domain-input > span { color: var(--muted-foreground); font-size: 0.85rem; white-space: nowrap; }
 .domain-steps { display: grid; gap: 0.75rem; margin-top: 1.25rem; }
 .domain-steps li { display: flex; gap: 0.75rem; align-items: flex-start; }

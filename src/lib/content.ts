@@ -221,7 +221,7 @@ export const en = {
         period: "per competition / season",
         blurb: "Full scoring analytics across the whole competition.",
         perks: [
-          "Co-branded club website on your own domain (yourclub.com)",
+          "Co-branded club website on your own domain (yourclub.com) — or a free yourclub.criclume.com address",
           "Every club in the competition included",
           "Live scorecards from every match side by side",
           "Live league table, standings and results",
@@ -302,7 +302,7 @@ export const en = {
       },
       {
         q: "Can our club website use our own domain?",
-        a: "Yes, on the League plan. Your club website runs at your own address — like yourclub.com — with your logo and colours first and a small “powered by CricLume” mark. Request it in Website → Own domain; we set it up, show you the records to add with your domain provider, and secure it with https. Other plans use the free criclume.com/club/your-name address.",
+        a: "Yes, on the League plan. Your club website runs at your own address — like yourclub.com — with your logo and colours first and a small “powered by CricLume” mark. Request it in Website → Own domain; we set it up, show you the records to add with your domain provider, and secure it with https. No domain? Take a free address like yourclub.criclume.com instead — nothing to buy, we set it up. Other plans use the free criclume.com/club/your-name address.",
       },
     ],
   },
@@ -561,7 +561,7 @@ export const de: Content = {
         period: "pro Wettbewerb / Saison",
         blurb: "Vollständige Scoring-Analyse für den gesamten Wettbewerb.",
         perks: [
-          "Co-Branding-Vereinswebsite unter eigener Domain (ihrverein.de)",
+          "Co-Branding-Vereinswebsite unter eigener Domain (ihrverein.de) – oder kostenlos unter ihrverein.criclume.com",
           "Alle Clubs des Wettbewerbs enthalten",
           "Live-Scorecards aller Spiele nebeneinander",
           "Live-Tabelle, Platzierungen und Ergebnisse",
@@ -643,7 +643,7 @@ export const de: Content = {
       },
       {
         q: "Kann unsere Vereinswebsite eine eigene Domain nutzen?",
-        a: "Ja, im League-Tarif. Ihre Vereinswebsite läuft unter Ihrer eigenen Adresse – etwa ihrverein.de – mit Ihrem Logo und Ihren Farben im Vordergrund und einem kleinen „powered by CricLume“-Hinweis. Beantragen Sie sie unter Website → Eigene Domain; wir richten alles ein, zeigen Ihnen die Einträge für Ihren Domain-Anbieter und sichern sie mit https. Andere Tarife nutzen die kostenlose Adresse criclume.com/club/ihr-name.",
+        a: "Ja, im League-Tarif. Ihre Vereinswebsite läuft unter Ihrer eigenen Adresse – etwa ihrverein.de – mit Ihrem Logo und Ihren Farben im Vordergrund und einem kleinen „powered by CricLume“-Hinweis. Beantragen Sie sie unter Website → Eigene Domain; wir richten alles ein, zeigen Ihnen die Einträge für Ihren Domain-Anbieter und sichern sie mit https. Keine Domain? Nehmen Sie stattdessen eine kostenlose Adresse wie ihrverein.criclume.com – nichts zu kaufen, wir richten sie ein. Andere Tarife nutzen die kostenlose Adresse criclume.com/club/ihr-name.",
       },
     ],
   },
@@ -897,7 +897,7 @@ export const nl: Content = {
         period: "per competitie / seizoen",
         blurb: "Volledige score-analyse voor de hele competitie.",
         perks: [
-          "Co-branded clubwebsite op je eigen domein (jouwclub.nl)",
+          "Co-branded clubwebsite op je eigen domein (jouwclub.nl) – of gratis op jouwclub.criclume.com",
           "Alle clubs in de competitie inbegrepen",
           "Live scorekaarten van alle wedstrijden naast elkaar",
           "Live stand, klassement en uitslagen",
@@ -979,7 +979,7 @@ export const nl: Content = {
       },
       {
         q: "Kan onze clubwebsite ons eigen domein gebruiken?",
-        a: "Ja, met het League-abonnement. Je clubwebsite draait op je eigen adres – zoals jouwclub.nl – met jullie logo en kleuren voorop en een klein ‘powered by CricLume’-merkje. Vraag het aan via Website → Eigen domein; wij zetten het op, tonen de records voor je domeinprovider en beveiligen het met https. Andere abonnementen gebruiken het gratis adres criclume.com/club/jouw-naam.",
+        a: "Ja, met het League-abonnement. Je clubwebsite draait op je eigen adres – zoals jouwclub.nl – met jullie logo en kleuren voorop en een klein ‘powered by CricLume’-merkje. Vraag het aan via Website → Eigen domein; wij zetten het op, tonen de records voor je domeinprovider en beveiligen het met https. Geen domein? Neem dan een gratis adres zoals jouwclub.criclume.com – niets te kopen, wij zetten het op. Andere abonnementen gebruiken het gratis adres criclume.com/club/jouw-naam.",
       },
     ],
   },
@@ -1235,7 +1235,7 @@ export const af: Content = {
         period: "per kompetisie / seisoen",
         blurb: "Volledige telling-ontleding oor die hele kompetisie.",
         perks: [
-          "Mede-handelsmerk klubwebwerf op jou eie domein (jouklub.co.za)",
+          "Mede-handelsmerk klubwebwerf op jou eie domein (jouklub.co.za) – of gratis op jouklub.criclume.com",
           "Elke klub in die kompetisie ingesluit",
           "Regstreekse telkaarte van elke wedstryd langs mekaar",
           "Regstreekse ranglys, posisies en uitslae",
@@ -1317,7 +1317,7 @@ export const af: Content = {
       },
       {
         q: "Kan ons klubwebwerf ons eie domein gebruik?",
-        a: "Ja, op die League-plan. Jou klubwebwerf loop op jou eie adres – soos jouklub.co.za – met jou logo en kleure voorop en ’n klein “powered by CricLume”-merk. Vra dit aan by Webwerf → Eie domein; ons stel dit op, wys jou die rekords om by jou domeinverskaffer by te voeg en beveilig dit met https. Ander planne gebruik die gratis adres criclume.com/club/jou-naam.",
+        a: "Ja, op die League-plan. Jou klubwebwerf loop op jou eie adres – soos jouklub.co.za – met jou logo en kleure voorop en ’n klein “powered by CricLume”-merk. Vra dit aan by Webwerf → Eie domein; ons stel dit op, wys jou die rekords om by jou domeinverskaffer by te voeg en beveilig dit met https. Geen domein nie? Kry eerder ’n gratis adres soos jouklub.criclume.com – niks om te koop nie, ons stel dit op. Ander planne gebruik die gratis adres criclume.com/club/jou-naam.",
       },
     ],
   },
@@ -1574,7 +1574,7 @@ export const fr: Content = {
         period: "par compétition / saison",
         blurb: "Analyse complète du marquage sur toute la compétition.",
         perks: [
-          "Site du club co-marqué sur votre propre domaine (votreclub.fr)",
+          "Site du club co-marqué sur votre propre domaine (votreclub.fr) – ou gratuitement sur votreclub.criclume.com",
           "Tous les clubs de la compétition inclus",
           "Feuilles de score en direct de tous les matchs côte à côte",
           "Classement en direct, positions et résultats",
@@ -1656,7 +1656,7 @@ export const fr: Content = {
       },
       {
         q: "Notre site de club peut-il utiliser notre propre domaine ?",
-        a: "Oui, avec l'offre League. Votre site tourne à votre propre adresse – comme votreclub.fr – avec votre logo et vos couleurs en premier et une petite mention « powered by CricLume ». Demandez-le dans Site web → Domaine personnel ; nous le configurons, vous montrons les enregistrements à ajouter chez votre fournisseur de domaine et le sécurisons en https. Les autres offres utilisent l'adresse gratuite criclume.com/club/votre-nom.",
+        a: "Oui, avec l'offre League. Votre site tourne à votre propre adresse – comme votreclub.fr – avec votre logo et vos couleurs en premier et une petite mention « powered by CricLume ». Demandez-le dans Site web → Domaine personnel ; nous le configurons, vous montrons les enregistrements à ajouter chez votre fournisseur de domaine et le sécurisons en https. Pas de domaine ? Prenez plutôt une adresse gratuite comme votreclub.criclume.com – rien à acheter, nous la configurons. Les autres offres utilisent l'adresse gratuite criclume.com/club/votre-nom.",
       },
     ],
   },

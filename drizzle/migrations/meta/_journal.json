@@ -225,6 +225,13 @@
       "when": 1795439062344,
       "tag": "0031_umpire_panels",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1795439730160,
+      "tag": "0032_club_criclume_addresses",
+      "breakpoints": true
     }
   ]
 }

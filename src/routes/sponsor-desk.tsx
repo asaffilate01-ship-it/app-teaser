@@ -29,7 +29,7 @@ import {
   type PromoCreative,
 } from "@/lib/promo-desk-cloud";
 import { staffDomainCloud, type StaffDomainRow } from "@/lib/club-domains-cloud";
-import { domainStatusLabels, type DomainStatus } from "@/lib/club-domain-records";
+import { criclumeStaffRecords, domainStatusLabels, type DomainStatus } from "@/lib/club-domain-records";
 
 export const Route = createFileRoute("/sponsor-desk")({
   head: () => ({
@@ -684,10 +684,14 @@ function ClubDomains() {
   return (
     <section className="office-card space-y-3">
       <div>
-        <h3>Club websites on their own domain</h3>
+        <h3>Club website addresses</h3>
         <p className="office-meta">
-          League plan only. Connect the domain to CricLume hosting first, paste the records it shows (address, then any extra records as
-          “TYPE NAME VALUE”, one per line), then set it live once hosting shows it active.
+          League plan only. Own domain: connect it to CricLume hosting first, paste the records it shows (address, then any extra records as
+          “TYPE NAME VALUE”, one per line) so the club can add them, then set it live once hosting shows it active.
+        </p>
+        <p className="office-meta">
+          Free CricLume address (name.criclume.com): connect it to CricLume hosting yourself and add its records in criclume.com's DNS — the
+          club has nothing to add. Set it live once hosting shows it active.
         </p>
       </div>
       {!rows ? (
@@ -730,7 +734,10 @@ function DomainRequest({ row, onSaved }: { row: StaffDomainRow; onSaved: () => v
     <li className="office-row !block space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
-          <p className="font-semibold">{row.hostname}</p>
+          <p className="flex flex-wrap items-center gap-2 font-semibold">
+            {row.hostname}
+            <span className="office-pill">{row.kind === "criclume" ? "Free CricLume address" : "Own domain"}</span>
+          </p>
           <p className="office-meta">
             {row.organisation_name} · /club/{row.site_slug} · {row.site_published ? "site published" : "site not published"}
             {row.plan_allowed ? "" : " · not on League plan"}
@@ -768,6 +775,18 @@ function DomainRequest({ row, onSaved }: { row: StaffDomainRow; onSaved: () => v
             placeholder={"TXT _lovable lovable_verify=…\nTXT _lovable.www lovable_verify=…"}
           />
         </label>
+        {row.kind === "criclume" && criclumeStaffRecords(row.hostname, aTarget, records).length > 0 && (
+          <div className="md:col-span-3 rounded-xl border border-border p-3 text-xs">
+            <p className="mb-2 font-semibold">Add in criclume.com DNS</p>
+            <ul className="space-y-1 font-mono">
+              {criclumeStaffRecords(row.hostname, aTarget, records).map((record) => (
+                <li key={`${record.type}-${record.name}-${record.value}`}>
+                  {record.type} {record.name} → {record.value}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div className="md:col-span-3">
           <button type="submit" className="action-primary" disabled={busy}>
             {busy ? <LoaderCircle className="size-4 animate-spin" /> : <Globe className="size-4" />} Save

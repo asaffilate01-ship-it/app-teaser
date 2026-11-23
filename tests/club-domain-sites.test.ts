@@ -57,3 +57,40 @@ test("typed web addresses are cleaned before sending", () => {
   assert.equal(looksLikeDomain("riversidecc.com"), true);
   assert.equal(looksLikeDomain("not a domain"), false);
 });
+
+test("a free club address like riverside.criclume.com is looked up as a club website; CricLume's own names are not", async () => {
+  const { criclumeClubLabel } = await import("../src/lib/club-domains.ts");
+  assert.equal(isPlatformHost("riverside.criclume.com"), false);
+  assert.equal(criclumeClubLabel("Riverside.CriCLume.com"), "riverside");
+  assert.equal(isPlatformHost("www.criclume.com"), true);
+  assert.equal(isPlatformHost("a.b.criclume.com"), true);
+  assert.equal(criclumeClubLabel("riversidecc.com"), null);
+});
+
+test("free CricLume address names: 3-40 letters, numbers or single dashes, and CricLume's own names are kept", async () => {
+  const { cleanClubLabel, clubLabelProblem } = await import("../src/lib/club-domain-records.ts");
+  assert.equal(cleanClubLabel("Riverside C.C."), "riverside-c-c");
+  assert.equal(cleanClubLabel("https://Riverside.criclume.com/news"), "riverside");
+  assert.equal(cleanClubLabel("x".repeat(60)).length, 40);
+  assert.equal(clubLabelProblem("riverside-cc"), null);
+  assert.notEqual(clubLabelProblem("ab"), null);
+  assert.notEqual(clubLabelProblem("www"), null);
+  assert.notEqual(clubLabelProblem("shop"), null);
+});
+
+test("staff add the free address in criclume.com's DNS by its name", async () => {
+  const { criclumeStaffRecords } = await import("../src/lib/club-domain-records.ts");
+  assert.deepEqual(criclumeStaffRecords("riverside.criclume.com", "185.158.133.1", "TXT _lovable.riverside lovable_verify=abc"), [
+    { type: "A", name: "riverside", value: "185.158.133.1" },
+    { type: "TXT", name: "_lovable.riverside", value: "lovable_verify=abc" },
+  ]);
+});
+
+test("the app and the database keep the same list of CricLume-only names", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { reservedClubLabels } = await import("../src/lib/club-domain-records.ts");
+  const sql = readFileSync(new URL("../drizzle/migrations/0032_club_criclume_addresses.sql", import.meta.url), "utf8");
+  const list = sql.match(/any \(array\[([\s\S]*?)\]\)/)?.[1] ?? "";
+  const dbNames = new Set([...list.matchAll(/'([a-z0-9]+)'/g)].map((m) => m[1]));
+  assert.deepEqual([...dbNames].sort(), [...reservedClubLabels].sort());
+});

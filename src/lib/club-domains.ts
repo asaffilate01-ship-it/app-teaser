@@ -1,5 +1,5 @@
 /**
- * Club websites on a club's own domain (League plan). A visitor to e.g. riversidecc.com sees
+ * Club websites on a club's own domain or a free riverside.criclume.com address (League plan). A visitor to e.g. riversidecc.com sees
  * that club's website at clean addresses (/, /fixtures, /news, /gallery); everything else on
  * that domain is sent to criclume.com. The edge worker (src/server.ts) looks the domain up and
  * remembers it here; the router (src/router.tsx) maps the clean addresses to /club/<slug>/….
@@ -10,7 +10,6 @@ export const PLATFORM_ORIGIN = "https://criclume.com";
 
 const platformExact = new Set(["criclume.com", "www.criclume.com", "localhost", "127.0.0.1", "[::1]"]);
 const platformSuffixes = [
-  ".criclume.com",
   ".lovable.app",
   ".lovable.dev",
   ".lovableproject.com",
@@ -23,10 +22,23 @@ export function normaliseHost(host: string): string {
   return host.trim().toLowerCase().replace(/\.$/, "");
 }
 
+/**
+ * A free club address like riverside.criclume.com (one name in front of criclume.com), or null.
+ * www and deeper names (a.b.criclume.com) stay CricLume's own.
+ */
+export function criclumeClubLabel(host: string): string | null {
+  const h = normaliseHost(host);
+  if (!h.endsWith(".criclume.com")) return null;
+  const label = h.slice(0, -".criclume.com".length);
+  if (!label || label === "www" || label.includes(".")) return null;
+  return label;
+}
+
 /** CricLume's own addresses (and previews) never need a club lookup. */
 export function isPlatformHost(host: string): boolean {
   const h = normaliseHost(host);
   if (platformExact.has(h)) return true;
+  if (h.endsWith(".criclume.com")) return criclumeClubLabel(h) === null;
   return platformSuffixes.some((suffix) => h.endsWith(suffix));
 }
 

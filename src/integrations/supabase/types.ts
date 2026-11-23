@@ -1014,6 +1014,7 @@ export type Database = {
           dns_txt_value: string | null
           hostname: string
           id: string
+          kind: string
           live_at: string | null
           organisation_id: string
           requested_by: string | null
@@ -1027,6 +1028,7 @@ export type Database = {
           dns_txt_value?: string | null
           hostname: string
           id?: string
+          kind?: string
           live_at?: string | null
           organisation_id: string
           requested_by?: string | null
@@ -1040,6 +1042,7 @@ export type Database = {
           dns_txt_value?: string | null
           hostname?: string
           id?: string
+          kind?: string
           live_at?: string | null
           organisation_id?: string
           requested_by?: string | null
@@ -4757,6 +4760,7 @@ export type Database = {
           dns_txt_value: string
           hostname: string
           id: string
+          kind: string
           live_at: string
           organisation_id: string
           organisation_name: string
@@ -5037,6 +5041,7 @@ export type Database = {
       is_match_manager: { Args: { p_match_id: string }; Returns: boolean }
       is_my_umpire: { Args: { p_umpire_id: string }; Returns: boolean }
       is_org_member: { Args: { p_organisation_id: string }; Returns: boolean }
+      is_reserved_club_label: { Args: { p_label: string }; Returns: boolean }
       is_ride_driver: { Args: { p_ride_id: string }; Returns: boolean }
       is_site_editor: { Args: { p_org: string }; Returns: boolean }
       is_store_manager: { Args: { p_org: string }; Returns: boolean }
@@ -5241,6 +5246,10 @@ export type Database = {
           p_team_id: string
         }
         Returns: undefined
+      }
+      request_club_criclume_address: {
+        Args: { p_label: string; p_organisation_id: string }
+        Returns: string
       }
       request_club_site_domain: {
         Args: { p_hostname: string; p_organisation_id: string }
