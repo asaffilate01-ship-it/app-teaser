@@ -61,6 +61,7 @@ import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace"
 import { AcademyDashboard } from "@/components/AcademyDashboard";
 import { LeagueStandings } from "@/components/LeagueStandings";
 import { LeagueHub } from "@/components/league/LeagueHub";
+import { SquadImport } from "@/components/club/SquadImport";
 import { toast } from "sonner";
 import { rainMethods } from "@/lib/rain-rules";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
@@ -1734,6 +1735,7 @@ function Players({
     <div className="space-y-5">
       {can(role, "team.manage") && <TeamAndGroundForms data={data} run={run} />}
       {can(role, "player.manage") && <PlayerForm data={data} run={run} />}
+      {can(role, "team.manage") && can(role, "player.manage") && <SquadImport data={data} run={run} />}
       <Panel
         title="Player histories"
         description="Career totals aggregate canonical delivery records visible to this organisation."

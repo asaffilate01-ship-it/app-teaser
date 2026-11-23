@@ -2875,3 +2875,24 @@
 .ground-players strong { font-family: var(--font-display); font-size: clamp(20px, 3vw, 64px); line-height: 1.1; }
 .ground-result { font-family: var(--font-display); font-size: clamp(22px, 3.4vw, 72px); color: var(--gold); }
 .ground-brand { font-size: clamp(10px, 1vw, 18px); letter-spacing: 0.2em; text-transform: uppercase; color: oklch(1 0 0 / 0.35); }
+
+/* Streaks and rivalries */
+.streak-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.25rem 0.75rem; align-items: center; border-radius: 0.5rem; background: oklch(1 0 0 / 0.04); padding: 0.55rem 0.75rem; font-size: 0.85rem; }
+.streak-meta { grid-column: 1 / -1; font-size: 0.72rem; color: oklch(0.72 0.02 260); }
+.form-chips { display: inline-flex; gap: 0.2rem; }
+.form-chips span { display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 0.3rem; font-size: 0.7rem; font-weight: 800; background: oklch(1 0 0 / 0.1); }
+.form-chips span[data-letter="W"] { background: oklch(0.62 0.15 150); color: oklch(0.98 0.01 150); }
+.form-chips span[data-letter="L"] { background: oklch(0.58 0.2 22); color: oklch(0.98 0.01 22); }
+.rivalry-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 0.25rem 0.6rem; align-items: center; border-radius: 0.5rem; background: oklch(1 0 0 / 0.04); padding: 0.55rem 0.75rem; font-size: 0.85rem; }
+.rivalry-row strong { font-family: var(--font-display); font-size: 1.15rem; color: var(--gold); }
+.rivalry-row small { grid-column: 1 / -1; text-align: center; font-size: 0.7rem; color: oklch(0.72 0.02 260); }
+.streak-player { display: flex; width: 100%; min-height: 2.75rem; align-items: center; justify-content: space-between; gap: 0.75rem; border-radius: 0.5rem; background: oklch(1 0 0 / 0.04); padding: 0.45rem 0.75rem; text-align: left; font-size: 0.85rem; }
+.streak-player small { color: oklch(0.72 0.02 260); font-size: 0.7rem; }
+.streak-player strong { font-family: var(--font-display); font-size: 1.1rem; color: var(--gold); }
+.streak-live { margin-left: 0.4rem; border-radius: 999px; background: oklch(0.8 0.15 84 / 0.18); padding: 0.1rem 0.45rem; font-size: 0.68rem; font-weight: 700; color: var(--gold); }
+
+.qual-status { margin-top: 1rem; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.25rem 1rem; border-radius: 0.6rem; border-left: 4px solid var(--gold); background: oklch(1 0 0 / 0.05); padding: 0.7rem 0.9rem; }
+.qual-status strong { font-family: var(--font-display); font-size: 1.1rem; }
+.qual-status span { font-size: 0.75rem; color: oklch(0.75 0.02 260); }
+.qual-status.is-through { border-left-color: oklch(0.7 0.16 150); }
+.qual-status.is-out { border-left-color: oklch(0.6 0.2 22); }

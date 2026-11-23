@@ -11,6 +11,8 @@ import { loadCloudMatchSnapshot } from "@/lib/cloud";
 import { commentaryFeed } from "@/lib/commentary";
 import { currentInnings, findPlayer, findTeam, isSuperOver, matchResult, type CricketMatch } from "@/lib/cricket";
 import { HeadToHead } from "@/components/league/HeadToHead";
+import { Streaks } from "@/components/league/Streaks";
+import { QualificationCalculator } from "@/components/league/QualificationCalculator";
 import { PlayerProfileView } from "@/components/league/PlayerProfileView";
 import { playerOfTheMatch } from "@/lib/player-profile";
 import { buildLeagueStandings } from "@/lib/league-standings";
@@ -20,7 +22,7 @@ import { figures, seasonStats, type SeasonStats } from "@/lib/season-stats";
 import { currentPrediction, winTimeline } from "@/lib/win-timeline";
 
 type HubView = "live" | "table" | "results" | "stats";
-type StatsTab = "batting" | "bowling" | "fielding" | "h2h";
+type StatsTab = "batting" | "bowling" | "fielding" | "h2h" | "streaks";
 type DetailView = "dashboard" | "card" | "balls";
 const liveStatuses = new Set(["live", "innings_break"]);
 
@@ -356,6 +358,17 @@ function LiveTable({
         {rows.length === 0 && <p className="card-empty">No teams in this competition yet.</p>}
       </div>
       <p className="text-[11px] text-slate-500">Live placings use the win predictor and are not official until results are signed off. Net run rate only changes when results are signed off.</p>
+      <QualificationCalculator
+        rows={base}
+        remaining={data.fixtures
+          .filter((fixture) => fixture.competitionId === competitionId && !["completed", "abandoned", "cancelled"].includes(fixture.status))
+          .map((fixture) => ({ homeTeamId: fixture.homeTeamId, awayTeamId: fixture.awayTeamId }))}
+        teamName={(id) => teamName(id)}
+        winPoints={competition.rules.points.win}
+        lossPoints={competition.rules.points.loss}
+        oversPerInnings={competition.rules.oversPerInnings}
+        ballsPerOver={competition.rules.ballsPerOver}
+      />
     </div>
   );
 }
@@ -424,13 +437,14 @@ function StatsBoard({ matches }: { matches: MatchRecord[] }) {
           </div>
         ))}
       </div>
-      <div className="card-tabs max-w-xl" role="tablist" aria-label="Stats type" style={{ position: "static", gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+      <div className="card-tabs max-w-xl" role="tablist" aria-label="Stats type" style={{ position: "static", gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}>
         {(
           [
             ["batting", "Batting"],
             ["bowling", "Bowling"],
             ["fielding", "Fielding"],
-            ["h2h", "Head to head"],
+            ["h2h", "H2H"],
+            ["streaks", "Streaks"],
           ] as [StatsTab, string][]
         ).map(([item, label]) => (
           <button key={item} type="button" role="tab" aria-selected={tab === item} onClick={() => setTab(item)}>
@@ -474,7 +488,8 @@ function StatsBoard({ matches }: { matches: MatchRecord[] }) {
         />
       )}
       {tab === "h2h" && <HeadToHead matches={loadedMatches} onPlayer={setPlayerId} />}
-      {tab !== "h2h" && <p className="text-[11px] text-slate-500">Tap a name to open the player's profile.</p>}
+      {tab === "streaks" && <Streaks matches={loadedMatches} onPlayer={setPlayerId} />}
+      {tab !== "h2h" && tab !== "streaks" && <p className="text-[11px] text-slate-500">Tap a name to open the player's profile.</p>}
     </div>
   );
 }
