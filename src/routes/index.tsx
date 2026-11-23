@@ -10,8 +10,6 @@ import {
   ChevronDown,
   Video,
   BarChart3,
-  Smartphone,
-  Users,
   Shield,
   Zap,
   Home,
@@ -28,6 +26,14 @@ import {
   Trophy,
   Minus,
   Plus,
+  BellRing,
+  WifiOff,
+  UsersRound,
+  Gauge,
+  MonitorPlay,
+  Radio,
+  Gavel,
+  Award,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { planOrder, featureOrder, planFeatures, adRevenueSharePercent, type FeatureAccess } from "@/lib/plans";
@@ -58,7 +64,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Free offline cricket scoring with safe sync, split scoring duties, up to 16 phone cameras, live scoreboards, league tables, club office and websites. Club, League and video plans.",
+          "Free offline cricket scoring with safe sync, split scoring duties, live scores and alerts for fans, ground big screens, league hubs, club office, umpires, club websites and up to 16 phone cameras. Club, League and video plans.",
       },
       { property: "og:title", content: "CricLume — See every ball. Shape every game." },
       {
@@ -94,8 +100,24 @@ const tabMeta: { id: TabId; icon: typeof Home; key: keyof Content["nav"] }[] = [
   { id: "login", icon: Play, key: "login" },
 ];
 
-const featureIcons = [Zap, Video, Activity, BarChart3, Smartphone, Users, Eye];
-const workflowIcons = [Zap, Video, Users];
+const featureIcons = [
+  Zap,
+  Video,
+  BellRing,
+  WifiOff,
+  UsersRound,
+  Activity,
+  BarChart3,
+  Gauge,
+  MonitorPlay,
+  Radio,
+  Trophy,
+  Building2,
+  Gavel,
+  Award,
+  Globe,
+];
+const workflowIcons = [Zap, BellRing, Building2];
 /** Same order as t.screensTab.items. Real CricLume screens captured from a sample club match. */
 const screenShots: ScreenShot[] = [
   { src: shotGroundScore, w: 1600, h: 900, kind: "tv", cat: "screens" },
@@ -286,7 +308,7 @@ function Header({
 
 function HomeTab({ onNavigate, region }: { onNavigate: (t: TabId) => void; region: Region }) {
   const { t } = useI18n();
-  const highlights = [0, 1, 6];
+  const highlights = [3, 2, 4, 1, 8, 10];
   const heroPlans = [
     { name: t.pricing.plans[0]!.name, price: t.pricing.free, period: t.pricing.plans[0]!.period, icon: Zap },
     { name: t.pricing.plans[1]!.name, price: region.clubPrice, period: region.period, icon: Building2, featured: true },

@@ -31,3 +31,12 @@ test("plan cards state the ad share each tier earns, in every language", () => {
     assert.ok(league!.perks.some((p) => /criclume\.com/.test(p)), `${language}: League card offers the free criclume.com address`);
   }
 });
+
+test("every language lists the same features and FAQs", () => {
+  const all = Object.values(languages);
+  for (const copy of all) {
+    assert.equal(copy.features.length, all[0]!.features.length);
+    assert.equal(copy.faq.items.length, all[0]!.faq.items.length);
+    assert.equal(copy.featuresTab.alsoItems.length, all[0]!.featuresTab.alsoItems.length);
+  }
+});

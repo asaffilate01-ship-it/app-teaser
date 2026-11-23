@@ -21,16 +21,16 @@ export const en = {
     previewLabel: "Example scorecard",
     kicker: "Cricket scoring, video and club platform",
     featuresLabel: "Everything in one app",
-    features: ["Offline scoring with safe sync", "Split scoring duties", "Up to 16 phone cameras", "Win predictor & ball-by-ball text", "Live scoreboards & phone alerts", "Ground big screen & stream overlay", "League hub & live tables", "Rain rules incl. DLS", "Club office, fees & bookings", "Club websites", "Awards & scouting reports", "Light & dark mode"],
+    features: ["Offline scoring with safe sync", "Split scoring duties", "Up to 16 phone cameras", "Win predictor & ball-by-ball text", "Live scoreboards & phone alerts", "Ground big screen & stream overlay", "League hub & live tables", "Rain rules incl. DLS", "Club office, fees & bookings", "Club websites", "Awards & scouting reports", "Light & dark mode", "Live scores page for fans", "Umpire panels & results desk"],
     plansLabel: "Plans",
     addonName: "Video add-on",
     planNotes: ["Free · basic offline scoring · ads", "Full analytics & club office · 30% ad share", "Whole competition · own club website", "Up to 16 cameras, streaming · 50% ad share"],
     plansCta: "Compare plans",
   },
   stats: [
-    { k: "Ball-by-ball", v: "Runs, wickets and extras" },
-    { k: "On-device", v: "Scoring without a signal" },
-    { k: "Video review", v: "Frame-by-frame tools" },
+    { k: "Offline-first", v: "Scores sync in the right order" },
+    { k: "Up to 16", v: "Phone cameras per match" },
+    { k: "Local prices", v: "In your country's currency" },
   ],
   home: {
     workflowKicker: "How CricLume works",
@@ -38,15 +38,15 @@ export const en = {
     workflowSteps: [
       {
         title: "Score the match",
-        body: "Record runs, wickets, extras and corrections on your device, including during temporary signal loss.",
+        body: "Named scorers record every ball on one phone or split the job between several. It keeps working without signal and syncs in the right order.",
       },
       {
-        title: "Review recorded footage",
-        body: "Open videos on your device to use slow motion, frame stepping and drawing tools during coaching review.",
+        title: "Share it live",
+        body: "Fans follow on the Live scores page, the public scoreboard or the ground big screen, with alerts for wickets, boundaries, rain delays and results.",
       },
       {
-        title: "Organise your club",
-        body: "Use the private club workspace for teams and fixtures. Connected services require an authorised setup.",
+        title: "Run the club",
+        body: "Fees, bookings, selection, availability, travel, umpires and your club website — each person sees only what their role allows.",
       },
     ],
     matchDayKicker: "Match day",
@@ -80,37 +80,69 @@ export const en = {
     },
     {
       title: "Multi-phone camera room",
-      body: "Pair up to 16 phones or the club's own cameras per match — behind the bowler, side-on, behind the keeper or in the nets — and keep every fixed angle linked to the ball it captured.",
+      body: "With the video add-on, pair up to 16 phones or the club's own cameras per match at fixed spots — behind the bowler, side-on, behind the keeper — and keep every angle linked to the ball it captured.",
+    },
+    {
+      title: "Live scores for fans",
+      body: "The public Live scores page shows every public match by country, region and competition, with pop-up alerts for wickets, fours, sixes, rain delays and results.",
+    },
+    {
+      title: "Offline-first scoring",
+      body: "Every ball is saved on the phone first and sent in the right order when the signal returns — even an innings started with no signal.",
+    },
+    {
+      title: "Split scoring duties",
+      body: "Only named scorers can score. Share the job: one phone for batting & runs, another for bowling & fielding, another for video, with a lead scorer in charge.",
     },
     {
       title: "Coaching review",
-      body: "Slow motion, frame stepping, angle switching, zoom and drawing tools, with two synced angles side by side.",
+      body: "With the video add-on: slow motion, frame stepping, angle switching, zoom and drawing tools, with two synced angles side by side.",
     },
     {
-      title: "Live scoreboards",
-      body: "Share a live scoreboard with run rate, win chances, partnerships, fall of wickets and ball-by-ball text.",
+      title: "Match analytics",
+      body: "Wagon wheels on a field of 30+ positions, pitch maps, Manhattans, worms, partnerships and run rate against the required rate.",
     },
     {
-      title: "Desktop and mobile",
-      body: "Score on a phone at the boundary or a laptop in the pavilion. Every ball is saved offline and synced when the signal returns.",
+      title: "Win predictor & commentary",
+      body: "Live win chances from score, wickets, balls left and conditions, with ball-by-ball text written automatically and optional AI over summaries.",
     },
     {
-      title: "Clubs, teams and players",
-      body: "Organisations, competitions, teams, players and grounds modelled from the ground up for season-long history.",
+      title: "Ground big screen",
+      body: "Put the scoreboard on a TV or LED screen at the ground, rotating through score, batting, bowling, Manhattan, worm and run chase — automatic or run from a phone.",
     },
     {
-      title: "Share live scoring",
-      body: "Leagues and clubs choose whether live scoring is private, shared with the opposition or league, or public for supporters.",
+      title: "Live streaming",
+      body: "With the video add-on, stream to YouTube, Facebook or TikTok using free OBS, your camera angles and a live score overlay.",
+    },
+    {
+      title: "League hub",
+      body: "Every live match side by side, live league placings, a results desk where results are signed off, fixtures, season stats, milestones and head-to-heads.",
+    },
+    {
+      title: "Club office",
+      body: "Member fees by bank or wallet transfer with a reference, ground and nets bookings, team selection, availability, events, travel with safe junior rides, kit and equipment.",
+    },
+    {
+      title: "Umpire panels",
+      body: "Club and league umpire panels, paid or voluntary, with appointments, required checks, availability, expenses and each umpire's own dashboard.",
+    },
+    {
+      title: "Awards & scouting",
+      body: "Player of the match and season awards, player profiles, and scouting reports coaches can share with bigger clubs — with consent, and they expire.",
+    },
+    {
+      title: "Club websites",
+      body: "A public club website with live scores, fixtures, results, news and sponsors. With the League plan, on your own domain or a free yourclub.criclume.com address.",
     },
   ],
   featuresTab: {
     kicker: "Platform",
     title: "Features",
     intro:
-      "Scoring, camera rooms, live scoreboards, league hubs, coaching review and scouting reports — everything a club and league needs in one place.",
+      "Scoring that works offline, live scores and alerts for fans, ground big screens, league hubs, club office, umpires, websites, camera rooms and coaching review — everything a club and league needs in one place.",
     watchTitle: "Who can watch live",
     watchBody:
-      "Private, opposition, league and public viewing rules require a configured club cloud workspace; they are not features of the device-only scorer.",
+      "Each match can be private, shared with the opposition, shared with the league or public. Public matches appear on the Live scores page without player names, and any delay your club sets still applies.",
     watchOptions: [
       { t: "Club only", d: "Scorers, coaches and members of your own club." },
       { t: "Opposition club", d: "The other team's staff and players follow the same live feed." },
@@ -125,11 +157,16 @@ export const en = {
     ],
     alsoTitle: "Also included",
     alsoItems: [
-      "Field zones, fielder selection and delivery timeline",
-      "Undo on any ball, with a full audit of edits",
-      "On-device slow motion, frame stepping and drawing tools",
-      "Competitions, innings and deliveries stored per club",
-      "Demo match data so you can trial before onboarding",
+      "Tap-the-field shot zones with 30+ fielding positions, for left- and right-handers",
+      "Undo on any ball, with a full record of edits",
+      "Rain rules: average run rate, most productive overs, DLS from official inputs or a manual target",
+      "Stop and resume play for rain or bad light — fans are told straight away",
+      "Multi-day matches with stumps and time-up draws",
+      "Squad import from a spreadsheet",
+      "Scorecards shared as an image, PDF or social post",
+      "Install on any phone from the browser — works offline",
+      "Light and dark mode, in five languages",
+      "Prices shown in your country's currency",
     ],
   },
   screensTab: {
@@ -306,6 +343,34 @@ export const en = {
         q: "Can our club website use our own domain?",
         a: "Yes, on the League plan. Your club website runs at your own address — like yourclub.com — with your logo and colours first and a small “powered by CricLume” mark. Request it in Website → Own domain; we set it up, show you the records to add with your domain provider, and secure it with https. No domain? Take a free address like yourclub.criclume.com instead — nothing to buy, we set it up. Other plans use the free criclume.com/club/your-name address.",
       },
+      {
+        q: "Where can fans follow live scores?",
+        a: "On the Live scores page at criclume.com/live. Filter by country, region or competition, follow several matches at once and get alerts for wickets, fours, sixes, rain delays, innings breaks and results. Only matches a club has made public appear, without player names.",
+      },
+      {
+        q: "Can more than one person score a match?",
+        a: "Yes. Only signed-in scorers named for that match can score. A club can split the job — batting & runs on one phone, bowling & fielding on another, video on a third — with a lead scorer in charge, and they never overwrite each other.",
+      },
+      {
+        q: "Can we stream our matches?",
+        a: "Yes, with the video add-on. Use free OBS with your camera angles and the CricLume live score overlay to stream to YouTube, Facebook or TikTok.",
+      },
+      {
+        q: "What does the club office do?",
+        a: "It runs the club side: member fees paid by bank or mobile-wallet transfer with a reference and confirmed by the treasurer, ground and nets bookings, team selection, availability, events, travel and kit. Each person only sees what their role allows.",
+      },
+      {
+        q: "Can we manage umpires?",
+        a: "Yes. Clubs and leagues keep an umpire panel, paid or voluntary, with the checks each umpire needs. Umpires get their own dashboard for availability, appointments, travel and payments.",
+      },
+      {
+        q: "Can coaches send scouting reports?",
+        a: "Yes. A coach can share a report on a player's strengths, scoring areas, bowling and fielding with a bigger club through a private link. Reports need consent and expire.",
+      },
+      {
+        q: "Which prices will I see?",
+        a: "The prices for your country, in your currency. If your country isn't listed, you'll see prices in GBP. You can switch country on the pricing page.",
+      },
     ],
   },
   login: {
@@ -321,7 +386,7 @@ export const en = {
     copyright: "CricLume. See every ball. Shape every game.",
   },
   footer: {
-    desc: "Ball-by-ball scoring, multi-camera video, live scoreboards and league tools for cricket clubs and leagues.",
+    desc: "Offline ball-by-ball scoring, live scores and alerts, ground big screens, league hubs, club office and multi-camera video for cricket clubs and leagues.",
     explore: "Explore",
     access: "Access",
     accessLine1: "Scoring is open to everyone",
@@ -358,32 +423,32 @@ export const de: Content = {
     previewLabel: "Beispiel-Spielstand",
     kicker: "Cricket-Scoring, Video & Vereinsplattform",
     featuresLabel: "Alles in einer App",
-    features: ["Offline-Scoring mit sicherer Synchronisierung", "Geteilte Scoring-Aufgaben", "Bis zu 16 Handykameras", "Siegchancen & Ball-für-Ball-Text", "Live-Anzeigetafeln & Handy-Alarme", "Stadionbildschirm & Stream-Overlay", "Liga-Hub & Live-Tabellen", "Regenregeln inkl. DLS", "Vereinsbüro, Beiträge & Buchungen", "Vereinswebsites", "Auszeichnungen & Scouting-Berichte", "Hell- & Dunkelmodus"],
+    features: ["Offline-Scoring mit sicherer Synchronisierung", "Geteilte Scoring-Aufgaben", "Bis zu 16 Handykameras", "Siegchancen & Ball-für-Ball-Text", "Live-Anzeigetafeln & Handy-Alarme", "Stadionbildschirm & Stream-Overlay", "Liga-Hub & Live-Tabellen", "Regenregeln inkl. DLS", "Vereinsbüro, Beiträge & Buchungen", "Vereinswebsites", "Auszeichnungen & Scouting-Berichte", "Hell- & Dunkelmodus", "Live-Scores-Seite für Fans", "Schiedsrichter & Ergebnis-Desk"],
     plansLabel: "Pläne",
     addonName: "Video-Zusatz",
     planNotes: ["Kostenlos · Offline-Scoring · Werbung", "Volle Analysen & Vereinsbüro · 30 % Werbeanteil", "Ganzer Wettbewerb · eigene Vereinswebsite", "Bis zu 16 Kameras, Streaming · 50 % Werbeanteil"],
     plansCta: "Pläne vergleichen",
   },
   stats: [
-    { k: "Ball für Ball", v: "Runs, Extras und Wickets" },
-    { k: "Auf dem Gerät", v: "Scoring ohne Empfang" },
-    { k: "Videoanalyse", v: "Bild-für-Bild-Werkzeuge" },
+    { k: "Offline zuerst", v: "Ergebnisse synchronisieren in der richtigen Reihenfolge" },
+    { k: "Bis zu 16", v: "Handykameras pro Spiel" },
+    { k: "Lokale Preise", v: "In der Währung deines Landes" },
   ],
   home: {
     workflowKicker: "So funktioniert CricLume",
     workflowTitle: "Vom ersten Ball zur nächsten Trainingseinheit",
     workflowSteps: [
       {
-        title: "Spiel erfassen",
-        body: "Erfasse Runs, Wickets, Extras und Korrekturen auf deinem Gerät, auch bei kurzzeitigem Netzausfall.",
+        title: "Spiel scoren",
+        body: "Eingetragene Scorer erfassen jeden Ball auf einem Handy oder teilen die Arbeit auf mehrere auf. Es funktioniert ohne Netz und synchronisiert in der richtigen Reihenfolge.",
       },
       {
-        title: "Aufnahmen prüfen",
-        body: "Prüfe lokale Videos in Zeitlupe, Bild für Bild und mit Zeichenwerkzeugen.",
+        title: "Live teilen",
+        body: "Fans folgen auf der Live-Scores-Seite, der öffentlichen Anzeigetafel oder der Großleinwand am Platz – mit Hinweisen zu Wickets, Boundaries, Regenpausen und Ergebnissen.",
       },
       {
-        title: "Verein organisieren",
-        body: "Nutze den privaten Vereinsbereich für Teams und Spiele. Cloud-Dienste müssen autorisiert eingerichtet sein.",
+        title: "Den Verein führen",
+        body: "Beiträge, Buchungen, Aufstellung, Verfügbarkeit, Fahrten, Schiedsrichter und eure Vereinswebsite – jede Person sieht nur, was ihre Rolle erlaubt.",
       },
     ],
     matchDayKicker: "Spieltag",
@@ -412,42 +477,74 @@ export const de: Content = {
   },
   features: [
     {
-      title: "Schnelles Scoring Ball für Ball",
-      body: "Runs, Dots, Wides, No-Balls, Byes, Leg-Byes, Strafen und jede Art von Dismissal — mit Rückgängig-Funktion und Zeitstempel für jeden Ball.",
+      title: "Schnelles Ball-für-Ball-Scoring",
+      body: "Runs, Dot Balls, Wides, No-Balls, Byes, Leg-Byes, Strafruns und jede Aus-Art – mit Rückgängig und Zeitstempel bei jedem Ball.",
     },
     {
       title: "Kameraraum mit mehreren Handys",
-      body: "Verbinde bis zu 16 Handys oder die eigenen Kameras des Clubs pro Spiel – hinter dem Bowler, seitlich, hinter dem Keeper oder im Netz – und verknüpfe jeden festen Winkel mit dem Ball, den er zeigt.",
+      body: "Mit dem Video-Add-on koppelt ihr bis zu 16 Handys oder eigene Vereinskameras pro Spiel an festen Plätzen – hinter dem Bowler, seitlich, hinter dem Keeper – und jeder Blickwinkel bleibt mit seinem Ball verknüpft.",
     },
     {
-      title: "Trainingsanalyse",
-      body: "Zeitlupe, Einzelbildschritte, Winkelwechsel, Zoom und Zeichenwerkzeuge, mit zwei synchronen Winkeln nebeneinander.",
+      title: "Live-Scores für Fans",
+      body: "Die öffentliche Live-Scores-Seite zeigt jedes öffentliche Spiel nach Land, Region und Wettbewerb – mit Hinweisen zu Wickets, Vieren, Sechsen, Regenpausen und Ergebnissen.",
     },
     {
-      title: "Live-Anzeigetafeln",
-      body: "Teile eine Live-Anzeigetafel mit Run-Rate, Siegchancen, Partnerschaften, Wicket-Verlauf und Ball-für-Ball-Text.",
+      title: "Scoring offline zuerst",
+      body: "Jeder Ball wird zuerst auf dem Handy gespeichert und in der richtigen Reihenfolge gesendet, sobald wieder Netz da ist – sogar ein ohne Netz begonnenes Innings.",
     },
     {
-      title: "Desktop und Mobil",
-      body: "Scoring per Handy am Spielfeldrand oder Laptop im Clubhaus. Jeder Ball wird offline gespeichert und bei Empfang synchronisiert.",
+      title: "Geteilte Scoring-Aufgaben",
+      body: "Nur eingetragene Scorer dürfen scoren. Teilt die Arbeit: ein Handy für Schlag & Runs, eines für Bowling & Feldspiel, eines für Video, mit einem Haupt-Scorer.",
     },
     {
-      title: "Clubs, Teams und Spieler",
-      body: "Organisationen, Wettbewerbe, Teams, Spieler und Plätze — von Grund auf für eine ganze Saison modelliert.",
+      title: "Trainer-Review",
+      body: "Mit dem Video-Add-on: Zeitlupe, Einzelbilder, Winkelwechsel, Zoom und Zeichenwerkzeuge, mit zwei synchronen Blickwinkeln nebeneinander.",
     },
     {
-      title: "Live-Scoring teilen",
-      body: "Ligen und Clubs entscheiden, wer ein Spiel in Echtzeit verfolgt — der Gegner, Fans, die Ligaverwaltung oder ein öffentlicher Link.",
+      title: "Spielanalysen",
+      body: "Wagon Wheels auf über 30 Feldpositionen, Pitch Maps, Manhattans, Worms, Partnerschaften und Run-Rate gegen die benötigte Rate.",
+    },
+    {
+      title: "Siegchancen & Kommentar",
+      body: "Live-Siegchancen aus Stand, Wickets, verbleibenden Bällen und Bedingungen, dazu automatischer Ball-für-Ball-Text und optionale KI-Over-Zusammenfassungen.",
+    },
+    {
+      title: "Großleinwand am Platz",
+      body: "Die Anzeigetafel auf einem TV oder LED-Bildschirm am Platz, wechselnd zwischen Stand, Schlag, Bowling, Manhattan, Worm und Run Chase – automatisch oder per Handy gesteuert.",
+    },
+    {
+      title: "Live-Streaming",
+      body: "Mit dem Video-Add-on streamt ihr mit kostenlosem OBS, euren Kamerawinkeln und einem Live-Score-Overlay zu YouTube, Facebook oder TikTok.",
+    },
+    {
+      title: "Liga-Hub",
+      body: "Alle Live-Spiele nebeneinander, Live-Tabellenplätze, ein Ergebnis-Desk zur Bestätigung, Spielpläne, Saisonstatistiken, Meilensteine und direkte Vergleiche.",
+    },
+    {
+      title: "Vereinsbüro",
+      body: "Mitgliedsbeiträge per Bank- oder Wallet-Überweisung mit Referenz, Platz- und Netzbuchungen, Aufstellung, Verfügbarkeit, Termine, Fahrten mit sicheren Jugendfahrten, Kleidung und Ausrüstung.",
+    },
+    {
+      title: "Schiedsrichter-Panels",
+      body: "Schiedsrichter-Panels für Vereine und Ligen, bezahlt oder ehrenamtlich, mit Ansetzungen, Pflichtnachweisen, Verfügbarkeit, Spesen und eigenem Dashboard für jeden Schiedsrichter.",
+    },
+    {
+      title: "Auszeichnungen & Scouting",
+      body: "Spieler des Spiels und der Saison, Spielerprofile und Scouting-Berichte, die Trainer mit größeren Vereinen teilen können – mit Einwilligung und Ablaufdatum.",
+    },
+    {
+      title: "Vereinswebsites",
+      body: "Eine öffentliche Vereinswebsite mit Live-Scores, Spielplan, Ergebnissen, News und Sponsoren. Im Liga-Tarif auf eurer eigenen Domain oder einer kostenlosen Adresse deinverein.criclume.com.",
     },
   ],
   featuresTab: {
     kicker: "Plattform",
     title: "Funktionen",
     intro:
-      "Scoring, Kameraräume, Live-Anzeigetafeln, Liga-Zentrale, Trainingsanalyse und Scouting-Berichte – alles, was Club und Liga brauchen, an einem Ort.",
+      "Scoring, das offline funktioniert, Live-Scores und Hinweise für Fans, Großleinwände, Liga-Hubs, Vereinsbüro, Schiedsrichter, Websites, Kameraräume und Trainer-Review – alles, was Verein und Liga brauchen, an einem Ort.",
     watchTitle: "Wer live zuschauen kann",
     watchBody:
-      "Private, gegnerische, Liga- und öffentliche Ansichten brauchen einen eingerichteten Club-Cloud-Zugang und sind nicht Teil des lokalen Scorers.",
+      "Jedes Spiel kann privat sein, mit dem Gegner oder der Liga geteilt werden oder öffentlich sein. Öffentliche Spiele erscheinen ohne Spielernamen auf der Live-Scores-Seite, und eine vom Verein eingestellte Verzögerung gilt weiterhin.",
     watchOptions: [
       { t: "Nur Club", d: "Scorer, Trainer und Mitglieder des eigenen Clubs." },
       {
@@ -465,11 +562,16 @@ export const de: Content = {
     ],
     alsoTitle: "Ebenfalls enthalten",
     alsoItems: [
-      "Feldzonen, Fielder-Auswahl und Ball-Timeline",
-      "Rückgängig bei jedem Ball, mit vollständiger Änderungshistorie",
-      "Lokale Videoanalyse mit Zeitlupe und Zeichenwerkzeugen",
-      "Wettbewerbe, Innings und Bälle pro Club gespeichert",
-      "Demo-Spieldaten zum Testen vor dem Onboarding",
+      "Schlagzonen per Tippen aufs Feld mit über 30 Feldpositionen, für Links- und Rechtshänder",
+      "Jeden Ball rückgängig machen, mit vollständigem Änderungsprotokoll",
+      "Regenregeln: durchschnittliche Run-Rate, ertragreichste Overs, DLS aus offiziellen Werten oder manuelles Ziel",
+      "Spiel bei Regen oder schlechtem Licht unterbrechen und fortsetzen – Fans werden sofort informiert",
+      "Mehrtägige Spiele mit Stumps und Unentschieden bei Zeitablauf",
+      "Kader-Import aus einer Tabelle",
+      "Scorecards als Bild, PDF oder Social-Media-Beitrag teilen",
+      "Auf jedem Handy aus dem Browser installieren – funktioniert offline",
+      "Hell- und Dunkelmodus, in fünf Sprachen",
+      "Preise in der Währung deines Landes",
     ],
   },
   screensTab: {
@@ -648,6 +750,34 @@ export const de: Content = {
         q: "Kann unsere Vereinswebsite eine eigene Domain nutzen?",
         a: "Ja, im League-Tarif. Ihre Vereinswebsite läuft unter Ihrer eigenen Adresse – etwa ihrverein.de – mit Ihrem Logo und Ihren Farben im Vordergrund und einem kleinen „powered by CricLume“-Hinweis. Beantragen Sie sie unter Website → Eigene Domain; wir richten alles ein, zeigen Ihnen die Einträge für Ihren Domain-Anbieter und sichern sie mit https. Keine Domain? Nehmen Sie stattdessen eine kostenlose Adresse wie ihrverein.criclume.com – nichts zu kaufen, wir richten sie ein. Andere Tarife nutzen die kostenlose Adresse criclume.com/club/ihr-name.",
       },
+      {
+        q: "Wo können Fans Live-Scores verfolgen?",
+        a: "Auf der Live-Scores-Seite unter criclume.com/live. Filtert nach Land, Region oder Wettbewerb, verfolgt mehrere Spiele gleichzeitig und erhaltet Hinweise zu Wickets, Vieren, Sechsen, Regenpausen, Innings-Pausen und Ergebnissen. Es erscheinen nur Spiele, die ein Verein öffentlich gemacht hat, ohne Spielernamen.",
+      },
+      {
+        q: "Können mehrere Personen ein Spiel scoren?",
+        a: "Ja. Nur angemeldete Scorer, die für dieses Spiel eingetragen sind, dürfen scoren. Ein Verein kann die Arbeit aufteilen – Schlag & Runs auf einem Handy, Bowling & Feldspiel auf einem anderen, Video auf einem dritten – mit einem Haupt-Scorer, und niemand überschreibt den anderen.",
+      },
+      {
+        q: "Können wir unsere Spiele streamen?",
+        a: "Ja, mit dem Video-Add-on. Nutzt kostenloses OBS mit euren Kamerawinkeln und dem CricLume-Live-Score-Overlay, um zu YouTube, Facebook oder TikTok zu streamen.",
+      },
+      {
+        q: "Was macht das Vereinsbüro?",
+        a: "Es regelt die Vereinsseite: Mitgliedsbeiträge per Bank- oder Wallet-Überweisung mit Referenz, vom Kassenwart bestätigt, Platz- und Netzbuchungen, Aufstellung, Verfügbarkeit, Termine, Fahrten und Kleidung. Jede Person sieht nur, was ihre Rolle erlaubt.",
+      },
+      {
+        q: "Können wir Schiedsrichter verwalten?",
+        a: "Ja. Vereine und Ligen führen ein Schiedsrichter-Panel, bezahlt oder ehrenamtlich, mit den nötigen Nachweisen. Schiedsrichter erhalten ein eigenes Dashboard für Verfügbarkeit, Ansetzungen, Anreise und Zahlungen.",
+      },
+      {
+        q: "Können Trainer Scouting-Berichte senden?",
+        a: "Ja. Ein Trainer kann einen Bericht über Stärken, Schlagzonen, Bowling und Feldspiel eines Spielers per privatem Link mit einem größeren Verein teilen. Berichte brauchen eine Einwilligung und laufen ab.",
+      },
+      {
+        q: "Welche Preise sehe ich?",
+        a: "Die Preise für dein Land, in deiner Währung. Ist dein Land nicht aufgeführt, siehst du Preise in GBP. Auf der Preisseite kannst du das Land wechseln.",
+      },
     ],
   },
   login: {
@@ -663,7 +793,7 @@ export const de: Content = {
     copyright: "CricLume. Jeder Ball. Jeder Vorteil.",
   },
   footer: {
-    desc: "Ball-für-Ball-Scoring, Video mit mehreren Kameras, Live-Anzeigetafeln und Liga-Tools für Cricket-Clubs und -Ligen.",
+    desc: "Offline-Ball-für-Ball-Scoring, Live-Scores und Hinweise, Großleinwände, Liga-Hubs, Vereinsbüro und Video mit mehreren Kameras für Cricket-Vereine und -Ligen.",
     explore: "Entdecken",
     access: "Zugang",
     accessLine1: "Scoring steht allen offen",
@@ -698,32 +828,32 @@ export const nl: Content = {
     previewLabel: "Voorbeeldscore",
     kicker: "Cricketscores, video & clubplatform",
     featuresLabel: "Alles in één app",
-    features: ["Offline scoren met veilige synchronisatie", "Gedeelde scoortaken", "Tot 16 telefooncamera's", "Winkansen & bal-voor-bal tekst", "Live scoreborden & meldingen", "Groot scherm & stream-overlay", "Competitiehub & live standen", "Regenregels incl. DLS", "Clubkantoor, contributie & reserveringen", "Clubwebsites", "Prijzen & scoutingrapporten", "Lichte & donkere modus"],
+    features: ["Offline scoren met veilige synchronisatie", "Gedeelde scoortaken", "Tot 16 telefooncamera's", "Winkansen & bal-voor-bal tekst", "Live scoreborden & meldingen", "Groot scherm & stream-overlay", "Competitiehub & live standen", "Regenregels incl. DLS", "Clubkantoor, contributie & reserveringen", "Clubwebsites", "Prijzen & scoutingrapporten", "Lichte & donkere modus", "Live scores-pagina voor fans", "Scheidsrechters & uitslagenbalie"],
     plansLabel: "Abonnementen",
     addonName: "Video-uitbreiding",
     planNotes: ["Gratis · offline basis scoren · advertenties", "Volledige analyses & clubkantoor · 30% advertentie-aandeel", "Hele competitie · eigen clubwebsite", "Tot 16 camera's, streaming · 50% advertentie-aandeel"],
     plansCta: "Abonnementen vergelijken",
   },
   stats: [
-    { k: "Bal voor bal", v: "Runs, extra's en wickets" },
-    { k: "Op apparaat", v: "Scoren zonder bereik" },
-    { k: "Videoreview", v: "Beeld voor beeld" },
+    { k: "Offline eerst", v: "Scores synchroniseren in de juiste volgorde" },
+    { k: "Tot 16", v: "Telefooncamera's per wedstrijd" },
+    { k: "Lokale prijzen", v: "In de valuta van jouw land" },
   ],
   home: {
     workflowKicker: "Zo werkt CricLume",
     workflowTitle: "Van de eerste bal tot de volgende training",
     workflowSteps: [
       {
-        title: "Wedstrijd scoren",
-        body: "Leg runs, wickets, extra's en correcties vast op je apparaat, ook bij tijdelijke verbindingsproblemen.",
+        title: "Scoor de wedstrijd",
+        body: "Aangewezen scorers leggen elke bal vast op één telefoon of verdelen het werk over meerdere. Het werkt zonder bereik en synchroniseert in de juiste volgorde.",
       },
       {
-        title: "Opnamen terugkijken",
-        body: "Bekijk lokale video's in slow motion, beeld voor beeld en met tekengereedschap.",
+        title: "Deel het live",
+        body: "Fans volgen via de Live scores-pagina, het openbare scorebord of het grote scherm bij het veld, met meldingen bij wickets, boundaries, regenpauzes en uitslagen.",
       },
       {
-        title: "Club organiseren",
-        body: "Gebruik de privéclubomgeving voor teams en wedstrijden. Clouddiensten vereisen een toegestane inrichting.",
+        title: "Leid de club",
+        body: "Contributie, boekingen, selectie, beschikbaarheid, vervoer, scheidsrechters en je clubwebsite – iedereen ziet alleen wat zijn rol toestaat.",
       },
     ],
     matchDayKicker: "Wedstrijddag",
@@ -753,42 +883,74 @@ export const nl: Content = {
   },
   features: [
     {
-      title: "Snel scoren bal voor bal",
-      body: "Runs, dots, wides, no-balls, byes, leg-byes, straffen en elk type dismissal — met ongedaan maken en tijdstempels op elke bal.",
+      title: "Snel bal-voor-bal scoren",
+      body: "Runs, dot balls, wides, no-balls, byes, leg-byes, strafruns en elke manier van uitgaan – met ongedaan maken en tijdstempels bij elke bal.",
     },
     {
-      title: "Camerakamer met meerdere telefoons",
-      body: "Koppel tot 16 telefoons of de eigen camera's van de club per wedstrijd – achter de bowler, van opzij, achter de keeper of in de nets – en koppel elke vaste hoek aan de bal die hij filmde.",
+      title: "Cameraruimte met meerdere telefoons",
+      body: "Met de video-add-on koppel je tot 16 telefoons of eigen clubcamera's per wedstrijd op vaste plekken – achter de bowler, opzij, achter de keeper – en elke hoek blijft gekoppeld aan zijn bal.",
     },
     {
-      title: "Coachingsanalyse",
-      body: "Slow motion, beeld-voor-beeld, hoeken wisselen, zoom en tekengereedschap, met twee gesynchroniseerde hoeken naast elkaar.",
+      title: "Live scores voor fans",
+      body: "De openbare Live scores-pagina toont elke openbare wedstrijd per land, regio en competitie, met meldingen bij wickets, vieren, zessen, regenpauzes en uitslagen.",
     },
     {
-      title: "Live scoreborden",
-      body: "Deel een live scorebord met run rate, winkansen, partnerships, val van wickets en bal-voor-bal tekst.",
+      title: "Offline-first scoren",
+      body: "Elke bal wordt eerst op de telefoon opgeslagen en in de juiste volgorde verstuurd zodra er weer bereik is – zelfs een innings die zonder bereik begon.",
     },
     {
-      title: "Desktop en mobiel",
-      body: "Scoor met een telefoon langs de lijn of een laptop in het clubhuis. Elke bal wordt offline bewaard en gesynchroniseerd zodra er bereik is.",
+      title: "Gedeelde scoretaken",
+      body: "Alleen aangewezen scorers kunnen scoren. Verdeel het werk: één telefoon voor slag & runs, een andere voor bowling & veldwerk, een derde voor video, met een hoofdscorer.",
     },
     {
-      title: "Clubs, teams en spelers",
-      body: "Organisaties, competities, teams, spelers en velden, van de grond af opgezet voor een heel seizoen.",
+      title: "Coachingreview",
+      body: "Met de video-add-on: slow motion, beeld voor beeld, hoek wisselen, zoom en tekentools, met twee gesynchroniseerde hoeken naast elkaar.",
     },
     {
-      title: "Live scoren delen",
-      body: "Competities en clubs bepalen wie een wedstrijd live volgt — de tegenstander, supporters, het competitiebureau of een openbare link.",
+      title: "Wedstrijdanalyses",
+      body: "Wagon wheels op een veld met 30+ posities, pitch maps, Manhattans, worms, partnerships en run rate tegenover de benodigde rate.",
+    },
+    {
+      title: "Winstvoorspeller & commentaar",
+      body: "Live winkansen op basis van score, wickets, resterende ballen en omstandigheden, met automatisch bal-voor-bal commentaar en optionele AI-samenvattingen per over.",
+    },
+    {
+      title: "Groot scherm bij het veld",
+      body: "Zet het scorebord op een tv of ledscherm bij het veld, wisselend tussen score, slag, bowling, Manhattan, worm en run chase – automatisch of vanaf een telefoon.",
+    },
+    {
+      title: "Livestreamen",
+      body: "Met de video-add-on stream je naar YouTube, Facebook of TikTok met gratis OBS, je camerahoeken en een live-score-overlay.",
+    },
+    {
+      title: "Competitiehub",
+      body: "Alle live wedstrijden naast elkaar, live standen, een uitslagenbalie waar uitslagen worden bevestigd, speelschema's, seizoensstatistieken, mijlpalen en onderlinge duels.",
+    },
+    {
+      title: "Clubkantoor",
+      body: "Contributie per bank- of wallet-overboeking met kenmerk, veld- en netboekingen, teamselectie, beschikbaarheid, evenementen, vervoer met veilige jeugdritten, kleding en materiaal.",
+    },
+    {
+      title: "Scheidsrechterspanels",
+      body: "Scheidsrechterspanels voor clubs en competities, betaald of vrijwillig, met aanstellingen, verplichte checks, beschikbaarheid, onkosten en een eigen dashboard per scheidsrechter.",
+    },
+    {
+      title: "Prijzen & scouting",
+      body: "Speler van de wedstrijd en van het seizoen, spelersprofielen en scoutingrapporten die coaches met grotere clubs kunnen delen – met toestemming, en ze verlopen.",
+    },
+    {
+      title: "Clubwebsites",
+      body: "Een openbare clubwebsite met live scores, programma, uitslagen, nieuws en sponsors. Met het competitieabonnement op je eigen domein of een gratis jouwclub.criclume.com-adres.",
     },
   ],
   featuresTab: {
     kicker: "Platform",
     title: "Functies",
     intro:
-      "Scoren, cameraruimtes, live scoreborden, competitieoverzicht, coachingreview en scoutingrapporten – alles wat club en competitie nodig hebben op één plek.",
+      "Scoren dat offline werkt, live scores en meldingen voor fans, grote schermen, competitiehubs, clubkantoor, scheidsrechters, websites, cameraruimtes en coachingreview – alles wat een club en competitie nodig heeft op één plek.",
     watchTitle: "Wie live kan meekijken",
     watchBody:
-      "Privé-, tegenstander-, competitie- en openbare weergaven vragen een ingestelde clubcloud en zijn geen onderdeel van de lokale scorer.",
+      "Elke wedstrijd kan privé zijn, gedeeld met de tegenstander, gedeeld met de competitie of openbaar. Openbare wedstrijden verschijnen zonder spelersnamen op de Live scores-pagina, en een vertraging die je club instelt blijft gelden.",
     watchOptions: [
       { t: "Alleen club", d: "Scorers, coaches en leden van je eigen club." },
       { t: "Tegenstander", d: "Staf en spelers van het andere team volgen dezelfde live feed." },
@@ -803,11 +965,16 @@ export const nl: Content = {
     ],
     alsoTitle: "Ook inbegrepen",
     alsoItems: [
-      "Veldzones, fielderselectie en baltijdlijn",
-      "Ongedaan maken op elke bal, met volledige wijzigingshistorie",
-      "Spraaknotities en AI-analyse in de review",
-      "Competities, innings en ballen per club opgeslagen",
-      "Demowedstrijddata om te proberen vóór onboarding",
+      "Slagzones door op het veld te tikken, met 30+ veldposities, voor links- en rechtshandigen",
+      "Elke bal ongedaan maken, met een volledig overzicht van wijzigingen",
+      "Regenregels: gemiddelde run rate, productiefste overs, DLS uit officiële gegevens of een handmatig doel",
+      "Spel stilleggen en hervatten bij regen of slecht licht – fans horen het meteen",
+      "Meerdaagse wedstrijden met stumps en remise bij tijdsverloop",
+      "Selectie importeren uit een spreadsheet",
+      "Scorekaarten delen als afbeelding, pdf of social-mediabericht",
+      "Op elke telefoon installeren vanuit de browser – werkt offline",
+      "Lichte en donkere modus, in vijf talen",
+      "Prijzen in de valuta van jouw land",
     ],
   },
   screensTab: {
@@ -986,6 +1153,34 @@ export const nl: Content = {
         q: "Kan onze clubwebsite ons eigen domein gebruiken?",
         a: "Ja, met het League-abonnement. Je clubwebsite draait op je eigen adres – zoals jouwclub.nl – met jullie logo en kleuren voorop en een klein ‘powered by CricLume’-merkje. Vraag het aan via Website → Eigen domein; wij zetten het op, tonen de records voor je domeinprovider en beveiligen het met https. Geen domein? Neem dan een gratis adres zoals jouwclub.criclume.com – niets te kopen, wij zetten het op. Andere abonnementen gebruiken het gratis adres criclume.com/club/jouw-naam.",
       },
+      {
+        q: "Waar kunnen fans live scores volgen?",
+        a: "Op de Live scores-pagina op criclume.com/live. Filter op land, regio of competitie, volg meerdere wedstrijden tegelijk en krijg meldingen bij wickets, vieren, zessen, regenpauzes, inningswissels en uitslagen. Alleen wedstrijden die een club openbaar heeft gemaakt verschijnen, zonder spelersnamen.",
+      },
+      {
+        q: "Kunnen meerdere mensen een wedstrijd scoren?",
+        a: "Ja. Alleen ingelogde scorers die voor die wedstrijd zijn aangewezen kunnen scoren. Een club kan het werk verdelen – slag & runs op één telefoon, bowling & veldwerk op een andere, video op een derde – met een hoofdscorer, en ze overschrijven elkaar nooit.",
+      },
+      {
+        q: "Kunnen we onze wedstrijden streamen?",
+        a: "Ja, met de video-add-on. Gebruik gratis OBS met je camerahoeken en de CricLume-live-score-overlay om naar YouTube, Facebook of TikTok te streamen.",
+      },
+      {
+        q: "Wat doet het clubkantoor?",
+        a: "Het regelt de clubkant: contributie per bank- of wallet-overboeking met kenmerk, bevestigd door de penningmeester, veld- en netboekingen, teamselectie, beschikbaarheid, evenementen, vervoer en kleding. Iedereen ziet alleen wat zijn rol toestaat.",
+      },
+      {
+        q: "Kunnen we scheidsrechters beheren?",
+        a: "Ja. Clubs en competities houden een scheidsrechterspanel bij, betaald of vrijwillig, met de checks die elke scheidsrechter nodig heeft. Scheidsrechters krijgen een eigen dashboard voor beschikbaarheid, aanstellingen, reizen en betalingen.",
+      },
+      {
+        q: "Kunnen coaches scoutingrapporten sturen?",
+        a: "Ja. Een coach kan via een privélink een rapport over de sterke punten, scoringsgebieden, bowling en veldwerk van een speler delen met een grotere club. Rapporten vereisen toestemming en verlopen.",
+      },
+      {
+        q: "Welke prijzen zie ik?",
+        a: "De prijzen voor jouw land, in jouw valuta. Staat je land er niet tussen, dan zie je prijzen in GBP. Op de prijzenpagina kun je van land wisselen.",
+      },
     ],
   },
   login: {
@@ -1001,7 +1196,7 @@ export const nl: Content = {
     copyright: "CricLume. Elke bal. Elk voordeel.",
   },
   footer: {
-    desc: "Bal-voor-bal scoren, video met meerdere camera's, live scoreborden en competitietools voor cricketclubs en -competities.",
+    desc: "Offline bal-voor-bal scoren, live scores en meldingen, grote schermen, competitiehubs, clubkantoor en video met meerdere camera's voor cricketclubs en -competities.",
     explore: "Ontdek",
     access: "Toegang",
     accessLine1: "Scoren is voor iedereen toegankelijk",
@@ -1036,16 +1231,16 @@ export const af: Content = {
     previewLabel: "Voorbeeldtelbord",
     kicker: "Krieket-telling, video & klubplatform",
     featuresLabel: "Alles in een app",
-    features: ["Vanlyn telling met veilige sinkronisering", "Verdeelde tellingstake", "Tot 16 foonkameras", "Wenkanse & bal-vir-bal teks", "Regstreekse telborde & foonwaarskuwings", "Grondskerm & stroom-oorleg", "Ligasentrum & regstreekse punteleer", "Reënreëls insl. DLS", "Klubkantoor, fooie & besprekings", "Klubwebwerwe", "Toekennings & verkenningsverslae", "Lig- & donkermodus"],
+    features: ["Vanlyn telling met veilige sinkronisering", "Verdeelde tellingstake", "Tot 16 foonkameras", "Wenkanse & bal-vir-bal teks", "Regstreekse telborde & foonwaarskuwings", "Grondskerm & stroom-oorleg", "Ligasentrum & regstreekse punteleer", "Reënreëls insl. DLS", "Klubkantoor, fooie & besprekings", "Klubwebwerwe", "Toekennings & verkenningsverslae", "Lig- & donkermodus", "Regstreekse tellings vir ondersteuners", "Skeidsregters en uitslaetoonbank"],
     plansLabel: "Planne",
     addonName: "Video-byvoeging",
     planNotes: ["Gratis · basiese vanlyn telling · advertensies", "Volle ontleding en klubkantoor · 30% advertensie-aandeel", "Hele kompetisie · eie klubwebwerf", "Tot 16 kameras, stroming · 50% advertensie-aandeel"],
     plansCta: "Vergelyk planne",
   },
   stats: [
-    { k: "Bal vir bal", v: "Lopies, ekstras en paaltjies" },
-    { k: "Op toestel", v: "Telling sonder sein" },
-    { k: "Video-oorsig", v: "Raampie vir raampie" },
+    { k: "Vanlyn eerste", v: "Tellings sinkroniseer in die regte volgorde" },
+    { k: "Tot 16", v: "Foonkameras per wedstryd" },
+    { k: "Plaaslike pryse", v: "In jou land se geldeenheid" },
   ],
   home: {
     workflowKicker: "Hoe CricLume werk",
@@ -1053,15 +1248,15 @@ export const af: Content = {
     workflowSteps: [
       {
         title: "Teken die wedstryd aan",
-        body: "Teken lopies, paaltjies, ekstras en regstellings op jou toestel aan, selfs wanneer die sein kortliks wegval.",
+        body: "Aangewese tellers teken elke bal op een foon aan of verdeel die werk tussen verskeie. Dit werk sonder sein en sinkroniseer in die regte volgorde.",
       },
       {
-        title: "Hersien opnames",
-        body: "Kyk plaaslike video's in stadige aksie, raam vir raam, en gebruik tekengereedskap.",
+        title: "Deel dit regstreeks",
+        body: "Ondersteuners volg op die Regstreekse tellings-blad, die openbare telbord of die grootskerm by die veld, met kennisgewings vir paaltjies, grense, reënvertragings en uitslae.",
       },
       {
-        title: "Organiseer jou klub",
-        body: "Gebruik die private klubwerkruimte vir spanne en wedstryde. Wolkdienste vereis gemagtigde opstelling.",
+        title: "Bestuur die klub",
+        body: "Ledegeld, besprekings, spankeuse, beskikbaarheid, vervoer, skeidsregters en julle klubwebwerf – elke persoon sien net wat hul rol toelaat.",
       },
     ],
     matchDayKicker: "Wedstryddag",
@@ -1091,42 +1286,74 @@ export const af: Content = {
   },
   features: [
     {
-      title: "Vinnige bal-vir-bal aantekening",
-      body: "Lopies, dots, wides, no-balls, byes, leg-byes, strafpunte en elke uitboortipe — met ontdoen en tydstempels op elke bal.",
+      title: "Vinnige bal-vir-bal telling",
+      body: "Lopies, kolbal, wydes, foutballe, loslopies, beenloslopies, strafloopies en elke manier van uitgaan – met ontdoen en tydstempels op elke bal.",
     },
     {
-      title: "Kamerakamer met verskeie fone",
-      body: "Koppel tot 16 fone of die klub se eie kameras per wedstryd – agter die bouler, van die sykant, agter die paaltjiewagter of in die nette – en koppel elke vaste hoek aan die bal wat dit verfilm het.",
+      title: "Kamerakamer met veelvuldige fone",
+      body: "Met die videobyvoeging koppel julle tot 16 fone of die klub se eie kameras per wedstryd op vaste plekke – agter die bouler, van die kant, agter die paaltjiewagter – en elke hoek bly aan sy bal gekoppel.",
     },
     {
-      title: "Afrigtersontleding",
-      body: "Stadige aksie, raampie-vir-raampie, hoekwisseling, zoem en tekengereedskap, met twee gesinchroniseerde hoeke langs mekaar.",
+      title: "Regstreekse tellings vir ondersteuners",
+      body: "Die openbare Regstreekse tellings-blad wys elke openbare wedstryd volgens land, streek en kompetisie, met kennisgewings vir paaltjies, viere, sesse, reënvertragings en uitslae.",
     },
     {
-      title: "Regstreekse telborde",
-      body: "Deel 'n regstreekse telbord met lopietempo, wenkanse, vennootskappe, paaltjieval en bal-vir-bal teks.",
+      title: "Vanlyn-eerste telling",
+      body: "Elke bal word eers op die foon gestoor en in die regte volgorde gestuur sodra die sein terug is – selfs 'n beurt wat sonder sein begin het.",
     },
     {
-      title: "Rekenaar en selfoon",
-      body: "Teken aan met 'n foon langs die kantlyn of 'n skootrekenaar in die klubhuis. Elke bal word vanlyn gestoor en gesinchroniseer sodra daar sein is.",
+      title: "Verdeelde tellingstake",
+      body: "Net aangewese tellers kan aanteken. Deel die werk: een foon vir kolf en lopies, 'n ander vir boul en veldwerk, nog een vir video, met 'n hooftelling in beheer.",
     },
     {
-      title: "Klubs, spanne en spelers",
-      body: "Organisasies, kompetisies, spanne, spelers en velde — van die grond af gebou vir 'n hele seisoen se geskiedenis.",
+      title: "Afrigtersoorsig",
+      body: "Met die videobyvoeging: stadige aksie, raam vir raam, hoekwisseling, zoem en tekengereedskap, met twee gesinkroniseerde hoeke langs mekaar.",
     },
     {
-      title: "Deel regstreekse aantekening",
-      body: "Ligas en klubs kies wie 'n wedstryd regstreeks volg — die teenstander, ondersteuners, die ligakantoor, of 'n openbare skakel.",
+      title: "Wedstryd-ontleding",
+      body: "Wawielkaarte op 'n veld met 30+ posisies, kolfblad-kaarte, Manhattans, wurms, vennootskappe en lopietempo teenoor die vereiste tempo.",
+    },
+    {
+      title: "Wenkansvoorspeller en kommentaar",
+      body: "Regstreekse wenkanse uit telling, paaltjies, oorblywende balle en toestande, met outomatiese bal-vir-bal teks en opsionele KI-opsommings per boulbeurt.",
+    },
+    {
+      title: "Grootskerm by die veld",
+      body: "Sit die telbord op 'n TV- of LED-skerm by die veld, wat wissel tussen telling, kolf, boul, Manhattan, wurm en lopiejag – outomaties of vanaf 'n foon beheer.",
+    },
+    {
+      title: "Regstreekse uitsending",
+      body: "Met die videobyvoeging stroom julle na YouTube, Facebook of TikTok met gratis OBS, julle kamerahoeke en 'n regstreekse tellingsoorleg.",
+    },
+    {
+      title: "Ligasentrum",
+      body: "Elke regstreekse wedstryd langs mekaar, regstreekse ligaposisies, 'n uitslaetoonbank waar uitslae afgeteken word, wedstrydroosters, seisoenstatistiek, mylpale en onderlinge stryde.",
+    },
+    {
+      title: "Klubkantoor",
+      body: "Ledegeld per bank- of beursie-oorplasing met 'n verwysing, veld- en netbesprekings, spankeuse, beskikbaarheid, geleenthede, vervoer met veilige juniorritte, drag en toerusting.",
+    },
+    {
+      title: "Skeidsregterpanele",
+      body: "Skeidsregterpanele vir klubs en ligas, betaal of vrywillig, met aanstellings, vereiste kontroles, beskikbaarheid, uitgawes en elke skeidsregter se eie paneelbord.",
+    },
+    {
+      title: "Toekennings en verkenning",
+      body: "Speler van die wedstryd en van die seisoen, spelerprofiele en verkenningsverslae wat afrigters met groter klubs kan deel – met toestemming, en hulle verval.",
+    },
+    {
+      title: "Klubwebwerwe",
+      body: "'n Openbare klubwebwerf met regstreekse tellings, wedstryde, uitslae, nuus en borge. Op die Ligaplan op julle eie domein of 'n gratis julleklub.criclume.com-adres.",
     },
   ],
   featuresTab: {
     kicker: "Platform",
     title: "Kenmerke",
     intro:
-      "Aanteken, kamerakamers, regstreekse telborde, ligasentrum, afrigtingsoorsig en verkenningsverslae – alles wat 'n klub en liga nodig het op een plek.",
+      "Telling wat vanlyn werk, regstreekse tellings en kennisgewings vir ondersteuners, grootskerms, ligasentrums, klubkantoor, skeidsregters, webwerwe, kamerakamers en afrigtersoorsig – alles wat 'n klub en liga nodig het op een plek.",
     watchTitle: "Wie regstreeks kan kyk",
     watchBody:
-      "Private, teenstander-, liga- en openbare aansigte vereis 'n opgestelde klubwolkdiens; dit is nie deel van die plaaslike tellingblad nie.",
+      "Elke wedstryd kan privaat wees, met die teenstander of die liga gedeel word, of openbaar wees. Openbare wedstryde verskyn sonder spelersname op die Regstreekse tellings-blad, en enige vertraging wat julle klub stel, geld steeds.",
     watchOptions: [
       { t: "Slegs klub", d: "Aantekenaars, afrigters en lede van jou eie klub." },
       {
@@ -1144,11 +1371,16 @@ export const af: Content = {
     ],
     alsoTitle: "Ook ingesluit",
     alsoItems: [
-      "Veldsones, veldwerkerkeuse en baltydlyn",
-      "Ontdoen op enige bal, met volledige oudit van wysigings",
-      "Plaaslike videohersiening met stadige aksie en merke",
-      "Kompetisies, beurte en balle per klub gestoor",
-      "Demo-wedstryddata om te toets voor aanboord",
+      "Hou-sones deur op die veld te tik, met 30+ veldposisies, vir links- en regshandiges",
+      "Ontdoen enige bal, met 'n volledige rekord van wysigings",
+      "Reënreëls: gemiddelde lopietempo, produktiefste beurte, DLS uit amptelike insette of 'n handmatige teiken",
+      "Stop en hervat spel vir reën of swak lig – ondersteuners word dadelik ingelig",
+      "Meerdaagse wedstryde met stompe en gelykop wanneer die tyd verstryk",
+      "Spanlys invoer uit 'n sigblad",
+      "Telkaarte gedeel as 'n prent, PDF of sosiale-mediaplasing",
+      "Installeer op enige foon vanuit die blaaier – werk vanlyn",
+      "Ligte en donker modus, in vyf tale",
+      "Pryse in jou land se geldeenheid",
     ],
   },
   screensTab: {
@@ -1326,6 +1558,34 @@ export const af: Content = {
         q: "Kan ons klubwebwerf ons eie domein gebruik?",
         a: "Ja, op die League-plan. Jou klubwebwerf loop op jou eie adres – soos jouklub.co.za – met jou logo en kleure voorop en ’n klein “powered by CricLume”-merk. Vra dit aan by Webwerf → Eie domein; ons stel dit op, wys jou die rekords om by jou domeinverskaffer by te voeg en beveilig dit met https. Geen domein nie? Kry eerder ’n gratis adres soos jouklub.criclume.com – niks om te koop nie, ons stel dit op. Ander planne gebruik die gratis adres criclume.com/club/jou-naam.",
       },
+      {
+        q: "Waar kan ondersteuners regstreekse tellings volg?",
+        a: "Op die Regstreekse tellings-blad by criclume.com/live. Filter volgens land, streek of kompetisie, volg verskeie wedstryde gelyktydig en kry kennisgewings vir paaltjies, viere, sesse, reënvertragings, beurtwisselings en uitslae. Net wedstryde wat 'n klub openbaar gemaak het, verskyn, sonder spelersname.",
+      },
+      {
+        q: "Kan meer as een persoon 'n wedstryd aanteken?",
+        a: "Ja. Net aangemelde tellers wat vir daardie wedstryd aangewys is, kan aanteken. 'n Klub kan die werk verdeel – kolf en lopies op een foon, boul en veldwerk op 'n ander, video op 'n derde – met 'n hooftelling in beheer, en hulle oorskryf mekaar nooit nie.",
+      },
+      {
+        q: "Kan ons ons wedstryde stroom?",
+        a: "Ja, met die videobyvoeging. Gebruik gratis OBS met julle kamerahoeke en die CricLume regstreekse tellingsoorleg om na YouTube, Facebook of TikTok te stroom.",
+      },
+      {
+        q: "Wat doen die klubkantoor?",
+        a: "Dit bestuur die klubkant: ledegeld per bank- of selfoonbeursie-oorplasing met 'n verwysing, deur die tesourier bevestig, veld- en netbesprekings, spankeuse, beskikbaarheid, geleenthede, vervoer en drag. Elke persoon sien net wat hul rol toelaat.",
+      },
+      {
+        q: "Kan ons skeidsregters bestuur?",
+        a: "Ja. Klubs en ligas hou 'n skeidsregterpaneel, betaal of vrywillig, met die kontroles wat elke skeidsregter nodig het. Skeidsregters kry hul eie paneelbord vir beskikbaarheid, aanstellings, reis en betalings.",
+      },
+      {
+        q: "Kan afrigters verkenningsverslae stuur?",
+        a: "Ja. 'n Afrigter kan 'n verslag oor 'n speler se sterk punte, hou-areas, boul en veldwerk deur 'n privaat skakel met 'n groter klub deel. Verslae vereis toestemming en verval.",
+      },
+      {
+        q: "Watter pryse sal ek sien?",
+        a: "Die pryse vir jou land, in jou geldeenheid. As jou land nie gelys is nie, sien jy pryse in GBP. Jy kan op die pryseblad van land verander.",
+      },
     ],
   },
   login: {
@@ -1341,7 +1601,7 @@ export const af: Content = {
     copyright: "CricLume. Elke bal. Elke voordeel.",
   },
   footer: {
-    desc: "Bal-vir-bal telling, video met veelvuldige kameras, regstreekse telborde en ligahulpmiddels vir krieketklubs en -ligas.",
+    desc: "Vanlyn bal-vir-bal telling, regstreekse tellings en kennisgewings, grootskerms, ligasentrums, klubkantoor en video met veelvuldige kameras vir krieketklubs en -ligas.",
     explore: "Verken",
     access: "Toegang",
     accessLine1: "Telling is oop vir almal",
@@ -1376,16 +1636,16 @@ export const fr: Content = {
     previewLabel: "Score d'exemple",
     kicker: "Score, vidéo et plateforme de club pour le cricket",
     featuresLabel: "Tout dans une seule app",
-    features: ["Score hors ligne, synchro fiable", "Tâches de score partagées", "Jusqu'à 16 caméras de téléphone", "Chances de victoire & texte balle par balle", "Tableaux en direct & alertes", "Grand écran & incrustation stream", "Espace ligue & classements en direct", "Règles de pluie dont DLS", "Secrétariat, cotisations & réservations", "Sites web de club", "Récompenses & rapports de scouting", "Mode clair & sombre"],
+    features: ["Score hors ligne, synchro fiable", "Tâches de score partagées", "Jusqu'à 16 caméras de téléphone", "Chances de victoire & texte balle par balle", "Tableaux en direct & alertes", "Grand écran & incrustation stream", "Espace ligue & classements en direct", "Règles de pluie dont DLS", "Secrétariat, cotisations & réservations", "Sites web de club", "Récompenses & rapports de scouting", "Mode clair & sombre", "Page de scores en direct", "Arbitres & bureau des résultats"],
     plansLabel: "Formules",
     addonName: "Option vidéo",
     planNotes: ["Gratuit · score de base hors ligne · publicité", "Analyses complètes & bureau du club · 30 % des revenus pub", "Toute la compétition · site du club", "Jusqu'à 16 caméras, streaming · 50 % des revenus pub"],
     plansCta: "Comparer les formules",
   },
   stats: [
-    { k: "Balle par balle", v: "Points, extras et éliminations" },
-    { k: "Sur l'appareil", v: "Saisie sans réseau" },
-    { k: "Revue vidéo", v: "Image par image" },
+    { k: "Hors ligne d'abord", v: "Les scores se synchronisent dans le bon ordre" },
+    { k: "Jusqu'à 16", v: "Caméras téléphone par match" },
+    { k: "Prix locaux", v: "Dans la devise de votre pays" },
   ],
   home: {
     workflowKicker: "Comment fonctionne CricLume",
@@ -1393,15 +1653,15 @@ export const fr: Content = {
     workflowSteps: [
       {
         title: "Marquer le match",
-        body: "Enregistrez runs, guichets, extras et corrections sur votre appareil, même pendant une coupure temporaire de réseau.",
+        body: "Les marqueurs désignés saisissent chaque balle sur un téléphone ou se répartissent le travail sur plusieurs. Tout fonctionne sans réseau et se synchronise dans le bon ordre.",
       },
       {
-        title: "Revoir les vidéos",
-        body: "Examinez des vidéos locales au ralenti, image par image, avec des outils de dessin.",
+        title: "Partager en direct",
+        body: "Les supporters suivent sur la page Scores en direct, le tableau public ou le grand écran du terrain, avec des alertes pour les wickets, boundaries, interruptions pour pluie et résultats.",
       },
       {
-        title: "Organiser le club",
-        body: "Gérez équipes et rencontres dans l'espace privé du club. Les services cloud nécessitent une configuration autorisée.",
+        title: "Gérer le club",
+        body: "Cotisations, réservations, sélections, disponibilités, trajets, arbitres et site du club – chacun ne voit que ce que son rôle permet.",
       },
     ],
     matchDayKicker: "Jour de match",
@@ -1431,42 +1691,74 @@ export const fr: Content = {
   },
   features: [
     {
-      title: "Marquage rapide balle par balle",
-      body: "Runs, dots, wides, no-balls, byes, leg-byes, pénalités et tous les types d'élimination — avec annulation et horodatage sur chaque balle.",
+      title: "Marquage balle par balle rapide",
+      body: "Points, balles nulles, wides, no-balls, byes, leg-byes, pénalités et tous les types d'élimination – avec annulation et horodatage de chaque balle.",
     },
     {
-      title: "Salle caméra multi-téléphones",
-      body: "Associez jusqu'à 16 téléphones ou les caméras du club par match – derrière le lanceur, de côté, derrière le gardien ou au filet – et reliez chaque angle fixe à la balle filmée.",
+      title: "Salle caméras multi-téléphones",
+      body: "Avec l'option vidéo, associez jusqu'à 16 téléphones ou caméras du club par match à des points fixes – derrière le lanceur, de côté, derrière le gardien – et chaque angle reste lié à sa balle.",
     },
     {
-      title: "Analyse d'entraînement",
-      body: "Ralenti, image par image, changement d'angle, zoom et outils de dessin, avec deux angles synchronisés côte à côte.",
+      title: "Scores en direct pour les supporters",
+      body: "La page publique Scores en direct affiche chaque match public par pays, région et compétition, avec des alertes pour les wickets, quatre, six, interruptions pour pluie et résultats.",
     },
     {
-      title: "Tableaux de score en direct",
-      body: "Partagez un tableau de score en direct avec run rate, chances de victoire, partenariats, chute des guichets et texte balle par balle.",
+      title: "Marquage hors ligne d'abord",
+      body: "Chaque balle est d'abord enregistrée sur le téléphone puis envoyée dans le bon ordre au retour du réseau – même une manche commencée sans réseau.",
     },
     {
-      title: "Ordinateur et mobile",
-      body: "Marquez depuis un téléphone au bord du terrain ou un ordinateur au club-house. Chaque balle est enregistrée hors ligne et synchronisée au retour du réseau.",
+      title: "Tâches de marquage partagées",
+      body: "Seuls les marqueurs désignés peuvent marquer. Répartissez le travail : un téléphone pour la batte & les points, un autre pour le lancer & le terrain, un autre pour la vidéo, avec un marqueur principal.",
     },
     {
-      title: "Clubs, équipes et joueurs",
-      body: "Organisations, compétitions, équipes, joueurs et terrains modélisés pour toute une saison.",
+      title: "Revue d'entraînement",
+      body: "Avec l'option vidéo : ralenti, image par image, changement d'angle, zoom et outils de dessin, avec deux angles synchronisés côte à côte.",
     },
     {
-      title: "Partager le direct",
-      body: "Ligues et clubs choisissent qui suit un match en temps réel — le club adverse, les supporters, la ligue ou un lien public.",
+      title: "Analyses de match",
+      body: "Wagon wheels sur un terrain de plus de 30 positions, pitch maps, Manhattans, worms, partenariats et rythme de points face au rythme requis.",
+    },
+    {
+      title: "Prédicteur de victoire & commentaire",
+      body: "Chances de victoire en direct selon le score, les wickets, les balles restantes et les conditions, avec un commentaire balle par balle automatique et des résumés d'over par IA en option.",
+    },
+    {
+      title: "Grand écran du terrain",
+      body: "Affichez le tableau sur un téléviseur ou un écran LED au terrain, en alternant score, batte, lancer, Manhattan, worm et poursuite – automatiquement ou depuis un téléphone.",
+    },
+    {
+      title: "Diffusion en direct",
+      body: "Avec l'option vidéo, diffusez sur YouTube, Facebook ou TikTok avec OBS gratuit, vos angles de caméra et l'incrustation du score en direct.",
+    },
+    {
+      title: "Espace ligue",
+      body: "Tous les matchs en direct côte à côte, classement en direct, un bureau des résultats où ils sont validés, calendriers, statistiques de saison, jalons et face-à-face.",
+    },
+    {
+      title: "Bureau du club",
+      body: "Cotisations par virement bancaire ou portefeuille mobile avec référence, réservations de terrain et de filets, sélections, disponibilités, événements, trajets avec covoiturage sécurisé des jeunes, tenues et matériel.",
+    },
+    {
+      title: "Panels d'arbitres",
+      body: "Panels d'arbitres pour clubs et ligues, rémunérés ou bénévoles, avec désignations, vérifications requises, disponibilités, frais et un tableau de bord pour chaque arbitre.",
+    },
+    {
+      title: "Récompenses & recrutement",
+      body: "Joueur du match et de la saison, profils joueurs et rapports de recrutement que les entraîneurs peuvent partager avec de plus grands clubs – avec consentement, et ils expirent.",
+    },
+    {
+      title: "Sites de club",
+      body: "Un site public du club avec scores en direct, calendrier, résultats, actualités et sponsors. Avec l'offre Ligue, sur votre propre domaine ou une adresse gratuite votreclub.criclume.com.",
     },
   ],
   featuresTab: {
     kicker: "Plateforme",
     title: "Fonctions",
     intro:
-      "Marquage, salles caméra, tableaux en direct, espace ligue, revue d'entraînement et rapports de recrutement – tout ce dont un club et une ligue ont besoin, au même endroit.",
+      "Un marquage qui fonctionne hors ligne, des scores et alertes en direct pour les supporters, grands écrans, espaces ligue, bureau du club, arbitres, sites web, salles caméras et revue d'entraînement – tout ce qu'il faut à un club et une ligue, au même endroit.",
     watchTitle: "Qui peut suivre en direct",
     watchBody:
-      "Les vues privées, adversaires, ligues et publiques nécessitent un espace cloud configuré; elles ne font pas partie du marqueur local.",
+      "Chaque match peut être privé, partagé avec l'adversaire, partagé avec la ligue ou public. Les matchs publics apparaissent sur la page Scores en direct sans nom de joueur, et le délai choisi par votre club s'applique toujours.",
     watchOptions: [
       { t: "Club uniquement", d: "Marqueurs, entraîneurs et membres de votre club." },
       { t: "Club adverse", d: "Le staff et les joueurs adverses suivent le même flux en direct." },
@@ -1481,11 +1773,16 @@ export const fr: Content = {
     ],
     alsoTitle: "Également inclus",
     alsoItems: [
-      "Zones de champ, sélection des fielders et chronologie des balles",
-      "Annulation sur chaque balle, avec historique complet des modifications",
-      "Revue vidéo locale avec ralenti et annotations",
-      "Compétitions, manches et balles enregistrées par club",
-      "Données de match de démo pour tester avant l'intégration",
+      "Zones de frappe en touchant le terrain, avec plus de 30 positions, pour gauchers et droitiers",
+      "Annulation de n'importe quelle balle, avec l'historique complet des modifications",
+      "Règles de pluie : moyenne de points, overs les plus productifs, DLS à partir des données officielles ou objectif manuel",
+      "Arrêter et reprendre le jeu pour la pluie ou la lumière – les supporters sont prévenus aussitôt",
+      "Matchs sur plusieurs jours avec fin de journée et match nul au temps",
+      "Import de l'effectif depuis un tableur",
+      "Feuilles de match partagées en image, PDF ou publication sociale",
+      "Installation sur tout téléphone depuis le navigateur – fonctionne hors ligne",
+      "Mode clair et sombre, en cinq langues",
+      "Prix affichés dans la devise de votre pays",
     ],
   },
   screensTab: {
@@ -1665,6 +1962,34 @@ export const fr: Content = {
         q: "Notre site de club peut-il utiliser notre propre domaine ?",
         a: "Oui, avec l'offre League. Votre site tourne à votre propre adresse – comme votreclub.fr – avec votre logo et vos couleurs en premier et une petite mention « powered by CricLume ». Demandez-le dans Site web → Domaine personnel ; nous le configurons, vous montrons les enregistrements à ajouter chez votre fournisseur de domaine et le sécurisons en https. Pas de domaine ? Prenez plutôt une adresse gratuite comme votreclub.criclume.com – rien à acheter, nous la configurons. Les autres offres utilisent l'adresse gratuite criclume.com/club/votre-nom.",
       },
+      {
+        q: "Où les supporters peuvent-ils suivre les scores en direct ?",
+        a: "Sur la page Scores en direct, à criclume.com/live. Filtrez par pays, région ou compétition, suivez plusieurs matchs à la fois et recevez des alertes pour les wickets, quatre, six, interruptions pour pluie, fins de manche et résultats. Seuls les matchs rendus publics par un club apparaissent, sans nom de joueur.",
+      },
+      {
+        q: "Plusieurs personnes peuvent-elles marquer un match ?",
+        a: "Oui. Seuls les marqueurs connectés et désignés pour ce match peuvent marquer. Un club peut répartir le travail – batte & points sur un téléphone, lancer & terrain sur un autre, vidéo sur un troisième – avec un marqueur principal, sans que personne n'écrase le travail de l'autre.",
+      },
+      {
+        q: "Pouvons-nous diffuser nos matchs ?",
+        a: "Oui, avec l'option vidéo. Utilisez OBS gratuit avec vos angles de caméra et l'incrustation du score CricLume pour diffuser sur YouTube, Facebook ou TikTok.",
+      },
+      {
+        q: "À quoi sert le bureau du club ?",
+        a: "Il gère la vie du club : cotisations par virement bancaire ou portefeuille mobile avec référence, confirmées par le trésorier, réservations de terrain et de filets, sélections, disponibilités, événements, trajets et tenues. Chacun ne voit que ce que son rôle permet.",
+      },
+      {
+        q: "Pouvons-nous gérer les arbitres ?",
+        a: "Oui. Clubs et ligues tiennent un panel d'arbitres, rémunérés ou bénévoles, avec les vérifications nécessaires. Les arbitres ont leur propre tableau de bord pour les disponibilités, désignations, déplacements et paiements.",
+      },
+      {
+        q: "Les entraîneurs peuvent-ils envoyer des rapports de recrutement ?",
+        a: "Oui. Un entraîneur peut partager avec un plus grand club, par lien privé, un rapport sur les points forts, zones de frappe, lancer et jeu de terrain d'un joueur. Les rapports exigent un consentement et expirent.",
+      },
+      {
+        q: "Quels prix vais-je voir ?",
+        a: "Les prix de votre pays, dans votre devise. Si votre pays n'est pas dans la liste, les prix s'affichent en GBP. Vous pouvez changer de pays sur la page des tarifs.",
+      },
     ],
   },
   login: {
@@ -1680,7 +2005,7 @@ export const fr: Content = {
     copyright: "CricLume. Chaque balle. Chaque avantage.",
   },
   footer: {
-    desc: "Marquage balle par balle, vidéo multi-caméras, tableaux de score en direct et outils de ligue pour clubs et ligues de cricket.",
+    desc: "Marquage balle par balle hors ligne, scores et alertes en direct, grands écrans, espaces ligue, bureau du club et vidéo multi-caméras pour les clubs et ligues de cricket.",
     explore: "Explorer",
     access: "Accès",
     accessLine1: "Le marquage est ouvert à tous",
