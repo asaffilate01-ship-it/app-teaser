@@ -180,7 +180,7 @@ export function useMatchCloudSync(
       const innings = currentInnings(match);
       const delivery = eventType === "delivery.recorded" ? innings.deliveries.at(-1) : null;
       const canonicalInningsEvent = ["delivery.recorded", "delivery.voided"].includes(eventType);
-      const liveState = publicLiveState(match);
+      const liveState = publicLiveState(match, { screenRefSalt: cloudMatchId });
       const event: PendingMatchEvent = {
         matchId: cloudMatchId,
         clientEventId: crypto.randomUUID(),

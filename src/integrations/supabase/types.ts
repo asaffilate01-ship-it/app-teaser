@@ -2262,6 +2262,66 @@ export type Database = {
           },
         ]
       }
+      ground_screens: {
+        Row: {
+          interval_seconds: number
+          manual_page: string
+          match_id: string
+          mode: string
+          pages: string[]
+          replay_delivery_id: string | null
+          replay_requested_at: string | null
+          replays: string
+          scoreboard_id: string
+          show_names: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          interval_seconds?: number
+          manual_page?: string
+          match_id: string
+          mode?: string
+          pages?: string[]
+          replay_delivery_id?: string | null
+          replay_requested_at?: string | null
+          replays?: string
+          scoreboard_id: string
+          show_names?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          interval_seconds?: number
+          manual_page?: string
+          match_id?: string
+          mode?: string
+          pages?: string[]
+          replay_delivery_id?: string | null
+          replay_requested_at?: string | null
+          replays?: string
+          scoreboard_id?: string
+          show_names?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ground_screens_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: true
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ground_screens_scoreboard_id_fkey"
+            columns: ["scoreboard_id"]
+            isOneToOne: true
+            referencedRelation: "public_scoreboards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grounds: {
         Row: {
           address: Json
@@ -4054,6 +4114,8 @@ export type Database = {
         Returns: boolean
       }
       find_user_id_by_email: { Args: { p_email: string }; Returns: string }
+      get_ground_screen: { Args: { p_slug: string }; Returns: Json }
+      get_ground_screen_names: { Args: { p_slug: string }; Returns: Json }
       get_public_scoreboard: { Args: { p_slug: string }; Returns: Json }
       get_shared_scouting_report: { Args: { p_token: string }; Returns: Json }
       ground_busy_slots: {
@@ -4061,6 +4123,18 @@ export type Database = {
         Returns: {
           ends_at: string
           starts_at: string
+        }[]
+      }
+      ground_replay_candidates: {
+        Args: { p_match_id: string }
+        Returns: {
+          ball_in_over: number
+          batter_runs: number
+          id: string
+          occurred_at: string
+          over_number: number
+          sequence: number
+          wicket: boolean
         }[]
       }
       has_org_role: {
@@ -4120,6 +4194,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      player_allows_public_highlights: {
+        Args: { p_player_id: string }
+        Returns: boolean
       }
       record_delivery_v1: {
         Args: {
@@ -4226,6 +4304,10 @@ export type Database = {
         }
         Returns: string
       }
+      request_ground_replay: {
+        Args: { p_delivery_id: string; p_match_id: string }
+        Returns: undefined
+      }
       scouting_consent_granted: {
         Args: { p_organisation_id: string; p_player_id: string }
         Returns: boolean
@@ -4233,6 +4315,18 @@ export type Database = {
       set_camera_room_capacity: {
         Args: { p_max_devices: number; p_room_id: string }
         Returns: number
+      }
+      set_ground_screen: {
+        Args: {
+          p_interval_seconds: number
+          p_manual_page: string
+          p_match_id: string
+          p_mode: string
+          p_pages: string[]
+          p_replays: string
+          p_show_names: boolean
+        }
+        Returns: undefined
       }
       set_selection_role: {
         Args: { p_event_id: string; p_field: string; p_player_id: string }

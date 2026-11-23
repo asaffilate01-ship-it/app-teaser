@@ -10,6 +10,7 @@ import { reviewFixtureSchedule } from "@/lib/fixture-scheduling";
 import { FixtureBuilder } from "@/components/league/FixtureBuilder";
 import { readSection, platformSections } from "@/lib/navigation";
 import { cameraLimitChoices } from "@/lib/camera-limits";
+import { GroundScreenControl } from "@/components/club/GroundScreenControl";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   useCallback,
@@ -1100,6 +1101,13 @@ function MatchCard({
           >
             Ground screen <ExternalLink className="size-3.5" />
           </a>
+        )}
+        {match.scoreboard?.enabled && can(role, "match.score") && (
+          <GroundScreenControl
+            matchId={match.id}
+            slug={match.scoreboard.slug}
+            matchTitle={`${teamName(data, match.homeTeamId)} v ${teamName(data, match.awayTeamId)}`}
+          />
         )}
         {can(role, "match.manage") && (
           <button

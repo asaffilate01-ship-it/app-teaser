@@ -88,3 +88,16 @@ test("shared live score carries the rain state and par so other devices can show
   assert.deepEqual(live["rain"], { method: "arr", revisedOvers: 12 });
   assert.ok("par" in live);
 });
+
+test("ground screen card refs are per-match pseudonyms, never player ids or names", async () => {
+  const { playerScreenRef } = await import("../src/lib/sha256.ts");
+  const match = privateMatch();
+  const json = JSON.stringify(publicLiveState(match, { screenRefSalt: "cloud-match-1" }));
+  for (const player of match.teams.flatMap((team) => team.players)) {
+    assert.equal(json.includes(player.id), false);
+    assert.equal(json.includes(player.name), false);
+  }
+  const striker = currentInnings(match).strikerId;
+  assert.ok(json.includes(playerScreenRef("cloud-match-1", striker)));
+  assert.notEqual(playerScreenRef("cloud-match-1", striker), playerScreenRef("cloud-match-2", striker));
+});

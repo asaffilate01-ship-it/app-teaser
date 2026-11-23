@@ -1,15 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { getCloudClient, isCloudConfigured } from "@/lib/cloud";
-import { buildGroundFeed, type GroundFeed } from "@/lib/ground-feed";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Maximize } from "lucide-react";
+import { isCloudConfigured } from "@/lib/cloud";
+import { useCloudSession } from "@/hooks/use-cloud-session";
+import {
+  availablePages,
+  buildGroundBoard,
+  defaultGroundSettings,
+  groundPageLabels,
+  pageOnScreen,
+  type GroundPageId,
+  type GroundScreenSettings,
+  type PublicBoardInput,
+} from "@/lib/ground-board";
+import { fetchGroundNames, fetchGroundSettings, fetchPublicBoard, loadGroundControl, type GroundControlRow } from "@/lib/ground-screen-cloud";
+import { GroundPage } from "@/components/ground/GroundPages";
+import { GroundReplay } from "@/components/ground/GroundReplay";
 
 export const Route = createFileRoute("/ground/$slug")({
   head: () => ({
     meta: [
-      { title: "Ground scoreboard — CricLume" },
-      { name: "description", content: "Full-screen live scoreboard for a TV or projector at the ground." },
-      { property: "og:title", content: "Ground scoreboard — CricLume" },
-      { property: "og:description", content: "Big, high-contrast live score for screens around the ground." },
+      { title: "Ground big screen — CricLume" },
+      { name: "description", content: "Widescreen HD scoreboard for TVs, projectors and LED screens at the ground, with rotating score pages." },
+      { property: "og:title", content: "Ground big screen — CricLume" },
+      { property: "og:description", content: "Scoreboard, batting, bowling, Manhattan, worm and run chase pages for the big screen at the ground." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -18,11 +32,19 @@ export const Route = createFileRoute("/ground/$slug")({
   component: GroundScreen,
 });
 
-/** Full-screen, high-contrast scoreboard for a TV, projector or LED screen fed by a laptop at the ground. */
+/** Widescreen (16:9) ground screen: pages turn automatically or as the club picks, with optional replays. */
 function GroundScreen() {
   const { slug } = Route.useParams();
-  const [feed, setFeed] = useState<GroundFeed | null>(null);
+  const { session } = useCloudSession();
+  const [board, setBoard] = useState<(PublicBoardInput & { matchId: string }) | null>(null);
   const [missing, setMissing] = useState(false);
+  const [settings, setSettings] = useState<GroundScreenSettings>(defaultGroundSettings);
+  const [names, setNames] = useState<Record<string, string>>({});
+  const [control, setControl] = useState<GroundControlRow | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  const [local, setLocal] = useState<{ page: GroundPageId; until: number } | null>(null);
+  const [chrome, setChrome] = useState(true);
+  const [replayNote, setReplayNote] = useState("");
 
   useEffect(() => {
     if (!isCloudConfigured()) {
@@ -31,13 +53,11 @@ function GroundScreen() {
     }
     let active = true;
     const load = async () => {
-      const { data, error } = await getCloudClient().rpc("get_public_scoreboard", { p_slug: slug });
+      const [next, nextSettings] = await Promise.all([fetchPublicBoard(slug), fetchGroundSettings(slug)]);
       if (!active) return;
-      if (error || !data) setMissing(true);
-      else {
-        setFeed(buildGroundFeed(data as Parameters<typeof buildGroundFeed>[0]));
-        setMissing(false);
-      }
+      setBoard(next);
+      setMissing(!next);
+      setSettings(nextSettings);
     };
     void load();
     const timer = window.setInterval(() => void load(), 4_000);
@@ -47,63 +67,153 @@ function GroundScreen() {
     };
   }, [slug]);
 
-  if (!feed) {
+  // Names only when the club switched them on; the database decides which players may be named.
+  useEffect(() => {
+    if (!settings.showNames) {
+      setNames({});
+      return;
+    }
+    let active = true;
+    const load = () => void fetchGroundNames(slug).then((value) => active && setNames(value));
+    load();
+    const timer = window.setInterval(load, 30_000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [slug, settings.showNames]);
+
+  // Replay requests are private to the club: only a signed-in screen can read them.
+  const matchId = board?.matchId ?? null;
+  useEffect(() => {
+    if (!session || !matchId) {
+      setControl(null);
+      return;
+    }
+    let active = true;
+    const load = () => void loadGroundControl(matchId).then((row) => active && setControl(row));
+    load();
+    const timer = window.setInterval(load, 4_000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [session, matchId]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 250);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  // Pointer movement shows the full-screen button briefly; arrow keys step pages on this screen for a minute.
+  useEffect(() => {
+    let hide = window.setTimeout(() => setChrome(false), 4_000);
+    const wake = () => {
+      setChrome(true);
+      window.clearTimeout(hide);
+      hide = window.setTimeout(() => setChrome(false), 4_000);
+    };
+    window.addEventListener("pointermove", wake);
+    return () => {
+      window.removeEventListener("pointermove", wake);
+      window.clearTimeout(hide);
+    };
+  }, []);
+
+  const view = useMemo(() => (board ? buildGroundBoard(board, names) : null), [board, names]);
+  const available = useMemo(() => (view ? availablePages(view) : (["score"] as GroundPageId[])), [view]);
+  const shown = pageOnScreen(settings, available, now);
+  const page = local && local.until > now && available.includes(local.page) ? local.page : shown.page;
+  const rotation = settings.pages.filter((id) => available.includes(id));
+
+  const step = useCallback(
+    (delta: number) => {
+      if (rotation.length === 0) return;
+      const index = Math.max(0, rotation.indexOf(page));
+      setLocal({ page: rotation[(index + delta + rotation.length) % rotation.length]!, until: Date.now() + 60_000 });
+    },
+    [page, rotation],
+  );
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "ArrowRight") step(1);
+      if (event.key === "ArrowLeft") step(-1);
+      if (event.key === "Escape") setLocal(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [step]);
+
+  if (!board || !view) {
     return (
-      <main className="ground-screen ground-waiting">
-        <p>{missing ? "This scoreboard is not public yet." : "Connecting to the live score…"}</p>
+      <main className="gs-viewport">
+        <div className="gs-stage gs-waiting">
+          <p>{missing ? "This scoreboard is not public yet." : "Connecting to the live score…"}</p>
+        </div>
       </main>
     );
   }
 
-  const cells: Array<[string, string | number]> = [
-    ["Overs", feed.oversLimit ? `${feed.overs}/${feed.oversLimit}` : feed.overs],
-    ...(feed.target ? ([["Target", feed.target]] as Array<[string, number]>) : []),
-    ...(feed.runsNeeded != null && feed.runsNeeded > 0 ? ([["Need", feed.runsNeeded]] as Array<[string, number]>) : []),
-    ...(feed.ballsLeft != null && feed.target ? ([["Balls left", feed.ballsLeft]] as Array<[string, number]>) : []),
-    ...(feed.par != null && feed.target ? ([["Par", feed.par]] as Array<[string, number]>) : []),
-    ["Run rate", feed.runRate?.toFixed(2) ?? "–"],
-  ];
+  const state = (board.liveState ?? {}) as Record<string, unknown>;
+  const live = board.status === "live" || board.status === "innings_break";
+  const replays = control?.replays ?? "off";
 
   return (
-    <main className="ground-screen" aria-live="polite">
-      <header className="ground-head">
-        <span>{feed.battingTeam}</span>
-        {(feed.freeHit || feed.superOver) && <span className="ground-alert">{feed.freeHit ? "FREE HIT" : "SUPER OVER"}</span>}
-        <span className="ground-vs">v {feed.bowlingTeam}</span>
-      </header>
-      <section className="ground-total" aria-label="Score">
-        <span>{feed.runs}</span>
-        <span className="ground-slash">/</span>
-        <span>{feed.wickets}</span>
-      </section>
-      <section className="ground-cells">
-        {cells.map(([key, value]) => (
-          <div key={key}>
-            <span>{key}</span>
-            <strong>{value}</strong>
+    <main className="gs-viewport" aria-live="polite">
+      <div className="gs-stage">
+        <header className="gs-head">
+          <div className="gs-head-teams">
+            <strong>{view.homeTeam}</strong>
+            <span>v</span>
+            <strong>{view.awayTeam}</strong>
           </div>
-        ))}
-      </section>
-      <section className="ground-players">
-        <div>
-          <span>Bat 1</span>
-          <strong>{feed.batter1 ? `${feed.batter1.runs} (${feed.batter1.balls})` : "–"}</strong>
-        </div>
-        <div>
-          <span>Bat 2</span>
-          <strong>{feed.batter2 ? `${feed.batter2.runs} (${feed.batter2.balls})` : "–"}</strong>
-        </div>
-        <div>
-          <span>Bowler</span>
-          <strong>{feed.bowler ? `${feed.bowler.wickets}-${feed.bowler.runs} (${feed.bowler.overs})` : "–"}</strong>
-        </div>
-        <div>
-          <span>Last balls</span>
-          <strong>{feed.lastBalls.join(" ") || "–"}</strong>
-        </div>
-      </section>
-      {feed.result && <p className="ground-result">{feed.result}</p>}
-      <p className="ground-brand">CricLume live</p>
+          <h1 className="gs-head-title">{groundPageLabels[page]}</h1>
+          <div className="gs-head-status">
+            {live ? (
+              <span className="gs-live">
+                <i aria-hidden="true" /> Live
+              </span>
+            ) : (
+              <span className="gs-muted">{board.status === "completed" ? "Result" : "Match"}</span>
+            )}
+          </div>
+        </header>
+        <section className="gs-body" key={page}>
+          <GroundPage page={page} board={view} state={state} />
+        </section>
+        <footer className="gs-foot">
+          <div className="gs-dots" aria-hidden="true">
+            {rotation.map((id) => (
+              <i key={id} className={id === page ? "is-on" : ""} />
+            ))}
+          </div>
+          <span className="gs-brand">{view.sponsor ? `Sponsored by ${view.sponsor} · ` : ""}CricLume live</span>
+          {settings.mode === "auto" && !local && rotation.length > 1 && (
+            <div className="gs-progress" style={{ transform: `scaleX(${shown.progress})` }} aria-hidden="true" />
+          )}
+        </footer>
+        {session && matchId && replays !== "off" && (
+          <GroundReplay
+            matchId={matchId}
+            mode={replays}
+            requestedId={control?.replayDeliveryId ?? null}
+            requestedAt={control?.replayRequestedAt ?? null}
+            onStatus={setReplayNote}
+          />
+        )}
+        {chrome && (
+          <div className="gs-chrome">
+            {replayNote && session && replays !== "off" && <span className="gs-note">{replayNote}</span>}
+            <button
+              type="button"
+              className="gs-chrome-button"
+              onClick={() => void document.documentElement.requestFullscreen?.().catch(() => undefined)}
+            >
+              <Maximize aria-hidden="true" /> Full screen
+            </button>
+          </div>
+        )}
+      </div>
     </main>
   );
 }

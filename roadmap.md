@@ -84,3 +84,9 @@
 - [x] Free = basic scoring only (with ads); Club/League = full scoring analytics; video & video analytics = extra add-on (pricing page, comparison table, FAQs, all five languages)
 - [ ] Video add-on price — waiting on user's answer (page shows "quoted per club" meanwhile)
 - [ ] Lock analytics and camera rooms inside the app by plan — not started; offer to user
+
+## Ground big screen
+- [x] Widescreen HD ground screen with rotating pages: score, batting, bowling, Manhattan, worm, run chase
+- [x] Club control panel: automatic or manual pages, page choice, seconds per page
+- [x] Video replays of wickets and boundaries on the big screen (only with player public-highlights consent) — not yet tried with real phone recordings
+- [x] Player names on the screen: club switch, juniors only with parent-signed consent

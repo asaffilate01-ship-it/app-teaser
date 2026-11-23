@@ -3092,3 +3092,159 @@
   background: oklch(0.8 0.15 84 / 0.18);
   color: oklch(0.92 0.1 84);
 }
+
+/* Ground big screen: a 16:9 stage letterboxed on any TV, projector or LED wall. Sizes use stage
+   height units (cqh) so text and charts stay sharp from 720p to 4K. */
+.gs-viewport {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: oklch(0.08 0.015 262);
+  color: oklch(0.98 0.01 90);
+  overflow: hidden;
+}
+.gs-stage {
+  position: relative;
+  width: min(100vw, calc(100vh * 16 / 9));
+  aspect-ratio: 16 / 9;
+  container-type: size;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background:
+    radial-gradient(120% 90% at 50% 0%, oklch(0.22 0.05 262) 0%, transparent 60%),
+    oklch(0.13 0.025 262);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+}
+.gs-waiting { place-items: center; grid-template-rows: 1fr; font-size: 4cqh; color: oklch(0.8 0.02 260); }
+.gs-head {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 2cqw;
+  padding: 2.4cqh 3cqw;
+  border-bottom: 0.3cqh solid oklch(1 0 0 / 0.08);
+  background: oklch(0.1 0.02 262 / 0.6);
+}
+.gs-head-teams { display: flex; align-items: baseline; gap: 1.2cqw; font-family: var(--font-display); font-size: 3.4cqh; text-transform: uppercase; letter-spacing: 0.03em; min-width: 0; }
+.gs-head-teams strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gs-head-teams span { color: oklch(0.7 0.02 260); font-size: 2.6cqh; }
+.gs-head-title { font-family: var(--font-display); font-size: 4.4cqh; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; margin: 0; }
+.gs-head-status { justify-self: end; font-size: 2.6cqh; text-transform: uppercase; letter-spacing: 0.14em; }
+.gs-live { display: inline-flex; align-items: center; gap: 0.8cqh; padding: 0.6cqh 1.6cqh; border-radius: 99px; background: var(--primary); color: var(--primary-foreground); font-weight: 700; }
+.gs-live i { width: 1.2cqh; height: 1.2cqh; border-radius: 99px; background: currentColor; animation: gs-pulse 1.4s ease-in-out infinite; }
+@keyframes gs-pulse { 50% { opacity: 0.3; } }
+.gs-muted { color: oklch(0.72 0.02 260); }
+.gs-body { padding: 3cqh 4cqw; min-height: 0; display: grid; animation: gs-in 0.5s ease-out; }
+@keyframes gs-in { from { opacity: 0; transform: translateY(1.5cqh); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .gs-body { animation: none; } .gs-live i { animation: none; } }
+.gs-foot { position: relative; display: flex; align-items: center; justify-content: space-between; padding: 1.8cqh 3cqw; border-top: 0.3cqh solid oklch(1 0 0 / 0.08); }
+.gs-dots { display: flex; gap: 1cqh; }
+.gs-dots i { width: 1.4cqh; height: 1.4cqh; border-radius: 99px; background: oklch(1 0 0 / 0.2); }
+.gs-dots i.is-on { background: var(--gold); width: 4cqh; }
+.gs-brand { font-size: 1.9cqh; letter-spacing: 0.22em; text-transform: uppercase; color: oklch(1 0 0 / 0.45); }
+.gs-progress { position: absolute; left: 0; right: 0; top: -0.3cqh; height: 0.5cqh; background: var(--gold); transform-origin: left; transition: transform 0.25s linear; }
+
+/* Scoreboard page */
+.gs-score { display: grid; grid-template-rows: auto auto auto auto; align-content: center; gap: 3.2cqh; text-align: center; }
+.gs-total { display: flex; align-items: baseline; justify-content: center; gap: 3cqw; }
+.gs-team { font-family: var(--font-display); font-size: 6cqh; color: var(--gold); text-transform: uppercase; letter-spacing: 0.04em; }
+.gs-runs { font-family: var(--font-display); font-size: 24cqh; line-height: 0.9; font-weight: 700; }
+.gs-slash { color: oklch(0.6 0.02 260); margin: 0 0.05em; }
+.gs-alert { align-self: center; border-radius: 1cqh; background: var(--primary); color: var(--primary-foreground); padding: 0.6cqh 1.6cqh; font-family: var(--font-display); font-size: 4cqh; }
+.gs-cells, .gs-crease { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 1.6cqw; }
+.gs-cells > div, .gs-crease > div {
+  display: grid;
+  gap: 0.8cqh;
+  padding: 1.8cqh 1.6cqw;
+  border-radius: 1.6cqh;
+  border: 0.2cqh solid oklch(1 0 0 / 0.1);
+  background: oklch(1 0 0 / 0.05);
+}
+.gs-cells span, .gs-crease span, .gs-rate span, .gs-win > span { font-size: 2.2cqh; text-transform: uppercase; letter-spacing: 0.12em; color: oklch(0.78 0.02 260); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gs-cells strong { font-family: var(--font-display); font-size: 7cqh; line-height: 1; }
+.gs-crease strong { font-family: var(--font-display); font-size: 5.4cqh; line-height: 1.05; }
+.gs-crease .is-strike { border-color: var(--gold); }
+.gs-balls { display: flex; justify-content: center; gap: 1.4cqh; font-size: 3cqh; }
+.gs-ball { display: grid; place-items: center; width: 7cqh; height: 7cqh; border-radius: 99px; background: oklch(1 0 0 / 0.1); font-family: var(--font-display); font-size: 3.6cqh; }
+.gs-ball.is-boundary { background: oklch(0.62 0.16 150); }
+.gs-ball.is-wicket { background: var(--primary); color: var(--primary-foreground); }
+.gs-result { font-family: var(--font-display); font-size: 5cqh; color: var(--gold); margin: 0; }
+
+/* Batting / bowling tables */
+.gs-table-page { display: grid; grid-template-rows: 1fr auto; min-height: 0; }
+.gs-table { width: 100%; border-collapse: collapse; font-size: 3.3cqh; }
+.gs-table th { font-size: 2.1cqh; text-transform: uppercase; letter-spacing: 0.12em; color: oklch(0.72 0.02 260); font-weight: 600; padding: 0 1cqw 1.2cqh; text-align: right; border-bottom: 0.25cqh solid oklch(1 0 0 / 0.15); }
+.gs-table td { padding: 0.75cqh 1cqw; text-align: right; border-bottom: 0.15cqh solid oklch(1 0 0 / 0.06); white-space: nowrap; }
+.gs-table .gs-left { text-align: left; }
+.gs-table .gs-how { color: oklch(0.75 0.02 260); font-size: 2.6cqh; text-transform: capitalize; }
+.gs-table .gs-strong { font-family: var(--font-display); font-weight: 700; font-size: 3.8cqh; }
+.gs-table tr.is-live td { color: var(--gold); }
+.gs-table tr.is-live td:first-child { box-shadow: inset 0.6cqh 0 0 var(--gold); }
+.gs-table tr.is-out td { color: oklch(0.85 0.01 260); }
+.gs-table-foot { display: flex; justify-content: space-between; margin: 1.6cqh 1cqw 0; font-size: 2.8cqh; color: oklch(0.8 0.02 260); }
+.gs-table-foot strong { font-family: var(--font-display); color: oklch(0.98 0.01 90); font-size: 3.6cqh; }
+
+/* Charts */
+.gs-chart-page { display: grid; grid-template-rows: 1fr auto; gap: 1.4cqh; min-height: 0; }
+.gs-chart { width: 100%; height: 100%; min-height: 0; }
+.gs-grid { stroke: oklch(1 0 0 / 0.1); stroke-width: 2; }
+.gs-axis { fill: oklch(0.75 0.02 260); font-size: 30px; font-family: var(--font-display); }
+.gs-bar-0 { fill: var(--gold); }
+.gs-bar-1 { fill: var(--primary); }
+.gs-line { fill: none; stroke-width: 7; stroke-linejoin: round; stroke-linecap: round; }
+.gs-line-0 { stroke: var(--gold); }
+.gs-line-1 { stroke: var(--primary); }
+.gs-target { stroke: oklch(1 0 0 / 0.5); stroke-width: 3; stroke-dasharray: 14 10; }
+.gs-wicket { fill: oklch(0.98 0.01 90); stroke: var(--primary); stroke-width: 5; }
+.gs-legend { display: flex; justify-content: center; gap: 3cqw; font-size: 2.6cqh; color: oklch(0.85 0.02 260); }
+.gs-key { display: inline-block; width: 2.4cqh; height: 2.4cqh; border-radius: 0.5cqh; vertical-align: -0.3cqh; margin-right: 0.6cqh; }
+.gs-key-0 { background: var(--gold); }
+.gs-key-1 { background: var(--primary); }
+.gs-key-wicket { border-radius: 99px; background: oklch(0.98 0.01 90); box-shadow: inset 0 0 0 0.5cqh var(--primary); }
+
+/* Run chase */
+.gs-chase { display: grid; align-content: center; gap: 3.4cqh; text-align: center; }
+.gs-chase-need { margin: 0; font-family: var(--font-display); font-size: 7cqh; line-height: 1.1; text-transform: uppercase; }
+.gs-chase-need strong { color: var(--gold); font-size: 1.3em; }
+.gs-rates { display: grid; gap: 1.8cqh; }
+.gs-rate { display: grid; grid-template-columns: 26cqw 1fr 10cqw; align-items: center; gap: 2cqw; text-align: left; }
+.gs-rate strong { font-family: var(--font-display); font-size: 5cqh; text-align: right; }
+.gs-rate-track { height: 3.4cqh; border-radius: 99px; background: oklch(1 0 0 / 0.08); overflow: hidden; }
+.gs-rate-fill { height: 100%; border-radius: 99px; }
+.gs-rate-now { background: var(--gold); }
+.gs-rate-need { background: var(--primary); }
+.gs-win { display: grid; gap: 1cqh; }
+.gs-win-bar { display: flex; height: 7cqh; border-radius: 1.4cqh; overflow: hidden; font-family: var(--font-display); font-size: 3.2cqh; }
+.gs-win-bat { display: flex; align-items: center; padding: 0 2cqw; background: var(--gold); color: var(--gold-foreground); white-space: nowrap; }
+.gs-win-bowl { flex: 1; display: flex; align-items: center; justify-content: flex-end; padding: 0 2cqw; background: var(--primary); color: var(--primary-foreground); white-space: nowrap; }
+
+/* Replays and on-screen controls */
+.gs-replay { position: absolute; inset: 0; z-index: 5; background: oklch(0 0 0); display: grid; place-items: center; animation: gs-in 0.3s ease-out; }
+.gs-replay video { width: 100%; height: 100%; object-fit: contain; }
+.gs-replay-tag { position: absolute; left: 3cqw; bottom: 4cqh; display: flex; align-items: center; gap: 1.6cqw; padding: 1.4cqh 2cqw; border-radius: 1.4cqh; background: oklch(0.1 0.02 262 / 0.85); font-family: var(--font-display); text-transform: uppercase; }
+.gs-replay-tag span { font-size: 2.4cqh; letter-spacing: 0.2em; color: oklch(0.8 0.02 260); }
+.gs-replay-tag strong { font-size: 4.4cqh; }
+.gs-replay-tag.is-wicket strong { color: oklch(0.75 0.18 25); }
+.gs-replay-tag.is-four strong, .gs-replay-tag.is-six strong { color: var(--gold); }
+.gs-chrome { position: absolute; right: 2cqw; bottom: 9cqh; z-index: 6; display: flex; flex-direction: column; align-items: flex-end; gap: 1cqh; }
+.gs-chrome-button { display: inline-flex; align-items: center; gap: 0.8cqh; padding: 1cqh 1.8cqh; border-radius: 99px; border: 0.2cqh solid oklch(1 0 0 / 0.25); background: oklch(0.1 0.02 262 / 0.8); color: inherit; font-size: 2cqh; cursor: pointer; }
+.gs-chrome-button svg { width: 2.2cqh; height: 2.2cqh; }
+.gs-note { padding: 0.8cqh 1.4cqh; border-radius: 1cqh; background: oklch(0.1 0.02 262 / 0.8); font-size: 1.8cqh; color: oklch(0.85 0.02 260); }
+
+/* Ground screen control panel */
+.ground-control-preview { border-radius: 0.75rem; overflow: hidden; border: 1px solid oklch(1 0 0 / 0.12); flex: none; }
+.gs-stage-preview { width: 100%; pointer-events: none; user-select: none; }
+.ground-control-section { display: grid; gap: 0.6rem; padding-top: 0.9rem; border-top: 1px solid oklch(1 0 0 / 0.1); }
+.ground-control-section h3 { font-family: var(--font-display); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gold); }
+.ground-control-hint { font-size: 0.8rem; line-height: 1.45; opacity: 0.75; }
+.ground-control-pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.5rem; }
+.ground-control-pages > label, .ground-control-pages > button { display: flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; padding: 0.5rem 0.75rem; border-radius: 0.6rem; border: 1px solid oklch(1 0 0 / 0.14); font-size: 0.875rem; font-weight: 600; cursor: pointer; }
+.ground-control-pages > .is-on { border-color: var(--gold); background: oklch(0.8 0.15 84 / 0.14); }
+.ground-control-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-size: 0.875rem; }
+.ground-control-row small { display: block; margin-top: 0.2rem; font-size: 0.75rem; opacity: 0.7; }
+.ground-control-row select { border-radius: 0.5rem; border: 1px solid oklch(1 0 0 / 0.14); background: oklch(0 0 0 / 0.3); padding: 0.35rem 0.5rem; }
+.ground-control-row input[type="checkbox"], .ground-control-pages input[type="checkbox"] { width: 1.15rem; height: 1.15rem; accent-color: var(--gold); flex: none; }
+.ground-control-balls { display: grid; gap: 0.4rem; }
+.ground-control-balls li { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.4rem 0.6rem; border-radius: 0.6rem; background: oklch(1 0 0 / 0.04); font-size: 0.875rem; }
