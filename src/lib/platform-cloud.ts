@@ -376,7 +376,8 @@ export async function loadOrganisationDashboard(
         client
           .from("camera_devices")
           .select("id,room_id,label,angle,clock_offset_ms,status,last_heartbeat_at")
-          .in("room_id", roomIds),
+          .in("room_id", roomIds)
+          .is("removed_at", null),
       )
     : [];
   const administrativeRoles: PlatformRole[] = [
@@ -848,6 +849,18 @@ export async function createCameraRoom(input: {
   });
   if (error) throw error;
   return data as { roomId: string; pairingToken: string; expiresAt: string };
+}
+
+/** How many phones may join a camera room (1–8). Only camera directors for the match can change it. */
+export async function setCameraRoomCapacity(roomId: string, maxDevices: number): Promise<void> {
+  const { error } = await getCloudClient().rpc("set_camera_room_capacity", { p_room_id: roomId, p_max_devices: maxDevices });
+  if (error) throw error;
+}
+
+/** Takes a phone out of a camera room to free its place; its recordings are kept. */
+export async function removeCameraDevice(deviceId: string): Promise<void> {
+  const { error } = await getCloudClient().rpc("remove_camera_device", { p_device_id: deviceId });
+  if (error) throw error;
 }
 
 export async function setPublicScoreboard(input: {

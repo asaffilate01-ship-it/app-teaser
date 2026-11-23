@@ -59,7 +59,7 @@ export const en = {
     ctaTitle1: "Watch the match back,",
     ctaTitle2: "ball by ball",
     ctaBody:
-      "Review recorded footage with slow motion, frame stepping and drawing tools on your device. Multi-phone capture and AI analysis are separate pilot features.",
+      "Review recorded footage with slow motion, frame stepping and drawing tools, compare two angles side by side and send scouting reports to bigger teams.",
     ctaButton: "Start scoring",
     tags: { league: "League", academy: "Academy", cup: "T20 Cup" },
   },
@@ -70,19 +70,19 @@ export const en = {
     },
     {
       title: "Multi-phone camera room",
-      body: "Cloud pilot: pair phones at both ends and side-on, then keep every angle linked to the delivery it captured.",
+      body: "Pair up to 8 phones per match — both ends, side-on and roaming — and keep every angle linked to the ball it captured.",
     },
     {
       title: "Coaching review",
-      body: "Preview available: load multiple local angles, use slow motion, frame stepping, angle switching, zoom and drawing tools.",
+      body: "Slow motion, frame stepping, angle switching, zoom and drawing tools, with two synced angles side by side.",
     },
     {
       title: "Live scoreboards",
-      body: "Cloud roadmap: share a live scoreboard with run rate, partnerships, fall of wickets and a rolling delivery timeline.",
+      body: "Share a live scoreboard with run rate, win chances, partnerships, fall of wickets and ball-by-ball text.",
     },
     {
       title: "Desktop and mobile",
-      body: "Preview available on phone or laptop, with device-to-device cloud sync following in the pilot.",
+      body: "Score on a phone at the boundary or a laptop in the pavilion. Every ball is saved offline and synced when the signal returns.",
     },
     {
       title: "Clubs, teams and players",
@@ -90,14 +90,14 @@ export const en = {
     },
     {
       title: "Share live scoring",
-      body: "Cloud roadmap: leagues and clubs choose whether live scoring is private, shared with the opposition or league, or public for supporters.",
+      body: "Leagues and clubs choose whether live scoring is private, shared with the opposition or league, or public for supporters.",
     },
   ],
   featuresTab: {
     kicker: "Platform",
     title: "Features",
     intro:
-      "The scorer and local video tools are available to try. Club cloud viewing and advanced integrations are being tested.",
+      "Scoring, camera rooms, live scoreboards, league hubs, coaching review and scouting reports — everything a club and league needs in one place.",
     watchTitle: "Who can watch live",
     watchBody:
       "Private, opposition, league and public viewing rules require a configured club cloud workspace; they are not features of the device-only scorer.",
@@ -142,7 +142,7 @@ export const en = {
       },
       {
         label: "Coaching review",
-        caption: "Desktop • four synced angles, frame-by-frame scrubbing and drawing tools",
+        caption: "Desktop • two synced angles side by side, frame-by-frame scrubbing and drawing tools",
       },
       {
         label: "Match dashboard",
@@ -176,7 +176,7 @@ export const en = {
     selectLabel: "Select your country",
     mostPopular: "For clubs",
     pilotNotice:
-      "Club and League plans are not yet available to purchase online. Prices and features are indicative; contact us about a pilot.",
+      "Club and League plans are set up with you directly for now. Prices shown are for your country; contact us to get started.",
     free: "Free",
     custom: "Custom",
     plans: [
@@ -199,7 +199,7 @@ export const en = {
         blurb: "The full match-day kit for clubs running several sides.",
         perks: [
           "Unlimited teams and fixtures",
-          "Unlimited camera angles per delivery",
+          "Up to 8 camera phones per match",
           "90-day video retention + clip export",
           "Coaching review with slow-motion tagging",
           "Share live scoring with opposition clubs",
@@ -223,7 +223,7 @@ export const en = {
       },
     ],
     footnote:
-      "Pilot prices and features are indicative. Taxes, billing terms and educational discounts will be confirmed before subscription.",
+      "Prices shown are for your country. Taxes and billing terms are confirmed before you subscribe.",
   },
   faq: {
     kicker: "Answers",
@@ -235,23 +235,23 @@ export const en = {
       },
       {
         q: "Do I need special cameras?",
-        a: "No. The preview accepts videos recorded by ordinary phones and lets you change angles during review. Synchronized remote-phone capture is part of the cloud pilot.",
+        a: "No. Ordinary phones work. Pair up to 8 phones per match (4 to start — the club can change it), watch every angle live on the director screen, record each ball and compare two angles side by side in review.",
       },
       {
         q: "Can I score without signal?",
-        a: "Yes. If the scorer is already open, you can keep recording balls on your device without a signal. Cloud sync is a separate club service and must be tested before match day.",
+        a: "Yes. Every ball is saved on the phone first. When the signal comes back, CricLume sends the balls to the club in the right order, so nothing is lost.",
       },
       {
         q: "Does it handle rain rules?",
-        a: "Not yet. Official rain-target calculations will only be released after the current method and required licence have been verified; the preview does not calculate an adjusted target.",
+        a: "Yes. Choose average run rate, most productive overs, a DLS target entered from the official resource, or a manual target. Leagues can set one default rule for all their matches.",
       },
       {
         q: "Where is video stored?",
-        a: "In the preview, chosen videos remain on the device and are not uploaded by CricLume. Organisation storage, retention, consent and privacy controls are cloud-pilot work.",
+        a: "In your club's private storage. Only your club's coaches and staff can watch it, player consent is checked first, and videos are removed after the club's chosen retention period.",
       },
       {
         q: "Can other clubs and the league watch our scoring live?",
-        a: "Not in the device-only preview. Private, opposition, league and public visibility controls are specified for the cloud pilot.",
+        a: "Yes. Each match can be private, shared with the opposition club, shared with the league, or public, and fans can turn on phone alerts for wickets and results.",
       },
       {
         q: "Is there a free option?",
@@ -351,7 +351,7 @@ export const de: Content = {
     ctaTitle1: "Sieh das Spiel erneut,",
     ctaTitle2: "Ball für Ball",
     ctaBody:
-      "Prüfe aufgenommene Videos auf deinem Gerät mit Zeitlupe, Einzelbildern und Zeichenwerkzeugen. Mehrkamera- und KI-Funktionen werden getrennt getestet.",
+      "Prüfe Aufnahmen mit Zeitlupe, Einzelbildern und Zeichenwerkzeugen, vergleiche zwei Winkel nebeneinander und sende Scouting-Berichte an größere Teams.",
     ctaButton: "Scoring starten",
     tags: { league: "Liga", academy: "Akademie", cup: "T20-Pokal" },
   },
@@ -362,19 +362,19 @@ export const de: Content = {
     },
     {
       title: "Kameraraum mit mehreren Handys",
-      body: "Handys an beiden Enden und seitlich koppeln — oder so viele Winkel hinzufügen, wie nötig. Ein Tipp startet den Raum, jeder Winkel bleibt mit seinem Ball verknüpft.",
+      body: "Verbinde bis zu 8 Handys pro Spiel – an beiden Enden, seitlich und mobil – und verknüpfe jeden Winkel mit dem Ball, den er zeigt.",
     },
     {
       title: "Trainingsanalyse",
-      body: "Zeitlupe, Einzelbildschritte, Winkelwechsel, Zoom, Zeichenwerkzeuge und Sprachnotizen für das Feedback nach dem Spiel.",
+      body: "Zeitlupe, Einzelbildschritte, Winkelwechsel, Zoom und Zeichenwerkzeuge, mit zwei synchronen Winkeln nebeneinander.",
     },
     {
       title: "Live-Anzeigetafeln",
-      body: "Anzeigetafeln in Broadcast-Qualität mit Run Rate, Partnerschaften, Wicket-Verlauf und rollender Ball-Timeline.",
+      body: "Teile eine Live-Anzeigetafel mit Run-Rate, Siegchancen, Partnerschaften, Wicket-Verlauf und Ball-für-Ball-Text.",
     },
     {
       title: "Desktop und Mobil",
-      body: "Scoring per Handy am Spielfeldrand oder per Laptop im Clubhaus — dasselbe Spiel, synchron.",
+      body: "Scoring per Handy am Spielfeldrand oder Laptop im Clubhaus. Jeder Ball wird offline gespeichert und bei Empfang synchronisiert.",
     },
     {
       title: "Clubs, Teams und Spieler",
@@ -389,7 +389,7 @@ export const de: Content = {
     kicker: "Plattform",
     title: "Funktionen",
     intro:
-      "Scoring und lokale Videoanalyse sind ausprobierbar. Club-Cloud-Ansichten und erweiterte Integrationen werden getestet.",
+      "Scoring, Kameraräume, Live-Anzeigetafeln, Liga-Zentrale, Trainingsanalyse und Scouting-Berichte – alles, was Club und Liga brauchen, an einem Ort.",
     watchTitle: "Wer live zuschauen kann",
     watchBody:
       "Private, gegnerische, Liga- und öffentliche Ansichten brauchen einen eingerichteten Club-Cloud-Zugang und sind nicht Teil des lokalen Scorers.",
@@ -438,7 +438,7 @@ export const de: Content = {
       },
       {
         label: "Trainingsanalyse",
-        caption: "Desktop • vier synchrone Winkel, Einzelbild-Navigation und Zeichenwerkzeuge",
+        caption: "Desktop • zwei synchrone Winkel nebeneinander, Einzelbild-Navigation und Zeichenwerkzeuge",
       },
       {
         label: "Spiel-Dashboard",
@@ -472,7 +472,7 @@ export const de: Content = {
     selectLabel: "Land auswählen",
     mostPopular: "Für Vereine",
     pilotNotice:
-      "Club- und Liga-Abos sind noch nicht online buchbar. Preise und Leistungen sind vorläufig; frage nach dem Pilot.",
+      "Club- und Liga-Abos richten wir vorerst direkt mit dir ein. Die Preise gelten für dein Land; melde dich, um zu starten.",
     free: "Kostenlos",
     custom: "Individuell",
     plans: [
@@ -495,7 +495,7 @@ export const de: Content = {
         blurb: "Die komplette Spieltags-Ausrüstung für Clubs mit mehreren Teams.",
         perks: [
           "Unbegrenzte Teams und Spiele",
-          "Unbegrenzte Kamerawinkel pro Ball",
+          "Bis zu 8 Kamera-Handys pro Spiel",
           "90 Tage Videospeicherung + Clip-Export",
           "Analyse mit Zeitlupen-Tagging",
           "Live-Scoring mit Gegnern teilen",
@@ -519,7 +519,7 @@ export const de: Content = {
       },
     ],
     footnote:
-      "Pilotpreise und Funktionen sind vorläufig. Steuern, Vertragsbedingungen und Schulrabatte werden vor Abschluss bestätigt.",
+      "Die Preise gelten für dein Land. Steuern und Zahlungsbedingungen werden vor Abschluss bestätigt.",
   },
   faq: {
     kicker: "Antworten",
@@ -531,23 +531,23 @@ export const de: Content = {
       },
       {
         q: "Brauche ich spezielle Kameras?",
-        a: "Nein. Lokale Videoanalyse funktioniert mit Aufnahmen normaler Handys. Synchronisierte Mehrkameraaufnahmen werden im Cloud-Pilot erprobt.",
+        a: "Nein. Normale Handys reichen. Verbinde bis zu 8 Handys pro Spiel (anfangs 4 – der Club kann das ändern), sieh alle Winkel live im Regie-Bildschirm, nimm jeden Ball auf und vergleiche zwei Winkel nebeneinander.",
       },
       {
         q: "Kann ich ohne Empfang scoren?",
-        a: "Ja. Wenn der Scorer bereits geöffnet ist, kannst du Bälle ohne Internet auf deinem Gerät erfassen. Die Club-Cloud-Synchronisierung muss separat eingerichtet und getestet werden.",
+        a: "Ja. Jeder Ball wird zuerst auf dem Handy gespeichert. Sobald wieder Empfang da ist, sendet CricLume die Bälle in der richtigen Reihenfolge an den Club – nichts geht verloren.",
       },
       {
         q: "Werden Regenregeln unterstützt?",
-        a: "Noch nicht. Offizielle Regen-Zielberechnungen werden erst nach Prüfung der Methode und der nötigen Lizenz aktiviert.",
+        a: "Ja. Wähle durchschnittliche Run-Rate, produktivste Overs, ein DLS-Ziel aus der offiziellen Quelle oder ein manuelles Ziel. Ligen können eine Standardregel für alle Spiele festlegen.",
       },
       {
         q: "Wo werden Videos gespeichert?",
-        a: "Bei der lokalen Vorschau bleiben ausgewählte Aufnahmen auf deinem Gerät. Private Cloud-Speicherung und Einwilligungen müssen gesondert eingerichtet werden.",
+        a: "Im privaten Speicher deines Clubs. Nur Trainer und Mitarbeiter deines Clubs können sie ansehen, die Einwilligung der Spieler wird zuerst geprüft, und Videos werden nach der vom Club gewählten Frist gelöscht.",
       },
       {
         q: "Können andere Clubs und die Liga unser Scoring live sehen?",
-        a: "Nicht über den lokalen Scorer allein. Private, gegnerische, Liga- und öffentliche Ansichten erfordern eine eingerichtete Club-Cloud-Umgebung.",
+        a: "Ja. Jedes Spiel kann privat sein, mit dem Gegner, der Liga oder öffentlich geteilt werden, und Fans können Handy-Benachrichtigungen für Wickets und Ergebnisse einschalten.",
       },
       {
         q: "Gibt es eine kostenlose Option?",
@@ -646,7 +646,7 @@ export const nl: Content = {
     ctaTitle1: "Kijk de wedstrijd terug,",
     ctaTitle2: "bal voor bal",
     ctaBody:
-      "Bekijk opgenomen video met vertraging, beeld-voor-beeld en tekengereedschap. Multi-telefoonopnamen en AI-analyse zijn aparte pilotfuncties.",
+      "Bekijk beelden met slow motion, beeld-voor-beeld en tekengereedschap, vergelijk twee hoeken naast elkaar en stuur scoutingrapporten naar grotere teams.",
     ctaButton: "Begin met scoren",
     tags: { league: "Competitie", academy: "Academie", cup: "T20-beker" },
   },
@@ -657,19 +657,19 @@ export const nl: Content = {
     },
     {
       title: "Camerakamer met meerdere telefoons",
-      body: "Koppel telefoons aan beide kanten en van opzij — of voeg zoveel hoeken toe als nodig. Eén tik start de kamer en elke hoek blijft aan zijn bal gekoppeld.",
+      body: "Koppel tot 8 telefoons per wedstrijd – aan beide kanten, van opzij en los – en koppel elke hoek aan de bal die hij filmde.",
     },
     {
       title: "Coachingsanalyse",
-      body: "Slow motion, beeld-voor-beeld, hoeken wisselen, zoomen, tekengereedschap en spraaknotities voor feedback na de wedstrijd.",
+      body: "Slow motion, beeld-voor-beeld, hoeken wisselen, zoom en tekengereedschap, met twee gesynchroniseerde hoeken naast elkaar.",
     },
     {
       title: "Live scoreborden",
-      body: "Scoreborden van uitzendkwaliteit met run rate, partnerships, wicketverloop en een doorlopende baltijdlijn.",
+      body: "Deel een live scorebord met run rate, winkansen, partnerships, val van wickets en bal-voor-bal tekst.",
     },
     {
       title: "Desktop en mobiel",
-      body: "Scoor met een telefoon langs de lijn of met een laptop in het clubhuis — dezelfde wedstrijd, synchroon.",
+      body: "Scoor met een telefoon langs de lijn of een laptop in het clubhuis. Elke bal wordt offline bewaard en gesynchroniseerd zodra er bereik is.",
     },
     {
       title: "Clubs, teams en spelers",
@@ -684,7 +684,7 @@ export const nl: Content = {
     kicker: "Platform",
     title: "Functies",
     intro:
-      "De scorer en lokale videofuncties zijn te proberen. Cloudweergaven en geavanceerde koppelingen worden getest.",
+      "Scoren, cameraruimtes, live scoreborden, competitieoverzicht, coachingreview en scoutingrapporten – alles wat club en competitie nodig hebben op één plek.",
     watchTitle: "Wie live kan meekijken",
     watchBody:
       "Privé-, tegenstander-, competitie- en openbare weergaven vragen een ingestelde clubcloud en zijn geen onderdeel van de lokale scorer.",
@@ -730,7 +730,7 @@ export const nl: Content = {
       {
         label: "Coachingsanalyse",
         caption:
-          "Desktop • vier gesynchroniseerde hoeken, beeld-voor-beeld scrubben en tekengereedschap",
+          "Desktop • twee gesynchroniseerde hoeken naast elkaar, beeld-voor-beeld scrubben en tekengereedschap",
       },
       {
         label: "Wedstrijddashboard",
@@ -764,7 +764,7 @@ export const nl: Content = {
     selectLabel: "Kies je land",
     mostPopular: "Voor clubs",
     pilotNotice:
-      "Club- en competitieabonnementen zijn nog niet online verkrijgbaar. Prijzen en functies zijn indicatief; neem contact op voor de pilot.",
+      "Club- en competitieabonnementen regelen we voorlopig direct met je. De prijzen gelden voor jouw land; neem contact op om te starten.",
     free: "Gratis",
     custom: "Op maat",
     plans: [
@@ -787,7 +787,7 @@ export const nl: Content = {
         blurb: "De volledige wedstrijduitrusting voor clubs met meerdere teams.",
         perks: [
           "Onbeperkt teams en wedstrijden",
-          "Onbeperkt camerahoeken per bal",
+          "Tot 8 cameratelefoons per wedstrijd",
           "90 dagen videobewaring + clipexport",
           "Analyse met slow-motion tagging",
           "Live scoren delen met tegenstanders",
@@ -811,7 +811,7 @@ export const nl: Content = {
       },
     ],
     footnote:
-      "Pilotprijzen en functies zijn indicatief. Belastingen, voorwaarden en onderwijskortingen worden vooraf bevestigd.",
+      "De prijzen gelden voor jouw land. Belastingen en betaalvoorwaarden worden bevestigd voordat je je aanmeldt.",
   },
   faq: {
     kicker: "Antwoorden",
@@ -823,23 +823,23 @@ export const nl: Content = {
       },
       {
         q: "Heb ik speciale camera's nodig?",
-        a: "Nee. Voor lokale videoreview volstaan normale telefoonvideo's. Gesynchroniseerde multi-telefoonopnamen worden in de cloudpilot getest.",
+        a: "Nee. Gewone telefoons volstaan. Koppel tot 8 telefoons per wedstrijd (eerst 4 – de club kan dat aanpassen), bekijk elke hoek live op het regiescherm, neem elke bal op en vergelijk twee hoeken naast elkaar.",
       },
       {
         q: "Kan ik scoren zonder bereik?",
-        a: "Ja. Als de scorer al openstaat, kun je zonder internet ballen op je apparaat registreren. Cloudsynchronisatie is een aparte clubdienst die vooraf getest moet worden.",
+        a: "Ja. Elke bal wordt eerst op de telefoon bewaard. Zodra er weer bereik is, stuurt CricLume de ballen in de juiste volgorde naar de club, zodat er niets verloren gaat.",
       },
       {
         q: "Ondersteunt het regenregels?",
-        a: "Nog niet. Officiële regendoelberekeningen worden pas ingeschakeld na verificatie van de methode en benodigde licentie.",
+        a: "Ja. Kies gemiddelde run rate, meest productieve overs, een DLS-doel uit de officiële bron of een handmatig doel. Competities kunnen één standaardregel voor al hun wedstrijden instellen.",
       },
       {
         q: "Waar wordt video opgeslagen?",
-        a: "Bij lokale review blijven gekozen video's op je apparaat. Privécloudopslag en toestemming vereisen een aparte configuratie.",
+        a: "In de privéopslag van je club. Alleen trainers en staf van je club kunnen ze bekijken, toestemming van spelers wordt eerst gecontroleerd en video's worden verwijderd na de bewaartermijn die de club kiest.",
       },
       {
         q: "Kunnen andere clubs en de competitie ons live volgen?",
-        a: "Niet via de lokale scorer alleen. Privé-, tegenstander-, competitie- en openbare weergaven vereisen een ingestelde clubcloud.",
+        a: "Ja. Elke wedstrijd kan privé zijn, gedeeld met de tegenstander, de competitie of openbaar, en fans kunnen meldingen op hun telefoon aanzetten voor wickets en uitslagen.",
       },
       {
         q: "Is er een gratis optie?",
@@ -938,7 +938,7 @@ export const af: Content = {
     ctaTitle1: "Kyk die wedstryd weer,",
     ctaTitle2: "bal vir bal",
     ctaBody:
-      "Hersien opgeneemde video's met stadige aksie, raampie-vir-raampie en tekengereedskap. Meervoudige kameras en KI is aparte loodsfunksies.",
+      "Hersien opnames met stadige aksie, raampie-vir-raampie en tekengereedskap, vergelyk twee hoeke langs mekaar en stuur verkenningsverslae na groter spanne.",
     ctaButton: "Begin tel",
     tags: { league: "Liga", academy: "Akademie", cup: "T20-beker" },
   },
@@ -949,19 +949,19 @@ export const af: Content = {
     },
     {
       title: "Kamerakamer met verskeie fone",
-      body: "Koppel fone aan albei kante en van die sykant — of voeg soveel hoeke by as wat nodig is. Een tik begin die kamer en elke hoek bly aan sy bal gekoppel.",
+      body: "Koppel tot 8 fone per wedstryd – aan albei kante, van die sykant en rondbeweeg – en koppel elke hoek aan die bal wat dit verfilm het.",
     },
     {
       title: "Afrigtersontleding",
-      body: "Stadige aksie, raampie-vir-raampie, hoekwisseling, zoem, tekengereedskap en stemnotas vir terugvoer ná die wedstryd.",
+      body: "Stadige aksie, raampie-vir-raampie, hoekwisseling, zoem en tekengereedskap, met twee gesinchroniseerde hoeke langs mekaar.",
     },
     {
       title: "Regstreekse telborde",
-      body: "Uitsaaikwaliteit telborde met lopietempo, vennootskappe, paaltjieverlies en 'n rollende baltydlyn.",
+      body: "Deel 'n regstreekse telbord met lopietempo, wenkanse, vennootskappe, paaltjieval en bal-vir-bal teks.",
     },
     {
       title: "Rekenaar en selfoon",
-      body: "Teken aan met 'n foon langs die kantlyn of 'n skootrekenaar in die klubhuis — dieselfde wedstryd, in sinchronisasie.",
+      body: "Teken aan met 'n foon langs die kantlyn of 'n skootrekenaar in die klubhuis. Elke bal word vanlyn gestoor en gesinchroniseer sodra daar sein is.",
     },
     {
       title: "Klubs, spanne en spelers",
@@ -976,7 +976,7 @@ export const af: Content = {
     kicker: "Platform",
     title: "Kenmerke",
     intro:
-      "Die tellingblad en plaaslike video-oorsig kan getoets word. Klubwolkaansigte en ander integrasies word nog getoets.",
+      "Aanteken, kamerakamers, regstreekse telborde, ligasentrum, afrigtingsoorsig en verkenningsverslae – alles wat 'n klub en liga nodig het op een plek.",
     watchTitle: "Wie regstreeks kan kyk",
     watchBody:
       "Private, teenstander-, liga- en openbare aansigte vereis 'n opgestelde klubwolkdiens; dit is nie deel van die plaaslike tellingblad nie.",
@@ -1025,7 +1025,7 @@ export const af: Content = {
       {
         label: "Afrigtersontleding",
         caption:
-          "Rekenaar • vier gesinchroniseerde hoeke, raampie-vir-raampie navigasie en tekengereedskap",
+          "Rekenaar • twee gesinchroniseerde hoeke langs mekaar, raampie-vir-raampie navigasie en tekengereedskap",
       },
       {
         label: "Wedstryd-dashboard",
@@ -1059,7 +1059,7 @@ export const af: Content = {
     selectLabel: "Kies jou land",
     mostPopular: "Vir klubs",
     pilotNotice:
-      "Klub- en liga-intekeninge is nog nie aanlyn beskikbaar nie. Pryse en funksies is voorlopig; kontak ons oor die loodsprojek.",
+      "Klub- en liga-intekeninge rig ons voorlopig direk saam met jou op. Die pryse geld vir jou land; kontak ons om te begin.",
     free: "Gratis",
     custom: "Pasgemaak",
     plans: [
@@ -1082,7 +1082,7 @@ export const af: Content = {
         blurb: "Die volle wedstryddagpakket vir klubs met verskeie spanne.",
         perks: [
           "Onbeperkte spanne en wedstryde",
-          "Onbeperkte kamerahoeke per bal",
+          "Tot 8 kamerafone per wedstryd",
           "90 dae videoberging + knipsel-uitvoer",
           "Ontleding met stadige-aksie merking",
           "Deel regstreekse aantekening met teenstanders",
@@ -1106,7 +1106,7 @@ export const af: Content = {
       },
     ],
     footnote:
-      "Loodspryse en funksies is voorlopig. Belasting, bepalings en skoolafslag word vooraf bevestig.",
+      "Die pryse geld vir jou land. Belasting en betaalvoorwaardes word bevestig voordat jy inteken.",
   },
   faq: {
     kicker: "Antwoorde",
@@ -1118,23 +1118,23 @@ export const af: Content = {
       },
       {
         q: "Het ek spesiale kameras nodig?",
-        a: "Nee. Gewone selfoonvideo's werk vir plaaslike hersiening. Gesinchroniseerde opnames met meer fone word in die wolkloods getoets.",
+        a: "Nee. Gewone fone werk. Koppel tot 8 fone per wedstryd (aanvanklik 4 – die klub kan dit verander), kyk elke hoek regstreeks op die regieskerm, neem elke bal op en vergelyk twee hoeke langs mekaar.",
       },
       {
         q: "Kan ek sonder sein aanteken?",
-        a: "Ja. As die tellingblad reeds oop is, kan jy balle sonder internet op jou toestel aanteken. Wolksinchronisasie is 'n aparte klubdiens wat vooraf getoets moet word.",
+        a: "Ja. Elke bal word eers op die foon gestoor. Sodra die sein terug is, stuur CricLume die balle in die regte volgorde na die klub, so niks gaan verlore nie.",
       },
       {
         q: "Hanteer dit reënreëls?",
-        a: "Nog nie. Amptelike reënteikenberekeninge word eers geaktiveer ná verifikasie van die metode en vereiste lisensie.",
+        a: "Ja. Kies gemiddelde lopietempo, mees produktiewe boulbeurte, 'n DLS-teiken uit die amptelike bron of 'n handmatige teiken. Ligas kan een standaardreël vir al hul wedstryde stel.",
       },
       {
         q: "Waar word video gestoor?",
-        a: "Vir plaaslike hersiening bly gekose video's op jou toestel. Private wolkberging en toestemming vereis aparte opstelling.",
+        a: "In jou klub se private berging. Net jou klub se afrigters en personeel kan dit kyk, spelers se toestemming word eers nagegaan, en video's word verwyder ná die klub se gekose bewaartydperk.",
       },
       {
         q: "Kan ander klubs en die liga ons regstreeks volg?",
-        a: "Nie via die plaaslike tellingblad alleen nie. Private, teenstander-, liga- en openbare aansigte vereis 'n opgestelde klubwolkdiens.",
+        a: "Ja. Elke wedstryd kan privaat wees, met die teenstander, die liga of die publiek gedeel word, en ondersteuners kan foonkennisgewings vir paaltjies en uitslae aanskakel.",
       },
       {
         q: "Is daar 'n gratis opsie?",
@@ -1233,7 +1233,7 @@ export const fr: Content = {
     ctaTitle1: "Revoyez le match,",
     ctaTitle2: "balle par balle",
     ctaBody:
-      "Revoyez des vidéos sur votre appareil au ralenti, image par image et avec annotations. La capture multi-téléphones et l'IA restent des fonctions pilotes.",
+      "Revoyez les images au ralenti, image par image et avec annotations, comparez deux angles côte à côte et envoyez des rapports de recrutement aux grandes équipes.",
     ctaButton: "Commencer le marquage",
     tags: { league: "Ligue", academy: "Académie", cup: "Coupe T20" },
   },
@@ -1244,19 +1244,19 @@ export const fr: Content = {
     },
     {
       title: "Salle caméra multi-téléphones",
-      body: "Associez des téléphones aux deux extrémités et de côté — ou ajoutez autant d'angles que nécessaire. Un appui lance la salle et chaque angle reste lié à sa balle.",
+      body: "Associez jusqu'à 8 téléphones par match – aux deux extrémités, de côté et mobiles – et reliez chaque angle à la balle filmée.",
     },
     {
       title: "Analyse d'entraînement",
-      body: "Ralenti, image par image, changement d'angle, zoom, outils de dessin et notes vocales pour le retour d'après-match.",
+      body: "Ralenti, image par image, changement d'angle, zoom et outils de dessin, avec deux angles synchronisés côte à côte.",
     },
     {
       title: "Tableaux de score en direct",
-      body: "Tableaux de qualité broadcast avec run rate, partenariats, chute des guichets et chronologie des balles.",
+      body: "Partagez un tableau de score en direct avec run rate, chances de victoire, partenariats, chute des guichets et texte balle par balle.",
     },
     {
       title: "Ordinateur et mobile",
-      body: "Marquez depuis un téléphone au bord du terrain ou un portable au club — le même match, synchronisé.",
+      body: "Marquez depuis un téléphone au bord du terrain ou un ordinateur au club-house. Chaque balle est enregistrée hors ligne et synchronisée au retour du réseau.",
     },
     {
       title: "Clubs, équipes et joueurs",
@@ -1271,7 +1271,7 @@ export const fr: Content = {
     kicker: "Plateforme",
     title: "Fonctions",
     intro:
-      "Le marqueur et la revue vidéo locale sont disponibles à l'essai. Les vues cloud et les intégrations avancées sont en pilote.",
+      "Marquage, salles caméra, tableaux en direct, espace ligue, revue d'entraînement et rapports de recrutement – tout ce dont un club et une ligue ont besoin, au même endroit.",
     watchTitle: "Qui peut suivre en direct",
     watchBody:
       "Les vues privées, adversaires, ligues et publiques nécessitent un espace cloud configuré; elles ne font pas partie du marqueur local.",
@@ -1319,7 +1319,7 @@ export const fr: Content = {
       {
         label: "Analyse d'entraînement",
         caption:
-          "Bureau • quatre angles synchronisés, navigation image par image et outils de dessin",
+          "Bureau • deux angles synchronisés côte à côte, navigation image par image et outils de dessin",
       },
       {
         label: "Tableau de bord du match",
@@ -1353,7 +1353,7 @@ export const fr: Content = {
     selectLabel: "Choisissez votre pays",
     mostPopular: "Pour les clubs",
     pilotNotice:
-      "Les offres Club et Ligue ne sont pas encore achetables en ligne. Les prix et fonctions sont indicatifs ; contactez-nous pour le pilote.",
+      "Les offres Club et Ligue sont mises en place directement avec vous pour l'instant. Les prix affichés sont ceux de votre pays ; contactez-nous pour commencer.",
     free: "Gratuit",
     custom: "Sur mesure",
     plans: [
@@ -1376,7 +1376,7 @@ export const fr: Content = {
         blurb: "L'équipement complet du jour de match pour les clubs à plusieurs équipes.",
         perks: [
           "Équipes et matchs illimités",
-          "Angles de caméra illimités par balle",
+          "Jusqu'à 8 téléphones caméra par match",
           "90 jours de conservation vidéo + export de clips",
           "Analyse avec marquage au ralenti",
           "Partage du direct avec les clubs adverses",
@@ -1400,7 +1400,7 @@ export const fr: Content = {
       },
     ],
     footnote:
-      "Les tarifs et fonctionnalités pilotes sont indicatifs. Taxes, conditions et remises scolaires seront confirmées avant inscription.",
+      "Les prix affichés sont ceux de votre pays. Taxes et conditions de paiement sont confirmées avant l'inscription.",
   },
   faq: {
     kicker: "Réponses",
@@ -1412,23 +1412,23 @@ export const fr: Content = {
       },
       {
         q: "Faut-il des caméras spéciales ?",
-        a: "Non. Des vidéos filmées avec un téléphone suffisent pour la revue locale. La capture synchronisée multi-téléphones est testée dans le pilote cloud.",
+        a: "Non. De simples téléphones suffisent. Associez jusqu'à 8 téléphones par match (4 au départ – le club peut changer), suivez chaque angle en direct sur l'écran de réalisation, enregistrez chaque balle et comparez deux angles côte à côte.",
       },
       {
         q: "Puis-je marquer sans réseau ?",
-        a: "Oui. Si le marqueur est déjà ouvert, vous pouvez enregistrer les balles sur votre appareil sans connexion. La synchronisation cloud est un service club distinct à tester avant le match.",
+        a: "Oui. Chaque balle est d'abord enregistrée sur le téléphone. Dès que le réseau revient, CricLume envoie les balles au club dans le bon ordre : rien n'est perdu.",
       },
       {
         q: "Les règles de pluie sont-elles gérées ?",
-        a: "Pas encore. Les calculs officiels des objectifs après pluie seront activés uniquement après vérification de la méthode et de la licence requise.",
+        a: "Oui. Choisissez le run rate moyen, les overs les plus productifs, un objectif DLS saisi depuis la source officielle ou un objectif manuel. Les ligues peuvent fixer une règle par défaut pour tous leurs matchs.",
       },
       {
         q: "Où sont stockées les vidéos ?",
-        a: "Dans la revue locale, les vidéos choisies restent sur votre appareil. Le stockage cloud privé et les consentements nécessitent une configuration distincte.",
+        a: "Dans le stockage privé de votre club. Seuls les entraîneurs et le personnel du club peuvent les voir, le consentement des joueurs est vérifié d'abord, et les vidéos sont supprimées après la durée de conservation choisie par le club.",
       },
       {
         q: "Les autres clubs et la ligue peuvent-ils suivre en direct ?",
-        a: "Pas avec le marqueur local seul. Les vues privées, adversaires, ligues et publiques nécessitent un service cloud configuré.",
+        a: "Oui. Chaque match peut être privé, partagé avec l'adversaire, la ligue ou le public, et les supporters peuvent activer des alertes sur téléphone pour les guichets et les résultats.",
       },
       {
         q: "Existe-t-il une offre gratuite ?",

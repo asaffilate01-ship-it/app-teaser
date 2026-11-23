@@ -78,6 +78,13 @@
       "when": 1795418003205,
       "tag": "0010_awards_and_scouting_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795418454185,
+      "tag": "0011_camera_room_capacity",
+      "breakpoints": true
     }
   ]
 }

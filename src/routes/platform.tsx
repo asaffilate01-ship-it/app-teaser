@@ -72,6 +72,8 @@ import { usePlatformDashboard } from "@/hooks/use-platform-dashboard";
 import { listOrganisationMemberships, type OrganisationMembership } from "@/lib/cloud";
 import {
   createCameraRoom,
+  setCameraRoomCapacity,
+  removeCameraDevice,
   createCheckout,
   openBillingPortal,
   createCompetition,
@@ -1655,20 +1657,48 @@ function Capture({
                       {teamNameForMatch(data, room.matchId)} · {room.status}
                     </p>
                   </div>
-                  <span className="text-sm font-bold text-amber-200">
-                    {room.devices.length}/{room.maxDevices}
+                  <span className="text-sm font-bold text-amber-200" aria-label={`${room.devices.length} of ${room.maxDevices} phones`}>
+                    {room.devices.length}/{room.maxDevices} phones
                   </span>
                 </div>
+                {(can(role, "video.capture") || can(role, "match.score")) && room.status === "open" && (
+                  <label className="mt-3 flex items-center justify-between gap-2 text-xs text-slate-300">
+                    Phones allowed in this match
+                    <select
+                      className="rounded-lg border border-white/10 bg-black/30 px-2 py-1"
+                      value={room.maxDevices}
+                      onChange={(event) => void run(() => setCameraRoomCapacity(room.id, Number(event.target.value)))}
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map((count) => (
+                        <option key={count} value={count} disabled={count < room.devices.length}>
+                          {count}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
                 <div className="mt-3 space-y-2">
                   {room.devices.map((device) => (
                     <div
                       key={device.id}
-                      className="flex justify-between rounded-lg bg-white/[0.04] px-3 py-2 text-xs"
+                      className="flex items-center justify-between gap-2 rounded-lg bg-white/[0.04] px-3 py-2 text-xs"
                     >
                       <span>
                         {device.label} · {device.angle.replaceAll("_", " ")}
                       </span>
-                      <span className="text-slate-500">{device.clockOffsetMs} ms</span>
+                      <span className="flex items-center gap-2 text-slate-500">
+                        {device.clockOffsetMs} ms
+                        {(can(role, "video.capture") || can(role, "match.score")) && room.status === "open" && (
+                          <button
+                            type="button"
+                            className="rounded-md border border-white/10 px-2 py-1 text-[11px] text-slate-300"
+                            aria-label={`Remove ${device.label}`}
+                            onClick={() => void run(() => removeCameraDevice(device.id))}
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </span>
                     </div>
                   ))}
                 </div>

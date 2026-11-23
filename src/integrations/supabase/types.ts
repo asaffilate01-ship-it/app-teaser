@@ -543,6 +543,7 @@ export type Database = {
           id: string
           label: string
           last_heartbeat_at: string
+          removed_at: string | null
           room_id: string
           status: Json
           user_id: string
@@ -556,6 +557,7 @@ export type Database = {
           id?: string
           label: string
           last_heartbeat_at?: string
+          removed_at?: string | null
           room_id: string
           status?: Json
           user_id: string
@@ -569,6 +571,7 @@ export type Database = {
           id?: string
           label?: string
           last_heartbeat_at?: string
+          removed_at?: string | null
           room_id?: string
           status?: Json
           user_id?: string
@@ -3065,6 +3068,7 @@ export type Database = {
           id: string
           label: string
           last_heartbeat_at: string
+          removed_at: string | null
           room_id: string
           status: Json
           user_id: string
@@ -3165,9 +3169,17 @@ export type Database = {
         }
         Returns: string
       }
+      remove_camera_device: {
+        Args: { p_device_id: string }
+        Returns: undefined
+      }
       scouting_consent_granted: {
         Args: { p_organisation_id: string; p_player_id: string }
         Returns: boolean
+      }
+      set_camera_room_capacity: {
+        Args: { p_max_devices: number; p_room_id: string }
+        Returns: number
       }
       start_match_innings: {
         Args: {

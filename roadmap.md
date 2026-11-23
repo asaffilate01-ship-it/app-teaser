@@ -63,7 +63,7 @@
 - [ ] Club team policy (unlimited teams per club vs per team vs bundle) — waiting on user's answer
 - [ ] Login-sharing protections (club branding, two devices per login, suspicious-club flags, scorers locked to teams) — waiting on user's pick
 - [x] Remove "features are in development" footer line (all five languages)
-- [ ] Regional competitor research (Pakistan, Afghanistan, Gulf, East/Southern Africa, Hong Kong, South Asia, North America, England, EU, Australia/NZ, Far East) with ways to be the best
-- [ ] Camera setup review: how many phones at once for live streaming, recording, playback and coaching analysis; fix any limits that contradict the site
+- [x] Regional competitor research (Pakistan, Afghanistan, Gulf, East/Southern Africa, Hong Kong, South Asia, North America, England, EU, Australia/NZ, Far East) with ways to be the best
+- [x] Camera setup review: how many phones at once for live streaming, recording, playback and coaching analysis; fix any limits that contradict the site
 - [x] Awards: man of the match, top scorer, best bowler, best fielder, player of the tournament, prizes
 - [x] Scouting reports: coaches/managers share full player reports (strengths, weaknesses, scoring shots, fielding, bowling, analytics) with bigger teams — needs player/guardian consent

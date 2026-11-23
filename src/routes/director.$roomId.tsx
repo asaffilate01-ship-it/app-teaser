@@ -159,7 +159,7 @@ function CameraDirector() {
           .subscribe();
         const [roomResult, deviceResult, armResult] = await Promise.all([
           client.from("camera_rooms").select("id,name,status,match_id").eq("id", roomId).single(),
-          client.from("camera_devices").select("id,label,angle").eq("room_id", roomId),
+          client.from("camera_devices").select("id,label,angle").eq("room_id", roomId).is("removed_at", null),
           client
             .from("camera_recording_arms")
             .select("device_id,armed,consent_confirmed")
@@ -194,7 +194,7 @@ function CameraDirector() {
     try {
       const client = getCloudClient();
       const [deviceResult, armResult] = await Promise.all([
-        client.from("camera_devices").select("id,label,angle").eq("room_id", roomId),
+        client.from("camera_devices").select("id,label,angle").eq("room_id", roomId).is("removed_at", null),
         client
           .from("camera_recording_arms")
           .select("device_id,armed,consent_confirmed")

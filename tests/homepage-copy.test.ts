@@ -46,17 +46,24 @@ test("public homepage translations exclude internal commercial strategy and fabr
   }
 });
 
-test("no public translation claims licensed rain-adjusted targets are available", () => {
+test("rain FAQ offers the built rain rules and DLS only from official inputs", () => {
   for (const [language, copy] of Object.entries(languages)) {
     const rain = copy.faq.items.find(({ q }) =>
       /rain rules|Regenregeln|regenregels|reënreëls|règles de pluie/i.test(q),
     );
     assert.ok(rain, `${language}: expected rain rule FAQ`);
-    assert.match(
-      rain.a,
-      /^(Not yet|Noch nicht|Nog niet|Nog nie|Pas encore)\b/i,
-      `${language}: FAQ must be honest about licensed rain targets`,
-    );
+    assert.doesNotMatch(rain.a, /^(Not yet|Noch nicht|Nog niet|Nog nie|Pas encore)\b/i);
+    assert.match(rain.a, /DLS/, `${language}: DLS option must be named`);
+    assert.match(rain.a, /offici|offiziell|amptelik/i, `${language}: DLS comes from the official resource`);
+  }
+});
+
+test("camera copy states the real 8-phone match limit, never unlimited", () => {
+  for (const [language, copy] of Object.entries(languages)) {
+    const text = JSON.stringify(copy);
+    assert.doesNotMatch(text, /Unlimited camera|Unbegrenzte Kamera|Onbeperkt camera|Onbeperkte kamera|caméra illimités/i);
+    const cameras = copy.faq.items[1]!;
+    assert.match(cameras.a, /\b8\b/, `${language}: camera FAQ names the 8-phone limit`);
   }
 });
 
