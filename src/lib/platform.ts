@@ -3,6 +3,8 @@ export const platformRoles = [
   "league_admin",
   "club_admin",
   "safeguarding_officer",
+  "treasurer",
+  "team_manager",
   "scorer",
   "coach",
   "player",
@@ -28,6 +30,14 @@ export const permissions = [
   "safeguarding.manage",
   "billing.manage",
   "audit.review",
+  "fees.manage",
+  "bookings.manage",
+  "bookings.request",
+  "events.manage",
+  "travel.manage",
+  "drivers.approve",
+  "store.manage",
+  "guardians.manage",
 ] as const;
 
 export type Permission = (typeof permissions)[number];
@@ -47,6 +57,9 @@ const rolePermissions: Record<PlatformRole, ReadonlySet<Permission>> = {
     "video.review",
     "video.publish",
     "audit.review",
+    "bookings.manage",
+    "bookings.request",
+    "events.manage",
   ]),
   club_admin: new Set([
     "members.manage",
@@ -60,6 +73,13 @@ const rolePermissions: Record<PlatformRole, ReadonlySet<Permission>> = {
     "video.review",
     "video.publish",
     "audit.review",
+    "fees.manage",
+    "bookings.manage",
+    "bookings.request",
+    "events.manage",
+    "travel.manage",
+    "store.manage",
+    "guardians.manage",
   ]),
   safeguarding_officer: new Set([
     "match.view_private",
@@ -68,6 +88,17 @@ const rolePermissions: Record<PlatformRole, ReadonlySet<Permission>> = {
     "player.private_data",
     "safeguarding.manage",
     "audit.review",
+    "travel.manage",
+    "drivers.approve",
+    "guardians.manage",
+  ]),
+  treasurer: new Set(["match.view_private", "fees.manage", "store.manage"]),
+  team_manager: new Set([
+    "match.view_private",
+    "events.manage",
+    "bookings.request",
+    "travel.manage",
+    "store.manage",
   ]),
   scorer: new Set(["match.manage", "match.score", "match.view_private", "video.capture"]),
   coach: new Set([
@@ -76,14 +107,41 @@ const rolePermissions: Record<PlatformRole, ReadonlySet<Permission>> = {
     "video.capture",
     "video.review",
     "audit.review",
+    "events.manage",
+    "bookings.request",
   ]),
   player: new Set(["match.view_private", "video.review"]),
   viewer: new Set(["match.view_private"]),
 };
 
 export function can(role: PlatformRole, permission: Permission): boolean {
-  return rolePermissions[role].has(permission);
+  return rolePermissions[role]?.has(permission) ?? false;
 }
+
+/**
+ * Roles a member may hand out or change. Mirrors `public.can_assign_role` in the database,
+ * which is what actually enforces it: owners manage everyone, club and league admins only
+ * manage the roles below them, and nobody can change their own role.
+ */
+export function assignableRoles(actor: PlatformRole): PlatformRole[] {
+  if (actor === "owner") return [...platformRoles];
+  if (actor === "club_admin" || actor === "league_admin")
+    return ["treasurer", "team_manager", "scorer", "coach", "player", "viewer"];
+  return [];
+}
+
+export const roleLabels: Record<PlatformRole, string> = {
+  owner: "Owner",
+  league_admin: "League admin",
+  club_admin: "Club admin",
+  safeguarding_officer: "Safeguarding officer",
+  treasurer: "Treasurer",
+  team_manager: "Team manager",
+  scorer: "Scorer",
+  coach: "Coach",
+  player: "Player",
+  viewer: "Member / parent",
+};
 
 export interface CompetitionRules {
   version: number;

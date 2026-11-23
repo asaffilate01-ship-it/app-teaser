@@ -1,6 +1,7 @@
 export const publicSections = ["home", "features", "screens", "pricing", "faq", "login"] as const;
 export const platformSections = [
   "overview",
+  "office",
   "competitions",
   "league",
   "capture",

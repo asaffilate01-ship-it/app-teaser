@@ -33,6 +33,7 @@ import {
   ExternalLink,
   FileCheck2,
   Gauge,
+  Briefcase,
   GraduationCap,
   LoaderCircle,
   LockKeyhole,
@@ -65,11 +66,12 @@ import { SquadImport } from "@/components/club/SquadImport";
 import { MatchDayPosts } from "@/components/league/MatchDayPosts";
 import { StreamGuide } from "@/components/club/StreamGuide";
 import { toast } from "sonner";
+import { ClubOffice } from "@/components/office/ClubOffice";
 import { rainMethods } from "@/lib/rain-rules";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { usePlatformDashboard } from "@/hooks/use-platform-dashboard";
-import { listOrganisationMemberships, type OrganisationMembership } from "@/lib/cloud";
+import { getCloudClient, listOrganisationMemberships, type OrganisationMembership } from "@/lib/cloud";
 import {
   createCameraRoom,
   setCameraRoomCapacity,
@@ -84,6 +86,7 @@ import {
   createPlayer,
   createTeam,
   inviteMember,
+  updateMember,
   recordPlayerConsent,
   setPublicScoreboard,
   type CompetitionRecord,
@@ -91,7 +94,7 @@ import {
   type MatchRecord,
   type PlatformDashboardData,
 } from "@/lib/platform-cloud";
-import { can, platformRoles, type PlatformRole } from "@/lib/platform";
+import { assignableRoles, can, platformRoles, roleLabels, type PlatformRole } from "@/lib/platform";
 
 export const Route = createFileRoute("/platform")({
   validateSearch: (search: Record<string, unknown>): { section?: PlatformTab } => {
@@ -114,6 +117,7 @@ export const Route = createFileRoute("/platform")({
 
 type PlatformTab =
   | "overview"
+  | "office"
   | "competitions"
   | "league"
   | "capture"
@@ -127,6 +131,7 @@ type RunAction = <T>(action: () => Promise<T>) => Promise<T>;
 
 const tabDefinitions: Array<[PlatformTab, LucideIcon, string]> = [
   ["overview", Gauge, "Overview"],
+  ["office", Briefcase, "Club office"],
   ["competitions", Trophy, "Competitions"],
   ["league", Radio, "League hub"],
   ["capture", Camera, "Capture"],
@@ -633,7 +638,7 @@ function OperationalPlatform({
           value={tab}
           onChange={setTab}
           items={tabDefinitions}
-          mobilePrimary={["overview", "league", "competitions", "capture"]}
+          mobilePrimary={["overview", "office", "league", "capture"]}
           layout="rail"
         />
         <div className="min-w-0 lg:pt-6">
@@ -664,6 +669,14 @@ function OperationalPlatform({
                   setLeagueStart("stats");
                   setTab("league");
                 }}
+              />
+            )}
+            {tab === "office" && (
+              <ClubOffice
+                key={membership.organisationId}
+                organisationId={membership.organisationId}
+                role={membership.role}
+                club={dashboard.data}
               />
             )}
             {tab === "competitions" && (
@@ -2143,6 +2156,12 @@ function Operations({
 }) {
   const [email, setEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<PlatformRole>("scorer");
+  const [me, setMe] = useState<string | null>(null);
+  useEffect(() => {
+    void getCloudClient()
+      .auth.getUser()
+      .then(({ data: auth }) => setMe(auth.user?.id ?? null));
+  }, []);
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const priceId = import.meta.env["VITE_STRIPE_PRICE_CLUB"]?.trim() ?? "";
@@ -2209,7 +2228,7 @@ function Operations({
       {can(role, "members.manage") && (
         <Panel
           title="Invite member"
-          description="The Edge Function sends an Auth invitation and records the organisation role."
+          description="We email them a sign-in link. They only get the access their role allows."
         >
           <form
             onSubmit={(event) => void submitInvite(event)}
@@ -2228,9 +2247,9 @@ function Operations({
               label="Role"
               value={inviteRole}
               setValue={(value) => setInviteRole(value as PlatformRole)}
-              options={platformRoles
+              options={assignableRoles(role)
                 .filter((item) => item !== "owner")
-                .map((item) => [item, item.replaceAll("_", " ")])}
+                .map((item) => [item, roleLabels[item]])}
             />
             <div className="flex items-end">
               <button disabled={busy} className="action-primary">
@@ -2246,17 +2265,59 @@ function Operations({
       <div className="grid gap-5 lg:grid-cols-2">
         <Panel title="Members" description={`${data.members.length} organisation memberships`}>
           <div className="space-y-2">
-            {data.members.map((member) => (
-              <div
-                key={member.userId}
-                className="flex items-center justify-between rounded-lg border border-white/8 px-3 py-2 text-xs"
-              >
-                <span className="font-bold">{member.displayName}</span>
-                <span className="text-slate-500">
-                  {member.role.replaceAll("_", " ")} · {member.status}
-                </span>
-              </div>
-            ))}
+            {data.members.map((member) => {
+              const manageable =
+                member.userId !== me &&
+                assignableRoles(role).includes(member.role) &&
+                can(role, "members.manage");
+              return (
+                <div
+                  key={member.userId}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/8 px-3 py-2 text-xs"
+                >
+                  <span className="font-bold">{member.displayName}</span>
+                  {manageable ? (
+                    <span className="flex items-center gap-2">
+                      <select
+                        aria-label={`Role for ${member.displayName}`}
+                        className="scorer-input h-9 py-0 text-xs"
+                        value={member.role}
+                        onChange={(event) =>
+                          void run(() =>
+                            updateMember({ organisationId, userId: member.userId, role: event.target.value as PlatformRole }),
+                          )
+                        }
+                      >
+                        {assignableRoles(role).map((item) => (
+                          <option key={item} value={item}>
+                            {roleLabels[item]}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        className="app-chip-button"
+                        onClick={() =>
+                          void run(() =>
+                            updateMember({
+                              organisationId,
+                              userId: member.userId,
+                              status: member.status === "suspended" ? "active" : "suspended",
+                            }),
+                          )
+                        }
+                      >
+                        {member.status === "suspended" ? "Restore access" : "Suspend"}
+                      </button>
+                    </span>
+                  ) : (
+                    <span className="text-slate-500">
+                      {roleLabels[member.role] ?? member.role} · {member.status}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </Panel>
         <Panel title="Subscription" description="Entitlements are webhook-driven.">

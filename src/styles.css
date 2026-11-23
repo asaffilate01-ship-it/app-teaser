@@ -2962,3 +2962,126 @@
   color: inherit;
 }
 .scout-input:focus { outline: 2px solid var(--crest-rim-a); outline-offset: 1px; }
+
+/* ---------- Club office ---------- */
+.office-tabs {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+}
+.office-tabs::-webkit-scrollbar {
+  display: none;
+}
+.office-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  white-space: nowrap;
+  border-radius: 999px;
+  border: 1px solid var(--broadcast-border);
+  background: oklch(1 0 0 / 0.04);
+  padding: 0 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+}
+.office-tab[aria-selected="true"] {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: var(--gold-foreground);
+}
+.office-card {
+  border-radius: 1.1rem;
+  border: 1px solid var(--broadcast-border);
+  background: var(--broadcast-surface);
+  padding: 1rem;
+}
+@media (min-width: 768px) {
+  .office-card {
+    padding: 1.25rem;
+  }
+}
+.office-card h3 {
+  font-size: 1rem;
+  font-weight: 800;
+}
+.office-meta {
+  font-size: 0.75rem;
+  line-height: 1.35rem;
+  color: var(--muted-foreground);
+}
+.office-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-radius: 0.8rem;
+  border: 1px solid oklch(1 0 0 / 0.07);
+  background: oklch(1 0 0 / 0.025);
+  padding: 0.65rem 0.8rem;
+  font-size: 0.8rem;
+}
+.office-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.office-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--broadcast-border);
+  padding: 0.1rem 0.55rem;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.office-pill-good {
+  border-color: oklch(0.7 0.14 155 / 0.45);
+  background: oklch(0.6 0.14 155 / 0.16);
+  color: oklch(0.86 0.1 155);
+}
+.office-pill-warn {
+  border-color: oklch(0.8 0.15 84 / 0.5);
+  background: oklch(0.8 0.15 84 / 0.14);
+  color: oklch(0.88 0.12 84);
+}
+.office-pill-bad {
+  border-color: oklch(0.62 0.2 22 / 0.5);
+  background: oklch(0.55 0.2 22 / 0.16);
+  color: oklch(0.85 0.09 22);
+}
+.office-stat {
+  border-radius: 0.9rem;
+  border: 1px solid oklch(1 0 0 / 0.07);
+  background: oklch(1 0 0 / 0.03);
+  padding: 0.75rem;
+}
+.office-stat strong {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.6rem;
+}
+.office-choice {
+  min-height: 2.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--broadcast-border);
+  padding: 0 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.office-choice[aria-pressed="true"] {
+  border-color: var(--gold);
+  background: oklch(0.8 0.15 84 / 0.18);
+  color: oklch(0.92 0.1 84);
+}

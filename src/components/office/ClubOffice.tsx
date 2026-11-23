@@ -1,0 +1,104 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { Banknote, Car, ClipboardList, KeyRound, LoaderCircle, MapPin, Shirt, UsersRound } from "lucide-react";
+import type { PlatformRole } from "@/lib/platform";
+import type { PlatformDashboardData } from "@/lib/platform-cloud";
+import { friendly, loadClubOffice, type ClubOfficeData } from "@/lib/club-office-cloud";
+import { EventsPanel } from "./EventsPanel";
+import { SelectionPanel } from "./SelectionPanel";
+import { FeesPanel } from "./FeesPanel";
+import { BookingsPanel } from "./BookingsPanel";
+import { TravelPanel } from "./TravelPanel";
+import { StorePanel } from "./StorePanel";
+import { AccessPanel } from "./AccessPanel";
+import type { OfficeProps } from "./ui";
+
+const tabs = [
+  ["events", "Events", ClipboardList],
+  ["selection", "Team selection", UsersRound],
+  ["fees", "Fees", Banknote],
+  ["bookings", "Bookings", MapPin],
+  ["travel", "Travel", Car],
+  ["store", "Kit and shop", Shirt],
+  ["access", "Access", KeyRound],
+] as const;
+type Tab = (typeof tabs)[number][0];
+
+export function ClubOffice({ organisationId, role, club }: { organisationId: string; role: PlatformRole; club: PlatformDashboardData }) {
+  const [tab, setTab] = useState<Tab>("events");
+  const [data, setData] = useState<ClubOfficeData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const request = useRef(0);
+  const reload = useCallback(async () => {
+    const id = ++request.current;
+    try {
+      const next = await loadClubOffice(organisationId);
+      if (id === request.current) {
+        setData(next);
+        setError(null);
+      }
+    } catch (reason) {
+      if (id === request.current) setError(reason instanceof Error ? friendly(reason.message) : "The club office could not load.");
+    }
+  }, [organisationId]);
+  useEffect(() => {
+    setData(null);
+    void reload();
+  }, [reload]);
+  const act = useCallback<OfficeProps["act"]>(
+    async (action, done) => {
+      try {
+        await action();
+        if (done) toast.success(done);
+        await reload();
+        return true;
+      } catch (reason) {
+        toast.error(reason instanceof Error ? friendly(reason.message) : "That didn't work.");
+        await reload();
+        return false;
+      }
+    },
+    [reload],
+  );
+  const props: OfficeProps | null = data ? { organisationId, role, data, club, act } : null;
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="panel-kicker">Club office</p>
+        <h2 className="text-2xl font-bold tracking-tight">Run the club</h2>
+        <p className="office-meta">Events, availability, selection, fees, bookings, lifts and kit — each person sees only what their role allows.</p>
+      </div>
+      <div className="office-tabs" role="tablist" aria-label="Club office">
+        {tabs.map(([value, label, Icon]) => (
+          <button key={value} type="button" role="tab" aria-selected={tab === value} className="office-tab" onClick={() => setTab(value)}>
+            <Icon className="size-4" /> {label}
+          </button>
+        ))}
+      </div>
+      {error && !data && (
+        <div className="office-card">
+          <p className="office-meta">{error}</p>
+          <button type="button" className="action-secondary mt-3" onClick={() => void reload()}>
+            Try again
+          </button>
+        </div>
+      )}
+      {!props && !error && (
+        <div className="office-card flex items-center gap-2 text-sm">
+          <LoaderCircle className="size-4 animate-spin" /> Loading the club office…
+        </div>
+      )}
+      {props && (
+        <div role="tabpanel">
+          {tab === "events" && <EventsPanel {...props} />}
+          {tab === "selection" && <SelectionPanel {...props} />}
+          {tab === "fees" && <FeesPanel {...props} />}
+          {tab === "bookings" && <BookingsPanel {...props} />}
+          {tab === "travel" && <TravelPanel {...props} />}
+          {tab === "store" && <StorePanel {...props} />}
+          {tab === "access" && <AccessPanel {...props} />}
+        </div>
+      )}
+    </div>
+  );
+}

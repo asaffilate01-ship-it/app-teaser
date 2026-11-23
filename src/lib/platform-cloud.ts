@@ -916,12 +916,29 @@ export async function inviteMember(input: {
   email: string;
   role: PlatformRole;
 }): Promise<void> {
-  await invokePlatformFunction("invite-member", {
-    organisationId: input.organisationId,
-    email: input.email.trim().toLowerCase(),
-    role: input.role,
-    redirectTo: `${window.location.origin}/platform`,
+  const { inviteClubMember } = await import("./members.functions");
+  const result = await inviteClubMember({
+    data: { organisationId: input.organisationId, email: input.email, role: input.role, origin: window.location.origin },
   });
+  if (!result.ok) throw new Error(result.reason);
+}
+
+/** Changes a member's role or status. The database refuses changes above the caller's own level. */
+export async function updateMember(input: {
+  organisationId: string;
+  userId: string;
+  role?: PlatformRole;
+  status?: "active" | "suspended";
+}): Promise<void> {
+  const patch: { role?: PlatformRole; status?: "active" | "suspended" } = {};
+  if (input.role) patch.role = input.role;
+  if (input.status) patch.status = input.status;
+  const { error } = await getCloudClient()
+    .from("organisation_members")
+    .update(patch)
+    .eq("organisation_id", input.organisationId)
+    .eq("user_id", input.userId);
+  if (error) throw error;
 }
 
 export async function createCheckout(input: {

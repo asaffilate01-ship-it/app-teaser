@@ -816,6 +816,150 @@ export type Database = {
           },
         ]
       }
+      club_events: {
+        Row: {
+          availability_open: boolean
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          kind: string
+          location: string | null
+          match_id: string | null
+          notes: string | null
+          organisation_id: string
+          selection_published_at: string | null
+          starts_at: string
+          team_id: string | null
+          title: string
+          travel_meet_at: string | null
+          travel_meet_point: string | null
+          travel_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          availability_open?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          location?: string | null
+          match_id?: string | null
+          notes?: string | null
+          organisation_id: string
+          selection_published_at?: string | null
+          starts_at: string
+          team_id?: string | null
+          title: string
+          travel_meet_at?: string | null
+          travel_meet_point?: string | null
+          travel_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          availability_open?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          location?: string | null
+          match_id?: string | null
+          notes?: string | null
+          organisation_id?: string
+          selection_published_at?: string | null
+          starts_at?: string
+          team_id?: string | null
+          title?: string
+          travel_meet_at?: string | null
+          travel_meet_point?: string | null
+          travel_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_events_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_events_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_events_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_items: {
+        Row: {
+          active: boolean
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          kind: string
+          loanable: boolean
+          name: string
+          organisation_id: string
+          price_minor: number | null
+          sizes: string[]
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          kind: string
+          loanable?: boolean
+          name: string
+          organisation_id: string
+          price_minor?: number | null
+          sizes?: string[]
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          kind?: string
+          loanable?: boolean
+          name?: string
+          organisation_id?: string
+          price_minor?: number | null
+          sizes?: string[]
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_items_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competition_awards: {
         Row: {
           category: string
@@ -1459,6 +1603,370 @@ export type Database = {
           },
         ]
       }
+      equipment_loans: {
+        Row: {
+          condition_note: string | null
+          created_at: string
+          due_back_on: string | null
+          id: string
+          issued_at: string
+          issued_by: string | null
+          item_id: string
+          organisation_id: string
+          player_id: string
+          quantity: number
+          returned_at: string | null
+        }
+        Insert: {
+          condition_note?: string | null
+          created_at?: string
+          due_back_on?: string | null
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          item_id: string
+          organisation_id: string
+          player_id: string
+          quantity?: number
+          returned_at?: string | null
+        }
+        Update: {
+          condition_note?: string | null
+          created_at?: string
+          due_back_on?: string | null
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          item_id?: string
+          organisation_id?: string
+          player_id?: string
+          quantity?: number
+          returned_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_loans_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "club_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_loans_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_loans_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_availability: {
+        Row: {
+          event_id: string
+          id: string
+          note: string | null
+          organisation_id: string
+          player_id: string
+          responded_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          note?: string | null
+          organisation_id: string
+          player_id: string
+          responded_by?: string | null
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          note?: string | null
+          organisation_id?: string
+          player_id?: string
+          responded_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_availability_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "club_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_availability_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_availability_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_selections: {
+        Row: {
+          batting_order: number | null
+          captain: boolean
+          created_at: string
+          event_id: string
+          id: string
+          organisation_id: string
+          player_id: string
+          selected_by: string | null
+          slot: string
+          wicketkeeper: boolean
+        }
+        Insert: {
+          batting_order?: number | null
+          captain?: boolean
+          created_at?: string
+          event_id: string
+          id?: string
+          organisation_id: string
+          player_id: string
+          selected_by?: string | null
+          slot?: string
+          wicketkeeper?: boolean
+        }
+        Update: {
+          batting_order?: number | null
+          captain?: boolean
+          created_at?: string
+          event_id?: string
+          id?: string
+          organisation_id?: string
+          player_id?: string
+          selected_by?: string | null
+          slot?: string
+          wicketkeeper?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_selections_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "club_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_selections_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_selections_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_charges: {
+        Row: {
+          amount_minor: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string
+          due_on: string | null
+          id: string
+          organisation_id: string
+          paid_minor: number
+          player_id: string
+          schedule_id: string | null
+          status: string
+          updated_at: string
+          waived_reason: string | null
+        }
+        Insert: {
+          amount_minor: number
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          description: string
+          due_on?: string | null
+          id?: string
+          organisation_id: string
+          paid_minor?: number
+          player_id: string
+          schedule_id?: string | null
+          status?: string
+          updated_at?: string
+          waived_reason?: string | null
+        }
+        Update: {
+          amount_minor?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string
+          due_on?: string | null
+          id?: string
+          organisation_id?: string
+          paid_minor?: number
+          player_id?: string
+          schedule_id?: string | null
+          status?: string
+          updated_at?: string
+          waived_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_charges_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_charges_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_charges_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "fee_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_payments: {
+        Row: {
+          amount_minor: number
+          charge_id: string
+          created_at: string
+          id: string
+          method: string
+          organisation_id: string
+          paid_on: string
+          recorded_by: string | null
+          reference: string | null
+        }
+        Insert: {
+          amount_minor: number
+          charge_id: string
+          created_at?: string
+          id?: string
+          method: string
+          organisation_id: string
+          paid_on?: string
+          recorded_by?: string | null
+          reference?: string | null
+        }
+        Update: {
+          amount_minor?: number
+          charge_id?: string
+          created_at?: string
+          id?: string
+          method?: string
+          organisation_id?: string
+          paid_on?: string
+          recorded_by?: string | null
+          reference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_payments_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "fee_charges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payments_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_schedules: {
+        Row: {
+          active: boolean
+          amount_minor: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          due_on: string | null
+          frequency: string
+          id: string
+          name: string
+          organisation_id: string
+          team_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          amount_minor: number
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          due_on?: string | null
+          frequency?: string
+          id?: string
+          name: string
+          organisation_id: string
+          team_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          amount_minor?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          due_on?: string | null
+          frequency?: string
+          id?: string
+          name?: string
+          organisation_id?: string
+          team_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_schedules_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_schedules_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fixtures: {
         Row: {
           away_points: number | null
@@ -1552,9 +2060,90 @@ export type Database = {
           },
         ]
       }
+      ground_bookings: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          ends_at: string
+          ground_id: string
+          id: string
+          note: string | null
+          organisation_id: string
+          purpose: string
+          requested_by: string | null
+          requester_organisation_id: string | null
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          ends_at: string
+          ground_id: string
+          id?: string
+          note?: string | null
+          organisation_id: string
+          purpose?: string
+          requested_by?: string | null
+          requester_organisation_id?: string | null
+          starts_at: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          ends_at?: string
+          ground_id?: string
+          id?: string
+          note?: string | null
+          organisation_id?: string
+          purpose?: string
+          requested_by?: string | null
+          requester_organisation_id?: string | null
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ground_bookings_ground_id_fkey"
+            columns: ["ground_id"]
+            isOneToOne: false
+            referencedRelation: "grounds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ground_bookings_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ground_bookings_requester_organisation_id_fkey"
+            columns: ["requester_organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grounds: {
         Row: {
           address: Json
+          bookable: boolean
+          booking_note: string | null
           created_at: string
           id: string
           latitude: number | null
@@ -1566,6 +2155,8 @@ export type Database = {
         }
         Insert: {
           address?: Json
+          bookable?: boolean
+          booking_note?: string | null
           created_at?: string
           id?: string
           latitude?: number | null
@@ -1577,6 +2168,8 @@ export type Database = {
         }
         Update: {
           address?: Json
+          bookable?: boolean
+          booking_note?: string | null
           created_at?: string
           id?: string
           latitude?: number | null
@@ -1709,6 +2302,70 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      item_orders: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          note: string | null
+          ordered_by: string
+          organisation_id: string
+          player_id: string | null
+          quantity: number
+          size: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          note?: string | null
+          ordered_by?: string
+          organisation_id: string
+          player_id?: string | null
+          quantity?: number
+          size?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          note?: string | null
+          ordered_by?: string
+          organisation_id?: string
+          player_id?: string | null
+          quantity?: number
+          size?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_orders_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "club_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_orders_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_orders_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
             referencedColumns: ["id"]
           },
         ]
@@ -2188,6 +2845,51 @@ export type Database = {
           },
         ]
       }
+      player_guardians: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          id: string
+          organisation_id: string
+          player_id: string
+          relationship: string
+          user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          organisation_id: string
+          player_id: string
+          relationship?: string
+          user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          organisation_id?: string
+          player_id?: string
+          relationship?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_guardians_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_guardians_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_private_profiles: {
         Row: {
           date_of_birth: string | null
@@ -2403,6 +3105,121 @@ export type Database = {
             columns: ["rule_version_id"]
             isOneToOne: false
             referencedRelation: "competition_rule_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ride_bookings: {
+        Row: {
+          booked_by: string | null
+          created_at: string
+          guardian_consent: boolean
+          id: string
+          organisation_id: string
+          player_id: string
+          ride_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          booked_by?: string | null
+          created_at?: string
+          guardian_consent?: boolean
+          id?: string
+          organisation_id: string
+          player_id: string
+          ride_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          booked_by?: string | null
+          created_at?: string
+          guardian_consent?: boolean
+          id?: string
+          organisation_id?: string
+          player_id?: string
+          ride_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ride_bookings_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ride_bookings_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ride_bookings_ride_id_fkey"
+            columns: ["ride_id"]
+            isOneToOne: false
+            referencedRelation: "ride_offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ride_offers: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          departs_at: string | null
+          direction: string
+          driver_user_id: string
+          event_id: string
+          id: string
+          meet_point: string
+          note: string | null
+          organisation_id: string
+          seats: number
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          departs_at?: string | null
+          direction?: string
+          driver_user_id?: string
+          event_id: string
+          id?: string
+          meet_point: string
+          note?: string | null
+          organisation_id: string
+          seats: number
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          departs_at?: string | null
+          direction?: string
+          driver_user_id?: string
+          event_id?: string
+          id?: string
+          meet_point?: string
+          note?: string | null
+          organisation_id?: string
+          seats?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ride_offers_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "club_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ride_offers_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
             referencedColumns: ["id"]
           },
         ]
@@ -2663,6 +3480,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "teams_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      travel_drivers: {
+        Row: {
+          approved_at: string
+          approved_by: string | null
+          checks_note: string | null
+          expires_on: string | null
+          id: string
+          organisation_id: string
+          revoked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string
+          approved_by?: string | null
+          checks_note?: string | null
+          expires_on?: string | null
+          id?: string
+          organisation_id: string
+          revoked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          approved_at?: string
+          approved_by?: string | null
+          checks_note?: string | null
+          expires_on?: string | null
+          id?: string
+          organisation_id?: string
+          revoked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_drivers_organisation_id_fkey"
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "organisations"
@@ -2951,9 +3809,19 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      approved_driver_ids: { Args: { p_org: string }; Returns: string[] }
       can_access_camera_room: { Args: { p_room_id: string }; Returns: boolean }
       can_access_camera_signal_topic: {
         Args: { p_topic: string }
+        Returns: boolean
+      }
+      can_act_for_player: { Args: { p_player_id: string }; Returns: boolean }
+      can_approve_drivers: { Args: { p_org: string }; Returns: boolean }
+      can_assign_role: {
+        Args: {
+          p_actor: Database["public"]["Enums"]["platform_role"]
+          p_target: Database["public"]["Enums"]["platform_role"]
+        }
         Returns: boolean
       }
       can_direct_camera_room: { Args: { p_room_id: string }; Returns: boolean }
@@ -2962,6 +3830,7 @@ export type Database = {
         Args: { p_name: string }
         Returns: boolean
       }
+      can_request_booking: { Args: { p_org: string }; Returns: boolean }
       can_review_camera_asset: {
         Args: { p_asset_id: string }
         Returns: boolean
@@ -2976,7 +3845,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      can_view_fee_charge: { Args: { p_charge_id: string }; Returns: boolean }
       can_view_match: { Args: { p_match_id: string }; Returns: boolean }
+      cancel_ground_booking: {
+        Args: { p_booking_id: string }
+        Returns: undefined
+      }
       claim_criclume_omniqora_run: {
         Args: {
           _match_id: string
@@ -3042,8 +3916,21 @@ export type Database = {
         }
         Returns: string
       }
+      event_org: { Args: { p_event_id: string }; Returns: string }
+      event_selection_published: {
+        Args: { p_event_id: string }
+        Returns: boolean
+      }
+      find_user_id_by_email: { Args: { p_email: string }; Returns: string }
       get_public_scoreboard: { Args: { p_slug: string }; Returns: Json }
       get_shared_scouting_report: { Args: { p_token: string }; Returns: Json }
+      ground_busy_slots: {
+        Args: { p_from: string; p_ground_id: string; p_to: string }
+        Returns: {
+          ends_at: string
+          starts_at: string
+        }[]
+      }
       has_org_role: {
         Args: {
           p_organisation_id: string
@@ -3051,7 +3938,29 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_approved_driver: {
+        Args: { p_org: string; p_user: string }
+        Returns: boolean
+      }
+      is_booking_manager: { Args: { p_org: string }; Returns: boolean }
+      is_event_manager: { Args: { p_org: string }; Returns: boolean }
+      is_finance_manager: { Args: { p_org: string }; Returns: boolean }
+      is_guardian_manager: { Args: { p_org: string }; Returns: boolean }
       is_org_member: { Args: { p_organisation_id: string }; Returns: boolean }
+      is_ride_driver: { Args: { p_ride_id: string }; Returns: boolean }
+      is_store_manager: { Args: { p_org: string }; Returns: boolean }
+      is_travel_manager: { Args: { p_org: string }; Returns: boolean }
+      list_bookable_grounds: {
+        Args: never
+        Returns: {
+          booking_note: string
+          ground_id: string
+          ground_name: string
+          organisation_id: string
+          organisation_name: string
+          timezone: string
+        }[]
+      }
       pair_camera_device: {
         Args: {
           p_angle: string
@@ -3173,6 +4082,18 @@ export type Database = {
         Args: { p_device_id: string }
         Returns: undefined
       }
+      request_ground_booking: {
+        Args: {
+          p_ends_at: string
+          p_ground_id: string
+          p_note: string
+          p_purpose: string
+          p_requester_org: string
+          p_starts_at: string
+          p_title: string
+        }
+        Returns: string
+      }
       scouting_consent_granted: {
         Args: { p_organisation_id: string; p_player_id: string }
         Returns: boolean
@@ -3266,6 +4187,8 @@ export type Database = {
         | "coach"
         | "player"
         | "viewer"
+        | "treasurer"
+        | "team_manager"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3442,6 +4365,8 @@ export const Constants = {
         "coach",
         "player",
         "viewer",
+        "treasurer",
+        "team_manager",
       ],
     },
   },

@@ -67,3 +67,14 @@
 - [x] Camera setup review: how many phones at once for live streaming, recording, playback and coaching analysis; fix any limits that contradict the site
 - [x] Awards: man of the match, top scorer, best bowler, best fielder, player of the tournament, prizes
 - [x] Scouting reports: coaches/managers share full player reports (strengths, weaknesses, scoring shots, fielding, bowling, analytics) with bigger teams — needs player/guardian consent
+
+## Club office (role-based)
+- [ ] New roles: treasurer and team manager
+- [ ] Fees and subs: charges, payments recorded by treasurer, balances; members see only their own
+- [ ] Ground and nets bookings: own club + requests from other clubs, no double-booking
+- [ ] Events calendar with player availability (players and parents answer)
+- [ ] Team selection per event, hidden until published
+- [ ] Travel: official meet point/time, ride sharing with seat limits; juniors only with approved drivers and parent consent
+- [ ] Merchandise orders and equipment loans
+- [ ] Parent/guardian links so parents act for junior players
+- [ ] Who-can-do-what access table on screen; database rules enforce it

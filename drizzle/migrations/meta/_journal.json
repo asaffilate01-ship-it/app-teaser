@@ -85,6 +85,20 @@
       "when": 1795418454185,
       "tag": "0011_camera_room_capacity",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1795418909114,
+      "tag": "0012_club_office_roles",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795419233100,
+      "tag": "0013_club_office",
+      "breakpoints": true
     }
   ]
 }
