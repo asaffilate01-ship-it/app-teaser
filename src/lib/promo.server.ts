@@ -31,6 +31,32 @@ export async function viewerHash(): Promise<string | null> {
 }
 
 /** The club that owns a published scoreboard (null when the board is not public). */
+/**
+ * The clubs behind a published scoreboard: the host (who runs the match) and the two playing clubs.
+ * Null when the board is not public.
+ */
+export async function clubsForBoard(slug: string): Promise<{ host: string; playing: string[] } | null> {
+  const db = await admin();
+  const { data } = await db
+    .from("public_scoreboards")
+    .select("enabled, matches!inner(owner_organisation_id, home_team_id, away_team_id)")
+    .eq("slug", slug)
+    .maybeSingle();
+  const row = data as
+    | { enabled: boolean; matches: { owner_organisation_id: string; home_team_id: string; away_team_id: string } | null }
+    | null;
+  if (!row?.enabled || !row.matches) return null;
+  const { data: teams } = await db
+    .from("teams")
+    .select("id, organisation_id")
+    .in("id", [row.matches.home_team_id, row.matches.away_team_id]);
+  const orgOf = (id: string) => (teams ?? []).find((team) => team.id === id)?.organisation_id ?? null;
+  const playing = [orgOf(row.matches.away_team_id), orgOf(row.matches.home_team_id)].filter(
+    (id, index, list): id is string => Boolean(id) && list.indexOf(id) === index,
+  );
+  return { host: row.matches.owner_organisation_id, playing };
+}
+
 export async function organisationForBoard(slug: string): Promise<string | null> {
   const db = await admin();
   const { data } = await db.from("public_scoreboards").select("enabled, matches!inner(owner_organisation_id)").eq("slug", slug).maybeSingle();

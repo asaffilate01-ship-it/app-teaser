@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getMemberPromos, getPromos, reportMemberPromoPlays, reportPromoPlays } from "@/lib/promo.functions";
+import { getMemberPromos, getPromos, reportMemberPromoPlays, reportPromoPlays, reportViewerBoardPlays } from "@/lib/promo.functions";
+import { currentCloudSession } from "@/lib/cloud";
 import type { PromoItem, PromoSlot, PromoSurface } from "@/lib/promo-targeting";
 
 type PromoSet = Record<PromoSlot, PromoItem[]>;
@@ -17,6 +18,9 @@ export function usePromos(options: { surface: PromoSurface; slug?: string; membe
   const fetchMember = useServerFn(getMemberPromos);
   const reportPublic = useServerFn(reportPromoPlays);
   const reportMember = useServerFn(reportMemberPromoPlays);
+  const reportViewer = useServerFn(reportViewerBoardPlays);
+  // On a public scoreboard, a signed-in viewer's plays can count for their own club.
+  const [viewerSignedIn, setViewerSignedIn] = useState(false);
   const queue = useRef<string[]>([]);
   const signedIn = member != null;
   const organisationId = member?.organisationId ?? null;
@@ -42,13 +46,28 @@ export function usePromos(options: { surface: PromoSurface; slug?: string; membe
   }, [surface, slug, signedIn, fetchMember, fetchPublic]);
 
   useEffect(() => {
+    if (surface !== "scoreboard" || !slug) return;
+    let active = true;
+    void currentCloudSession()
+      .then((session) => {
+        if (active) setViewerSignedIn(Boolean(session));
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [surface, slug]);
+
+  useEffect(() => {
     const flush = () => {
       const batch = [...new Set(queue.current)].slice(0, 20);
       queue.current = [];
       if (batch.length === 0) return;
       const sent = signedIn
         ? reportMember({ data: { organisationId, creativeIds: batch } })
-        : reportPublic({ data: slug ? { surface, slug, creativeIds: batch } : { surface, creativeIds: batch } });
+        : viewerSignedIn && slug && surface === "scoreboard"
+          ? reportViewer({ data: { slug, creativeIds: batch } })
+          : reportPublic({ data: slug ? { surface, slug, creativeIds: batch } : { surface, creativeIds: batch } });
       void sent.catch(() => undefined);
     };
     const timer = window.setInterval(flush, 30_000);
@@ -56,7 +75,7 @@ export function usePromos(options: { surface: PromoSurface; slug?: string; membe
       window.clearInterval(timer);
       flush();
     };
-  }, [surface, slug, signedIn, organisationId, reportMember, reportPublic]);
+  }, [surface, slug, signedIn, viewerSignedIn, organisationId, reportMember, reportPublic, reportViewer]);
 
   const onPlay = useCallback((creativeId: string) => {
     if (typeof document !== "undefined" && document.visibilityState !== "visible") return;

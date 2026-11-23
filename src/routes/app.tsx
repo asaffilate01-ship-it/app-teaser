@@ -56,6 +56,7 @@ import { useMatchCloudSync } from "@/hooks/use-match-cloud-sync";
 import { cachedDuties, useMatchDuties } from "@/hooks/use-match-duties";
 import { FieldingDesk } from "@/components/scorer/FieldingDesk";
 import { ScoringTeamStrip, VideoDutyCard } from "@/components/scorer/ScoringTeam";
+import { CheckScorerStrip } from "@/components/scorer/CheckScorerStrip";
 import {
   applyPatch,
   applyPatches,
@@ -1354,6 +1355,7 @@ function LiveMatch({
             onChanged={() => void dutyState.refresh()}
           />
         )}
+        {cloudMatchId && dutyState.duties && access.onTeam && <CheckScorerStrip matchId={cloudMatchId} />}
         {cloudMatchId && dutyState.duties && !access.onTeam && (
           <section role="status" className="broadcast-panel mb-5 text-sm text-slate-200">
             <h2 className="font-bold text-amber-200">You're not on this match's scoring team</h2>

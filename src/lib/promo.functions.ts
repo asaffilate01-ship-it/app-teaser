@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { PromoItem, PromoSlot } from "./promo-targeting";
+import { creditedClub } from "./promo-credit";
 
 type PromoSet = Record<PromoSlot, PromoItem[]>;
 const empty: PromoSet = { top: [], side: [] };
@@ -62,6 +63,31 @@ export const reportMemberPromoPlays = createServerFn({ method: "POST" })
       }
       const { countPlays } = await import("./promo.server");
       return { counted: await countPlays("app", organisationId, data.creativeIds) };
+    } catch (error) {
+      console.error("Ad plays could not be counted", error);
+      return { counted: 0 };
+    }
+  });
+
+/**
+ * Count plays on a public scoreboard watched by a signed-in person. Like the app, plays credit the
+ * viewer's own club when it is one of the two clubs playing; otherwise they go to the host club.
+ */
+export const reportViewerBoardPlays = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ slug, creativeIds: ids }).parse(data))
+  .handler(async ({ data, context }) => {
+    try {
+      const { clubsForBoard, countPlays } = await import("./promo.server");
+      const clubs = await clubsForBoard(data.slug);
+      if (!clubs) return { counted: 0 };
+      const memberOf: string[] = [];
+      for (const organisationId of clubs.playing) {
+        const { data: member } = await context.supabase.rpc("is_org_member", { p_organisation_id: organisationId });
+        if (member === true) memberOf.push(organisationId);
+      }
+      const organisationId = creditedClub({ host: clubs.host, playing: clubs.playing, viewerClubs: memberOf });
+      return { counted: await countPlays("scoreboard", organisationId, data.creativeIds) };
     } catch (error) {
       console.error("Ad plays could not be counted", error);
       return { counted: 0 };

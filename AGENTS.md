@@ -18,10 +18,10 @@
 - Ball-by-ball text is template-built in `src/lib/commentary.ts`; public and AI-bound text is generated without a name resolver (roles only) to keep junior players private.
 - Lovable AI calls run only in signed-in server functions (`*.functions.ts` + `ai-gateway.server.ts`) so public visitors cannot spend AI credits.
 - League hub stats and live placings are computed client-side from per-match snapshots (`src/lib/season-stats.ts`, `src/lib/live-table.ts`); live placings never change net run rate or signed-off standings — keeps official results authoritative.
-- Highlight reels are cut client-side from camera recordings by `src/lib/highlight-reel.ts` (ball times + device clock + calibration); no server rendering, same private-recording access checks.
-- The stream overlay (`/overlay/$slug`) reads the same public scoreboard data as `/scoreboard/$slug` — no names, only works once a club publishes the board.
+- Highlight reels are cut client-side by `src/lib/highlight-reel.ts`; no server rendering, same private-recording checks.
+- The stream overlay (`/overlay/$slug`) reads the same public data as `/scoreboard/$slug` — no names.
 - Match alerts use WebCrypto Web Push (`src/lib/web-push.server.ts`, key from `PUSH_VAPID_SECRET`), name-free text from `src/lib/match-alerts.ts`, sent only by a match's scorers — no Node packages on the edge worker.
-- Awards (`src/lib/awards.ts`) and scouting (`src/lib/scouting.ts`) are computed client-side; shared scouting reports are frozen `scouting_reports` read only via `get_shared_scouting_report` by hashed token, expiring ≤180 days or on withdrawn consent.
+- Awards/scouting computed client-side (`awards.ts`, `scouting.ts`); shared reports are frozen `scouting_reports` read via `get_shared_scouting_report` (hashed token, ≤180 days, consent).
 - Camera room phone limits are enforced in the database (`pair_camera_device` locks the room, counts phones without `removed_at`, re-pairing never uses a place; `set_camera_room_capacity` / `remove_camera_device` are director-only) — the limit holds even if two phones join at once, and removing a phone keeps its recordings.
 - Club office (`src/components/office/*`, data in `src/lib/club-office-cloud.ts`, pure rules in `src/lib/club-office.ts`) relies on database RLS, triggers and RPCs for every permission (finance/store/booking/selection managers, guardians via `player_guardians`, driver approval by owner/safeguarding only); the UI only hides controls — so a changed role or a hand-made request can never get past the club's rules.
 - Member fee payments are bank/wallet transfers the member reports with a reference (`fee_payment_claims`); only `decide_fee_claim` (finance roles) turns one into a `fee_payments` row — no live payment gateway is involved, references can't be reused, and claims can't exceed what's owed.
@@ -43,3 +43,4 @@
 - Umpires: panel/appointment rules live in the database (`umpire_appointment_before`: required checks on match day, 8-hour clash, unavailable day; RPCs for umpire replies, expenses, payments); `src/lib/umpires.ts` mirrors them for ranking and hints — umpires link by confirmed email so they needn't be club members.
 - Promo screenshots (`src/assets/shot-*`): real captures of a made-up match; order matches `screensTab.items`.
 - Live centre (`/live`) reads only `list_public_live_matches` (public boards, name-free, delay kept); alerts from `liveEventsBetween` comparing polls.
+- Away check scorers (`match_check_scorers`/`match_check_flags`, RPCs only, `/check`): `my_match_duties` returns none for them so the DB blocks every score write; public-board ad credit picks the viewer's playing club via `creditedClub()`.

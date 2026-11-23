@@ -2842,6 +2842,111 @@ export type Database = {
           },
         ]
       }
+      match_check_flags: {
+        Row: {
+          ball_label: string | null
+          delivery_id: string | null
+          id: string
+          innings_number: number | null
+          match_id: string
+          note: string
+          raised_at: string
+          raised_by: string
+          reply: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+        }
+        Insert: {
+          ball_label?: string | null
+          delivery_id?: string | null
+          id?: string
+          innings_number?: number | null
+          match_id: string
+          note: string
+          raised_at?: string
+          raised_by: string
+          reply?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Update: {
+          ball_label?: string | null
+          delivery_id?: string | null
+          id?: string
+          innings_number?: number | null
+          match_id?: string
+          note?: string
+          raised_at?: string
+          raised_by?: string
+          reply?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_check_flags_delivery_id_fkey"
+            columns: ["delivery_id"]
+            isOneToOne: false
+            referencedRelation: "deliveries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_check_flags_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      match_check_scorers: {
+        Row: {
+          added_by: string
+          confirm_note: string | null
+          confirmed_at: string | null
+          created_at: string
+          match_id: string
+          organisation_id: string
+          user_id: string
+        }
+        Insert: {
+          added_by: string
+          confirm_note?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          match_id: string
+          organisation_id: string
+          user_id: string
+        }
+        Update: {
+          added_by?: string
+          confirm_note?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          match_id?: string
+          organisation_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_check_scorers_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_check_scorers_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_events: {
         Row: {
           client_event_id: string
@@ -4747,6 +4852,10 @@ export type Database = {
       }
     }
     Functions: {
+      add_match_check_scorer: {
+        Args: { p_email: string; p_match_id: string }
+        Returns: string
+      }
       admin_club_plans: {
         Args: never
         Returns: {
@@ -4849,6 +4958,7 @@ export type Database = {
         Returns: boolean
       }
       can_direct_camera_room: { Args: { p_room_id: string }; Returns: boolean }
+      can_name_check_scorer: { Args: { p_match_id: string }; Returns: boolean }
       can_operate_camera_room: { Args: { p_room_id: string }; Returns: boolean }
       can_pay_charge: { Args: { p_charge_id: string }; Returns: boolean }
       can_read_camera_storage_path: {
@@ -4889,6 +4999,7 @@ export type Database = {
         Args: { p_player_ids: string[]; p_schedule_id: string }
         Returns: number
       }
+      check_scoring_view: { Args: { p_match_id: string }; Returns: Json }
       claim_criclume_omniqora_run: {
         Args: {
           _match_id: string
@@ -4936,6 +5047,10 @@ export type Database = {
       complete_video_processing: {
         Args: { p_job: string; p_status: string }
         Returns: Json
+      }
+      confirm_check_scorecard: {
+        Args: { p_match_id: string; p_note: string }
+        Returns: undefined
       }
       create_camera_room: {
         Args: { p_match_id: string; p_name?: string }
@@ -5041,9 +5156,11 @@ export type Database = {
         Returns: boolean
       }
       is_booking_manager: { Args: { p_org: string }; Returns: boolean }
+      is_check_scorer: { Args: { p_match_id: string }; Returns: boolean }
       is_event_manager: { Args: { p_org: string }; Returns: boolean }
       is_finance_manager: { Args: { p_org: string }; Returns: boolean }
       is_guardian_manager: { Args: { p_org: string }; Returns: boolean }
+      is_home_scoring_side: { Args: { p_match_id: string }; Returns: boolean }
       is_match_manager: { Args: { p_match_id: string }; Returns: boolean }
       is_my_umpire: { Args: { p_umpire_id: string }; Returns: boolean }
       is_org_member: { Args: { p_organisation_id: string }; Returns: boolean }
@@ -5084,7 +5201,9 @@ export type Database = {
           weight: number
         }[]
       }
+      list_my_check_matches: { Args: never; Returns: Json }
       list_public_live_matches: { Args: never; Returns: Json }
+      match_away_organisation: { Args: { p_match_id: string }; Returns: string }
       match_scoring_team: {
         Args: { p_match_id: string }
         Returns: {
@@ -5134,6 +5253,10 @@ export type Database = {
       promo_share_percent: {
         Args: { p_organisation_id: string }
         Returns: number
+      }
+      raise_check_flag: {
+        Args: { p_delivery_id: string; p_match_id: string; p_note: string }
+        Returns: string
       }
       record_delivery_v1: {
         Args: {
@@ -5241,6 +5364,10 @@ export type Database = {
         Args: { p_organisation_id: string }
         Returns: undefined
       }
+      remove_match_check_scorer: {
+        Args: { p_match_id: string; p_user_id: string }
+        Returns: undefined
+      }
       reopen_fixture_result: {
         Args: { p_fixture_id: string }
         Returns: undefined
@@ -5276,6 +5403,10 @@ export type Database = {
       }
       request_ground_replay: {
         Args: { p_delivery_id: string; p_match_id: string }
+        Returns: undefined
+      }
+      resolve_check_flag: {
+        Args: { p_flag_id: string; p_reply: string; p_status: string }
         Returns: undefined
       }
       resolve_club_site_domain: { Args: { p_host: string }; Returns: string }

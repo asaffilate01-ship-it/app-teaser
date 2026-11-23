@@ -371,6 +371,10 @@ export const en = {
         q: "Which prices will I see?",
         a: "The prices for your country, in your currency. If your country isn't listed, you'll see prices in GBP. You can switch country on the pricing page.",
       },
+      {
+        q: "What if both teams use CricLume?",
+        a: "There's one shared scorecard, run by the host club's scorers. The away club can name a check scorer who sees every ball live, queries anything that looks wrong and confirms the scorecard — they can't add or change balls. Ads show for everyone, and signed-in members watching the public scoreboard earn the ad share for their own club.",
+      },
     ],
   },
   login: {
@@ -778,6 +782,10 @@ export const de: Content = {
         q: "Welche Preise sehe ich?",
         a: "Die Preise für dein Land, in deiner Währung. Ist dein Land nicht aufgeführt, siehst du Preise in GBP. Auf der Preisseite kannst du das Land wechseln.",
       },
+      {
+        q: "Was ist, wenn beide Teams CricLume nutzen?",
+        a: "Es gibt eine gemeinsame Scorecard, geführt von den Scorern des Gastgebers. Der Gastverein kann einen Kontroll-Scorer benennen, der jeden Ball live sieht, Unstimmigkeiten meldet und die Scorecard bestätigt – Bälle hinzufügen oder ändern kann er nicht. Werbung sehen alle; angemeldete Mitglieder, die die öffentliche Anzeigetafel verfolgen, bringen ihrem eigenen Verein den Werbeanteil.",
+      },
     ],
   },
   login: {
@@ -1180,6 +1188,10 @@ export const nl: Content = {
       {
         q: "Welke prijzen zie ik?",
         a: "De prijzen voor jouw land, in jouw valuta. Staat je land er niet tussen, dan zie je prijzen in GBP. Op de prijzenpagina kun je van land wisselen.",
+      },
+      {
+        q: "Wat als beide teams CricLume gebruiken?",
+        a: "Er is één gedeelde scorekaart, bijgehouden door de scorers van de thuisclub. De uitclub kan een controlescorer aanwijzen die elke bal live ziet, vragen stelt bij wat niet klopt en de scorekaart bevestigt – ballen toevoegen of wijzigen kan die niet. Iedereen ziet advertenties; ingelogde leden die het openbare scorebord volgen, leveren het advertentie-aandeel op voor hun eigen club.",
       },
     ],
   },
@@ -1586,6 +1598,10 @@ export const af: Content = {
         q: "Watter pryse sal ek sien?",
         a: "Die pryse vir jou land, in jou geldeenheid. As jou land nie gelys is nie, sien jy pryse in GBP. Jy kan op die pryseblad van land verander.",
       },
+      {
+        q: "Wat as albei spanne CricLume gebruik?",
+        a: "Daar is een gedeelde telkaart, wat deur die gasheerklub se tellers bygehou word. Die besoekende klub kan 'n kontroleteller aanwys wat elke bal regstreeks sien, navrae doen oor enigiets wat verkeerd lyk en die telkaart bevestig – hulle kan nie balle byvoeg of verander nie. Almal sien advertensies; aangemelde lede wat die openbare telbord volg, verdien die advertensie-aandeel vir hul eie klub.",
+      },
     ],
   },
   login: {
@@ -1989,6 +2005,10 @@ export const fr: Content = {
       {
         q: "Quels prix vais-je voir ?",
         a: "Les prix de votre pays, dans votre devise. Si votre pays n'est pas dans la liste, les prix s'affichent en GBP. Vous pouvez changer de pays sur la page des tarifs.",
+      },
+      {
+        q: "Et si les deux équipes utilisent CricLume ?",
+        a: "Il y a une seule feuille de match partagée, tenue par les marqueurs du club hôte. Le club visiteur peut désigner un marqueur de contrôle qui voit chaque balle en direct, signale ce qui semble faux et confirme la feuille de match – sans pouvoir ajouter ni modifier de balle. Tout le monde voit la publicité ; les membres connectés qui suivent le tableau public rapportent la part publicitaire à leur propre club.",
       },
     ],
   },

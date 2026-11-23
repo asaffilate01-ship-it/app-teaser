@@ -594,6 +594,9 @@ function OperationalPlatform({
           <Link to="/umpire" className="app-chip-button hidden sm:inline-flex">
             Umpiring
           </Link>
+          <Link to="/check" className="app-chip-button hidden sm:inline-flex">
+            Check scoring
+          </Link>
           <button
             type="button"
             onClick={() => void signOut()}

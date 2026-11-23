@@ -19,6 +19,8 @@ import { Route as SponsorDeskRouteImport } from './routes/sponsor-desk'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UmpireRouteImport } from './routes/umpire'
 import { Route as CameraRoomIdRouteImport } from './routes/camera.$roomId'
+import { Route as CheckIndexRouteImport } from './routes/check.index'
+import { Route as CheckMatchIdRouteImport } from './routes/check.$matchId'
 import { Route as ClubSlugRouteImport } from './routes/club.$slug'
 import { Route as DirectorRoomIdRouteImport } from './routes/director.$roomId'
 import { Route as GroundSlugRouteImport } from './routes/ground.$slug'
@@ -81,6 +83,16 @@ const UmpireRoute = UmpireRouteImport.update({
 const CameraRoomIdRoute = CameraRoomIdRouteImport.update({
   id: '/camera/$roomId',
   path: '/camera/$roomId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckIndexRoute = CheckIndexRouteImport.update({
+  id: '/check/',
+  path: '/check/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckMatchIdRoute = CheckMatchIdRouteImport.update({
+  id: '/check/$matchId',
+  path: '/check/$matchId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClubSlugRoute = ClubSlugRouteImport.update({
@@ -160,12 +172,14 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/umpire': typeof UmpireRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
+  '/check/$matchId': typeof CheckMatchIdRoute
   '/club/$slug': typeof ClubSlugRouteWithChildren
   '/director/$roomId': typeof DirectorRoomIdRoute
   '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
   '/scout/$token': typeof ScoutTokenRoute
+  '/check/': typeof CheckIndexRoute
   '/club/$slug/fixtures': typeof ClubSlugFixturesRoute
   '/club/$slug/gallery': typeof ClubSlugGalleryRoute
   '/club/$slug/news': typeof ClubSlugNewsRouteWithChildren
@@ -185,11 +199,13 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/umpire': typeof UmpireRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
+  '/check/$matchId': typeof CheckMatchIdRoute
   '/director/$roomId': typeof DirectorRoomIdRoute
   '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
   '/scout/$token': typeof ScoutTokenRoute
+  '/check': typeof CheckIndexRoute
   '/club/$slug/fixtures': typeof ClubSlugFixturesRoute
   '/club/$slug/gallery': typeof ClubSlugGalleryRoute
   '/club/$slug/news': typeof ClubSlugNewsRouteWithChildren
@@ -210,12 +226,14 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/umpire': typeof UmpireRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
+  '/check/$matchId': typeof CheckMatchIdRoute
   '/club/$slug': typeof ClubSlugRouteWithChildren
   '/director/$roomId': typeof DirectorRoomIdRoute
   '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
   '/scout/$token': typeof ScoutTokenRoute
+  '/check/': typeof CheckIndexRoute
   '/club/$slug/fixtures': typeof ClubSlugFixturesRoute
   '/club/$slug/gallery': typeof ClubSlugGalleryRoute
   '/club/$slug/news': typeof ClubSlugNewsRouteWithChildren
@@ -237,12 +255,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/umpire'
     | '/camera/$roomId'
+    | '/check/$matchId'
     | '/club/$slug'
     | '/director/$roomId'
     | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
     | '/scout/$token'
+    | '/check/'
     | '/club/$slug/fixtures'
     | '/club/$slug/gallery'
     | '/club/$slug/news'
@@ -262,11 +282,13 @@ export interface FileRouteTypes {
     | '/terms'
     | '/umpire'
     | '/camera/$roomId'
+    | '/check/$matchId'
     | '/director/$roomId'
     | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
     | '/scout/$token'
+    | '/check'
     | '/club/$slug/fixtures'
     | '/club/$slug/gallery'
     | '/club/$slug/news'
@@ -286,12 +308,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/umpire'
     | '/camera/$roomId'
+    | '/check/$matchId'
     | '/club/$slug'
     | '/director/$roomId'
     | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
     | '/scout/$token'
+    | '/check/'
     | '/club/$slug/fixtures'
     | '/club/$slug/gallery'
     | '/club/$slug/news'
@@ -312,12 +336,14 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   UmpireRoute: typeof UmpireRoute
   CameraRoomIdRoute: typeof CameraRoomIdRoute
+  CheckMatchIdRoute: typeof CheckMatchIdRoute
   ClubSlugRoute: typeof ClubSlugRouteWithChildren
   DirectorRoomIdRoute: typeof DirectorRoomIdRoute
   GroundSlugRoute: typeof GroundSlugRoute
   OverlaySlugRoute: typeof OverlaySlugRoute
   ScoreboardSlugRoute: typeof ScoreboardSlugRoute
   ScoutTokenRoute: typeof ScoutTokenRoute
+  CheckIndexRoute: typeof CheckIndexRoute
   ApiPublicGroundFeedSlugRoute: typeof ApiPublicGroundFeedSlugRoute
   ApiPublicPushSlugRoute: typeof ApiPublicPushSlugRoute
 }
@@ -392,6 +418,20 @@ declare module '@tanstack/react-router' {
       path: '/camera/$roomId'
       fullPath: '/camera/$roomId'
       preLoaderRoute: typeof CameraRoomIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check/': {
+      id: '/check/'
+      path: '/check'
+      fullPath: '/check/'
+      preLoaderRoute: typeof CheckIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check/$matchId': {
+      id: '/check/$matchId'
+      path: '/check/$matchId'
+      fullPath: '/check/$matchId'
+      preLoaderRoute: typeof CheckMatchIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/club/$slug': {
@@ -529,12 +569,14 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   UmpireRoute: UmpireRoute,
   CameraRoomIdRoute: CameraRoomIdRoute,
+  CheckMatchIdRoute: CheckMatchIdRoute,
   ClubSlugRoute: ClubSlugRouteWithChildren,
   DirectorRoomIdRoute: DirectorRoomIdRoute,
   GroundSlugRoute: GroundSlugRoute,
   OverlaySlugRoute: OverlaySlugRoute,
   ScoreboardSlugRoute: ScoreboardSlugRoute,
   ScoutTokenRoute: ScoutTokenRoute,
+  CheckIndexRoute: CheckIndexRoute,
   ApiPublicGroundFeedSlugRoute: ApiPublicGroundFeedSlugRoute,
   ApiPublicPushSlugRoute: ApiPublicPushSlugRoute,
 }
