@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { browserServiceWorkerAllowed } from "@/lib/sw-guard";
 import {
   Outlet,
   Link,
@@ -162,8 +163,13 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
-    if ("serviceWorker" in navigator && import.meta.env.PROD) {
+    if (browserServiceWorkerAllowed()) {
       void navigator.serviceWorker.register("/sw.js");
+    } else if ("serviceWorker" in navigator) {
+      // Preview, editor frame or ?sw=off: remove any old app worker so it can't serve stale pages.
+      void navigator.serviceWorker.getRegistrations().then((registrations) =>
+        registrations.filter((item) => item.active?.scriptURL.endsWith("/sw.js")).forEach((item) => void item.unregister()),
+      );
     }
   }, []);
 

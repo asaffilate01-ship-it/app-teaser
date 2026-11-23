@@ -45,7 +45,7 @@
 - [x] 8 Multi-day: end of day / stumps
 - [x] 6 Social post text + result and match-day posters
 - [x] 3 Installable app: install prompt, iPhone instructions, brand colours (store builds need user's developer accounts)
-- [ ] 7 Phone alerts for wickets, milestones and results (web push)
+- [x] 7 Phone alerts for wickets, milestones and results (web push) — live site only; needs a real-phone check after publishing
 - [ ] 10 Club / league public website pages: branding, news, gallery, documents, fixtures/results
 - [x] 1 Live streaming via free OBS: Go live guide (YouTube, Facebook, TikTok) with overlay links
 - [ ] 15a Player auction / draft
@@ -56,5 +56,6 @@
 ## Pakistan pricing + CricScoreboard (new ask)
 - [x] Review CricScoreboard and compare with the proposed PKR prices
 - [ ] Proposed PKR plans: team Basic 25k/yr (scoring + basic video), team Advanced 50k/yr (live streaming, coaching, analytics); leagues ≤10 teams 20k/team/yr, 10+ teams 17.5k/team/yr; +20k/team/yr for full system — waiting on user's go-ahead before changing site prices
-- [ ] Offline scoring with reliable resync after internet loss: check again
+- [x] Offline scoring with reliable resync after internet loss: checked (17 tests pass, automatic resend when back online)
 - [x] Streaming guide covers Facebook, YouTube and TikTok
+- [ ] League bands proposal: teams 1–10 at 20k, teams 11–20 at 17.5k, teams 21+ (multi-division) at 15k, each band charged only on the teams in it; analytics/full system +20k per team. Waiting on user's yes

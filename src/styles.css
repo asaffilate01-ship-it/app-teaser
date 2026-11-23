@@ -2906,3 +2906,15 @@
 .install-steps { display: grid; gap: 0.75rem; counter-reset: step; font-size: 0.9rem; }
 .install-steps li { counter-increment: step; display: flex; gap: 0.6rem; align-items: baseline; }
 .install-steps li::before { content: counter(step); display: grid; place-items: center; flex: none; width: 1.6rem; height: 1.6rem; border-radius: 999px; background: var(--gold); color: var(--gold-foreground); font-weight: 800; font-size: 0.8rem; }
+
+/* Match alerts window on the dark public scoreboard */
+.alerts-dialog {
+  background: oklch(0.17 0.025 300);
+  border: 1px solid var(--broadcast-border);
+  color: oklch(0.97 0.01 84);
+  border-radius: 1.25rem;
+}
+.alerts-dialog [data-slot="dialog-description"],
+.alerts-dialog .text-muted-foreground {
+  color: oklch(0.8 0.02 84);
+}

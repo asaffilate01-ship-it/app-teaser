@@ -1,4 +1,4 @@
-const CACHE_NAME = "criclume-static-v3";
+const CACHE_NAME = "criclume-static-v4";
 const OFFLINE_PAGE = "/offline.html";
 
 // Keep the offline fallback public and generic. Never cache club dashboards,
@@ -49,6 +49,38 @@ self.addEventListener("fetch", (event) => {
       const response = await fetch(request);
       if (response.ok) await cache.put(request, response.clone());
       return response;
+    }),
+  );
+});
+
+// Match alerts (wickets, milestones, results) for fans who turned them on from a public scoreboard.
+// The payload is name-free text built by the scorer's device.
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { title: "CricLume", body: event.data ? event.data.text() : "" };
+  }
+  const url = typeof data.url === "string" && data.url.startsWith("/") ? data.url : "/";
+  event.waitUntil(
+    self.registration.showNotification(String(data.title || "CricLume match update").slice(0, 120), {
+      body: String(data.body || "").slice(0, 200),
+      icon: "/icon-192.png",
+      badge: "/icon-maskable-192.png",
+      data: { url },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL((event.notification.data && event.notification.data.url) || "/", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+      const open = windows.find((client) => client.url === url);
+      if (open) return open.focus();
+      return self.clients.openWindow(url);
     }),
   );
 });

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { MatchAlerts } from "@/components/scoreboard/MatchAlerts";
 import { useEffect, useState } from "react";
 import { Clock3, MapPin, Radio, RotateCw } from "lucide-react";
 import logoAsset from "@/assets/criclume-logo-on-dark.png.asset.json";
@@ -216,6 +217,7 @@ function PublicScoreboard() {
                 {state.rain?.method ? ` · ${rainMethodShort(state.rain.method as RainMethod)}` : ""}
               </span>
             )}
+            {!state.result && <MatchAlerts slug={slug} />}
             <span className={`hero-chip ${isLive ? "hero-chip-live" : ""}`}>
               {isLive && <span className="live-dot" aria-hidden="true" />}
               {isLive ? "Live" : scoreboard.status.replaceAll("_", " ")}

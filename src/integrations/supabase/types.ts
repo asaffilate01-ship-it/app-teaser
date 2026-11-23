@@ -1735,6 +1735,50 @@ export type Database = {
           },
         ]
       }
+      match_push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          failures: number
+          id: string
+          kinds: string[]
+          last_sent_at: string | null
+          p256dh: string
+          scoreboard_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          failures?: number
+          id?: string
+          kinds?: string[]
+          last_sent_at?: string | null
+          p256dh: string
+          scoreboard_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          failures?: number
+          id?: string
+          kinds?: string[]
+          last_sent_at?: string | null
+          p256dh?: string
+          scoreboard_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_push_subscriptions_scoreboard_id_fkey"
+            columns: ["scoreboard_id"]
+            isOneToOne: false
+            referencedRelation: "public_scoreboards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_squads: {
         Row: {
           batting_position: number | null

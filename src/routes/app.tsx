@@ -105,6 +105,8 @@ import { ScorecardView } from "@/components/scorer/ScorecardView";
 import { commentaryFeed } from "@/lib/commentary";
 import { currentPrediction, winTimeline } from "@/lib/win-timeline";
 import { summariseOver } from "@/lib/over-summary.functions";
+import { sendMatchAlerts } from "@/lib/push.functions";
+import { alertsBetween } from "@/lib/match-alerts";
 
 const batterHandKey = "criclume.batter-hands.v1";
 
@@ -934,6 +936,11 @@ function LiveMatch({
     if (cloudConflict) return;
     onSave(next);
     void cloudSync.publish(next, eventType);
+    // Fans' phone alerts: best-effort and live-only — a late wicket alert after reconnecting would mislead.
+    if (cloudMatchId && navigator.onLine) {
+      const alerts = alertsBetween(match, next);
+      if (alerts.length) void sendMatchAlerts({ data: { matchId: cloudMatchId, alerts } }).catch(() => undefined);
+    }
   };
   const advanceInnings = async (options: { followOn?: boolean } = {}) => {
     if (cloudConflict) return;
