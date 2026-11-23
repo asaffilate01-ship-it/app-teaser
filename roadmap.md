@@ -143,3 +143,7 @@
 - [x] Team types (1st/2nd XI, age groups, ladies, veterans); free plan 1 team, paid unlimited (enforced in database)
 - [x] Clubs/leagues invite other clubs to tournaments and leagues; invited club accepts with its teams; teams appear in fixtures
 - [ ] Waiting on answers: free-plan team count, and whether free clubs can host competitions
+
+## Competitor gaps round 4 (report in Files)
+- [x] Round 4 gap report: scoring, analysis, training, video, scoreboards, leagues, players, awards, umpires, admin
+- [ ] Build quick wins (toss, retired hurt/out, in-screen player add, left-hand wheel flip, bowling workload, website score widget, walkovers/deductions, fan POTM vote, season MVP table, volunteer jobs) — waiting on user's pick
