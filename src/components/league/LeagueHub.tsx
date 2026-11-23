@@ -14,6 +14,9 @@ import { HeadToHead } from "@/components/league/HeadToHead";
 import { Streaks } from "@/components/league/Streaks";
 import { QualificationCalculator } from "@/components/league/QualificationCalculator";
 import { PlayerProfileView } from "@/components/league/PlayerProfileView";
+import { AwardsBoard } from "@/components/league/AwardsBoard";
+import { ScoutingPanel } from "@/components/scouting/ScoutingPanel";
+import { matchAwards } from "@/lib/awards";
 import { playerOfTheMatch } from "@/lib/player-profile";
 import { buildLeagueStandings } from "@/lib/league-standings";
 import { projectLiveTable, readLiveSituation, type LiveMatchSituation } from "@/lib/live-table";
@@ -22,7 +25,7 @@ import { figures, seasonStats, type SeasonStats } from "@/lib/season-stats";
 import { currentPrediction, winTimeline } from "@/lib/win-timeline";
 
 type HubView = "live" | "table" | "results" | "stats";
-type StatsTab = "batting" | "bowling" | "fielding" | "h2h" | "streaks";
+type StatsTab = "awards" | "batting" | "bowling" | "fielding" | "h2h" | "streaks";
 type DetailView = "dashboard" | "card" | "balls";
 const liveStatuses = new Set(["live", "innings_break"]);
 
@@ -242,13 +245,16 @@ function MatchDashboard({ match }: { match: CricketMatch }) {
         <div className="broadcast-panel potm-banner" role="status">
           <p className="font-display text-xl font-bold text-gold">{result.text}</p>
           {star && (
-            <p className="inline-flex items-center gap-2 text-sm">
-              <Trophy className="size-4 text-gold" aria-hidden="true" />
-              Player of the Match: <strong>{star.name}</strong>
-              <span className="text-xs text-slate-400">
-                ({star.runs} runs{star.wickets ? `, ${star.wickets} wkts` : ""})
-              </span>
-            </p>
+            <ul className="mt-1 grid gap-1 text-sm sm:grid-cols-2">
+              {matchAwards(match).map((award) => (
+                <li key={award.category} className="inline-flex min-w-0 items-center gap-2">
+                  <Trophy className="size-4 shrink-0 text-gold" aria-hidden="true" />
+                  <span className="truncate">
+                    {award.label}: <strong>{award.name}</strong> <span className="text-xs text-slate-400">({award.value})</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       )}
@@ -374,13 +380,13 @@ function LiveTable({
 }
 
 
-function StatsBoard({ matches }: { matches: MatchRecord[] }) {
+function StatsBoard({ matches, data, competitionId }: { matches: MatchRecord[]; data: PlatformDashboardData; competitionId: string }) {
   const [stats, setStats] = useState<SeasonStats | null>(null);
   const [loadedMatches, setLoadedMatches] = useState<CricketMatch[]>([]);
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [failed, setFailed] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<StatsTab>("batting");
+  const [tab, setTab] = useState<StatsTab>("awards");
   const ids = matches.filter((match) => liveStatuses.has(match.status) || match.status === "completed").slice(0, 40).map((match) => match.id);
   const key = ids.join(",");
 
@@ -406,7 +412,15 @@ function StatsBoard({ matches }: { matches: MatchRecord[] }) {
   }, [key]);
 
   if (!stats) return <p className="text-sm text-slate-400">{loading ? "Adding up every scorecard…" : "No stats yet."}</p>;
-  if (playerId) return <PlayerProfileView matches={loadedMatches} playerId={playerId} onBack={() => setPlayerId(null)} />;
+  if (playerId)
+    return (
+      <div className="space-y-4">
+        <PlayerProfileView matches={loadedMatches} playerId={playerId} onBack={() => setPlayerId(null)} />
+        {data.players.some((player) => player.id === playerId) && (
+          <ScoutingPanel matches={loadedMatches} playerId={playerId} organisationId={data.organisationId} player={data.players.find((player) => player.id === playerId)} />
+        )}
+      </div>
+    );
   const topRuns = stats.batting[0];
   const topScore = [...stats.batting].sort((a, b) => b.highScore - a.highScore)[0];
   const topWickets = stats.bowling[0];
@@ -437,9 +451,10 @@ function StatsBoard({ matches }: { matches: MatchRecord[] }) {
           </div>
         ))}
       </div>
-      <div className="card-tabs max-w-xl" role="tablist" aria-label="Stats type" style={{ position: "static", gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}>
+      <div className="card-tabs max-w-xl" role="tablist" aria-label="Stats type" style={{ position: "static", gridTemplateColumns: "repeat(6, minmax(0, 1fr))" }}>
         {(
           [
+            ["awards", "Awards"],
             ["batting", "Batting"],
             ["bowling", "Bowling"],
             ["fielding", "Fielding"],
@@ -489,7 +504,8 @@ function StatsBoard({ matches }: { matches: MatchRecord[] }) {
       )}
       {tab === "h2h" && <HeadToHead matches={loadedMatches} onPlayer={setPlayerId} />}
       {tab === "streaks" && <Streaks matches={loadedMatches} onPlayer={setPlayerId} />}
-      {tab !== "h2h" && tab !== "streaks" && <p className="text-[11px] text-slate-500">Tap a name to open the player's profile.</p>}
+      {tab === "awards" && <AwardsBoard matches={loadedMatches} competitionId={competitionId} organisationId={data.organisationId} onPlayer={setPlayerId} />}
+      {tab !== "h2h" && tab !== "streaks" && tab !== "awards" && <p className="text-[11px] text-slate-500">Tap a name to open the player's profile.</p>}
     </div>
   );
 }
@@ -669,7 +685,7 @@ export function LeagueHub({
           <p className="text-sm text-slate-400">Finished matches and their full scorecards appear here.</p>
         ))}
 
-      {view === "stats" && <StatsBoard matches={matches} />}
+      {view === "stats" && <StatsBoard matches={matches} data={data} competitionId={competitionId} />}
     </section>
   );
 }

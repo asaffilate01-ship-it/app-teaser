@@ -2918,3 +2918,47 @@
 .alerts-dialog .text-muted-foreground {
   color: oklch(0.8 0.02 84);
 }
+
+/* Scouting reports */
+.scout-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+@media (min-width: 768px) {
+  .scout-stats { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+.scout-stat {
+  border-radius: 0.75rem;
+  background: oklch(1 0 0 / 0.04);
+  padding: 0.5rem 0.625rem;
+}
+.scout-stat span { display: block; font-size: 0.6875rem; color: oklch(0.78 0.02 84); }
+.scout-stat strong { display: block; font-family: var(--font-display, inherit); font-size: 1.25rem; color: var(--crest-rim-a); }
+.scout-bar { display: grid; grid-template-columns: 6.5rem 1fr 4.5rem; align-items: center; gap: 0.5rem; font-size: 0.75rem; }
+.scout-bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scout-bar-track { height: 0.5rem; border-radius: 999px; background: oklch(1 0 0 / 0.08); overflow: hidden; }
+.scout-bar-fill { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--crest-rim-b), var(--crest-rim-a)); }
+.scout-bar-value { text-align: right; color: oklch(0.85 0.02 84); }
+.scout-table { margin-top: 0.375rem; width: 100%; font-size: 0.75rem; border-collapse: collapse; }
+.scout-table th { text-align: left; font-weight: 600; color: oklch(0.75 0.02 84); padding: 0.25rem 0.25rem; }
+.scout-table td { padding: 0.3rem 0.25rem; border-top: 1px solid oklch(1 0 0 / 0.06); }
+.award-row { display: grid; grid-template-columns: 2.25rem 1fr auto; gap: 0.75rem; align-items: center; }
+.award-icon { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 0.75rem; background: oklch(0.82 0.15 84 / 0.14); color: var(--crest-rim-a); }
+@media print {
+  .scout-page { background: #fff !important; color: #111 !important; }
+  .scout-page .broadcast-panel { border-color: #ccc; background: #fff; break-inside: avoid; }
+  .scout-page .no-print { display: none !important; }
+}
+.scout-input {
+  margin-top: 0.25rem;
+  display: block;
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--broadcast-border);
+  background: oklch(1 0 0 / 0.04);
+  padding: 0.5rem 0.625rem;
+  font-size: 0.875rem;
+  color: inherit;
+}
+.scout-input:focus { outline: 2px solid var(--crest-rim-a); outline-offset: 1px; }

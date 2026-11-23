@@ -813,6 +813,60 @@ export type Database = {
           },
         ]
       }
+      competition_awards: {
+        Row: {
+          category: string
+          competition_id: string
+          created_at: string
+          id: string
+          organisation_id: string
+          prize: string | null
+          updated_at: string
+          updated_by: string | null
+          winner_name: string | null
+          winner_player_id: string | null
+        }
+        Insert: {
+          category: string
+          competition_id: string
+          created_at?: string
+          id?: string
+          organisation_id: string
+          prize?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          winner_name?: string | null
+          winner_player_id?: string | null
+        }
+        Update: {
+          category?: string
+          competition_id?: string
+          created_at?: string
+          id?: string
+          organisation_id?: string
+          prize?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          winner_name?: string | null
+          winner_player_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_awards_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_awards_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competition_entries: {
         Row: {
           competition_id: string
@@ -2350,6 +2404,66 @@ export type Database = {
           },
         ]
       }
+      scouting_reports: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          last_viewed_at: string | null
+          organisation_id: string
+          player_id: string
+          recipient: string
+          report: Json
+          revoked_at: string | null
+          token_hash: string
+          view_count: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          expires_at: string
+          id?: string
+          last_viewed_at?: string | null
+          organisation_id: string
+          player_id: string
+          recipient: string
+          report: Json
+          revoked_at?: string | null
+          token_hash: string
+          view_count?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          last_viewed_at?: string | null
+          organisation_id?: string
+          player_id?: string
+          recipient?: string
+          report?: Json
+          revoked_at?: string | null
+          token_hash?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scouting_reports_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scouting_reports_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seasons: {
         Row: {
           created_at: string
@@ -2926,6 +3040,7 @@ export type Database = {
         Returns: string
       }
       get_public_scoreboard: { Args: { p_slug: string }; Returns: Json }
+      get_shared_scouting_report: { Args: { p_token: string }; Returns: Json }
       has_org_role: {
         Args: {
           p_organisation_id: string
@@ -3049,6 +3164,10 @@ export type Database = {
           p_recording: Database["public"]["Enums"]["consent_state"]
         }
         Returns: string
+      }
+      scouting_consent_granted: {
+        Args: { p_organisation_id: string; p_player_id: string }
+        Returns: boolean
       }
       start_match_innings: {
         Args: {

@@ -71,6 +71,13 @@
       "when": 1795417258679,
       "tag": "0009_match_push_subscriptions",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795418003205,
+      "tag": "0010_awards_and_scouting_reports",
+      "breakpoints": true
     }
   ]
 }

@@ -15,11 +15,13 @@ import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PromoRouteImport } from './routes/promo'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as ZzPreviewRouteImport } from './routes/zz-preview'
 import { Route as CameraRoomIdRouteImport } from './routes/camera.$roomId'
 import { Route as DirectorRoomIdRouteImport } from './routes/director.$roomId'
 import { Route as GroundSlugRouteImport } from './routes/ground.$slug'
 import { Route as OverlaySlugRouteImport } from './routes/overlay.$slug'
 import { Route as ScoreboardSlugRouteImport } from './routes/scoreboard.$slug'
+import { Route as ScoutTokenRouteImport } from './routes/scout.$token'
 import { Route as ApiPublicGroundFeedSlugRouteImport } from './routes/api/public/ground-feed.$slug'
 import { Route as ApiPublicPushSlugRouteImport } from './routes/api/public/push/$slug'
 
@@ -53,6 +55,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZzPreviewRoute = ZzPreviewRouteImport.update({
+  id: '/zz-preview',
+  path: '/zz-preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CameraRoomIdRoute = CameraRoomIdRouteImport.update({
   id: '/camera/$roomId',
   path: '/camera/$roomId',
@@ -78,6 +85,11 @@ const ScoreboardSlugRoute = ScoreboardSlugRouteImport.update({
   path: '/scoreboard/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ScoutTokenRoute = ScoutTokenRouteImport.update({
+  id: '/scout/$token',
+  path: '/scout/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicGroundFeedSlugRoute = ApiPublicGroundFeedSlugRouteImport.update({
   id: '/api/public/ground-feed/$slug',
   path: '/api/public/ground-feed/$slug',
@@ -96,11 +108,13 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/promo': typeof PromoRoute
   '/terms': typeof TermsRoute
+  '/zz-preview': typeof ZzPreviewRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/director/$roomId': typeof DirectorRoomIdRoute
   '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
+  '/scout/$token': typeof ScoutTokenRoute
   '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
   '/api/public/push/$slug': typeof ApiPublicPushSlugRoute
 }
@@ -111,11 +125,13 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/promo': typeof PromoRoute
   '/terms': typeof TermsRoute
+  '/zz-preview': typeof ZzPreviewRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/director/$roomId': typeof DirectorRoomIdRoute
   '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
+  '/scout/$token': typeof ScoutTokenRoute
   '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
   '/api/public/push/$slug': typeof ApiPublicPushSlugRoute
 }
@@ -127,11 +143,13 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/promo': typeof PromoRoute
   '/terms': typeof TermsRoute
+  '/zz-preview': typeof ZzPreviewRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/director/$roomId': typeof DirectorRoomIdRoute
   '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
+  '/scout/$token': typeof ScoutTokenRoute
   '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
   '/api/public/push/$slug': typeof ApiPublicPushSlugRoute
 }
@@ -144,11 +162,13 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/promo'
     | '/terms'
+    | '/zz-preview'
     | '/camera/$roomId'
     | '/director/$roomId'
     | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
+    | '/scout/$token'
     | '/api/public/ground-feed/$slug'
     | '/api/public/push/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -159,11 +179,13 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/promo'
     | '/terms'
+    | '/zz-preview'
     | '/camera/$roomId'
     | '/director/$roomId'
     | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
+    | '/scout/$token'
     | '/api/public/ground-feed/$slug'
     | '/api/public/push/$slug'
   id:
@@ -174,11 +196,13 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/promo'
     | '/terms'
+    | '/zz-preview'
     | '/camera/$roomId'
     | '/director/$roomId'
     | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
+    | '/scout/$token'
     | '/api/public/ground-feed/$slug'
     | '/api/public/push/$slug'
   fileRoutesById: FileRoutesById
@@ -190,11 +214,13 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   PromoRoute: typeof PromoRoute
   TermsRoute: typeof TermsRoute
+  ZzPreviewRoute: typeof ZzPreviewRoute
   CameraRoomIdRoute: typeof CameraRoomIdRoute
   DirectorRoomIdRoute: typeof DirectorRoomIdRoute
   GroundSlugRoute: typeof GroundSlugRoute
   OverlaySlugRoute: typeof OverlaySlugRoute
   ScoreboardSlugRoute: typeof ScoreboardSlugRoute
+  ScoutTokenRoute: typeof ScoutTokenRoute
   ApiPublicGroundFeedSlugRoute: typeof ApiPublicGroundFeedSlugRoute
   ApiPublicPushSlugRoute: typeof ApiPublicPushSlugRoute
 }
@@ -243,6 +269,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/zz-preview': {
+      id: '/zz-preview'
+      path: '/zz-preview'
+      fullPath: '/zz-preview'
+      preLoaderRoute: typeof ZzPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/camera/$roomId': {
       id: '/camera/$roomId'
       path: '/camera/$roomId'
@@ -278,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScoreboardSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/scout/$token': {
+      id: '/scout/$token'
+      path: '/scout/$token'
+      fullPath: '/scout/$token'
+      preLoaderRoute: typeof ScoutTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/ground-feed/$slug': {
       id: '/api/public/ground-feed/$slug'
       path: '/api/public/ground-feed/$slug'
@@ -302,11 +342,13 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   PromoRoute: PromoRoute,
   TermsRoute: TermsRoute,
+  ZzPreviewRoute: ZzPreviewRoute,
   CameraRoomIdRoute: CameraRoomIdRoute,
   DirectorRoomIdRoute: DirectorRoomIdRoute,
   GroundSlugRoute: GroundSlugRoute,
   OverlaySlugRoute: OverlaySlugRoute,
   ScoreboardSlugRoute: ScoreboardSlugRoute,
+  ScoutTokenRoute: ScoutTokenRoute,
   ApiPublicGroundFeedSlugRoute: ApiPublicGroundFeedSlugRoute,
   ApiPublicPushSlugRoute: ApiPublicPushSlugRoute,
 }
