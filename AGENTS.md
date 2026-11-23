@@ -19,7 +19,7 @@
 - Lovable AI calls run only in signed-in server functions (`*.functions.ts` + `ai-gateway.server.ts`) so public visitors cannot spend AI credits.
 - League hub stats and live placings are computed client-side from per-match snapshots (`src/lib/season-stats.ts`, `src/lib/live-table.ts`); live placings never change net run rate or signed-off standings — keeps official results authoritative.
 - Highlight reels are cut client-side by `src/lib/highlight-reel.ts`; no server rendering, same private-recording checks.
-- The stream overlay (`/overlay/$slug`) reads the same public data as `/scoreboard/$slug` — no names.
+- Stream overlay (`/overlay/$slug`, view-model `src/lib/overlay-feed.ts`): public liveState; names only via `get_ground_screen_names` like the ground screen.
 - Match alerts use WebCrypto Web Push (`src/lib/web-push.server.ts`, key from `PUSH_VAPID_SECRET`), name-free text from `src/lib/match-alerts.ts`, sent only by a match's scorers — no Node packages on the edge worker.
 - Awards/scouting computed client-side (`awards.ts`, `scouting.ts`); shared reports are frozen `scouting_reports` read via `get_shared_scouting_report` (hashed token, ≤180 days, consent).
 - Camera phone limits are enforced in the DB (`pair_camera_device` locks the room, counts phones without `removed_at`; capacity/remove RPCs director-only) — holds under races; removing a phone keeps recordings.
