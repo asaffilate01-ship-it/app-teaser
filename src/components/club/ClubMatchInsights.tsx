@@ -1,15 +1,18 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, MapPin, Trophy, Target, Activity } from "lucide-react";
+import { CalendarDays, MapPin, Trophy, Target, Activity, Users } from "lucide-react";
 import { TeamCrest } from "@/components/scorer/Broadcast";
 import type { MatchRecord, PlatformDashboardData } from "@/lib/platform-cloud";
 import { loadMatchInsights, type InsightInnings } from "@/lib/match-insights-cloud";
 import {
   overProgression,
+  requiredRateByOver,
+  topAllRounders,
   topBatters,
   topBowlers,
   wagonWheel,
   wheelZones,
+  type InsightInningsData,
   type OverPoint,
   type WagonWheel,
 } from "@/lib/match-insights";
@@ -38,6 +41,11 @@ function liveScore(match: MatchRecord) {
     message: typeof state["message"] === "string" ? (state["message"] as string) : null,
   };
 }
+function ballsPerOver(match: MatchRecord): number {
+  const settings = (match.liveState["settings"] ?? {}) as Record<string, unknown>;
+  const value = Number(settings["ballsPerOver"]);
+  return Number.isFinite(value) && value > 0 ? value : 6;
+}
 function oversPerInnings(match: MatchRecord): number | null {
   const settings = (match.liveState["settings"] ?? {}) as Record<string, unknown>;
   const value = Number(settings["oversPerInnings"]);
@@ -52,7 +60,7 @@ export function pickFeaturedMatch(matches: MatchRecord[]): MatchRecord | null {
   return started[0] ?? null;
 }
 
-export function ClubMatchInsights({ data }: { data: PlatformDashboardData }) {
+export function ClubMatchInsights({ data, onViewStats }: { data: PlatformDashboardData; onViewStats?: (() => void) | undefined }) {
   const started = useMemo(
     () => data.matches.filter((match) => STARTED.has(match.status)),
     [data.matches],
@@ -69,6 +77,7 @@ export function ClubMatchInsights({ data }: { data: PlatformDashboardData }) {
           match={match}
           choices={started}
           onChoose={setMatchId}
+          onViewStats={onViewStats}
         />
       ) : (
         <section className="broadcast-panel insights-empty">
@@ -148,7 +157,7 @@ function MatchDayBody({ data, match, mode }: { data: PlatformDashboardData; matc
       </div>
       <div className="matchday-foot">
         {mode !== "next" && score.message ? (
-          <span className="truncate">{score.message}</span>
+          <span className={`truncate ${mode === "last" ? "matchday-result" : ""}`}>{score.message}</span>
         ) : (
           <>
             <span className="inline-flex items-center gap-1"><CalendarDays className="size-3.5" aria-hidden="true" />{shortDate(match.scheduledAt ?? match.startedAt)}</span>
@@ -165,11 +174,13 @@ function InsightsBoard({
   match,
   choices,
   onChoose,
+  onViewStats,
 }: {
   data: PlatformDashboardData;
   match: MatchRecord;
   choices: MatchRecord[];
   onChoose: (id: string) => void;
+  onViewStats?: (() => void) | undefined;
 }) {
   const isLive = LIVE.has(match.status);
   const query = useQuery({
@@ -240,37 +251,71 @@ function InsightsBoard({
           <p className="insights-muted text-sm">No balls recorded in this innings yet. Charts fill in as the scorer records deliveries.</p>
         </div>
       ) : (
-        <InningsInsights data={data} match={match} innings={current} />
+        <InningsInsights data={data} match={match} innings={current} all={innings} onViewStats={onViewStats} />
       )}
     </section>
   );
 }
 
-function InningsInsights({ data, match, innings }: { data: PlatformDashboardData; match: MatchRecord; innings: InsightInnings }) {
-  const points = overProgression(innings.balls);
+function InningsInsights({ data, match, innings, all, onViewStats }: { data: PlatformDashboardData; match: MatchRecord; innings: InsightInnings; all: InsightInnings[]; onViewStats?: (() => void) | undefined }) {
+  return (
+    <InningsDashboard
+      innings={innings}
+      allInnings={all}
+      maxOvers={oversPerInnings(match)}
+      ballsPerOver={ballsPerOver(match)}
+      teamName={(id) => teamName(data, id)}
+      playerName={(id) => playerName(data, id)}
+      onViewStats={onViewStats}
+    />
+  );
+}
+
+/** Demo-style match dashboard: run-rate chart with chase line, colour wagon wheel and top performers. */
+export function InningsDashboard({
+  innings,
+  allInnings,
+  maxOvers,
+  ballsPerOver: perOver,
+  teamName: nameOfTeam,
+  playerName: nameOfPlayer,
+  onViewStats,
+}: {
+  innings: InsightInningsData;
+  allInnings: InsightInningsData[];
+  maxOvers: number | null;
+  ballsPerOver: number;
+  teamName: (id: string) => string;
+  playerName: (id: string) => string;
+  onViewStats?: (() => void) | undefined;
+}) {
+  const points = overProgression(innings.balls, perOver);
   const wheel = wagonWheel(innings.balls);
   const batters = topBatters(innings.balls);
-  const bowlers = topBowlers(innings.balls);
-  const maxOvers = oversPerInnings(match);
+  const bowlers = topBowlers(innings.balls, perOver);
+  const allRounders = topAllRounders(allInnings.flatMap((item) => item.balls), perOver);
   const last = points.at(-1);
   const legalBalls = innings.balls.filter((ball) => ball.legal).length;
-  const ballsLeft = maxOvers ? Math.max(0, maxOvers * 6 - legalBalls) : null;
+  const ballsLeft = maxOvers ? Math.max(0, maxOvers * perOver - legalBalls) : null;
   const required =
-    innings.target && ballsLeft && last ? Math.max(0, ((innings.target - last.totalRuns) * 6) / ballsLeft) : null;
+    innings.target && ballsLeft && last ? Math.max(0, ((innings.target - last.totalRuns) * perOver) / ballsLeft) : null;
+  const requiredLine = innings.target && maxOvers ? requiredRateByOver(points, innings.target, maxOvers, perOver) : null;
   const projected = maxOvers && last ? Math.round(last.runRate * maxOvers) : null;
+  const oversText = (balls: number) => `${Math.floor(balls / perOver)}.${balls % perOver}`;
   return (
     <div className="space-y-4">
       <div className="grid gap-4 lg:grid-cols-5">
         <article className="broadcast-panel lg:col-span-3">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="panel-kicker">Run rate over time</h3>
             <div className="insights-legend">
               <span><i className="legend-bar" />Runs per over</span>
               <span><i className="legend-line" />Run rate</span>
+              {requiredLine && <span><i className="legend-dash" />Required rate</span>}
             </div>
           </div>
           <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_9.5rem]">
-            <RunRateChart points={points} maxOvers={maxOvers} />
+            <RunRateChart points={points} maxOvers={maxOvers} required={requiredLine} />
             <dl className="grid grid-cols-2 gap-2 sm:grid-cols-1">
               <RateStat label="Current run rate" value={(last?.runRate ?? 0).toFixed(2)} tone="crimson" />
               {required !== null ? (
@@ -278,17 +323,18 @@ function InningsInsights({ data, match, innings }: { data: PlatformDashboardData
               ) : (
                 <RateStat label="Projected score" value={projected !== null ? String(projected) : "—"} tone="gold" />
               )}
-              <RateStat label="Score" value={`${last?.totalRuns ?? 0}`} />
-              <RateStat
-                label={ballsLeft !== null ? "Overs left" : "Overs bowled"}
-                value={ballsLeft !== null ? `${Math.floor(ballsLeft / 6)}.${ballsLeft % 6}` : `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`}
-              />
+              {innings.target ? (
+                <RateStat label="Target" value={String(innings.target)} />
+              ) : (
+                <RateStat label="Score" value={`${last?.totalRuns ?? 0}`} />
+              )}
+              <RateStat label={ballsLeft !== null ? "Overs left" : "Overs bowled"} value={ballsLeft !== null ? oversText(ballsLeft) : oversText(legalBalls)} />
             </dl>
           </div>
         </article>
         <article className="broadcast-panel lg:col-span-2">
           <h3 className="panel-kicker">Wagon wheel</h3>
-          <WagonWheelChart wheel={wheel} overs={last ? `${Math.floor(legalBalls / 6)}.${legalBalls % 6}` : "0.0"} />
+          <WagonWheelChart wheel={wheel} overs={oversText(legalBalls)} />
           {wheel.unplacedRuns > 0 && (
             <p className="insights-muted mt-2 text-center text-[11px]">
               {wheel.unplacedRuns} run{wheel.unplacedRuns === 1 ? "" : "s"} without a recorded field zone
@@ -297,33 +343,42 @@ function InningsInsights({ data, match, innings }: { data: PlatformDashboardData
         </article>
       </div>
       <article className="broadcast-panel">
-        <h3 className="panel-kicker">Top performers</h3>
-        <div className="mt-3 grid gap-4 md:grid-cols-2">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="panel-kicker">Top performers</h3>
+          {onViewStats && (
+            <button type="button" className="action-secondary min-h-9 px-3 text-xs" onClick={onViewStats}>
+              View full stats
+            </button>
+          )}
+        </div>
+        <div className="mt-3 grid gap-5 md:grid-cols-3">
           <div>
-            <p className="performer-head"><Trophy className="size-3.5" aria-hidden="true" />Batters · {teamName(data, innings.battingTeamId)}</p>
+            <p className="performer-head"><Trophy className="size-3.5" aria-hidden="true" />Batters · {nameOfTeam(innings.battingTeamId)}</p>
             <ul className="mt-2 divide-y divide-[var(--broadcast-border)]">
               {batters.map((line) => (
-                <PerformerRow
-                  key={line.playerId}
-                  name={playerName(data, line.playerId)}
-                  detail={`${line.fours}×4 · ${line.sixes}×6`}
-                  figure={`${line.runs}${line.out ? "" : "*"} (${line.balls})`}
-                />
+                <PerformerRow key={line.playerId} name={nameOfPlayer(line.playerId)} detail={`${line.fours}×4 · ${line.sixes}×6`} figure={`${line.runs}${line.out ? "" : "*"} (${line.balls})`} />
               ))}
             </ul>
           </div>
           <div>
-            <p className="performer-head"><Target className="size-3.5" aria-hidden="true" />Bowlers · {teamName(data, innings.bowlingTeamId)}</p>
+            <p className="performer-head"><Target className="size-3.5" aria-hidden="true" />Bowlers · {nameOfTeam(innings.bowlingTeamId)}</p>
             <ul className="mt-2 divide-y divide-[var(--broadcast-border)]">
               {bowlers.map((line) => (
-                <PerformerRow
-                  key={line.playerId}
-                  name={playerName(data, line.playerId)}
-                  detail={`${line.overs} overs`}
-                  figure={`${line.wickets}/${line.runs}`}
-                />
+                <PerformerRow key={line.playerId} name={nameOfPlayer(line.playerId)} detail={`${line.overs} overs`} figure={`${line.wickets}/${line.runs}`} />
               ))}
             </ul>
+          </div>
+          <div>
+            <p className="performer-head"><Users className="size-3.5" aria-hidden="true" />All-rounders</p>
+            {allRounders.length ? (
+              <ul className="mt-2 divide-y divide-[var(--broadcast-border)]">
+                {allRounders.map((line) => (
+                  <PerformerRow key={line.playerId} name={nameOfPlayer(line.playerId)} detail={`${line.runs} (${line.balls}) & ${line.wickets}/${line.runsConceded} (${line.overs})`} figure={`${line.runs + line.wickets * 20}`} />
+                ))}
+              </ul>
+            ) : (
+              <p className="insights-muted mt-3 text-xs">Shows players who have both batted and bowled in this match.</p>
+            )}
           </div>
         </div>
       </article>
@@ -353,13 +408,22 @@ function PerformerRow({ name, detail, figure }: { name: string; detail: string; 
   );
 }
 
-function RunRateChart({ points, maxOvers }: { points: OverPoint[]; maxOvers: number | null }) {
+function RunRateChart({
+  points,
+  maxOvers,
+  required,
+}: {
+  points: OverPoint[];
+  maxOvers: number | null;
+  required: { over: number; rate: number | null }[] | null;
+}) {
   const width = 520;
   const height = 240;
   const pad = { left: 30, right: 10, top: 12, bottom: 26 };
   // Without a known match length, leave room for a few more overs so bars keep a sensible width.
   const overs = Math.max(maxOvers ?? (points.at(-1)?.over ?? 0) + 3, points.at(-1)?.over ?? 1, 5);
-  const top = Math.max(6, ...points.map((point) => point.runs), ...points.map((point) => point.runRate));
+  const requiredRates = (required ?? []).flatMap((item) => (item.rate == null ? [] : [Math.min(item.rate, 24)]));
+  const top = Math.max(6, ...points.map((point) => point.runs), ...points.map((point) => point.runRate), ...requiredRates);
   const yMax = Math.ceil(top / 2) * 2;
   const plotW = width - pad.left - pad.right;
   const plotH = height - pad.top - pad.bottom;
@@ -369,6 +433,12 @@ function RunRateChart({ points, maxOvers }: { points: OverPoint[]; maxOvers: num
   const ticks = Array.from({ length: yMax / 2 + 1 }, (_, index) => index * 2).filter((_, index, all) => all.length <= 8 || index % 2 === 0);
   const xStep = overs > 50 ? 10 : overs > 20 ? 5 : overs > 10 ? 2 : 1;
   const line = points.map((point, index) => `${index === 0 ? "M" : "L"}${x(point.over).toFixed(1)},${y(point.runRate).toFixed(1)}`).join(" ");
+  // Required rate is measured at over boundaries, so it is drawn from x = 0 (start of the chase).
+  const atBoundary = (over: number) => pad.left + (over / overs) * plotW;
+  const requiredPath = (required ?? [])
+    .filter((item) => item.rate != null)
+    .map((item, index) => `${index === 0 ? "M" : "L"}${atBoundary(item.over).toFixed(1)},${y(Math.min(item.rate!, 24)).toFixed(1)}`)
+    .join(" ");
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="insights-chart" role="img" aria-label={`Run rate chart over ${points.length} overs`}>
       {ticks.map((tick) => (
@@ -395,6 +465,7 @@ function RunRateChart({ points, maxOvers }: { points: OverPoint[]; maxOvers: num
           <title>{`Over ${point.over}: ${point.runs} runs${point.wickets ? `, ${point.wickets} wicket${point.wickets > 1 ? "s" : ""}` : ""}`}</title>
         </rect>
       ))}
+      {requiredPath && <path d={requiredPath} className="chart-required" />}
       <path d={line} className="chart-line" />
       {points.map((point) => (
         <circle key={point.over} cx={x(point.over)} cy={y(point.runRate)} r={3} className="chart-dot" />
@@ -426,12 +497,12 @@ function WagonWheelChart({ wheel, overs }: { wheel: WagonWheel; overs: string })
         const mid = ((start + step / 2 - 90) * Math.PI) / 180;
         const labelR = (inner + outer) / 2 + 4;
         const nameR = outer + 18;
-        const intensity = zone.runs > 0 ? 0.18 + (zone.share / maxShare) * 0.62 : 0.05;
+        const intensity = zone.runs > 0 ? 0.35 + (zone.share / maxShare) * 0.55 : 0.12;
         return (
           <g key={zone.zone}>
             <path
               d={wedgePath(c, c, inner, outer, start, end)}
-              className="wheel-wedge"
+              className={`wheel-wedge wheel-wedge-${index}`}
               style={{ fillOpacity: intensity }}
             >
               <title>{`${zone.zone}: ${zone.runs} runs (${zone.share}%)`}</title>

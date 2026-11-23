@@ -2257,7 +2257,9 @@
 
 /* League hub */
 .hub-tile {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   width: 100%;
   padding: 1rem;
   transition: transform 140ms ease, border-color 140ms ease;
@@ -2351,4 +2353,32 @@
   .hub-live-dot {
     display: none;
   }
+}
+
+/* Demo-style dashboard additions */
+.legend-dash {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0;
+  border-top: 2px dashed var(--gold);
+}
+.chart-required {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+  stroke-linecap: round;
+}
+.wheel-wedge-0 { fill: oklch(0.62 0.12 160); }
+.wheel-wedge-1 { fill: oklch(0.6 0.13 235); }
+.wheel-wedge-2 { fill: oklch(0.58 0.14 265); }
+.wheel-wedge-3 { fill: oklch(0.56 0.15 315); }
+.wheel-wedge-4 { fill: oklch(0.58 0.15 350); }
+.wheel-wedge-5 { fill: oklch(0.66 0.14 60); }
+.wheel-wedge-6 { fill: oklch(0.72 0.14 90); }
+.wheel-wedge-7 { fill: oklch(0.64 0.13 120); }
+.wheel-wedge-8 { fill: oklch(0.6 0.1 200); }
+.matchday-result {
+  color: oklch(0.8 0.15 155);
+  font-weight: 700;
 }

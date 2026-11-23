@@ -144,6 +144,26 @@ export const en = {
         label: "Coaching review",
         caption: "Desktop • four synced angles, frame-by-frame scrubbing and drawing tools",
       },
+      {
+        label: "Match dashboard",
+        caption:
+          "Desktop • win predictor, run rate against the required rate, colour wagon wheel and top performers",
+      },
+      {
+        label: "League stats",
+        caption:
+          "Desktop • season batting, bowling and fielding tables with 50s, 100s, best figures and 5-fors",
+      },
+      {
+        label: "League live",
+        caption:
+          "Phone • every live match in the competition side by side with win chances",
+      },
+      {
+        label: "Live league table",
+        caption:
+          "Phone • where teams would finish if every match ended now, with movers marked",
+      },
     ],
   },
   pricing: {
@@ -420,6 +440,26 @@ export const de: Content = {
         label: "Trainingsanalyse",
         caption: "Desktop • vier synchrone Winkel, Einzelbild-Navigation und Zeichenwerkzeuge",
       },
+      {
+        label: "Spiel-Dashboard",
+        caption:
+          "Desktop • Siegprognose, Run-Rate gegen benötigte Rate, farbiges Wagon Wheel und Top-Spieler",
+      },
+      {
+        label: "Liga-Statistiken",
+        caption:
+          "Desktop • Batting-, Bowling- und Fielding-Tabellen der Saison mit 50ern, 100ern, besten Zahlen und 5-Wicket-Hauls",
+      },
+      {
+        label: "Liga live",
+        caption:
+          "Handy • alle Live-Spiele des Wettbewerbs nebeneinander mit Siegchancen",
+      },
+      {
+        label: "Live-Tabelle",
+        caption:
+          "Handy • wo die Teams stehen würden, wenn jetzt alle Spiele enden – mit Auf- und Absteigern",
+      },
     ],
   },
   pricing: {
@@ -691,6 +731,26 @@ export const nl: Content = {
         label: "Coachingsanalyse",
         caption:
           "Desktop • vier gesynchroniseerde hoeken, beeld-voor-beeld scrubben en tekengereedschap",
+      },
+      {
+        label: "Wedstrijddashboard",
+        caption:
+          "Desktop • winvoorspelling, run rate tegen de benodigde rate, gekleurd wagon wheel en topspelers",
+      },
+      {
+        label: "Competitiestatistieken",
+        caption:
+          "Desktop • slag-, werp- en veldtabellen van het seizoen met 50s, 100s, beste cijfers en 5-wickets",
+      },
+      {
+        label: "Competitie live",
+        caption:
+          "Telefoon • alle live wedstrijden van de competitie naast elkaar met winkansen",
+      },
+      {
+        label: "Live stand",
+        caption:
+          "Telefoon • waar teams zouden eindigen als alle wedstrijden nu stopten, met stijgers en dalers",
       },
     ],
   },
@@ -967,6 +1027,26 @@ export const af: Content = {
         caption:
           "Rekenaar • vier gesinchroniseerde hoeke, raampie-vir-raampie navigasie en tekengereedskap",
       },
+      {
+        label: "Wedstryd-dashboard",
+        caption:
+          "Rekenaar • wenvoorspeller, lopietempo teen die vereiste tempo, gekleurde wawielkaart en topspelers",
+      },
+      {
+        label: "Ligastatistiek",
+        caption:
+          "Rekenaar • seisoen se kolf-, boul- en veldwerktabelle met 50's, 100's, beste syfers en 5-paaltjies",
+      },
+      {
+        label: "Liga regstreeks",
+        caption:
+          "Foon • elke regstreekse wedstryd in die kompetisie langs mekaar met wenkanse",
+      },
+      {
+        label: "Regstreekse punteleer",
+        caption:
+          "Foon • waar spanne sou eindig as elke wedstryd nou klaarmaak, met stygers gemerk",
+      },
     ],
   },
   pricing: {
@@ -1240,6 +1320,26 @@ export const fr: Content = {
         label: "Analyse d'entraînement",
         caption:
           "Bureau • quatre angles synchronisés, navigation image par image et outils de dessin",
+      },
+      {
+        label: "Tableau de bord du match",
+        caption:
+          "Ordinateur • prédiction de victoire, run rate face au taux requis, wagon wheel en couleurs et meilleurs joueurs",
+      },
+      {
+        label: "Statistiques de ligue",
+        caption:
+          "Ordinateur • tableaux de batte, de lancer et de champ de la saison avec 50, 100, meilleures figures et 5 guichets",
+      },
+      {
+        label: "Ligue en direct",
+        caption:
+          "Téléphone • tous les matchs en direct de la compétition côte à côte avec les chances de victoire",
+      },
+      {
+        label: "Classement en direct",
+        caption:
+          "Téléphone • le classement si tous les matchs s'arrêtaient maintenant, avec les mouvements indiqués",
       },
     ],
   },

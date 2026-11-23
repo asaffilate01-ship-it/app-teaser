@@ -22,3 +22,5 @@
 - [x] League hub: historic scorecards
 - [x] League stats: batting (runs, avg, SR, 50s, 100s, HS) and bowling (wkts, avg, econ, SR, best, 5-fors, 10-in-match)
 - [ ] Go-live (needs user): payments live keys, email sending, legal/safeguarding sign-off
+- [x] Demo-style dashboards: League hub match dashboard + club home closer to demo
+- [x] Promo page: show more dashboard screenshots (league hub, match dashboard, stats)

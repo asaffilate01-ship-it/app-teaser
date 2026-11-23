@@ -33,6 +33,10 @@ import shotDashboard from "@/assets/shot-dashboard.jpg";
 import shotScoreboard from "@/assets/shot-scoreboard.jpg";
 import shotMobile from "@/assets/shot-mobile.jpg";
 import shotReview from "@/assets/shot-review.jpg";
+import shotMatchDashboard from "@/assets/shot-match-dashboard.jpg";
+import shotLeagueStats from "@/assets/shot-league-stats.jpg";
+import shotLeagueLive from "@/assets/shot-league-live.jpg";
+import shotLiveTable from "@/assets/shot-live-table.jpg";
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): { section?: TabId } => {
@@ -88,6 +92,10 @@ const screenImages = [
   { src: shotScoreboard, w: 1600, h: 1008 },
   { src: shotMobile, w: 768, h: 1408 },
   { src: shotReview, w: 1600, h: 1008 },
+  { src: shotMatchDashboard, w: 1600, h: 1008 },
+  { src: shotLeagueStats, w: 1600, h: 1008 },
+  { src: shotLeagueLive, w: 768, h: 1408 },
+  { src: shotLiveTable, w: 768, h: 1408 },
 ];
 const planIcons = [Zap, Building2, Trophy];
 

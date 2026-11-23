@@ -1,6 +1,8 @@
 import { ArrowDown, ArrowLeft, ArrowUp, ChevronRight, Radio, RefreshCw, Trophy } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { TeamCrest } from "@/components/scorer/Broadcast";
+import { InningsDashboard } from "@/components/club/ClubMatchInsights";
+import { insightsFromMatch } from "@/lib/match-insights";
 import { ScorecardView } from "@/components/scorer/ScorecardView";
 import { CommentaryFeed } from "@/components/scorer/CommentaryFeed";
 import { WinPredictor } from "@/components/scorer/WinPredictor";
@@ -14,6 +16,7 @@ import { figures, seasonStats, type SeasonStats } from "@/lib/season-stats";
 import { currentPrediction, winTimeline } from "@/lib/win-timeline";
 
 type HubView = "live" | "table" | "results" | "stats";
+type DetailView = "dashboard" | "card" | "balls";
 const liveStatuses = new Set(["live", "innings_break"]);
 
 function useTeamName(data: PlatformDashboardData) {
@@ -99,7 +102,7 @@ function MatchTile({
 function MatchDetail({ record, title, onBack }: { record: MatchRecord; title: string; onBack: () => void }) {
   const [match, setMatch] = useState<CricketMatch | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<"card" | "balls">("card");
+  const [view, setView] = useState<DetailView>("dashboard");
   const live = liveStatuses.has(record.status);
 
   useEffect(() => {
@@ -153,27 +156,49 @@ function MatchDetailBody({
 }: {
   match: CricketMatch;
   live: boolean;
-  view: "card" | "balls";
-  setView: (view: "card" | "balls") => void;
+  view: DetailView;
+  setView: (view: DetailView) => void;
 }) {
   const innings = currentInnings(match);
   const [home, away] = match.teams;
   const prediction = currentPrediction(match);
   const battingIsHome = innings.battingTeamId === home.id;
+  const predictor = (
+  <WinPredictor
+    firstName={home.name}
+    secondName={away.name}
+    firstWin={live && prediction ? (battingIsHome ? prediction.battingWin : prediction.bowlingWin) : null}
+    prediction={live ? prediction : null}
+    battingName={findTeam(match, innings.battingTeamId).name}
+    timeline={winTimeline(match)}
+    unavailableReason={live ? undefined : `This match has finished. The line shows how ${home.name}'s chances swung.`}
+  />
+  );
   const lines = commentaryFeed(innings, match.settings.ballsPerOver, {
     player: (id) => (id ? findPlayer(match, id)?.name : undefined),
     battingTeam: findTeam(match, innings.battingTeamId).name,
   });
   return (
     <>
-      <div className="card-tabs max-w-sm" role="tablist" aria-label="Match view" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-        <button type="button" role="tab" aria-selected={view === "card"} onClick={() => setView("card")}>
-          Scorecard
-        </button>
-        <button type="button" role="tab" aria-selected={view === "balls"} onClick={() => setView("balls")}>
-          Ball by ball
-        </button>
+      <div className="card-tabs max-w-md" role="tablist" aria-label="Match view" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))", position: "static" }}>
+        {(
+          [
+            ["dashboard", "Dashboard"],
+            ["card", "Scorecard"],
+            ["balls", "Ball by ball"],
+          ] as [DetailView, string][]
+        ).map(([key, text]) => (
+          <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)}>
+            {text}
+          </button>
+        ))}
       </div>
+      {view === "dashboard" ? (
+        <div className="space-y-4">
+          {predictor}
+          <MatchDashboard match={match} />
+        </div>
+      ) : (
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-start">
         {view === "card" ? (
           <ScorecardView key={match.innings.length} match={match} />
@@ -182,17 +207,42 @@ function MatchDetailBody({
             <CommentaryFeed lines={lines} />
           </div>
         )}
-        <WinPredictor
-          firstName={home.name}
-          secondName={away.name}
-          firstWin={live && prediction ? (battingIsHome ? prediction.battingWin : prediction.bowlingWin) : null}
-          prediction={live ? prediction : null}
-          battingName={findTeam(match, innings.battingTeamId).name}
-          timeline={winTimeline(match)}
-          unavailableReason={live ? undefined : `This match has finished. The line shows how ${home.name}'s chances swung.`}
-        />
+        {predictor}
       </div>
+      )}
     </>
+  );
+}
+
+function MatchDashboard({ match }: { match: CricketMatch }) {
+  const innings = insightsFromMatch(match);
+  const withBalls = [...innings].reverse().find((item) => item.balls.length > 0) ?? innings[0];
+  const [chosen, setChosen] = useState<string | null>(null);
+  const current = innings.find((item) => item.id === chosen) ?? withBalls;
+  if (!current || current.balls.length === 0) {
+    return <p className="broadcast-panel p-4 text-sm text-slate-400">Charts fill in as soon as the first ball is scored.</p>;
+  }
+  const teamOf = (id: string) => findTeam(match, id).name;
+  return (
+    <div className="space-y-3">
+      {innings.length > 1 && (
+        <div className="insights-toggle" role="tablist" aria-label="Innings">
+          {innings.map((item) => (
+            <button key={item.id} type="button" role="tab" aria-selected={current.id === item.id} className={current.id === item.id ? "is-active" : ""} onClick={() => setChosen(item.id)}>
+              {teamOf(item.battingTeamId)} innings
+            </button>
+          ))}
+        </div>
+      )}
+      <InningsDashboard
+        innings={current}
+        allInnings={innings}
+        maxOvers={match.settings.oversPerInnings ?? null}
+        ballsPerOver={match.settings.ballsPerOver}
+        teamName={teamOf}
+        playerName={(id) => findPlayer(match, id)?.name ?? "Player"}
+      />
+    </div>
   );
 }
 
@@ -452,10 +502,20 @@ function StatsTable({
 }
 
 /** Competition control room: every match at once, live table, results and season stats. */
-export function LeagueHub({ data, onRefresh, refreshing }: { data: PlatformDashboardData; onRefresh: () => void; refreshing: boolean }) {
+export function LeagueHub({
+  data,
+  onRefresh,
+  refreshing,
+  initialView = "live",
+}: {
+  data: PlatformDashboardData;
+  onRefresh: () => void;
+  refreshing: boolean;
+  initialView?: HubView;
+}) {
   const teamName = useTeamName(data);
   const [competitionId, setCompetitionId] = useState(data.competitions[0]?.id ?? "");
-  const [view, setView] = useState<HubView>("live");
+  const [view, setView] = useState<HubView>(initialView);
   const [openId, setOpenId] = useState<string | null>(null);
   const matches = data.matches.filter((match) => !competitionId || match.competitionId === competitionId);
   const situations = matches.map((match) => readLiveSituation(match));

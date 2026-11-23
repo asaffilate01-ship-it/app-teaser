@@ -1,15 +1,8 @@
 import { getCloudClient } from "@/lib/cloud";
 import type { DismissalType, FieldZone } from "@/lib/cricket";
-import type { InsightBall } from "@/lib/match-insights";
+import type { InsightBall, InsightInningsData } from "@/lib/match-insights";
 
-export interface InsightInnings {
-  id: string;
-  number: number;
-  battingTeamId: string;
-  bowlingTeamId: string;
-  target: number | null;
-  balls: InsightBall[];
-}
+export type InsightInnings = InsightInningsData;
 
 const count = (value: unknown) => {
   const number = Number(value ?? 0);

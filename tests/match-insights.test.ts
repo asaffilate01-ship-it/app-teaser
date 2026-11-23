@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   overProgression,
+  requiredRateByOver,
+  topAllRounders,
   topBatters,
   topBowlers,
   wagonWheel,
@@ -74,4 +76,41 @@ test("bowlers are not credited with run outs and are not charged byes", () => {
   ]);
   assert.deepEqual([first?.playerId, first?.wickets, first?.runs, first?.overs], ["x", 1, 0, "0.2"]);
   assert.deepEqual([second?.playerId, second?.wickets, second?.runs], ["y", 0, 3]);
+});
+
+test("required rate falls as the chase scores faster than needed", () => {
+  // Chasing 61 in 10 overs: 6.1 an over at the start.
+  const balls = Array.from({ length: 12 }, (_, index) => ball(Math.floor(index / 6), { batterRuns: 2 }));
+  const rates = requiredRateByOver(overProgression(balls), 61, 10);
+  // After 2 overs: 37 needed from 48 balls = 4.63 an over.
+  assert.deepEqual(rates, [
+    { over: 0, rate: 6.1 },
+    { over: 1, rate: 5.44 },
+    { over: 2, rate: 4.63 },
+  ]);
+});
+
+test("required rate stops once the target is reached", () => {
+  const balls = Array.from({ length: 6 }, () => ball(0, { batterRuns: 6 }));
+  assert.equal(requiredRateByOver(overProgression(balls), 30, 5).at(-1)?.rate, null);
+});
+
+test("all-rounders must bat and bowl and rank by runs plus 20 per wicket", () => {
+  const balls = [
+    // a: 30 runs batting, no bowling. b: 10 runs and 2 wickets. c: 25 runs and 0 wickets.
+    ...Array.from({ length: 5 }, () => ball(0, { strikerId: "a", batterRuns: 6, bowlerId: "z" })),
+    ball(1, { strikerId: "b", batterRuns: 10 as number, bowlerId: "z" }),
+    ball(2, { strikerId: "c", batterRuns: 25 as number, bowlerId: "z" }),
+    ball(3, { strikerId: "q", bowlerId: "b", dismissalType: "bowled" }),
+    ball(3, { strikerId: "r", bowlerId: "b", dismissalType: "bowled" }),
+    ball(4, { strikerId: "q", bowlerId: "c", batterRuns: 1 }),
+  ];
+  const lines = topAllRounders(balls);
+  assert.deepEqual(
+    lines.map((line) => [line.playerId, line.runs, line.wickets]),
+    [
+      ["b", 10, 2],
+      ["c", 25, 0],
+    ],
+  );
 });

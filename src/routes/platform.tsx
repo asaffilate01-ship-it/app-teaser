@@ -558,6 +558,7 @@ function OperationalPlatform({
   const setTab = (section: PlatformTab) =>
     void navigate({ search: { section }, resetScroll: true });
   const dashboard = usePlatformDashboard(membership.organisationId, membership.role);
+  const [leagueStart, setLeagueStart] = useState<"live" | "stats">("live");
   return (
     <PageFrame
       right={
@@ -650,13 +651,17 @@ function OperationalPlatform({
                 role={membership.role}
                 run={dashboard.run}
                 onOpenSection={setTab}
+                onViewStats={() => {
+                  setLeagueStart("stats");
+                  setTab("league");
+                }}
               />
             )}
             {tab === "competitions" && (
               <Competitions data={dashboard.data} role={membership.role} run={dashboard.run} />
             )}
             {tab === "league" && (
-              <LeagueHub data={dashboard.data} onRefresh={() => void dashboard.refresh()} refreshing={dashboard.refreshing} />
+              <LeagueHub key={leagueStart} initialView={leagueStart} data={dashboard.data} onRefresh={() => void dashboard.refresh()} refreshing={dashboard.refreshing} />
             )}
             {tab === "capture" && (
               <Capture data={dashboard.data} role={membership.role} run={dashboard.run} />
@@ -714,11 +719,13 @@ function Overview({
   role,
   run,
   onOpenSection,
+  onViewStats,
 }: {
   data: PlatformDashboardData;
   role: PlatformRole;
   run: RunAction;
   onOpenSection: (section: PlatformTab) => void;
+  onViewStats: () => void;
 }) {
   const liveMatches = data.matches.filter((match) => match.status === "live");
   const upcoming = data.matches.filter((match) => ["draft", "scheduled"].includes(match.status));
@@ -763,7 +770,7 @@ function Overview({
           <MetricCard key={label} icon={Icon} label={label} value={value} detail={detail} />
         ))}
       </div>
-      <ClubMatchInsights data={data} />
+      <ClubMatchInsights data={data} onViewStats={onViewStats} />
       {can(role, "match.manage") && <CreateMatchPanel data={data} run={run} />}
       <Panel
         title="Matches"

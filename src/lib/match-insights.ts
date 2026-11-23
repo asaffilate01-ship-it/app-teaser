@@ -1,4 +1,4 @@
-import { isBowlerWicket, type DismissalType, type FieldZone } from "./cricket.ts";
+import { isBowlerWicket, type CricketMatch, type DismissalType, type FieldZone } from "./cricket.ts";
 import { fieldAreas, zoneArea } from "./field-positions.ts";
 
 /** One recorded ball, reduced to what the club dashboard charts need. */
@@ -21,6 +21,8 @@ export interface OverPoint {
   runs: number;
   wickets: number;
   totalRuns: number;
+  /** Legal balls bowled up to the end of this over. */
+  legalBalls: number;
   runRate: number;
 }
 
@@ -50,6 +52,7 @@ export function overProgression(balls: InsightBall[], ballsPerOver = 6): OverPoi
         runs: entry.runs,
         wickets: entry.wickets,
         totalRuns,
+        legalBalls: totalLegal,
         runRate: oversBowled > 0 ? Math.round((totalRuns / oversBowled) * 100) / 100 : 0,
       };
     });
@@ -150,5 +153,95 @@ export function topBowlers(balls: InsightBall[], ballsPerOver = 6, limit = 3): B
       overs: `${Math.floor(line.legalBalls / ballsPerOver)}.${line.legalBalls % ballsPerOver}`,
     }))
     .sort((a, b) => b.wickets - a.wickets || a.runs - b.runs)
+    .slice(0, limit);
+}
+
+/** One innings worth of chart data; the cloud loader and match snapshots both produce this shape. */
+export interface InsightInningsData {
+  id: string;
+  number: number;
+  battingTeamId: string;
+  bowlingTeamId: string;
+  target: number | null;
+  balls: InsightBall[];
+}
+
+/** Turns a scorer match snapshot into chart data. Only one-innings-a-side matches get a chase target. */
+export function insightsFromMatch(match: CricketMatch): InsightInningsData[] {
+  return match.innings.map((innings, index) => {
+    const previous = match.innings[index - 1];
+    const previousRuns = previous
+      ? previous.deliveries.reduce(
+          (sum, ball) =>
+            sum + ball.batterRuns + ball.extras.wide + ball.extras.noBall + ball.extras.bye + ball.extras.legBye + ball.extras.penalty,
+          0,
+        )
+      : 0;
+    return {
+      id: innings.id,
+      number: innings.number,
+      battingTeamId: innings.battingTeamId,
+      bowlingTeamId: innings.bowlingTeamId,
+      target: index === 1 && match.settings.inningsPerSide === 1 ? previousRuns + 1 : null,
+      balls: innings.deliveries.map((ball) => ({
+        over: ball.over,
+        legal: ball.legal,
+        batterRuns: ball.batterRuns,
+        wide: ball.extras.wide,
+        noBall: ball.extras.noBall,
+        bye: ball.extras.bye,
+        legBye: ball.extras.legBye,
+        strikerId: ball.strikerId,
+        bowlerId: ball.bowlerId,
+        fieldZone: ball.fieldZone,
+        dismissalType: ball.dismissal?.type ?? null,
+      })),
+    };
+  });
+}
+
+/**
+ * Required run rate at the end of each over of a chase. Null once the target is reached or no balls remain.
+ */
+export function requiredRateByOver(
+  points: OverPoint[],
+  target: number,
+  maxOvers: number,
+  ballsPerOver = 6,
+): { over: number; rate: number | null }[] {
+  const maxBalls = maxOvers * ballsPerOver;
+  const start = { over: 0, rate: Math.round((target / maxOvers) * 100) / 100 };
+  return [
+    start,
+    ...points.map((point) => {
+      const ballsLeft = maxBalls - point.legalBalls;
+      const runsLeft = target - point.totalRuns;
+      return {
+        over: point.over,
+        rate: ballsLeft > 0 && runsLeft > 0 ? Math.round(((runsLeft * ballsPerOver) / ballsLeft) * 100) / 100 : null,
+      };
+    }),
+  ];
+}
+
+export interface AllRounderLine {
+  playerId: string;
+  runs: number;
+  balls: number;
+  wickets: number;
+  runsConceded: number;
+  overs: string;
+}
+
+/** Players who both batted and bowled, ranked by runs plus 20 per wicket (a simple, explainable impact score). */
+export function topAllRounders(balls: InsightBall[], ballsPerOver = 6, limit = 3): AllRounderLine[] {
+  const batting = new Map(topBatters(balls, Number.POSITIVE_INFINITY).map((line) => [line.playerId, line]));
+  return topBowlers(balls, ballsPerOver, Number.POSITIVE_INFINITY)
+    .filter((bowl) => bowl.legalBalls > 0 && batting.has(bowl.playerId))
+    .map((bowl) => {
+      const bat = batting.get(bowl.playerId)!;
+      return { playerId: bowl.playerId, runs: bat.runs, balls: bat.balls, wickets: bowl.wickets, runsConceded: bowl.runs, overs: bowl.overs };
+    })
+    .sort((a, b) => b.runs + b.wickets * 20 - (a.runs + a.wickets * 20) || a.runsConceded - b.runsConceded)
     .slice(0, limit);
 }
