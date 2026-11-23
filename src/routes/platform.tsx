@@ -269,41 +269,20 @@ function ActivationGate() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto flex min-h-[calc(100vh-74px)] max-w-4xl items-center px-4 py-12 md:px-8"
+        className="mx-auto flex min-h-[calc(100vh-74px)] max-w-xl items-center px-4 py-12 md:px-8"
       >
-        <section className="w-full rounded-3xl border border-amber-300/20 bg-gradient-to-br from-amber-300/[0.09] via-white/[0.03] to-rose-400/[0.07] p-6 md:p-10">
-          <span className="flex size-12 items-center justify-center rounded-2xl bg-amber-300/10 text-amber-300">
+        <section className="broadcast-panel w-full p-6 text-center md:p-10">
+          <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-amber-300/10 text-amber-300">
             <Database className="size-6" />
           </span>
-          <p className="mt-6 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
-            Production activation required
+          <h1 className="mt-5 text-2xl font-bold md:text-4xl">Club workspace is briefly unavailable</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-300">
+            We couldn't reach CricLume Cloud just now. Please refresh in a moment — your club's
+            data is safe.
           </p>
-          <h1 className="mt-2 text-3xl font-bold md:text-5xl">Connect the Supabase project</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300">
-            Demo figures have been removed. CricLume will show only authenticated database records,
-            so the production URL and publishable key must be present at build time.
-          </p>
-          <ol className="mt-7 grid gap-3 text-sm text-slate-300 md:grid-cols-2">
-            {[
-              "Apply both migrations in supabase/migrations",
-              "Set VITE_SUPABASE_URL",
-              "Set VITE_SUPABASE_PUBLISHABLE_KEY",
-              "Configure Auth redirect URLs and production SMTP",
-            ].map((step, index) => (
-              <li
-                key={step}
-                className="flex gap-3 rounded-xl border border-white/10 bg-black/15 p-4"
-              >
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-amber-300 text-xs font-black text-[#1d1520]">
-                  {index + 1}
-                </span>
-                {step}
-              </li>
-            ))}
-          </ol>
-          <p className="mt-6 text-xs text-slate-500">
-            No secret or service-role key belongs in a VITE_ variable.
-          </p>
+          <button className="action-primary mt-6" onClick={() => window.location.reload()}>
+            Try again
+          </button>
         </section>
       </main>
     </PageFrame>
@@ -2190,7 +2169,7 @@ function Operations({
     }
   };
   const integrations = [
-    [Database, "Supabase / Postgres", "Connected", true],
+    [Database, "CricLume Cloud database", "Connected", true],
     [
       CircleDollarSign,
       "Stripe Billing",
