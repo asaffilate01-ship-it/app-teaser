@@ -127,3 +127,11 @@
 - [x] Club logo on the website header
 - [x] Pricing, FAQ and plan rules mention the own-domain website (five languages)
 - [ ] First real club domain: connect it in hosting settings and switch off the Primary-domain redirect (needs the owner)
+
+## Umpires (new ask)
+- [x] Umpire panel for every club and league: grade, qualification, safeguarding / first-aid expiry, kit, paid or voluntary, fee
+- [x] Panel rules (which checks are required, default fee, travel rate per km, guidance for umpires)
+- [x] Appoint umpires to fixtures with a ranked pick list (available, ready, fair share), clash and "unavailable" checks in the database
+- [x] Logistics per appointment: report time, venue, meeting point, contact, travel notes
+- [x] Payments: fee + travel expenses, due → approved → paid with reference (treasurer or admin), voluntary umpires
+- [x] Umpire dashboard (/umpire): accept/decline, availability calendar, earnings and money owed, logistics, check expiries — across every panel they're on

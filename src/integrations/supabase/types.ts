@@ -4182,6 +4182,288 @@ export type Database = {
           },
         ]
       }
+      umpire_appointments: {
+        Row: {
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          expenses_minor: number
+          expenses_note: string | null
+          fee_minor: number
+          fixture_id: string | null
+          id: string
+          match_id: string | null
+          meet_point: string | null
+          organisation_id: string
+          paid_on: string | null
+          pay_basis: string
+          payment_reference: string | null
+          payment_status: string
+          position: string
+          report_at: string | null
+          responded_at: string | null
+          response_note: string | null
+          starts_at: string
+          status: string
+          timezone: string
+          title: string
+          travel_km: number | null
+          travel_notes: string | null
+          umpire_id: string
+          updated_at: string
+          venue: string | null
+        }
+        Insert: {
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          expenses_minor?: number
+          expenses_note?: string | null
+          fee_minor?: number
+          fixture_id?: string | null
+          id?: string
+          match_id?: string | null
+          meet_point?: string | null
+          organisation_id: string
+          paid_on?: string | null
+          pay_basis?: string
+          payment_reference?: string | null
+          payment_status?: string
+          position?: string
+          report_at?: string | null
+          responded_at?: string | null
+          response_note?: string | null
+          starts_at: string
+          status?: string
+          timezone?: string
+          title: string
+          travel_km?: number | null
+          travel_notes?: string | null
+          umpire_id: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Update: {
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          expenses_minor?: number
+          expenses_note?: string | null
+          fee_minor?: number
+          fixture_id?: string | null
+          id?: string
+          match_id?: string | null
+          meet_point?: string | null
+          organisation_id?: string
+          paid_on?: string | null
+          pay_basis?: string
+          payment_reference?: string | null
+          payment_status?: string
+          position?: string
+          report_at?: string | null
+          responded_at?: string | null
+          response_note?: string | null
+          starts_at?: string
+          status?: string
+          timezone?: string
+          title?: string
+          travel_km?: number | null
+          travel_notes?: string | null
+          umpire_id?: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "umpire_appointments_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "umpire_appointments_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "umpire_appointments_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "umpire_appointments_umpire_id_fkey"
+            columns: ["umpire_id"]
+            isOneToOne: false
+            referencedRelation: "umpires"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      umpire_availability: {
+        Row: {
+          day: string
+          note: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          day: string
+          note?: string | null
+          status: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          day?: string
+          note?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      umpire_panel_settings: {
+        Row: {
+          currency: string
+          default_fee_minor: number
+          default_pay_basis: string
+          guidance: string | null
+          organisation_id: string
+          requires_first_aid: boolean
+          requires_kit: boolean
+          requires_qualification: boolean
+          requires_safeguarding: boolean
+          travel_rate_minor: number
+          updated_at: string
+        }
+        Insert: {
+          currency?: string
+          default_fee_minor?: number
+          default_pay_basis?: string
+          guidance?: string | null
+          organisation_id: string
+          requires_first_aid?: boolean
+          requires_kit?: boolean
+          requires_qualification?: boolean
+          requires_safeguarding?: boolean
+          travel_rate_minor?: number
+          updated_at?: string
+        }
+        Update: {
+          currency?: string
+          default_fee_minor?: number
+          default_pay_basis?: string
+          guidance?: string | null
+          organisation_id?: string
+          requires_first_aid?: boolean
+          requires_kit?: boolean
+          requires_qualification?: boolean
+          requires_safeguarding?: boolean
+          travel_rate_minor?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "umpire_panel_settings_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: true
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      umpires: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          display_name: string
+          email: string | null
+          first_aid_expires: string | null
+          grade: string
+          home_area: string | null
+          id: string
+          kit_ok: boolean
+          match_fee_minor: number | null
+          max_travel_km: number | null
+          notes: string | null
+          organisation_id: string
+          pay_basis: string
+          phone: string | null
+          qualification: string | null
+          qualification_expires: string | null
+          safeguarding_expires: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          display_name: string
+          email?: string | null
+          first_aid_expires?: string | null
+          grade?: string
+          home_area?: string | null
+          id?: string
+          kit_ok?: boolean
+          match_fee_minor?: number | null
+          max_travel_km?: number | null
+          notes?: string | null
+          organisation_id: string
+          pay_basis?: string
+          phone?: string | null
+          qualification?: string | null
+          qualification_expires?: string | null
+          safeguarding_expires?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          display_name?: string
+          email?: string | null
+          first_aid_expires?: string | null
+          grade?: string
+          home_area?: string | null
+          id?: string
+          kit_ok?: boolean
+          match_fee_minor?: number | null
+          max_travel_km?: number | null
+          notes?: string | null
+          organisation_id?: string
+          pay_basis?: string
+          phone?: string | null
+          qualification?: string | null
+          qualification_expires?: string | null
+          safeguarding_expires?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "umpires_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -4585,6 +4867,10 @@ export type Database = {
         Returns: boolean
       }
       can_view_match: { Args: { p_match_id: string }; Returns: boolean }
+      can_view_umpire_availability: {
+        Args: { p_user: string }
+        Returns: boolean
+      }
       cancel_ground_booking: {
         Args: { p_booking_id: string }
         Returns: undefined
@@ -4603,6 +4889,15 @@ export type Database = {
           _tenant_id: string
         }
         Returns: Json
+      }
+      claim_umpire_expenses: {
+        Args: {
+          p_amount_minor: number
+          p_id: string
+          p_km: number
+          p_note?: string
+        }
+        Returns: undefined
       }
       claim_video_processing: {
         Args: { p_asset: string; p_user: string }
@@ -4740,11 +5035,15 @@ export type Database = {
       is_finance_manager: { Args: { p_org: string }; Returns: boolean }
       is_guardian_manager: { Args: { p_org: string }; Returns: boolean }
       is_match_manager: { Args: { p_match_id: string }; Returns: boolean }
+      is_my_umpire: { Args: { p_umpire_id: string }; Returns: boolean }
       is_org_member: { Args: { p_organisation_id: string }; Returns: boolean }
       is_ride_driver: { Args: { p_ride_id: string }; Returns: boolean }
       is_site_editor: { Args: { p_org: string }; Returns: boolean }
       is_store_manager: { Args: { p_org: string }; Returns: boolean }
       is_travel_manager: { Args: { p_org: string }; Returns: boolean }
+      is_umpire_manager: { Args: { p_org: string }; Returns: boolean }
+      is_umpire_payer: { Args: { p_org: string }; Returns: boolean }
+      link_my_umpire_profiles: { Args: never; Returns: number }
       list_bookable_grounds: {
         Args: never
         Returns: {
@@ -4785,7 +5084,9 @@ export type Database = {
         }[]
       }
       my_match_duties: { Args: { p_match_id: string }; Returns: string[] }
+      my_umpire_panels: { Args: never; Returns: Json }
       normalise_club_hostname: { Args: { p_input: string }; Returns: string }
+      on_my_umpire_panel: { Args: { p_org: string }; Returns: boolean }
       pair_camera_device: {
         Args: {
           p_angle: string
@@ -4962,6 +5263,10 @@ export type Database = {
         Returns: undefined
       }
       resolve_club_site_domain: { Args: { p_host: string }; Returns: string }
+      respond_umpire_appointment: {
+        Args: { p_accept: boolean; p_id: string; p_note?: string }
+        Returns: undefined
+      }
       scouting_consent_granted: {
         Args: { p_organisation_id: string; p_player_id: string }
         Returns: boolean
@@ -4993,6 +5298,15 @@ export type Database = {
       }
       set_selection_role: {
         Args: { p_event_id: string; p_field: string; p_player_id: string }
+        Returns: undefined
+      }
+      set_umpire_payment: {
+        Args: {
+          p_id: string
+          p_paid_on?: string
+          p_reference?: string
+          p_status: string
+        }
         Returns: undefined
       }
       sign_off_fixture_result: {
@@ -5068,6 +5382,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      update_my_umpire_details: {
+        Args: {
+          p_home_area: string
+          p_max_travel_km: number
+          p_phone: string
+          p_umpire_id: string
+        }
+        Returns: undefined
       }
       void_last_delivery_v1: {
         Args: {

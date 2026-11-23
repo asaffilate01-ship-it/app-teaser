@@ -38,6 +38,8 @@ export const permissions = [
   "drivers.approve",
   "store.manage",
   "guardians.manage",
+  "umpires.manage",
+  "umpires.pay",
 ] as const;
 
 export type Permission = (typeof permissions)[number];
@@ -60,6 +62,8 @@ const rolePermissions: Record<PlatformRole, ReadonlySet<Permission>> = {
     "bookings.manage",
     "bookings.request",
     "events.manage",
+    "umpires.manage",
+    "umpires.pay",
   ]),
   club_admin: new Set([
     "members.manage",
@@ -80,6 +84,8 @@ const rolePermissions: Record<PlatformRole, ReadonlySet<Permission>> = {
     "travel.manage",
     "store.manage",
     "guardians.manage",
+    "umpires.manage",
+    "umpires.pay",
   ]),
   safeguarding_officer: new Set([
     "match.view_private",
@@ -92,7 +98,7 @@ const rolePermissions: Record<PlatformRole, ReadonlySet<Permission>> = {
     "drivers.approve",
     "guardians.manage",
   ]),
-  treasurer: new Set(["match.view_private", "fees.manage", "store.manage"]),
+  treasurer: new Set(["match.view_private", "fees.manage", "store.manage", "umpires.pay"]),
   team_manager: new Set([
     "match.view_private",
     "events.manage",

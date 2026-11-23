@@ -16,6 +16,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PromoRouteImport } from './routes/promo'
 import { Route as SponsorDeskRouteImport } from './routes/sponsor-desk'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as UmpireRouteImport } from './routes/umpire'
 import { Route as CameraRoomIdRouteImport } from './routes/camera.$roomId'
 import { Route as ClubSlugRouteImport } from './routes/club.$slug'
 import { Route as DirectorRoomIdRouteImport } from './routes/director.$roomId'
@@ -64,6 +65,11 @@ const SponsorDeskRoute = SponsorDeskRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UmpireRoute = UmpireRouteImport.update({
+  id: '/umpire',
+  path: '/umpire',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CameraRoomIdRoute = CameraRoomIdRouteImport.update({
@@ -145,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/promo': typeof PromoRoute
   '/sponsor-desk': typeof SponsorDeskRoute
   '/terms': typeof TermsRoute
+  '/umpire': typeof UmpireRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/club/$slug': typeof ClubSlugRouteWithChildren
   '/director/$roomId': typeof DirectorRoomIdRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/promo': typeof PromoRoute
   '/sponsor-desk': typeof SponsorDeskRoute
   '/terms': typeof TermsRoute
+  '/umpire': typeof UmpireRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/director/$roomId': typeof DirectorRoomIdRoute
   '/ground/$slug': typeof GroundSlugRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/promo': typeof PromoRoute
   '/sponsor-desk': typeof SponsorDeskRoute
   '/terms': typeof TermsRoute
+  '/umpire': typeof UmpireRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/club/$slug': typeof ClubSlugRouteWithChildren
   '/director/$roomId': typeof DirectorRoomIdRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/promo'
     | '/sponsor-desk'
     | '/terms'
+    | '/umpire'
     | '/camera/$roomId'
     | '/club/$slug'
     | '/director/$roomId'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/promo'
     | '/sponsor-desk'
     | '/terms'
+    | '/umpire'
     | '/camera/$roomId'
     | '/director/$roomId'
     | '/ground/$slug'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/promo'
     | '/sponsor-desk'
     | '/terms'
+    | '/umpire'
     | '/camera/$roomId'
     | '/club/$slug'
     | '/director/$roomId'
@@ -285,6 +297,7 @@ export interface RootRouteChildren {
   PromoRoute: typeof PromoRoute
   SponsorDeskRoute: typeof SponsorDeskRoute
   TermsRoute: typeof TermsRoute
+  UmpireRoute: typeof UmpireRoute
   CameraRoomIdRoute: typeof CameraRoomIdRoute
   ClubSlugRoute: typeof ClubSlugRouteWithChildren
   DirectorRoomIdRoute: typeof DirectorRoomIdRoute
@@ -345,6 +358,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/umpire': {
+      id: '/umpire'
+      path: '/umpire'
+      fullPath: '/umpire'
+      preLoaderRoute: typeof UmpireRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/camera/$roomId': {
@@ -486,6 +506,7 @@ const rootRouteChildren: RootRouteChildren = {
   PromoRoute: PromoRoute,
   SponsorDeskRoute: SponsorDeskRoute,
   TermsRoute: TermsRoute,
+  UmpireRoute: UmpireRoute,
   CameraRoomIdRoute: CameraRoomIdRoute,
   ClubSlugRoute: ClubSlugRouteWithChildren,
   DirectorRoomIdRoute: DirectorRoomIdRoute,

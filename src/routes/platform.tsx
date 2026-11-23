@@ -491,6 +491,13 @@ function OrganisationOnboarding({
           <p className="mt-2 text-sm text-slate-400">
             You become the owner and can invite the rest of the team afterwards.
           </p>
+          <p className="mt-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-slate-300">
+            Umpiring for a club or league?{" "}
+            <Link to="/umpire" className="font-bold text-amber-300 underline-offset-2 hover:underline">
+              Open your umpire dashboard
+            </Link>{" "}
+            instead — no organisation needed.
+          </p>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <Field label="Organisation name">
               <input
@@ -582,6 +589,9 @@ function OperationalPlatform({
           )}
           <Link to="/app" className="app-chip-button">
             Scorer
+          </Link>
+          <Link to="/umpire" className="app-chip-button hidden sm:inline-flex">
+            Umpiring
           </Link>
           <button
             type="button"

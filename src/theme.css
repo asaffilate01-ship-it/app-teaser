@@ -20,6 +20,7 @@ html[data-theme="light"] {
   --accent-foreground: oklch(0.2 0.03 60);
   --destructive: oklch(0.54 0.22 25);
   --destructive-foreground: oklch(0.99 0.005 90);
+  --success: oklch(0.55 0.15 150);
   --border: oklch(0.89 0.01 265);
   --input: oklch(0.86 0.012 265);
   --ring: oklch(0.62 0.15 78);
