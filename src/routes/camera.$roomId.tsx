@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { lockDarkWhileMounted } from "@/lib/theme";
 import {
   BatteryCharging,
   Camera,
@@ -67,6 +68,8 @@ function deviceKey(): string {
 }
 
 function MatchCamera() {
+  // Broadcast and camera screens always stay dark, whatever look the visitor picked.
+  useEffect(() => lockDarkWhileMounted(), []);
   const { roomId } = Route.useParams();
   const { configured, session, loading, requestLink } = useCloudSession();
   const videoRef = useRef<HTMLVideoElement>(null);

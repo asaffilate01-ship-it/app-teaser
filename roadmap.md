@@ -119,3 +119,11 @@
 - [x] Club revenue share: free 0%, paid 30%, paid + video add-on 50% (club office → Ad earnings)
 - [x] CricLume ads desk (/sponsor-desk) for media@criclume.com: campaigns, uploads, place check, payouts, club plans
 - [x] Pricing page + FAQ in five languages say paid clubs show ads and earn a share
+
+## Light/dark switch and own-domain club websites (new ask)
+- [x] Light/dark switch on the promo site, club websites and the app (big screens, overlay and camera screens stay dark)
+- [x] Premium light theme: readable text, cards and charts in both modes
+- [x] League plan: co-branded club website on the club's own domain (request in Website → Own domain, staff desk → Club domains)
+- [x] Club logo on the website header
+- [x] Pricing, FAQ and plan rules mention the own-domain website (five languages)
+- [ ] First real club domain: connect it in hosting settings and switch off the Primary-domain redirect (needs the owner)

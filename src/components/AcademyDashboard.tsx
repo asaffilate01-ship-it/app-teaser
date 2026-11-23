@@ -3,7 +3,7 @@ import { academyCohortsCsv, academyOverview } from "@/lib/academy-dashboard";
 import { can, type PlatformRole } from "@/lib/platform";
 import type { PlatformDashboardData } from "@/lib/platform-cloud";
 
-const field = "rounded-lg border border-white/15 bg-[#17111f] px-3 py-2 text-sm text-white";
+const field = "rounded-lg border border-white/15 bg-card px-3 py-2 text-sm text-white";
 
 export function AcademyDashboard({
   data,
@@ -49,7 +49,7 @@ export function AcademyDashboard({
 
   return (
     <section className="space-y-6">
-      <header className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-[#2c1429] via-[#17111f] to-[#2a210e] p-6 md:p-8">
+      <header className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-primary/15 via-card to-card p-6 md:p-8">
         <p className="text-xs font-bold uppercase tracking-widest text-amber-200">
           CricLume · Academy workspace
         </p>

@@ -3,18 +3,19 @@
  * and any future in-app checks read the same rules.
  */
 export type PlanId = "starter" | "club" | "league";
-export type PlanFeature = "basicScoring" | "scoringAnalytics" | "video";
+export type PlanFeature = "basicScoring" | "scoringAnalytics" | "video" | "customDomain";
 export type FeatureAccess = "included" | "addon" | "none";
 
 export const planOrder: PlanId[] = ["starter", "club", "league"];
-export const featureOrder: PlanFeature[] = ["basicScoring", "scoringAnalytics", "video"];
+export const featureOrder: PlanFeature[] = ["basicScoring", "scoringAnalytics", "video", "customDomain"];
 
 export const planFeatures: Record<PlanId, Record<PlanFeature, FeatureAccess>> = {
   // Free: basic scoring only, supported by ads. No analytics, no cameras.
-  starter: { basicScoring: "included", scoringAnalytics: "none", video: "none" },
+  starter: { basicScoring: "included", scoringAnalytics: "none", video: "none", customDomain: "none" },
   // Paid plans: full scoring analytics. Video & video analytics cost extra.
-  club: { basicScoring: "included", scoringAnalytics: "included", video: "addon" },
-  league: { basicScoring: "included", scoringAnalytics: "included", video: "addon" },
+  club: { basicScoring: "included", scoringAnalytics: "included", video: "addon", customDomain: "none" },
+  // League: co-branded club website on the club's own domain (database: club_custom_domain_allowed).
+  league: { basicScoring: "included", scoringAnalytics: "included", video: "addon", customDomain: "included" },
 };
 
 /** Whether a plan can use a feature, given whether the video add-on was bought. */

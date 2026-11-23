@@ -38,7 +38,7 @@ export async function loadSiteEditor(organisationId: string): Promise<SiteEditor
   check(org);
   check(posts);
   check(photos);
-  const paths = [site.data?.hero_path, ...(photos.data ?? []).map((p) => p.path), ...(posts.data ?? []).map((p) => p.file_path)].filter(
+  const paths = [site.data?.hero_path, site.data?.logo_path, ...(photos.data ?? []).map((p) => p.path), ...(posts.data ?? []).map((p) => p.file_path)].filter(
     (path): path is string => Boolean(path),
   );
   const files: Record<string, string> = {};
@@ -56,7 +56,7 @@ export function checkSiteFile(file: File, imagesOnly = false): string | null {
   return null;
 }
 
-export async function uploadSiteFile(organisationId: string, folder: "hero" | "photos" | "docs", file: File): Promise<string> {
+export async function uploadSiteFile(organisationId: string, folder: "hero" | "logo" | "photos" | "docs", file: File): Promise<string> {
   const problem = checkSiteFile(file, folder !== "docs");
   if (problem) throw new Error(problem);
   const ext = file.type === "application/pdf" ? "pdf" : file.type.split("/")[1] === "jpeg" ? "jpg" : file.type.split("/")[1];

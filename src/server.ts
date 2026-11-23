@@ -3,6 +3,8 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { handleStripeWebhook } from "./lib/stripe-webhook.server";
+import { clubDomainRedirect, isPlatformHost } from "./lib/club-domains";
+import { resolveClubHost } from "./lib/club-domains.server";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -83,8 +85,17 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      if (new URL(request.url).pathname === "/api/stripe-webhook")
+      const url = new URL(request.url);
+      if (url.pathname === "/api/stripe-webhook")
         return applySecurityHeaders(await handleStripeWebhook(request, env));
+      // A League-plan club's own domain: serve its website, send everything else to criclume.com.
+      if (!isPlatformHost(url.hostname)) {
+        const slug = await resolveClubHost(url.hostname);
+        const location = slug ? clubDomainRedirect(url, slug) : null;
+        if (location) {
+          return applySecurityHeaders(new Response(null, { status: 302, headers: { location } }));
+        }
+      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return applySecurityHeaders(await normalizeCatastrophicSsrResponse(response));

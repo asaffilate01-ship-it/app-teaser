@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { Coins, ImagePlus, LoaderCircle, MapPin, Megaphone, Pause, Play, Plus, Trash2, Users } from "lucide-react";
+import { Coins, Globe, ImagePlus, LoaderCircle, MapPin, Megaphone, Pause, Play, Plus, Trash2, Users } from "lucide-react";
 import { AppHeader } from "@/components/app-shell/AppHeader";
 import { GoogleButton } from "@/components/app-shell/GoogleButton";
 import { useCloudSession } from "@/hooks/use-cloud-session";
@@ -28,6 +28,8 @@ import {
   type PromoCampaign,
   type PromoCreative,
 } from "@/lib/promo-desk-cloud";
+import { staffDomainCloud, type StaffDomainRow } from "@/lib/club-domains-cloud";
+import { domainStatusLabels, type DomainStatus } from "@/lib/club-domain-records";
 
 export const Route = createFileRoute("/sponsor-desk")({
   head: () => ({
@@ -44,7 +46,7 @@ export const Route = createFileRoute("/sponsor-desk")({
   component: SponsorDesk,
 });
 
-type DeskTab = "campaigns" | "payouts" | "plans";
+type DeskTab = "campaigns" | "payouts" | "plans" | "domains";
 const surfaceLabels: Record<PromoSurface, string> = { ground: "Ground big screen", scoreboard: "Public scoreboard", app: "App (phone & desktop)" };
 const statusTone: Record<PromoCampaign["status"], string> = { live: "office-pill-good", paused: "office-pill-warn", draft: "", ended: "office-pill-bad" };
 
@@ -119,6 +121,7 @@ function SponsorDesk() {
                   ["campaigns", "Campaigns", Megaphone],
                   ["payouts", "Club payouts", Coins],
                   ["plans", "Club plans", Users],
+                  ["domains", "Club domains", Globe],
                 ] as const
               ).map(([value, label, Icon]) => (
                 <button key={value} type="button" role="tab" aria-selected={tab === value} className="office-tab" onClick={() => setTab(value)}>
@@ -129,6 +132,7 @@ function SponsorDesk() {
             {tab === "campaigns" && <Campaigns />}
             {tab === "payouts" && <Payouts />}
             {tab === "plans" && <Plans />}
+            {tab === "domains" && <ClubDomains />}
           </>
         )}
       </main>
@@ -655,5 +659,121 @@ function Plans() {
         </ul>
       )}
     </section>
+  );
+}
+
+const domainStatusOrder: DomainStatus[] = ["requested", "setting_up", "live", "paused", "declined"];
+
+/**
+ * League-plan clubs asking to run their website on their own domain. Staff first connect the
+ * domain to CricLume's hosting (Project Settings → Domains), copy the records it shows here for
+ * the club, then mark it live once hosting reports the domain active.
+ */
+function ClubDomains() {
+  const [rows, setRows] = useState<StaffDomainRow[] | null>(null);
+  const reload = useCallback(() => {
+    staffDomainCloud
+      .list()
+      .then(setRows)
+      .catch((reason) => {
+        setRows([]);
+        toast.error(friendly(reason));
+      });
+  }, []);
+  useEffect(reload, [reload]);
+  return (
+    <section className="office-card space-y-3">
+      <div>
+        <h3>Club websites on their own domain</h3>
+        <p className="office-meta">
+          League plan only. Connect the domain to CricLume hosting first, paste the records it shows (address, then any extra records as
+          “TYPE NAME VALUE”, one per line), then set it live once hosting shows it active.
+        </p>
+      </div>
+      {!rows ? (
+        <p className="office-meta flex items-center gap-2">
+          <LoaderCircle className="size-4 animate-spin" /> Loading…
+        </p>
+      ) : rows.length === 0 ? (
+        <p className="office-meta">No requests yet.</p>
+      ) : (
+        <ul className="space-y-3">
+          {rows.map((row) => (
+            <DomainRequest key={row.id} row={row} onSaved={reload} />
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function DomainRequest({ row, onSaved }: { row: StaffDomainRow; onSaved: () => void }) {
+  const [status, setStatus] = useState<DomainStatus>(row.status as DomainStatus);
+  const [aTarget, setATarget] = useState(row.dns_a_target ?? "");
+  const [records, setRecords] = useState(row.dns_txt_value ?? "");
+  const [note, setNote] = useState(row.staff_note ?? "");
+  const [busy, setBusy] = useState(false);
+  const save = async (event: FormEvent) => {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      await staffDomainCloud.update(row.id, { status, aTarget, records, note });
+      toast.success(`${row.hostname}: ${domainStatusLabels[status]}`);
+      onSaved();
+    } catch (reason) {
+      toast.error(friendly(reason));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <li className="office-row !block space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="font-semibold">{row.hostname}</p>
+          <p className="office-meta">
+            {row.organisation_name} · /club/{row.site_slug} · {row.site_published ? "site published" : "site not published"}
+            {row.plan_allowed ? "" : " · not on League plan"}
+          </p>
+        </div>
+        <span className={`office-pill ${row.status === "live" ? "office-pill-good" : row.status === "declined" || row.status === "paused" ? "office-pill-bad" : "office-pill-warn"}`}>
+          {domainStatusLabels[row.status as DomainStatus]}
+        </span>
+      </div>
+      <form className="grid gap-2 md:grid-cols-[10rem_12rem_1fr]" onSubmit={(event) => void save(event)}>
+        <label className="grid gap-1 text-xs font-semibold">
+          Status
+          <select className="scorer-input !h-10" value={status} onChange={(e) => setStatus(e.target.value as DomainStatus)}>
+            {domainStatusOrder.map((value) => (
+              <option key={value} value={value}>
+                {domainStatusLabels[value]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="grid gap-1 text-xs font-semibold">
+          Address (A record)
+          <input className="scorer-input !h-10" value={aTarget} onChange={(e) => setATarget(e.target.value)} placeholder="IP from hosting" />
+        </label>
+        <label className="grid gap-1 text-xs font-semibold">
+          Note for the club
+          <input className="scorer-input !h-10" value={note} maxLength={300} onChange={(e) => setNote(e.target.value)} />
+        </label>
+        <label className="grid gap-1 text-xs font-semibold md:col-span-3">
+          Extra records (one per line)
+          <textarea
+            className="scorer-input min-h-20 py-2 font-mono text-xs"
+            value={records}
+            onChange={(e) => setRecords(e.target.value)}
+            placeholder={"TXT _lovable lovable_verify=…\nTXT _lovable.www lovable_verify=…"}
+          />
+        </label>
+        <div className="md:col-span-3">
+          <button type="submit" className="action-primary" disabled={busy}>
+            {busy ? <LoaderCircle className="size-4 animate-spin" /> : <Globe className="size-4" />} Save
+          </button>
+        </div>
+      </form>
+    </li>
   );
 }

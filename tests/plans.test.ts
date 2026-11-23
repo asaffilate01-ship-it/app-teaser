@@ -40,3 +40,11 @@ test("paid clubs on the full system (video add-on) get 50% of ad revenue", () =>
   assert.equal(adRevenueSharePercent("club", { videoAddon: true }), 50);
   assert.equal(adRevenueSharePercent("league", { videoAddon: true }), 50);
 });
+
+test("only the League plan gets the co-branded website on the club's own domain", () => {
+  assert.equal(canUseFeature("starter", "customDomain"), false);
+  assert.equal(canUseFeature("club", "customDomain"), false);
+  assert.equal(canUseFeature("club", "customDomain", { videoAddon: true }), false);
+  assert.equal(canUseFeature("league", "customDomain"), true);
+  assert.equal(canUseFeature("league", "customDomain", { videoAddon: true }), true);
+});

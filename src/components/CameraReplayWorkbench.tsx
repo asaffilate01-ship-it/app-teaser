@@ -241,7 +241,7 @@ export function CameraReplayWorkbench({
 
   return (
     <section
-      className="mt-6 rounded-xl border border-white/10 bg-[#141923] p-4 md:p-5"
+      className="mt-6 rounded-xl border border-white/10 bg-card p-4 md:p-5"
       aria-label="Private dual-angle replay calibration and highlight review"
     >
       <div className="flex items-start gap-3">
@@ -286,7 +286,7 @@ export function CameraReplayWorkbench({
                         if (side === "left") setLeftId(event.target.value);
                         else setRightId(event.target.value);
                       }}
-                      className="min-h-11 rounded-md border border-white/20 bg-[#141923] px-2 text-xs"
+                      className="min-h-11 rounded-md border border-white/20 bg-card px-2 text-xs"
                     >
                       <option value="">Choose a clip</option>
                       {clips
@@ -348,7 +348,7 @@ export function CameraReplayWorkbench({
                                 [clip.id]: Number(event.target.value),
                               }))
                             }
-                            className="w-28 min-h-10 rounded-md border border-white/20 bg-[#141923] px-2"
+                            className="w-28 min-h-10 rounded-md border border-white/20 bg-card px-2"
                           />
                         </label>
                         <button
@@ -433,7 +433,7 @@ export function CameraReplayWorkbench({
               <select
                 value={kind}
                 onChange={(event) => setKind(event.target.value as HighlightKind)}
-                className="min-h-10 rounded-md border border-white/20 bg-[#141923] px-2"
+                className="min-h-10 rounded-md border border-white/20 bg-card px-2"
               >
                 <option value="other">Moment</option>
                 <option value="wicket">Wicket</option>
@@ -446,7 +446,7 @@ export function CameraReplayWorkbench({
               <select
                 value={linkedDelivery}
                 onChange={(event) => setLinkedDelivery(event.target.value)}
-                className="min-h-10 rounded-md border border-white/20 bg-[#141923] px-2"
+                className="min-h-10 rounded-md border border-white/20 bg-card px-2"
               >
                 <option value="">No delivery selected</option>
                 {deliveries.slice(0, 200).map((delivery) => (
@@ -464,7 +464,7 @@ export function CameraReplayWorkbench({
               onChange={(event) => setNote(event.target.value)}
               maxLength={240}
               placeholder="Why is this moment worth reviewing?"
-              className="min-h-11 rounded-md border border-white/20 bg-[#141923] px-3"
+              className="min-h-11 rounded-md border border-white/20 bg-card px-3"
             />
           </label>
           <button

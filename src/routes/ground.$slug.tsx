@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { lockDarkWhileMounted } from "@/lib/theme";
 import { Maximize } from "lucide-react";
 import { isCloudConfigured } from "@/lib/cloud";
 import { useCloudSession } from "@/hooks/use-cloud-session";
@@ -36,6 +37,8 @@ export const Route = createFileRoute("/ground/$slug")({
 
 /** Widescreen (16:9) ground screen: pages turn automatically or as the club picks, with optional replays. */
 function GroundScreen() {
+  // Broadcast and camera screens always stay dark, whatever look the visitor picked.
+  useEffect(() => lockDarkWhileMounted(), []);
   const { slug } = Route.useParams();
   const { session } = useCloudSession();
   const [board, setBoard] = useState<(PublicBoardInput & { matchId: string }) | null>(null);

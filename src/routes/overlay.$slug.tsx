@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { lockDarkWhileMounted } from "@/lib/theme";
 import { getCloudClient, isCloudConfigured } from "@/lib/cloud";
 import { chaseState, teamInitials } from "@/lib/match-broadcast";
 
@@ -53,6 +54,8 @@ const shortName = (team: { name: string; shortName?: string }) =>
 
 /** Transparent score bug for OBS / Streamlabs browser sources. Same public data as the scoreboard, no names. */
 function ScoreOverlay() {
+  // Broadcast and camera screens always stay dark, whatever look the visitor picked.
+  useEffect(() => lockDarkWhileMounted(), []);
   const { slug } = Route.useParams();
   const { layout = "bar" } = Route.useSearch();
   const [data, setData] = useState<OverlayData | null>(null);

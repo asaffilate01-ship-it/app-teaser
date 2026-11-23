@@ -108,7 +108,7 @@ export function CameraReplayLibrary({
   return (
     <section
       aria-label="Private camera recordings and ball review"
-      className="mt-6 rounded-xl border border-white/10 bg-[#151b26] p-4 md:p-5"
+      className="mt-6 rounded-xl border border-white/10 bg-card p-4 md:p-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -177,7 +177,7 @@ export function CameraReplayLibrary({
                   <select
                     value={String(speed)}
                     onChange={(event) => setSpeed(Number(event.target.value))}
-                    className="rounded-md border border-white/20 bg-[#151b26] px-2 py-2 text-sm"
+                    className="rounded-md border border-white/20 bg-card px-2 py-2 text-sm"
                   >
                     <option value="0.25">0.25×</option>
                     <option value="0.5">0.5×</option>
@@ -208,7 +208,7 @@ export function CameraReplayLibrary({
             <select
               value={selectedDevice}
               onChange={(event) => setSelectedDevice(event.target.value)}
-              className="min-h-11 rounded-md border border-white/20 bg-[#151b26] px-3 text-sm"
+              className="min-h-11 rounded-md border border-white/20 bg-card px-3 text-sm"
             >
               <option value="all">All paired cameras</option>
               {devices.map((device) => (

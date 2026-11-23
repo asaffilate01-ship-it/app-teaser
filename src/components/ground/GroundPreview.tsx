@@ -47,14 +47,14 @@ export function GroundPreview({ slug, settings }: { slug: string; settings: Grou
   const view = useMemo(() => (board ? buildGroundBoard(board, names) : null), [board, names]);
   if (!board || !view) {
     return (
-      <div className="gs-stage gs-stage-preview gs-waiting">
+      <div className="stay-dark gs-stage gs-stage-preview gs-waiting">
         <p>Waiting for the live score…</p>
       </div>
     );
   }
   const page = pageOnScreen(settings, availablePages(view), now).page;
   return (
-    <div className="gs-stage gs-stage-preview">
+    <div className="stay-dark gs-stage gs-stage-preview">
       <header className="gs-head">
         <div className="gs-head-teams">
           <strong>{view.homeTeam}</strong>

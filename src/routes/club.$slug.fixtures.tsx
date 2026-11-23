@@ -8,7 +8,7 @@ const layoutRoute = getRouteApi("/club/$slug");
 
 export const Route = createFileRoute("/club/$slug/fixtures")({
   head: ({ matches }) =>
-    siteHead(siteFromMatches(matches), { title: "Fixtures and results", description: (name) => `Upcoming fixtures, live scores, results and league tables for ${name}.` }),
+    siteHead(siteFromMatches(matches), { path: "/fixtures", title: "Fixtures and results", description: (name) => `Upcoming fixtures, live scores, results and league tables for ${name}.` }),
   component: FixturesPage,
 });
 

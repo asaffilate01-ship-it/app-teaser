@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/club-site-query";
 import { createFileRoute, getRouteApi, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, FileText } from "lucide-react";
 import { getClubSite } from "@/lib/club-site.functions";
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/club/$slug/news/$postId")({
     const site = await getClubSite({ data: { slug: params.slug } });
     const post = site?.posts?.find((item) => item.id === params.postId);
     if (!site || !post) throw notFound();
-    return { club: site.name, title: post.title, excerpt: postExcerpt(post.body, 200) };
+    return { club: site.name, title: post.title, excerpt: postExcerpt(post.body, 200), domain: site.domain ?? null, id: post.id };
   },
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Club news — CricLume" }, { name: "robots", content: "noindex" }] };
@@ -26,6 +27,7 @@ export const Route = createFileRoute("/club/$slug/news/$postId")({
         { property: "og:type", content: "article" },
         { name: "twitter:card", content: "summary" },
       ],
+      links: loaderData.domain ? [{ rel: "canonical", href: siteUrl(loaderData.domain, `/news/${loaderData.id}`) }] : [],
     };
   },
   component: PostPage,

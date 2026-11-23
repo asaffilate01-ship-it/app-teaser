@@ -346,7 +346,7 @@ export function CricketApp() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0d17] text-slate-100">
+    <div className="min-h-screen bg-background text-slate-100">
       <AppHeader
         area="Scorer"
         {...(screen !== "dashboard"
@@ -439,7 +439,7 @@ export function CricketApp() {
             <p className="mt-2 text-sm leading-6 text-slate-400">{cloudBootstrap.message}</p>
             <Link
               to="/platform"
-              className="mt-6 inline-flex h-11 items-center rounded-full bg-amber-300 px-6 text-sm font-extrabold text-[#1d1520]"
+              className="mt-6 inline-flex h-11 items-center rounded-full bg-amber-300 px-6 text-sm font-extrabold text-gold-foreground"
             >
               Open cloud control centre
             </Link>
@@ -515,7 +515,7 @@ function Dashboard({
       <PromoSlot items={promos.top} slot="top" onPlay={onPlay} />
       <div className={promos.side.length > 0 ? "promo-with-side" : ""}>
       <div className="min-w-0 space-y-8">
-      <section className="grid gap-6 overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#2a1427] via-[#17111f] to-[#2b220e] p-6 shadow-2xl md:grid-cols-[1fr_auto] md:items-end md:p-10">
+      <section className="grid gap-6 overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-primary/15 via-card to-card p-6 shadow-2xl md:grid-cols-[1fr_auto] md:items-end md:p-10">
         <div className="space-y-4">
           <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-amber-300">
             <CircleDot className="size-4" /> Match centre
@@ -533,7 +533,7 @@ function Dashboard({
         <button
           type="button"
           onClick={onNew}
-          className="inline-flex h-14 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-400 px-7 text-sm font-extrabold uppercase tracking-[0.1em] text-white shadow-lg shadow-rose-950/40"
+          className="inline-flex h-14 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-400 px-7 text-sm font-extrabold uppercase tracking-[0.1em] text-primary-foreground shadow-lg shadow-rose-950/40"
         >
           <Plus className="size-5" /> New match
         </button>
@@ -945,7 +945,7 @@ function MatchSetup({
         <button
           type="button"
           onClick={submit}
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-400 px-8 text-sm font-extrabold uppercase tracking-wider text-white"
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-400 px-8 text-sm font-extrabold uppercase tracking-wider text-primary-foreground"
         >
           <Play className="size-4" /> Start scoring
         </button>
@@ -1224,7 +1224,7 @@ function LiveMatch({
       {tab === "score" && (
         <aside
           aria-label="Compact live score"
-          className="sticky top-[68px] z-30 grid grid-cols-[1fr_auto] items-center gap-2 border-b border-amber-300/20 bg-[#211828]/95 px-4 py-2 text-slate-100 shadow-lg backdrop-blur-xl md:hidden"
+          className="sticky top-[68px] z-30 grid grid-cols-[1fr_auto] items-center gap-2 border-b border-amber-300/20 bg-card/95 px-4 py-2 text-slate-100 shadow-lg backdrop-blur-xl md:hidden"
         >
           <div className="min-w-0">
             <p className="truncate text-xs font-semibold">
@@ -1579,7 +1579,7 @@ function ScoringPad({
               <button
                 type="button"
                 onClick={() => onAdvanceInnings({ followOn: true })}
-                className="h-12 rounded-full bg-amber-300 px-7 text-sm font-extrabold uppercase tracking-wider text-[#1d1520]"
+                className="h-12 rounded-full bg-amber-300 px-7 text-sm font-extrabold uppercase tracking-wider text-gold-foreground"
               >
                 Enforce follow-on
               </button>
@@ -1590,7 +1590,7 @@ function ScoringPad({
               className={
                 plan.kind === "regular" && plan.followOnTeamId
                   ? "h-12 rounded-full border border-amber-300/50 px-7 text-sm font-bold text-amber-100"
-                  : "h-12 rounded-full bg-amber-300 px-7 text-sm font-extrabold uppercase tracking-wider text-[#1d1520]"
+                  : "h-12 rounded-full bg-amber-300 px-7 text-sm font-extrabold uppercase tracking-wider text-gold-foreground"
               }
             >
               {plan.kind === "super-over"
@@ -1605,7 +1605,7 @@ function ScoringPad({
             <button
               type="button"
               onClick={() => onAdvanceInnings()}
-              className="h-12 rounded-full bg-amber-300 px-7 text-sm font-extrabold uppercase tracking-wider text-[#1d1520]"
+              className="h-12 rounded-full bg-amber-300 px-7 text-sm font-extrabold uppercase tracking-wider text-gold-foreground"
             >
               Complete match
             </button>
@@ -1897,7 +1897,7 @@ function ScoringPad({
 
       {showWicket && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4">
-          <div className="w-full max-w-lg space-y-5 rounded-t-3xl border border-white/10 bg-[#1a1622] p-5 shadow-2xl sm:rounded-3xl sm:p-7">
+          <div className="w-full max-w-lg space-y-5 rounded-t-3xl border border-white/10 bg-card p-5 shadow-2xl sm:rounded-3xl sm:p-7">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-rose-300">
@@ -1988,7 +1988,7 @@ function ScoringPad({
                 setDismissalFielderId("");
                 resetDetailedRuns();
               }}
-              className="h-13 w-full rounded-full bg-rose-500 text-sm font-extrabold uppercase tracking-wider text-white disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-13 w-full rounded-full bg-rose-500 text-sm font-extrabold uppercase tracking-wider text-primary-foreground disabled:cursor-not-allowed disabled:opacity-40"
             >
               Confirm wicket
             </button>
@@ -2285,7 +2285,7 @@ function AuditTrail({ match }: { match: CricketMatch }) {
               className="grid grid-cols-[auto_1fr_auto] gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4"
             >
               <span
-                className={`flex size-11 items-center justify-center rounded-full text-sm font-extrabold ${ball.dismissal ? "bg-rose-500 text-white" : "bg-amber-300 text-[#1d1520]"}`}
+                className={`flex size-11 items-center justify-center rounded-full text-sm font-extrabold ${ball.dismissal ? "bg-rose-500 text-primary-foreground" : "bg-amber-300 text-gold-foreground"}`}
               >
                 {deliveryLabel(ball)}
               </span>
@@ -2586,7 +2586,7 @@ function VideoLab() {
           </p>
           <h2 className="font-display text-3xl font-bold">Multi-angle video lab</h2>
         </div>
-        <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-amber-300 px-5 text-xs font-extrabold uppercase tracking-wider text-[#1d1520]">
+        <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-amber-300 px-5 text-xs font-extrabold uppercase tracking-wider text-gold-foreground">
           <Camera className="size-4" /> Add angle
           <input
             type="file"
@@ -2606,7 +2606,7 @@ function VideoLab() {
                 key={angle.id}
                 type="button"
                 onClick={() => setActiveId(angle.id)}
-                className={`rounded-full px-4 py-2 text-xs font-bold ${angle.id === activeId ? "bg-fuchsia-500 text-white" : "border border-white/10 text-slate-400"}`}
+                className={`rounded-full px-4 py-2 text-xs font-bold ${angle.id === activeId ? "bg-fuchsia-500 text-primary-foreground" : "border border-white/10 text-slate-400"}`}
               >
                 Angle {index + 1}
               </button>
@@ -2669,7 +2669,7 @@ function VideoLab() {
                   setRate(next);
                   if (videoRef.current) videoRef.current.playbackRate = next;
                 }}
-                className="h-9 rounded-full border border-white/10 bg-[#19151f] px-3 text-xs"
+                className="h-9 rounded-full border border-white/10 bg-card px-3 text-xs"
               >
                 <option value={0.25}>0.25×</option>
                 <option value={0.5}>0.5×</option>

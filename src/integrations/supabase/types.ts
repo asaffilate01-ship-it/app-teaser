@@ -1007,6 +1007,56 @@ export type Database = {
           },
         ]
       }
+      club_site_domains: {
+        Row: {
+          created_at: string
+          dns_a_target: string | null
+          dns_txt_value: string | null
+          hostname: string
+          id: string
+          live_at: string | null
+          organisation_id: string
+          requested_by: string | null
+          staff_note: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dns_a_target?: string | null
+          dns_txt_value?: string | null
+          hostname: string
+          id?: string
+          live_at?: string | null
+          organisation_id: string
+          requested_by?: string | null
+          staff_note?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dns_a_target?: string | null
+          dns_txt_value?: string | null
+          hostname?: string
+          id?: string
+          live_at?: string | null
+          organisation_id?: string
+          requested_by?: string | null
+          staff_note?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_site_domains_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       club_site_photos: {
         Row: {
           caption: string
@@ -1107,6 +1157,7 @@ export type Database = {
           contact_phone: string | null
           created_at: string
           hero_path: string | null
+          logo_path: string | null
           map_url: string | null
           organisation_id: string
           published: boolean
@@ -1125,6 +1176,7 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           hero_path?: string | null
+          logo_path?: string | null
           map_url?: string | null
           organisation_id: string
           published?: boolean
@@ -1143,6 +1195,7 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           hero_path?: string | null
+          logo_path?: string | null
           map_url?: string | null
           organisation_id?: string
           published?: boolean
@@ -4414,6 +4467,24 @@ export type Database = {
           video_addon: boolean
         }[]
       }
+      admin_club_site_domains: {
+        Args: never
+        Returns: {
+          created_at: string
+          dns_a_target: string
+          dns_txt_value: string
+          hostname: string
+          id: string
+          live_at: string
+          organisation_id: string
+          organisation_name: string
+          plan_allowed: boolean
+          site_published: boolean
+          site_slug: string
+          staff_note: string
+          status: string
+        }[]
+      }
       admin_promo_payouts: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -4429,6 +4500,16 @@ export type Database = {
           p_organisation_id: string
           p_plan: string
           p_video_addon: boolean
+        }
+        Returns: undefined
+      }
+      admin_update_club_site_domain: {
+        Args: {
+          p_dns_a_target: string
+          p_dns_txt_value: string
+          p_id: string
+          p_staff_note: string
+          p_status: string
         }
         Returns: undefined
       }
@@ -4528,6 +4609,7 @@ export type Database = {
         Returns: Json
       }
       clean_fixture_result: { Args: { p_result: Json }; Returns: Json }
+      club_custom_domain_allowed: { Args: { p_org: string }; Returns: boolean }
       club_promo_earnings: {
         Args: { p_from: string; p_organisation_id: string; p_to: string }
         Returns: {
@@ -4703,6 +4785,7 @@ export type Database = {
         }[]
       }
       my_match_duties: { Args: { p_match_id: string }; Returns: string[] }
+      normalise_club_hostname: { Args: { p_input: string }; Returns: string }
       pair_camera_device: {
         Args: {
           p_angle: string
@@ -4841,6 +4924,10 @@ export type Database = {
         Args: { p_device_id: string }
         Returns: undefined
       }
+      remove_club_site_domain: {
+        Args: { p_organisation_id: string }
+        Returns: undefined
+      }
       reopen_fixture_result: {
         Args: { p_fixture_id: string }
         Returns: undefined
@@ -4853,6 +4940,10 @@ export type Database = {
           p_team_id: string
         }
         Returns: undefined
+      }
+      request_club_site_domain: {
+        Args: { p_hostname: string; p_organisation_id: string }
+        Returns: string
       }
       request_ground_booking: {
         Args: {
@@ -4870,6 +4961,7 @@ export type Database = {
         Args: { p_delivery_id: string; p_match_id: string }
         Returns: undefined
       }
+      resolve_club_site_domain: { Args: { p_host: string }; Returns: string }
       scouting_consent_granted: {
         Args: { p_organisation_id: string; p_player_id: string }
         Returns: boolean

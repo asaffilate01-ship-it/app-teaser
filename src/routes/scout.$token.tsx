@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Printer, ShieldCheck } from "lucide-react";
-import logoAsset from "@/assets/criclume-logo-on-dark.png.asset.json";
+import { BrandLogo } from "@/components/theme/BrandLogo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { ScoutingReportView } from "@/components/scouting/ScoutingReportView";
 import { getSharedScoutingReport } from "@/lib/scouting.functions";
 
@@ -31,13 +32,16 @@ function ScoutPage() {
       <header className="scoreboard-topbar no-print">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 md:px-8">
           <Link to="/" aria-label="CricLume home">
-            <img src={logoAsset.url} alt="CricLume" className="h-9 w-auto" />
+            <BrandLogo className="h-9 w-auto" />
           </Link>
+          <div className="flex items-center gap-2">
+          <ThemeToggle />
           {shared && (
             <button type="button" className="action-secondary" onClick={() => window.print()}>
               <Printer className="size-4" aria-hidden="true" /> Print or save PDF
             </button>
           )}
+          </div>
         </div>
       </header>
       <main id="main-content" className="mx-auto max-w-5xl space-y-4 px-3 py-5 md:px-8">

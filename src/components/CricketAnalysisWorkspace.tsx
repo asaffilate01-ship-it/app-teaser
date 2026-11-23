@@ -54,7 +54,7 @@ export function CricketAnalysisWorkspace({
   const [match, setMatch] = useState(matches[0]?.id ?? "");
   return (
     <section className="space-y-5">
-      <header className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-[#2c1429] via-[#17111f] to-[#2a210e] p-6 md:p-8">
+      <header className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-primary/15 via-card to-card p-6 md:p-8">
         <p className="text-xs font-bold uppercase tracking-widest text-amber-200">
           CricLume · Analysis room
         </p>

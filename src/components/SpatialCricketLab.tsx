@@ -167,7 +167,7 @@ export function SpatialCricketLab({
   return (
     <section
       aria-label="Cricket spatial lab"
-      className="rounded-3xl border border-emerald-200/20 bg-[#0b1423] p-5 text-white sm:p-6"
+      className="rounded-3xl border border-emerald-200/20 bg-card p-5 text-white sm:p-6"
     >
       <p className="text-xs uppercase tracking-widest text-emerald-200">
         CricLume / Three-dimensional analysis

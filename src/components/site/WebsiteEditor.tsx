@@ -22,11 +22,13 @@ import {
 import { canEditSite, checkSiteFile, loadSiteEditor, siteCloud, uploadSiteFile, type SiteEditorData, type SitePostRow } from "@/lib/club-site-cloud";
 import { friendly } from "@/lib/club-office-cloud";
 import { Empty, OfficeCard, OfficeField, Pill, day } from "@/components/office/ui";
+import { DomainPanel } from "@/components/site/DomainPanel";
 
 const tabs = [
   ["settings", "Website", Settings2],
   ["posts", "News and documents", Newspaper],
   ["photos", "Photos", ImagePlus],
+  ["domain", "Own domain", Globe],
 ] as const;
 type Tab = (typeof tabs)[number][0];
 
@@ -125,6 +127,7 @@ export function WebsiteEditor({ organisationId, organisationName, role }: { orga
       )}
       {data && tab === "posts" && <PostsPanel data={data} organisationId={organisationId} editor={editor} act={act} />}
       {data && tab === "photos" && <PhotosPanel data={data} organisationId={organisationId} editor={editor} act={act} />}
+      {data && tab === "domain" && <DomainPanel organisationId={organisationId} editor={editor} published={published} />}
     </div>
   );
 }
@@ -158,6 +161,8 @@ function SettingsPanel({
   const [sponsors, setSponsors] = useState<Sponsor[]>(() => readSponsors(site?.sponsors));
   const [heroPath, setHeroPath] = useState<string | null>(site?.hero_path ?? null);
   const [heroPreview, setHeroPreview] = useState<string | null>(site?.hero_path ? (data.files[site.hero_path] ?? null) : null);
+  const [logoPath, setLogoPath] = useState<string | null>(site?.logo_path ?? null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(site?.logo_path ? (data.files[site.logo_path] ?? null) : null);
   const [busy, setBusy] = useState(false);
 
   const slugOk = isValidWebSlug(slug);
@@ -182,6 +187,7 @@ function SettingsPanel({
           socials: Object.fromEntries(Object.entries(socials).filter(([, v]) => v.trim()).map(([k, v]) => [k, v.trim()])),
           sponsors: sponsors.filter((s) => s.name.trim()).map((s) => ({ name: s.name.trim(), url: s.url?.trim() || null })),
           hero_path: heroPath,
+          logo_path: logoPath,
         }).catch((reason: unknown) => {
           if (reason instanceof Error && /web_slug|duplicate/i.test(reason.message)) throw new Error("Another club already uses that web address.");
           throw reason;
@@ -189,6 +195,23 @@ function SettingsPanel({
       published ? "Website saved and published" : "Website saved",
     );
     setBusy(false);
+  };
+
+  const pickLogo = async (file: File | undefined) => {
+    if (!file) return;
+    const problem = checkSiteFile(file, true);
+    if (problem) { toast.error(problem); return; }
+    setBusy(true);
+    try {
+      const path = await uploadSiteFile(organisationId, "logo", file);
+      setLogoPath(path);
+      setLogoPreview(URL.createObjectURL(file));
+      toast.success("Logo added — save to use it");
+    } catch (reason) {
+      toast.error(reason instanceof Error ? reason.message : "The logo could not upload.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const pickHero = async (file: File | undefined) => {
@@ -253,6 +276,27 @@ function SettingsPanel({
           </label>
           {heroPath && (
             <button type="button" className="action-secondary" onClick={() => (setHeroPath(null), setHeroPreview(null))}>
+              Remove
+            </button>
+          )}
+        </div>
+      </OfficeCard>
+
+      <OfficeCard title="Club logo" description="Shown in the website header. A square PNG with a clear background looks best.">
+        <div className="flex items-center gap-4">
+          {logoPreview ? (
+            <img src={logoPreview} alt="Club logo" className="size-20 rounded-2xl border border-border bg-card object-contain p-1" />
+          ) : (
+            <Empty>No logo — your club's initials are used.</Empty>
+          )}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <label className="action-secondary cursor-pointer">
+            <Upload className="size-4" aria-hidden="true" /> {logoPath ? "Replace logo" : "Add logo"}
+            <input type="file" accept="image/png,image/webp,image/jpeg" className="sr-only" onChange={(e) => void pickLogo(e.target.files?.[0])} />
+          </label>
+          {logoPath && (
+            <button type="button" className="action-secondary" onClick={() => (setLogoPath(null), setLogoPreview(null))}>
               Remove
             </button>
           )}

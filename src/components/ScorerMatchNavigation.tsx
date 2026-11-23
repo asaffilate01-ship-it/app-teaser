@@ -22,7 +22,7 @@ export function ScorerMatchNavigation({
     <>
       <nav
         aria-label="Match sections"
-        className="no-scrollbar sticky top-[65px] z-30 mx-0 hidden gap-1 overflow-x-auto border-b border-white/10 bg-[#0f0d17]/95 px-3 py-2 backdrop-blur-xl md:top-[77px] md:mt-4 md:flex md:rounded-2xl md:border md:px-2"
+        className="no-scrollbar sticky top-[65px] z-30 mx-0 hidden gap-1 overflow-x-auto border-b border-white/10 bg-background/95 px-3 py-2 backdrop-blur-xl md:top-[77px] md:mt-4 md:flex md:rounded-2xl md:border md:px-2"
       >
         {scorerDestinations.map(({ id, label }) => {
           const Icon = icons[id];
@@ -33,7 +33,7 @@ export function ScorerMatchNavigation({
               aria-current={active === id ? "page" : undefined}
               onClick={() => onChange(id)}
               className={`flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-200 ${
-                active === id ? "bg-amber-300 text-[#1d1520]" : "text-slate-400"
+                active === id ? "bg-amber-300 text-gold-foreground" : "text-slate-400"
               }`}
             >
               <Icon className="size-4" aria-hidden="true" />
@@ -53,7 +53,7 @@ export function ScorerMatchNavigation({
 
       <nav
         aria-label="Scorer bottom navigation"
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-amber-200/15 bg-[#17111f]/95 px-2 pt-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-amber-200/15 bg-card/95 px-2 pt-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl md:hidden"
       >
         <div className="mx-auto grid w-full max-w-lg grid-cols-5 gap-1">
           {scorerDestinations.map(({ id, label, mobileLabel }) => {

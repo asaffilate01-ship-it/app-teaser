@@ -4,7 +4,8 @@ import { PromoSlot } from "@/components/promo/PromoSlot";
 import { usePromos } from "@/hooks/use-promos";
 import { useEffect, useState } from "react";
 import { Clock3, MapPin, Radio, RotateCw } from "lucide-react";
-import logoAsset from "@/assets/criclume-logo-on-dark.png.asset.json";
+import { BrandLogo } from "@/components/theme/BrandLogo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { getCloudClient, isCloudConfigured } from "@/lib/cloud";
 import { TeamCrest } from "@/components/scorer/Broadcast";
 import { chaseState } from "@/lib/match-broadcast";
@@ -201,9 +202,10 @@ function PublicScoreboard() {
       <header className="scoreboard-topbar">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:px-8">
           <Link to="/" aria-label="CricLume home">
-            <img src={logoAsset.url} alt="CricLume" className="h-9 w-auto md:h-10" />
+            <BrandLogo className="h-9 w-auto md:h-10" />
           </Link>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             {(state.superOver || state.freeHit) && (
               <span className="hero-chip hero-chip-alert" role="status">
                 {state.freeHit ? "Free hit" : "Super Over"}

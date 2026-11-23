@@ -54,7 +54,7 @@ export function BowlingPlacement({
   return (
     <section
       aria-label="Bowling line and length"
-      className="overflow-hidden rounded-3xl border border-amber-200/20 bg-gradient-to-br from-[#1b1d2b] to-[#0b1423] p-5 sm:p-6"
+      className="overflow-hidden rounded-3xl border border-amber-200/20 bg-gradient-to-br from-secondary to-card p-5 sm:p-6"
     >
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -123,7 +123,7 @@ export function BowlingPlacement({
             <tr>
               <th
                 scope="col"
-                className="sticky left-0 z-10 bg-[#151e2d] px-2 text-left text-xs text-slate-400"
+                className="sticky left-0 z-10 bg-card px-2 text-left text-xs text-slate-400"
               >
                 Length / line
               </th>
@@ -143,7 +143,7 @@ export function BowlingPlacement({
               <tr key={length}>
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 bg-[#151e2d] px-2 text-left text-xs font-medium capitalize text-slate-300"
+                  className="sticky left-0 z-10 bg-card px-2 text-left text-xs font-medium capitalize text-slate-300"
                 >
                   {coachingLabel(length)}
                   {length === "full_toss" && (

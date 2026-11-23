@@ -83,7 +83,7 @@ function ZoneGround({
   return (
     <section
       aria-label="Match Observatory"
-      className="overflow-hidden rounded-3xl border border-emerald-200/20 bg-[#0b1423]"
+      className="overflow-hidden rounded-3xl border border-emerald-200/20 bg-card"
     >
       <header className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 p-5 sm:p-6">
         <div>

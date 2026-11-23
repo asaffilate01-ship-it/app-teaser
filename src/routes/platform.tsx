@@ -571,7 +571,7 @@ function OperationalPlatform({
               aria-label="Organisation"
               value={membership.organisationId}
               onChange={(event) => onSelectOrganisation(event.target.value)}
-              className="h-11 max-w-36 rounded-md border border-white/10 bg-[#17111f] px-2 text-xs"
+              className="h-11 max-w-36 rounded-md border border-white/10 bg-card px-2 text-xs"
             >
               {memberships.map((item) => (
                 <option key={item.organisationId} value={item.organisationId}>
@@ -2401,7 +2401,7 @@ function Operations({
 
 function PageFrame({ children, right }: { children: ReactNode; right?: ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#0f0d17] text-slate-100">
+    <div className="min-h-screen bg-background text-slate-100">
       <AppHeader area="Club workspace" right={right} />
       {children}
     </div>

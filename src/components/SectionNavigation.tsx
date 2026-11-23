@@ -103,7 +103,7 @@ export function SectionNavigation<T extends string>({
                 side="top"
                 align="end"
                 sideOffset={12}
-                className="w-64 max-w-[calc(100vw-2rem)] rounded-xl border-white/20 bg-[#211829] p-2 text-slate-100"
+                className="w-64 max-w-[calc(100vw-2rem)] rounded-xl border-white/20 bg-card p-2 text-slate-100"
               >
                 <DropdownMenuLabel>Other workspace sections</DropdownMenuLabel>
                 {secondary.map(([key, Icon, text]) => (

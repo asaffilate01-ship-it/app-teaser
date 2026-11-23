@@ -28,6 +28,7 @@ import {
   Minus,
   Plus,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { planOrder, featureOrder, planFeatures, type FeatureAccess } from "@/lib/plans";
 
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
@@ -175,7 +176,7 @@ function Header({
 }) {
   const { t } = useI18n();
   return (
-    <header className="sticky top-0 z-20 border-b border-border/15 bg-white px-5 py-3 shadow-sm backdrop-blur-xl md:px-8 md:py-4 lg:px-12">
+    <header className="keep-palette sticky top-0 z-20 border-b border-border/15 bg-white px-5 py-3 shadow-sm backdrop-blur-xl md:px-8 md:py-4 lg:px-12">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
         <button
           onClick={onHome}
@@ -210,6 +211,10 @@ function Header({
               </button>
             ))}
           <LanguageSelect className="ml-2" />
+          <ThemeToggle
+            className="theme-toggle-light-chrome ml-1"
+            labels={{ toLight: t.nav.themeLight, toDark: t.nav.themeDark }}
+          />
           <button
             onClick={() => onChange("login")}
             className="brand-gradient glow ml-2 inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-bold uppercase tracking-wider text-primary-foreground"
@@ -219,6 +224,10 @@ function Header({
         </nav>
 
         <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle
+            className="theme-toggle-light-chrome"
+            labels={{ toLight: t.nav.themeLight, toDark: t.nav.themeDark }}
+          />
           <LanguageSelect />
         </div>
       </div>
@@ -399,7 +408,7 @@ function SectionHeader({
 function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
   const { t } = useI18n();
   return (
-    <footer className="mt-10 border-t border-border/15 bg-white px-5 pb-28 pt-10 md:mt-16 md:px-8 md:pb-12 lg:px-12">
+    <footer className="keep-palette mt-10 border-t border-border/15 bg-white px-5 pb-28 pt-10 md:mt-16 md:px-8 md:pb-12 lg:px-12">
       <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-[1.2fr_1fr_1fr]">
         <div className="space-y-3">
           <img
@@ -878,7 +887,7 @@ function BottomNav({ tab, onChange }: { tab: TabId; onChange: (t: TabId) => void
   return (
     <nav
       aria-label="Primary navigation"
-      className="fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.08)] backdrop-blur-xl md:hidden"
+      className="keep-palette fixed bottom-0 left-1/2 z-30 w-full max-w-md -translate-x-1/2 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.08)] backdrop-blur-xl md:hidden"
     >
       <ul className="grid grid-cols-5">
         {tabMeta

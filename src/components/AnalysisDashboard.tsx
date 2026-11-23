@@ -6,7 +6,7 @@ import { uniqueCurrent } from "@/lib/spatial-analysis";
 import { dashboardAnalysis, type RateSeries } from "@/lib/dashboard-analysis";
 const button =
   "min-h-11 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-slate-200";
-const card = "min-w-0 rounded-2xl border border-white/10 bg-[#1d1f24] p-4 sm:p-5";
+const card = "min-w-0 rounded-2xl border border-white/10 bg-card p-4 sm:p-5";
 export function Plot({
   kind,
   zones,

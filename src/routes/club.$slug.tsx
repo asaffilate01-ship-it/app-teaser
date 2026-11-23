@@ -5,6 +5,9 @@ import { isSiteSlug } from "@/lib/club-site-query";
 import { getClubSite } from "@/lib/club-site.functions";
 import { readAccent, readSocials, socialLabels, type PublicClubSite } from "@/lib/club-site";
 import { SiteCrest } from "@/components/site/SiteParts";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import logoMark from "@/assets/criclume-logo-header.png.asset.json";
+import logoMarkOnDark from "@/assets/criclume-logo-on-dark.png.asset.json";
 
 export const Route = createFileRoute("/club/$slug")({
   loader: async ({ params }) => {
@@ -38,15 +41,23 @@ function ClubSiteLayout() {
   if (!site.published) return <SiteUnpublished site={site} />;
   const accent = readAccent(site.site?.accent);
   const socials = readSocials(site.site?.socials);
+  const logo = site.site?.logoPath ? site.files?.[site.site.logoPath] : undefined;
+  // On the club's own domain "/" is the club's home, so CricLume links must be full addresses.
+  const criclumeHref = site.domain ? "https://criclume.com/" : "/";
   return (
     <div className="club-site" data-accent={accent}>
       <a href="#site-main" className="club-skip">Skip to content</a>
       <header className="club-header">
         <div className="club-shell club-header-row">
           <Link to="/club/$slug" params={{ slug }} className="club-brand">
-            <SiteCrest name={site.name} />
+            {logo ? (
+              <img src={logo} alt="" className="club-logo" width={44} height={44} />
+            ) : (
+              <SiteCrest name={site.name} />
+            )}
             <span className="club-brand-name">{site.name}</span>
           </Link>
+          <div className="club-header-tools">
           <nav aria-label={`${site.name} website`} className="club-nav">
             {nav.map((item) => (
               <Link
@@ -61,6 +72,8 @@ function ClubSiteLayout() {
               </Link>
             ))}
           </nav>
+          <ThemeToggle pageDefault="light" />
+          </div>
         </div>
       </header>
       <main id="site-main" tabIndex={-1}>
@@ -93,12 +106,20 @@ function ClubSiteLayout() {
               ))}
             </ul>
           )}
-          <p className="club-powered">
-            Live scores and website by{" "}
-            <Link to="/" className="club-powered-link">
-              CricLume
-            </Link>
-          </p>
+          {site.coBranded ? (
+            <a href={criclumeHref} className="club-cobrand" aria-label={`Official ${site.name} website, powered by CricLume`}>
+              <span className="club-cobrand-label">Official website · powered by</span>
+              <img src={logoMark.url} alt="CricLume" width={1600} height={600} className="club-cobrand-logo club-cobrand-on-light" />
+              <img src={logoMarkOnDark.url} alt="" aria-hidden="true" width={840} height={276} className="club-cobrand-logo club-cobrand-on-dark" />
+            </a>
+          ) : (
+            <p className="club-powered">
+              Live scores and website by{" "}
+              <a href={criclumeHref} className="club-powered-link">
+                CricLume
+              </a>
+            </p>
+          )}
         </div>
       </footer>
       <nav aria-label={`${site.name} menu`} className="club-tabbar">

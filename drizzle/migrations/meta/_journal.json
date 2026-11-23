@@ -211,6 +211,13 @@
       "when": 1795436217924,
       "tag": "0029_ad_banners_and_revenue_share",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1795437456464,
+      "tag": "0030_club_site_custom_domains",
+      "breakpoints": true
     }
   ]
 }

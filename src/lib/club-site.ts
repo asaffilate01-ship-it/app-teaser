@@ -8,6 +8,10 @@ export interface PublicClubSite {
   name: string;
   kind: string;
   slug: string;
+  /** The club's own web address when it is live (League plan), e.g. "riversidecc.com". */
+  domain?: string | null;
+  /** League plan: club-first branding with a small "Powered by CricLume" mark. */
+  coBranded?: boolean;
   site?: SiteSettings;
   teams?: SiteTeam[];
   matches?: SiteMatch[];
@@ -28,6 +32,7 @@ export interface SiteSettings {
   socials: Record<string, string>;
   sponsors: Array<{ name: string; url?: string | null }>;
   heroPath: string | null;
+  logoPath?: string | null;
   updatedAt: string;
 }
 export interface SiteTeam { id: string; name: string; shortName: string | null; ageGroup: string | null }
@@ -275,6 +280,7 @@ export const postKindLabels: Record<PostKind, string> = { news: "News", notice: 
 export function siteFilePaths(site: PublicClubSite): string[] {
   const paths = new Set<string>();
   if (site.site?.heroPath) paths.add(site.site.heroPath);
+  if (site.site?.logoPath) paths.add(site.site.logoPath);
   for (const photo of site.photos ?? []) paths.add(photo.path);
   for (const post of site.posts ?? []) if (post.filePath) paths.add(post.filePath);
   return [...paths];

@@ -204,7 +204,7 @@ function ScopedIntelligencePanel({
 
   return (
     <section className="space-y-5">
-      <div className="rounded-3xl border border-fuchsia-400/20 bg-gradient-to-br from-fuchsia-950/30 to-[#17111f] p-5 md:p-8">
+      <div className="rounded-3xl border border-fuchsia-400/20 bg-gradient-to-br from-fuchsia-950/30 to-card p-5 md:p-8">
         <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-fuchsia-300">
           <Sparkles className="size-4" /> Intelligence by Omniqora
         </div>
@@ -275,7 +275,7 @@ function ScopedIntelligencePanel({
                 id="omniqora-match"
                 value={matchId}
                 onChange={(event) => setMatchId(event.target.value)}
-                className="w-full rounded-xl border border-white/15 bg-[#17111f] px-3 py-3 text-sm"
+                className="w-full rounded-xl border border-white/15 bg-card px-3 py-3 text-sm"
                 disabled={busy || !matches.length}
               >
                 {matches.length === 0 && <option value="">No club matches yet</option>}
@@ -292,7 +292,7 @@ function ScopedIntelligencePanel({
                 id="omniqora-task"
                 value={task}
                 onChange={(event) => setTask(event.target.value as IntelligenceTask)}
-                className="w-full rounded-xl border border-white/15 bg-[#17111f] px-3 py-3 text-sm"
+                className="w-full rounded-xl border border-white/15 bg-card px-3 py-3 text-sm"
                 disabled={busy}
               >
                 {intelligenceTaskOptions.map((option) => (
@@ -315,7 +315,7 @@ function ScopedIntelligencePanel({
                 type="button"
                 disabled={checking || !matchId}
                 onClick={() => void verify()}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-300 px-4 py-3 text-sm font-bold text-[#1d1520] disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-300 px-4 py-3 text-sm font-bold text-gold-foreground disabled:opacity-50"
               >
                 {checking ? (
                   <LoaderCircle className="size-4 animate-spin" />

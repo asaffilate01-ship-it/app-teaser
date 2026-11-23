@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Mail, ShieldCheck } from "lucide-react";
-import logoAsset from "@/assets/criclume-logo-on-dark.png.asset.json";
+import { BrandLogo } from "@/components/theme/BrandLogo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -138,15 +139,18 @@ export function LegalPage({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#0f0d17] text-slate-100">
+    <div className="min-h-screen bg-background text-slate-100">
       <header className="border-b border-white/10 px-4 py-3 md:px-8">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-3">
           <Link to="/">
-            <img src={logoAsset.url} alt="CricLume" className="h-10 w-auto" />
+            <BrandLogo className="h-10 w-auto" />
           </Link>
-          <Link to="/" className="inline-flex items-center gap-2 text-xs font-bold text-slate-400">
-            <ArrowLeft className="size-4" /> Back to site
-          </Link>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Link to="/" className="inline-flex items-center gap-2 text-xs font-bold text-slate-400">
+              <ArrowLeft className="size-4" /> Back to site
+            </Link>
+          </div>
         </div>
       </header>
       <main

@@ -14,6 +14,8 @@ import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { reportMonitoringEvent } from "../lib/monitoring";
+import { themeBootScript } from "../lib/theme";
+import { CLUB_SITE_META, clubSlugForHost } from "../lib/club-domains";
 
 function NotFoundComponent() {
   return (
@@ -132,9 +134,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  // On a club's own domain the page tells the browser which club website it is (see src/router.tsx).
+  const host =
+    typeof window === "undefined"
+      ? router.options.origin
+        ? new URL(router.options.origin).hostname
+        : ""
+      : window.location.hostname;
+  const clubSlug = host ? clubSlugForHost(host) : null;
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Applies the visitor's saved light/dark choice before the page paints. */}
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+        {clubSlug && <meta name={CLUB_SITE_META} content={clubSlug} />}
         <HeadContent />
       </head>
       <body>

@@ -94,7 +94,7 @@ export function CameraCloudRecordingPanel({
   return (
     <section
       aria-label="Server-side cloud camera recording"
-      className="mt-6 rounded-xl border border-white/10 bg-[#171d29] p-4"
+      className="mt-6 rounded-xl border border-white/10 bg-card p-4"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
