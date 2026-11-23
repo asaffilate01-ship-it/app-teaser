@@ -50,8 +50,8 @@
 - [x] 1 Live streaming via free OBS: Go live guide (YouTube, Facebook, TikTok) with overlay links
 - [x] 15a Player auction / draft
 - [ ] 15b Ground and nets booking requests
-- [ ] 15c Match tickets (selling online needs live payments)
-- [ ] 15d Merchandise shop (selling online needs live payments)
+- [ ] 15c Match tickets: owner chose transfers only, so ticket money is requested and recorded by hand (no online card checkout)
+- [ ] 15d Merchandise shop: owner chose transfers only, so orders are taken and recorded by hand (no online card checkout)
 
 ## Pakistan pricing + CricScoreboard (new ask)
 - [x] Review CricScoreboard and compare with the proposed PKR prices
@@ -186,7 +186,7 @@
 - [x] "Join the club" form on club website + approval queue
 - [x] Activity history (who changed what, when)
 - [x] Player auction / draft for franchise leagues
-- [ ] Card payments — waiting on owner's choice
+- [x] Card payments — owner chose transfers only (no card gateway, no card fees; treasurer keeps confirming references)
 - [ ] Email / WhatsApp / SMS reminders — waiting on owner's choice
 - [ ] Go live from the app without OBS — waiting on owner's choice (running costs)
 - [ ] LED scoreboard controller test — needs real hardware
