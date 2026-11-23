@@ -189,18 +189,26 @@ export function regionFromLocale(locale: string | null | undefined): string | nu
 }
 
 /**
- * Country selection is an optional locale-based suggestion.
- * We do not send the visitor's IP address to third-party geolocation services.
+ * The price list a visitor sees by default.
+ * The country comes from our own hosting network (no third-party lookups, nothing stored);
+ * only when that is unknown do we fall back to the browser's language setting.
+ * Any country not on our list is shown UK prices in GBP.
  */
-export async function detectCountry(): Promise<string | null> {
-  try {
-    if (typeof navigator === "undefined") return null;
-    for (const locale of [navigator.language, ...navigator.languages]) {
-      const region = regionFromLocale(locale);
-      if (region) return region;
-    }
-  } catch {
-    // Users can always choose their region from the pricing selector.
+export function pricingRegionFor(networkCountry: string | null | undefined, locales: readonly string[] = []): Region {
+  if (networkCountry) return findRegion(networkCountry) ?? defaultRegion;
+  for (const locale of locales) {
+    const code = regionFromLocale(locale);
+    if (code) return findRegion(code) ?? defaultRegion;
   }
-  return null;
+  return defaultRegion;
+}
+
+/** Browser language tags, safely (empty during server rendering). */
+export function browserLocales(): string[] {
+  try {
+    if (typeof navigator === "undefined") return [];
+    return [navigator.language, ...(navigator.languages ?? [])].filter(Boolean);
+  } catch {
+    return [];
+  }
 }

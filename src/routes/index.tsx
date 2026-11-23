@@ -1,7 +1,8 @@
 import { readSection, publicSections } from "@/lib/navigation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { regions, defaultRegion, findRegion, detectCountry, type Region } from "@/lib/pricing";
+import { regions, defaultRegion, findRegion, pricingRegionFor, browserLocales, type Region } from "@/lib/pricing";
+import { getVisitorCountry } from "@/lib/visitor-country.functions";
 import { I18nProvider, useI18n, LanguageSelect } from "@/lib/i18n";
 import type { Content } from "@/lib/content";
 import {
@@ -124,12 +125,14 @@ function useVisitorRegion() {
   const [detected, setDetected] = useState(false);
   useEffect(() => {
     let active = true;
-    detectCountry().then((code) => {
-      if (!active) return;
-      const match = findRegion(code);
-      if (match) setRegion(match);
-      setDetected(true);
-    });
+    getVisitorCountry()
+      .then((result) => result.country)
+      .catch(() => null)
+      .then((country) => {
+        if (!active) return;
+        setRegion(pricingRegionFor(country, browserLocales()));
+        setDetected(true);
+      });
     return () => {
       active = false;
     };

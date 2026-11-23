@@ -202,7 +202,7 @@ export const en = {
         period: "per team / month",
         blurb: "Full scoring analytics for clubs running several sides.",
         perks: [
-          "Everything in Starter — plus 30% of the ad money from your own screens",
+          "Everything in Starter — ads still show, and your club earns 30% of the ad money from its own screens",
           "Unlimited teams and fixtures",
           "Wagon wheels, pitch maps and run-rate charts",
           "Win predictor and ball-by-ball commentary",
@@ -253,7 +253,7 @@ export const en = {
       addon: "Add-on",
     },
     footnote:
-      "Prices shown are for your country. Taxes and billing terms are confirmed before you subscribe.",
+      "Prices shown are for your country; countries not listed are shown prices in GBP. Taxes and billing terms are confirmed before you subscribe.",
   },
   faq: {
     kicker: "Answers",
@@ -289,7 +289,7 @@ export const en = {
       },
       {
         q: "Do clubs earn from the ads?",
-        a: "Yes. CricLume sells the top and side banners on your big screen, public scoreboard and app, and ads can be aimed at your area. On the free plan they help cover running costs; on a Club or League plan your club earns 30% of the ad money from your own screens, and 50% with the video add-on.",
+        a: "Yes. Ads show on every plan, free or paid. CricLume sells the top and side banners on your big screen, public scoreboard and app, and ads can be aimed at your area. On the free plan they help cover running costs; on a Club or League plan your club earns 30% of the ad money from your own screens, and 50% with the video add-on.",
       },
       {
         q: "How do I get access?",
@@ -536,7 +536,7 @@ export const de: Content = {
         period: "pro Team / Monat",
         blurb: "Vollständige Scoring-Analyse für Clubs mit mehreren Teams.",
         perks: [
-          "Alles aus Starter – plus 30 % der Werbeeinnahmen von euren eigenen Bildschirmen",
+          "Alles aus Starter – Werbung läuft weiter, und euer Verein erhält 30 % der Werbeeinnahmen von den eigenen Bildschirmen",
           "Unbegrenzte Teams und Spiele",
           "Wagon Wheels, Pitch Maps und Run-Rate-Grafiken",
           "Siegprognose und Ball-für-Ball-Kommentar",
@@ -588,7 +588,7 @@ export const de: Content = {
       addon: "Add-on",
     },
     footnote:
-      "Die Preise gelten für dein Land. Steuern und Zahlungsbedingungen werden vor Abschluss bestätigt.",
+      "Die Preise gelten für dein Land; für nicht aufgeführte Länder gelten Preise in GBP. Steuern und Zahlungsbedingungen werden vor Abschluss bestätigt.",
   },
   faq: {
     kicker: "Antworten",
@@ -624,7 +624,7 @@ export const de: Content = {
       },
       {
         q: "Verdienen Vereine an der Werbung mit?",
-        a: "Ja. CricLume verkauft die Banner oben und an der Seite auf eurer Großleinwand, der öffentlichen Anzeigetafel und in der App; Werbung kann gezielt in eurer Region laufen. Beim kostenlosen Tarif decken die Anzeigen die Betriebskosten; mit einem Club- oder Liga-Abo erhält euer Verein 30 % der Werbeeinnahmen von den eigenen Bildschirmen, mit dem Video-Add-on 50 %.",
+        a: "Ja. Werbung läuft in jedem Tarif, kostenlos oder bezahlt. CricLume verkauft die Banner oben und an der Seite auf eurer Großleinwand, der öffentlichen Anzeigetafel und in der App; Werbung kann gezielt in eurer Region laufen. Beim kostenlosen Tarif decken die Anzeigen die Betriebskosten; mit einem Club- oder Liga-Abo erhält euer Verein 30 % der Werbeeinnahmen von den eigenen Bildschirmen, mit dem Video-Add-on 50 %.",
       },
       {
         q: "Wie bekomme ich Zugang?",
@@ -867,7 +867,7 @@ export const nl: Content = {
         period: "per team / maand",
         blurb: "Volledige score-analyse voor clubs met meerdere teams.",
         perks: [
-          "Alles uit Starter – plus 30% van de advertentie-inkomsten van je eigen schermen",
+          "Alles uit Starter – advertenties blijven draaien en je club krijgt 30% van de advertentie-inkomsten van de eigen schermen",
           "Onbeperkt teams en wedstrijden",
           "Wagon wheels, pitch maps en run-rategrafieken",
           "Winstvoorspeller en bal-voor-bal commentaar",
@@ -919,7 +919,7 @@ export const nl: Content = {
       addon: "Add-on",
     },
     footnote:
-      "De prijzen gelden voor jouw land. Belastingen en betaalvoorwaarden worden bevestigd voordat je je aanmeldt.",
+      "De prijzen gelden voor jouw land; voor landen die niet in de lijst staan gelden prijzen in GBP. Belastingen en betaalvoorwaarden worden bevestigd voordat je je aanmeldt.",
   },
   faq: {
     kicker: "Antwoorden",
@@ -955,7 +955,7 @@ export const nl: Content = {
       },
       {
         q: "Verdienen clubs mee aan de advertenties?",
-        a: "Ja. CricLume verkoopt de banners boven en aan de zijkant op je grote scherm, het openbare scorebord en in de app, en advertenties kunnen op jouw regio gericht worden. Bij het gratis abonnement helpen ze de kosten te dekken; met een club- of competitieabonnement krijgt je club 30% van de advertentie-inkomsten van de eigen schermen, en 50% met de video-add-on.",
+        a: "Ja. Advertenties draaien bij elk abonnement, gratis of betaald. CricLume verkoopt de banners boven en aan de zijkant op je grote scherm, het openbare scorebord en in de app, en advertenties kunnen op jouw regio gericht worden. Bij het gratis abonnement helpen ze de kosten te dekken; met een club- of competitieabonnement krijgt je club 30% van de advertentie-inkomsten van de eigen schermen, en 50% met de video-add-on.",
       },
       {
         q: "Hoe krijg ik toegang?",
@@ -1200,7 +1200,7 @@ export const af: Content = {
         period: "per span / maand",
         blurb: "Volledige telling-ontleding vir klubs met verskeie spanne.",
         perks: [
-          "Alles in Starter – plus 30% van die advertensiegeld van julle eie skerms",
+          "Alles in Starter – advertensies wys steeds, en julle klub kry 30% van die advertensiegeld van julle eie skerms",
           "Onbeperkte spanne en wedstryde",
           "Wagon wheels, pitch maps en lopietempo-grafieke",
           "Wenvoorspeller en bal-vir-bal kommentaar",
@@ -1252,7 +1252,7 @@ export const af: Content = {
       addon: "Byvoeging",
     },
     footnote:
-      "Die pryse geld vir jou land. Belasting en betaalvoorwaardes word bevestig voordat jy inteken.",
+      "Die pryse geld vir jou land; lande wat nie gelys is nie, sien pryse in GBP. Belasting en betaalvoorwaardes word bevestig voordat jy inteken.",
   },
   faq: {
     kicker: "Antwoorde",
@@ -1288,7 +1288,7 @@ export const af: Content = {
       },
       {
         q: "Verdien klubs uit die advertensies?",
-        a: "Ja. CricLume verkoop die baniere bo en aan die kant op julle groot skerm, openbare telbord en in die app, en advertensies kan op julle area gemik word. Op die gratis plan help dit lopende koste dek; op 'n Klub- of Ligaplan kry julle klub 30% van die advertensiegeld van julle eie skerms, en 50% met die videobyvoeging.",
+        a: "Ja. Advertensies wys op elke plan, gratis of betaal. CricLume verkoop die baniere bo en aan die kant op julle groot skerm, openbare telbord en in die app, en advertensies kan op julle area gemik word. Op die gratis plan help dit lopende koste dek; op 'n Klub- of Ligaplan kry julle klub 30% van die advertensiegeld van julle eie skerms, en 50% met die videobyvoeging.",
       },
       {
         q: "Hoe kry ek toegang?",
@@ -1532,7 +1532,7 @@ export const fr: Content = {
         period: "par équipe / mois",
         blurb: "Analyse complète du marquage pour les clubs à plusieurs équipes.",
         perks: [
-          "Tout Starter – plus 30 % des recettes publicitaires de vos propres écrans",
+          "Tout Starter – la publicité reste affichée et votre club reçoit 30 % des recettes publicitaires de ses propres écrans",
           "Équipes et matchs illimités",
           "Wagon wheels, pitch maps et graphiques de run rate",
           "Prédicteur de victoire et commentaire balle par balle",
@@ -1584,7 +1584,7 @@ export const fr: Content = {
       addon: "Option",
     },
     footnote:
-      "Les prix affichés sont ceux de votre pays. Taxes et conditions de paiement sont confirmées avant l'inscription.",
+      "Les prix affichés sont ceux de votre pays ; pour les pays non listés, les prix sont en GBP. Taxes et conditions de paiement sont confirmées avant l'inscription.",
   },
   faq: {
     kicker: "Réponses",
@@ -1620,7 +1620,7 @@ export const fr: Content = {
       },
       {
         q: "Les clubs touchent-ils une part de la publicité ?",
-        a: "Oui. CricLume vend les bannières du haut et du côté sur votre grand écran, votre tableau des scores public et l'application, et les annonces peuvent cibler votre région. Avec l'offre gratuite, elles aident à couvrir les frais ; avec une offre Club ou Ligue, votre club reçoit 30 % des recettes publicitaires de ses propres écrans, et 50 % avec l'option vidéo.",
+        a: "Oui. La publicité s'affiche avec toutes les offres, gratuites ou payantes. CricLume vend les bannières du haut et du côté sur votre grand écran, votre tableau des scores public et l'application, et les annonces peuvent cibler votre région. Avec l'offre gratuite, elles aident à couvrir les frais ; avec une offre Club ou Ligue, votre club reçoit 30 % des recettes publicitaires de ses propres écrans, et 50 % avec l'option vidéo.",
       },
       {
         q: "Comment obtenir un accès ?",
