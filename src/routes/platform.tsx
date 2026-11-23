@@ -63,6 +63,7 @@ import { LeagueStandings } from "@/components/LeagueStandings";
 import { LeagueHub } from "@/components/league/LeagueHub";
 import { SquadImport } from "@/components/club/SquadImport";
 import { MatchDayPosts } from "@/components/league/MatchDayPosts";
+import { StreamGuide } from "@/components/club/StreamGuide";
 import { toast } from "sonner";
 import { rainMethods } from "@/lib/rain-rules";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
@@ -1090,6 +1091,9 @@ function MatchCard({
           >
             Stream overlay <Copy className="size-3.5" />
           </button>
+        )}
+        {match.scoreboard?.enabled && (
+          <StreamGuide slug={match.scoreboard.slug} matchTitle={`${teamName(data, match.homeTeamId)} v ${teamName(data, match.awayTeamId)}`} />
         )}
         {match.scoreboard?.enabled && (
           <a

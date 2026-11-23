@@ -44,17 +44,17 @@
 - [x] 9 "What do we need to qualify" calculator + spreadsheet import of teams/players
 - [x] 8 Multi-day: end of day / stumps
 - [x] 6 Social post text + result and match-day posters
-- [ ] 3 Installable app: install prompt, iPhone instructions, brand colours (store builds need user's developer accounts)
+- [x] 3 Installable app: install prompt, iPhone instructions, brand colours (store builds need user's developer accounts)
 - [ ] 7 Phone alerts for wickets, milestones and results (web push)
 - [ ] 10 Club / league public website pages: branding, news, gallery, documents, fixtures/results
-- [ ] 1 Live streaming via free OBS: step-by-step stream setup screen in the club workspace with overlay links (no paid video service)
+- [x] 1 Live streaming via free OBS: Go live guide (YouTube, Facebook, TikTok) with overlay links
 - [ ] 15a Player auction / draft
 - [ ] 15b Ground and nets booking requests
 - [ ] 15c Match tickets (selling online needs live payments)
 - [ ] 15d Merchandise shop (selling online needs live payments)
 
 ## Pakistan pricing + CricScoreboard (new ask)
-- [ ] Review CricScoreboard and compare with the proposed PKR prices
+- [x] Review CricScoreboard and compare with the proposed PKR prices
 - [ ] Proposed PKR plans: team Basic 25k/yr (scoring + basic video), team Advanced 50k/yr (live streaming, coaching, analytics); leagues ≤10 teams 20k/team/yr, 10+ teams 17.5k/team/yr; +20k/team/yr for full system — waiting on user's go-ahead before changing site prices
 - [ ] Offline scoring with reliable resync after internet loss: check again
-- [ ] Streaming guide covers Facebook, YouTube and TikTok (part of gap 1)
+- [x] Streaming guide covers Facebook, YouTube and TikTok
