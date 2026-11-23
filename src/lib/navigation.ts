@@ -4,6 +4,7 @@ export const platformSections = [
   "office",
   "competitions",
   "league",
+  "website",
   "capture",
   "players",
   "academy",

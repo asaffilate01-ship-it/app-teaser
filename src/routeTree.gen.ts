@@ -16,13 +16,19 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PromoRouteImport } from './routes/promo'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as CameraRoomIdRouteImport } from './routes/camera.$roomId'
+import { Route as ClubSlugRouteImport } from './routes/club.$slug'
 import { Route as DirectorRoomIdRouteImport } from './routes/director.$roomId'
 import { Route as GroundSlugRouteImport } from './routes/ground.$slug'
 import { Route as OverlaySlugRouteImport } from './routes/overlay.$slug'
 import { Route as ScoreboardSlugRouteImport } from './routes/scoreboard.$slug'
 import { Route as ScoutTokenRouteImport } from './routes/scout.$token'
+import { Route as ClubSlugIndexRouteImport } from './routes/club.$slug.index'
+import { Route as ClubSlugFixturesRouteImport } from './routes/club.$slug.fixtures'
+import { Route as ClubSlugGalleryRouteImport } from './routes/club.$slug.gallery'
+import { Route as ClubSlugNewsRouteImport } from './routes/club.$slug.news'
 import { Route as ApiPublicGroundFeedSlugRouteImport } from './routes/api/public/ground-feed.$slug'
 import { Route as ApiPublicPushSlugRouteImport } from './routes/api/public/push/$slug'
+import { Route as ClubSlugNewsPostIdRouteImport } from './routes/club.$slug.news.$postId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -59,6 +65,11 @@ const CameraRoomIdRoute = CameraRoomIdRouteImport.update({
   path: '/camera/$roomId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClubSlugRoute = ClubSlugRouteImport.update({
+  id: '/club/$slug',
+  path: '/club/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DirectorRoomIdRoute = DirectorRoomIdRouteImport.update({
   id: '/director/$roomId',
   path: '/director/$roomId',
@@ -84,6 +95,26 @@ const ScoutTokenRoute = ScoutTokenRouteImport.update({
   path: '/scout/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClubSlugIndexRoute = ClubSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClubSlugRoute,
+} as any)
+const ClubSlugFixturesRoute = ClubSlugFixturesRouteImport.update({
+  id: '/fixtures',
+  path: '/fixtures',
+  getParentRoute: () => ClubSlugRoute,
+} as any)
+const ClubSlugGalleryRoute = ClubSlugGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => ClubSlugRoute,
+} as any)
+const ClubSlugNewsRoute = ClubSlugNewsRouteImport.update({
+  id: '/news',
+  path: '/news',
+  getParentRoute: () => ClubSlugRoute,
+} as any)
 const ApiPublicGroundFeedSlugRoute = ApiPublicGroundFeedSlugRouteImport.update({
   id: '/api/public/ground-feed/$slug',
   path: '/api/public/ground-feed/$slug',
@@ -94,6 +125,11 @@ const ApiPublicPushSlugRoute = ApiPublicPushSlugRouteImport.update({
   path: '/api/public/push/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClubSlugNewsPostIdRoute = ClubSlugNewsPostIdRouteImport.update({
+  id: '/$postId',
+  path: '/$postId',
+  getParentRoute: () => ClubSlugNewsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,13 +139,19 @@ export interface FileRoutesByFullPath {
   '/promo': typeof PromoRoute
   '/terms': typeof TermsRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
+  '/club/$slug': typeof ClubSlugRouteWithChildren
   '/director/$roomId': typeof DirectorRoomIdRoute
   '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
   '/scout/$token': typeof ScoutTokenRoute
+  '/club/$slug/fixtures': typeof ClubSlugFixturesRoute
+  '/club/$slug/gallery': typeof ClubSlugGalleryRoute
+  '/club/$slug/news': typeof ClubSlugNewsRouteWithChildren
+  '/club/$slug/': typeof ClubSlugIndexRoute
   '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
   '/api/public/push/$slug': typeof ApiPublicPushSlugRoute
+  '/club/$slug/news/$postId': typeof ClubSlugNewsPostIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -124,8 +166,13 @@ export interface FileRoutesByTo {
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
   '/scout/$token': typeof ScoutTokenRoute
+  '/club/$slug/fixtures': typeof ClubSlugFixturesRoute
+  '/club/$slug/gallery': typeof ClubSlugGalleryRoute
+  '/club/$slug/news': typeof ClubSlugNewsRouteWithChildren
+  '/club/$slug': typeof ClubSlugIndexRoute
   '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
   '/api/public/push/$slug': typeof ApiPublicPushSlugRoute
+  '/club/$slug/news/$postId': typeof ClubSlugNewsPostIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -136,13 +183,19 @@ export interface FileRoutesById {
   '/promo': typeof PromoRoute
   '/terms': typeof TermsRoute
   '/camera/$roomId': typeof CameraRoomIdRoute
+  '/club/$slug': typeof ClubSlugRouteWithChildren
   '/director/$roomId': typeof DirectorRoomIdRoute
   '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
   '/scout/$token': typeof ScoutTokenRoute
+  '/club/$slug/fixtures': typeof ClubSlugFixturesRoute
+  '/club/$slug/gallery': typeof ClubSlugGalleryRoute
+  '/club/$slug/news': typeof ClubSlugNewsRouteWithChildren
+  '/club/$slug/': typeof ClubSlugIndexRoute
   '/api/public/ground-feed/$slug': typeof ApiPublicGroundFeedSlugRoute
   '/api/public/push/$slug': typeof ApiPublicPushSlugRoute
+  '/club/$slug/news/$postId': typeof ClubSlugNewsPostIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -154,13 +207,19 @@ export interface FileRouteTypes {
     | '/promo'
     | '/terms'
     | '/camera/$roomId'
+    | '/club/$slug'
     | '/director/$roomId'
     | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
     | '/scout/$token'
+    | '/club/$slug/fixtures'
+    | '/club/$slug/gallery'
+    | '/club/$slug/news'
+    | '/club/$slug/'
     | '/api/public/ground-feed/$slug'
     | '/api/public/push/$slug'
+    | '/club/$slug/news/$postId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -175,8 +234,13 @@ export interface FileRouteTypes {
     | '/overlay/$slug'
     | '/scoreboard/$slug'
     | '/scout/$token'
+    | '/club/$slug/fixtures'
+    | '/club/$slug/gallery'
+    | '/club/$slug/news'
+    | '/club/$slug'
     | '/api/public/ground-feed/$slug'
     | '/api/public/push/$slug'
+    | '/club/$slug/news/$postId'
   id:
     | '__root__'
     | '/'
@@ -186,13 +250,19 @@ export interface FileRouteTypes {
     | '/promo'
     | '/terms'
     | '/camera/$roomId'
+    | '/club/$slug'
     | '/director/$roomId'
     | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
     | '/scout/$token'
+    | '/club/$slug/fixtures'
+    | '/club/$slug/gallery'
+    | '/club/$slug/news'
+    | '/club/$slug/'
     | '/api/public/ground-feed/$slug'
     | '/api/public/push/$slug'
+    | '/club/$slug/news/$postId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -203,6 +273,7 @@ export interface RootRouteChildren {
   PromoRoute: typeof PromoRoute
   TermsRoute: typeof TermsRoute
   CameraRoomIdRoute: typeof CameraRoomIdRoute
+  ClubSlugRoute: typeof ClubSlugRouteWithChildren
   DirectorRoomIdRoute: typeof DirectorRoomIdRoute
   GroundSlugRoute: typeof GroundSlugRoute
   OverlaySlugRoute: typeof OverlaySlugRoute
@@ -263,6 +334,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CameraRoomIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/club/$slug': {
+      id: '/club/$slug'
+      path: '/club/$slug'
+      fullPath: '/club/$slug'
+      preLoaderRoute: typeof ClubSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/director/$roomId': {
       id: '/director/$roomId'
       path: '/director/$roomId'
@@ -298,6 +376,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScoutTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/club/$slug/': {
+      id: '/club/$slug/'
+      path: '/'
+      fullPath: '/club/$slug/'
+      preLoaderRoute: typeof ClubSlugIndexRouteImport
+      parentRoute: typeof ClubSlugRoute
+    }
+    '/club/$slug/fixtures': {
+      id: '/club/$slug/fixtures'
+      path: '/fixtures'
+      fullPath: '/club/$slug/fixtures'
+      preLoaderRoute: typeof ClubSlugFixturesRouteImport
+      parentRoute: typeof ClubSlugRoute
+    }
+    '/club/$slug/gallery': {
+      id: '/club/$slug/gallery'
+      path: '/gallery'
+      fullPath: '/club/$slug/gallery'
+      preLoaderRoute: typeof ClubSlugGalleryRouteImport
+      parentRoute: typeof ClubSlugRoute
+    }
+    '/club/$slug/news': {
+      id: '/club/$slug/news'
+      path: '/news'
+      fullPath: '/club/$slug/news'
+      preLoaderRoute: typeof ClubSlugNewsRouteImport
+      parentRoute: typeof ClubSlugRoute
+    }
     '/api/public/ground-feed/$slug': {
       id: '/api/public/ground-feed/$slug'
       path: '/api/public/ground-feed/$slug'
@@ -312,8 +418,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPushSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/club/$slug/news/$postId': {
+      id: '/club/$slug/news/$postId'
+      path: '/$postId'
+      fullPath: '/club/$slug/news/$postId'
+      preLoaderRoute: typeof ClubSlugNewsPostIdRouteImport
+      parentRoute: typeof ClubSlugNewsRoute
+    }
   }
 }
+
+interface ClubSlugNewsRouteChildren {
+  ClubSlugNewsPostIdRoute: typeof ClubSlugNewsPostIdRoute
+}
+
+const ClubSlugNewsRouteChildren: ClubSlugNewsRouteChildren = {
+  ClubSlugNewsPostIdRoute: ClubSlugNewsPostIdRoute,
+}
+
+const ClubSlugNewsRouteWithChildren = ClubSlugNewsRoute._addFileChildren(
+  ClubSlugNewsRouteChildren,
+)
+
+interface ClubSlugRouteChildren {
+  ClubSlugFixturesRoute: typeof ClubSlugFixturesRoute
+  ClubSlugGalleryRoute: typeof ClubSlugGalleryRoute
+  ClubSlugNewsRoute: typeof ClubSlugNewsRouteWithChildren
+  ClubSlugIndexRoute: typeof ClubSlugIndexRoute
+}
+
+const ClubSlugRouteChildren: ClubSlugRouteChildren = {
+  ClubSlugFixturesRoute: ClubSlugFixturesRoute,
+  ClubSlugGalleryRoute: ClubSlugGalleryRoute,
+  ClubSlugNewsRoute: ClubSlugNewsRouteWithChildren,
+  ClubSlugIndexRoute: ClubSlugIndexRoute,
+}
+
+const ClubSlugRouteWithChildren = ClubSlugRoute._addFileChildren(
+  ClubSlugRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -323,6 +466,7 @@ const rootRouteChildren: RootRouteChildren = {
   PromoRoute: PromoRoute,
   TermsRoute: TermsRoute,
   CameraRoomIdRoute: CameraRoomIdRoute,
+  ClubSlugRoute: ClubSlugRouteWithChildren,
   DirectorRoomIdRoute: DirectorRoomIdRoute,
   GroundSlugRoute: GroundSlugRoute,
   OverlaySlugRoute: OverlaySlugRoute,

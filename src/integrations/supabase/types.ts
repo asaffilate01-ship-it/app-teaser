@@ -1007,6 +1007,162 @@ export type Database = {
           },
         ]
       }
+      club_site_photos: {
+        Row: {
+          caption: string
+          consent_confirmed: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          organisation_id: string
+          path: string
+        }
+        Insert: {
+          caption?: string
+          consent_confirmed: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organisation_id: string
+          path: string
+        }
+        Update: {
+          caption?: string
+          consent_confirmed?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organisation_id?: string
+          path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_site_photos_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_site_posts: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          file_path: string | null
+          id: string
+          kind: string
+          link_url: string | null
+          organisation_id: string
+          pinned: boolean
+          published_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          file_path?: string | null
+          id?: string
+          kind?: string
+          link_url?: string | null
+          organisation_id: string
+          pinned?: boolean
+          published_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          file_path?: string | null
+          id?: string
+          kind?: string
+          link_url?: string | null
+          organisation_id?: string
+          pinned?: boolean
+          published_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_site_posts_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_sites: {
+        Row: {
+          about: string
+          accent: string
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          hero_path: string | null
+          map_url: string | null
+          organisation_id: string
+          published: boolean
+          socials: Json
+          sponsors: Json
+          tagline: string
+          updated_at: string
+          updated_by: string | null
+          web_slug: string | null
+        }
+        Insert: {
+          about?: string
+          accent?: string
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          hero_path?: string | null
+          map_url?: string | null
+          organisation_id: string
+          published?: boolean
+          socials?: Json
+          sponsors?: Json
+          tagline?: string
+          updated_at?: string
+          updated_by?: string | null
+          web_slug?: string | null
+        }
+        Update: {
+          about?: string
+          accent?: string
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          hero_path?: string | null
+          map_url?: string | null
+          organisation_id?: string
+          published?: boolean
+          socials?: Json
+          sponsors?: Json
+          tagline?: string
+          updated_at?: string
+          updated_by?: string | null
+          web_slug?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_sites_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: true
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competition_awards: {
         Row: {
           category: string
@@ -2083,6 +2239,51 @@ export type Database = {
           },
           {
             foreignKeyName: "fee_schedules_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fixture_result_reports: {
+        Row: {
+          fixture_id: string
+          id: string
+          note: string
+          result: Json
+          submitted_at: string
+          submitted_by: string | null
+          team_id: string
+        }
+        Insert: {
+          fixture_id: string
+          id?: string
+          note?: string
+          result: Json
+          submitted_at?: string
+          submitted_by?: string | null
+          team_id: string
+        }
+        Update: {
+          fixture_id?: string
+          id?: string
+          note?: string
+          result?: Json
+          submitted_at?: string
+          submitted_by?: string | null
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fixture_result_reports_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixture_result_reports_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -4054,6 +4255,9 @@ export type Database = {
         Args: { p_asset: string; p_user: string }
         Returns: Json
       }
+      clean_fixture_result: { Args: { p_result: Json }; Returns: Json }
+      club_site_file_public: { Args: { p_name: string }; Returns: boolean }
+      club_site_path_org: { Args: { p_name: string }; Returns: string }
       complete_camera_asset_upload: {
         Args: { p_asset_id: string; p_storage_path: string }
         Returns: string
@@ -4114,6 +4318,12 @@ export type Database = {
         Returns: boolean
       }
       find_user_id_by_email: { Args: { p_email: string }; Returns: string }
+      fixture_result_is_valid: {
+        Args: { p_away: string; p_home: string; p_result: Json }
+        Returns: boolean
+      }
+      fixture_results_inbox: { Args: { p_org: string }; Returns: Json }
+      get_club_site: { Args: { p_slug: string }; Returns: Json }
       get_ground_screen: { Args: { p_slug: string }; Returns: Json }
       get_ground_screen_names: { Args: { p_slug: string }; Returns: Json }
       get_public_scoreboard: { Args: { p_slug: string }; Returns: Json }
@@ -4154,6 +4364,7 @@ export type Database = {
       is_guardian_manager: { Args: { p_org: string }; Returns: boolean }
       is_org_member: { Args: { p_organisation_id: string }; Returns: boolean }
       is_ride_driver: { Args: { p_ride_id: string }; Returns: boolean }
+      is_site_editor: { Args: { p_org: string }; Returns: boolean }
       is_store_manager: { Args: { p_org: string }; Returns: boolean }
       is_travel_manager: { Args: { p_org: string }; Returns: boolean }
       list_bookable_grounds: {
@@ -4292,6 +4503,19 @@ export type Database = {
         Args: { p_device_id: string }
         Returns: undefined
       }
+      reopen_fixture_result: {
+        Args: { p_fixture_id: string }
+        Returns: undefined
+      }
+      report_fixture_result: {
+        Args: {
+          p_fixture_id: string
+          p_note?: string
+          p_result: Json
+          p_team_id: string
+        }
+        Returns: undefined
+      }
       request_ground_booking: {
         Args: {
           p_ends_at: string
@@ -4330,6 +4554,10 @@ export type Database = {
       }
       set_selection_role: {
         Args: { p_event_id: string; p_field: string; p_player_id: string }
+        Returns: undefined
+      }
+      sign_off_fixture_result: {
+        Args: { p_abandoned?: boolean; p_fixture_id: string; p_result: Json }
         Returns: undefined
       }
       start_match_innings: {

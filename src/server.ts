@@ -20,7 +20,7 @@ const securityHeaders: Record<string, string> = {
     "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com data:",
-    "img-src 'self' data: blob:",
+    "img-src 'self' data: blob: https://*.supabase.co",
     "media-src 'self' blob: https://*.supabase.co",
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.lovable.dev",
     "worker-src 'self' blob:",

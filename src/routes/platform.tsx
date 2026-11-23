@@ -35,6 +35,7 @@ import {
   ExternalLink,
   FileCheck2,
   Gauge,
+  Globe,
   Briefcase,
   GraduationCap,
   LoaderCircle,
@@ -54,6 +55,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { AppHeader } from "@/components/app-shell/AppHeader";
+import { WebsiteEditor } from "@/components/site/WebsiteEditor";
+import { ResultsDesk } from "@/components/league/ResultsDesk";
 import { GoogleButton } from "@/components/app-shell/GoogleButton";
 import { SetupChecklist } from "@/components/SetupChecklist";
 import { ClubMatchInsights } from "@/components/club/ClubMatchInsights";
@@ -122,6 +125,7 @@ type PlatformTab =
   | "office"
   | "competitions"
   | "league"
+  | "website"
   | "capture"
   | "players"
   | "academy"
@@ -136,6 +140,7 @@ const tabDefinitions: Array<[PlatformTab, LucideIcon, string]> = [
   ["office", Briefcase, "Club office"],
   ["competitions", Trophy, "Competitions"],
   ["league", Radio, "League hub"],
+  ["website", Globe, "Website"],
   ["capture", Camera, "Capture"],
   ["players", Users, "Players"],
   ["academy", GraduationCap, "Academy"],
@@ -666,6 +671,14 @@ function OperationalPlatform({
             {tab === "league" && (
               <LeagueHub key={leagueStart} initialView={leagueStart} data={dashboard.data} onRefresh={() => void dashboard.refresh()} refreshing={dashboard.refreshing} />
             )}
+            {tab === "website" && (
+              <WebsiteEditor
+                key={membership.organisationId}
+                organisationId={membership.organisationId}
+                organisationName={membership.organisationName}
+                role={membership.role}
+              />
+            )}
             {tab === "capture" && (
               <Capture data={dashboard.data} role={membership.role} run={dashboard.run} />
             )}
@@ -1165,6 +1178,7 @@ function Competitions({
   const scheduling = reviewFixtureSchedule(data.fixtures);
   return (
     <div className="space-y-5">
+      <ResultsDesk organisationId={data.organisationId} />
       {can(role, "competition.manage") && <CompetitionForm data={data} run={run} />}
       {can(role, "fixtures.manage") && <FixtureBuilder data={data} run={run} />}
       {can(role, "fixtures.manage") && <FixtureForm data={data} run={run} />}
