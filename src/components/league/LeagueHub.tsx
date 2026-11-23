@@ -5,6 +5,7 @@ import { InningsDashboard } from "@/components/club/ClubMatchInsights";
 import { insightsFromMatch } from "@/lib/match-insights";
 import { ScorecardView } from "@/components/scorer/ScorecardView";
 import { CommentaryFeed } from "@/components/scorer/CommentaryFeed";
+import { ReadAloud } from "@/components/scorer/ReadAloud";
 import { WinPredictor } from "@/components/scorer/WinPredictor";
 import { loadCloudMatchSnapshot } from "@/lib/cloud";
 import { commentaryFeed } from "@/lib/commentary";
@@ -209,6 +210,9 @@ function MatchDetailBody({
           <ScorecardView key={match.innings.length} match={match} />
         ) : (
           <div className="broadcast-panel p-4">
+            <div className="mb-3 flex justify-end">
+              <ReadAloud lines={lines} />
+            </div>
             <CommentaryFeed lines={lines} />
           </div>
         )}

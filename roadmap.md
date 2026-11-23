@@ -38,7 +38,7 @@
 ## Competitor gaps 1–15 (round 2)
 - [x] 5 Over-by-over comparison (Manhattan already compares both innings)
 - [x] 14 Rain rules: average run rate, most productive overs, DLS (licensed provider or official target entered), manual target; league default
-- [ ] 13 Spoken ball-by-ball commentary on the public scoreboard
+- [x] 13 Spoken ball-by-ball commentary on the public scoreboard
 - [ ] 12 Ground scoreboard (LED) feed + big-screen display page
 - [ ] 11 Rivalries and streaks
 - [ ] 9 "What do we need to qualify" calculator + spreadsheet import of teams/players

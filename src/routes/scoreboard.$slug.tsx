@@ -7,6 +7,7 @@ import { TeamCrest } from "@/components/scorer/Broadcast";
 import { chaseState } from "@/lib/match-broadcast";
 import { WinPredictor } from "@/components/scorer/WinPredictor";
 import { CommentaryFeed } from "@/components/scorer/CommentaryFeed";
+import { ReadAloud } from "@/components/scorer/ReadAloud";
 import { predictWin, type MatchConditions } from "@/lib/win-predictor";
 import type { CommentaryLine } from "@/lib/commentary";
 import { rainMethodShort, type RainMethod } from "@/lib/rain-rules";
@@ -386,7 +387,10 @@ function PublicScoreboard() {
             </div>
             {commentary && (
               <div className={`broadcast-panel ${panel !== "commentary" ? "hidden md:block" : ""}`}>
-                <p className="panel-kicker mb-3">Ball by ball</p>
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <p className="panel-kicker">Ball by ball</p>
+                  <ReadAloud lines={commentary} />
+                </div>
                 <div className="md:max-h-[42rem] md:overflow-y-auto md:pr-1">
                   <CommentaryFeed lines={commentary} />
                 </div>
