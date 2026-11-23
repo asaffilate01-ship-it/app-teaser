@@ -2,6 +2,7 @@ import { createFileRoute, getRouteApi, Link } from "@tanstack/react-router";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { siteFromMatches, siteHead } from "@/lib/club-site-query";
 import { readSponsors, siteSchedule, siteTables } from "@/lib/club-site";
+import { JoinClubForm } from "@/components/site/JoinClubForm";
 import { LeagueTableView, LiveCard, PhotoGrid, PostCard, ResultRow, SectionHead, UpcomingRow } from "@/components/site/SiteParts";
 
 const layoutRoute = getRouteApi("/club/$slug");
@@ -37,8 +38,8 @@ function ClubHome() {
             <Link to="/club/$slug/fixtures" params={{ slug }} className="club-button">
               Fixtures and results
             </Link>
-            {contactEmail && (
-              <a href={`mailto:${contactEmail}?subject=${encodeURIComponent(`Joining ${site.name}`)}`} className="club-button club-button-light">
+            {site.kind !== "league" && (
+              <a href="#join" className="club-button club-button-light">
                 Join us
               </a>
             )}
@@ -153,6 +154,7 @@ function ClubHome() {
               )}
             </section>
           )}
+          {site.kind !== "league" && <JoinClubForm slug={slug} clubName={site.name} />}
           {(contactEmail || contactPhone || address) && (
             <section className="club-card" id="contact">
               <SectionHead title="Find us and get in touch" />

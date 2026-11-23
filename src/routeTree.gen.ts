@@ -18,6 +18,7 @@ import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PromoRouteImport } from './routes/promo'
+import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as ScreensRouteImport } from './routes/screens'
 import { Route as SponsorDeskRouteImport } from './routes/sponsor-desk'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -83,6 +84,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PromoRoute = PromoRouteImport.update({
   id: '/promo',
   path: '/promo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RankingsRoute = RankingsRouteImport.update({
+  id: '/rankings',
+  path: '/rankings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScreensRoute = ScreensRouteImport.update({
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/promo': typeof PromoRoute
+  '/rankings': typeof RankingsRoute
   '/screens': typeof ScreensRoute
   '/sponsor-desk': typeof SponsorDeskRoute
   '/terms': typeof TermsRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/promo': typeof PromoRoute
+  '/rankings': typeof RankingsRoute
   '/screens': typeof ScreensRoute
   '/sponsor-desk': typeof SponsorDeskRoute
   '/terms': typeof TermsRoute
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/promo': typeof PromoRoute
+  '/rankings': typeof RankingsRoute
   '/screens': typeof ScreensRoute
   '/sponsor-desk': typeof SponsorDeskRoute
   '/terms': typeof TermsRoute
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/promo'
+    | '/rankings'
     | '/screens'
     | '/sponsor-desk'
     | '/terms'
@@ -331,6 +341,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/promo'
+    | '/rankings'
     | '/screens'
     | '/sponsor-desk'
     | '/terms'
@@ -362,6 +373,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/promo'
+    | '/rankings'
     | '/screens'
     | '/sponsor-desk'
     | '/terms'
@@ -395,6 +407,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   PromoRoute: typeof PromoRoute
+  RankingsRoute: typeof RankingsRoute
   ScreensRoute: typeof ScreensRoute
   SponsorDeskRoute: typeof SponsorDeskRoute
   TermsRoute: typeof TermsRoute
@@ -476,6 +489,13 @@ declare module '@tanstack/react-router' {
       path: '/promo'
       fullPath: '/promo'
       preLoaderRoute: typeof PromoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rankings': {
+      id: '/rankings'
+      path: '/rankings'
+      fullPath: '/rankings'
+      preLoaderRoute: typeof RankingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/screens': {
@@ -668,6 +688,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   PromoRoute: PromoRoute,
+  RankingsRoute: RankingsRoute,
   ScreensRoute: ScreensRoute,
   SponsorDeskRoute: SponsorDeskRoute,
   TermsRoute: TermsRoute,

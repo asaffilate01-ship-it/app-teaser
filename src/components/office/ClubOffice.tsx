@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Banknote, Car, Coins, ClipboardList, Gavel, HandHeart, KeyRound, LoaderCircle, MapPin, Shirt, UsersRound } from "lucide-react";
+import { Banknote, Car, Coins, ClipboardList, Gavel, HandHeart, History, KeyRound, LoaderCircle, MapPin, Shirt, UserPlus, UsersRound } from "lucide-react";
 import { can } from "@/lib/platform";
 import type { PlatformRole } from "@/lib/platform";
 import type { PlatformDashboardData } from "@/lib/platform-cloud";
@@ -16,6 +16,7 @@ import { AdEarningsPanel } from "./AdEarningsPanel";
 import { ClubPromosPanel } from "./ClubPromosPanel";
 import { UmpiresPanel } from "./UmpiresPanel";
 import { VolunteersPanel } from "./VolunteersPanel";
+import { ActivityPanel, PeoplePanel } from "./PeoplePanel";
 import type { OfficeProps } from "./ui";
 
 const tabs = [
@@ -27,8 +28,10 @@ const tabs = [
   ["store", "Kit and shop", Shirt],
   ["volunteers", "Volunteers", HandHeart],
   ["umpires", "Umpires", Gavel],
+  ["people", "Join requests", UserPlus],
   ["ads", "Ad earnings", Coins],
   ["access", "Access", KeyRound],
+  ["activity", "Activity", History],
 ] as const;
 type Tab = (typeof tabs)[number][0];
 
@@ -113,6 +116,8 @@ export function ClubOffice({ organisationId, role, club }: { organisationId: str
             </div>
           )}
           {tab === "access" && <AccessPanel {...props} />}
+          {tab === "people" && <PeoplePanel key={organisationId} {...props} />}
+          {tab === "activity" && <ActivityPanel key={organisationId} {...props} />}
         </div>
       )}
     </div>

@@ -9,8 +9,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type ChangeEvent,
-  type PointerEvent,
 } from "react";
 import {
   Activity,
@@ -18,7 +16,6 @@ import {
   Columns3,
   Footprints,
   MoveHorizontal,
-  Camera,
   Check,
   ChevronRight,
   CircleDot,
@@ -26,19 +23,15 @@ import {
   Cloud,
   CloudOff,
   Download,
-  FileVideo,
   Flag,
   History,
   ListPlus,
   MoreHorizontal,
-  Pause,
   Play,
   Plus,
   RotateCcw,
   Save,
   ShieldCheck,
-  SkipBack,
-  SkipForward,
   Sparkles,
   Trash2,
   Undo2,
@@ -75,6 +68,7 @@ import { InstallBanner } from "@/components/app-shell/InstallApp";
 import { RetirePanel, SquadPanel, SubstitutePanel, TossPanel, WorkloadPanel } from "@/components/scorer/MatchTools";
 import { BallSpeedTool } from "@/components/scorer/BallSpeedTool";
 import { BallTrackChart, BallTrackPad } from "@/components/scorer/BallTrack";
+import { VideoLab } from "@/components/video/VideoLab";
 import { bowlingTypeSplits, phaseSplits, type SplitRow } from "@/lib/phase-splits";
 import { ballByBallCsv, downloadCsv, scorecardCsv } from "@/lib/stats-export";
 import { FixBallPanel } from "@/components/scorer/FixBall";
@@ -2658,217 +2652,6 @@ function Analysis({ match }: { match: CricketMatch }) {
           ))}
         </div>
       </div>
-    </section>
-  );
-}
-
-interface VideoAngle {
-  id: string;
-  name: string;
-  url: string;
-}
-
-function VideoLab() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const anglesRef = useRef<VideoAngle[]>([]);
-  const [angles, setAngles] = useState<VideoAngle[]>([]);
-  const [activeId, setActiveId] = useState("");
-  const [playing, setPlaying] = useState(false);
-  const [rate, setRate] = useState(0.5);
-  const [zoom, setZoom] = useState(1);
-  const drawing = useRef(false);
-  const active = angles.find((angle) => angle.id === activeId);
-
-  const addVideos = (event: ChangeEvent<HTMLInputElement>) => {
-    const additions = Array.from(event.target.files ?? []).map((file, index) => ({
-      id: `${file.name}-${file.lastModified}-${index}`,
-      name: file.name,
-      url: URL.createObjectURL(file),
-    }));
-    setAngles((current) => [...current, ...additions]);
-    if (!activeId && additions[0]) setActiveId(additions[0].id);
-  };
-
-  useEffect(() => {
-    anglesRef.current = angles;
-  }, [angles]);
-
-  useEffect(
-    () => () => {
-      anglesRef.current.forEach((angle) => URL.revokeObjectURL(angle.url));
-    },
-    [],
-  );
-
-  const seekFrames = (frames: number) => {
-    if (videoRef.current)
-      videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime + frames / 30);
-  };
-
-  const canvasPoint = (event: PointerEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current!;
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: ((event.clientX - rect.left) / rect.width) * canvas.width,
-      y: ((event.clientY - rect.top) / rect.height) * canvas.height,
-    };
-  };
-
-  const startDraw = (event: PointerEvent<HTMLCanvasElement>) => {
-    drawing.current = true;
-    const point = canvasPoint(event);
-    const context = canvasRef.current?.getContext("2d");
-    context?.beginPath();
-    context?.moveTo(point.x, point.y);
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-  const draw = (event: PointerEvent<HTMLCanvasElement>) => {
-    if (!drawing.current) return;
-    const point = canvasPoint(event);
-    const context = canvasRef.current?.getContext("2d");
-    if (!context) return;
-    context.strokeStyle = "#fbbf24";
-    context.lineWidth = 5;
-    context.lineCap = "round";
-    context.lineTo(point.x, point.y);
-    context.stroke();
-  };
-  const clearDrawing = () => canvasRef.current?.getContext("2d")?.clearRect(0, 0, 1280, 720);
-
-  return (
-    <section className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-300">
-            Coaching review
-          </p>
-          <h2 className="font-display text-3xl font-bold">Multi-angle video lab</h2>
-        </div>
-        <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-amber-300 px-5 text-xs font-extrabold uppercase tracking-wider text-gold-foreground">
-          <Camera className="size-4" /> Add angle
-          <input
-            type="file"
-            accept="video/*"
-            multiple
-            capture="environment"
-            onChange={addVideos}
-            className="sr-only"
-          />
-        </label>
-      </div>
-      {active ? (
-        <>
-          <div className="flex flex-wrap gap-2">
-            {angles.map((angle, index) => (
-              <button
-                key={angle.id}
-                type="button"
-                onClick={() => setActiveId(angle.id)}
-                className={`rounded-full px-4 py-2 text-xs font-bold ${angle.id === activeId ? "bg-fuchsia-500 text-primary-foreground" : "border border-white/10 text-slate-400"}`}
-              >
-                Angle {index + 1}
-              </button>
-            ))}
-          </div>
-          <div className="overflow-hidden rounded-3xl border border-white/10 bg-black">
-            <div className="relative aspect-video overflow-hidden">
-              <video
-                ref={videoRef}
-                key={active.url}
-                src={active.url}
-                onPlay={() => setPlaying(true)}
-                onPause={() => setPlaying(false)}
-                className="size-full object-contain transition-transform"
-                style={{ transform: `scale(${zoom})` }}
-                playsInline
-              />
-              <canvas
-                ref={canvasRef}
-                width={1280}
-                height={720}
-                onPointerDown={startDraw}
-                onPointerMove={draw}
-                onPointerUp={() => {
-                  drawing.current = false;
-                }}
-                className="absolute inset-0 size-full touch-none"
-              />
-            </div>
-            <div className="flex flex-wrap items-center gap-2 border-t border-white/10 p-3">
-              <button
-                type="button"
-                onClick={() => seekFrames(-1)}
-                className="video-control"
-                aria-label="Previous frame"
-              >
-                <SkipBack className="size-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  videoRef.current?.paused ? videoRef.current?.play() : videoRef.current?.pause()
-                }
-                className="video-control"
-              >
-                {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
-              </button>
-              <button
-                type="button"
-                onClick={() => seekFrames(1)}
-                className="video-control"
-                aria-label="Next frame"
-              >
-                <SkipForward className="size-4" />
-              </button>
-              <select
-                value={rate}
-                onChange={(event) => {
-                  const next = Number(event.target.value);
-                  setRate(next);
-                  if (videoRef.current) videoRef.current.playbackRate = next;
-                }}
-                className="h-9 rounded-full border border-white/10 bg-card px-3 text-xs"
-              >
-                <option value={0.25}>0.25×</option>
-                <option value={0.5}>0.5×</option>
-                <option value={1}>1×</option>
-                <option value={2}>2×</option>
-              </select>
-              <label className="ml-auto flex items-center gap-2 text-xs text-slate-400">
-                Zoom
-                <input
-                  type="range"
-                  min="1"
-                  max="3"
-                  step="0.1"
-                  value={zoom}
-                  onChange={(event) => setZoom(Number(event.target.value))}
-                  className="w-24 accent-amber-300"
-                />
-              </label>
-              <button
-                type="button"
-                onClick={clearDrawing}
-                className="video-control"
-                aria-label="Clear drawing"
-              >
-                <Trash2 className="size-4" />
-              </button>
-            </div>
-          </div>
-          <p className="text-xs text-slate-500">
-            Videos remain on this device in this preview. Frame stepping assumes 30 fps; exact
-            source-frame metadata and synchronized remote phones require the cloud capture service.
-          </p>
-        </>
-      ) : (
-        <EmptyState
-          icon={FileVideo}
-          title="Add one or more phone angles"
-          body="Record or choose videos, change angle, slow playback, step forward or back, zoom and draw directly over the action."
-        />
-      )}
     </section>
   );
 }

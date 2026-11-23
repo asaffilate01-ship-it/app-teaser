@@ -77,3 +77,24 @@ test("spreadsheet cells can't run as formulas", () => {
   assert.equal(csvCell("-3"), "-3");
   assert.equal(csvCell('Ali "the wall"'), '"Ali ""the wall"""');
 });
+
+import { comparePlayers, economy, rankPlayers, rankingPoints } from "../src/lib/rankings.ts";
+
+test("ranking points: a run is 1, a wicket 20, a catch 10", () => {
+  assert.equal(rankingPoints({ runs: 50, wickets: 2, catches: 1 }), 100);
+});
+
+test("economy ranking ignores bowlers with under 60 balls and puts the cheapest first", () => {
+  const rows = [
+    { ref: "a", ballsBowled: 30, runsConceded: 5 },
+    { ref: "b", ballsBowled: 120, runsConceded: 160 },
+    { ref: "c", ballsBowled: 120, runsConceded: 100 },
+  ];
+  assert.deepEqual(rankPlayers(rows, "economy").map((r) => r.ref), ["c", "b"]);
+  assert.equal(economy(rows[2]!), 5);
+});
+
+test("compare marks the lower economy as better", () => {
+  const line = comparePlayers({ ballsBowled: 60, runsConceded: 40 }, { ballsBowled: 60, runsConceded: 60 }).find((l) => l.label === "Economy")!;
+  assert.equal(line.better, "a");
+});

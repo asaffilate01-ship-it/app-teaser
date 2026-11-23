@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/app-shell/AppHeader";
 import { GoogleButton } from "@/components/app-shell/GoogleButton";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { Empty, OfficeCard, OfficeField, Pill, day, when } from "@/components/office/ui";
+import { MyMatchRecords } from "@/components/umpire/UmpireReports";
 import {
   addDays,
   appointmentStatusLabels,
@@ -239,6 +240,8 @@ function Dashboard({ data, act }: { data: MyUmpireData; act: Act }) {
       </OfficeCard>
 
       <Availability data={data} act={act} />
+
+      <MyMatchRecords appointments={data.appointments} act={act} />
 
       <OfficeCard title="Payments" description="Claim travel after each match. Clubs pay by transfer and record the reference here.">
         {toClaim.length === 0 && thisYear.filter((row) => row.payment_status === "paid").length === 0 ? (

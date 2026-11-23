@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { CalendarCheck, Coins, Gavel, LoaderCircle, Plus, Settings2, UserPlus, Users } from "lucide-react";
+import { CalendarCheck, ClipboardCheck, Coins, Gavel, LoaderCircle, Plus, Settings2, UserPlus, Users } from "lucide-react";
 import { can } from "@/lib/platform";
 import {
   appointmentStatusLabels,
@@ -24,8 +24,9 @@ import {
 } from "@/lib/umpires";
 import { friendlyUmpire, loadUmpirePanel, umpireOffice, type AppointmentRow, type UmpirePanelData, type UmpireRow } from "@/lib/umpires-cloud";
 import { Empty, OfficeCard, OfficeField, Pill, currencies, day, fromLocal, when, type OfficeProps } from "./ui";
+import { UmpireReportsDesk } from "@/components/umpire/UmpireReports";
 
-type View = "appointments" | "panel" | "payments" | "rules";
+type View = "appointments" | "panel" | "payments" | "rules" | "reports";
 type Act = (action: () => Promise<void>, done?: string) => Promise<boolean>;
 
 interface Slot {
@@ -106,7 +107,7 @@ export function UmpiresPanel({ organisationId, role, club }: OfficeProps) {
   const views: [View, string, typeof Gavel][] = [
     ...(manager ? ([["appointments", "Appointments", CalendarCheck], ["panel", "Panel", Users]] as [View, string, typeof Gavel][]) : []),
     ["payments", "Payments", Coins],
-    ...(manager ? ([["rules", "Rules", Settings2]] as [View, string, typeof Gavel][]) : []),
+    ...(manager ? ([["reports", "Reports", ClipboardCheck], ["rules", "Rules", Settings2]] as [View, string, typeof Gavel][]) : []),
   ];
 
   if (error && !data)
@@ -149,6 +150,7 @@ export function UmpiresPanel({ organisationId, role, club }: OfficeProps) {
       {view === "appointments" && manager && <Appointments data={data} club={club} organisationId={organisationId} act={act} />}
       {view === "panel" && manager && <Panel data={data} club={club} organisationId={organisationId} act={act} />}
       {view === "payments" && <Payments data={data} manager={manager} act={act} />}
+      {view === "reports" && manager && <UmpireReportsDesk organisationId={organisationId} umpires={data.umpires} appointments={data.appointments} act={act} />}
       {view === "rules" && manager && <Rules data={data} organisationId={organisationId} act={act} />}
     </div>
   );

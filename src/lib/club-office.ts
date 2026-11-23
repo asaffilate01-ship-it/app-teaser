@@ -72,10 +72,11 @@ export function maxPayment(charge: ChargeLike): number {
   return charge.status === "waived" ? 0 : Math.max(0, charge.amountMinor - charge.paidMinor);
 }
 
-export type Availability = "available" | "unavailable" | "maybe";
+/** "waitlist" is set by the database when an event's places are full. */
+export type Availability = "available" | "unavailable" | "maybe" | "waitlist";
 
 export function availabilitySummary(playerIds: string[], answers: Map<string, Availability>) {
-  const summary = { available: 0, maybe: 0, unavailable: 0, noReply: [] as string[] };
+  const summary = { available: 0, maybe: 0, unavailable: 0, waitlist: 0, noReply: [] as string[] };
   for (const id of playerIds) {
     const answer = answers.get(id);
     if (answer) summary[answer] += 1;
@@ -190,3 +191,28 @@ export const transferMethods = [
   ["bkash", "bKash"],
   ["other", "Other"],
 ] as const;
+
+/** A calendar file (.ics) for one event, so players can add it to their phone's calendar. */
+export function eventIcs(event: { id: string; title: string; starts_at: string; ends_at?: string | null; location?: string | null; notes?: string | null }, now = new Date()): string {
+  const stamp = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const escape = (text: string) => text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  const end = event.ends_at ?? new Date(new Date(event.starts_at).getTime() + 3 * 3_600_000).toISOString();
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//CricLume//Club events//EN",
+    "BEGIN:VEVENT",
+    `UID:${event.id}@criclume.com`,
+    `DTSTAMP:${stamp(now.toISOString())}`,
+    `DTSTART:${stamp(event.starts_at)}`,
+    `DTEND:${stamp(end)}`,
+    `SUMMARY:${escape(event.title)}`,
+    ...(event.location ? [`LOCATION:${escape(event.location)}`] : []),
+    ...(event.notes ? [`DESCRIPTION:${escape(event.notes)}`] : []),
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+}
+
+/** Replies close at the deadline (managers can still change them). */
+export const repliesClosed = (replyBy: string | null | undefined, now = Date.now()) => Boolean(replyBy && new Date(replyBy).getTime() < now);

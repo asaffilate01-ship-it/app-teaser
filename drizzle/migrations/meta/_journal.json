@@ -288,6 +288,20 @@
       "when": 1795449967106,
       "tag": "0040_gaps_club_admin_comms",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1795450674280,
+      "tag": "0041_historic_player_stats",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1795450858435,
+      "tag": "0042_league_desk_lookups",
+      "breakpoints": true
     }
   ]
 }

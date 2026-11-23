@@ -3,6 +3,7 @@ import type { CricketMatch } from "@/lib/cricket";
 import { teamInitials } from "@/lib/match-broadcast";
 import { playerProfile, type BadgeKind } from "@/lib/player-profile";
 import { figures } from "@/lib/season-stats";
+import { PlayerExtras, ShareAwardButton } from "@/components/league/PlayerExtras";
 
 const badgeIcon: Record<BadgeKind, typeof Award> = {
   fifty: Star,
@@ -132,6 +133,7 @@ export function PlayerProfileView({
                       <small className="block truncate text-xs text-slate-400">{badge.detail}</small>
                     </span>
                     {badge.date && <span className="text-[11px] text-slate-500">{shortDate(badge.date)}</span>}
+                    <ShareAwardButton title={badge.label} detail={badge.detail} playerName={profile.name} team={profile.team} date={badge.date ? shortDate(badge.date) : undefined} />
                   </li>
                 );
               })}
@@ -141,6 +143,7 @@ export function PlayerProfileView({
           )}
         </article>
       </div>
+      <PlayerExtras playerId={playerId} playerName={profile.name} />
     </section>
   );
 }

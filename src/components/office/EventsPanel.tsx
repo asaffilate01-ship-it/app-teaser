@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
-import { CalendarPlus } from "lucide-react";
+import { CalendarCheck, CalendarPlus } from "lucide-react";
 import { can } from "@/lib/platform";
-import { availabilitySummary, type Availability } from "@/lib/club-office";
+import { availabilitySummary, eventIcs, repliesClosed, type Availability } from "@/lib/club-office";
 import { office, type ClubEvent } from "@/lib/club-office-cloud";
 import { Empty, OfficeCard, OfficeField, Pill, fromLocal, nameOfPlayer, upcoming, when, type OfficeProps } from "./ui";
 
@@ -14,7 +14,17 @@ const kinds = [
   ["other", "Other"],
 ] as const;
 
-const answerLabels: Record<Availability, string> = { available: "Available", maybe: "Maybe", unavailable: "Can't make it" };
+const answerLabels: Record<Availability, string> = { available: "Available", maybe: "Maybe", unavailable: "Can't make it", waitlist: "Waiting list" };
+const choices = ["available", "maybe", "unavailable"] as const;
+
+function addToCalendar(event: ClubEvent) {
+  const url = URL.createObjectURL(new Blob([eventIcs(event)], { type: "text/calendar" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${event.title.replace(/[^\w-]+/g, "-").slice(0, 60)}.ics`;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 export function squadFor(event: ClubEvent, club: OfficeProps["club"]): string[] {
   if (event.team_id) {
@@ -41,6 +51,7 @@ export function EventsPanel(props: OfficeProps) {
         const summary = availabilitySummary(squad, answers);
         const mine = data.myPlayerIds.filter((id) => squad.includes(id) || !event.team_id);
         const team = club.teams.find((item) => item.id === event.team_id);
+        const closed = !event.availability_open || (!manager && repliesClosed(event.reply_by));
         return (
           <OfficeCard
             key={event.id}
@@ -49,19 +60,25 @@ export function EventsPanel(props: OfficeProps) {
             action={<Pill>{kinds.find(([value]) => value === event.kind)?.[1] ?? event.kind}</Pill>}
           >
             {event.notes && <p className="office-meta mb-3">{event.notes}</p>}
+            <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+              {event.reply_by && <Pill tone={repliesClosed(event.reply_by) ? "bad" : "warn"}>Reply by {when(event.reply_by)}</Pill>}
+              {event.squad_cap && <Pill>{summary.available}/{event.squad_cap} places{summary.waitlist ? ` · ${summary.waitlist} waiting` : ""}</Pill>}
+              <button type="button" className="app-chip-button" onClick={() => addToCalendar(event)}><CalendarCheck className="size-3.5" /> Add to calendar</button>
+            </div>
             {mine.length > 0 && (
               <div className="mb-3 space-y-2">
                 {mine.map((playerId) => (
                   <div key={playerId} className="office-row">
                     <span className="font-bold">{nameOfPlayer(club, playerId)}</span>
                     <span className="flex flex-wrap gap-1.5">
-                      {(Object.keys(answerLabels) as Availability[]).map((status) => (
+                      {answers.get(playerId) === "waitlist" && <Pill tone="warn">On the waiting list</Pill>}
+                      {choices.map((status) => (
                         <button
                           key={status}
                           type="button"
                           className="office-choice"
                           aria-pressed={answers.get(playerId) === status}
-                          disabled={!event.availability_open}
+                          disabled={closed}
                           onClick={() =>
                             void act(() => office.answer({ organisationId, eventId: event.id, playerId, status }), "Answer saved")
                           }
@@ -72,7 +89,7 @@ export function EventsPanel(props: OfficeProps) {
                     </span>
                   </div>
                 ))}
-                {!event.availability_open && <p className="office-meta">Answers are closed for this event.</p>}
+                {closed && <p className="office-meta">Answers are closed for this event.</p>}
               </div>
             )}
             {manager && (
@@ -81,6 +98,7 @@ export function EventsPanel(props: OfficeProps) {
                   <Pill tone="good">{summary.available} available</Pill>
                   <Pill tone="warn">{summary.maybe} maybe</Pill>
                   <Pill tone="bad">{summary.unavailable} can't</Pill>
+                  {summary.waitlist > 0 && <Pill tone="warn">{summary.waitlist} waiting</Pill>}
                   <Pill>{summary.noReply.length} no reply</Pill>
                   <button type="button" className="app-chip-button" onClick={() => setOpen(open === event.id ? null : event.id)}>
                     {open === event.id ? "Hide answers" : "See answers"}
@@ -111,7 +129,7 @@ export function EventsPanel(props: OfficeProps) {
                         <div key={playerId} className="office-row">
                           <span>{nameOfPlayer(club, playerId)}</span>
                           {answer ? (
-                            <Pill tone={answer === "available" ? "good" : answer === "maybe" ? "warn" : "bad"}>{answerLabels[answer]}</Pill>
+                            <Pill tone={answer === "available" ? "good" : answer === "maybe" || answer === "waitlist" ? "warn" : "bad"}>{answerLabels[answer]}</Pill>
                           ) : (
                             <Pill>No reply</Pill>
                           )}
@@ -137,6 +155,8 @@ function NewEvent({ club, organisationId, act }: OfficeProps) {
   const [endsAt, setEndsAt] = useState("");
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
+  const [replyBy, setReplyBy] = useState("");
+  const [cap, setCap] = useState("");
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     const start = fromLocal(startsAt);
@@ -152,6 +172,8 @@ function NewEvent({ club, organisationId, act }: OfficeProps) {
           ends_at: fromLocal(endsAt),
           location: location.trim() || null,
           notes: notes.trim() || null,
+          reply_by: fromLocal(replyBy),
+          squad_cap: cap ? Math.min(200, Math.max(1, Number(cap))) : null,
         }),
       "Event added — players and parents can now answer",
     );
@@ -193,6 +215,12 @@ function NewEvent({ club, organisationId, act }: OfficeProps) {
         </OfficeField>
         <OfficeField label="Where">
           <input maxLength={200} className="scorer-input" value={location} onChange={(event) => setLocation(event.target.value)} />
+        </OfficeField>
+        <OfficeField label="Reply by (optional)">
+          <input type="datetime-local" className="scorer-input" value={replyBy} onChange={(event) => setReplyBy(event.target.value)} />
+        </OfficeField>
+        <OfficeField label="Places (optional)">
+          <input inputMode="numeric" className="scorer-input" value={cap} onChange={(event) => setCap(event.target.value.replace(/\D/g, ""))} placeholder="e.g. 14 — then a waiting list" />
         </OfficeField>
         <OfficeField label="Notes" className="sm:col-span-2">
           <input maxLength={1000} className="scorer-input" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Whites, arrive 45 minutes early" />

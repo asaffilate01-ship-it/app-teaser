@@ -3628,6 +3628,90 @@ export type Database = {
           },
         ]
       }
+      historic_player_stats: {
+        Row: {
+          balls_bowled: number
+          balls_faced: number
+          catches: number
+          created_at: string
+          fours: number
+          high_score: number | null
+          id: string
+          imported_by: string | null
+          innings: number
+          matches: number
+          not_outs: number
+          organisation_id: string
+          player_id: string
+          runs: number
+          runs_conceded: number
+          season: string
+          sixes: number
+          source: string
+          stumpings: number
+          wickets: number
+        }
+        Insert: {
+          balls_bowled?: number
+          balls_faced?: number
+          catches?: number
+          created_at?: string
+          fours?: number
+          high_score?: number | null
+          id?: string
+          imported_by?: string | null
+          innings?: number
+          matches?: number
+          not_outs?: number
+          organisation_id: string
+          player_id: string
+          runs?: number
+          runs_conceded?: number
+          season: string
+          sixes?: number
+          source?: string
+          stumpings?: number
+          wickets?: number
+        }
+        Update: {
+          balls_bowled?: number
+          balls_faced?: number
+          catches?: number
+          created_at?: string
+          fours?: number
+          high_score?: number | null
+          id?: string
+          imported_by?: string | null
+          innings?: number
+          matches?: number
+          not_outs?: number
+          organisation_id?: string
+          player_id?: string
+          runs?: number
+          runs_conceded?: number
+          season?: string
+          sixes?: number
+          source?: string
+          stumpings?: number
+          wickets?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historic_player_stats_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historic_player_stats_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       innings: {
         Row: {
           batting_team_id: string
@@ -6882,6 +6966,14 @@ export type Database = {
         Returns: boolean
       }
       fixture_results_inbox: { Args: { p_org: string }; Returns: Json }
+      fixture_umpires_for_marks: {
+        Args: { p_fixture: string }
+        Returns: {
+          display_name: string
+          position: string
+          umpire_id: string
+        }[]
+      }
       get_club_site: { Args: { p_slug: string }; Returns: Json }
       get_ground_screen: { Args: { p_slug: string }; Returns: Json }
       get_ground_screen_names: { Args: { p_slug: string }; Returns: Json }
@@ -6957,6 +7049,14 @@ export type Database = {
       is_umpire_manager: { Args: { p_org: string }; Returns: boolean }
       is_umpire_payer: { Args: { p_org: string }; Returns: boolean }
       league_links: { Args: { p_org: string }; Returns: Json }
+      league_member_players: {
+        Args: { p_club: string; p_league: string }
+        Returns: {
+          display_name: string
+          id: string
+          is_junior: boolean
+        }[]
+      }
       link_my_umpire_profiles: { Args: never; Returns: number }
       list_bookable_grounds: {
         Args: never

@@ -51,11 +51,15 @@ import {
   Gauge,
   Globe,
   Briefcase,
+  ClipboardCheck,
+  Dumbbell,
   GraduationCap,
   LoaderCircle,
   LockKeyhole,
   Mail,
   MapPin,
+  Megaphone,
+  MessageSquare,
   Plus,
   Radio,
   RefreshCw,
@@ -87,6 +91,10 @@ import { StreamGuide } from "@/components/club/StreamGuide";
 import { toast } from "sonner";
 import { embedCode } from "@/lib/embed-code";
 import { ClubOffice } from "@/components/office/ClubOffice";
+import { TrainingHub } from "@/components/training/TrainingHub";
+import { TeamChat } from "@/components/messages/TeamChat";
+import { LeagueDesk } from "@/components/leaguedesk/LeagueDesk";
+import { LookingForBoard } from "@/components/board/LookingForBoard";
 import { rainMethods } from "@/lib/rain-rules";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
 import { useCloudSession } from "@/hooks/use-cloud-session";
@@ -140,6 +148,10 @@ export const Route = createFileRoute("/platform")({
 type PlatformTab =
   | "overview"
   | "office"
+  | "training"
+  | "messages"
+  | "leaguedesk"
+  | "board"
   | "competitions"
   | "league"
   | "website"
@@ -155,6 +167,10 @@ type RunAction = <T>(action: () => Promise<T>) => Promise<T>;
 const tabDefinitions: Array<[PlatformTab, LucideIcon, string]> = [
   ["overview", Gauge, "Overview"],
   ["office", Briefcase, "Club office"],
+  ["training", Dumbbell, "Training"],
+  ["messages", MessageSquare, "Messages"],
+  ["leaguedesk", ClipboardCheck, "Registrations"],
+  ["board", Megaphone, "Looking for"],
   ["competitions", Trophy, "Competitions"],
   ["league", Radio, "League hub"],
   ["website", Globe, "Website"],
@@ -756,6 +772,18 @@ function OperationalPlatform({
                 role={membership.role}
                 club={dashboard.data}
               />
+            )}
+            {tab === "training" && (
+              <TrainingHub key={membership.organisationId} organisationId={membership.organisationId} role={membership.role} club={dashboard.data} />
+            )}
+            {tab === "messages" && (
+              <TeamChat key={membership.organisationId} organisationId={membership.organisationId} role={membership.role} club={dashboard.data} />
+            )}
+            {tab === "leaguedesk" && (
+              <LeagueDesk key={membership.organisationId} organisationId={membership.organisationId} role={membership.role} kind={membership.organisationKind} club={dashboard.data} />
+            )}
+            {tab === "board" && (
+              <LookingForBoard key={membership.organisationId} organisationId={membership.organisationId} organisationName={membership.organisationName} role={membership.role} />
             )}
             {tab === "competitions" && (
               <Competitions

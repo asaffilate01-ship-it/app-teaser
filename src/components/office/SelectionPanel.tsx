@@ -48,7 +48,7 @@ export function SelectionPanel(props: OfficeProps) {
     sideSize,
   );
   const squad = [...squadFor(event, club)].sort((a, b) => {
-    const rank = (id: string) => ({ available: 0, maybe: 1, unavailable: 3 })[answers.get(id) ?? "maybe"] ?? 2;
+    const rank = (id: string) => ({ available: 0, maybe: 1, waitlist: 1, unavailable: 3 })[answers.get(id) ?? "maybe"] ?? 2;
     return rank(a) - rank(b);
   });
   return (
