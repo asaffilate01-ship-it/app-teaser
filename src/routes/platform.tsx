@@ -2319,7 +2319,7 @@ function Operations({
           )}
           {!data.subscription?.hasBillingAccount && !priceId && (
             <p className="mt-3 text-[11px] text-amber-200">
-              Set VITE_STRIPE_PRICE_CLUB before enabling checkout.
+              Online checkout isn't switched on yet.
             </p>
           )}
         </Panel>

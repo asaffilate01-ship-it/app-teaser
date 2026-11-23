@@ -241,7 +241,7 @@ function CameraDirector() {
     }
   };
 
-  if (!isCloudConfigured()) return <DirectorGate text="CricLume Cloud must be configured." />;
+  if (!isCloudConfigured()) return <DirectorGate text="Camera control is briefly unavailable. Please refresh in a moment." />;
   if (loading) return <DirectorGate text="Checking camera director access…" />;
   if (!session) {
     const signIn = (event: FormEvent) => {

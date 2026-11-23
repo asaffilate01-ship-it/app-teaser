@@ -25,7 +25,10 @@ function GroundScreen() {
   const [missing, setMissing] = useState(false);
 
   useEffect(() => {
-    if (!isCloudConfigured()) return;
+    if (!isCloudConfigured()) {
+      setMissing(true);
+      return;
+    }
     let active = true;
     const load = async () => {
       const { data, error } = await getCloudClient().rpc("get_public_scoreboard", { p_slug: slug });

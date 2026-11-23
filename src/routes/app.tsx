@@ -190,7 +190,7 @@ export function CricketApp() {
     if (!cloudSession.configured) {
       setCloudBootstrap({
         status: "error",
-        message: "CricLume Cloud has not been configured for this deployment.",
+        message: "CricLume Cloud is briefly unavailable. Your scoring is saved on this device.",
       });
       return;
     }

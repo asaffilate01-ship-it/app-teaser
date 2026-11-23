@@ -88,7 +88,7 @@ export function getCloudClient(): SupabaseClient {
   const configuration = cloudConfiguration();
   if (!configuration) {
     throw new Error(
-      "CricLume Cloud is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.",
+      "CricLume Cloud is briefly unavailable. Please refresh in a moment.",
     );
   }
   // Share the generated Lovable Cloud client so Google sign-in, email links and
@@ -590,7 +590,7 @@ export async function uploadVideoResumably(input: {
   onProgress?: (uploaded: number, total: number) => void;
 }): Promise<string> {
   const configuration = cloudConfiguration();
-  if (!configuration) throw new Error("CricLume Cloud is not configured.");
+  if (!configuration) throw new Error("CricLume Cloud is briefly unavailable. Please refresh in a moment.");
   const { data } = await getCloudClient().auth.getSession();
   if (!data.session) throw new Error("Sign in before uploading video.");
   const extension = input.contentType.includes("mp4") ? "mp4" : "webm";

@@ -663,7 +663,7 @@ function MatchCamera() {
   if (!configured)
     return (
       <CameraMessage
-        title="Camera cloud not configured"
+        title="Live cameras unavailable"
         detail="Live cameras aren't switched on for this club yet. Ask your club admin to finish setup."
       />
     );
