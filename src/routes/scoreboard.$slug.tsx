@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MatchAlerts } from "@/components/scoreboard/MatchAlerts";
+import { FanVote } from "@/components/scoreboard/FanVote";
 import { PromoSlot } from "@/components/promo/PromoSlot";
 import { usePromos } from "@/hooks/use-promos";
 import { useEffect, useState } from "react";
@@ -71,6 +72,7 @@ interface ScoreboardData {
     followOn?: boolean;
     days?: { current?: number; atStumps?: boolean } | null;
     result?: string | null;
+    toss?: { winnerIsHome: boolean; decision: "bat" | "bowl" } | null;
   };
   updatedAt: string;
   sponsor?: { name?: string };
@@ -167,13 +169,17 @@ function PublicScoreboard() {
         : (state.settings?.oversPerInnings ?? null);
   const chase = chaseState(state.target ?? null, runs, legalBalls, oversLimit, ballsPerOver);
   const isLive = scoreboard.status === "live" || scoreboard.status === "innings_break";
+  const tossLine =
+    state.toss && (state.inningsNumber ?? 1) === 1 && legalBallsFromOvers(state.overs, ballsPerOver) < 12
+      ? `${(state.toss.winnerIsHome ? scoreboard.homeTeam : scoreboard.awayTeam).name} won the toss and chose to ${state.toss.decision}`
+      : null;
   const ribbon = state.result
     ? state.result
     : chase && chase.runsNeeded > 0
       ? `${batting.name} need ${chase.runsNeeded} ${chase.runsNeeded === 1 ? "run" : "runs"}${chase.ballsLeft != null ? ` from ${chase.ballsLeft} balls` : ""}`
       : chase
         ? `${batting.name} have reached the target`
-        : (state.message ?? `${batting.name} batting`);
+        : (tossLine ?? state.message ?? `${batting.name} batting`);
   const recent = state.recent ?? [];
   const commentary = state.commentary ?? null;
   const prediction = state.result ? null : predictWin({
@@ -411,6 +417,10 @@ function PublicScoreboard() {
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="mt-4">
+            <FanVote slug={slug} />
           </div>
 
           <p className="scoreboard-muted mt-4 text-center text-[11px]">

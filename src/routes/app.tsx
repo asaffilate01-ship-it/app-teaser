@@ -72,6 +72,9 @@ import { RainPanel } from "@/components/scorer/RainPanel";
 import { DayPanel } from "@/components/scorer/DayPanel";
 import { StoppagePanel } from "@/components/scorer/StoppagePanel";
 import { InstallBanner } from "@/components/app-shell/InstallApp";
+import { RetirePanel, SquadPanel, TossPanel, WorkloadPanel } from "@/components/scorer/MatchTools";
+import { BallSpeedTool } from "@/components/scorer/BallSpeedTool";
+import { canBowlNextOver } from "@/lib/bowling-workload";
 import {
   allowedDismissals,
   canDeclare,
@@ -92,6 +95,9 @@ import {
   summarizeInnings,
   targetForCurrentInnings,
   undoLastDelivery,
+  setPlayerHand,
+  undoRetirement,
+  undoableRetirement,
   type CricketMatch,
   type MatchRules,
   type DeliveryEnd,
@@ -1386,6 +1392,10 @@ function LiveMatch({
         </div>
         {tab === "score" && !cloudConflict && access.recordBalls && (
           <div className="mt-5 space-y-5">
+            {match.status === "live" && <RetirePanel match={match} onSave={saveAndSync} />}
+            <SquadPanel match={match} onSave={saveAndSync} cloudMatchId={cloudMatchId} />
+            <TossPanel match={match} onSave={saveAndSync} />
+            <WorkloadPanel match={match} onSave={saveAndSync} />
             <MatchPredictorPanel match={match} onSave={saveAndSync} />
             <LiveRulesPanel match={match} onSave={saveAndSync} />
             <RainPanel match={match} onSave={saveAndSync} />
@@ -1397,6 +1407,7 @@ function LiveMatch({
         {tab === "video" && (
           <div className="space-y-5">
             {cloudMatchId && access.video && <VideoDutyCard matchId={cloudMatchId} />}
+            <BallSpeedTool match={match} onSave={access.recordBalls && !cloudConflict ? saveAndSync : undefined} />
             <VideoLab />
           </div>
         )}
@@ -1487,6 +1498,8 @@ function ScoringPad({
     });
   };
   const recentPositions = recentZones(innings.deliveries);
+  const workloadCheck = canBowlNextOver(match, bowlerId);
+  const workloadNote = workloadCheck?.message ? workloadCheck : null;
 
   const saveBall = (partial: Partial<RecordDeliveryInput>) => {
     const input: RecordDeliveryInput = {
@@ -1733,6 +1746,11 @@ function ScoringPad({
             The bowler and end are set by the bowling & fielding scorer.
           </p>
         )}
+        {workloadNote && (
+          <p role="status" className={`rounded-xl border px-3 py-2 text-xs ${workloadNote.allowed ? "border-amber-300/30 text-amber-200" : "border-rose-400/40 text-rose-200"}`}>
+            {findPlayer(match, bowlerId)?.name ?? "Bowler"}: {workloadNote.message}
+          </p>
+        )}
 
         {bowlingByOther ? (
           <div className="broadcast-panel space-y-3" aria-label="How was the ball played?">
@@ -1753,8 +1771,12 @@ function ScoringPad({
             <ShotZonePicker
               value={fieldZone}
               onChange={chooseZone}
-              leftHanded={Boolean(leftHanders[strikerId])}
-              onHandChange={(left) => setBatterHand(strikerId, left)}
+              leftHanded={Boolean(findPlayer(match, strikerId)?.leftHanded ?? leftHanders[strikerId])}
+              onHandChange={(left) => {
+                setBatterHand(strikerId, left);
+                // Saved on the player too, so wagon wheels flip for them everywhere.
+                onSave(setPlayerHand(match, strikerId, left));
+              }}
               recent={recentPositions}
             />
             <div className="space-y-4">
@@ -1870,12 +1892,17 @@ function ScoringPad({
         <div className="flex flex-wrap justify-center gap-2">
           <button
             type="button"
-            disabled={!innings.deliveries.length}
+            disabled={!innings.deliveries.length || Boolean(undoableRetirement(match))}
             onClick={() => onSave(undoLastDelivery(match), "delivery.voided")}
             className="app-chip-button disabled:opacity-30"
           >
             <Undo2 className="size-4" /> Undo last ball
           </button>
+          {undoableRetirement(match) && (
+            <button type="button" onClick={() => onSave(undoRetirement(match))} className="app-chip-button">
+              <Undo2 className="size-4" /> Undo retirement
+            </button>
+          )}
           <button
             type="button"
             onClick={() => {

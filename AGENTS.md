@@ -46,3 +46,9 @@
 - Away check scorers (`match_check_scorers`/`match_check_flags`, RPCs only, `/check`): `my_match_duties` returns none for them so the DB blocks every score write; public-board ad credit picks the viewer's playing club via `creditedClub()`.
 - Club places: lazy `/public/geo/<CC>.json` (GeoNames, `src/lib/geo.ts`) + free text; team cap = DB `club_team_limit` = `teamLimit()` in plans.ts; leagues/invites only via RPCs (`league_links`, `competition_invites_overview`).
 - Light finish: `src/theme-light.css` (light only, skipped in `.stay-dark`) — no markup changes, dark untouched.
+- Ball speed is measured on the device (`src/lib/ball-speed.ts`: frame differencing along a once-per-camera A→B line, then a straight-line fit); clips are never uploaded and no paid tracking API is used — free, private, works offline.
+- Only `/embed/$slug` may be framed by other sites (`src/lib/frame-policy.ts`, applied in `src/server.ts`); it shows name-free public score data only — every other page keeps `frame-ancestors 'none'`.
+- Toss, retirements, mid-match squad edits, handedness and ball speeds live in the match snapshot (`cricket.ts`); players added to cloud matches go through `add_match_squad_player` first so delivery RPCs accept them.
+- Fan Player of the Match votes are RPC-only (`cast_potm_vote`/`potm_vote_tally`), keyed by refs from `get_ground_screen_names` with a hashed per-phone voter id — no names in liveState.
+- Junior bowling limits (`src/lib/bowling-workload.ts`) are scorer warnings, never blocks; point deductions (`competition_point_adjustments`) change points only, never net run rate.
+- Volunteer jobs: `club_volunteer_jobs`/`club_volunteer_signups`; sign-up only via `volunteer_sign_up`, which enforces places in the DB.

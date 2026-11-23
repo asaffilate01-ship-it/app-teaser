@@ -5,6 +5,7 @@ import { renderErrorPage } from "./lib/error-page";
 import { handleStripeWebhook } from "./lib/stripe-webhook.server";
 import { clubDomainRedirect, isPlatformHost } from "./lib/club-domains";
 import { resolveClubHost } from "./lib/club-domains.server";
+import { frameHeaders } from "./lib/frame-policy";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -37,9 +38,14 @@ const securityHeaders: Record<string, string> = {
   "x-frame-options": "DENY",
 };
 
-function applySecurityHeaders(response: Response): Response {
+function applySecurityHeaders(response: Response, pathname = "/"): Response {
   const headers = new Headers(response.headers);
   for (const [name, value] of Object.entries(securityHeaders)) headers.set(name, value);
+  const frame = frameHeaders(pathname);
+  headers.set("content-security-policy", securityHeaders["content-security-policy"]!.replace("frame-ancestors 'none'", frame.frameAncestors));
+  headers.set("cross-origin-resource-policy", frame.resourcePolicy);
+  if (frame.xFrameOptions) headers.set("x-frame-options", frame.xFrameOptions);
+  else headers.delete("x-frame-options");
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -98,7 +104,7 @@ export default {
       }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return applySecurityHeaders(await normalizeCatastrophicSsrResponse(response));
+      return applySecurityHeaders(await normalizeCatastrophicSsrResponse(response), url.pathname);
     } catch (error) {
       console.error(error);
       return applySecurityHeaders(

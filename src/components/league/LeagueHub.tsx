@@ -15,6 +15,7 @@ import { Streaks } from "@/components/league/Streaks";
 import { QualificationCalculator } from "@/components/league/QualificationCalculator";
 import { PlayerProfileView } from "@/components/league/PlayerProfileView";
 import { AwardsBoard } from "@/components/league/AwardsBoard";
+import { PointAdjustments } from "@/components/league/PointAdjustments";
 import { ScoutingPanel } from "@/components/scouting/ScoutingPanel";
 import { matchAwards } from "@/lib/awards";
 import { playerOfTheMatch } from "@/lib/player-profile";
@@ -284,11 +285,15 @@ function LiveTable({
   competitionId,
   situations,
   teamName,
+  canManage = false,
+  onChanged = () => undefined,
 }: {
   data: PlatformDashboardData;
   competitionId: string;
   situations: LiveMatchSituation[];
   teamName: (id: string | null) => string;
+  canManage?: boolean;
+  onChanged?: () => void;
 }) {
   const competition = data.competitions.find((item) => item.id === competitionId);
   const [mode, setMode] = useState<"live" | "official">("live");
@@ -358,11 +363,20 @@ function LiveTable({
             <span role="cell">{row.lost}</span>
             <span role="cell" className="hidden sm:block">{row.tied + row.noResult}</span>
             <span role="cell" className="hidden sm:block">{row.netRunRate.toFixed(2)}</span>
-            <span role="cell" className="card-big">{row.points}</span>
+            <span role="cell" className="card-big">
+              {row.points}
+              {row.pointsAdjustment ? (
+                <sup className={`ml-0.5 text-[10px] ${row.pointsAdjustment < 0 ? "text-rose-300" : "text-emerald-300"}`} title="Points changed by the league — see below">
+                  {row.pointsAdjustment > 0 ? "+" : ""}
+                  {row.pointsAdjustment}
+                </sup>
+              ) : null}
+            </span>
           </div>
         ))}
         {rows.length === 0 && <p className="card-empty">No teams in this competition yet.</p>}
       </div>
+      <PointAdjustments competitionId={competition.id} teamIds={[...participants]} teamName={teamName} canManage={canManage} onChanged={onChanged} />
       <p className="text-[11px] text-slate-500">Live placings use the win predictor and are not official until results are signed off. Net run rate only changes when results are signed off.</p>
       <QualificationCalculator
         rows={base}
@@ -586,11 +600,14 @@ export function LeagueHub({
   onRefresh,
   refreshing,
   initialView = "live",
+  role,
 }: {
   data: PlatformDashboardData;
   onRefresh: () => void;
   refreshing: boolean;
   initialView?: HubView;
+  /** The viewer's role in this organisation; league owners and admins can change points. */
+  role?: string;
 }) {
   const teamName = useTeamName(data);
   const [competitionId, setCompetitionId] = useState(data.competitions[0]?.id ?? "");
@@ -672,7 +689,7 @@ export function LeagueHub({
           </div>
         ))}
 
-      {view === "table" && <LiveTable data={data} competitionId={competitionId} situations={situations.filter((item) => liveMatches.some((match) => match.id === item.matchId))} teamName={teamName} />}
+      {view === "table" && <LiveTable data={data} competitionId={competitionId} situations={situations.filter((item) => liveMatches.some((match) => match.id === item.matchId))} teamName={teamName} canManage={role === "owner" || role === "league_admin"} onChanged={onRefresh} />}
 
       {view === "results" &&
         (results.length ? (

@@ -4345,3 +4345,39 @@
   .tv-strip, .tv-card, .tv-tab, .tv-runs { animation: none; }
   .tv-moment, .tv-card-moment { animation-duration: 1ms; animation-iteration-count: 1; animation-fill-mode: none; }
 }
+
+/* Ball speed tool */
+.speed-stage { position: relative; overflow: hidden; border-radius: 1rem; border: 1px solid var(--border); background: oklch(0.12 0.01 285); }
+.speed-video { display: block; width: 100%; max-height: 70vh; object-fit: contain; }
+.speed-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.speed-overlay.is-picking { pointer-events: auto; cursor: crosshair; }
+.speed-mark { fill: color-mix(in oklch, var(--gold) 55%, transparent); stroke: var(--gold); stroke-width: 3; vector-effect: non-scaling-stroke; }
+.speed-line { stroke: var(--gold); stroke-width: 2; stroke-dasharray: 8 6; vector-effect: non-scaling-stroke; }
+.speed-track { fill: var(--primary); stroke: oklch(0.98 0 0); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.speed-hint { position: absolute; left: 50%; top: 0.75rem; transform: translateX(-50%); padding: 0.4rem 0.8rem; border-radius: 999px; background: color-mix(in oklch, var(--card) 88%, transparent); font-size: 0.75rem; font-weight: 700; pointer-events: none; white-space: nowrap; }
+.speed-reading { border-radius: 1rem; border: 1px solid color-mix(in oklch, var(--gold) 40%, transparent); background: color-mix(in oklch, var(--gold) 8%, transparent); padding: 1rem; }
+.speed-kph { font-family: var(--font-display, inherit); font-size: 2.6rem; font-weight: 800; line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; }
+.speed-kph span { font-size: 1rem; font-weight: 700; color: var(--muted-foreground); }
+
+/* Fan Player of the Match vote */
+.fan-vote-row { position: relative; display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 0.75rem; overflow: hidden; border-radius: 0.8rem; border: 1px solid var(--border); padding: 0.55rem 0.8rem; font-size: 0.85rem; text-align: left; isolation: isolate; }
+.fan-vote-row::before { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--share, 0%); background: color-mix(in oklch, var(--gold) 16%, transparent); z-index: -1; transition: width 400ms ease; }
+.fan-vote-row[aria-pressed="true"] { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+.fan-vote-row:disabled { cursor: default; }
+
+/* Embeddable score widget (/embed/$slug) — fits a 320×140 frame */
+.score-widget { --w-bg: oklch(0.2 0.03 260); --w-ink: oklch(0.97 0.005 260); --w-muted: oklch(0.75 0.02 260); --w-line: oklch(0.32 0.03 260);
+  display: flex; flex-direction: column; gap: 0.35rem; box-sizing: border-box; width: 100%; min-height: 100vh; padding: 0.75rem 0.9rem;
+  background: var(--w-bg); color: var(--w-ink); text-decoration: none; font-family: inherit; border: 1px solid var(--w-line); border-radius: 0.9rem; }
+.score-widget[data-theme="light"] { --w-bg: oklch(0.99 0.003 260); --w-ink: oklch(0.22 0.04 260); --w-muted: oklch(0.5 0.02 260); --w-line: oklch(0.9 0.01 260); }
+.score-widget-top { display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+.score-widget-status { padding: 0.1rem 0.45rem; border-radius: 999px; border: 1px solid var(--w-line); }
+.score-widget-status.is-live { background: var(--primary); border-color: var(--primary); color: oklch(0.99 0 0); }
+.score-widget-main { display: flex; align-items: baseline; gap: 0.5rem; }
+.score-widget-team { font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+.score-widget-score { font-size: 1.8rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; color: var(--gold); }
+.score-widget[data-theme="light"] .score-widget-score { color: var(--primary); }
+.score-widget-muted { color: var(--w-muted); font-size: 0.75rem; }
+.score-widget-line { font-size: 0.8rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.score-widget-balls { display: flex; gap: 0.25rem; }
+.score-widget-balls span { min-width: 1.5rem; padding: 0.1rem 0.3rem; border-radius: 0.4rem; border: 1px solid var(--w-line); text-align: center; font-size: 0.7rem; font-weight: 700; font-variant-numeric: tabular-nums; }

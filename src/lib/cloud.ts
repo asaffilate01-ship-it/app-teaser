@@ -816,3 +816,14 @@ export async function loadScoringPatches(matchId: string, afterSequence = 0): Pr
     )
     .filter((patch): patch is ScoringPatch => patch !== null);
 }
+
+/** Adds a new player to a team's squad for this match (scorers only; their own club's teams). Returns the player id. */
+export async function addCloudSquadPlayer(matchId: string, teamId: string, name: string): Promise<string> {
+  const { data, error } = await getCloudClient().rpc("add_match_squad_player", {
+    p_match_id: matchId,
+    p_team_id: teamId,
+    p_name: name,
+  });
+  if (error) throw new Error(error.message.replace(/^.*?ERROR:\s*/i, ""));
+  return String(data);
+}

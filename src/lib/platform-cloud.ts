@@ -1,6 +1,6 @@
 import type { RealtimeChannel, User } from "@supabase/supabase-js";
 import { getCloudClient, invokePlatformFunction } from "@/lib/cloud";
-import type { CompetitionRules, PlatformRole } from "@/lib/platform";
+import type { CompetitionRules, PlatformRole, PointAdjustment } from "@/lib/platform";
 
 export interface OrganisationRecord {
   id: string;
@@ -72,6 +72,8 @@ export interface CompetitionRecord {
   activeRuleVersion: number;
   ruleVersionId: string | null;
   rules: CompetitionRules | null;
+  /** League points added or deducted (with reasons). */
+  adjustments?: PointAdjustment[];
 }
 
 export interface FixtureRecord {
@@ -347,6 +349,20 @@ export async function loadOrganisationDashboard(
   ]);
 
   const competitionIds = new Set(competitionRows.map((row) => String(row["id"])));
+  // League points added or deducted; row rules decide who may read them.
+  const adjustmentRows = competitionIds.size
+    ? await client
+        .from("competition_point_adjustments")
+        .select("competition_id,team_id,points,reason")
+        .in("competition_id", [...competitionIds])
+        .then(({ data, error }) => (error ? [] : (data ?? [])))
+    : [];
+  const adjustmentsByCompetition = new Map<string, PointAdjustment[]>();
+  for (const row of adjustmentRows) {
+    const list = adjustmentsByCompetition.get(row.competition_id) ?? [];
+    list.push({ teamId: row.team_id, points: Number(row.points), reason: row.reason });
+    adjustmentsByCompetition.set(row.competition_id, list);
+  }
   const entryTeamRows = competitionRows.length
     ? await client
         .rpc("competition_entry_teams", { p_org: organisationId })
@@ -531,6 +547,7 @@ export async function loadOrganisationDashboard(
         activeRuleVersion: activeVersion,
         ruleVersionId: rule ? String(rule["id"]) : null,
         rules: rule ? (rule["rules"] as CompetitionRules) : null,
+        adjustments: adjustmentsByCompetition.get(String(row["id"])) ?? [],
       };
     }),
     fixtures: organisationFixtures.map((row) => ({

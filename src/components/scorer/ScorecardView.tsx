@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ScorecardShare } from "@/components/scorer/ScorecardShare";
-import { bowlingCard, findTeam, isSuperOver, type CricketMatch } from "@/lib/cricket";
+import { bowlingCard, findTeam, isSuperOver, tossSummary, type CricketMatch } from "@/lib/cricket";
 import { battingSplit, fallOfWickets, inningsHeadline } from "@/lib/scorecard";
 
 type View = "batting" | "bowling" | "wickets";
@@ -48,6 +48,7 @@ export function ScorecardView({ match, shareable = true }: { match: CricketMatch
             {innings.declared ? " · declared" : ""}
           </p>
           <h2 className="truncate font-display text-2xl font-bold">{team.name}</h2>
+          {tossSummary(match) && <p className="text-xs text-muted-foreground">{tossSummary(match)}</p>}
         </div>
         <div className="text-right">
           <p className="card-total">{head.label}</p>

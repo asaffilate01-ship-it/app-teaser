@@ -12,6 +12,7 @@ import {
   liveParScore,
   matchResult,
   nextBallIsFreeHit,
+  retiredHurtWaiting,
   summarizeInnings,
   targetForCurrentInnings,
 } from "./cricket.ts";
@@ -40,6 +41,7 @@ function battingOrder(innings: Innings): string[] {
     add(delivery.strikerId);
     add(delivery.nonStrikerId);
   }
+  for (const item of innings.retirements ?? []) add(item.batterId);
   add(innings.strikerId);
   if (innings.nonStrikerId !== innings.strikerId) add(innings.nonStrikerId);
   return order;
@@ -52,7 +54,11 @@ function publicCard(match: CricketMatch, innings: Innings, salt: string | undefi
   const ref = (id: string) => (salt ? { ref: playerScreenRef(salt, id) } : {});
   const batting = battingOrder(innings).map((id, index) => {
     const row = batters.find((item) => item.playerId === id);
-    const out = innings.deliveries.find((delivery) => delivery.dismissal?.batterId === id)?.dismissal?.type ?? null;
+    const retired = [...(innings.retirements ?? [])].reverse().find((item) => item.batterId === id);
+    const out =
+      innings.deliveries.find((delivery) => delivery.dismissal?.batterId === id)?.dismissal?.type ??
+      (retired?.kind === "out" ? "retired-out" : retired?.kind === "timed-out" ? "timed-out" : null) ??
+      (retired?.kind === "hurt" && retiredHurtWaiting(innings).includes(id) ? "retired-hurt" : null);
     return {
       no: index + 1,
       ...ref(id),
@@ -172,6 +178,10 @@ export function publicLiveState(match: CricketMatch, options: PublicStateOptions
     declared: Boolean(innings.declared),
     followOn: Boolean(innings.followOn),
     result: result?.text ?? null,
+    // Toss: team names only.
+    toss: match.toss
+      ? { winnerIsHome: match.toss.winnerTeamId === match.teams[0].id, decision: match.toss.decision }
+      : null,
     striker: striker
       ? { name: "Striker", runs: strikerFigures?.runs ?? 0, balls: strikerFigures?.balls ?? 0 }
       : null,

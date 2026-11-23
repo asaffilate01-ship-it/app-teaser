@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Banknote, Car, Coins, ClipboardList, Gavel, KeyRound, LoaderCircle, MapPin, Shirt, UsersRound } from "lucide-react";
+import { Banknote, Car, Coins, ClipboardList, Gavel, HandHeart, KeyRound, LoaderCircle, MapPin, Shirt, UsersRound } from "lucide-react";
 import { can } from "@/lib/platform";
 import type { PlatformRole } from "@/lib/platform";
 import type { PlatformDashboardData } from "@/lib/platform-cloud";
@@ -15,6 +15,7 @@ import { AccessPanel } from "./AccessPanel";
 import { AdEarningsPanel } from "./AdEarningsPanel";
 import { ClubPromosPanel } from "./ClubPromosPanel";
 import { UmpiresPanel } from "./UmpiresPanel";
+import { VolunteersPanel } from "./VolunteersPanel";
 import type { OfficeProps } from "./ui";
 
 const tabs = [
@@ -24,6 +25,7 @@ const tabs = [
   ["bookings", "Bookings", MapPin],
   ["travel", "Travel", Car],
   ["store", "Kit and shop", Shirt],
+  ["volunteers", "Volunteers", HandHeart],
   ["umpires", "Umpires", Gavel],
   ["ads", "Ad earnings", Coins],
   ["access", "Access", KeyRound],
@@ -72,7 +74,7 @@ export function ClubOffice({ organisationId, role, club }: { organisationId: str
       <div>
         <p className="panel-kicker">Club office</p>
         <h2 className="text-2xl font-bold tracking-tight">Run the club</h2>
-        <p className="office-meta">Events, availability, selection, fees, bookings, lifts, kit and umpires — each person sees only what their role allows.</p>
+        <p className="office-meta">Events, availability, selection, fees, bookings, lifts, kit, volunteers and umpires — each person sees only what their role allows.</p>
       </div>
       <div className="office-tabs" role="tablist" aria-label="Club office">
         {tabs.filter(([value]) => value !== "umpires" || can(role, "umpires.pay")).map(([value, label, Icon]) => (
@@ -102,6 +104,7 @@ export function ClubOffice({ organisationId, role, club }: { organisationId: str
           {tab === "bookings" && <BookingsPanel {...props} />}
           {tab === "travel" && <TravelPanel {...props} />}
           {tab === "store" && <StorePanel {...props} />}
+          {tab === "volunteers" && <VolunteersPanel key={organisationId} {...props} />}
           {tab === "umpires" && can(role, "umpires.pay") && <UmpiresPanel key={organisationId} {...props} />}
           {tab === "ads" && (
             <div className="space-y-4">

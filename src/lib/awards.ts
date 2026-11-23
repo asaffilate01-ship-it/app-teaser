@@ -169,3 +169,58 @@ export function awardBoard(automatic: AwardWinner<TournamentAwardCategory>[], se
     };
   });
 }
+
+export interface MvpRow {
+  playerId: string;
+  name: string;
+  team: string;
+  matches: number;
+  batting: number;
+  bowling: number;
+  fielding: number;
+  total: number;
+  potm: number;
+}
+
+/**
+ * Season MVP points for every player, with the same impact scoring as Player of the Match:
+ * 1 per run (+10 for a fifty, +25 for a hundred), 20 per wicket (+25 for five), 10 per catch, stumping or run out.
+ */
+export function mvpTable(matches: readonly CricketMatch[]): MvpRow[] {
+  const rows = new Map<string, MvpRow>();
+  for (const match of matches) {
+    const star = playerOfTheMatch(match);
+    const seen = new Set<string>();
+    const row = (playerId: string) => {
+      let entry = rows.get(playerId);
+      if (!entry) {
+        const team = teamOf(match, playerId);
+        entry = { playerId, name: team?.players.find((player) => player.id === playerId)?.name ?? "Player", team: team?.name ?? "", matches: 0, batting: 0, bowling: 0, fielding: 0, total: 0, potm: 0 };
+        rows.set(playerId, entry);
+      }
+      if (!seen.has(playerId)) {
+        seen.add(playerId);
+        entry.matches += 1;
+      }
+      return entry;
+    };
+    for (const inn of match.innings.filter((item) => !isSuperOver(item))) {
+      for (const bat of battingCard(match, inn)) {
+        if (!bat.balls && !bat.runs) continue;
+        row(bat.playerId).batting += bat.runs + (bat.runs >= 100 ? 25 : bat.runs >= 50 ? 10 : 0);
+      }
+      for (const bowl of bowlingCard(match, inn)) {
+        row(bowl.playerId).bowling += bowl.wickets * 20 + (bowl.wickets >= 5 ? 25 : 0);
+      }
+      for (const ball of inn.deliveries) {
+        const fielder = ball.dismissal?.fielderId;
+        if (fielder && ["caught", "stumped", "run-out"].includes(ball.dismissal!.type)) row(fielder).fielding += 10;
+      }
+    }
+    if (star) row(star.playerId).potm += 1;
+  }
+  return [...rows.values()]
+    .map((item) => ({ ...item, total: item.batting + item.bowling + item.fielding }))
+    .filter((item) => item.total > 0 || item.potm > 0)
+    .sort((a, b) => b.total - a.total || b.potm - a.potm || a.name.localeCompare(b.name));
+}

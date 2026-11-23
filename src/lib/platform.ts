@@ -179,6 +179,8 @@ export interface CompetitionRules {
 
 export interface CompletedFixture {
   id: string;
+  /** Awarded without play (the other side conceded). */
+  walkover?: boolean;
   homeTeamId: string;
   awayTeamId: string;
   status: "completed" | "abandoned" | "cancelled";
@@ -206,6 +208,15 @@ export interface TableRow {
   runsAgainst: number;
   ballsBowled: number;
   netRunRate: number;
+  /** League points added or taken away by the organisers (already inside points). */
+  pointsAdjustment?: number;
+}
+
+/** Points the league added or deducted for a team, with the reason shown under the table. */
+export interface PointAdjustment {
+  teamId: string;
+  points: number;
+  reason: string;
 }
 
 export interface FixtureTeam {
@@ -365,8 +376,15 @@ export function calculateCompetitionTable(
   teamIds: string[],
   fixtures: CompletedFixture[],
   rules: CompetitionRules,
+  adjustments: readonly PointAdjustment[] = [],
 ): TableRow[] {
   const rows = new Map(teamIds.map((teamId) => [teamId, emptyTableRow(teamId)]));
+  for (const adjustment of adjustments) {
+    const row = rows.get(adjustment.teamId);
+    if (!row || !Number.isFinite(adjustment.points)) continue;
+    row.points += adjustment.points;
+    row.pointsAdjustment = Math.round(((row.pointsAdjustment ?? 0) + adjustment.points) * 100) / 100;
+  }
 
   for (const fixture of fixtures) {
     if (fixture.status !== "completed" && fixture.status !== "abandoned") continue;

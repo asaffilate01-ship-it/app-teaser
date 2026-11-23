@@ -1,8 +1,8 @@
-import { calculateCompetitionTable, type CompletedFixture, type TableRow } from "./platform.ts";
+import { calculateCompetitionTable, type CompletedFixture, type PointAdjustment, type TableRow } from "./platform.ts";
 import type { CompetitionRecord, FixtureRecord, TeamRecord } from "./platform-cloud";
 
 type LeagueInput = {
-  competition: Pick<CompetitionRecord, "id" | "rules" | "ruleVersionId">;
+  competition: Pick<CompetitionRecord, "id" | "rules" | "ruleVersionId"> & { adjustments?: readonly PointAdjustment[] | undefined };
   fixtures: readonly FixtureRecord[];
   teams: readonly Pick<TeamRecord, "id" | "name">[];
 };
@@ -64,6 +64,20 @@ function validatedResult(fixture: FixtureRecord): CompletedFixture | null {
   const homeBonusPoints = bonusField(result, "homeBonusPoints");
   const awayBonusPoints = bonusField(result, "awayBonusPoints");
   if (homeBonusPoints === null || awayBonusPoints === null) return null;
+  if (result["walkover"] === true) {
+    // Conceded match: the winner takes the win points; no runs or balls go into net run rate.
+    if (!hasWinner) return null;
+    return {
+      id: fixture.id,
+      homeTeamId: fixture.homeTeamId,
+      awayTeamId: fixture.awayTeamId,
+      status: "completed",
+      winnerTeamId: winner as string,
+      walkover: true,
+      homeBonusPoints,
+      awayBonusPoints,
+    };
+  }
   if (noResult) {
     // A no-result decision has no validated NRR innings. Never invent score data.
     if (homeBonusPoints !== 0 || awayBonusPoints !== 0) return null;
@@ -162,6 +176,7 @@ export function buildLeagueStandings(input: LeagueInput): LeagueStandingsPreview
       blockedReason: "Head-to-head tie-breaking needs an approved competition calculation.",
     };
   }
+  const adjustments = (competition.adjustments ?? []).filter((item) => knownTeams.has(item.teamId));
   const accepted: CompletedFixture[] = [];
   for (const fixture of recorded) {
     if (
@@ -178,9 +193,15 @@ export function buildLeagueStandings(input: LeagueInput): LeagueStandingsPreview
   }
   return {
     ...base,
-    rows: accepted.length
-      ? calculateCompetitionTable(participantIds, accepted, competition.rules)
-      : [],
+    rows:
+      accepted.length || adjustments.length
+        ? calculateCompetitionTable(
+            [...new Set([...participantIds, ...adjustments.map((item) => item.teamId)])],
+            accepted,
+            competition.rules,
+            adjustments,
+          )
+        : [],
     counted: accepted.length,
     awaitingReview: recorded.length - accepted.length,
     blockedReason: null,

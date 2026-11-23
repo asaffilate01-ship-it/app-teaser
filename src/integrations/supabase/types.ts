@@ -1275,6 +1275,99 @@ export type Database = {
           },
         ]
       }
+      club_volunteer_jobs: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          event_id: string | null
+          id: string
+          notes: string | null
+          organisation_id: string
+          places: number
+          starts_at: string
+          title: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          event_id?: string | null
+          id?: string
+          notes?: string | null
+          organisation_id: string
+          places: number
+          starts_at: string
+          title: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          event_id?: string | null
+          id?: string
+          notes?: string | null
+          organisation_id?: string
+          places?: number
+          starts_at?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_volunteer_jobs_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "club_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_volunteer_jobs_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_volunteer_signups: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          organisation_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          organisation_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          organisation_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_volunteer_signups_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "club_volunteer_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_volunteer_signups_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competition_awards: {
         Row: {
           category: string
@@ -1418,6 +1511,51 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competition_point_adjustments: {
+        Row: {
+          competition_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          points: number
+          reason: string
+          team_id: string
+        }
+        Insert: {
+          competition_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          points: number
+          reason: string
+          team_id: string
+        }
+        Update: {
+          competition_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          points?: number
+          reason?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_point_adjustments_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_point_adjustments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -3740,6 +3878,38 @@ export type Database = {
           },
         ]
       }
+      potm_votes: {
+        Row: {
+          created_at: string
+          match_id: string
+          player_ref: string
+          updated_at: string
+          voter_hash: string
+        }
+        Insert: {
+          created_at?: string
+          match_id: string
+          player_ref: string
+          updated_at?: string
+          voter_hash: string
+        }
+        Update: {
+          created_at?: string
+          match_id?: string
+          player_ref?: string
+          updated_at?: string
+          voter_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "potm_votes_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_path: string | null
@@ -5026,6 +5196,10 @@ export type Database = {
         Args: { p_email: string; p_match_id: string }
         Returns: string
       }
+      add_match_squad_player: {
+        Args: { p_match_id: string; p_name: string; p_team_id: string }
+        Returns: string
+      }
       admin_club_plans: {
         Args: never
         Returns: {
@@ -5165,6 +5339,10 @@ export type Database = {
       cancel_ground_booking: {
         Args: { p_booking_id: string }
         Returns: undefined
+      }
+      cast_potm_vote: {
+        Args: { p_ref: string; p_slug: string; p_voter: string }
+        Returns: Json
       }
       charge_fee_schedule: {
         Args: { p_player_ids: string[]; p_schedule_id: string }
@@ -5479,6 +5657,8 @@ export type Database = {
         Args: { p_player_id: string }
         Returns: boolean
       }
+      potm_vote_tally: { Args: { p_slug: string }; Returns: Json }
+      potm_vote_tally_for_match: { Args: { p_match_id: string }; Returns: Json }
       promo_share_percent: {
         Args: { p_organisation_id: string }
         Returns: number
@@ -5817,6 +5997,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      volunteer_sign_up: { Args: { p_job_id: string }; Returns: undefined }
       withdraw_competition_invite: {
         Args: { p_invite: string }
         Returns: undefined

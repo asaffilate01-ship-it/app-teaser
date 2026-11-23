@@ -5,6 +5,7 @@ import { WagonWheelField } from "./WagonWheelField";
 
 /** The scorer's wagon wheel for one innings: every ball with a recorded field position. */
 export function ScorerWagonWheel({ innings, players }: { innings: Innings; players: Player[] }) {
+  const lefties = useMemo(() => new Set(players.filter((p) => p.leftHanded).map((p) => p.id)), [players]);
   const balls = useMemo<WheelBall[]>(
     () =>
       innings.deliveries.map((ball) => ({
@@ -16,8 +17,9 @@ export function ScorerWagonWheel({ innings, players }: { innings: Innings; playe
         batterRuns: ball.batterRuns,
         fieldZone: ball.fieldZone,
         wicket: Boolean(ball.dismissal),
+        ...(lefties.has(ball.strikerId) ? { leftHanded: true } : {}),
       })),
-    [innings.deliveries],
+    [innings.deliveries, lefties],
   );
   const names = useMemo(() => new Map(players.map((p) => [p.id, p.name])), [players]);
   return (

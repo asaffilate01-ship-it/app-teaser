@@ -13,6 +13,7 @@ import {
   nextBallIsFreeHit,
   summarizeInnings,
   targetForCurrentInnings,
+  tossSummary,
   type CricketMatch,
 } from "@/lib/cricket";
 
@@ -74,7 +75,9 @@ export function ScoreHero({ match, sync }: { match: CricketMatch; sync?: ReactNo
         ? `${batting.name} have reached the target`
         : superOver
           ? `${batting.name} batting · Super Over`
-          : `${batting.name} batting · Innings ${innings.number}${innings.followOn ? " (follow-on)" : ""}`;
+          : match.toss && match.innings.length === 1 && innings.deliveries.length < 12
+            ? (tossSummary(match) ?? `${batting.name} batting`)
+            : `${batting.name} batting · Innings ${innings.number}${innings.followOn ? " (follow-on)" : ""}`;
   const live = match.status === "live";
 
   return (

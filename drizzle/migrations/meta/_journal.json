@@ -260,6 +260,13 @@
       "when": 1795445658702,
       "tag": "0036_club_own_promos",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1795448213289,
+      "tag": "0037_quick_wins_league_votes_volunteers",
+      "breakpoints": true
     }
   ]
 }

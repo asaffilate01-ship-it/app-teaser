@@ -15,6 +15,22 @@ export interface WheelBall {
   batterRuns: number;
   fieldZone: string | null | undefined;
   wicket: boolean;
+  /** The striker bats left-handed. */
+  leftHanded?: boolean | undefined;
+}
+
+/**
+ * Which way round to draw the wheel: a left-hander's own view when one batter is picked and they bat
+ * left-handed (or every shot shown is by left-handers); otherwise the right-hander view.
+ */
+export function viewHandFor(balls: readonly WheelBall[], batterId = ""): boolean {
+  const scoped = batterId ? balls.filter((ball) => ball.strikerId === batterId) : balls;
+  return scoped.length > 0 && scoped.every((ball) => ball.leftHanded === true);
+}
+
+/** True when the shots shown come from both right- and left-handers. */
+export function mixedHands(balls: readonly WheelBall[]): boolean {
+  return balls.some((ball) => ball.leftHanded === true) && balls.some((ball) => ball.leftHanded !== true);
 }
 
 export type WheelFilter = "all" | "1" | "2" | "3" | "4" | "6" | "wickets";

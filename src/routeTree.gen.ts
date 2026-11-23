@@ -27,6 +27,7 @@ import { Route as CheckIndexRouteImport } from './routes/check.index'
 import { Route as CheckMatchIdRouteImport } from './routes/check.$matchId'
 import { Route as ClubSlugRouteImport } from './routes/club.$slug'
 import { Route as DirectorRoomIdRouteImport } from './routes/director.$roomId'
+import { Route as EmbedSlugRouteImport } from './routes/embed.$slug'
 import { Route as GroundSlugRouteImport } from './routes/ground.$slug'
 import { Route as OverlaySlugRouteImport } from './routes/overlay.$slug'
 import { Route as ScoreboardSlugRouteImport } from './routes/scoreboard.$slug'
@@ -129,6 +130,11 @@ const DirectorRoomIdRoute = DirectorRoomIdRouteImport.update({
   path: '/director/$roomId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmbedSlugRoute = EmbedSlugRouteImport.update({
+  id: '/embed/$slug',
+  path: '/embed/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GroundSlugRoute = GroundSlugRouteImport.update({
   id: '/ground/$slug',
   path: '/ground/$slug',
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/check/$matchId': typeof CheckMatchIdRoute
   '/club/$slug': typeof ClubSlugRouteWithChildren
   '/director/$roomId': typeof DirectorRoomIdRoute
+  '/embed/$slug': typeof EmbedSlugRoute
   '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/camera/$roomId': typeof CameraRoomIdRoute
   '/check/$matchId': typeof CheckMatchIdRoute
   '/director/$roomId': typeof DirectorRoomIdRoute
+  '/embed/$slug': typeof EmbedSlugRoute
   '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/check/$matchId': typeof CheckMatchIdRoute
   '/club/$slug': typeof ClubSlugRouteWithChildren
   '/director/$roomId': typeof DirectorRoomIdRoute
+  '/embed/$slug': typeof EmbedSlugRoute
   '/ground/$slug': typeof GroundSlugRoute
   '/overlay/$slug': typeof OverlaySlugRoute
   '/scoreboard/$slug': typeof ScoreboardSlugRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/check/$matchId'
     | '/club/$slug'
     | '/director/$roomId'
+    | '/embed/$slug'
     | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/camera/$roomId'
     | '/check/$matchId'
     | '/director/$roomId'
+    | '/embed/$slug'
     | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/check/$matchId'
     | '/club/$slug'
     | '/director/$roomId'
+    | '/embed/$slug'
     | '/ground/$slug'
     | '/overlay/$slug'
     | '/scoreboard/$slug'
@@ -391,6 +403,7 @@ export interface RootRouteChildren {
   CheckMatchIdRoute: typeof CheckMatchIdRoute
   ClubSlugRoute: typeof ClubSlugRouteWithChildren
   DirectorRoomIdRoute: typeof DirectorRoomIdRoute
+  EmbedSlugRoute: typeof EmbedSlugRoute
   GroundSlugRoute: typeof GroundSlugRoute
   OverlaySlugRoute: typeof OverlaySlugRoute
   ScoreboardSlugRoute: typeof ScoreboardSlugRoute
@@ -528,6 +541,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DirectorRoomIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/embed/$slug': {
+      id: '/embed/$slug'
+      path: '/embed/$slug'
+      fullPath: '/embed/$slug'
+      preLoaderRoute: typeof EmbedSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ground/$slug': {
       id: '/ground/$slug'
       path: '/ground/$slug'
@@ -656,6 +676,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckMatchIdRoute: CheckMatchIdRoute,
   ClubSlugRoute: ClubSlugRouteWithChildren,
   DirectorRoomIdRoute: DirectorRoomIdRoute,
+  EmbedSlugRoute: EmbedSlugRoute,
   GroundSlugRoute: GroundSlugRoute,
   OverlaySlugRoute: OverlaySlugRoute,
   ScoreboardSlugRoute: ScoreboardSlugRoute,

@@ -85,6 +85,7 @@ import { SquadImport } from "@/components/club/SquadImport";
 import { MatchDayPosts } from "@/components/league/MatchDayPosts";
 import { StreamGuide } from "@/components/club/StreamGuide";
 import { toast } from "sonner";
+import { embedCode } from "@/lib/embed-code";
 import { ClubOffice } from "@/components/office/ClubOffice";
 import { rainMethods } from "@/lib/rain-rules";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
@@ -766,7 +767,7 @@ function OperationalPlatform({
               />
             )}
             {tab === "league" && (
-              <LeagueHub key={leagueStart} initialView={leagueStart} data={dashboard.data} onRefresh={() => void dashboard.refresh()} refreshing={dashboard.refreshing} />
+              <LeagueHub key={leagueStart} initialView={leagueStart} data={dashboard.data} role={membership.role} onRefresh={() => void dashboard.refresh()} refreshing={dashboard.refreshing} />
             )}
             {tab === "website" && (
               <WebsiteEditor
@@ -1207,6 +1208,22 @@ function MatchCard({
             }}
           >
             Stream overlay <Copy className="size-3.5" />
+          </button>
+        )}
+        {match.scoreboard?.enabled && (
+          <button
+            type="button"
+            className="action-secondary"
+            title="Copy code that puts a small live score on your club or league website"
+            onClick={() => {
+              const code = embedCode(window.location.origin, match.scoreboard!.slug);
+              void navigator.clipboard
+                .writeText(code)
+                .then(() => toast.success("Website score code copied. Paste it into your website editor where the score should appear."))
+                .catch(() => window.prompt("Copy this code into your website", code));
+            }}
+          >
+            Website widget <Copy className="size-3.5" />
           </button>
         )}
         {match.scoreboard?.enabled && (

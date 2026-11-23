@@ -77,6 +77,8 @@ export interface SiteCompetition {
   season: string | null;
   ruleVersionId: string | null;
   rules: CompetitionRules | null;
+  /** League points added or deducted, with reasons. */
+  adjustments?: { teamId: string; points: number; reason: string }[];
 }
 export type PostKind = "news" | "notice" | "document";
 export interface SitePost {
@@ -255,7 +257,12 @@ export function siteTables(site: Pick<PublicClubSite, "competitions" | "fixtures
       signedOffBy: f.signedOff ? "league" : null,
     }));
     const preview = buildLeagueStandings({
-      competition: { id: competition.id, rules: competition.rules, ruleVersionId: competition.ruleVersionId },
+      competition: {
+        id: competition.id,
+        rules: competition.rules,
+        ruleVersionId: competition.ruleVersionId,
+        adjustments: (competition.adjustments ?? []).map((item) => ({ ...item, points: Number(item.points) })),
+      },
       fixtures,
       teams: [...names].map(([id, name]) => ({ id, name })),
     });

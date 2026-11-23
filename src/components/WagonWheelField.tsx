@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RotateCcw } from "lucide-react";
 import {
   matchesFilter,
@@ -6,6 +6,8 @@ import {
   summarizeWheel,
   type PlottedShot,
   type WheelBall,
+  mixedHands,
+  viewHandFor,
   type WheelFilter,
 } from "@/lib/wagon-geometry";
 
@@ -76,13 +78,20 @@ export function WagonWheelField({
   const [batter, setBatter] = useState("");
   const [bowler, setBowler] = useState("");
   const [area, setArea] = useState("");
-  const [leftHanded, setLeftHanded] = useState(false);
+  const [leftHanded, setLeftHanded] = useState(() => viewHandFor(balls));
   const [activeId, setActiveId] = useState("");
 
   const scoped = useMemo(
     () => balls.filter((b) => (!batter || b.strikerId === batter) && (!bowler || b.bowlerId === bowler)),
     [balls, batter, bowler],
   );
+  // Flip by itself for a left-handed batter; the RH/LH buttons still override until the batter changes.
+  const handKey = `${batter}|${balls.filter((b) => b.leftHanded).length}`;
+  useEffect(() => {
+    setLeftHanded(viewHandFor(balls, batter));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handKey]);
+  const mixed = !batter && mixedHands(scoped);
   const summary = useMemo(() => summarizeWheel(scoped), [scoped]);
   const counts = useMemo(() => {
     const out = {} as Record<WheelFilter, number>;
@@ -275,6 +284,7 @@ export function WagonWheelField({
                 : shots.length
                   ? "Tap a line for the ball, or a slice of the ground to focus on it."
                   : "No shots to show. Pick a field position while scoring to draw it here."}
+            {!active && !area && mixed && shots.length > 0 && " Left- and right-handers mixed: each shot is drawn from its batter's own view. Pick a batter to see theirs."}
           </p>
         </div>
 

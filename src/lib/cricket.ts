@@ -16,6 +16,30 @@ export type DismissalType =
 export interface Player {
   id: string;
   name: string;
+  /** Bats left-handed: wagon wheels and shot maps flip for this batter. */
+  leftHanded?: boolean | undefined;
+}
+
+/** Junior age bands that have fast-bowling limits (see bowling-workload.ts). */
+export type YouthBand = "U13" | "U14" | "U15" | "U16" | "U17" | "U18" | "U19";
+
+export interface Toss {
+  winnerTeamId: string;
+  decision: "bat" | "bowl";
+}
+
+/** Leaving the crease without a dismissal on a ball: retired hurt (can come back), retired out, or timed out. */
+export type RetirementKind = "hurt" | "out" | "timed-out";
+export interface Retirement {
+  batterId: string;
+  kind: RetirementKind;
+  /** Balls in the innings when it happened (the retirement sits after that ball). */
+  afterBall: number;
+  /** Who was at the crease before, so the retirement can be undone exactly. */
+  prevStrikerId: string;
+  prevNonStrikerId: string;
+  replacementId?: string | undefined;
+  at: string;
 }
 
 export interface Team {
@@ -38,6 +62,8 @@ export interface MatchRules {
   rainMethod?: RainMethod | undefined;
   /** Two-innings matches: scheduled number of days (the match is drawn if time runs out). */
   days?: number | undefined;
+  /** Junior fast-bowling limits for this match (warnings only), or null/absent for none. */
+  youthBowling?: YouthBand | null | undefined;
 }
 
 export interface MatchSettings {
@@ -87,6 +113,8 @@ export interface Delivery {
   note?: string | undefined;
   /** This ball was a free hit (only run out or obstructing the field can dismiss the batter). */
   freeHit?: boolean | undefined;
+  /** Average speed down the pitch, measured from a video clip (km/h). */
+  speedKph?: number | undefined;
 }
 
 export interface Innings {
@@ -108,6 +136,8 @@ export interface Innings {
   unfinished?: boolean | undefined;
   /** This innings was batted as an enforced follow-on. */
   followOn?: boolean | undefined;
+  /** Retired hurt / retired out / timed out, in the order they happened. */
+  retirements?: Retirement[] | undefined;
 }
 
 export interface CricketMatch {
@@ -128,6 +158,8 @@ export interface CricketMatch {
   days?: MatchDays | undefined;
   /** Play stopped for rain, bad light or another reason (scoring paused until it resumes). */
   stoppage?: PlayStoppage | null | undefined;
+  /** Who won the toss and what they chose. */
+  toss?: Toss | undefined;
 }
 
 export type StoppageReason = "rain" | "bad-light" | "wet-outfield" | "other";
@@ -165,6 +197,8 @@ export interface CreateMatchInput {
   awayPlayers: string[];
   battingFirst: "home" | "away";
   settings: MatchSettings;
+  /** When given, the toss decides who bats first (battingFirst is ignored). */
+  toss?: { winner: "home" | "away"; decision: "bat" | "bowl" } | undefined;
 }
 
 export interface RecordDeliveryInput {
@@ -256,8 +290,9 @@ export function createMatch(input: CreateMatchInput): CricketMatch {
     name: input.awayTeamName.trim(),
     players: makePlayers("away", input.awayPlayers),
   };
-  const battingTeam = input.battingFirst === "home" ? home : away;
-  const bowlingTeam = input.battingFirst === "home" ? away : home;
+  const battingFirst = input.toss ? battingFirstFromToss(input.toss.winner, input.toss.decision) : input.battingFirst;
+  const battingTeam = battingFirst === "home" ? home : away;
+  const bowlingTeam = battingFirst === "home" ? away : home;
   const now = new Date().toISOString();
 
   return {
@@ -268,6 +303,9 @@ export function createMatch(input: CreateMatchInput): CricketMatch {
     settings: input.settings,
     teams: [home, away],
     innings: [createInnings(1, battingTeam, bowlingTeam)],
+    ...(input.toss
+      ? { toss: { winnerTeamId: input.toss.winner === "home" ? home.id : away.id, decision: input.toss.decision } }
+      : {}),
   };
 }
 
@@ -296,7 +334,9 @@ export function summarizeInnings(innings: Innings, ballsPerOver = 6): InningsSum
   );
   const runs = innings.deliveries.reduce((sum, delivery) => sum + deliveryRuns(delivery), 0);
   const legalBalls = innings.deliveries.filter((delivery) => delivery.legal).length;
-  const wickets = innings.deliveries.filter((delivery) => Boolean(delivery.dismissal)).length;
+  const wickets =
+    innings.deliveries.filter((delivery) => Boolean(delivery.dismissal)).length +
+    (innings.retirements ?? []).filter((item) => item.kind !== "hurt").length;
 
   return {
     runs,
@@ -309,17 +349,44 @@ export function summarizeInnings(innings: Innings, ballsPerOver = 6): InningsSum
 }
 
 const dismissedPlayerIds = (innings: Innings) =>
-  new Set(
-    innings.deliveries.flatMap((delivery) =>
+  new Set([
+    ...innings.deliveries.flatMap((delivery) =>
       delivery.dismissal ? [delivery.dismissal.batterId] : [],
     ),
-  );
+    ...(innings.retirements ?? []).filter((item) => item.kind !== "hurt").map((item) => item.batterId),
+  ]);
 
-const nextBatter = (team: Team, innings: Innings, activeIds: string[]) => {
+/** Retired-hurt batters who have not come back to the crease yet (they may resume later). */
+export function retiredHurtWaiting(innings: Innings): string[] {
+  const waiting: string[] = [];
   const dismissed = dismissedPlayerIds(innings);
-  return team.players.find((player) => !dismissed.has(player.id) && !activeIds.includes(player.id))
-    ?.id;
-};
+  for (const item of innings.retirements ?? []) {
+    if (item.kind !== "hurt" || dismissed.has(item.batterId) || waiting.includes(item.batterId)) continue;
+    const later = innings.deliveries.slice(item.afterBall);
+    const lastForBatter = [...(innings.retirements ?? [])].reverse().find((entry) => entry.batterId === item.batterId);
+    if (lastForBatter !== item) continue;
+    const resumed =
+      later.some((delivery) => delivery.strikerId === item.batterId || delivery.nonStrikerId === item.batterId) ||
+      innings.strikerId === item.batterId ||
+      innings.nonStrikerId === item.batterId;
+    if (!resumed) waiting.push(item.batterId);
+  }
+  return waiting;
+}
+
+/** Batters who can walk in next, in batting order: fresh batters first, then retired-hurt batters returning. */
+export function availableBatters(team: Team, innings: Innings, activeIds: string[]): string[] {
+  const dismissed = dismissedPlayerIds(innings);
+  const hurt = new Set(retiredHurtWaiting(innings));
+  const free = team.players.filter((player) => !dismissed.has(player.id) && !activeIds.includes(player.id));
+  return [
+    ...free.filter((player) => !hurt.has(player.id)).map((player) => player.id),
+    ...free.filter((player) => hurt.has(player.id)).map((player) => player.id),
+  ];
+}
+
+const nextBatter = (team: Team, innings: Innings, activeIds: string[]) =>
+  availableBatters(team, innings, activeIds)[0];
 
 export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput): CricketMatch {
   if (match.status !== "live" || match.days?.atStumps) return match;
@@ -357,6 +424,7 @@ export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput):
   let strikerId = input.strikerId;
   let nonStrikerId = input.nonStrikerId;
 
+  let noBatterLeft = false;
   if (input.dismissal) {
     const replacement = nextBatter(battingTeam, { ...innings, deliveries }, [
       strikerId,
@@ -370,6 +438,9 @@ export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput):
       const survivor = input.dismissal.batterId === strikerId ? nonStrikerId : strikerId;
       strikerId = survivor;
       nonStrikerId = survivor;
+    } else {
+      // Nobody left to come in (for example a batter retired hurt and cannot return).
+      noBatterLeft = true;
     }
   }
 
@@ -403,7 +474,7 @@ export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput):
   // finishes as soon as the target is reached.
   const target = targetForCurrentInnings(match);
   const chaseWon = target !== null && summaryAfter.runs >= target;
-  const inningsComplete = allOut || oversComplete || chaseWon;
+  const inningsComplete = allOut || oversComplete || chaseWon || noBatterLeft;
   updatedInnings.status = inningsComplete ? "completed" : "live";
 
   return {
@@ -473,6 +544,8 @@ export function undoLastDelivery(match: CricketMatch): CricketMatch {
   if (!innings.deliveries.length) return match;
   const removed = innings.deliveries.at(-1)!;
   const deliveries = innings.deliveries.slice(0, -1);
+  // Anything recorded after the removed ball (a retirement) goes with it.
+  const retirements = (innings.retirements ?? []).filter((item) => item.afterBall <= deliveries.length);
   return {
     ...match,
     status: "live",
@@ -483,6 +556,7 @@ export function undoLastDelivery(match: CricketMatch): CricketMatch {
         ...innings,
         status: "live",
         deliveries,
+        ...(innings.retirements ? { retirements } : {}),
         strikerId: removed.strikerId,
         nonStrikerId: removed.nonStrikerId,
         bowlerId: removed.bowlerId,
@@ -526,6 +600,15 @@ export function battingCard(match: CricketMatch, innings: Innings): BatterRow[] 
     const dismissalDelivery = innings.deliveries.find(
       (delivery) => delivery.dismissal?.batterId === player.id,
     );
+    const retirement = [...(innings.retirements ?? [])].reverse().find((item) => item.batterId === player.id);
+    const retiredLabel =
+      retirement?.kind === "out"
+        ? "retired out"
+        : retirement?.kind === "timed-out"
+          ? "timed out"
+          : retirement?.kind === "hurt" && retiredHurtWaiting(innings).includes(player.id)
+            ? "retired hurt"
+            : null;
     return {
       playerId: player.id,
       name: player.name,
@@ -534,7 +617,7 @@ export function battingCard(match: CricketMatch, innings: Innings): BatterRow[] 
       fours: faced.filter((delivery) => delivery.batterRuns === 4).length,
       sixes: faced.filter((delivery) => delivery.batterRuns === 6).length,
       strikeRate: balls ? (runs * 100) / balls : 0,
-      dismissal: dismissalDelivery ? dismissalLabel(dismissalDelivery, match) : "not out",
+      dismissal: dismissalDelivery ? dismissalLabel(dismissalDelivery, match) : (retiredLabel ?? "not out"),
     };
   });
 }
@@ -916,4 +999,181 @@ export function abandonForRain(match: CricketMatch): CricketMatch {
   const rain: RainState = { ...(match.rain ?? { method: match.settings.rules?.rainMethod ?? "arr" }), abandoned: true };
   const innings = match.innings.map((item, index) => (index === match.innings.length - 1 ? { ...item, status: "completed" as const } : item));
   return { ...match, rain, innings, status: "completed", updatedAt: new Date().toISOString() };
+}
+
+// ---------------------------------------------------------------------------
+// Toss, retirements, squad changes and measured ball speed.
+// ---------------------------------------------------------------------------
+
+/** Who bats first after the toss: the winner if they chose to bat, otherwise the other side. */
+export function battingFirstFromToss(winner: "home" | "away", decision: "bat" | "bowl"): "home" | "away" {
+  if (decision === "bat") return winner;
+  return winner === "home" ? "away" : "home";
+}
+
+/** Record the toss for a match already set up: the decision follows from who is batting first. */
+export function recordToss(match: CricketMatch, winnerTeamId: string): CricketMatch {
+  const first = regularInnings(match)[0] ?? match.innings[0];
+  if (!first || !match.teams.some((team) => team.id === winnerTeamId)) return match;
+  const decision: Toss["decision"] = first.battingTeamId === winnerTeamId ? "bat" : "bowl";
+  return { ...match, toss: { winnerTeamId, decision }, updatedAt: new Date().toISOString() };
+}
+
+export function tossSummary(match: CricketMatch): string | null {
+  if (!match.toss) return null;
+  const team = match.teams.find((item) => item.id === match.toss!.winnerTeamId);
+  if (!team) return null;
+  return `${team.name} won the toss and chose to ${match.toss.decision}`;
+}
+
+/** The newest retirement, when nothing has been bowled since (so it can still be undone). */
+export function undoableRetirement(match: CricketMatch): Retirement | null {
+  const innings = currentInnings(match);
+  const last = innings.retirements?.at(-1);
+  return last && last.afterBall === innings.deliveries.length ? last : null;
+}
+
+/**
+ * A batter at the crease retires hurt (may come back later), retires out, or is given out timed out
+ * (only before facing a ball). Retired out and timed out count as wickets; retired hurt does not.
+ */
+export function retireBatter(
+  match: CricketMatch,
+  batterId: string,
+  kind: RetirementKind,
+  replacementId?: string,
+): CricketMatch {
+  if (match.status !== "live" || match.days?.atStumps) return match;
+  const innings = currentInnings(match);
+  const slot = batterId === innings.strikerId ? "striker" : batterId === innings.nonStrikerId ? "nonStriker" : null;
+  if (!slot) return match;
+  const batted = innings.deliveries.some((d) => d.strikerId === batterId || d.nonStrikerId === batterId);
+  if (kind === "timed-out" && batted) return match;
+  const team = findTeam(match, innings.battingTeamId);
+  const alone = innings.strikerId === innings.nonStrikerId;
+  const other = slot === "striker" ? innings.nonStrikerId : innings.strikerId;
+  const retirement: Retirement = {
+    batterId,
+    kind,
+    afterBall: innings.deliveries.length,
+    prevStrikerId: innings.strikerId,
+    prevNonStrikerId: innings.nonStrikerId,
+    at: new Date().toISOString(),
+  };
+  const withRetirement: Innings = { ...innings, retirements: [...(innings.retirements ?? []), retirement] };
+  const options = availableBatters(team, withRetirement, [other, batterId]);
+  const replacement = replacementId && options.includes(replacementId) ? replacementId : options[0];
+  let strikerId = innings.strikerId;
+  let nonStrikerId = innings.nonStrikerId;
+  let noBatterLeft = false;
+  if (replacement && !alone) {
+    if (slot === "striker") strikerId = replacement;
+    else nonStrikerId = replacement;
+    retirement.replacementId = replacement;
+  } else if (replacement && alone) {
+    strikerId = replacement;
+    nonStrikerId = replacement;
+    retirement.replacementId = replacement;
+  } else if (!alone && lastManStandsApplies(match, innings)) {
+    strikerId = other;
+    nonStrikerId = other;
+  } else {
+    noBatterLeft = true;
+  }
+  const updated: Innings = { ...withRetirement, strikerId, nonStrikerId };
+  const summary = summarizeInnings(updated, match.settings.ballsPerOver);
+  const complete = noBatterLeft || summary.wickets >= inningsWicketLimit(match, innings);
+  updated.status = complete ? "completed" : "live";
+  return {
+    ...match,
+    status: complete ? "innings-break" : "live",
+    updatedAt: new Date().toISOString(),
+    innings: [...match.innings.slice(0, -1), updated],
+  };
+}
+
+/** Undo the newest retirement if no ball has been bowled since. */
+export function undoRetirement(match: CricketMatch): CricketMatch {
+  const last = undoableRetirement(match);
+  if (!last || match.status === "completed") return match;
+  const innings = currentInnings(match);
+  return {
+    ...match,
+    status: "live",
+    updatedAt: new Date().toISOString(),
+    innings: [
+      ...match.innings.slice(0, -1),
+      {
+        ...innings,
+        status: "live",
+        retirements: (innings.retirements ?? []).slice(0, -1),
+        strikerId: last.prevStrikerId,
+        nonStrikerId: last.prevNonStrikerId,
+      },
+    ],
+  };
+}
+
+const mapTeam = (match: CricketMatch, teamId: string, change: (team: Team) => Team): CricketMatch => ({
+  ...match,
+  updatedAt: new Date().toISOString(),
+  teams: match.teams.map((team) => (team.id === teamId ? change(team) : team)) as [Team, Team],
+});
+
+/** Add a player to a team during the match (they join the end of the batting order). */
+export function addPlayer(match: CricketMatch, teamId: string, name: string, id?: string): CricketMatch {
+  const clean = name.trim().replace(/\s+/g, " ").slice(0, 60);
+  if (!clean || !match.teams.some((team) => team.id === teamId)) return match;
+  const playerId = id ?? `${teamId}-p-${makeId("player")}`;
+  if (match.teams.some((team) => team.players.some((player) => player.id === playerId))) return match;
+  return mapTeam(match, teamId, (team) => ({ ...team, players: [...team.players, { id: playerId, name: clean }] }));
+}
+
+export function renamePlayer(match: CricketMatch, playerId: string, name: string): CricketMatch {
+  const clean = name.trim().replace(/\s+/g, " ").slice(0, 60);
+  const team = match.teams.find((item) => item.players.some((player) => player.id === playerId));
+  if (!clean || !team) return match;
+  return mapTeam(match, team.id, (item) => ({
+    ...item,
+    players: item.players.map((player) => (player.id === playerId ? { ...player, name: clean } : player)),
+  }));
+}
+
+export function setPlayerHand(match: CricketMatch, playerId: string, leftHanded: boolean): CricketMatch {
+  const team = match.teams.find((item) => item.players.some((player) => player.id === playerId));
+  if (!team) return match;
+  return mapTeam(match, team.id, (item) => ({
+    ...item,
+    players: item.players.map((player) => {
+      if (player.id !== playerId) return player;
+      const { leftHanded: _old, ...rest } = player;
+      return leftHanded ? { ...rest, leftHanded: true } : rest;
+    }),
+  }));
+}
+
+/** Move a player up (-1) or down (+1) the batting order. */
+export function movePlayer(match: CricketMatch, teamId: string, playerId: string, delta: -1 | 1): CricketMatch {
+  const team = match.teams.find((item) => item.id === teamId);
+  const index = team?.players.findIndex((player) => player.id === playerId) ?? -1;
+  const target = index + delta;
+  if (!team || index < 0 || target < 0 || target >= team.players.length) return match;
+  const players = [...team.players];
+  [players[index], players[target]] = [players[target]!, players[index]!];
+  return mapTeam(match, teamId, (item) => ({ ...item, players }));
+}
+
+/** Store (or clear) the measured speed of one ball. */
+export function setDeliverySpeed(match: CricketMatch, deliveryId: string, kph: number | null): CricketMatch {
+  let found = false;
+  const innings = match.innings.map((item) => ({
+    ...item,
+    deliveries: item.deliveries.map((delivery) => {
+      if (delivery.id !== deliveryId) return delivery;
+      found = true;
+      const { speedKph: _old, ...rest } = delivery;
+      return kph != null && Number.isFinite(kph) && kph > 0 ? { ...rest, speedKph: Math.round(kph * 10) / 10 } : rest;
+    }),
+  }));
+  return found ? { ...match, innings, updatedAt: new Date().toISOString() } : match;
 }

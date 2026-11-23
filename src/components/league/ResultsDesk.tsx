@@ -171,6 +171,7 @@ function ResultForm({ fixture, onDone }: { fixture: InboxFixture; onDone: () => 
     fixture.officialResult ||
     {};
   const [outcome, setOutcome] = useState<string>(start.noResult ? "nr" : start.tied ? "tie" : (start.winnerTeamId ?? ""));
+  const [walkover, setWalkover] = useState(Boolean(start.walkover));
   const [nums, setNums] = useState({
     homeRuns: start.homeRuns?.toString() ?? "",
     homeOvers: ballsToOvers(start.homeLegalBalls),
@@ -189,7 +190,9 @@ function ResultForm({ fixture, onDone }: { fixture: InboxFixture; onDone: () => 
     if (outcome === "nr") r.noResult = true;
     else if (outcome === "tie") r.tied = true;
     else if (outcome) r.winnerTeamId = outcome;
-    if (outcome !== "nr") {
+    const conceded = walkover && outcome !== "nr" && outcome !== "tie" && Boolean(outcome);
+    if (conceded) r.walkover = true;
+    if (outcome !== "nr" && !conceded) {
       const values = {
         homeRuns: toInt(nums.homeRuns),
         awayRuns: toInt(nums.awayRuns),
@@ -244,12 +247,18 @@ function ResultForm({ fixture, onDone }: { fixture: InboxFixture; onDone: () => 
           </button>
         ))}
       </div>
+      {outcome !== "nr" && outcome !== "tie" && outcome && (
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={walkover} onChange={(e) => setWalkover(e.target.checked)} />
+          Walkover — the other team conceded or didn't turn up (win points, no runs counted)
+        </label>
+      )}
       <div className="grid gap-3 sm:grid-cols-2">
         {(["home", "away"] as const).map((side) => (
           <fieldset key={side} className="desk-side">
             <legend>{side === "home" ? fixture.home : fixture.away}</legend>
             <div className="grid grid-cols-3 gap-2">
-              {outcome !== "nr" && (
+              {outcome !== "nr" && !(walkover && outcome !== "tie") && (
                 <>
                   <NumField label="Runs" value={nums[`${side}Runs`]} onChange={(v) => setNums((n) => ({ ...n, [`${side}Runs`]: v }))} />
                   <NumField label="Overs" value={nums[`${side}Overs`]} decimal onChange={(v) => setNums((n) => ({ ...n, [`${side}Overs`]: v }))} />

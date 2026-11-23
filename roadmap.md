@@ -146,4 +146,14 @@
 
 ## Competitor gaps round 4 (report in Files)
 - [x] Round 4 gap report: scoring, analysis, training, video, scoreboards, leagues, players, awards, umpires, admin
-- [ ] Build quick wins (toss, retired hurt/out, in-screen player add, left-hand wheel flip, bowling workload, website score widget, walkovers/deductions, fan POTM vote, season MVP table, volunteer jobs) — waiting on user's pick
+- [x] Toss: who won, bat or bowl — scorecard, scoreboard, posters
+- [x] Retired hurt / retired out / timed out; retired-hurt batter can come back
+- [x] Add or rename a player and change batting order from the scoring screen
+- [x] Wagon wheel flips by itself for left-handed batters
+- [x] Bowling workload tracker with junior fast-bowling limits
+- [x] Live score widget clubs can paste into any website
+- [x] Walkovers, forfeits, abandoned games and points deductions in tables
+- [x] Fan vote for Player of the Match on the public scoreboard
+- [x] Season MVP points table for every player
+- [x] Volunteer jobs with self sign-up
+- [x] Ball speed from camera clips: free on-phone automatic ball tracking (camera set once per fixed angle), manual tap fallback, saved to the ball
