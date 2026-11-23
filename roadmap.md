@@ -92,10 +92,10 @@
 - [x] Player names on the screen: club switch, juniors only with parent-signed consent
 
 ## Competitor gaps round 3 (new ask: fill gaps, better phone and desktop)
-- [ ] Public club and league websites: about, live now, fixtures/results, league table, news, notices, documents, gallery, sponsors, contact — editor in the workspace
-- [ ] Result confirmation by both teams + league "needs action" inbox (overdue, disputed, unconfirmed results)
+- [x] Public club and league websites: about, live now, fixtures/results, league table, news, notices, documents, gallery, sponsors, contact — editor in the workspace
+- [x] Result confirmation by both teams + league "needs action" inbox (overdue, disputed, unconfirmed results)
 - [ ] Umpire appointments per fixture + captain's marks for umpires/pitch and umpire reports
 - [ ] Availability upgrades: reply-by deadline, squad cap with waitlist, add to phone calendar
 - [ ] Volunteer duties (teas, setup, umpiring, scoring) with self sign-up
 - [ ] "Join the club" applications from the public website with an approval queue
-- [ ] Updated competitor report (round 3) saved to Files
+- [x] Updated competitor report (round 3) saved to Files

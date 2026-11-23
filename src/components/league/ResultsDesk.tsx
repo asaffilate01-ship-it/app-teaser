@@ -244,17 +244,21 @@ function ResultForm({ fixture, onDone }: { fixture: InboxFixture; onDone: () => 
           </button>
         ))}
       </div>
-      {outcome !== "nr" && (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <NumField label={`${fixture.home} runs`} value={nums.homeRuns} onChange={(v) => setNums((n) => ({ ...n, homeRuns: v }))} />
-          <NumField label={`${fixture.home} overs`} value={nums.homeOvers} decimal onChange={(v) => setNums((n) => ({ ...n, homeOvers: v }))} />
-          <NumField label={`${fixture.away} runs`} value={nums.awayRuns} onChange={(v) => setNums((n) => ({ ...n, awayRuns: v }))} />
-          <NumField label={`${fixture.away} overs`} value={nums.awayOvers} decimal onChange={(v) => setNums((n) => ({ ...n, awayOvers: v }))} />
-        </div>
-      )}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <NumField label={`${fixture.home} bonus`} value={nums.homeBonus} decimal onChange={(v) => setNums((n) => ({ ...n, homeBonus: v }))} />
-        <NumField label={`${fixture.away} bonus`} value={nums.awayBonus} decimal onChange={(v) => setNums((n) => ({ ...n, awayBonus: v }))} />
+      <div className="grid gap-3 sm:grid-cols-2">
+        {(["home", "away"] as const).map((side) => (
+          <fieldset key={side} className="desk-side">
+            <legend>{side === "home" ? fixture.home : fixture.away}</legend>
+            <div className="grid grid-cols-3 gap-2">
+              {outcome !== "nr" && (
+                <>
+                  <NumField label="Runs" value={nums[`${side}Runs`]} onChange={(v) => setNums((n) => ({ ...n, [`${side}Runs`]: v }))} />
+                  <NumField label="Overs" value={nums[`${side}Overs`]} decimal onChange={(v) => setNums((n) => ({ ...n, [`${side}Overs`]: v }))} />
+                </>
+              )}
+              <NumField label="Bonus pts" value={nums[`${side}Bonus`]} decimal onChange={(v) => setNums((n) => ({ ...n, [`${side}Bonus`]: v }))} />
+            </div>
+          </fieldset>
+        ))}
       </div>
       <p className="office-meta">Overs as bowled, e.g. 19.4. For an all-out side, use the overs your league counts for net run rate.</p>
       {fixture.myTeamIds.length > 0 && (
