@@ -34,7 +34,7 @@ export function SquadImport({ data, run }: { data: PlatformDashboardData; run: R
     setBusy(true);
     try {
       await run(async () => {
-        const teamIds = new Map(data.teams.map((team) => [team.name.trim().toLowerCase(), team.id]));
+        const teamIds = new Map(data.teams.filter((team) => !team.external).map((team) => [team.name.trim().toLowerCase(), team.id]));
         for (const team of plan.newTeams) {
           setProgress(`Creating ${team.name}…`);
           const id = await createTeam({ organisationId: data.organisationId, name: team.name, shortName: team.shortName, ...(team.ageGroup ? { ageGroup: team.ageGroup } : {}) });

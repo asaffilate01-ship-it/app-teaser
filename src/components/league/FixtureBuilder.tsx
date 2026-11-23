@@ -8,7 +8,10 @@ type RunAction = <T>(action: () => Promise<T>) => Promise<T>;
 /** Generates a whole season of round-robin fixtures, previews them, then creates them in one go. */
 export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run: RunAction }) {
   const [competitionId, setCompetitionId] = useState(data.competitions[0]?.id ?? "");
-  const [selected, setSelected] = useState<string[]>(() => data.teams.map((team) => team.id));
+  const teamsFor = (id: string) =>
+    data.teams.filter((team) => !team.external || (team.competitionIds ?? []).includes(id));
+  const [selected, setSelected] = useState<string[]>(() => teamsFor(data.competitions[0]?.id ?? "").map((team) => team.id));
+  const teams = teamsFor(competitionId);
   const [legs, setLegs] = useState<1 | 2>(1);
   const [firstDate, setFirstDate] = useState("");
   const [startTime, setStartTime] = useState("13:00");
@@ -60,7 +63,7 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
     }
   };
 
-  if (data.competitions.length === 0 || data.teams.length < 2) return null;
+  if (data.competitions.length === 0 || teams.length < 2) return null;
   const rounds = Array.from({ length: plan.rounds }, (_, index) => index + 1);
   const when = (iso: string | null) =>
     iso
@@ -81,7 +84,14 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
       <div className="grid gap-3 md:grid-cols-3">
         <label className="block space-y-2">
           <span className="builder-label">Competition</span>
-          <select value={competitionId} onChange={(event) => setCompetitionId(event.target.value)} className="scorer-input">
+          <select
+            value={competitionId}
+            onChange={(event) => {
+              setCompetitionId(event.target.value);
+              setSelected(teamsFor(event.target.value).map((team) => team.id));
+            }}
+            className="scorer-input"
+          >
             {data.competitions.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}
@@ -132,7 +142,7 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
       <fieldset className="mt-4">
         <legend className="builder-label">Teams ({selected.length})</legend>
         <div className="mt-2 flex flex-wrap gap-2">
-          {data.teams.map((team) => (
+          {teams.map((team) => (
             <button
               key={team.id}
               type="button"

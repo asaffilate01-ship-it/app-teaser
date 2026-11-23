@@ -44,3 +44,11 @@ export function adRevenueSharePercent(plan: PlanId, options: { videoAddon?: bool
   if (plan === "starter") return 0;
   return options.videoAddon === true ? 50 : 30;
 }
+
+/**
+ * Teams a club may run on each plan (null = as many as it likes). Free clubs get one team;
+ * paid clubs add 2nd XIs, age groups, ladies and more. Must match `club_team_limit` in the database.
+ */
+export function teamLimit(plan: PlanId): number | null {
+  return plan === "starter" ? 1 : null;
+}

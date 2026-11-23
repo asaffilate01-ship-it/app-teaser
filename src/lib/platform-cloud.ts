@@ -16,7 +16,14 @@ export interface TeamRecord {
   name: string;
   shortName: string;
   ageGroup: string | null;
+  /** 1st XI, 2nd XI, U13, women… (see team-types.ts). */
+  category?: string | null;
   playerIds: string[];
+  /** Another club's team entered in one of this organisation's competitions (read-only here). */
+  external?: boolean;
+  clubName?: string;
+  /** For external teams: the competitions they are entered in. */
+  competitionIds?: string[];
 }
 
 export interface GroundRecord {
@@ -246,7 +253,7 @@ export async function loadOrganisationDashboard(
     rows<Record<string, unknown>>(
       client
         .from("teams")
-        .select("id,name,short_name,age_group")
+        .select("id,name,short_name,age_group,category")
         .eq("organisation_id", organisationId)
         .order("name"),
     ),
@@ -340,6 +347,11 @@ export async function loadOrganisationDashboard(
   ]);
 
   const competitionIds = new Set(competitionRows.map((row) => String(row["id"])));
+  const entryTeamRows = competitionRows.length
+    ? await client
+        .rpc("competition_entry_teams", { p_org: organisationId })
+        .then(({ data, error }) => (error ? [] : (data ?? [])))
+    : [];
   const memberUserIds = memberRows.map((row) => String(row["user_id"]));
   const profileRows = memberUserIds.length
     ? await rows<Record<string, unknown>>(
@@ -470,13 +482,17 @@ export async function loadOrganisationDashboard(
   const today = Date.now();
   return {
     organisationId,
-    teams: teamRows.map((row) => ({
-      id: String(row["id"]),
-      name: String(row["name"]),
-      shortName: String(row["short_name"]),
-      ageGroup: row["age_group"] ? String(row["age_group"]) : null,
-      playerIds: teamPlayers.get(String(row["id"])) ?? [],
-    })),
+    teams: [
+      ...teamRows.map((row) => ({
+        id: String(row["id"]),
+        name: String(row["name"]),
+        shortName: String(row["short_name"]),
+        ageGroup: row["age_group"] ? String(row["age_group"]) : null,
+        category: row["category"] ? String(row["category"]) : null,
+        playerIds: teamPlayers.get(String(row["id"])) ?? [],
+      })),
+      ...externalTeams(entryTeamRows, new Set(teamRows.map((row) => String(row["id"])))),
+    ],
     grounds: groundRows.map((row) => ({
       id: String(row["id"]),
       name: String(row["name"]),
@@ -649,11 +665,40 @@ export function subscribeToOrganisationOperations(
   };
 }
 
+/** Other clubs' teams entered in this organisation's competitions, named with their club so fixtures read clearly. */
+export function externalTeams(
+  rows: ReadonlyArray<{ competition_id: string; team_id: string; name: string; short_name: string; club_name: string }>,
+  ownIds: ReadonlySet<string>,
+): TeamRecord[] {
+  const byId = new Map<string, TeamRecord>();
+  for (const row of rows) {
+    if (ownIds.has(row.team_id)) continue;
+    const existing = byId.get(row.team_id);
+    if (existing) {
+      existing.competitionIds = [...(existing.competitionIds ?? []), row.competition_id];
+      continue;
+    }
+    const named = row.name.toLowerCase().includes(row.club_name.toLowerCase()) ? row.name : `${row.club_name} ${row.name}`;
+    byId.set(row.team_id, {
+      id: row.team_id,
+      name: named,
+      shortName: row.short_name,
+      ageGroup: null,
+      playerIds: [],
+      external: true,
+      clubName: row.club_name,
+      competitionIds: [row.competition_id],
+    });
+  }
+  return [...byId.values()];
+}
+
 export async function createTeam(input: {
   organisationId: string;
   name: string;
   shortName: string;
   ageGroup?: string;
+  category?: string;
 }): Promise<string> {
   const { data, error } = await getCloudClient()
     .from("teams")
@@ -662,6 +707,7 @@ export async function createTeam(input: {
       name: input.name.trim(),
       short_name: input.shortName.trim().toUpperCase().slice(0, 12),
       age_group: input.ageGroup?.trim() || null,
+      category: input.category || null,
     })
     .select("id")
     .single();

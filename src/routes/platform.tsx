@@ -1,4 +1,17 @@
 import { LiveListingPanel } from "@/components/club/LiveListingPanel";
+import { LeaguePanel } from "@/components/club/LeaguePanel";
+import { LocationPicker } from "@/components/club/LocationPicker";
+import { CompetitionNetwork } from "@/components/league/CompetitionInvites";
+import { loadTeamAllowance, requestLeague, saveOrganisationPlace, searchLeagues, type LeagueOption } from "@/lib/club-network-cloud";
+import { emptyPlace, type PlaceValue } from "@/lib/geo";
+import {
+  canAddTeam,
+  suggestedShortName,
+  suggestedTeamName,
+  teamCategories,
+  teamCategory,
+  type TeamAllowance,
+} from "@/lib/team-types";
 import {
   readOrganisationDraft,
   storeOrganisationDraft,
@@ -443,6 +456,23 @@ function OrganisationOnboarding({
   const [kind, setKind] = useState<"club" | "league" | "school" | "academy">(draft?.kind ?? "club");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [place, setPlace] = useState<PlaceValue>(emptyPlace);
+  const [leagueId, setLeagueId] = useState("");
+  const [leagues, setLeagues] = useState<LeagueOption[]>([]);
+  useEffect(() => {
+    if (!place.country || kind === "league") {
+      setLeagues([]);
+      setLeagueId("");
+      return;
+    }
+    let active = true;
+    void searchLeagues("", place.country)
+      .then((rows) => active && setLeagues(rows))
+      .catch(() => active && setLeagues([]));
+    return () => {
+      active = false;
+    };
+  }, [place.country, kind]);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (submitting.current) return;
@@ -462,12 +492,23 @@ function OrganisationOnboarding({
     setBusy(true);
     setError(null);
     try {
-      await createOrganisation({
+      const organisationId = await createOrganisation({
         name: request.name,
         kind: request.kind,
         requestId: request.requestId,
         user: user as Parameters<typeof createOrganisation>[0]["user"],
       });
+      if (place.country) {
+        await saveOrganisationPlace(organisationId, place).catch(() =>
+          toast.error("Your club was created, but where you play wasn't saved. Set it on the club home."),
+        );
+      }
+      if (leagueId && request.kind !== "league") {
+        await requestLeague(organisationId, leagueId).then(
+          () => toast.success("Request sent to your league. They'll approve you."),
+          () => toast.error("Your club was created, but the league request didn't go through. Try again from the club home."),
+        );
+      }
       await onCreated();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Organisation could not be created.");
@@ -526,6 +567,37 @@ function OrganisationOnboarding({
               </select>
             </Field>
           </div>
+          <fieldset className="mt-6 space-y-3" disabled={busy}>
+            <legend className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+              Where you play
+            </legend>
+            <LocationPicker value={place} onChange={setPlace} disabled={busy} />
+          </fieldset>
+          {kind !== "league" && place.country !== "" && (
+            <div className="mt-4">
+              <Field label="Your league (if you're in one)">
+                <select
+                  className="scorer-input"
+                  value={leagueId}
+                  disabled={busy}
+                  onChange={(event) => setLeagueId(event.target.value)}
+                >
+                  <option value="">Not part of a league</option>
+                  {leagues.map((league) => (
+                    <option key={league.id} value={league.id}>
+                      {league.name}
+                      {league.province ? ` · ${league.province}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <p className="mt-1 text-xs text-slate-400">
+                {leagues.length === 0
+                  ? "No leagues on CricLume in this country yet. You can join one later from the club home."
+                  : "The league approves your club, then can invite your teams to its competitions."}
+              </p>
+            </div>
+          )}
           {draft && (
             <p role="status" className="mt-4 text-sm text-amber-200">
               These details are kept for a safe retry. Continue to recover the same organisation if
@@ -667,6 +739,7 @@ function OperationalPlatform({
               <Overview
                 data={dashboard.data}
                 role={membership.role}
+                kind={membership.organisationKind}
                 run={dashboard.run}
                 onOpenSection={setTab}
                 onViewStats={() => {
@@ -684,7 +757,13 @@ function OperationalPlatform({
               />
             )}
             {tab === "competitions" && (
-              <Competitions data={dashboard.data} role={membership.role} run={dashboard.run} />
+              <Competitions
+                data={dashboard.data}
+                role={membership.role}
+                kind={membership.organisationKind}
+                run={dashboard.run}
+                onChanged={() => void dashboard.refresh()}
+              />
             )}
             {tab === "league" && (
               <LeagueHub key={leagueStart} initialView={leagueStart} data={dashboard.data} onRefresh={() => void dashboard.refresh()} refreshing={dashboard.refreshing} />
@@ -751,12 +830,14 @@ function OperationalPlatform({
 function Overview({
   data,
   role,
+  kind,
   run,
   onOpenSection,
   onViewStats,
 }: {
   data: PlatformDashboardData;
   role: PlatformRole;
+  kind: OrganisationMembership["organisationKind"];
   run: RunAction;
   onOpenSection: (section: PlatformTab) => void;
   onViewStats: () => void;
@@ -791,7 +872,7 @@ function Overview({
       {can(role, "match.manage") && (
         <SetupChecklist
           counts={{
-            teams: data.teams.length,
+            teams: data.teams.filter((team) => !team.external).length,
             players: data.players.length,
             members: data.members.length,
             matches: data.matches.length,
@@ -806,6 +887,13 @@ function Overview({
       </div>
       <ClubMatchInsights data={data} onViewStats={onViewStats} />
       {can(role, "organisation.manage") && <LiveListingPanel organisationId={data.organisationId} />}
+      {(kind === "league" || can(role, "team.manage")) && (
+        <LeaguePanel
+          organisationId={data.organisationId}
+          kind={kind}
+          canManage={kind === "league" ? ["owner", "league_admin"].includes(role) : ["owner", "club_admin"].includes(role)}
+        />
+      )}
       {can(role, "match.manage") && <CreateMatchPanel data={data} run={run} />}
       <Panel
         title="Matches"
@@ -829,14 +917,15 @@ function Overview({
 }
 
 function CreateMatchPanel({ data, run }: { data: PlatformDashboardData; run: RunAction }) {
+  const ownTeams = data.teams.filter((team) => !team.external);
   const [open, setOpen] = useState(false);
-  const [home, setHome] = useState(data.teams[0]?.id ?? "");
-  const [away, setAway] = useState(data.teams[1]?.id ?? "");
+  const [home, setHome] = useState(ownTeams[0]?.id ?? "");
+  const [away, setAway] = useState(ownTeams[1]?.id ?? "");
   const [ground, setGround] = useState("");
   const [competition, setCompetition] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
   const [visibility, setVisibility] = useState<MatchRecord["visibility"]>("private");
-  const [battingFirst, setBattingFirst] = useState(data.teams[0]?.id ?? "");
+  const [battingFirst, setBattingFirst] = useState(ownTeams[0]?.id ?? "");
   const [overs, setOvers] = useState("20");
   const [weather, setWeather] = useState("");
   const [busy, setBusy] = useState(false);
@@ -853,7 +942,7 @@ function CreateMatchPanel({ data, run }: { data: PlatformDashboardData; run: Run
       awayTeamId: away,
       battingFirstTeamId: battingFirst,
       overs,
-      teams: data.teams,
+      teams: ownTeams,
     });
     if (!validation.ok) {
       setError(validation.error);
@@ -904,7 +993,7 @@ function CreateMatchPanel({ data, run }: { data: PlatformDashboardData; run: Run
         </button>
       }
     >
-      {data.teams.length < 2 ? (
+      {ownTeams.length < 2 ? (
         <EmptyState
           title="Two teams required"
           detail="Use the Players tab to create teams and register at least two players in each."
@@ -920,11 +1009,11 @@ function CreateMatchPanel({ data, run }: { data: PlatformDashboardData; run: Run
             setValue={(value) => {
               setHome(value);
               if (away === value) {
-                setAway(data.teams.find((team) => team.id !== value)?.id ?? "");
+                setAway(ownTeams.find((team) => team.id !== value)?.id ?? "");
               }
               setBattingFirst(value);
             }}
-            options={data.teams.map((team) => [team.id, `${team.name} (${team.playerIds.length})`])}
+            options={ownTeams.map((team) => [team.id, `${team.name} (${team.playerIds.length})`])}
           />
           <SelectField
             label="Away team"
@@ -933,7 +1022,7 @@ function CreateMatchPanel({ data, run }: { data: PlatformDashboardData; run: Run
               setAway(value);
               if (battingFirst !== home) setBattingFirst(value);
             }}
-            options={data.teams
+            options={ownTeams
               .filter((team) => team.id !== home)
               .map((team) => [team.id, `${team.name} (${team.playerIds.length})`])}
           />
@@ -941,7 +1030,7 @@ function CreateMatchPanel({ data, run }: { data: PlatformDashboardData; run: Run
             label="Batting first"
             value={battingFirst}
             setValue={setBattingFirst}
-            options={data.teams
+            options={ownTeams
               .filter((team) => [home, away].includes(team.id))
               .map((team) => [team.id, team.name])}
           />
@@ -1188,16 +1277,21 @@ function downloadFixtureCalendar(data: PlatformDashboardData, competition: Compe
 function Competitions({
   data,
   role,
+  kind,
   run,
+  onChanged,
 }: {
   data: PlatformDashboardData;
   role: PlatformRole;
+  kind: OrganisationMembership["organisationKind"];
   run: RunAction;
+  onChanged: () => void;
 }) {
   const scheduling = reviewFixtureSchedule(data.fixtures);
   return (
     <div className="space-y-5">
       <ResultsDesk organisationId={data.organisationId} />
+      <CompetitionNetwork data={data} kind={kind} role={role} onChanged={onChanged} />
       {can(role, "competition.manage") && <CompetitionForm data={data} run={run} />}
       {can(role, "fixtures.manage") && <FixtureBuilder data={data} run={run} />}
       {can(role, "fixtures.manage") && <FixtureForm data={data} run={run} />}
@@ -1462,6 +1556,9 @@ function FixtureForm({ data, run }: { data: PlatformDashboardData; run: RunActio
   const [round, setRound] = useState("");
   const [busy, setBusy] = useState(false);
   const competition = data.competitions.find((item) => item.id === competitionId);
+  const teams = data.teams.filter(
+    (team) => !team.external || (team.competitionIds ?? []).includes(competitionId),
+  );
   const [error, setError] = useState<string | null>(null);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -1473,8 +1570,8 @@ function FixtureForm({ data, run }: { data: PlatformDashboardData; run: RunActio
     }
     if (
       home === away ||
-      !data.teams.some((team) => team.id === home) ||
-      !data.teams.some((team) => team.id === away)
+      !teams.some((team) => team.id === home) ||
+      !teams.some((team) => team.id === away)
     ) {
       setError("Choose two different registered teams.");
       return;
@@ -1516,7 +1613,7 @@ function FixtureForm({ data, run }: { data: PlatformDashboardData; run: RunActio
       title="Schedule fixture"
       description="Fixture rows are governed by the selected competition's active rule version."
     >
-      {data.competitions.length === 0 || data.teams.length < 2 ? (
+      {data.competitions.length === 0 || teams.length < 2 ? (
         <EmptyState
           title="Competition and teams required"
           detail="Create those records before scheduling fixtures."
@@ -1533,13 +1630,13 @@ function FixtureForm({ data, run }: { data: PlatformDashboardData; run: RunActio
             label="Home"
             value={home}
             setValue={setHome}
-            options={data.teams.map((item) => [item.id, item.name])}
+            options={teams.map((item) => [item.id, item.name])}
           />
           <SelectField
             label="Away"
             value={away}
             setValue={setAway}
-            options={data.teams
+            options={teams
               .filter((item) => item.id !== home)
               .map((item) => [item.id, item.name])}
           />
@@ -1852,12 +1949,42 @@ function Players({
 
 function TeamAndGroundForms({ data, run }: { data: PlatformDashboardData; run: RunAction }) {
   const [team, setTeam] = useState("");
+  const [nameTouched, setNameTouched] = useState(false);
   const [short, setShort] = useState("");
-  const [age, setAge] = useState("");
+  const [category, setCategory] = useState("first_xi");
   const [ground, setGround] = useState("");
   const [busy, setBusy] = useState(false);
+  const [clubName, setClubName] = useState("");
+  const [allowance, setAllowance] = useState<TeamAllowance | null>(null);
+  const [teamError, setTeamError] = useState<string | null>(null);
+  const ownTeamCount = data.teams.filter((item) => !item.external).length;
+  useEffect(() => {
+    let active = true;
+    void getCloudClient()
+      .from("organisations")
+      .select("name")
+      .eq("id", data.organisationId)
+      .maybeSingle()
+      .then(({ data: row }) => {
+        if (active && row?.name) setClubName(row.name);
+      });
+    void loadTeamAllowance(data.organisationId)
+      .then((value) => active && setAllowance(value))
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [data.organisationId, ownTeamCount]);
+  useEffect(() => {
+    if (nameTouched || !clubName) return;
+    const suggestion = suggestedTeamName(clubName, category);
+    setTeam(suggestion);
+    setShort(suggestedShortName(suggestion, category));
+  }, [category, clubName, nameTouched]);
+  const atLimit = allowance !== null && !canAddTeam(allowance);
   const addTeam = async (event: FormEvent) => {
     event.preventDefault();
+    setTeamError(null);
     setBusy(true);
     try {
       await run(() =>
@@ -1865,11 +1992,15 @@ function TeamAndGroundForms({ data, run }: { data: PlatformDashboardData; run: R
           organisationId: data.organisationId,
           name: team,
           shortName: short || team.slice(0, 3),
-          ageGroup: age,
+          ageGroup: teamCategory(category)?.ageGroup ?? "",
+          category,
         }),
       );
+      setNameTouched(false);
       setTeam("");
       setShort("");
+    } catch (reason) {
+      setTeamError(reason instanceof Error ? reason.message : "Could not add this team.");
     } finally {
       setBusy(false);
     }
@@ -1884,38 +2015,88 @@ function TeamAndGroundForms({ data, run }: { data: PlatformDashboardData; run: R
       setBusy(false);
     }
   };
+  const groups = [...new Set(teamCategories.map((item) => item.group))];
   return (
     <div className="grid gap-5 lg:grid-cols-2">
-      <Panel title="Register team">
-        <form onSubmit={(event) => void addTeam(event)} className="grid gap-3 sm:grid-cols-3">
-          <Field label="Name">
-            <input
-              required
-              value={team}
-              onChange={(event) => setTeam(event.target.value)}
-              className="scorer-input"
-            />
-          </Field>
-          <Field label="Short name">
-            <input
-              value={short}
-              onChange={(event) => setShort(event.target.value)}
-              className="scorer-input"
-              maxLength={12}
-            />
-          </Field>
-          <Field label="Age group">
-            <input
-              value={age}
-              onChange={(event) => setAge(event.target.value)}
-              className="scorer-input"
-              placeholder="Open / U15"
-            />
-          </Field>
-          <button disabled={busy} className="action-primary sm:col-span-3 sm:justify-self-end">
-            Add team
-          </button>
-        </form>
+      <Panel
+        title="Register team"
+        description={
+          allowance === null
+            ? "1st and 2nd XIs, age groups, women's and veterans' sides."
+            : allowance.limit === null
+              ? `Your plan includes as many teams as you like · ${allowance.used} so far.`
+              : `Free plan: ${allowance.limit} team (${allowance.used} used). Paid plans add 2nd XIs, age groups, ladies and more.`
+        }
+      >
+        {atLimit ? (
+          <div className="rounded-xl border border-amber-300/30 bg-amber-300/[0.06] p-4 text-sm">
+            <p className="font-bold text-amber-100">Your free plan includes one team.</p>
+            <p className="mt-1 text-slate-300">
+              Move to the Club or League plan to run more teams, such as a 2nd XI, under-13s or a ladies side.
+              The owner can upgrade under Operations → Subscription.
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={(event) => void addTeam(event)} className="grid gap-3 sm:grid-cols-3">
+            <Field label="Team type">
+              <select value={category} onChange={(event) => setCategory(event.target.value)} className="scorer-input">
+                {groups.map((group) => (
+                  <optgroup key={group} label={group}>
+                    {teamCategories
+                      .filter((item) => item.group === group)
+                      .map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.label}
+                        </option>
+                      ))}
+                  </optgroup>
+                ))}
+              </select>
+            </Field>
+            <Field label="Name">
+              <input
+                required
+                value={team}
+                onChange={(event) => {
+                  setNameTouched(true);
+                  setTeam(event.target.value);
+                }}
+                className="scorer-input"
+              />
+            </Field>
+            <Field label="Short name">
+              <input
+                value={short}
+                onChange={(event) => {
+                  setNameTouched(true);
+                  setShort(event.target.value);
+                }}
+                className="scorer-input"
+                maxLength={12}
+              />
+            </Field>
+            {teamError && (
+              <p role="alert" className="text-sm text-rose-200 sm:col-span-3">
+                {teamError}
+              </p>
+            )}
+            <button disabled={busy} className="action-primary sm:col-span-3 sm:justify-self-end">
+              Add team
+            </button>
+          </form>
+        )}
+        {ownTeamCount > 0 && (
+          <ul className="mt-4 flex flex-wrap gap-2" aria-label="Your teams">
+            {data.teams
+              .filter((item) => !item.external)
+              .map((item) => (
+                <li key={item.id} className="office-pill">
+                  {item.name}
+                  {teamCategory(item.category)?.label ? ` · ${teamCategory(item.category)?.label}` : ""}
+                </li>
+              ))}
+          </ul>
+        )}
       </Panel>
       <Panel title="Register ground">
         <form
@@ -1940,8 +2121,9 @@ function TeamAndGroundForms({ data, run }: { data: PlatformDashboardData; run: R
 }
 
 function PlayerForm({ data, run }: { data: PlatformDashboardData; run: RunAction }) {
+  const ownTeams = data.teams.filter((team) => !team.external);
   const [name, setName] = useState("");
-  const [teamId, setTeamId] = useState(data.teams[0]?.id ?? "");
+  const [teamId, setTeamId] = useState(ownTeams[0]?.id ?? "");
   const [junior, setJunior] = useState(false);
   const [publicProfile, setPublicProfile] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -1968,7 +2150,7 @@ function PlayerForm({ data, run }: { data: PlatformDashboardData; run: RunAction
       title="Register player"
       description="Junior and public-profile flags are explicit and can be changed only by authorised roles."
     >
-      {data.teams.length === 0 ? (
+      {ownTeams.length === 0 ? (
         <EmptyState
           title="Create a team first"
           detail="Every new player is assigned to an active team roster."
@@ -1990,7 +2172,7 @@ function PlayerForm({ data, run }: { data: PlatformDashboardData; run: RunAction
             label="Team"
             value={teamId}
             setValue={setTeamId}
-            options={data.teams.map((team) => [team.id, team.name])}
+            options={ownTeams.map((team) => [team.id, team.name])}
           />
           <CheckField label="Junior" checked={junior} setChecked={setJunior} />
           <CheckField

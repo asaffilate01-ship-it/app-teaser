@@ -1312,6 +1312,60 @@ export type Database = {
           },
         ]
       }
+      competition_invites: {
+        Row: {
+          competition_id: string
+          created_at: string
+          id: string
+          invited_by: string
+          message: string
+          organisation_id: string
+          responded_at: string | null
+          responded_by: string | null
+          status: string
+          team_ids: string[]
+        }
+        Insert: {
+          competition_id: string
+          created_at?: string
+          id?: string
+          invited_by: string
+          message?: string
+          organisation_id: string
+          responded_at?: string | null
+          responded_by?: string | null
+          status?: string
+          team_ids?: string[]
+        }
+        Update: {
+          competition_id?: string
+          created_at?: string
+          id?: string
+          invited_by?: string
+          message?: string
+          organisation_id?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          status?: string
+          team_ids?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_invites_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_invites_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competition_rule_versions: {
         Row: {
           competition_id: string
@@ -2810,6 +2864,57 @@ export type Database = {
           },
         ]
       }
+      league_memberships: {
+        Row: {
+          club_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          league_id: string
+          requested_by: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          league_id: string
+          requested_by: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          league_id?: string
+          requested_by?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "league_memberships_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "league_memberships_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_assignments: {
         Row: {
           assigned_by: string
@@ -3327,12 +3432,14 @@ export type Database = {
           created_by: string
           creation_request_id: string | null
           default_retention_days: number
+          district: string | null
           id: string
           kind: Database["public"]["Enums"]["organisation_kind"]
           name: string
           region: string | null
           settings: Json
           slug: string
+          town: string | null
           updated_at: string
         }
         Insert: {
@@ -3341,12 +3448,14 @@ export type Database = {
           created_by: string
           creation_request_id?: string | null
           default_retention_days?: number
+          district?: string | null
           id?: string
           kind: Database["public"]["Enums"]["organisation_kind"]
           name: string
           region?: string | null
           settings?: Json
           slug: string
+          town?: string | null
           updated_at?: string
         }
         Update: {
@@ -3355,12 +3464,14 @@ export type Database = {
           created_by?: string
           creation_request_id?: string | null
           default_retention_days?: number
+          district?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["organisation_kind"]
           name?: string
           region?: string | null
           settings?: Json
           slug?: string
+          town?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -4217,6 +4328,7 @@ export type Database = {
       teams: {
         Row: {
           age_group: string | null
+          category: string | null
           created_at: string
           external_reference: string | null
           id: string
@@ -4227,6 +4339,7 @@ export type Database = {
         }
         Insert: {
           age_group?: string | null
+          category?: string | null
           created_at?: string
           external_reference?: string | null
           id?: string
@@ -4237,6 +4350,7 @@ export type Database = {
         }
         Update: {
           age_group?: string | null
+          category?: string | null
           created_at?: string
           external_reference?: string | null
           id?: string
@@ -4981,6 +5095,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      can_view_entered_team: { Args: { p_team: string }; Returns: boolean }
       can_view_fee_charge: { Args: { p_charge_id: string }; Returns: boolean }
       can_view_fixture_reports: {
         Args: { p_fixture_id: string }
@@ -5040,6 +5155,19 @@ export type Database = {
       }
       club_site_file_public: { Args: { p_name: string }; Returns: boolean }
       club_site_path_org: { Args: { p_name: string }; Returns: string }
+      club_team_limit: { Args: { p_org: string }; Returns: number }
+      competition_entry_teams: {
+        Args: { p_org: string }
+        Returns: {
+          club_name: string
+          competition_id: string
+          name: string
+          short_name: string
+          team_id: string
+        }[]
+      }
+      competition_host: { Args: { p_competition: string }; Returns: string }
+      competition_invites_overview: { Args: { p_org: string }; Returns: Json }
       complete_camera_asset_upload: {
         Args: { p_asset_id: string; p_storage_path: string }
         Returns: string
@@ -5098,10 +5226,29 @@ export type Database = {
         Args: { p_claim_id: string; p_confirm: boolean; p_note: string }
         Returns: undefined
       }
+      decide_league_membership: {
+        Args: { p_approve: boolean; p_id: string }
+        Returns: undefined
+      }
+      end_league_membership: { Args: { p_id: string }; Returns: undefined }
       event_org: { Args: { p_event_id: string }; Returns: string }
       event_selection_published: {
         Args: { p_event_id: string }
         Returns: boolean
+      }
+      find_clubs_to_invite: {
+        Args: { p_competition: string; p_country?: string; p_query?: string }
+        Returns: {
+          country_code: string
+          district: string
+          id: string
+          in_league: boolean
+          invite_status: string
+          kind: string
+          name: string
+          region: string
+          town: string
+        }[]
       }
       find_user_id_by_email: { Args: { p_email: string }; Returns: string }
       fixture_result_is_valid: {
@@ -5151,12 +5298,24 @@ export type Database = {
         }
         Returns: boolean
       }
+      invite_clubs_to_competition: {
+        Args: { p_competition: string; p_message?: string; p_orgs: string[] }
+        Returns: number
+      }
+      invite_league_clubs: {
+        Args: { p_competition: string; p_message?: string }
+        Returns: number
+      }
       is_approved_driver: {
         Args: { p_org: string; p_user: string }
         Returns: boolean
       }
       is_booking_manager: { Args: { p_org: string }; Returns: boolean }
       is_check_scorer: { Args: { p_match_id: string }; Returns: boolean }
+      is_competition_participant: {
+        Args: { p_competition: string }
+        Returns: boolean
+      }
       is_event_manager: { Args: { p_org: string }; Returns: boolean }
       is_finance_manager: { Args: { p_org: string }; Returns: boolean }
       is_guardian_manager: { Args: { p_org: string }; Returns: boolean }
@@ -5171,6 +5330,7 @@ export type Database = {
       is_travel_manager: { Args: { p_org: string }; Returns: boolean }
       is_umpire_manager: { Args: { p_org: string }; Returns: boolean }
       is_umpire_payer: { Args: { p_org: string }; Returns: boolean }
+      league_links: { Args: { p_org: string }; Returns: Json }
       link_my_umpire_profiles: { Args: never; Returns: number }
       list_bookable_grounds: {
         Args: never
@@ -5405,11 +5565,19 @@ export type Database = {
         Args: { p_delivery_id: string; p_match_id: string }
         Returns: undefined
       }
+      request_league_membership: {
+        Args: { p_club: string; p_league: string }
+        Returns: string
+      }
       resolve_check_flag: {
         Args: { p_flag_id: string; p_reply: string; p_status: string }
         Returns: undefined
       }
       resolve_club_site_domain: { Args: { p_host: string }; Returns: string }
+      respond_competition_invite: {
+        Args: { p_accept: boolean; p_invite: string; p_team_ids?: string[] }
+        Returns: undefined
+      }
       respond_umpire_appointment: {
         Args: { p_accept: boolean; p_id: string; p_note?: string }
         Returns: undefined
@@ -5417,6 +5585,17 @@ export type Database = {
       scouting_consent_granted: {
         Args: { p_organisation_id: string; p_player_id: string }
         Returns: boolean
+      }
+      search_leagues: {
+        Args: { p_country?: string; p_query?: string }
+        Returns: {
+          country_code: string
+          district: string
+          id: string
+          name: string
+          region: string
+          town: string
+        }[]
       }
       set_camera_room_capacity: {
         Args: { p_max_devices: number; p_room_id: string }
@@ -5530,6 +5709,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      team_allowance: { Args: { p_org: string }; Returns: Json }
       update_my_umpire_details: {
         Args: {
           p_home_area: string
@@ -5567,6 +5747,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      withdraw_competition_invite: {
+        Args: { p_invite: string }
+        Returns: undefined
       }
     }
     Enums: {

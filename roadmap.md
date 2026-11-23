@@ -136,3 +136,10 @@
 - [x] Payments: fee + travel expenses, due → approved → paid with reference (treasurer or admin), voluntary umpires
 - [x] Umpire dashboard (/umpire): accept/decline, availability calendar, earnings and money owed, logistics, check expiries — across every panel they're on
 - [x] Public Live scores page (/live): filters by country/region/competition, many scores at once, alerts for wickets/4s/6s/rain delays/results; scorer "Stop play" button; club "Where you play" setting
+
+## Club setup, teams and club-run competitions (new ask)
+- [x] Setup picks country → province → region → town (lists per country, "not listed" typing), then league
+- [x] Clubs ask to join a league; league approves; either side can end it
+- [x] Team types (1st/2nd XI, age groups, ladies, veterans); free plan 1 team, paid unlimited (enforced in database)
+- [x] Clubs/leagues invite other clubs to tournaments and leagues; invited club accepts with its teams; teams appear in fixtures
+- [ ] Waiting on answers: free-plan team count, and whether free clubs can host competitions
