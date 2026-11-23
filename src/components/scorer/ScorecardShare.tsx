@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { Copy, FileDown, ImageDown, Share2 } from "lucide-react";
+import { Copy, FileDown, ImageDown, Megaphone, Share2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import type { CricketMatch } from "@/lib/cricket";
 import { scorecardHtml, scorecardSheet, scorecardText, type ScorecardSheet } from "@/lib/scorecard-share";
+import { resultPost, topPerformers } from "@/lib/social-posts";
+import { resultPoster, sharePoster } from "@/lib/posters";
+import logoAsset from "@/assets/criclume-logo-on-dark.png.asset.json";
 
 const fileSlug = (text: string) =>
   text
@@ -196,6 +199,36 @@ export function ScorecardShare({ match }: { match: CricketMatch }) {
     }
   };
 
+  const teams: [string, string] = [match.teams[0].name, match.teams[1].name];
+  const copyPost = async () => {
+    const text = resultPost(sheet(), teams);
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Post copied — paste it into Facebook, Instagram, X or WhatsApp");
+    } catch {
+      toast.error("Could not copy the post.");
+    }
+  };
+  const poster = async () => {
+    setBusy(true);
+    try {
+      const data = sheet();
+      const blob = await resultPoster({
+        innings: data.innings.map((inn) => ({ team: inn.team, total: inn.total, overs: inn.overs })),
+        result: data.result,
+        subtitle: data.subtitle,
+        top: topPerformers(data),
+        logoUrl: logoAsset.url,
+      });
+      const how = await sharePoster(blob, `${name}-result.png`, `${teams[0]} v ${teams[1]}`);
+      if (how === "downloaded") toast.success("Result poster downloaded");
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === "AbortError")) toast.error("The poster could not be created.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="card-share" aria-label="Share scorecard">
       <p className="panel-kicker">Share scorecard</p>
@@ -209,6 +242,12 @@ export function ScorecardShare({ match }: { match: CricketMatch }) {
         </button>
         <button type="button" className="app-chip-button" onClick={() => void shareText()}>
           <Copy className="size-4" /> Text
+        </button>
+        <button type="button" className="app-chip-button" onClick={() => void poster()} disabled={busy}>
+          <Sparkles className="size-4" /> Poster
+        </button>
+        <button type="button" className="app-chip-button" onClick={() => void copyPost()}>
+          <Megaphone className="size-4" /> Social post
         </button>
       </div>
       <label className="card-share-toggle">

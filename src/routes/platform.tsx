@@ -62,6 +62,7 @@ import { AcademyDashboard } from "@/components/AcademyDashboard";
 import { LeagueStandings } from "@/components/LeagueStandings";
 import { LeagueHub } from "@/components/league/LeagueHub";
 import { SquadImport } from "@/components/club/SquadImport";
+import { MatchDayPosts } from "@/components/league/MatchDayPosts";
 import { toast } from "sonner";
 import { rainMethods } from "@/lib/rain-rules";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
@@ -1268,6 +1269,7 @@ function Competitions({
                     teams={data.teams}
                   />
                 )}
+                <MatchDayPosts data={data} competition={competition} />
                 <div className="mt-3 grid gap-2 lg:grid-cols-2">
                   {data.fixtures
                     .filter((fixture) => fixture.competitionId === competition.id)

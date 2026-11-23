@@ -43,7 +43,7 @@
 - [x] 11 Rivalries and streaks
 - [x] 9 "What do we need to qualify" calculator + spreadsheet import of teams/players
 - [x] 8 Multi-day: end of day / stumps
-- [ ] 6 Social post text + result and match-day posters
+- [x] 6 Social post text + result and match-day posters
 - [ ] 3 Installable app: install prompt, iPhone instructions, brand colours (store builds need user's developer accounts)
 - [ ] 7 Phone alerts for wickets, milestones and results (web push)
 - [ ] 10 Club / league public website pages: branding, news, gallery, documents, fixtures/results
