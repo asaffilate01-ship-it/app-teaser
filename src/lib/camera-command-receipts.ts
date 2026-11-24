@@ -116,11 +116,7 @@ export function commandReceiptLabel(
 /** Phone presence is advisory and must expire when its heartbeat is no longer current. */
 export function freshCameraPresence<
   T extends { deviceId: string; lastSeenAt: string; recording: boolean },
->(
-  presence: T | undefined,
-  deviceId: string,
-  nowMs: number,
-): T | undefined {
+>(presence: T | undefined, deviceId: string, nowMs: number): T | undefined {
   if (!presence || presence.deviceId !== deviceId || typeof presence.recording !== "boolean")
     return undefined;
   const timestamp = Date.parse(presence.lastSeenAt);
