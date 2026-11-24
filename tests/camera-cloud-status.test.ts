@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   cameraCloudActive,
+  cameraCloudControls,
   cameraCloudLabel,
   isCameraCloudState,
 } from "../src/lib/camera-cloud-status.ts";
@@ -27,4 +28,23 @@ test("cloud status never implies the remote archive was verified", () => {
   for (const status of ["starting", "recording", "stopping", "provider_completed"] as const) {
     assert.doesNotMatch(cameraCloudLabel(status), /saved to library|verified footage|public/i);
   }
+});
+
+test("chargeable recording starts require an armed camera with verified inactive status", () => {
+  const input = { armed: true, verified: true, state: null, busy: false };
+  assert.equal(cameraCloudControls(input).canStart, true);
+  assert.equal(cameraCloudControls({ ...input, armed: false }).canStart, false);
+  assert.equal(cameraCloudControls({ ...input, verified: false }).canStart, false);
+  assert.equal(cameraCloudControls({ ...input, state: "recording" }).canStart, false);
+  assert.equal(cameraCloudControls({ ...input, state: "unknown" }).canStart, false);
+  assert.equal(cameraCloudControls({ ...input, busy: true }).canStart, false);
+});
+
+test("an uncertain recording state permits a server-authorised stop, not another start", () => {
+  const input = { armed: false, verified: false, state: null, busy: false };
+  assert.deepEqual(cameraCloudControls(input), { canStart: false, canStop: true });
+  assert.equal(cameraCloudControls({ ...input, busy: true }).canStop, false);
+  assert.equal(cameraCloudControls({ ...input, verified: true }).canStop, false);
+  assert.equal(cameraCloudControls({ ...input, verified: true, state: "recording" }).canStop, true);
+  assert.equal(cameraCloudControls({ ...input, verified: true, state: "stopping" }).canStop, false);
 });
