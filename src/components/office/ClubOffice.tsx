@@ -163,6 +163,12 @@ function ScopedClubOffice({ organisationId, role, club }: ClubOfficeProps) {
     }
   }, []);
   const props: OfficeProps | null = data ? { organisationId, role, data, club, act } : null;
+  const visibleTabs = tabs.filter(
+    ([value]) =>
+      (value !== "umpires" || can(role, "umpires.pay")) &&
+      (value !== "reminders" || remindersVisible(role)) &&
+      (value !== "tickets" || isTicketGate(role)),
+  );
   return (
     <div className="space-y-4">
       <div>
@@ -197,15 +203,26 @@ function ScopedClubOffice({ organisationId, role, club }: ClubOfficeProps) {
           Refresh failed. Displayed records may be out of date. Refresh before saving changes.
         </p>
       )}
-      <nav className="office-tabs" aria-label="Club office">
-        {tabs
-          .filter(
-            ([value]) =>
-              (value !== "umpires" || can(role, "umpires.pay")) &&
-              (value !== "reminders" || remindersVisible(role)) &&
-              (value !== "tickets" || isTicketGate(role)),
-          )
-          .map(([value, label, Icon]) => (
+      <label className="block md:hidden">
+        <span className="office-label">Club office section</span>
+        <select
+          className="scorer-input w-full"
+          value={tab}
+          onChange={(event) => {
+            const selected = visibleTabs.find(([value]) => value === event.target.value);
+            if (selected) setTab(selected[0]);
+          }}
+        >
+          {visibleTabs.map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="hidden md:block">
+        <nav className="office-tabs" aria-label="Club office">
+          {visibleTabs.map(([value, label, Icon]) => (
             <button
               key={value}
               type="button"
@@ -213,10 +230,11 @@ function ScopedClubOffice({ organisationId, role, club }: ClubOfficeProps) {
               className="office-tab"
               onClick={() => setTab(value)}
             >
-              <Icon className="size-4" /> {label}
+              <Icon className="size-4" aria-hidden="true" /> {label}
             </button>
           ))}
-      </nav>
+        </nav>
+      </div>
       {error && !data && (
         <div className="office-card">
           <p className="office-meta">{error}</p>
