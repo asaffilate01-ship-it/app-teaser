@@ -48,7 +48,22 @@ const needs: Record<PlanFeature, string> = {
 /** Wraps a paid screen: shows it as normal, with a "Paid plan" note before go-live, or a lock card after. */
 export function PlanGate({ organisationId, feature, children }: { organisationId: string; feature: PlanFeature | undefined; children: ReactNode }) {
   const access = useClubPlan(organisationId);
-  if (!feature || !access) return <>{children}</>;
+  if (!feature) return <>{children}</>;
+  // Loading or failed entitlement lookups must not unlock paid features
+  // after production enforcement is enabled. Before launch, preserve the
+  // existing, clearly labelled free-preview experience.
+  if (!access && gateWhenPlanUnknown(feature) === "locked") {
+    return (
+      <section className="office-card plan-lock" role="status">
+        <h2 className="font-display text-2xl font-bold">Unable to verify club access</h2>
+        <p className="office-meta">
+          Paid feature permissions are temporarily unavailable. Refresh the page
+          or contact your club administrator. Your scoring records remain safe.
+        </p>
+      </section>
+    );
+  }
+  if (!access) return <>{children}</>;
   const gate = planGate(access.plan, feature, { videoAddon: access.videoAddon });
   if (gate === "open") return <>{children}</>;
   if (gate === "locked")
