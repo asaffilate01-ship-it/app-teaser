@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   commandReceiptLabel,
+  freshCameraPresence,
+  matchingCameraReceipt,
   nextCameraCommand,
   reportCameraCommandResult,
 } from "../src/lib/camera-command-receipts.ts";
@@ -113,4 +115,29 @@ test("stop receipts do not imply media was uploaded", () => {
   assert.match(commandReceiptLabel("start", "blocked", "missing_consent"), /permission/);
   assert.match(commandReceiptLabel("stop", "stopped"), /reported/);
   assert.doesNotMatch(commandReceiptLabel("stop", "stopped"), /upload|saved/i);
+});
+
+test("phone recording indicators expire when the heartbeat is stale or invalid", () => {
+  const presence = {
+    deviceId,
+    lastSeenAt: "2026-11-21T12:59:45Z",
+    recording: true,
+  };
+  assert.deepEqual(freshCameraPresence(presence, deviceId, now), presence);
+  assert.equal(freshCameraPresence(presence, deviceId, now + 31_000), undefined);
+  assert.equal(freshCameraPresence({ ...presence, lastSeenAt: "bad" }, deviceId, now), undefined);
+  assert.equal(freshCameraPresence(presence, "another-device", now), undefined);
+  assert.equal(
+    freshCameraPresence({ ...presence, lastSeenAt: "2026-11-21T13:00:10Z" }, deviceId, now),
+    undefined,
+  );
+});
+
+test("command acknowledgments must match the addressed camera as well as the command", () => {
+  const command = { id: idA, device_id: deviceId };
+  const unrelated = { command_id: idA, device_id: "another-device", outcome: "started" };
+  const matching = { command_id: idA, device_id: deviceId, outcome: "blocked" };
+  assert.equal(matchingCameraReceipt(command, [unrelated]), undefined);
+  assert.deepEqual(matchingCameraReceipt(command, [unrelated, matching]), matching);
+  assert.equal(matchingCameraReceipt({ ...command, id: idB }, [matching]), undefined);
 });
