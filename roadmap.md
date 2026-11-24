@@ -129,7 +129,7 @@
 - [x] League plan: co-branded club website on the club's own domain (request in Website → Own domain, staff desk → Club domains)
 - [x] Club logo on the website header
 - [x] Pricing, FAQ and plan rules mention the own-domain website (five languages)
-- [ ] First real club domain: connect it in hosting settings and switch off the Primary-domain redirect (needs the owner)
+- [ ] First real club domain: connect it in hosting settings and switch off the Primary-domain redirect (deferred by owner; resume only when requested)
 
 ## Umpires (new ask)
 - [x] Umpire panel for every club and league: grade, qualification, safeguarding / first-aid expiry, kit, paid or voluntary, fee
@@ -203,5 +203,5 @@
 - [x] Pakistan subscription payment choice: Raast, Easypaisa, JazzCash or bank transfer; no Paddle/card checkout
 - [ ] Pakistan subscription transfer flow and confirmation — needs CricLume receiving payment details; keep plan locks off until subscriptions can be confirmed
 - [ ] Subscription payment methods outside Pakistan — not yet decided
-- [ ] First club domain — awaits the actual club hostname
+- [ ] First club domain — deferred by owner; leave for now
 - [ ] Legal/safeguarding sign-off — launch checklist prepared; qualified reviewer required
