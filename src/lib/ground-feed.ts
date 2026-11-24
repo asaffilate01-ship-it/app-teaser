@@ -90,7 +90,10 @@ export function buildGroundFeed(board: PublicBoard): GroundFeed {
           overs: String(bowler["overs"] ?? "0.0"),
         }
       : null,
-    lastBalls: recent.slice(-6).map((ball) => String(ball["label"] ?? "")),
+    lastBalls: recent
+      .slice(-6)
+      .filter((ball) => ball && typeof ball === "object")
+      .map((ball) => (typeof ball["label"] === "string" ? ball["label"] : "")),
     freeHit: state["freeHit"] === true,
     superOver,
     result: typeof state["result"] === "string" ? (state["result"] as string) : null,
@@ -119,5 +122,10 @@ export function groundFeedText(feed: GroundFeed): string {
     ["LAST6", feed.lastBalls.join(" ")],
     ["RESULT", feed.result],
   ];
-  return rows.map(([key, value]) => `${key} ${value ?? "-"}`).join("\n") + "\n";
+  // Ground controllers parse one record per line. Never let a user-supplied label add a key.
+  return (
+    rows
+      .map(([key, value]) => `${key} ${String(value ?? "-").replace(/[\r\n\u2028\u2029]/g, " ")}`)
+      .join("\n") + "\n"
+  );
 }

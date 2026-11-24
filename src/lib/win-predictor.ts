@@ -88,7 +88,8 @@ function strengthFactor(
   battingIsHome: boolean | undefined,
   batting: boolean,
 ) {
-  if (!conditions.edge || battingIsHome === undefined) return 1;
+  if (!Number.isFinite(conditions.edge) || !conditions.edge || battingIsHome === undefined)
+    return 1;
   const homeBatting = batting ? battingIsHome : !battingIsHome;
   const sign = homeBatting ? 1 : -1;
   return 1 + 0.04 * Math.max(-2, Math.min(2, conditions.edge)) * sign;
@@ -132,10 +133,21 @@ const clampOpen = (value: number) => Math.min(99, Math.max(1, Math.round(value))
 /** Win chances for a limited-overs, one-innings-per-side match. Returns null when the model does not apply. */
 export function predictWin(state: PredictorState): Prediction | null {
   const overs = state.oversPerInnings;
-  if (!overs || overs <= 0 || state.inningsPerSide !== 1) return null;
+  if (!overs || !Number.isFinite(overs) || overs <= 0 || state.inningsPerSide !== 1) return null;
+  if (
+    !Number.isFinite(state.runs) ||
+    !Number.isInteger(state.wickets) ||
+    state.wickets < 0 ||
+    !Number.isInteger(state.legalBalls) ||
+    state.legalBalls < 0 ||
+    !Number.isInteger(state.ballsPerOver) ||
+    state.ballsPerOver <= 0 ||
+    (state.maxWickets !== undefined && !Number.isFinite(state.maxWickets))
+  )
+    return null;
   if (state.inningsNumber !== 1 && state.inningsNumber !== 2) return null;
   const conditions = state.conditions ?? defaultConditions;
-  const bpo = state.ballsPerOver > 0 ? state.ballsPerOver : 6;
+  const bpo = state.ballsPerOver;
   const fullBalls = overs * bpo;
   const maxWickets = Math.max(1, Math.min(10, state.maxWickets ?? 10));
   const rpo = parRunRate(overs);
@@ -150,14 +162,18 @@ export function predictWin(state: PredictorState): Prediction | null {
   const sdRest = spread(ballsLeft, rest);
 
   if (state.inningsNumber === 2) {
-    const target = state.target ?? 0;
+    const target = state.target;
+    if (target == null || !Number.isFinite(target) || target <= 0) return null;
     const par = Math.round(
       expectedRuns(fullBalls, maxWickets, maxWickets, rpo * batFactor, bpo, fullBalls),
     );
     const needed = target - state.runs;
     if (needed <= 0) return { battingWin: 100, bowlingWin: 0, projected, par };
-    if (ballsLeft === 0 || wicketsInHand === 0)
+    if (ballsLeft === 0 || wicketsInHand === 0) {
+      // A level score is a tie, not a bowling-side win. This binary model cannot represent it.
+      if (needed === 1) return null;
       return { battingWin: 0, bowlingWin: 100, projected, par };
+    }
     const chance = 100 * (1 - normalCdf((needed - 0.5 - rest) / sdRest));
     const battingWin = clampOpen(chance);
     return { battingWin, bowlingWin: 100 - battingWin, projected, par };

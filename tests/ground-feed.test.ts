@@ -41,3 +41,23 @@ test("text format is one KEY VALUE per line", () => {
   assert.match(text, /^NEED 26$/m);
   assert.match(text, /^PAR -$/m);
 });
+
+test("ground controller text cannot inject additional records through team or result labels", () => {
+  const text = groundFeedText(
+    buildGroundFeed({
+      ...board,
+      awayTeam: { ...board.awayTeam, shortName: "TIG\nTOTAL 999" },
+      liveState: { ...board.liveState, result: "Finished\r\nWICKETS 99" },
+    }),
+  );
+  assert.equal(text.split("\n").filter((line) => line.startsWith("TOTAL ")).length, 1);
+  assert.equal(text.split("\n").filter((line) => line.startsWith("WICKETS ")).length, 1);
+});
+
+test("malformed recent-ball entries do not crash the ground feed", () => {
+  const feed = buildGroundFeed({
+    ...board,
+    liveState: { ...board.liveState, recent: [null, { label: "W" }] },
+  });
+  assert.deepEqual(feed.lastBalls, ["W"]);
+});
