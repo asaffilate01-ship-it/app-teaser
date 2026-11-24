@@ -3,7 +3,7 @@
  * Place lists come from the open GeoNames data set, one file per country in /public/geo,
  * fetched only when a country is picked. Anything not listed can be typed in.
  */
-import { liveCountryCodes } from "@/lib/live-centre";
+import { liveCountryCodes } from "./live-centre.ts";
 
 export interface GeoRegion {
   n: string;
