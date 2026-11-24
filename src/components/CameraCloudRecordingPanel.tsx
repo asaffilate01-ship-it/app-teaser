@@ -37,7 +37,10 @@ function ScopedCameraCloudRecordingPanel({ roomId, devices, armedDeviceIds }: Cl
   const requestRef = useRef(0);
   const activeRef = useRef(true);
   const locks = useRef(new Set<string>());
-  const ids = devices.map((device) => device.id).sort().join(",");
+  const ids = devices
+    .map((device) => device.id)
+    .sort()
+    .join(",");
 
   const refresh = useCallback(async () => {
     if (!activeRef.current) return;
