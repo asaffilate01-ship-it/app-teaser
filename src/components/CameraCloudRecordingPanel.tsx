@@ -192,11 +192,12 @@ function ScopedCameraCloudRecordingPanel({ roomId, devices, armedDeviceIds }: Cl
                     " · " + Math.round(recording.archive_object_bytes / 1024) + " KiB"}
                 </p>
               )}
-              {recording && statusVerified && (
+              {recording && (
                 <CameraImportApproval
                   key={recording.id}
                   recording={recording}
                   onSubmitted={refresh}
+                  statusVerified={statusVerified && !busy[device.id]}
                 />
               )}
               {unavailable[device.id] && (
