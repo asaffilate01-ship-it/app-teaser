@@ -199,7 +199,10 @@ function ScopedClubOffice({ organisationId, role, club }: ClubOfficeProps) {
         </button>
       </div>
       {error && data && (
-        <p role="alert" className="rounded-xl border border-amber-300/30 p-3 text-sm text-amber-200">
+        <p
+          role="alert"
+          className="rounded-xl border border-amber-300/30 p-3 text-sm text-amber-200"
+        >
           Refresh failed. Displayed records may be out of date. Refresh before saving changes.
         </p>
       )}
