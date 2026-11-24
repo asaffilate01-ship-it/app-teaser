@@ -55,14 +55,14 @@
 
 ## Pakistan pricing + CricScoreboard (new ask)
 - [x] Review CricScoreboard and compare with the proposed PKR prices
-- [x] Pakistan yearly prices on the pricing page: Club ₨25k/team/yr (₨50k with video), league bands ₨20k / 17.5k / 15k per team, video +₨20k per league team (built with suggested answer; owner confirming)
+- [x] Pakistan yearly prices on the pricing page: Club ₨25k/team/yr (₨50k with video), league bands ₨20k / 17.5k / 15k per team, video +₨20k per league team (owner confirmed)
 - [x] Offline scoring with reliable resync after internet loss: checked (17 tests pass, automatic resend when back online)
 - [x] Streaming guide covers Facebook, YouTube and TikTok
 - [x] League bands 1–10 / 11–20 / 21+ charged only on the teams in each band (tested)
-- [x] Dashboards: simple on free, full on paid (current behaviour; owner confirming)
-- [x] Club team policy: paid clubs pay per team (suggested answer; owner confirming)
+- [x] Dashboards: basic scorecard/charts on free, full analysis on paid (owner confirmed)
+- [x] Club team policy: paid clubs pay per team (owner confirmed)
 - [x] Login sharing: two devices per login (oldest signed out, Devices list in the workspace), club name on the scorer, terms say one login per person; scorers already locked per match
-- [ ] Suspicious-club flags — only if owner picks it
+- [x] Suspicious-club flags excluded: owner chose two-device logins and club names only
 - [x] Remove "features are in development" footer line (all five languages)
 - [x] Regional competitor research (Pakistan, Afghanistan, Gulf, East/Southern Africa, Hong Kong, South Asia, North America, England, EU, Australia/NZ, Far East) with ways to be the best
 - [x] Camera setup review: how many phones at once for live streaming, recording, playback and coaching analysis; fix any limits that contradict the site
@@ -84,7 +84,7 @@
 ## Plan structure (new ask)
 - [x] Free = basic scoring only (with ads); Club/League = full scoring analytics; video & video analytics = extra add-on (pricing page, comparison table, FAQs, all five languages)
 - [x] Video add-on price in Pakistan: ₨25k per club team / ₨20k per league team per year
-- [ ] Video add-on price outside Pakistan — waiting on owner (page shows "quoted per club")
+- [x] Video add-on outside Pakistan stays "quoted per club" (owner confirmed)
 - [x] Paid-plan note on Analysis room, AI Intelligence and Capture (owner: "whatever is best" → badges now)
 - [ ] Switch the plan lock on at go-live (one switch in the plan rules) and add matching database checks for camera rooms — waits on live payments
 
@@ -145,7 +145,7 @@
 - [x] Clubs ask to join a league; league approves; either side can end it
 - [x] Team types (1st/2nd XI, age groups, ladies, veterans); free plan 1 team, paid unlimited (enforced in database)
 - [x] Clubs/leagues invite other clubs to tournaments and leagues; invited club accepts with its teams; teams appear in fixtures
-- [x] Free plan: 1 team; free clubs can host competitions (suggested answer; owner confirming)
+- [x] Free plan: 1 team; free clubs can host competitions (owner confirmed)
 
 ## Competitor gaps round 4 (report in Files)
 - [x] Round 4 gap report: scoring, analysis, training, video, scoreboards, leagues, players, awards, umpires, admin
@@ -192,6 +192,14 @@
 - [x] Card payments — owner chose transfers only (no card gateway, no card fees; treasurer keeps confirming references)
 - [x] Reminders for availability, fees and umpire jobs: in-app bell, phone alerts, hourly automatic + "Send now"
 - [ ] Email reminders — waiting on owner setting up the criclume.com sending address
-- [ ] WhatsApp/SMS reminders — built; waiting on owner connecting a Twilio account (and a Meta-approved WhatsApp template); owner confirmed paid plans only
+- [ ] WhatsApp/SMS reminders — built; connection declined; waits on owner connecting a Twilio account (and a Meta-approved WhatsApp template); owner confirmed paid plans only
 - [x] Go live from the app without OBS — owner chose to skip for now; free OBS overlay and guide stay
 - [ ] LED scoreboard controller test — needs real hardware
+
+## Launch items 1–11 verification
+- [x] Pakistan prices, per-team policy, quoted video outside Pakistan and free tournament hosting confirmed
+- [x] Device list read back in the signed-in app; 3rd device revoked the oldest, and manual sign-out was observed
+- [x] Pakistan pricing and Devices list checked at 411px without horizontal overflow; 28 focused tests passed
+- [ ] Card subscription setup — awaits Paddle approval choice, then account verification; existing unconfigured Stripe scaffolding must be replaced before enabling Paddle
+- [ ] First club domain — awaits the actual club hostname
+- [ ] Legal/safeguarding sign-off — launch checklist prepared; qualified reviewer required

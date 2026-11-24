@@ -1,6 +1,7 @@
 import { getCloudClient } from "@/lib/cloud";
 import { deviceLabel, type DeviceStatus } from "@/lib/device-limit";
 
+let fallbackKey: string | null = null;
 const KEY = "criclume:device-key";
 const claimedKey = (userId: string) => `criclume:device-claimed:${userId}`;
 
@@ -12,7 +13,8 @@ export function thisDeviceKey(): string {
     window.localStorage.setItem(KEY, next);
     return next;
   } catch {
-    return crypto.randomUUID();
+    fallbackKey ??= crypto.randomUUID();
+    return fallbackKey;
   }
 }
 

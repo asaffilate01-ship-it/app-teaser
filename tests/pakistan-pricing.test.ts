@@ -25,12 +25,13 @@ test("Pakistan league video (full system) adds ₨20,000 per team", () => {
 });
 
 test("Pakistan price list shows the yearly prices", () => {
-  const pk = findRegion("PK")!;
+  const pk = findRegion("PK");
+  assert.ok(pk);
   assert.equal(pk.clubPrice, "₨25,000");
   assert.equal(pk.period, "per team / year");
   assert.equal(pk.addonPrice, "₨25,000");
   assert.equal(
-    findRegion("GB")!.addonPrice,
+    findRegion("GB")?.addonPrice,
     undefined,
     "outside Pakistan the add-on stays quoted per club",
   );

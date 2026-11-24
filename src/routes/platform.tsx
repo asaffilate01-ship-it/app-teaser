@@ -568,7 +568,7 @@ function OrganisationOnboarding({
     }
   };
   return (
-    <PageFrame>
+    <PageFrame right={<DevicesButton />}>
       <main
         id="main-content"
         tabIndex={-1}

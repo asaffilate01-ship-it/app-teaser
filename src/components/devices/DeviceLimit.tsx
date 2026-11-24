@@ -10,6 +10,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import { useDeviceLimit } from "@/hooks/use-device-limit";
 import { deviceLimit } from "@/lib/device-limit";
 import { listMyDevices, signOutDevice, type LoginDevice } from "@/lib/device-limit-cloud";
@@ -67,10 +68,10 @@ export function DevicesButton() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <button type="button" className="app-chip-button" aria-label="Signed-in devices">
+        <Button variant="ghost" type="button" className="app-chip-button" aria-label="Signed-in devices" title="Signed-in devices">
           <MonitorSmartphone className="size-4" aria-hidden="true" />
           <span className="hidden md:inline">Devices</span>
-        </button>
+        </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-full max-w-sm overflow-y-auto">
         <SheetHeader>
@@ -92,7 +93,7 @@ export function DevicesButton() {
             </p>
           )}
           {active.map((device) => (
-            <div key={device.id} className="rounded-xl border border-border p-3">
+            <div key={device.id} className="rounded-lg border border-border p-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold">
@@ -106,7 +107,8 @@ export function DevicesButton() {
                   </p>
                 </div>
                 {!device.thisDevice && (
-                  <button
+                  <Button
+                    variant="outline"
                     type="button"
                     disabled={busyId === device.id}
                     className="action-secondary shrink-0 px-3 py-1.5 text-xs"
@@ -124,7 +126,7 @@ export function DevicesButton() {
                     }}
                   >
                     Sign out
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -137,7 +139,7 @@ export function DevicesButton() {
               <ul className="space-y-1 text-xs text-muted-foreground">
                 {earlier.map((device) => (
                   <li key={device.id}>
-                    {device.label} · {when(device.revokedAt!)}
+                    {device.label} · {device.revokedAt ? when(device.revokedAt) : ""}
                   </li>
                 ))}
               </ul>
