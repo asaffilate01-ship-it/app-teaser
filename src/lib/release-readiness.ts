@@ -41,29 +41,144 @@ export interface ReleaseGate {
 const hours = (days: number) => days * 24;
 
 export const releaseGates: readonly ReleaseGate[] = [
-  { id: "green_main_build", label: "Green required CI on current release SHA", phase: "p0", maxAgeHours: hours(7) },
-  { id: "correct_backend_and_schema", label: "Approved live project and migration parity", phase: "p0", maxAgeHours: hours(7) },
-  { id: "deployed_auth_functions", label: "Live authentication and server functions tested", phase: "p0", maxAgeHours: hours(7) },
-  { id: "cross_tenant_rls", label: "Actual cross-club and junior-permission negative tests", phase: "p0", maxAgeHours: hours(30) },
-  { id: "recent_database_backup", label: "Recoverable recent managed database backup or PITR", phase: "p0", maxAgeHours: 36 },
-  { id: "database_and_private_media_restore", label: "Independent database and private-video restore rehearsal", phase: "p0", maxAgeHours: hours(90) },
-  { id: "legal_safeguarding", label: "Signed privacy, player/guardian and safety review", phase: "p0", maxAgeHours: hours(90) },
-  { id: "two_device_full_match", label: "Complete iPhone and Android dual-scorer match", phase: "p1", maxAgeHours: hours(30) },
-  { id: "offline_reconnect_and_conflicts", label: "Airplane mode, replay, undo and conflict field tests", phase: "p1", maxAgeHours: hours(30) },
-  { id: "anonymous_public_scoreboard", label: "Anonymous live scoreboard correctness and data-exposure tests", phase: "p1", maxAgeHours: hours(30) },
-  { id: "mobile_desktop_accessibility", label: "Phone, tablet and desktop usability/accessibility acceptance", phase: "p1", maxAgeHours: hours(30) },
-  { id: "club_academy_league_pilot", label: "Real club/academy/league workflows with signed pilot approval", phase: "p1", maxAgeHours: hours(45) },
-  { id: "commercial_entitlements", label: "Approved subscription provider, payment/cancel and plan checks", phase: "p2", maxAgeHours: hours(14) },
-  { id: "email_push_reminders", label: "Production mail, push and paid-only messaging acceptance", phase: "p2", maxAgeHours: hours(14) },
-  { id: "domain_and_monitoring", label: "Production domains, TLS, alerts and error monitoring", phase: "p2", maxAgeHours: hours(7) },
-  { id: "multi_camera_consent_blur", label: "Actual multi-phone capture, permissions and private blurred replay", phase: "p2", maxAgeHours: hours(30) },
-  { id: "private_media_archive_retention", label: "Private storage, verified copies, expiry and deletion tested", phase: "p2", maxAgeHours: hours(30) },
-  { id: "ai_disabled_or_budget_certified", label: "AI remains disabled or is budget/consent certified", phase: "p2", maxAgeHours: hours(30) },
-  { id: "rain_disabled_or_licensed", label: "Official rain rules remain disabled or are licensed/verified", phase: "p2", maxAgeHours: hours(30) },
-  { id: "native_capture_interruptions", label: "Real native camera and background interruption tests", phase: "p3", maxAgeHours: hours(30) },
-  { id: "signed_ios_android_builds", label: "Reproducible signed production native binaries", phase: "p3", maxAgeHours: hours(14) },
-  { id: "testflight_and_play_closed_testing", label: "TestFlight and closed Play Console test reports", phase: "p3", maxAgeHours: hours(30) },
-  { id: "store_privacy_billing_compliance", label: "Approved store privacy, children and billing declarations", phase: "p3", maxAgeHours: hours(30) },
+  {
+    id: "green_main_build",
+    label: "Green required CI on current release SHA",
+    phase: "p0",
+    maxAgeHours: hours(7),
+  },
+  {
+    id: "correct_backend_and_schema",
+    label: "Approved live project and migration parity",
+    phase: "p0",
+    maxAgeHours: hours(7),
+  },
+  {
+    id: "deployed_auth_functions",
+    label: "Live authentication and server functions tested",
+    phase: "p0",
+    maxAgeHours: hours(7),
+  },
+  {
+    id: "cross_tenant_rls",
+    label: "Actual cross-club and junior-permission negative tests",
+    phase: "p0",
+    maxAgeHours: hours(30),
+  },
+  {
+    id: "recent_database_backup",
+    label: "Recoverable recent managed database backup or PITR",
+    phase: "p0",
+    maxAgeHours: 36,
+  },
+  {
+    id: "database_and_private_media_restore",
+    label: "Independent database and private-video restore rehearsal",
+    phase: "p0",
+    maxAgeHours: hours(90),
+  },
+  {
+    id: "legal_safeguarding",
+    label: "Signed privacy, player/guardian and safety review",
+    phase: "p0",
+    maxAgeHours: hours(90),
+  },
+  {
+    id: "two_device_full_match",
+    label: "Complete iPhone and Android dual-scorer match",
+    phase: "p1",
+    maxAgeHours: hours(30),
+  },
+  {
+    id: "offline_reconnect_and_conflicts",
+    label: "Airplane mode, replay, undo and conflict field tests",
+    phase: "p1",
+    maxAgeHours: hours(30),
+  },
+  {
+    id: "anonymous_public_scoreboard",
+    label: "Anonymous live scoreboard correctness and data-exposure tests",
+    phase: "p1",
+    maxAgeHours: hours(30),
+  },
+  {
+    id: "mobile_desktop_accessibility",
+    label: "Phone, tablet and desktop usability/accessibility acceptance",
+    phase: "p1",
+    maxAgeHours: hours(30),
+  },
+  {
+    id: "club_academy_league_pilot",
+    label: "Real club/academy/league workflows with signed pilot approval",
+    phase: "p1",
+    maxAgeHours: hours(45),
+  },
+  {
+    id: "commercial_entitlements",
+    label: "Approved subscription provider, payment/cancel and plan checks",
+    phase: "p2",
+    maxAgeHours: hours(14),
+  },
+  {
+    id: "email_push_reminders",
+    label: "Production mail, push and paid-only messaging acceptance",
+    phase: "p2",
+    maxAgeHours: hours(14),
+  },
+  {
+    id: "domain_and_monitoring",
+    label: "Production domains, TLS, alerts and error monitoring",
+    phase: "p2",
+    maxAgeHours: hours(7),
+  },
+  {
+    id: "multi_camera_consent_blur",
+    label: "Actual multi-phone capture, permissions and private blurred replay",
+    phase: "p2",
+    maxAgeHours: hours(30),
+  },
+  {
+    id: "private_media_archive_retention",
+    label: "Private storage, verified copies, expiry and deletion tested",
+    phase: "p2",
+    maxAgeHours: hours(30),
+  },
+  {
+    id: "ai_disabled_or_budget_certified",
+    label: "AI remains disabled or is budget/consent certified",
+    phase: "p2",
+    maxAgeHours: hours(30),
+  },
+  {
+    id: "rain_disabled_or_licensed",
+    label: "Official rain rules remain disabled or are licensed/verified",
+    phase: "p2",
+    maxAgeHours: hours(30),
+  },
+  {
+    id: "native_capture_interruptions",
+    label: "Real native camera and background interruption tests",
+    phase: "p3",
+    maxAgeHours: hours(30),
+  },
+  {
+    id: "signed_ios_android_builds",
+    label: "Reproducible signed production native binaries",
+    phase: "p3",
+    maxAgeHours: hours(14),
+  },
+  {
+    id: "testflight_and_play_closed_testing",
+    label: "TestFlight and closed Play Console test reports",
+    phase: "p3",
+    maxAgeHours: hours(30),
+  },
+  {
+    id: "store_privacy_billing_compliance",
+    label: "Approved store privacy, children and billing declarations",
+    phase: "p3",
+    maxAgeHours: hours(30),
+  },
 ];
 
 export type GateEvidence = {
@@ -138,14 +253,16 @@ export function evaluateReleaseEvidence(
             !Number.isFinite(checkedAtMs) ||
             checkedAtMs > nowMs + 5 * 60_000 ||
             nowMs - checkedAtMs > gate.maxAgeHours * 60 * 60_000
-          ) status = "stale";
+          )
+            status = "stale";
           else status = "verified";
         }
       }
       return { id: gate.id, phase: gate.phase, label: gate.label, status };
     });
   return {
-    approved: environmentMatched && results.length > 0 && results.every((r) => r.status === "verified"),
+    approved:
+      environmentMatched && results.length > 0 && results.every((r) => r.status === "verified"),
     environmentMatched,
     results,
     blockers: results.filter((r) => r.status !== "verified").map((r) => r.id),

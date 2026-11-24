@@ -13,7 +13,10 @@ import {
   type CricketMatch,
   type RecordDeliveryInput,
 } from "../src/lib/cricket.ts";
-import { reviewCloudBootstrap, reviewRemoteScorerSnapshot } from "../src/lib/scorer-reconciliation.ts";
+import {
+  reviewCloudBootstrap,
+  reviewRemoteScorerSnapshot,
+} from "../src/lib/scorer-reconciliation.ts";
 import { createOrderedQueueDrainer } from "../src/lib/offline-queue.ts";
 
 /** A deterministic release-regression simulation; NOT a substitute for two physical phones. */
@@ -54,7 +57,10 @@ test("one-over pilot simulates extras, an innings transition, a successful chase
   let match = fixture();
   match = recordDelivery(match, ball(match, { batterRuns: 4, outcome: "hit" }));
   match = recordDelivery(match, ball(match, { extras: { wide: 1 }, outcome: "missed" }));
-  match = recordDelivery(match, ball(match, { extras: { noBall: 1 }, batterRuns: 1, outcome: "hit" }));
+  match = recordDelivery(
+    match,
+    ball(match, { extras: { noBall: 1 }, batterRuns: 1, outcome: "hit" }),
+  );
   for (let index = 0; index < 5; index++) match = recordDelivery(match, ball(match));
 
   const first = currentInnings(match);
@@ -95,7 +101,9 @@ test("offline replay maintains idempotency IDs and leaves unknown sends for a re
   const delivered: string[] = [];
   const drain = createOrderedQueueDrainer({
     read: () => queue,
-    write: (_match, remaining) => { queue = remaining; },
+    write: (_match, remaining) => {
+      queue = remaining;
+    },
     send: async (event) => {
       delivered.push(event.clientEventId);
       if (unavailable) throw Error("offline");
@@ -104,7 +112,10 @@ test("offline replay maintains idempotency IDs and leaves unknown sends for a re
   });
   const interrupted = await drain("pilot");
   assert.deepEqual(interrupted, { sent: 0, remaining: 2, lastSequence: 0 });
-  assert.deepEqual(queue.map((x) => x.clientEventId), ["ball-a", "ball-b"]);
+  assert.deepEqual(
+    queue.map((x) => x.clientEventId),
+    ["ball-a", "ball-b"],
+  );
   unavailable = false;
   const replayed = await drain("pilot");
   assert.equal(replayed.sent, 2);

@@ -15,8 +15,10 @@ const fresh = (phase: ReleasePhase): ReleaseEvidenceBundle => ({
   releaseSha: sha,
   checks: Object.fromEntries(
     releaseGates
-      .filter((gate) => ["p0", "p1", "p2", "p3"].indexOf(gate.phase) <=
-        ["p0", "p1", "p2", "p3"].indexOf(phase))
+      .filter(
+        (gate) =>
+          ["p0", "p1", "p2", "p3"].indexOf(gate.phase) <= ["p0", "p1", "p2", "p3"].indexOf(phase),
+      )
       .map((gate) => [
         gate.id,
         {
@@ -43,7 +45,8 @@ test("a passing CI report cannot approve the wrong source commit or backend", ()
   const data = fresh("p0");
   assert.equal(evaluateReleaseEvidence(data, "p0", "b".repeat(40), nowMs).approved, false);
   assert.equal(
-    evaluateReleaseEvidence({ ...data, projectRef: "ebzinvoxundsdubczqfg" }, "p0", sha, nowMs).approved,
+    evaluateReleaseEvidence({ ...data, projectRef: "ebzinvoxundsdubczqfg" }, "p0", sha, nowMs)
+      .approved,
     false,
   );
   assert.equal(evaluateReleaseEvidence(data, "p0", "not-a-real-sha", nowMs).approved, false);

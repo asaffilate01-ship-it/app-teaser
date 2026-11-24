@@ -1,7 +1,4 @@
-import {
-  evaluateReleaseEvidence,
-  releasePhases,
-} from "../src/lib/release-readiness.ts";
+import { evaluateReleaseEvidence, releasePhases } from "../src/lib/release-readiness.ts";
 
 // Run ONLY against evidence independently collected from the correct live
 // CricLume environment. This does not connect to, deploy or alter production.
@@ -30,7 +27,8 @@ try {
     !bundle.checks ||
     typeof bundle.checks !== "object" ||
     Array.isArray(bundle.checks)
-  ) throw new Error("Invalid evidence bundle");
+  )
+    throw new Error("Invalid evidence bundle");
 } catch {
   console.error("Release BLOCKED: invalid structured release evidence.");
   process.exit(2);
