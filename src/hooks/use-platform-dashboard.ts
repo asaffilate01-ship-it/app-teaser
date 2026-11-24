@@ -11,6 +11,7 @@ export function usePlatformDashboard(organisationId: string | null, role: Platfo
   const [loading, setLoading] = useState(Boolean(organisationId && role));
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const requestRef = useRef(0);
 
   const refresh = useCallback(async () => {
@@ -24,7 +25,10 @@ export function usePlatformDashboard(organisationId: string | null, role: Platfo
     setError(null);
     try {
       const next = await loadOrganisationDashboard(organisationId, role);
-      if (request === requestRef.current) setData(next);
+      if (request === requestRef.current) {
+        setData(next);
+        setLastUpdated(Date.now());
+      }
     } catch (reason) {
       if (request === requestRef.current)
         setError(reason instanceof Error ? reason.message : "Could not load the control centre.");
@@ -38,6 +42,7 @@ export function usePlatformDashboard(organisationId: string | null, role: Platfo
 
   useEffect(() => {
     setData(null);
+    setLastUpdated(null);
     setLoading(Boolean(organisationId && role));
     void refresh();
     if (!organisationId || !role)
@@ -67,5 +72,5 @@ export function usePlatformDashboard(organisationId: string | null, role: Platfo
     [refresh],
   );
 
-  return { data, loading, refreshing, error, setError, refresh, run };
+  return { data, loading, refreshing, error, setError, refresh, run, lastUpdated };
 }
