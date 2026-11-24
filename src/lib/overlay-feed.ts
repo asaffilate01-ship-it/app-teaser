@@ -93,7 +93,7 @@ export function buildOverlayFeed(
       : null;
 
   // Batters at the crease: striker first. Fall back to the simple striker / non-striker figures.
-  let batters: OverlayBatter[] = ground.batting
+  const batters: OverlayBatter[] = ground.batting
     .filter((b) => b.atCrease)
     .sort((a, b) => Number(b.onStrike) - Number(a.onStrike))
     .slice(0, 2)
