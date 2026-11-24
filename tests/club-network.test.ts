@@ -1,8 +1,9 @@
-import { describe, expect, test } from "bun:test";
-import { cleanPlace, placeLine, provinceNames, regionNames, townNames, type GeoCountry } from "../src/lib/geo";
-import { canAddTeam, suggestedShortName, suggestedTeamName } from "../src/lib/team-types";
-import { teamLimit } from "../src/lib/plans";
-import { externalTeams } from "../src/lib/platform-cloud";
+import { describe, test } from "node:test";
+import { expect } from "./assert-expect.ts";
+import { cleanPlace, placeLine, provinceNames, regionNames, townNames, type GeoCountry } from "../src/lib/geo.ts";
+import { canAddTeam, suggestedShortName, suggestedTeamName } from "../src/lib/team-types.ts";
+import { teamLimit } from "../src/lib/plans.ts";
+import { externalTeams } from "../src/lib/external-teams.ts";
 
 const sample: GeoCountry = {
   v: 1,
