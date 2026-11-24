@@ -101,3 +101,17 @@ export function findFixtureStartConflict(
         Boolean(proposed.groundId && proposed.groundId === fixture.groundId)),
   );
 }
+
+/** Find proposed starts that clash with the currently visible fixture schedule. */
+export function reviewProposedFixtureStarts(
+  proposed: readonly Pick<
+    ScheduledFixture,
+    "startsAt" | "homeTeamId" | "awayTeamId" | "groundId"
+  >[],
+  existing: readonly ScheduledFixture[],
+) {
+  return proposed.flatMap((fixture, index) => {
+    const conflict = findFixtureStartConflict(fixture, existing);
+    return conflict ? [{ index, existingFixtureId: conflict.id }] : [];
+  });
+}

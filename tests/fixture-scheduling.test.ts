@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { findFixtureStartConflict, reviewFixtureSchedule } from "../src/lib/fixture-scheduling.ts";
+import {
+  findFixtureStartConflict,
+  reviewFixtureSchedule,
+  reviewProposedFixtureStarts,
+} from "../src/lib/fixture-scheduling.ts";
 import type { FixtureRecord } from "../src/lib/platform-cloud.ts";
 
 type FixtureInput = Pick<
@@ -99,4 +103,18 @@ test("manual fixture preflight permits different starts, drafts and cancelled bo
   );
   assert.equal(findFixtureStartConflict({ ...first, startsAt: null }, [first]), undefined);
   assert.equal(findFixtureStartConflict(first, [{ ...first, status: "cancelled" }]), undefined);
+});
+
+test("bulk fixture preflight identifies only conflicting proposed matches", () => {
+  const proposals = [
+    { ...first, groundId: null },
+    { ...first, startsAt: null },
+    { ...first, homeTeamId: "team-x", awayTeamId: "team-y" },
+    { ...first, startsAt: "2026-12-10T17:00:00Z" },
+  ];
+  assert.deepEqual(reviewProposedFixtureStarts(proposals, [first]), [
+    { index: 0, existingFixtureId: "f1" },
+    { index: 2, existingFixtureId: "f1" },
+  ]);
+  assert.deepEqual(reviewProposedFixtureStarts(proposals, [{ ...first, status: "cancelled" }]), []);
 });

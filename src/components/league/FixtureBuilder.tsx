@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { CalendarRange, Wand2 } from "lucide-react";
 import { buildRoundRobin } from "@/lib/fixture-builder";
+import { reviewProposedFixtureStarts } from "@/lib/fixture-scheduling";
 import { createFixtures, type PlatformDashboardData } from "@/lib/platform-cloud";
 
 type RunAction = <T>(action: () => Promise<T>) => Promise<T>;
@@ -44,6 +45,10 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
     [selected, legs, firstDate, startTime, gap, groundMode, data.grounds],
   );
   const unallocated = groundMode === "none" ? 0 : plan.fixtures.filter((f) => !f.groundId).length;
+  const conflicts = useMemo(
+    () => reviewProposedFixtureStarts(plan.fixtures, data.fixtures),
+    [plan.fixtures, data.fixtures],
+  );
   const existing = data.fixtures.filter(
     (fixture) => fixture.competitionId === competitionId,
   ).length;
@@ -54,6 +59,7 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
     );
 
   const create = async () => {
+    if (busy || conflicts.length > 0 || plan.fixtures.length > 400) return;
     if (!competition?.ruleVersionId) {
       setMessage({ tone: "error", text: "Choose a competition with an active rule version." });
       return;
@@ -219,6 +225,22 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
               undated drafts so you can arrange another venue or time.
             </p>
           )}
+          {conflicts.length > 0 && (
+            <div role="alert" className="mt-3 rounded-lg border border-amber-300/30 p-3 text-sm">
+              <p className="font-semibold text-amber-200">
+                {conflicts.length} proposed matches clash with existing fixture start times.
+              </p>
+              <p className="mt-1 text-slate-300">
+                Change the dates, teams or grounds before creating the season.
+              </p>
+              <a
+                href={`#fixture-${conflicts[0]!.existingFixtureId}`}
+                className="mt-2 inline-block text-amber-200 underline"
+              >
+                Review first conflicting fixture
+              </a>
+            </div>
+          )}
           <div className="builder-preview mt-3" aria-label="Fixture preview">
             {rounds.map((round) => (
               <div key={round} className="builder-round">
@@ -279,7 +301,7 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
             <button
               type="button"
               className="action-primary"
-              disabled={busy || plan.fixtures.length > 400}
+              disabled={busy || plan.fixtures.length > 400 || conflicts.length > 0}
               onClick={() => void create()}
             >
               {busy ? "Creating…" : `Create ${plan.fixtures.length} fixtures`}
