@@ -3,6 +3,9 @@ import test from "node:test";
 import {
   estimateDeliveryCues,
   isReviewableClip,
+  privateReplayDeadline,
+  replaySeekPosition,
+  sameReplaySource,
   storageVideoMimeType,
   type CameraClip,
   type CameraDelivery,
@@ -91,4 +94,36 @@ test("overlapping camera angles retain separate cues in canonical ball order", (
     [8, 8, 9, 9],
   );
   assert.match(result[3]!.label, /WICKET/);
+});
+
+test("private preview lifetime cannot outlast retention or its local playback window", () => {
+  const now = Date.parse("2026-11-21T12:00:00Z");
+  assert.equal(privateReplayDeadline(clip, now), now + 240_000);
+  const soon = { ...clip, retention_expires_at: new Date(now + 10_000).toISOString() };
+  assert.equal(privateReplayDeadline(soon, now), now + 10_000);
+  assert.equal(privateReplayDeadline(soon, now + 10_000), null);
+  assert.equal(privateReplayDeadline({ ...clip, recording_consent: "withdrawn" }, now), null);
+  assert.equal(privateReplayDeadline(clip, NaN), null);
+});
+
+test("a changed source or privacy policy invalidates an existing replay preview", () => {
+  assert.equal(sameReplaySource(clip, { ...clip, status: "ready" }), true);
+  for (const changed of [
+    { ...clip, storage_path: "different/source.webm" },
+    { ...clip, recording_consent: "withdrawn" },
+    { ...clip, blur_mode: "faces" as const },
+    { ...clip, retention_expires_at: "2026-11-22T00:00:00Z" },
+    { ...clip, device_id: "device-2" },
+  ]) {
+    assert.equal(sameReplaySource(clip, changed), false);
+  }
+});
+
+test("cue seeking clamps to playable duration and rejects invalid timestamps", () => {
+  assert.equal(replaySeekPosition(7, 60), 7);
+  assert.equal(replaySeekPosition(-3, 60), 0);
+  assert.equal(replaySeekPosition(90, 60), 59.99);
+  assert.equal(replaySeekPosition(7, 0), null);
+  assert.equal(replaySeekPosition(7, Infinity), null);
+  assert.equal(replaySeekPosition(NaN, 60), null);
 });
