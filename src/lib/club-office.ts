@@ -9,13 +9,17 @@ export function currencyDigits(currency: string): number {
   return zeroDecimal.has(currency) ? 0 : 2;
 }
 
-/** "2,500.50" → minor units. Returns null for empty, negative or non-numeric input. */
+/** Parse major units exactly; never round a payment or silently strip malformed grouping. */
 export function toMinor(amount: string, currency: string): number | null {
-  const cleaned = amount.replace(/[,\s]/g, "");
-  if (!/^\d+(\.\d+)?$/.test(cleaned)) return null;
+  const cleaned = amount.trim().replace(/[\u00a0\u202f]/g, " ");
+  const [whole, fraction = "", ...extra] = cleaned.split(".");
+  if (!whole || extra.length || (cleaned.includes(".") && !/^\d+$/.test(fraction))) return null;
+  const grouped = /^(?:\d+|\d{1,3}(?:,\d{3})+|\d{1,2}(?:,\d{2})+,\d{3}|\d{1,3}(?: \d{3})+)$/;
+  if (!grouped.test(whole)) return null;
   const digits = currencyDigits(currency);
-  const value = Math.round(Number(cleaned) * 10 ** digits);
-  return value > 0 ? value : null;
+  if (fraction.length > digits) return null;
+  const value = Number(whole.replace(/[, ]/g, "") + fraction.padEnd(digits, "0"));
+  return Number.isSafeInteger(value) && value > 0 ? value : null;
 }
 
 export function formatMoney(minor: number, currency: string): string {
@@ -30,6 +34,20 @@ export function formatMoney(minor: number, currency: string): string {
   } catch {
     return `${currency} ${(minor / 10 ** digits).toFixed(digits)}`;
   }
+}
+
+/** An unavailable team never widens a fee schedule to the whole club. */
+export function feeScheduleTargets(
+  schedule: { active: boolean; team_id: string | null },
+  teams: readonly { id: string; playerIds: readonly string[]; external?: boolean }[],
+  playerIds: readonly string[],
+): string[] {
+  if (!schedule.active) return [];
+  const eligible = new Set(playerIds);
+  if (schedule.team_id === null) return [...eligible];
+  const team = teams.find((item) => item.id === schedule.team_id && !item.external);
+  if (!team) return [];
+  return [...new Set(team.playerIds)].filter((id) => eligible.has(id));
 }
 
 export interface ChargeLike {
