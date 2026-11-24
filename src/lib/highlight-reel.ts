@@ -23,9 +23,19 @@ export interface ReelItem {
 
 export const maxReelItems = 40;
 
-function qualifies(delivery: ReelDelivery, kind: ReelKind, playerId: string | null): ReelItem["tone"] | null {
+function qualifies(
+  delivery: ReelDelivery,
+  kind: ReelKind,
+  playerId: string | null,
+): ReelItem["tone"] | null {
   const runs = delivery.batter_runs ?? null;
-  const tone: ReelItem["tone"] | null = delivery.wicket ? "wicket" : runs === 6 ? "six" : runs === 4 ? "four" : null;
+  const tone: ReelItem["tone"] | null = delivery.wicket
+    ? "wicket"
+    : runs === 6
+      ? "six"
+      : runs === 4
+        ? "four"
+        : null;
   if (!tone) return null;
   switch (kind) {
     case "boundaries":
@@ -65,7 +75,11 @@ export function buildHighlightReel(input: {
   const post = input.postRollMs ?? 5_000;
   const usable = input.clips
     .filter((clip) => isReviewableClip(clip, input.nowMs) && clipDurationSeconds(clip) !== null)
-    .sort((a, b) => Number(b.device_id === input.preferDeviceId) - Number(a.device_id === input.preferDeviceId) || a.started_at.localeCompare(b.started_at));
+    .sort(
+      (a, b) =>
+        Number(b.device_id === input.preferDeviceId) -
+          Number(a.device_id === input.preferDeviceId) || a.started_at.localeCompare(b.started_at),
+    );
   const items: ReelItem[] = [];
   const ordered = [...input.deliveries].sort((a, b) => a.sequence - b.sequence);
   for (const delivery of ordered) {

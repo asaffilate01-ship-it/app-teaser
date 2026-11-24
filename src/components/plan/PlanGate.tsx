@@ -1,7 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Lock, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { planGate, readPlanId, type PlanFeature, type PlanId } from "@/lib/plans";
+import {
+  gateWhenPlanUnknown,
+  planGate,
+  readPlanId,
+  type PlanFeature,
+  type PlanId,
+} from "@/lib/plans";
 
 interface PlanAccess {
   plan: PlanId;
@@ -40,19 +46,47 @@ const needs: Record<PlanFeature, string> = {
 };
 
 /** Wraps a paid screen: shows it as normal, with a "Paid plan" note before go-live, or a lock card after. */
-export function PlanGate({ organisationId, feature, children }: { organisationId: string; feature: PlanFeature | undefined; children: ReactNode }) {
+export function PlanGate({
+  organisationId,
+  feature,
+  children,
+}: {
+  organisationId: string;
+  feature: PlanFeature | undefined;
+  children: ReactNode;
+}) {
   const access = useClubPlan(organisationId);
-  if (!feature || !access) return <>{children}</>;
+  if (!feature) return <>{children}</>;
+  // Loading or failed entitlement lookups must not unlock paid features
+  // after production enforcement is enabled. Before launch, preserve the
+  // existing, clearly labelled free-preview experience.
+  if (!access && gateWhenPlanUnknown(feature) === "locked") {
+    return (
+      <section className="office-card plan-lock" role="status">
+        <h2 className="font-display text-2xl font-bold">Unable to verify club access</h2>
+        <p className="office-meta">
+          Paid feature permissions are temporarily unavailable. Refresh the page or contact your
+          club administrator. Your scoring records remain safe.
+        </p>
+      </section>
+    );
+  }
+  if (!access) return <>{children}</>;
   const gate = planGate(access.plan, feature, { videoAddon: access.videoAddon });
   if (gate === "open") return <>{children}</>;
   if (gate === "locked")
     return (
-      <section className="office-card plan-lock" aria-label={`${featureName[feature]} needs a paid plan`}>
+      <section
+        className="office-card plan-lock"
+        aria-label={`${featureName[feature]} needs a paid plan`}
+      >
         <span className="icon-tile flex size-11 items-center justify-center">
           <Lock className="size-5 text-gold" />
         </span>
         <h2 className="font-display text-2xl font-bold">{featureName[feature]}</h2>
-        <p className="office-meta">This part of CricLume comes with {needs[feature]}. Basic scoring stays free.</p>
+        <p className="office-meta">
+          This part of CricLume comes with {needs[feature]}. Basic scoring stays free.
+        </p>
         <a href="/pricing" className="action-primary">
           See plans
         </a>
@@ -63,7 +97,8 @@ export function PlanGate({ organisationId, feature, children }: { organisationId
       <div className="plan-note" role="note">
         <Sparkles className="size-4 shrink-0 text-gold" aria-hidden="true" />
         <p>
-          <strong>Paid plan feature.</strong> {featureName[feature]} comes with {needs[feature]}. It's open to every club while CricLume launches.
+          <strong>Paid plan feature.</strong> {featureName[feature]} comes with {needs[feature]}.
+          It's open to every club while CricLume launches.
         </p>
         <a href="/pricing" className="plan-note-link">
           Plans

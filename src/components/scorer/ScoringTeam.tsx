@@ -2,12 +2,22 @@ import { useState } from "react";
 import { Camera, ExternalLink, ShieldCheck, Users } from "lucide-react";
 import { setScoringDuty } from "@/lib/cloud";
 import { createCameraRoom } from "@/lib/platform-cloud";
-import { dutyLabel, scoringDuties, type ScoringDuty, type ScoringTeamMember } from "@/lib/scoring-duties";
+import {
+  dutyLabel,
+  scoringDuties,
+  type ScoringDuty,
+  type ScoringTeamMember,
+} from "@/lib/scoring-duties";
 
 function friendly(reason: unknown): string {
-  const message = reason instanceof Error ? reason.message : String((reason as { message?: unknown })?.message ?? "");
-  if (/active members/i.test(message)) return "Only active members of the club can be given a scoring job.";
-  if (/only club admins/i.test(message)) return "Only club admins (or the lead scorer, for helpers) can hand out jobs.";
+  const message =
+    reason instanceof Error
+      ? reason.message
+      : String((reason as { message?: unknown })?.message ?? "");
+  if (/active members/i.test(message))
+    return "Only active members of the club can be given a scoring job.";
+  if (/only club admins/i.test(message))
+    return "Only club admins (or the lead scorer, for helpers) can hand out jobs.";
   return "That change didn't save. Check your connection and try again.";
 }
 
@@ -42,7 +52,12 @@ export function ScoringTeamStrip({
     setBusy(key);
     setError(null);
     try {
-      await setScoringDuty({ matchId, userId: member.userId, duty, enabled: !member.duties.includes(duty) });
+      await setScoringDuty({
+        matchId,
+        userId: member.userId,
+        duty,
+        enabled: !member.duties.includes(duty),
+      });
       onChanged();
     } catch (reason) {
       setError(friendly(reason));
@@ -56,7 +71,9 @@ export function ScoringTeamStrip({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <ShieldCheck className="size-4 shrink-0 text-amber-300" aria-hidden="true" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Your job</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+            Your job
+          </span>
           {mine.map((duty) => (
             <span key={duty} className="hero-chip">
               {isAdmin && duty === "lead" ? "Club admin · everything" : dutyLabel(duty)}
@@ -74,7 +91,8 @@ export function ScoringTeamStrip({
           aria-expanded={open}
           onClick={() => setOpen((value) => !value)}
         >
-          <Users className="size-4" aria-hidden="true" /> {canManage ? "Scoring team" : "Who's scoring"}
+          <Users className="size-4" aria-hidden="true" />{" "}
+          {canManage ? "Scoring team" : "Who's scoring"}
         </button>
       </div>
       {open && (
@@ -96,11 +114,17 @@ export function ScoringTeamStrip({
                     {member.userId === myUserId ? " (you)" : ""}
                   </p>
                   <p className="text-[11px] capitalize text-slate-400">
-                    {member.alwaysFull ? "Club admin · can do everything" : member.clubRole.replaceAll("_", " ")}
+                    {member.alwaysFull
+                      ? "Club admin · can do everything"
+                      : member.clubRole.replaceAll("_", " ")}
                   </p>
                 </div>
                 {!member.alwaysFull && (
-                  <div className="flex flex-wrap gap-1.5" role="group" aria-label={`Jobs for ${member.name}`}>
+                  <div
+                    className="flex flex-wrap gap-1.5"
+                    role="group"
+                    aria-label={`Jobs for ${member.name}`}
+                  >
                     {scoringDuties.map((duty) => {
                       const on = member.duties.includes(duty.id);
                       const allowed = canManage && (duty.id !== "lead" || isAdmin);
@@ -129,7 +153,9 @@ export function ScoringTeamStrip({
             </p>
           )}
           {!canManage && (
-            <p className="text-[11px] text-slate-400">Ask a club admin or the lead scorer to change jobs.</p>
+            <p className="text-[11px] text-slate-400">
+              Ask a club admin or the lead scorer to change jobs.
+            </p>
           )}
         </div>
       )}
@@ -159,21 +185,36 @@ export function VideoDutyCard({ matchId }: { matchId: string }) {
         <Camera className="size-4" aria-hidden="true" /> Video feed
       </h2>
       <p className="text-sm text-slate-300">
-        You run the cameras for this match. Open a camera room, pair the phones, then direct them from the
-        director screen. The score is kept by the scorers.
+        You run the cameras for this match. Open a camera room, pair the phones, then direct them
+        from the director screen. The score is kept by the scorers.
       </p>
-      <button type="button" className="action-primary min-h-11" disabled={busy} onClick={() => void open()}>
+      <button
+        type="button"
+        className="action-primary min-h-11"
+        disabled={busy}
+        onClick={() => void open()}
+      >
         {busy ? "Opening…" : "Open a camera room"}
       </button>
       {pairing && (
         <div className="rounded-xl border border-amber-300/20 bg-amber-300/[0.07] p-4">
-          <p className="text-xs text-slate-400">Pairing code for the camera phones (valid 30 minutes)</p>
-          <p className="mt-1 break-all font-mono text-lg font-bold text-amber-200">{pairing.pairingToken}</p>
+          <p className="text-xs text-slate-400">
+            Pairing code for the camera phones (valid 30 minutes)
+          </p>
+          <p className="mt-1 break-all font-mono text-lg font-bold text-amber-200">
+            {pairing.pairingToken}
+          </p>
           <div className="mt-3 flex flex-wrap gap-4 text-xs font-bold text-amber-200">
-            <a href={`/camera/${pairing.roomId}`} className="inline-flex items-center gap-1 underline">
+            <a
+              href={`/camera/${pairing.roomId}`}
+              className="inline-flex items-center gap-1 underline"
+            >
               Camera phone page <ExternalLink className="size-3" aria-hidden="true" />
             </a>
-            <a href={`/director/${pairing.roomId}`} className="inline-flex items-center gap-1 underline">
+            <a
+              href={`/director/${pairing.roomId}`}
+              className="inline-flex items-center gap-1 underline"
+            >
               Director screen <ExternalLink className="size-3" aria-hidden="true" />
             </a>
           </div>

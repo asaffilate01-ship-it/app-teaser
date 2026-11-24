@@ -54,10 +54,22 @@ function wedge(start: number, end: number, leftHanded: boolean) {
 }
 
 const runClass = (shot: PlottedShot) =>
-  shot.ball.wicket ? "ww-w" : shot.ball.batterRuns >= 6 ? "ww-r6" : shot.ball.batterRuns === 4 ? "ww-r4" : `ww-r${Math.min(3, shot.ball.batterRuns)}`;
+  shot.ball.wicket
+    ? "ww-w"
+    : shot.ball.batterRuns >= 6
+      ? "ww-r6"
+      : shot.ball.batterRuns === 4
+        ? "ww-r4"
+        : `ww-r${Math.min(3, shot.ball.batterRuns)}`;
 
 const runWord = (ball: WheelBall) =>
-  ball.wicket ? "Wicket" : ball.batterRuns >= 6 ? "SIX" : ball.batterRuns === 4 ? "FOUR" : `${ball.batterRuns} run${ball.batterRuns === 1 ? "" : "s"}`;
+  ball.wicket
+    ? "Wicket"
+    : ball.batterRuns >= 6
+      ? "SIX"
+      : ball.batterRuns === 4
+        ? "FOUR"
+        : `${ball.batterRuns} run${ball.batterRuns === 1 ? "" : "s"}`;
 
 export function WagonWheelField({
   balls,
@@ -82,7 +94,10 @@ export function WagonWheelField({
   const [activeId, setActiveId] = useState("");
 
   const scoped = useMemo(
-    () => balls.filter((b) => (!batter || b.strikerId === batter) && (!bowler || b.bowlerId === bowler)),
+    () =>
+      balls.filter(
+        (b) => (!batter || b.strikerId === batter) && (!bowler || b.bowlerId === bowler),
+      ),
     [balls, batter, bowler],
   );
   // Flip by itself for a left-handed batter; the RH/LH buttons still override until the batter changes.
@@ -169,11 +184,22 @@ export function WagonWheelField({
 
       {!compact && batters.length > 1 && (
         <div className="ww-scroll" role="group" aria-label="Batter">
-          <button type="button" className="ww-pill" aria-pressed={!batter} onClick={() => setBatter("")}>
+          <button
+            type="button"
+            className="ww-pill"
+            aria-pressed={!batter}
+            onClick={() => setBatter("")}
+          >
             All batters
           </button>
           {batters.map(([id, runs]) => (
-            <button key={id} type="button" className="ww-pill" aria-pressed={batter === id} onClick={() => setBatter(batter === id ? "" : id)}>
+            <button
+              key={id}
+              type="button"
+              className="ww-pill"
+              aria-pressed={batter === id}
+              onClick={() => setBatter(batter === id ? "" : id)}
+            >
               {playerName(id)} <span className="ww-pill-runs">{runs}</span>
             </button>
           ))}
@@ -182,7 +208,12 @@ export function WagonWheelField({
 
       <div className={compact ? "ww-body ww-body-compact" : "ww-body"}>
         <div className="ww-stage">
-          <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="ww-svg" role="img" aria-label={`${title}: ${shots.length} shots, ${summary.runs} bat runs`}>
+          <svg
+            viewBox={`0 0 ${SIZE} ${SIZE}`}
+            className="ww-svg"
+            role="img"
+            aria-label={`${title}: ${shots.length} shots, ${summary.runs} bat runs`}
+          >
             <defs>
               <radialGradient id="ww-grass" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" className="ww-grass-in" />
@@ -199,7 +230,14 @@ export function WagonWheelField({
             <circle cx={C} cy={C} r={R + 30} className="ww-apron" />
             <circle cx={C} cy={C} r={R} fill="url(#ww-grass)" />
             {[0.2, 0.4, 0.6, 0.8].map((f) => (
-              <circle key={f} cx={C} cy={C} r={R * f + R * 0.1} className="ww-mow" strokeWidth={R * 0.1} />
+              <circle
+                key={f}
+                cx={C}
+                cy={C}
+                r={R * f + R * 0.1}
+                className="ww-mow"
+                strokeWidth={R * 0.1}
+              />
             ))}
             {areas.map((a) => (
               <path
@@ -221,8 +259,12 @@ export function WagonWheelField({
               const stat = summary.areas.find((s) => s.area === a.name);
               return (
                 <g key={a.name} className={`ww-label ${area === a.name ? "is-on" : ""}`}>
-                  <text x={p.x} y={p.y - 1} textAnchor="middle">{a.label}</text>
-                  <text x={p.x} y={p.y + 10} textAnchor="middle" className="ww-label-runs">{stat?.runs ?? 0}</text>
+                  <text x={p.x} y={p.y - 1} textAnchor="middle">
+                    {a.label}
+                  </text>
+                  <text x={p.x} y={p.y + 10} textAnchor="middle" className="ww-label-runs">
+                    {stat?.runs ?? 0}
+                  </text>
                 </g>
               );
             })}
@@ -230,8 +272,12 @@ export function WagonWheelField({
             <rect x={C - 7} y={C - 62} width={14} height={70} rx={2} className="ww-pitch" />
             <line x1={C - 10} x2={C + 10} y1={C - 52} y2={C - 52} className="ww-crease" />
             <line x1={C - 10} x2={C + 10} y1={C - 2} y2={C - 2} className="ww-crease" />
-            <text x={20} y={26} className="ww-side">{leftHanded ? "OFF" : "LEG"}</text>
-            <text x={SIZE - 20} y={26} textAnchor="end" className="ww-side">{leftHanded ? "LEG" : "OFF"}</text>
+            <text x={20} y={26} className="ww-side">
+              {leftHanded ? "OFF" : "LEG"}
+            </text>
+            <text x={SIZE - 20} y={26} textAnchor="end" className="ww-side">
+              {leftHanded ? "LEG" : "OFF"}
+            </text>
 
             <g>
               {shots.map((s) => {
@@ -259,7 +305,11 @@ export function WagonWheelField({
                       }
                     }}
                   >
-                    <path d={path} className="ww-line" filter={s.ball.batterRuns >= 4 ? "url(#ww-glow)" : undefined} />
+                    <path
+                      d={path}
+                      className="ww-line"
+                      filter={s.ball.batterRuns >= 4 ? "url(#ww-glow)" : undefined}
+                    />
                     <path d={path} className="ww-hit" />
                     {s.ball.wicket ? (
                       <g className="ww-x" transform={`translate(${ex} ${ey})`}>
@@ -267,7 +317,12 @@ export function WagonWheelField({
                         <line x1={-4.5} y1={4.5} x2={4.5} y2={-4.5} />
                       </g>
                     ) : (
-                      <circle cx={ex} cy={ey} r={s.ball.batterRuns >= 4 ? 4.2 : 3} className="ww-end" />
+                      <circle
+                        cx={ex}
+                        cy={ey}
+                        r={s.ball.batterRuns >= 4 ? 4.2 : 3}
+                        className="ww-end"
+                      />
                     )}
                   </g>
                 );
@@ -284,7 +339,11 @@ export function WagonWheelField({
                 : shots.length
                   ? "Tap a line for the ball, or a slice of the ground to focus on it."
                   : "No shots to show. Pick a field position while scoring to draw it here."}
-            {!active && !area && mixed && shots.length > 0 && " Left- and right-handers mixed: each shot is drawn from its batter's own view. Pick a batter to see theirs."}
+            {!active &&
+              !area &&
+              mixed &&
+              shots.length > 0 &&
+              " Left- and right-handers mixed: each shot is drawn from its batter's own view. Pick a batter to see theirs."}
           </p>
         </div>
 
@@ -308,7 +367,10 @@ export function WagonWheelField({
             </div>
           </dl>
 
-          <div className="ww-split" aria-label={`Off side ${pct(summary.offRuns)}%, leg side ${pct(summary.legRuns)}%`}>
+          <div
+            className="ww-split"
+            aria-label={`Off side ${pct(summary.offRuns)}%, leg side ${pct(summary.legRuns)}%`}
+          >
             <div className="ww-split-labels">
               <span>Off {pct(summary.offRuns)}%</span>
               {summary.straightRuns > 0 && <span>Straight {pct(summary.straightRuns)}%</span>}
@@ -316,7 +378,10 @@ export function WagonWheelField({
             </div>
             <div className="ww-split-bar">
               <span className="ww-split-off" style={{ width: `${pct(summary.offRuns)}%` }} />
-              <span className="ww-split-straight" style={{ width: `${pct(summary.straightRuns)}%` }} />
+              <span
+                className="ww-split-straight"
+                style={{ width: `${pct(summary.straightRuns)}%` }}
+              />
               <span className="ww-split-leg" style={{ width: `${pct(summary.legRuns)}%` }} />
             </div>
           </div>
@@ -325,7 +390,11 @@ export function WagonWheelField({
             <ul className="ww-areas">
               {summary.areas.slice(0, compact ? 4 : 9).map((a) => (
                 <li key={a.area}>
-                  <button type="button" aria-pressed={area === a.area} onClick={() => setArea(area === a.area ? "" : a.area)}>
+                  <button
+                    type="button"
+                    aria-pressed={area === a.area}
+                    onClick={() => setArea(area === a.area ? "" : a.area)}
+                  >
                     <span className="ww-area-name">{a.area}</span>
                     <span className="ww-area-bar">
                       <span style={{ width: `${(a.runs / topAreaRuns) * 100}%` }} />
@@ -353,7 +422,8 @@ export function WagonWheelField({
 
           {summary.unplacedRuns > 0 && (
             <p className="ww-note">
-              {summary.unplacedRuns} run{summary.unplacedRuns === 1 ? "" : "s"} without a field position aren't drawn.
+              {summary.unplacedRuns} run{summary.unplacedRuns === 1 ? "" : "s"} without a field
+              position aren't drawn.
             </p>
           )}
           {filtered && (
@@ -372,10 +442,17 @@ export function WagonWheelField({
             .slice(0, 24)
             .map((s) => (
               <li key={s.ball.id}>
-                <button type="button" aria-pressed={activeId === s.ball.id} onClick={() => setActiveId(activeId === s.ball.id ? "" : s.ball.id)}>
-                  <span className={`ww-badge ${runClass(s)}`}>{s.ball.wicket ? "W" : s.ball.batterRuns}</span>
+                <button
+                  type="button"
+                  aria-pressed={activeId === s.ball.id}
+                  onClick={() => setActiveId(activeId === s.ball.id ? "" : s.ball.id)}
+                >
+                  <span className={`ww-badge ${runClass(s)}`}>
+                    {s.ball.wicket ? "W" : s.ball.batterRuns}
+                  </span>
                   <span className="min-w-0 flex-1 truncate">
-                    {playerName(s.ball.strikerId)} <span className="ww-muted">· {s.ball.fieldZone}</span>
+                    {playerName(s.ball.strikerId)}{" "}
+                    <span className="ww-muted">· {s.ball.fieldZone}</span>
                   </span>
                   <span className="ww-muted">
                     {s.ball.over}.{s.ball.ball}

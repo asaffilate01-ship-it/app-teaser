@@ -2,7 +2,13 @@ import { LiveListingPanel } from "@/components/club/LiveListingPanel";
 import { LeaguePanel } from "@/components/club/LeaguePanel";
 import { LocationPicker } from "@/components/club/LocationPicker";
 import { CompetitionNetwork } from "@/components/league/CompetitionInvites";
-import { loadTeamAllowance, requestLeague, saveOrganisationPlace, searchLeagues, type LeagueOption } from "@/lib/club-network-cloud";
+import {
+  loadTeamAllowance,
+  requestLeague,
+  saveOrganisationPlace,
+  searchLeagues,
+  type LeagueOption,
+} from "@/lib/club-network-cloud";
 import { emptyPlace, type PlaceValue } from "@/lib/geo";
 import {
   canAddTeam,
@@ -101,7 +107,11 @@ import { rainMethods } from "@/lib/rain-rules";
 import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { usePlatformDashboard } from "@/hooks/use-platform-dashboard";
-import { getCloudClient, listOrganisationMemberships, type OrganisationMembership } from "@/lib/cloud";
+import {
+  getCloudClient,
+  listOrganisationMemberships,
+  type OrganisationMembership,
+} from "@/lib/cloud";
 import {
   createCameraRoom,
   setCameraRoomCapacity,
@@ -329,10 +339,12 @@ function ActivationGate() {
           <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-amber-300/10 text-amber-300">
             <Database className="size-6" />
           </span>
-          <h1 className="mt-5 text-2xl font-bold md:text-4xl">Club workspace is briefly unavailable</h1>
+          <h1 className="mt-5 text-2xl font-bold md:text-4xl">
+            Club workspace is briefly unavailable
+          </h1>
           <p className="mt-3 text-sm leading-6 text-slate-300">
-            We couldn't reach CricLume Cloud just now. Please refresh in a moment — your club's
-            data is safe.
+            We couldn't reach CricLume Cloud just now. Please refresh in a moment — your club's data
+            is safe.
           </p>
           <button className="action-primary mt-6" onClick={() => window.location.reload()}>
             Try again
@@ -429,7 +441,8 @@ function SignInPanel({
             <GoogleButton onClick={() => void signInWithGoogle()} busy={googleBusy} />
           </div>
           <div className="my-5 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
-            <span className="h-px flex-1 bg-white/10" /> or use email <span className="h-px flex-1 bg-white/10" />
+            <span className="h-px flex-1 bg-white/10" /> or use email{" "}
+            <span className="h-px flex-1 bg-white/10" />
           </div>
           <Field label="Email address">
             <input
@@ -454,7 +467,8 @@ function SignInPanel({
               role={message ? "alert" : "status"}
               className={`mt-4 rounded-xl p-3 text-xs ${message ? "bg-rose-400/10 text-rose-200" : "bg-amber-300/10 text-amber-200"}`}
             >
-              {message ?? `We’ve sent a sign-in link to ${email.trim()}. Open it on this device to continue.`}
+              {message ??
+                `We’ve sent a sign-in link to ${email.trim()}. Open it on this device to continue.`}
             </p>
           )}
           <p className="mt-6 flex items-center gap-2 text-xs text-slate-500">
@@ -531,13 +545,18 @@ function OrganisationOnboarding({
       });
       if (place.country) {
         await saveOrganisationPlace(organisationId, place).catch(() =>
-          toast.error("Your club was created, but where you play wasn't saved. Set it on the club home."),
+          toast.error(
+            "Your club was created, but where you play wasn't saved. Set it on the club home.",
+          ),
         );
       }
       if (leagueId && request.kind !== "league") {
         await requestLeague(organisationId, leagueId).then(
           () => toast.success("Request sent to your league. They'll approve you."),
-          () => toast.error("Your club was created, but the league request didn't go through. Try again from the club home."),
+          () =>
+            toast.error(
+              "Your club was created, but the league request didn't go through. Try again from the club home.",
+            ),
         );
       }
       await onCreated();
@@ -566,7 +585,10 @@ function OrganisationOnboarding({
           </p>
           <p className="mt-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-slate-300">
             Umpiring for a club or league?{" "}
-            <Link to="/umpire" className="font-bold text-amber-300 underline-offset-2 hover:underline">
+            <Link
+              to="/umpire"
+              className="font-bold text-amber-300 underline-offset-2 hover:underline"
+            >
               Open your umpire dashboard
             </Link>{" "}
             instead — no organisation needed.
@@ -672,7 +694,10 @@ function OperationalPlatform({
     void navigate({ search: { section }, resetScroll: true });
   const dashboard = usePlatformDashboard(membership.organisationId, membership.role);
   const [leagueStart, setLeagueStart] = useState<"live" | "stats">("live");
-  const { promos, onPlay } = usePromos({ surface: "app", member: { organisationId: membership.organisationId } });
+  const { promos, onPlay } = usePromos({
+    surface: "app",
+    member: { organisationId: membership.organisationId },
+  });
   return (
     <PageFrame
       right={
@@ -702,11 +727,7 @@ function OperationalPlatform({
           </Link>
           <RemindersBell />
           <DevicesButton />
-          <button
-            type="button"
-            onClick={() => void signOut()}
-            className="app-chip-button"
-          >
+          <button type="button" onClick={() => void signOut()} className="app-chip-button">
             Sign out
           </button>
         </div>
@@ -741,137 +762,176 @@ function OperationalPlatform({
           </button>
         </div>
         <div className="lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start lg:gap-8">
-        <SectionNavigation
-          label="Workspace section"
-          value={tab}
-          onChange={setTab}
-          items={tabDefinitions}
-          mobilePrimary={["overview", "office", "league", "capture"]}
-          layout="rail"
-        />
-        <div className="min-w-0 lg:pt-6">
-        {dashboard.error && <ErrorNotice message={dashboard.error} />}
-        {!dashboard.loading && !dashboard.data && dashboard.error ? (
-          <section className="workspace-empty" role="status">
-            <h2>Let’s get your workspace back</h2>
-            <p>Your club records could not be loaded. Try the connection again.</p>
-            <button
-              className="action-primary"
-              disabled={dashboard.refreshing}
-              onClick={() => void dashboard.refresh()}
-            >
-              Try again
-            </button>
-          </section>
-        ) : dashboard.loading || !dashboard.data ? (
-          <FullPanelStatus title="Loading operational data…" />
-        ) : (
-          <>
-            {tab === "overview" && <PromoSlot items={promos.top} slot="top" onPlay={onPlay} className="mb-5" />}
-            {tab === "overview" && (
-              <Overview
-                data={dashboard.data}
-                role={membership.role}
-                kind={membership.organisationKind}
-                run={dashboard.run}
-                onOpenSection={setTab}
-                onViewStats={() => {
-                  setLeagueStart("stats");
-                  setTab("league");
-                }}
-              />
+          <SectionNavigation
+            label="Workspace section"
+            value={tab}
+            onChange={setTab}
+            items={tabDefinitions}
+            mobilePrimary={["overview", "office", "league", "capture"]}
+            layout="rail"
+          />
+          <div className="min-w-0 lg:pt-6">
+            {dashboard.error && <ErrorNotice message={dashboard.error} />}
+            {!dashboard.loading && !dashboard.data && dashboard.error ? (
+              <section className="workspace-empty" role="status">
+                <h2>Let’s get your workspace back</h2>
+                <p>Your club records could not be loaded. Try the connection again.</p>
+                <button
+                  className="action-primary"
+                  disabled={dashboard.refreshing}
+                  onClick={() => void dashboard.refresh()}
+                >
+                  Try again
+                </button>
+              </section>
+            ) : dashboard.loading || !dashboard.data ? (
+              <FullPanelStatus title="Loading operational data…" />
+            ) : (
+              <>
+                {tab === "overview" && (
+                  <PromoSlot items={promos.top} slot="top" onPlay={onPlay} className="mb-5" />
+                )}
+                {tab === "overview" && (
+                  <Overview
+                    data={dashboard.data}
+                    role={membership.role}
+                    kind={membership.organisationKind}
+                    run={dashboard.run}
+                    onOpenSection={setTab}
+                    onViewStats={() => {
+                      setLeagueStart("stats");
+                      setTab("league");
+                    }}
+                  />
+                )}
+                {tab === "office" && (
+                  <ClubOffice
+                    key={membership.organisationId}
+                    organisationId={membership.organisationId}
+                    role={membership.role}
+                    club={dashboard.data}
+                  />
+                )}
+                {tab === "training" && (
+                  <TrainingHub
+                    key={membership.organisationId}
+                    organisationId={membership.organisationId}
+                    role={membership.role}
+                    club={dashboard.data}
+                  />
+                )}
+                {tab === "messages" && (
+                  <TeamChat
+                    key={membership.organisationId}
+                    organisationId={membership.organisationId}
+                    role={membership.role}
+                    club={dashboard.data}
+                  />
+                )}
+                {tab === "leaguedesk" && (
+                  <LeagueDesk
+                    key={membership.organisationId}
+                    organisationId={membership.organisationId}
+                    role={membership.role}
+                    kind={membership.organisationKind}
+                    club={dashboard.data}
+                  />
+                )}
+                {tab === "board" && (
+                  <LookingForBoard
+                    key={membership.organisationId}
+                    organisationId={membership.organisationId}
+                    organisationName={membership.organisationName}
+                    role={membership.role}
+                  />
+                )}
+                {tab === "competitions" && (
+                  <Competitions
+                    data={dashboard.data}
+                    role={membership.role}
+                    kind={membership.organisationKind}
+                    run={dashboard.run}
+                    onChanged={() => void dashboard.refresh()}
+                  />
+                )}
+                {tab === "league" && (
+                  <LeagueHub
+                    key={leagueStart}
+                    initialView={leagueStart}
+                    data={dashboard.data}
+                    role={membership.role}
+                    onRefresh={() => void dashboard.refresh()}
+                    refreshing={dashboard.refreshing}
+                  />
+                )}
+                {tab === "website" && (
+                  <WebsiteEditor
+                    key={membership.organisationId}
+                    organisationId={membership.organisationId}
+                    organisationName={membership.organisationName}
+                    role={membership.role}
+                  />
+                )}
+                {tab === "capture" && (
+                  <PlanGate
+                    organisationId={membership.organisationId}
+                    feature={sectionFeature["capture"]}
+                  >
+                    <Capture data={dashboard.data} role={membership.role} run={dashboard.run} />
+                  </PlanGate>
+                )}
+                {tab === "players" && (
+                  <Players data={dashboard.data} role={membership.role} run={dashboard.run} />
+                )}
+                {tab === "academy" && (
+                  <AcademyDashboard
+                    data={dashboard.data}
+                    role={membership.role}
+                    onOpenPlayers={() => setTab("players")}
+                    onOpenCompetitions={() => setTab("competitions")}
+                  />
+                )}
+                {tab === "safety" && (
+                  <Safeguarding data={dashboard.data} role={membership.role} run={dashboard.run} />
+                )}
+                {tab === "analysis" && (
+                  <PlanGate
+                    organisationId={membership.organisationId}
+                    feature={sectionFeature["analysis"]}
+                  >
+                    <CricketAnalysisWorkspace
+                      key={membership.organisationId}
+                      organisationId={membership.organisationId}
+                      role={membership.role}
+                      matches={dashboard.data.matches}
+                      players={dashboard.data.players}
+                    />
+                  </PlanGate>
+                )}
+                {tab === "intelligence" && (
+                  <PlanGate
+                    organisationId={membership.organisationId}
+                    feature={sectionFeature["intelligence"]}
+                  >
+                    <OmniqoraIntelligencePanel
+                      key={membership.organisationId}
+                      organisationId={membership.organisationId}
+                      role={membership.role}
+                      matches={dashboard.data.matches}
+                    />
+                  </PlanGate>
+                )}
+                {tab === "operations" && (
+                  <Operations
+                    data={dashboard.data}
+                    role={membership.role}
+                    organisationId={membership.organisationId}
+                    run={dashboard.run}
+                  />
+                )}
+              </>
             )}
-            {tab === "office" && (
-              <ClubOffice
-                key={membership.organisationId}
-                organisationId={membership.organisationId}
-                role={membership.role}
-                club={dashboard.data}
-              />
-            )}
-            {tab === "training" && (
-              <TrainingHub key={membership.organisationId} organisationId={membership.organisationId} role={membership.role} club={dashboard.data} />
-            )}
-            {tab === "messages" && (
-              <TeamChat key={membership.organisationId} organisationId={membership.organisationId} role={membership.role} club={dashboard.data} />
-            )}
-            {tab === "leaguedesk" && (
-              <LeagueDesk key={membership.organisationId} organisationId={membership.organisationId} role={membership.role} kind={membership.organisationKind} club={dashboard.data} />
-            )}
-            {tab === "board" && (
-              <LookingForBoard key={membership.organisationId} organisationId={membership.organisationId} organisationName={membership.organisationName} role={membership.role} />
-            )}
-            {tab === "competitions" && (
-              <Competitions
-                data={dashboard.data}
-                role={membership.role}
-                kind={membership.organisationKind}
-                run={dashboard.run}
-                onChanged={() => void dashboard.refresh()}
-              />
-            )}
-            {tab === "league" && (
-              <LeagueHub key={leagueStart} initialView={leagueStart} data={dashboard.data} role={membership.role} onRefresh={() => void dashboard.refresh()} refreshing={dashboard.refreshing} />
-            )}
-            {tab === "website" && (
-              <WebsiteEditor
-                key={membership.organisationId}
-                organisationId={membership.organisationId}
-                organisationName={membership.organisationName}
-                role={membership.role}
-              />
-            )}
-            {tab === "capture" && (
-              <PlanGate organisationId={membership.organisationId} feature={sectionFeature["capture"]}>
-                <Capture data={dashboard.data} role={membership.role} run={dashboard.run} />
-              </PlanGate>
-            )}
-            {tab === "players" && (
-              <Players data={dashboard.data} role={membership.role} run={dashboard.run} />
-            )}
-            {tab === "academy" && (
-              <AcademyDashboard
-                data={dashboard.data}
-                role={membership.role}
-                onOpenPlayers={() => setTab("players")}
-                onOpenCompetitions={() => setTab("competitions")}
-              />
-            )}
-            {tab === "safety" && (
-              <Safeguarding data={dashboard.data} role={membership.role} run={dashboard.run} />
-            )}
-            {tab === "analysis" && (
-              <PlanGate organisationId={membership.organisationId} feature={sectionFeature["analysis"]}>
-                <CricketAnalysisWorkspace
-                  key={membership.organisationId}
-                  organisationId={membership.organisationId}
-                  role={membership.role}
-                  matches={dashboard.data.matches}
-                  players={dashboard.data.players}
-                />
-              </PlanGate>
-            )}
-            {tab === "intelligence" && (
-              <PlanGate organisationId={membership.organisationId} feature={sectionFeature["intelligence"]}>
-                <OmniqoraIntelligencePanel
-                  key={membership.organisationId}
-                  organisationId={membership.organisationId}
-                  role={membership.role}
-                  matches={dashboard.data.matches}
-                />
-              </PlanGate>
-            )}
-            {tab === "operations" && (
-              <Operations
-                data={dashboard.data}
-                role={membership.role}
-                organisationId={membership.organisationId}
-                run={dashboard.run}
-              />
-            )}
-          </>
-        )}
-        </div>
+          </div>
         </div>
       </main>
     </PageFrame>
@@ -937,12 +997,18 @@ function Overview({
         ))}
       </div>
       <ClubMatchInsights data={data} onViewStats={onViewStats} />
-      {can(role, "organisation.manage") && <LiveListingPanel organisationId={data.organisationId} />}
+      {can(role, "organisation.manage") && (
+        <LiveListingPanel organisationId={data.organisationId} />
+      )}
       {(kind === "league" || can(role, "team.manage")) && (
         <LeaguePanel
           organisationId={data.organisationId}
           kind={kind}
-          canManage={kind === "league" ? ["owner", "league_admin"].includes(role) : ["owner", "club_admin"].includes(role)}
+          canManage={
+            kind === "league"
+              ? ["owner", "league_admin"].includes(role)
+              : ["owner", "club_admin"].includes(role)
+          }
         />
       )}
       {can(role, "match.manage") && <CreateMatchPanel data={data} run={run} />}
@@ -1253,7 +1319,11 @@ function MatchCard({
               const link = `${window.location.origin}/overlay/${match.scoreboard!.slug}`;
               void navigator.clipboard
                 .writeText(link)
-                .then(() => toast.success("Stream overlay link copied. Add it as a Browser Source in OBS or Streamlabs."))
+                .then(() =>
+                  toast.success(
+                    "Stream overlay link copied. Add it as a Browser Source in OBS or Streamlabs.",
+                  ),
+                )
                 .catch(() => window.prompt("Copy this overlay link", link));
             }}
           >
@@ -1269,7 +1339,11 @@ function MatchCard({
               const code = embedCode(window.location.origin, match.scoreboard!.slug);
               void navigator.clipboard
                 .writeText(code)
-                .then(() => toast.success("Website score code copied. Paste it into your website editor where the score should appear."))
+                .then(() =>
+                  toast.success(
+                    "Website score code copied. Paste it into your website editor where the score should appear.",
+                  ),
+                )
                 .catch(() => window.prompt("Copy this code into your website", code));
             }}
           >
@@ -1277,7 +1351,10 @@ function MatchCard({
           </button>
         )}
         {match.scoreboard?.enabled && (
-          <StreamGuide slug={match.scoreboard.slug} matchTitle={`${teamName(data, match.homeTeamId)} v ${teamName(data, match.awayTeamId)}`} />
+          <StreamGuide
+            slug={match.scoreboard.slug}
+            matchTitle={`${teamName(data, match.homeTeamId)} v ${teamName(data, match.awayTeamId)}`}
+          />
         )}
         {match.scoreboard?.enabled && (
           <a
@@ -1703,9 +1780,7 @@ function FixtureForm({ data, run }: { data: PlatformDashboardData; run: RunActio
             label="Away"
             value={away}
             setValue={setAway}
-            options={teams
-              .filter((item) => item.id !== home)
-              .map((item) => [item.id, item.name])}
+            options={teams.filter((item) => item.id !== home).map((item) => [item.id, item.name])}
           />
           <SelectField
             label="Ground"
@@ -1855,26 +1930,32 @@ function Capture({
                       {teamNameForMatch(data, room.matchId)} · {room.status}
                     </p>
                   </div>
-                  <span className="text-sm font-bold text-amber-200" aria-label={`${room.devices.length} of ${room.maxDevices} phones`}>
+                  <span
+                    className="text-sm font-bold text-amber-200"
+                    aria-label={`${room.devices.length} of ${room.maxDevices} phones`}
+                  >
                     {room.devices.length}/{room.maxDevices} phones
                   </span>
                 </div>
-                {(can(role, "video.capture") || can(role, "match.score")) && room.status === "open" && (
-                  <label className="mt-3 flex items-center justify-between gap-2 text-xs text-slate-300">
-                    Phones allowed in this match
-                    <select
-                      className="rounded-lg border border-white/10 bg-black/30 px-2 py-1"
-                      value={room.maxDevices}
-                      onChange={(event) => void run(() => setCameraRoomCapacity(room.id, Number(event.target.value)))}
-                    >
-                      {cameraLimitChoices().map((count) => (
-                        <option key={count} value={count} disabled={count < room.devices.length}>
-                          {count}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )}
+                {(can(role, "video.capture") || can(role, "match.score")) &&
+                  room.status === "open" && (
+                    <label className="mt-3 flex items-center justify-between gap-2 text-xs text-slate-300">
+                      Phones allowed in this match
+                      <select
+                        className="rounded-lg border border-white/10 bg-black/30 px-2 py-1"
+                        value={room.maxDevices}
+                        onChange={(event) =>
+                          void run(() => setCameraRoomCapacity(room.id, Number(event.target.value)))
+                        }
+                      >
+                        {cameraLimitChoices().map((count) => (
+                          <option key={count} value={count} disabled={count < room.devices.length}>
+                            {count}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
                 <div className="mt-3 space-y-2">
                   {room.devices.map((device) => (
                     <div
@@ -1886,16 +1967,17 @@ function Capture({
                       </span>
                       <span className="flex items-center gap-2 text-slate-500">
                         {device.clockOffsetMs} ms
-                        {(can(role, "video.capture") || can(role, "match.score")) && room.status === "open" && (
-                          <button
-                            type="button"
-                            className="rounded-md border border-white/10 px-2 py-1 text-[11px] text-slate-300"
-                            aria-label={`Remove ${device.label}`}
-                            onClick={() => void run(() => removeCameraDevice(device.id))}
-                          >
-                            Remove
-                          </button>
-                        )}
+                        {(can(role, "video.capture") || can(role, "match.score")) &&
+                          room.status === "open" && (
+                            <button
+                              type="button"
+                              className="rounded-md border border-white/10 px-2 py-1 text-[11px] text-slate-300"
+                              aria-label={`Remove ${device.label}`}
+                              onClick={() => void run(() => removeCameraDevice(device.id))}
+                            >
+                              Remove
+                            </button>
+                          )}
                       </span>
                     </div>
                   ))}
@@ -1969,7 +2051,9 @@ function Players({
     <div className="space-y-5">
       {can(role, "team.manage") && <TeamAndGroundForms data={data} run={run} />}
       {can(role, "player.manage") && <PlayerForm data={data} run={run} />}
-      {can(role, "team.manage") && can(role, "player.manage") && <SquadImport data={data} run={run} />}
+      {can(role, "team.manage") && can(role, "player.manage") && (
+        <SquadImport data={data} run={run} />
+      )}
       <Panel
         title="Player histories"
         description="Career totals aggregate canonical delivery records visible to this organisation."
@@ -2099,14 +2183,18 @@ function TeamAndGroundForms({ data, run }: { data: PlatformDashboardData; run: R
           <div className="rounded-xl border border-amber-300/30 bg-amber-300/[0.06] p-4 text-sm">
             <p className="font-bold text-amber-100">Your free plan includes one team.</p>
             <p className="mt-1 text-slate-300">
-              Move to the Club or League plan to run more teams, such as a 2nd XI, under-13s or a ladies side.
-              The owner can upgrade under Operations → Subscription.
+              Move to the Club or League plan to run more teams, such as a 2nd XI, under-13s or a
+              ladies side. The owner can upgrade under Operations → Subscription.
             </p>
           </div>
         ) : (
           <form onSubmit={(event) => void addTeam(event)} className="grid gap-3 sm:grid-cols-3">
             <Field label="Team type">
-              <select value={category} onChange={(event) => setCategory(event.target.value)} className="scorer-input">
+              <select
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+                className="scorer-input"
+              >
                 {groups.map((group) => (
                   <optgroup key={group} label={group}>
                     {teamCategories
@@ -2159,7 +2247,9 @@ function TeamAndGroundForms({ data, run }: { data: PlatformDashboardData; run: R
               .map((item) => (
                 <li key={item.id} className="office-pill">
                   {item.name}
-                  {teamCategory(item.category)?.label ? ` · ${teamCategory(item.category)?.label}` : ""}
+                  {teamCategory(item.category)?.label
+                    ? ` · ${teamCategory(item.category)?.label}`
+                    : ""}
                 </li>
               ))}
           </ul>
@@ -2554,7 +2644,11 @@ function Operations({
                         value={member.role}
                         onChange={(event) =>
                           void run(() =>
-                            updateMember({ organisationId, userId: member.userId, role: event.target.value as PlatformRole }),
+                            updateMember({
+                              organisationId,
+                              userId: member.userId,
+                              role: event.target.value as PlatformRole,
+                            }),
                           )
                         }
                       >
@@ -2857,8 +2951,12 @@ function FullPanelStatus({ title }: { title: string }) {
 }
 function StatusBadge({ value }: { value: string }) {
   return (
-    <span className={`hero-chip ${value === "live" || value === "in_progress" ? "hero-chip-live" : ""}`}>
-      {(value === "live" || value === "in_progress") && <span className="live-dot" aria-hidden="true" />}
+    <span
+      className={`hero-chip ${value === "live" || value === "in_progress" ? "hero-chip-live" : ""}`}
+    >
+      {(value === "live" || value === "in_progress") && (
+        <span className="live-dot" aria-hidden="true" />
+      )}
       {value.replaceAll("_", " ")}
     </span>
   );

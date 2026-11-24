@@ -30,7 +30,8 @@ export interface LiveMatchSituation {
   homeWin: number | null;
 }
 
-const num = (value: unknown, fallback = 0) => (typeof value === "number" && Number.isFinite(value) ? value : fallback);
+const num = (value: unknown, fallback = 0) =>
+  typeof value === "number" && Number.isFinite(value) ? value : fallback;
 
 export function legalBallsFromOvers(overs: string, ballsPerOver: number) {
   const match = /^(\d+)\.(\d+)$/.exec(overs);
@@ -38,9 +39,16 @@ export function legalBallsFromOvers(overs: string, ballsPerOver: number) {
 }
 
 /** Turn a published live state into a match situation with a home-side win chance. */
-export function readLiveSituation(match: { id: string; homeTeamId: string; awayTeamId: string; liveState: LiveStateLike }): LiveMatchSituation {
+export function readLiveSituation(match: {
+  id: string;
+  homeTeamId: string;
+  awayTeamId: string;
+  liveState: LiveStateLike;
+}): LiveMatchSituation {
   const state = match.liveState ?? {};
-  const settings = (state.settings && typeof state.settings === "object" ? state.settings : {}) as Record<string, unknown>;
+  const settings = (
+    state.settings && typeof state.settings === "object" ? state.settings : {}
+  ) as Record<string, unknown>;
   const ballsPerOver = num(settings["ballsPerOver"], 6) || 6;
   const limit = (state as Record<string, unknown>)["oversLimit"];
   const oversPerInnings =
@@ -68,7 +76,10 @@ export function readLiveSituation(match: { id: string; homeTeamId: string; awayT
         target,
         maxWickets: num(state.maxWickets, 10),
         battingIsHome,
-        conditions: state.conditions && typeof state.conditions === "object" ? (state.conditions as MatchConditions) : undefined,
+        conditions:
+          state.conditions && typeof state.conditions === "object"
+            ? (state.conditions as MatchConditions)
+            : undefined,
       })
     : null;
   return {
@@ -108,7 +119,20 @@ export function projectLiveTable(
   const outcome = new Map<string, "W" | "L" | "T">();
   const ensure = (teamId: string) => {
     if (!rows.has(teamId)) {
-      rows.set(teamId, { teamId, played: 0, won: 0, tied: 0, lost: 0, noResult: 0, points: 0, runsFor: 0, ballsFaced: 0, runsAgainst: 0, ballsBowled: 0, netRunRate: 0 });
+      rows.set(teamId, {
+        teamId,
+        played: 0,
+        won: 0,
+        tied: 0,
+        lost: 0,
+        noResult: 0,
+        points: 0,
+        runsFor: 0,
+        ballsFaced: 0,
+        runsAgainst: 0,
+        ballsBowled: 0,
+        netRunRate: 0,
+      });
     }
     return rows.get(teamId)!;
   };
@@ -139,7 +163,8 @@ export function projectLiveTable(
     for (const tieBreaker of rules.tieBreakers) {
       if (tieBreaker === "points" && a.points !== b.points) return b.points - a.points;
       if (tieBreaker === "wins" && a.won !== b.won) return b.won - a.won;
-      if (tieBreaker === "net-run-rate" && a.netRunRate !== b.netRunRate) return b.netRunRate - a.netRunRate;
+      if (tieBreaker === "net-run-rate" && a.netRunRate !== b.netRunRate)
+        return b.netRunRate - a.netRunRate;
     }
     return a.teamId.localeCompare(b.teamId);
   };

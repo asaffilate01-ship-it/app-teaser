@@ -2,7 +2,17 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { HandHeart, LoaderCircle, Plus, X } from "lucide-react";
 import { can } from "@/lib/platform";
 import { getCloudClient } from "@/lib/cloud";
-import { Empty, OfficeCard, OfficeField, Pill, fromLocal, nameOfMember, upcoming, when, type OfficeProps } from "./ui";
+import {
+  Empty,
+  OfficeCard,
+  OfficeField,
+  Pill,
+  fromLocal,
+  nameOfMember,
+  upcoming,
+  when,
+  type OfficeProps,
+} from "./ui";
 
 interface Job {
   id: string;
@@ -28,8 +38,15 @@ export function VolunteersPanel({ organisationId, role, club, act }: OfficeProps
     const client = getCloudClient();
     const [{ data: user }, jobsResult, signupResult] = await Promise.all([
       client.auth.getUser(),
-      client.from("club_volunteer_jobs").select("id,title,starts_at,places,notes,cancelled_at").eq("organisation_id", organisationId).order("starts_at"),
-      client.from("club_volunteer_signups").select("id,job_id,user_id").eq("organisation_id", organisationId),
+      client
+        .from("club_volunteer_jobs")
+        .select("id,title,starts_at,places,notes,cancelled_at")
+        .eq("organisation_id", organisationId)
+        .order("starts_at"),
+      client
+        .from("club_volunteer_signups")
+        .select("id,job_id,user_id")
+        .eq("organisation_id", organisationId),
     ]);
     setMe(user.user?.id ?? null);
     setJobs((jobsResult.data ?? []) as Job[]);
@@ -41,7 +58,9 @@ export function VolunteersPanel({ organisationId, role, club, act }: OfficeProps
     await act(action, done);
     await load();
   };
-  const must = async <T,>(request: PromiseLike<{ error: { message: string } | null; data?: T }>) => {
+  const must = async <T,>(
+    request: PromiseLike<{ error: { message: string } | null; data?: T }>,
+  ) => {
     const { error } = await request;
     if (error) throw new Error(error.message);
   };
@@ -56,8 +75,27 @@ export function VolunteersPanel({ organisationId, role, club, act }: OfficeProps
   const open = upcoming(jobs);
   return (
     <div className="space-y-4">
-      {manager && <NewJob onAdd={(job) => run(() => must(getCloudClient().from("club_volunteer_jobs").insert({ ...job, organisation_id: organisationId })), "Job posted — members can now sign up")} />}
-      {open.length === 0 && <Empty>No volunteer jobs coming up.{manager ? " Post one above — teas, scoring, bar, ground prep." : ""}</Empty>}
+      {manager && (
+        <NewJob
+          onAdd={(job) =>
+            run(
+              () =>
+                must(
+                  getCloudClient()
+                    .from("club_volunteer_jobs")
+                    .insert({ ...job, organisation_id: organisationId }),
+                ),
+              "Job posted — members can now sign up",
+            )
+          }
+        />
+      )}
+      {open.length === 0 && (
+        <Empty>
+          No volunteer jobs coming up.
+          {manager ? " Post one above — teas, scoring, bar, ground prep." : ""}
+        </Empty>
+      )}
       {open.map((job) => {
         const names = signups.filter((item) => item.job_id === job.id);
         const mine = names.find((item) => item.user_id === me);
@@ -67,7 +105,11 @@ export function VolunteersPanel({ organisationId, role, club, act }: OfficeProps
             key={job.id}
             title={job.title}
             description={when(job.starts_at)}
-            action={<Pill tone={full ? "good" : "warn"}>{names.length}/{job.places} filled</Pill>}
+            action={
+              <Pill tone={full ? "good" : "warn"}>
+                {names.length}/{job.places} filled
+              </Pill>
+            }
           >
             {job.notes && <p className="office-meta mb-3">{job.notes}</p>}
             {names.length > 0 && (
@@ -76,7 +118,23 @@ export function VolunteersPanel({ organisationId, role, club, act }: OfficeProps
                   <li key={item.id} className="office-pill">
                     {item.user_id === me ? "You" : nameOfMember(club, item.user_id)}
                     {manager && item.user_id !== me && (
-                      <button type="button" aria-label="Remove" className="ml-1" onClick={() => void run(() => must(getCloudClient().from("club_volunteer_signups").delete().eq("id", item.id)), "Removed from the job")}>
+                      <button
+                        type="button"
+                        aria-label="Remove"
+                        className="ml-1"
+                        onClick={() =>
+                          void run(
+                            () =>
+                              must(
+                                getCloudClient()
+                                  .from("club_volunteer_signups")
+                                  .delete()
+                                  .eq("id", item.id),
+                              ),
+                            "Removed from the job",
+                          )
+                        }
+                      >
                         <X className="size-3" />
                       </button>
                     )}
@@ -86,16 +144,56 @@ export function VolunteersPanel({ organisationId, role, club, act }: OfficeProps
             )}
             <div className="flex flex-wrap gap-2">
               {mine ? (
-                <button type="button" className="action-secondary" onClick={() => void run(() => must(getCloudClient().from("club_volunteer_signups").delete().eq("id", mine.id)), "You're off this job")}>
+                <button
+                  type="button"
+                  className="action-secondary"
+                  onClick={() =>
+                    void run(
+                      () =>
+                        must(
+                          getCloudClient()
+                            .from("club_volunteer_signups")
+                            .delete()
+                            .eq("id", mine.id),
+                        ),
+                      "You're off this job",
+                    )
+                  }
+                >
                   Can't make it now
                 </button>
               ) : (
-                <button type="button" className="action-primary" disabled={full} onClick={() => void run(() => must(getCloudClient().rpc("volunteer_sign_up", { p_job_id: job.id })), "Thanks — you're down for it")}>
+                <button
+                  type="button"
+                  className="action-primary"
+                  disabled={full}
+                  onClick={() =>
+                    void run(
+                      () => must(getCloudClient().rpc("volunteer_sign_up", { p_job_id: job.id })),
+                      "Thanks — you're down for it",
+                    )
+                  }
+                >
                   <HandHeart className="size-4" /> {full ? "All places taken" : "I'll help"}
                 </button>
               )}
               {manager && (
-                <button type="button" className="action-secondary" onClick={() => void run(() => must(getCloudClient().from("club_volunteer_jobs").update({ cancelled_at: new Date().toISOString() }).eq("id", job.id)), "Job cancelled")}>
+                <button
+                  type="button"
+                  className="action-secondary"
+                  onClick={() =>
+                    void run(
+                      () =>
+                        must(
+                          getCloudClient()
+                            .from("club_volunteer_jobs")
+                            .update({ cancelled_at: new Date().toISOString() })
+                            .eq("id", job.id),
+                        ),
+                      "Job cancelled",
+                    )
+                  }
+                >
                   Cancel job
                 </button>
               )}
@@ -107,7 +205,16 @@ export function VolunteersPanel({ organisationId, role, club, act }: OfficeProps
   );
 }
 
-function NewJob({ onAdd }: { onAdd: (job: { title: string; starts_at: string; places: number; notes: string | null }) => Promise<void> }) {
+function NewJob({
+  onAdd,
+}: {
+  onAdd: (job: {
+    title: string;
+    starts_at: string;
+    places: number;
+    notes: string | null;
+  }) => Promise<void>;
+}) {
   const [title, setTitle] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [places, setPlaces] = useState(2);
@@ -121,19 +228,54 @@ function NewJob({ onAdd }: { onAdd: (job: { title: string; starts_at: string; pl
     setNotes("");
   };
   return (
-    <OfficeCard title="Post a volunteer job" description="Members see it here and put their name down. You see who's coming.">
-      <form onSubmit={(event) => void submit(event)} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <OfficeCard
+      title="Post a volunteer job"
+      description="Members see it here and put their name down. You see who's coming."
+    >
+      <form
+        onSubmit={(event) => void submit(event)}
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+      >
         <OfficeField label="Job" className="lg:col-span-2">
-          <input required minLength={2} maxLength={80} className="scorer-input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Teas for Saturday's 1st XI" />
+          <input
+            required
+            minLength={2}
+            maxLength={80}
+            className="scorer-input"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="Teas for Saturday's 1st XI"
+          />
         </OfficeField>
         <OfficeField label="When">
-          <input required type="datetime-local" className="scorer-input" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} />
+          <input
+            required
+            type="datetime-local"
+            className="scorer-input"
+            value={startsAt}
+            onChange={(event) => setStartsAt(event.target.value)}
+          />
         </OfficeField>
         <OfficeField label="People needed">
-          <input type="number" min={1} max={50} className="scorer-input" value={places} onChange={(event) => setPlaces(Math.max(1, Math.min(50, Number(event.target.value) || 1)))} />
+          <input
+            type="number"
+            min={1}
+            max={50}
+            className="scorer-input"
+            value={places}
+            onChange={(event) =>
+              setPlaces(Math.max(1, Math.min(50, Number(event.target.value) || 1)))
+            }
+          />
         </OfficeField>
         <OfficeField label="Notes (optional)" className="sm:col-span-2 lg:col-span-3">
-          <input maxLength={500} className="scorer-input" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Bring a cake; urn is in the kitchen" />
+          <input
+            maxLength={500}
+            className="scorer-input"
+            value={notes}
+            onChange={(event) => setNotes(event.target.value)}
+            placeholder="Bring a cake; urn is in the kitchen"
+          />
         </OfficeField>
         <div className="flex items-end">
           <button className="action-primary w-full">

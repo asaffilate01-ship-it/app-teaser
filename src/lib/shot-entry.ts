@@ -10,7 +10,10 @@ interface FieldedBall {
  * The fielder who most recently stopped a ball at this position.
  * Falls back to the last fielder anywhere in the same broad area (e.g. Cover → Extra cover).
  */
-export function lastFielderInZone(balls: readonly FieldedBall[], zone: FieldZone): string | undefined {
+export function lastFielderInZone(
+  balls: readonly FieldedBall[],
+  zone: FieldZone,
+): string | undefined {
   if (zone === "Not recorded") return undefined;
   for (let index = balls.length - 1; index >= 0; index -= 1) {
     const ball = balls[index];

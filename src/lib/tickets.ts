@@ -7,9 +7,18 @@ import type { PlatformRole } from "./platform";
 export type TicketStatus = "pending" | "confirmed" | "rejected" | "cancelled";
 
 /** Owner, club/league admins and the treasurer set up ticket sales and check payments. */
-export const ticketManagerRoles: readonly PlatformRole[] = ["owner", "club_admin", "league_admin", "treasurer"];
+export const ticketManagerRoles: readonly PlatformRole[] = [
+  "owner",
+  "club_admin",
+  "league_admin",
+  "treasurer",
+];
 /** Gate staff can also check tickets in on match day. */
-export const ticketGateRoles: readonly PlatformRole[] = [...ticketManagerRoles, "team_manager", "coach"];
+export const ticketGateRoles: readonly PlatformRole[] = [
+  ...ticketManagerRoles,
+  "team_manager",
+  "coach",
+];
 
 export const isTicketManager = (role: PlatformRole) => ticketManagerRoles.includes(role);
 export const isTicketGate = (role: PlatformRole) => ticketGateRoles.includes(role);
@@ -23,12 +32,18 @@ interface OrderLike {
 
 /** Pending and confirmed orders both hold seats, so nobody can be sold a seat that's waiting on a payment check. */
 export function ticketsLeft(capacity: number, orders: OrderLike[]): number {
-  const held = orders.filter((order) => order.status === "pending" || order.status === "confirmed").reduce((sum, order) => sum + order.quantity, 0);
+  const held = orders
+    .filter((order) => order.status === "pending" || order.status === "confirmed")
+    .reduce((sum, order) => sum + order.quantity, 0);
   return Math.max(0, capacity - held);
 }
 
 /** Most tickets one buyer can ask for right now. */
-export function mostCanBuy(input: { remaining: number; maxPerOrder: number; alreadyHeld?: number }): number {
+export function mostCanBuy(input: {
+  remaining: number;
+  maxPerOrder: number;
+  alreadyHeld?: number;
+}): number {
   return Math.max(0, Math.min(input.remaining, input.maxPerOrder - (input.alreadyHeld ?? 0)));
 }
 

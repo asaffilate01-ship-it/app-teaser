@@ -50,11 +50,18 @@ export function LocationPicker({
   const regions = regionNames(places, value.province);
   const towns = townNames(places, value.province, value.district);
   const hasProvinces = provinces.length > 0;
-  const provinceTyped = typed.province || !hasProvinces || (value.province !== "" && !provinces.includes(value.province));
+  const provinceTyped =
+    typed.province ||
+    !hasProvinces ||
+    (value.province !== "" && !provinces.includes(value.province));
   const hasRegions = !provinceTyped && regions.length > 0;
-  const districtTyped = typed.district || provinceTyped || (value.district !== "" && hasRegions && !regions.includes(value.district));
+  const districtTyped =
+    typed.district ||
+    provinceTyped ||
+    (value.district !== "" && hasRegions && !regions.includes(value.district));
   const townsListed = !districtTyped && towns.length > 0;
-  const townTyped = typed.town || !townsListed || (value.town !== "" && !towns.includes(value.town));
+  const townTyped =
+    typed.town || !townsListed || (value.town !== "" && !towns.includes(value.town));
   const labels = placeLabels(value.country);
   const showDistrict = value.province !== "" && (hasRegions || districtTyped);
   const showTown = value.province !== "" && (!hasRegions || value.district !== "" || districtTyped);
@@ -92,7 +99,14 @@ export function LocationPicker({
               maxLength={60}
               placeholder={`Type your ${labels.province.toLowerCase()}`}
               onChange={(text) => onChange({ ...value, province: text, district: "", town: "" })}
-              onBack={hasProvinces ? () => { setTyped({ province: false, district: false, town: false }); onChange({ ...value, province: "", district: "", town: "" }); } : undefined}
+              onBack={
+                hasProvinces
+                  ? () => {
+                      setTyped({ province: false, district: false, town: false });
+                      onChange({ ...value, province: "", district: "", town: "" });
+                    }
+                  : undefined
+              }
             />
           ) : (
             <select
@@ -131,7 +145,14 @@ export function LocationPicker({
               maxLength={80}
               placeholder={`Type your ${labels.district.toLowerCase()} (optional)`}
               onChange={(text) => onChange({ ...value, district: text, town: value.town })}
-              onBack={hasRegions && typed.district ? () => { setTyped({ ...typed, district: false, town: false }); onChange({ ...value, district: "", town: "" }); } : undefined}
+              onBack={
+                hasRegions && typed.district
+                  ? () => {
+                      setTyped({ ...typed, district: false, town: false });
+                      onChange({ ...value, district: "", town: "" });
+                    }
+                  : undefined
+              }
             />
           ) : (
             <select
@@ -170,7 +191,14 @@ export function LocationPicker({
               maxLength={80}
               placeholder="Type your town or city"
               onChange={(text) => onChange({ ...value, town: text })}
-              onBack={townsListed && typed.town ? () => { setTyped({ ...typed, town: false }); onChange({ ...value, town: "" }); } : undefined}
+              onBack={
+                townsListed && typed.town
+                  ? () => {
+                      setTyped({ ...typed, town: false });
+                      onChange({ ...value, town: "" });
+                    }
+                  : undefined
+              }
             />
           ) : (
             <select
@@ -201,7 +229,15 @@ export function LocationPicker({
   );
 }
 
-function Level({ label, busy = false, children }: { label: string; busy?: boolean; children: ReactNode }) {
+function Level({
+  label,
+  busy = false,
+  children,
+}: {
+  label: string;
+  busy?: boolean;
+  children: ReactNode;
+}) {
   return (
     <label className="block space-y-2">
       <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
@@ -239,7 +275,12 @@ function TypedInput({
         onChange={(event) => onChange(event.target.value)}
       />
       {onBack && (
-        <button type="button" className="app-chip-button shrink-0" onClick={onBack} disabled={disabled}>
+        <button
+          type="button"
+          className="app-chip-button shrink-0"
+          onClick={onBack}
+          disabled={disabled}
+        >
           Pick from list
         </button>
       )}

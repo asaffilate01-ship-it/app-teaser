@@ -48,7 +48,11 @@ export function FanVote({ slug }: { slug: string }) {
     setBusy(true);
     setError(null);
     const voter = fanVoterId(window.localStorage, () => crypto.randomUUID().replace(/-/g, ""));
-    const { data, error: requestError } = await getCloudClient().rpc("cast_potm_vote", { p_slug: slug, p_ref: ref, p_voter: voter });
+    const { data, error: requestError } = await getCloudClient().rpc("cast_potm_vote", {
+      p_slug: slug,
+      p_ref: ref,
+      p_voter: voter,
+    });
     setBusy(false);
     if (requestError) return setError(requestError.message);
     setTally(data as unknown as Tally);
@@ -63,7 +67,8 @@ export function FanVote({ slug }: { slug: string }) {
           <Trophy className="size-4" aria-hidden="true" /> Fans' Player of the Match
         </p>
         <span className="scoreboard-muted text-[11px]">
-          {tally.total ?? 0} vote{tally.total === 1 ? "" : "s"} · {tally.open ? "voting open" : "voting closed"}
+          {tally.total ?? 0} vote{tally.total === 1 ? "" : "s"} ·{" "}
+          {tally.open ? "voting open" : "voting closed"}
         </span>
       </div>
       <ul className="grid gap-1.5 sm:grid-cols-2">
@@ -83,8 +88,16 @@ export function FanVote({ slug }: { slug: string }) {
           </li>
         ))}
       </ul>
-      {mine && tally.open && <p className="scoreboard-muted mt-2 text-[11px]">Thanks for voting. Tap another player to change your vote.</p>}
-      {error && <p className="mt-2 text-xs text-rose-300" role="alert">{error}</p>}
+      {mine && tally.open && (
+        <p className="scoreboard-muted mt-2 text-[11px]">
+          Thanks for voting. Tap another player to change your vote.
+        </p>
+      )}
+      {error && (
+        <p className="mt-2 text-xs text-rose-300" role="alert">
+          {error}
+        </p>
+      )}
     </section>
   );
 }

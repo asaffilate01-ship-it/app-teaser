@@ -22,7 +22,10 @@ export async function loadOrganisationPlace(organisationId: string): Promise<Pla
   };
 }
 
-export async function saveOrganisationPlace(organisationId: string, place: PlaceValue): Promise<PlaceValue> {
+export async function saveOrganisationPlace(
+  organisationId: string,
+  place: PlaceValue,
+): Promise<PlaceValue> {
   const clean = cleanPlace(place);
   const { error } = await getCloudClient()
     .from("organisations")
@@ -47,9 +50,19 @@ export interface LeagueOption {
 }
 
 export async function searchLeagues(query: string, country: string): Promise<LeagueOption[]> {
-  const { data, error } = await getCloudClient().rpc("search_leagues", { p_query: query, p_country: country });
+  const { data, error } = await getCloudClient().rpc("search_leagues", {
+    p_query: query,
+    p_country: country,
+  });
   fail(error);
-  type Row = { id: string; name: string; country_code: string | null; region: string | null; district: string | null; town: string | null };
+  type Row = {
+    id: string;
+    name: string;
+    country_code: string | null;
+    region: string | null;
+    district: string | null;
+    town: string | null;
+  };
   return ((data ?? []) as Row[]).map((row) => ({
     id: row.id,
     name: row.name,
@@ -61,7 +74,10 @@ export async function searchLeagues(query: string, country: string): Promise<Lea
 }
 
 export async function requestLeague(clubId: string, leagueId: string): Promise<void> {
-  const { error } = await getCloudClient().rpc("request_league_membership", { p_club: clubId, p_league: leagueId });
+  const { error } = await getCloudClient().rpc("request_league_membership", {
+    p_club: clubId,
+    p_league: leagueId,
+  });
   fail(error);
 }
 
@@ -87,7 +103,10 @@ export async function loadLeagueLinks(organisationId: string): Promise<LeagueLin
 }
 
 export async function decideLeagueLink(id: string, approve: boolean): Promise<void> {
-  const { error } = await getCloudClient().rpc("decide_league_membership", { p_id: id, p_approve: approve });
+  const { error } = await getCloudClient().rpc("decide_league_membership", {
+    p_id: id,
+    p_approve: approve,
+  });
   fail(error);
 }
 
@@ -100,7 +119,10 @@ export async function loadTeamAllowance(organisationId: string): Promise<TeamAll
   const { data, error } = await getCloudClient().rpc("team_allowance", { p_org: organisationId });
   fail(error);
   const value = (data ?? {}) as { limit?: number | null; used?: number };
-  return { limit: typeof value.limit === "number" ? value.limit : null, used: Number(value.used ?? 0) };
+  return {
+    limit: typeof value.limit === "number" ? value.limit : null,
+    used: Number(value.used ?? 0),
+  };
 }
 
 export interface ReceivedInvite {
@@ -153,7 +175,9 @@ export interface InvitesOverview {
 }
 
 export async function loadInvitesOverview(organisationId: string): Promise<InvitesOverview> {
-  const { data, error } = await getCloudClient().rpc("competition_invites_overview", { p_org: organisationId });
+  const { data, error } = await getCloudClient().rpc("competition_invites_overview", {
+    p_org: organisationId,
+  });
   fail(error);
   const value = (data ?? {}) as Partial<InvitesOverview>;
   return { received: value.received ?? [], sent: value.sent ?? [], entered: value.entered ?? [] };
@@ -171,7 +195,11 @@ export interface InvitableClub {
   inLeague: boolean;
 }
 
-export async function findClubsToInvite(competitionId: string, query: string, country: string): Promise<InvitableClub[]> {
+export async function findClubsToInvite(
+  competitionId: string,
+  query: string,
+  country: string,
+): Promise<InvitableClub[]> {
   const { data, error } = await getCloudClient().rpc("find_clubs_to_invite", {
     p_competition: competitionId,
     p_query: query,
@@ -179,8 +207,15 @@ export async function findClubsToInvite(competitionId: string, query: string, co
   });
   fail(error);
   type Row = {
-    id: string; name: string; kind: string; country_code: string | null; region: string | null;
-    district: string | null; town: string | null; invite_status: string | null; in_league: boolean;
+    id: string;
+    name: string;
+    kind: string;
+    country_code: string | null;
+    region: string | null;
+    district: string | null;
+    town: string | null;
+    invite_status: string | null;
+    in_league: boolean;
   };
   return ((data ?? []) as Row[]).map((row) => ({
     id: row.id,
@@ -195,7 +230,11 @@ export async function findClubsToInvite(competitionId: string, query: string, co
   }));
 }
 
-export async function inviteClubs(competitionId: string, clubIds: string[], message: string): Promise<number> {
+export async function inviteClubs(
+  competitionId: string,
+  clubIds: string[],
+  message: string,
+): Promise<number> {
   const { data, error } = await getCloudClient().rpc("invite_clubs_to_competition", {
     p_competition: competitionId,
     p_orgs: clubIds,
@@ -206,17 +245,26 @@ export async function inviteClubs(competitionId: string, clubIds: string[], mess
 }
 
 export async function inviteLeagueClubs(competitionId: string, message: string): Promise<number> {
-  const { data, error } = await getCloudClient().rpc("invite_league_clubs", { p_competition: competitionId, p_message: message });
+  const { data, error } = await getCloudClient().rpc("invite_league_clubs", {
+    p_competition: competitionId,
+    p_message: message,
+  });
   fail(error);
   return Number(data ?? 0);
 }
 
 export async function withdrawInvite(inviteId: string): Promise<void> {
-  const { error } = await getCloudClient().rpc("withdraw_competition_invite", { p_invite: inviteId });
+  const { error } = await getCloudClient().rpc("withdraw_competition_invite", {
+    p_invite: inviteId,
+  });
   fail(error);
 }
 
-export async function answerInvite(inviteId: string, accept: boolean, teamIds: string[]): Promise<void> {
+export async function answerInvite(
+  inviteId: string,
+  accept: boolean,
+  teamIds: string[],
+): Promise<void> {
   const { error } = await getCloudClient().rpc("respond_competition_invite", {
     p_invite: inviteId,
     p_accept: accept,

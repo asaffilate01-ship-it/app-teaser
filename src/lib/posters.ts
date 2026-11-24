@@ -56,7 +56,13 @@ function base(kicker: string) {
   return { canvas, ctx };
 }
 
-function fit(ctx: CanvasRenderingContext2D, value: string, max: number, start: number, font: (size: number) => string) {
+function fit(
+  ctx: CanvasRenderingContext2D,
+  value: string,
+  max: number,
+  start: number,
+  font: (size: number) => string,
+) {
   let size = start;
   ctx.font = font(size);
   while (size > 28 && ctx.measureText(value).width > max) {
@@ -66,7 +72,12 @@ function fit(ctx: CanvasRenderingContext2D, value: string, max: number, start: n
   return size;
 }
 
-async function finish(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, logoUrl: string | null, footer: string) {
+async function finish(
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
+  logoUrl: string | null,
+  footer: string,
+) {
   if (logoUrl) {
     try {
       const image = new Image();
@@ -85,7 +96,10 @@ async function finish(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, 
   ctx.font = body(24);
   ctx.fillText(footer, W / 2, H - 60, W - 120);
   return new Promise<Blob>((resolve, reject) =>
-    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Poster could not be created"))), "image/png"),
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("Poster could not be created"))),
+      "image/png",
+    ),
   );
 }
 
@@ -132,8 +146,16 @@ export async function resultPoster(input: {
     y += 80;
   }
   const performers = [
-    input.top.batter && ["TOP BAT", input.top.batter.name, `${input.top.batter.runs}${input.top.batter.notOut ? "*" : ""} (${input.top.batter.balls})`],
-    input.top.bowler && ["TOP BOWL", input.top.bowler.name, `${input.top.bowler.wickets}/${input.top.bowler.runs}`],
+    input.top.batter && [
+      "TOP BAT",
+      input.top.batter.name,
+      `${input.top.batter.runs}${input.top.batter.notOut ? "*" : ""} (${input.top.batter.balls})`,
+    ],
+    input.top.bowler && [
+      "TOP BOWL",
+      input.top.bowler.name,
+      `${input.top.bowler.wickets}/${input.top.bowler.runs}`,
+    ],
   ].filter(Boolean) as string[][];
   if (performers.length) {
     y += 30;
@@ -212,7 +234,11 @@ export async function fixturePoster(input: {
 }
 
 /** Share a poster through the phone's share sheet, or download it on desktop. */
-export async function sharePoster(blob: Blob, fileName: string, title: string): Promise<"shared" | "downloaded"> {
+export async function sharePoster(
+  blob: Blob,
+  fileName: string,
+  title: string,
+): Promise<"shared" | "downloaded"> {
   const file = new File([blob], fileName, { type: "image/png" });
   if (navigator.canShare?.({ files: [file] })) {
     await navigator.share({ files: [file], title });

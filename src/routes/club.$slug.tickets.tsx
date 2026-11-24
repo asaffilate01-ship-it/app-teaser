@@ -13,14 +13,28 @@ import { MyTicketCard } from "@/components/tickets/MyTicketCard";
 const layoutRoute = getRouteApi("/club/$slug");
 
 export const Route = createFileRoute("/club/$slug/tickets")({
-  loader: async ({ params }) => ({ listings: await getClubTickets({ data: { slug: params.slug } }) }),
+  loader: async ({ params }) => ({
+    listings: await getClubTickets({ data: { slug: params.slug } }),
+  }),
   staleTime: 30_000,
   head: ({ matches }) =>
-    siteHead(siteFromMatches(matches), { path: "/tickets", title: "Tickets", description: (name) => `Buy match tickets for ${name} — pay by bank or wallet transfer and show your ticket code at the gate.` }),
+    siteHead(siteFromMatches(matches), {
+      path: "/tickets",
+      title: "Tickets",
+      description: (name) =>
+        `Buy match tickets for ${name} — pay by bank or wallet transfer and show your ticket code at the gate.`,
+    }),
   component: TicketsPage,
 });
 
-const when = (iso: string) => new Date(iso).toLocaleString(undefined, { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+const when = (iso: string) =>
+  new Date(iso).toLocaleString(undefined, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
 function TicketsPage() {
   const { site } = layoutRoute.useLoaderData();
@@ -45,17 +59,25 @@ function TicketsPage() {
   if (!site?.published) return null;
   const listingIds = new Set(listings.map((l) => l.id));
   const myHere = mine.filter((t) => listingIds.has(t.listingId) && t.status !== "cancelled");
-  const defaultName = String(session?.user.user_metadata?.["full_name"] ?? session?.user.user_metadata?.["name"] ?? "");
+  const defaultName = String(
+    session?.user.user_metadata?.["full_name"] ?? session?.user.user_metadata?.["name"] ?? "",
+  );
 
   return (
     <div className="club-shell club-page">
       <div className="club-page-head">
         <div>
           <h1>Tickets</h1>
-          <p className="mt-1 text-sm opacity-80">Pay {site.name} by bank or wallet transfer, add the reference, and your ticket code appears once the club confirms it.</p>
+          <p className="mt-1 text-sm opacity-80">
+            Pay {site.name} by bank or wallet transfer, add the reference, and your ticket code
+            appears once the club confirms it.
+          </p>
         </div>
         {session && (
-          <a href={site.domain ? "https://criclume.com/tickets" : "/tickets"} className="club-button club-button-ghost club-button-sm">
+          <a
+            href={site.domain ? "https://criclume.com/tickets" : "/tickets"}
+            className="club-button club-button-ghost club-button-sm"
+          >
             <Ticket /> All my tickets
           </a>
         )}
@@ -65,7 +87,11 @@ function TicketsPage() {
         <section aria-label="Your tickets" className="space-y-3">
           <h2 className="text-lg font-bold">Your tickets</h2>
           {myHere.map((ticket) => (
-            <MyTicketCard key={ticket.id} ticket={ticket} onChange={() => void Promise.all([refresh(), router.invalidate()])} />
+            <MyTicketCard
+              key={ticket.id}
+              ticket={ticket}
+              onChange={() => void Promise.all([refresh(), router.invalidate()])}
+            />
           ))}
         </section>
       )}
@@ -107,7 +133,17 @@ function TicketsPage() {
   );
 }
 
-function ListingCard({ listing, open, onToggle, buy }: { listing: PublicTicketListing; open: boolean; onToggle: () => void; buy: ReactNode }) {
+function ListingCard({
+  listing,
+  open,
+  onToggle,
+  buy,
+}: {
+  listing: PublicTicketListing;
+  open: boolean;
+  onToggle: () => void;
+  buy: ReactNode;
+}) {
   const soldOut = listing.remaining <= 0;
   return (
     <article className="club-card ticket-listing">
@@ -125,12 +161,25 @@ function ListingCard({ listing, open, onToggle, buy }: { listing: PublicTicketLi
           {listing.details && <p className="mt-2 text-sm opacity-80">{listing.details}</p>}
         </div>
         <div className="ticket-price">
-          <span className="ticket-price-amount">{listing.priceMinor === 0 ? "Free" : formatMoney(listing.priceMinor, listing.currency)}</span>
-          <span className="ticket-price-left">{soldOut ? "Sold out" : listing.remaining <= 20 ? `Only ${listing.remaining} left` : "per ticket"}</span>
+          <span className="ticket-price-amount">
+            {listing.priceMinor === 0 ? "Free" : formatMoney(listing.priceMinor, listing.currency)}
+          </span>
+          <span className="ticket-price-left">
+            {soldOut
+              ? "Sold out"
+              : listing.remaining <= 20
+                ? `Only ${listing.remaining} left`
+                : "per ticket"}
+          </span>
         </div>
       </div>
       {!soldOut && (
-        <button type="button" className={`club-button ${open ? "club-button-ghost" : ""}`} aria-expanded={open} onClick={onToggle}>
+        <button
+          type="button"
+          className={`club-button ${open ? "club-button-ghost" : ""}`}
+          aria-expanded={open}
+          onClick={onToggle}
+        >
           <Ticket /> {open ? "Close" : "Get tickets"}
         </button>
       )}

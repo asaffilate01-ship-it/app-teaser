@@ -6,9 +6,11 @@ export async function resolveClubHost(host: string): Promise<string | null> {
   if (isPlatformHost(h)) return null;
   const cached = cachedClubHost(h);
   if (cached !== undefined) return cached;
-  const url = process.env["SUPABASE_URL"] ?? (import.meta.env["VITE_SUPABASE_URL"] as string | undefined);
+  const url =
+    process.env["SUPABASE_URL"] ?? (import.meta.env["VITE_SUPABASE_URL"] as string | undefined);
   const key =
-    process.env["SUPABASE_PUBLISHABLE_KEY"] ?? (import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] as string | undefined);
+    process.env["SUPABASE_PUBLISHABLE_KEY"] ??
+    (import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] as string | undefined);
   if (!url || !key) return null;
   try {
     const response = await fetch(`${url}/rest/v1/rpc/resolve_club_site_domain`, {

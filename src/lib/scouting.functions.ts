@@ -12,7 +12,9 @@ export interface SharedScoutingReport {
 
 /** Public read of a shared scouting report by its secret link. Returns null when revoked, expired or consent is withdrawn. */
 export const getSharedScoutingReport = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) => z.object({ token: z.string().regex(/^[A-Za-z0-9_-]{32,128}$/) }).parse(data))
+  .inputValidator((data: unknown) =>
+    z.object({ token: z.string().regex(/^[A-Za-z0-9_-]{32,128}$/) }).parse(data),
+  )
   .handler(async ({ data }): Promise<SharedScoutingReport | null> => {
     const url = process.env["SUPABASE_URL"];
     const key = process.env["SUPABASE_PUBLISHABLE_KEY"];

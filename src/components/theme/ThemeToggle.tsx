@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
-import { THEME_EVENT, THEME_KEY, effectiveTheme, readSavedTheme, setTheme, type ThemeMode } from "@/lib/theme";
+import {
+  THEME_EVENT,
+  THEME_KEY,
+  effectiveTheme,
+  readSavedTheme,
+  setTheme,
+  type ThemeMode,
+} from "@/lib/theme";
 
 /** Sun / moon switch. `pageDefault` is the look this page has when the visitor hasn't chosen. */
 export function ThemeToggle({

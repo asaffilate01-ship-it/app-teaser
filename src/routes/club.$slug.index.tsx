@@ -3,13 +3,25 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import { siteFromMatches, siteHead } from "@/lib/club-site-query";
 import { readSponsors, siteSchedule, siteTables } from "@/lib/club-site";
 import { JoinClubForm } from "@/components/site/JoinClubForm";
-import { LeagueTableView, LiveCard, PhotoGrid, PostCard, ResultRow, SectionHead, UpcomingRow } from "@/components/site/SiteParts";
+import {
+  LeagueTableView,
+  LiveCard,
+  PhotoGrid,
+  PostCard,
+  ResultRow,
+  SectionHead,
+  UpcomingRow,
+} from "@/components/site/SiteParts";
 
 const layoutRoute = getRouteApi("/club/$slug");
 
 export const Route = createFileRoute("/club/$slug/")({
   head: ({ matches }) =>
-    siteHead(siteFromMatches(matches), { path: "/", title: "", description: (name) => `${name}: live scores, fixtures, results, news and photos.` }),
+    siteHead(siteFromMatches(matches), {
+      path: "/",
+      title: "",
+      description: (name) => `${name}: live scores, fixtures, results, news and photos.`,
+    }),
   component: ClubHome,
 });
 
@@ -31,7 +43,15 @@ function ClubHome() {
       <section className={hero ? "club-hero club-hero-photo" : "club-hero"}>
         {hero && <img src={hero} alt="" className="club-hero-img" />}
         <div className="club-shell club-hero-inner">
-          <p className="club-kicker">{site.kind === "league" ? "Cricket league" : site.kind === "academy" ? "Cricket academy" : site.kind === "school" ? "School cricket" : "Cricket club"}</p>
+          <p className="club-kicker">
+            {site.kind === "league"
+              ? "Cricket league"
+              : site.kind === "academy"
+                ? "Cricket academy"
+                : site.kind === "school"
+                  ? "School cricket"
+                  : "Cricket club"}
+          </p>
           <h1>{site.name}</h1>
           {site.site.tagline && <p className="club-hero-tagline">{site.site.tagline}</p>}
           <div className="club-hero-actions">
@@ -83,7 +103,12 @@ function ClubHome() {
             <SectionHead
               title="Latest results"
               action={
-                <Link to="/club/$slug/fixtures" params={{ slug }} hash="results" className="club-more">
+                <Link
+                  to="/club/$slug/fixtures"
+                  params={{ slug }}
+                  hash="results"
+                  className="club-more"
+                >
                   All results
                 </Link>
               }
@@ -141,7 +166,9 @@ function ClubHome() {
               {site.site.about && <p className="club-prose">{site.site.about}</p>}
               {teams.length > 0 && (
                 <>
-                  <h3 className="club-subhead">{site.kind === "league" ? "Member teams" : "Our teams"}</h3>
+                  <h3 className="club-subhead">
+                    {site.kind === "league" ? "Member teams" : "Our teams"}
+                  </h3>
                   <ul className="club-chips">
                     {teams.map((team) => (
                       <li key={team.id}>

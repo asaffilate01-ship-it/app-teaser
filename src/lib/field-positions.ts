@@ -19,17 +19,105 @@ export type FieldArea = (typeof fieldAreas)[number];
 
 /** Inside-the-ring and deep positions, one pair per slice of the ground. */
 export const ringSectors = [
-  { start: 0, end: 33, area: "Fine leg", inner: "Short fine leg", innerLabel: ["Short", "fine"], deep: "Fine leg", deepLabel: ["Fine", "leg"] },
-  { start: 33, end: 66, area: "Square leg", inner: "Backward square leg", innerLabel: ["Back", "square"], deep: "Deep backward square", deepLabel: ["Deep", "back sq"] },
-  { start: 66, end: 99, area: "Square leg", inner: "Square leg", innerLabel: ["Square", "leg"], deep: "Deep square leg", deepLabel: ["Deep", "square"] },
-  { start: 99, end: 132, area: "Mid-wicket", inner: "Mid-wicket", innerLabel: ["Mid-", "wicket"], deep: "Deep mid-wicket", deepLabel: ["Deep", "mid-wkt"] },
-  { start: 132, end: 165, area: "Long on", inner: "Mid-on", innerLabel: ["Mid-on"], deep: "Long on", deepLabel: ["Long", "on"] },
-  { start: 165, end: 195, area: "Straight", inner: "Straight", innerLabel: ["Straight"], deep: "Long straight", deepLabel: ["Long", "straight"] },
-  { start: 195, end: 228, area: "Long off", inner: "Mid-off", innerLabel: ["Mid-off"], deep: "Long off", deepLabel: ["Long", "off"] },
-  { start: 228, end: 261, area: "Cover", inner: "Extra cover", innerLabel: ["Extra", "cover"], deep: "Deep extra cover", deepLabel: ["Deep", "ex cover"] },
-  { start: 261, end: 294, area: "Cover", inner: "Cover", innerLabel: ["Cover"], deep: "Deep cover", deepLabel: ["Deep", "cover"] },
-  { start: 294, end: 327, area: "Point", inner: "Point", innerLabel: ["Point"], deep: "Deep point", deepLabel: ["Deep", "point"] },
-  { start: 327, end: 360, area: "Third", inner: "Short third", innerLabel: ["Short", "third"], deep: "Third man", deepLabel: ["Third", "man"] },
+  {
+    start: 0,
+    end: 33,
+    area: "Fine leg",
+    inner: "Short fine leg",
+    innerLabel: ["Short", "fine"],
+    deep: "Fine leg",
+    deepLabel: ["Fine", "leg"],
+  },
+  {
+    start: 33,
+    end: 66,
+    area: "Square leg",
+    inner: "Backward square leg",
+    innerLabel: ["Back", "square"],
+    deep: "Deep backward square",
+    deepLabel: ["Deep", "back sq"],
+  },
+  {
+    start: 66,
+    end: 99,
+    area: "Square leg",
+    inner: "Square leg",
+    innerLabel: ["Square", "leg"],
+    deep: "Deep square leg",
+    deepLabel: ["Deep", "square"],
+  },
+  {
+    start: 99,
+    end: 132,
+    area: "Mid-wicket",
+    inner: "Mid-wicket",
+    innerLabel: ["Mid-", "wicket"],
+    deep: "Deep mid-wicket",
+    deepLabel: ["Deep", "mid-wkt"],
+  },
+  {
+    start: 132,
+    end: 165,
+    area: "Long on",
+    inner: "Mid-on",
+    innerLabel: ["Mid-on"],
+    deep: "Long on",
+    deepLabel: ["Long", "on"],
+  },
+  {
+    start: 165,
+    end: 195,
+    area: "Straight",
+    inner: "Straight",
+    innerLabel: ["Straight"],
+    deep: "Long straight",
+    deepLabel: ["Long", "straight"],
+  },
+  {
+    start: 195,
+    end: 228,
+    area: "Long off",
+    inner: "Mid-off",
+    innerLabel: ["Mid-off"],
+    deep: "Long off",
+    deepLabel: ["Long", "off"],
+  },
+  {
+    start: 228,
+    end: 261,
+    area: "Cover",
+    inner: "Extra cover",
+    innerLabel: ["Extra", "cover"],
+    deep: "Deep extra cover",
+    deepLabel: ["Deep", "ex cover"],
+  },
+  {
+    start: 261,
+    end: 294,
+    area: "Cover",
+    inner: "Cover",
+    innerLabel: ["Cover"],
+    deep: "Deep cover",
+    deepLabel: ["Deep", "cover"],
+  },
+  {
+    start: 294,
+    end: 327,
+    area: "Point",
+    inner: "Point",
+    innerLabel: ["Point"],
+    deep: "Deep point",
+    deepLabel: ["Deep", "point"],
+  },
+  {
+    start: 327,
+    end: 360,
+    area: "Third",
+    inner: "Short third",
+    innerLabel: ["Short", "third"],
+    deep: "Third man",
+    deepLabel: ["Third", "man"],
+  },
 ] as const;
 
 /** Close catchers sit too near the bat to tap on a small drawing, so they are offered as buttons, grouped by side. */
@@ -54,7 +142,8 @@ export const closeCatchers = [
 type RingPosition = (typeof ringSectors)[number]["inner" | "deep"];
 type ClosePosition = (typeof closeCatchers)[number]["name"];
 
-export type FieldZone = FieldArea | RingPosition | ClosePosition | "Keeper" | "Bowler" | "Not recorded";
+export type FieldZone =
+  FieldArea | RingPosition | ClosePosition | "Keeper" | "Bowler" | "Not recorded";
 
 export const allFieldZones = Array.from(
   new Set<FieldZone>([
@@ -76,10 +165,19 @@ export interface ZoneInfo {
 }
 
 const info = new Map<string, ZoneInfo>();
-const sideOf = (start: number): ZoneInfo["side"] => (start === 165 ? "straight" : start < 165 ? "leg" : "off");
+const sideOf = (start: number): ZoneInfo["side"] =>
+  start === 165 ? "straight" : start < 165 ? "leg" : "off";
 for (const sector of ringSectors) {
-  info.set(sector.inner.toLowerCase(), { area: sector.area, depth: "ring", side: sideOf(sector.start) });
-  info.set(sector.deep.toLowerCase(), { area: sector.area, depth: "deep", side: sideOf(sector.start) });
+  info.set(sector.inner.toLowerCase(), {
+    area: sector.area,
+    depth: "ring",
+    side: sideOf(sector.start),
+  });
+  info.set(sector.deep.toLowerCase(), {
+    area: sector.area,
+    depth: "deep",
+    side: sideOf(sector.start),
+  });
 }
 for (const catcher of closeCatchers) {
   info.set(catcher.name.toLowerCase(), { area: catcher.area, depth: "close", side: catcher.side });

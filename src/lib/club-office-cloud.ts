@@ -69,31 +69,90 @@ export async function loadClubOffice(organisationId: string): Promise<ClubOffice
   if (!userId) throw new Error("Sign in again to open the club office.");
   const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
   const org = organisationId;
-  const [events, myPlayers, guardians, schedules, charges, payments, grounds, bookings, bookable, items, orders, loans, drivers, approved, accounts, claims] =
-    await Promise.all([
-      supabase.from("club_events").select("*").eq("organisation_id", org).gte("starts_at", since).order("starts_at").limit(200),
-      supabase.from("players").select("id").eq("organisation_id", org).eq("linked_user_id", userId),
-      supabase.from("player_guardians").select("*").eq("organisation_id", org),
-      supabase.from("fee_schedules").select("*").eq("organisation_id", org).order("created_at", { ascending: false }),
-      supabase.from("fee_charges").select("*").eq("organisation_id", org).order("created_at", { ascending: false }).limit(1000),
-      supabase.from("fee_payments").select("*").eq("organisation_id", org).order("paid_on", { ascending: false }).limit(1000),
-      supabase.from("grounds").select("id,name,bookable,booking_note").eq("organisation_id", org).order("name"),
-      supabase
-        .from("ground_bookings")
-        .select("*")
-        .or(`organisation_id.eq.${org},requester_organisation_id.eq.${org}`)
-        .gte("ends_at", since)
-        .order("starts_at")
-        .limit(300),
-      supabase.rpc("list_bookable_grounds"),
-      supabase.from("club_items").select("*").eq("organisation_id", org).order("name"),
-      supabase.from("item_orders").select("*").eq("organisation_id", org).order("created_at", { ascending: false }).limit(300),
-      supabase.from("equipment_loans").select("*").eq("organisation_id", org).order("issued_at", { ascending: false }).limit(300),
-      supabase.from("travel_drivers").select("*").eq("organisation_id", org),
-      supabase.rpc("approved_driver_ids", { p_org: org }),
-      supabase.from("club_payment_accounts").select("*").eq("organisation_id", org).order("created_at"),
-      supabase.from("fee_payment_claims").select("*").eq("organisation_id", org).order("created_at", { ascending: false }).limit(500),
-    ]);
+  const [
+    events,
+    myPlayers,
+    guardians,
+    schedules,
+    charges,
+    payments,
+    grounds,
+    bookings,
+    bookable,
+    items,
+    orders,
+    loans,
+    drivers,
+    approved,
+    accounts,
+    claims,
+  ] = await Promise.all([
+    supabase
+      .from("club_events")
+      .select("*")
+      .eq("organisation_id", org)
+      .gte("starts_at", since)
+      .order("starts_at")
+      .limit(200),
+    supabase.from("players").select("id").eq("organisation_id", org).eq("linked_user_id", userId),
+    supabase.from("player_guardians").select("*").eq("organisation_id", org),
+    supabase
+      .from("fee_schedules")
+      .select("*")
+      .eq("organisation_id", org)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("fee_charges")
+      .select("*")
+      .eq("organisation_id", org)
+      .order("created_at", { ascending: false })
+      .limit(1000),
+    supabase
+      .from("fee_payments")
+      .select("*")
+      .eq("organisation_id", org)
+      .order("paid_on", { ascending: false })
+      .limit(1000),
+    supabase
+      .from("grounds")
+      .select("id,name,bookable,booking_note")
+      .eq("organisation_id", org)
+      .order("name"),
+    supabase
+      .from("ground_bookings")
+      .select("*")
+      .or(`organisation_id.eq.${org},requester_organisation_id.eq.${org}`)
+      .gte("ends_at", since)
+      .order("starts_at")
+      .limit(300),
+    supabase.rpc("list_bookable_grounds"),
+    supabase.from("club_items").select("*").eq("organisation_id", org).order("name"),
+    supabase
+      .from("item_orders")
+      .select("*")
+      .eq("organisation_id", org)
+      .order("created_at", { ascending: false })
+      .limit(300),
+    supabase
+      .from("equipment_loans")
+      .select("*")
+      .eq("organisation_id", org)
+      .order("issued_at", { ascending: false })
+      .limit(300),
+    supabase.from("travel_drivers").select("*").eq("organisation_id", org),
+    supabase.rpc("approved_driver_ids", { p_org: org }),
+    supabase
+      .from("club_payment_accounts")
+      .select("*")
+      .eq("organisation_id", org)
+      .order("created_at"),
+    supabase
+      .from("fee_payment_claims")
+      .select("*")
+      .eq("organisation_id", org)
+      .order("created_at", { ascending: false })
+      .limit(500),
+  ]);
   const eventRows = must(events) as ClubEvent[];
   const eventIds = eventRows.map((event) => event.id);
   const [availability, selections, rides] = eventIds.length
@@ -102,10 +161,22 @@ export async function loadClubOffice(organisationId: string): Promise<ClubOffice
         supabase.from("event_selections").select("*").in("event_id", eventIds),
         supabase.from("ride_offers").select("*").in("event_id", eventIds),
       ])
-    : [{ data: [], error: null }, { data: [], error: null }, { data: [], error: null }];
+    : [
+        { data: [], error: null },
+        { data: [], error: null },
+        { data: [], error: null },
+      ];
   const rideRows = must(rides) as RideOffer[];
   const rideBookings = rideRows.length
-    ? (must(await supabase.from("ride_bookings").select("*").in("ride_id", rideRows.map((ride) => ride.id))) as RideBooking[])
+    ? (must(
+        await supabase
+          .from("ride_bookings")
+          .select("*")
+          .in(
+            "ride_id",
+            rideRows.map((ride) => ride.id),
+          ),
+      ) as RideBooking[])
     : [];
   const guardianRows = must(guardians) as GuardianLink[];
   const myPlayerIds = [
@@ -131,7 +202,9 @@ export async function loadClubOffice(organisationId: string): Promise<ClubOffice
     claims: must(claims) as PaymentClaim[],
     grounds: must(grounds) as OwnGround[],
     bookings: must(bookings) as GroundBooking[],
-    bookableGrounds: ((bookable.data ?? []) as BookableGround[]).filter((ground) => ground.organisation_id !== org),
+    bookableGrounds: ((bookable.data ?? []) as BookableGround[]).filter(
+      (ground) => ground.organisation_id !== org,
+    ),
     items: must(items) as ClubItem[],
     orders: must(orders) as ItemOrder[],
     loans: must(loans) as EquipmentLoan[],
@@ -146,8 +219,10 @@ function check(result: { error: { message: string } | null }) {
 /** Database refusals arrive as plain sentences already; trim the technical prefix if any. */
 export function friendly(message: string): string {
   if (/row-level security/i.test(message)) return "Your role doesn't allow that.";
-  if (/ground_bookings_no_double/i.test(message)) return "That time clashes with another approved booking.";
-  if (/fee_payment_claims_reference_once/i.test(message)) return "That transaction reference has already been sent.";
+  if (/ground_bookings_no_double/i.test(message))
+    return "That time clashes with another approved booking.";
+  if (/fee_payment_claims_reference_once/i.test(message))
+    return "That transaction reference has already been sent.";
   if (/duplicate key/i.test(message)) return "That's already been added.";
   return message.replace(/^.*?ERROR:\s*/i, "");
 }
@@ -159,33 +234,75 @@ export const office = {
   async updateEvent(id: string, patch: Tables["club_events"]["Update"]) {
     check(await supabase.from("club_events").update(patch).eq("id", id));
   },
-  async answer(input: { organisationId: string; eventId: string; playerId: string; status: "available" | "unavailable" | "maybe"; note?: string }) {
+  async answer(input: {
+    organisationId: string;
+    eventId: string;
+    playerId: string;
+    status: "available" | "unavailable" | "maybe";
+    note?: string;
+  }) {
     check(
       await supabase.from("event_availability").upsert(
-        { organisation_id: input.organisationId, event_id: input.eventId, player_id: input.playerId, status: input.status, note: input.note ?? null },
+        {
+          organisation_id: input.organisationId,
+          event_id: input.eventId,
+          player_id: input.playerId,
+          status: input.status,
+          note: input.note ?? null,
+        },
         { onConflict: "event_id,player_id" },
       ),
     );
   },
   async pick(input: Tables["event_selections"]["Insert"]) {
-    check(await supabase.from("event_selections").upsert(input, { onConflict: "event_id,player_id" }));
+    check(
+      await supabase.from("event_selections").upsert(input, { onConflict: "event_id,player_id" }),
+    );
   },
   async unpick(eventId: string, playerId: string) {
-    check(await supabase.from("event_selections").delete().eq("event_id", eventId).eq("player_id", playerId));
+    check(
+      await supabase
+        .from("event_selections")
+        .delete()
+        .eq("event_id", eventId)
+        .eq("player_id", playerId),
+    );
   },
   async setRole(eventId: string, playerId: string, field: "captain" | "wicketkeeper") {
-    check(await supabase.rpc("set_selection_role", { p_event_id: eventId, p_player_id: playerId, p_field: field }));
+    check(
+      await supabase.rpc("set_selection_role", {
+        p_event_id: eventId,
+        p_player_id: playerId,
+        p_field: field,
+      }),
+    );
   },
   async offerRide(input: Tables["ride_offers"]["Insert"]) {
     check(await supabase.from("ride_offers").insert(input));
   },
   async cancelRide(id: string) {
-    check(await supabase.from("ride_offers").update({ cancelled_at: new Date().toISOString() }).eq("id", id));
+    check(
+      await supabase
+        .from("ride_offers")
+        .update({ cancelled_at: new Date().toISOString() })
+        .eq("id", id),
+    );
   },
-  async requestSeat(input: { organisationId: string; rideId: string; playerId: string; guardianConsent: boolean }) {
+  async requestSeat(input: {
+    organisationId: string;
+    rideId: string;
+    playerId: string;
+    guardianConsent: boolean;
+  }) {
     check(
       await supabase.from("ride_bookings").upsert(
-        { organisation_id: input.organisationId, ride_id: input.rideId, player_id: input.playerId, guardian_consent: input.guardianConsent, status: "requested" },
+        {
+          organisation_id: input.organisationId,
+          ride_id: input.rideId,
+          player_id: input.playerId,
+          guardian_consent: input.guardianConsent,
+          status: "requested",
+        },
         { onConflict: "ride_id,player_id" },
       ),
     );
@@ -193,23 +310,44 @@ export const office = {
   async setSeat(id: string, status: "confirmed" | "declined" | "cancelled") {
     check(await supabase.from("ride_bookings").update({ status }).eq("id", id));
   },
-  async approveDriver(input: { organisationId: string; userId: string; expiresOn: string | null; checksNote: string }) {
+  async approveDriver(input: {
+    organisationId: string;
+    userId: string;
+    expiresOn: string | null;
+    checksNote: string;
+  }) {
     check(
       await supabase.from("travel_drivers").upsert(
-        { organisation_id: input.organisationId, user_id: input.userId, expires_on: input.expiresOn, checks_note: input.checksNote || null, revoked_at: null },
+        {
+          organisation_id: input.organisationId,
+          user_id: input.userId,
+          expires_on: input.expiresOn,
+          checks_note: input.checksNote || null,
+          revoked_at: null,
+        },
         { onConflict: "organisation_id,user_id" },
       ),
     );
   },
   async revokeDriver(id: string) {
-    check(await supabase.from("travel_drivers").update({ revoked_at: new Date().toISOString() }).eq("id", id));
+    check(
+      await supabase
+        .from("travel_drivers")
+        .update({ revoked_at: new Date().toISOString() })
+        .eq("id", id),
+    );
   },
   async addSchedule(input: Tables["fee_schedules"]["Insert"]) {
     check(await supabase.from("fee_schedules").insert(input));
   },
   async chargePlayers(schedule: FeeSchedule, playerIds: string[]) {
     if (!playerIds.length) return;
-    check(await supabase.rpc("charge_fee_schedule", { p_schedule_id: schedule.id, p_player_ids: playerIds }));
+    check(
+      await supabase.rpc("charge_fee_schedule", {
+        p_schedule_id: schedule.id,
+        p_player_ids: playerIds,
+      }),
+    );
   },
   async recordPayment(input: Tables["fee_payments"]["Insert"]) {
     check(await supabase.from("fee_payments").insert(input));
@@ -220,7 +358,16 @@ export const office = {
   async setPaymentAccount(id: string, active: boolean) {
     check(await supabase.from("club_payment_accounts").update({ active }).eq("id", id));
   },
-  async submitClaim(input: { organisationId: string; chargeId: string; userId: string; amountMinor: number; method: string; reference: string; paidOn: string; note: string }) {
+  async submitClaim(input: {
+    organisationId: string;
+    chargeId: string;
+    userId: string;
+    amountMinor: number;
+    method: string;
+    reference: string;
+    paidOn: string;
+    note: string;
+  }) {
     check(
       await supabase.from("fee_payment_claims").insert({
         organisation_id: input.organisationId,
@@ -235,10 +382,17 @@ export const office = {
     );
   },
   async decideClaim(id: string, confirm: boolean, note: string) {
-    check(await supabase.rpc("decide_fee_claim", { p_claim_id: id, p_confirm: confirm, p_note: note }));
+    check(
+      await supabase.rpc("decide_fee_claim", { p_claim_id: id, p_confirm: confirm, p_note: note }),
+    );
   },
   async waive(id: string, reason: string) {
-    check(await supabase.from("fee_charges").update({ status: "waived", waived_reason: reason || null }).eq("id", id));
+    check(
+      await supabase
+        .from("fee_charges")
+        .update({ status: "waived", waived_reason: reason || null })
+        .eq("id", id),
+    );
   },
   async setGroundBookable(id: string, bookable: boolean, note: string | null) {
     check(await supabase.from("grounds").update({ bookable, booking_note: note }).eq("id", id));
@@ -246,7 +400,15 @@ export const office = {
   async bookOwnGround(input: Tables["ground_bookings"]["Insert"]) {
     check(await supabase.from("ground_bookings").insert(input));
   },
-  async requestOtherGround(input: { groundId: string; requesterOrg: string; title: string; purpose: string; startsAt: string; endsAt: string; note: string }) {
+  async requestOtherGround(input: {
+    groundId: string;
+    requesterOrg: string;
+    title: string;
+    purpose: string;
+    startsAt: string;
+    endsAt: string;
+    note: string;
+  }) {
     check(
       await supabase.rpc("request_ground_booking", {
         p_ground_id: input.groundId,
@@ -266,7 +428,11 @@ export const office = {
     check(await supabase.rpc("cancel_ground_booking", { p_booking_id: id }));
   },
   async busySlots(groundId: string, from: string, to: string) {
-    const result = await supabase.rpc("ground_busy_slots", { p_ground_id: groundId, p_from: from, p_to: to });
+    const result = await supabase.rpc("ground_busy_slots", {
+      p_ground_id: groundId,
+      p_from: from,
+      p_to: to,
+    });
     check(result);
     return (result.data ?? []) as { starts_at: string; ends_at: string }[];
   },
@@ -276,7 +442,14 @@ export const office = {
   async updateItem(id: string, patch: Tables["club_items"]["Update"]) {
     check(await supabase.from("club_items").update(patch).eq("id", id));
   },
-  async order(input: { organisationId: string; itemId: string; userId: string; playerId: string | null; quantity: number; size: string | null }) {
+  async order(input: {
+    organisationId: string;
+    itemId: string;
+    userId: string;
+    playerId: string | null;
+    quantity: number;
+    size: string | null;
+  }) {
     check(
       await supabase.from("item_orders").insert({
         organisation_id: input.organisationId,
@@ -295,9 +468,19 @@ export const office = {
     check(await supabase.from("equipment_loans").insert(input));
   },
   async returned(id: string, note: string) {
-    check(await supabase.from("equipment_loans").update({ returned_at: new Date().toISOString(), condition_note: note || null }).eq("id", id));
+    check(
+      await supabase
+        .from("equipment_loans")
+        .update({ returned_at: new Date().toISOString(), condition_note: note || null })
+        .eq("id", id),
+    );
   },
-  async linkGuardian(input: { organisationId: string; playerId: string; userId: string; relationship: string }) {
+  async linkGuardian(input: {
+    organisationId: string;
+    playerId: string;
+    userId: string;
+    relationship: string;
+  }) {
     check(
       await supabase.from("player_guardians").insert({
         organisation_id: input.organisationId,

@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createMatch, currentInnings, recordDelivery, type CricketMatch, type RecordDeliveryInput } from "../src/lib/cricket.ts";
+import {
+  createMatch,
+  currentInnings,
+  recordDelivery,
+  type CricketMatch,
+  type RecordDeliveryInput,
+} from "../src/lib/cricket.ts";
 import { lengthBand, lineBand, pitchBreakdown } from "../src/lib/ball-track.ts";
 import { bowlingTypeSplits, phaseOf, phaseOvers, phaseSplits } from "../src/lib/phase-splits.ts";
 import { csvCell } from "../src/lib/stats-export.ts";
@@ -12,11 +18,28 @@ const make = () =>
     homePlayers: ["Ali", "Ben", "Cal"],
     awayPlayers: ["Fin", "Gus", "Hal"],
     battingFirst: "home",
-    settings: { format: "T20", oversPerInnings: 20, inningsPerSide: 1, ballsPerOver: 6, ground: "", weather: "", startTime: "2027-05-01T10:00:00Z" },
+    settings: {
+      format: "T20",
+      oversPerInnings: 20,
+      inningsPerSide: 1,
+      ballsPerOver: 6,
+      ground: "",
+      weather: "",
+      startTime: "2027-05-01T10:00:00Z",
+    },
   });
 const ball = (m: CricketMatch, extra: Partial<RecordDeliveryInput> = {}): RecordDeliveryInput => {
   const i = currentInnings(m);
-  return { strikerId: i.strikerId, nonStrikerId: i.nonStrikerId, bowlerId: i.bowlerId, end: "Pavilion", deliveryStyle: "Fast", outcome: "hit", batterRuns: 0, ...extra };
+  return {
+    strikerId: i.strikerId,
+    nonStrikerId: i.nonStrikerId,
+    bowlerId: i.bowlerId,
+    end: "Pavilion",
+    deliveryStyle: "Fast",
+    outcome: "hit",
+    batterRuns: 0,
+    ...extra,
+  };
 };
 
 test("T20 powerplay is overs 1-6 and the death is overs 16-20", () => {
@@ -90,11 +113,17 @@ test("economy ranking ignores bowlers with under 60 balls and puts the cheapest 
     { ref: "b", ballsBowled: 120, runsConceded: 160 },
     { ref: "c", ballsBowled: 120, runsConceded: 100 },
   ];
-  assert.deepEqual(rankPlayers(rows, "economy").map((r) => r.ref), ["c", "b"]);
+  assert.deepEqual(
+    rankPlayers(rows, "economy").map((r) => r.ref),
+    ["c", "b"],
+  );
   assert.equal(economy(rows[2]!), 5);
 });
 
 test("compare marks the lower economy as better", () => {
-  const line = comparePlayers({ ballsBowled: 60, runsConceded: 40 }, { ballsBowled: 60, runsConceded: 60 }).find((l) => l.label === "Economy")!;
+  const line = comparePlayers(
+    { ballsBowled: 60, runsConceded: 40 },
+    { ballsBowled: 60, runsConceded: 60 },
+  ).find((l) => l.label === "Economy")!;
   assert.equal(line.better, "a");
 });

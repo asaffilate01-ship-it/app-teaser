@@ -1,12 +1,33 @@
 /** Umpire match records (decisions given) and assessments — pure helpers, shared by the umpire and manager screens. */
 
-export const decisionKinds = ["lbw", "caught", "run_out", "stumped", "bowled", "wide", "no_ball", "other"] as const;
+export const decisionKinds = [
+  "lbw",
+  "caught",
+  "run_out",
+  "stumped",
+  "bowled",
+  "wide",
+  "no_ball",
+  "other",
+] as const;
 export type DecisionKind = (typeof decisionKinds)[number];
 export const decisionLabels: Record<DecisionKind, string> = {
-  lbw: "LBW", caught: "Caught", run_out: "Run out", stumped: "Stumped", bowled: "Bowled", wide: "Wide", no_ball: "No-ball", other: "Other",
+  lbw: "LBW",
+  caught: "Caught",
+  run_out: "Run out",
+  stumped: "Stumped",
+  bowled: "Bowled",
+  wide: "Wide",
+  no_ball: "No-ball",
+  other: "Other",
 };
 
-export interface UmpireDecision { kind: DecisionKind; given: boolean; over?: string; note?: string }
+export interface UmpireDecision {
+  kind: DecisionKind;
+  given: boolean;
+  over?: string;
+  note?: string;
+}
 
 /** Reads saved decisions defensively (older or hand-edited rows are skipped). */
 export function readDecisions(value: unknown): UmpireDecision[] {
@@ -16,7 +37,14 @@ export function readDecisions(value: unknown): UmpireDecision[] {
     const row = item as Record<string, unknown>;
     const kind = decisionKinds.find((k) => k === row["kind"]);
     if (!kind) return [];
-    return [{ kind, given: row["given"] === true, ...(typeof row["over"] === "string" && row["over"] ? { over: row["over"] } : {}), ...(typeof row["note"] === "string" && row["note"] ? { note: row["note"] } : {}) }];
+    return [
+      {
+        kind,
+        given: row["given"] === true,
+        ...(typeof row["over"] === "string" && row["over"] ? { over: row["over"] } : {}),
+        ...(typeof row["note"] === "string" && row["note"] ? { note: row["note"] } : {}),
+      },
+    ];
   });
 }
 
@@ -46,7 +74,9 @@ export type AssessmentScores = Partial<Record<(typeof assessmentCriteria)[number
 
 /** Overall score out of 100 = average of the criteria that were marked (each 1–5), scaled; 0 if none. */
 export function overallPercent(scores: AssessmentScores): number {
-  const marks = Object.values(scores).filter((v): v is number => typeof v === "number" && v >= 1 && v <= 5);
+  const marks = Object.values(scores).filter(
+    (v): v is number => typeof v === "number" && v >= 1 && v <= 5,
+  );
   if (!marks.length) return 0;
   return Math.round((marks.reduce((a, b) => a + b, 0) / marks.length) * 20);
 }
@@ -55,5 +85,8 @@ export function overallPercent(scores: AssessmentScores): number {
 export function averageMark(marks: { mark: number }[]): { average: number | null; count: number } {
   const valid = marks.filter((m) => Number.isFinite(m.mark));
   if (!valid.length) return { average: null, count: 0 };
-  return { average: Math.round((valid.reduce((a, m) => a + m.mark, 0) / valid.length) * 10) / 10, count: valid.length };
+  return {
+    average: Math.round((valid.reduce((a, m) => a + m.mark, 0) / valid.length) * 10) / 10,
+    count: valid.length,
+  };
 }

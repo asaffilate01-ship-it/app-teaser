@@ -3,7 +3,19 @@ import { Car, ShieldCheck } from "lucide-react";
 import { can } from "@/lib/platform";
 import { rideBlocker, seatsLeft, type BookingStatus } from "@/lib/club-office";
 import { office, type ClubEvent } from "@/lib/club-office-cloud";
-import { Empty, OfficeCard, OfficeField, Pill, day, fromLocal, nameOfMember, nameOfPlayer, upcoming, when, type OfficeProps } from "./ui";
+import {
+  Empty,
+  OfficeCard,
+  OfficeField,
+  Pill,
+  day,
+  fromLocal,
+  nameOfMember,
+  nameOfPlayer,
+  upcoming,
+  when,
+  type OfficeProps,
+} from "./ui";
 
 const directions = [
   ["both", "There and back"],
@@ -22,9 +34,12 @@ export function TravelPanel(props: OfficeProps) {
       >
         <span className="flex flex-wrap gap-1.5">
           <Pill tone="good">
-            <ShieldCheck className="size-3" /> {data.approvedDriverIds.length} approved driver{data.approvedDriverIds.length === 1 ? "" : "s"}
+            <ShieldCheck className="size-3" /> {data.approvedDriverIds.length} approved driver
+            {data.approvedDriverIds.length === 1 ? "" : "s"}
           </Pill>
-          {data.approvedDriverIds.includes(data.userId) && <Pill tone="good">You're an approved driver</Pill>}
+          {data.approvedDriverIds.includes(data.userId) && (
+            <Pill tone="good">You're an approved driver</Pill>
+          )}
         </span>
       </OfficeCard>
       {events.length === 0 && <Empty>Travel plans appear here for upcoming events.</Empty>}
@@ -36,7 +51,14 @@ export function TravelPanel(props: OfficeProps) {
   );
 }
 
-function EventTravel({ event, data, club, role, organisationId, act }: OfficeProps & { event: ClubEvent }) {
+function EventTravel({
+  event,
+  data,
+  club,
+  role,
+  organisationId,
+  act,
+}: OfficeProps & { event: ClubEvent }) {
   const manager = can(role, "travel.manage");
   const [editing, setEditing] = useState(false);
   const [meetPoint, setMeetPoint] = useState(event.travel_meet_point ?? "");
@@ -64,7 +86,8 @@ function EventTravel({ event, data, club, role, organisationId, act }: OfficePro
           <span className="office-label">Club travel</span>
           {event.travel_meet_point || event.travel_meet_at ? (
             <span className="block text-sm">
-              Meet {event.travel_meet_point ?? ""} {event.travel_meet_at ? `at ${when(event.travel_meet_at)}` : ""}
+              Meet {event.travel_meet_point ?? ""}{" "}
+              {event.travel_meet_at ? `at ${when(event.travel_meet_at)}` : ""}
             </span>
           ) : (
             <span className="office-meta block">No meeting point set yet.</span>
@@ -93,9 +116,29 @@ function EventTravel({ event, data, club, role, organisationId, act }: OfficePro
             ).then((ok) => ok && setEditing(false));
           }}
         >
-          <input aria-label="Meeting point" maxLength={200} className="scorer-input" placeholder="Club car park" value={meetPoint} onChange={(item) => setMeetPoint(item.target.value)} />
-          <input aria-label="Meeting time" type="datetime-local" className="scorer-input" value={meetAt} onChange={(item) => setMeetAt(item.target.value)} />
-          <input aria-label="Travel notes" maxLength={600} className="scorer-input" placeholder="Minibus leaves 8:15, back by 7pm" value={travelNotes} onChange={(item) => setTravelNotes(item.target.value)} />
+          <input
+            aria-label="Meeting point"
+            maxLength={200}
+            className="scorer-input"
+            placeholder="Club car park"
+            value={meetPoint}
+            onChange={(item) => setMeetPoint(item.target.value)}
+          />
+          <input
+            aria-label="Meeting time"
+            type="datetime-local"
+            className="scorer-input"
+            value={meetAt}
+            onChange={(item) => setMeetAt(item.target.value)}
+          />
+          <input
+            aria-label="Travel notes"
+            maxLength={600}
+            className="scorer-input"
+            placeholder="Minibus leaves 8:15, back by 7pm"
+            value={travelNotes}
+            onChange={(item) => setTravelNotes(item.target.value)}
+          />
           <button className="action-primary">Save</button>
         </form>
       )}
@@ -120,10 +163,23 @@ function EventTravel({ event, data, club, role, organisationId, act }: OfficePro
           }}
         >
           <OfficeField label="Seats">
-            <input type="number" min={1} max={8} className="scorer-input" value={seats} onChange={(item) => setSeats(Math.min(8, Math.max(1, Number(item.target.value) || 1)))} />
+            <input
+              type="number"
+              min={1}
+              max={8}
+              className="scorer-input"
+              value={seats}
+              onChange={(item) =>
+                setSeats(Math.min(8, Math.max(1, Number(item.target.value) || 1)))
+              }
+            />
           </OfficeField>
           <OfficeField label="Trip">
-            <select className="scorer-input" value={direction} onChange={(item) => setDirection(item.target.value)}>
+            <select
+              className="scorer-input"
+              value={direction}
+              onChange={(item) => setDirection(item.target.value)}
+            >
               {directions.map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
@@ -132,10 +188,22 @@ function EventTravel({ event, data, club, role, organisationId, act }: OfficePro
             </select>
           </OfficeField>
           <OfficeField label="Pick-up point (not a home address)">
-            <input required maxLength={160} className="scorer-input" value={ridePoint} onChange={(item) => setRidePoint(item.target.value)} placeholder="Station car park" />
+            <input
+              required
+              maxLength={160}
+              className="scorer-input"
+              value={ridePoint}
+              onChange={(item) => setRidePoint(item.target.value)}
+              placeholder="Station car park"
+            />
           </OfficeField>
           <OfficeField label="Leaving">
-            <input type="datetime-local" className="scorer-input" value={departs} onChange={(item) => setDeparts(item.target.value)} />
+            <input
+              type="datetime-local"
+              className="scorer-input"
+              value={departs}
+              onChange={(item) => setDeparts(item.target.value)}
+            />
           </OfficeField>
           <div className="flex items-end">
             <button className="action-primary w-full">Offer</button>
@@ -148,21 +216,32 @@ function EventTravel({ event, data, club, role, organisationId, act }: OfficePro
         <div className="space-y-2">
           {rides.map((ride) => {
             const bookings = data.rideBookings.filter((booking) => booking.ride_id === ride.id);
-            const left = seatsLeft(ride.seats, bookings.map((booking) => ({ status: booking.status as BookingStatus })));
+            const left = seatsLeft(
+              ride.seats,
+              bookings.map((booking) => ({ status: booking.status as BookingStatus })),
+            );
             const approved = data.approvedDriverIds.includes(ride.driver_user_id);
             const mine = ride.driver_user_id === data.userId;
             return (
               <div key={ride.id} className="office-row">
                 <span className="min-w-0">
-                  <span className="font-bold">{mine ? "Your lift" : nameOfMember(club, ride.driver_user_id)}</span>{" "}
+                  <span className="font-bold">
+                    {mine ? "Your lift" : nameOfMember(club, ride.driver_user_id)}
+                  </span>{" "}
                   {approved ? <Pill tone="good">Approved driver</Pill> : <Pill>Adults only</Pill>}
                   <span className="office-meta block">
-                    {directions.find(([value]) => value === ride.direction)?.[1]} · from {ride.meet_point}
-                    {ride.departs_at ? ` · ${when(ride.departs_at)}` : ""} · {left} of {ride.seats} seats free
+                    {directions.find(([value]) => value === ride.direction)?.[1]} · from{" "}
+                    {ride.meet_point}
+                    {ride.departs_at ? ` · ${when(ride.departs_at)}` : ""} · {left} of {ride.seats}{" "}
+                    seats free
                   </span>
                 </span>
                 {(mine || manager) && (
-                  <button type="button" className="app-chip-button" onClick={() => void act(() => office.cancelRide(ride.id), "Lift cancelled")}>
+                  <button
+                    type="button"
+                    className="app-chip-button"
+                    onClick={() => void act(() => office.cancelRide(ride.id), "Lift cancelled")}
+                  >
                     Cancel lift
                   </button>
                 )}
@@ -170,24 +249,61 @@ function EventTravel({ event, data, club, role, organisationId, act }: OfficePro
                   {bookings
                     .filter((booking) => booking.status !== "cancelled")
                     .map((booking) => (
-                      <div key={booking.id} className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <div
+                        key={booking.id}
+                        className="flex flex-wrap items-center justify-between gap-2 text-xs"
+                      >
                         <span>
                           {nameOfPlayer(club, booking.player_id)}{" "}
-                          <Pill tone={booking.status === "confirmed" ? "good" : booking.status === "declined" ? "bad" : "warn"}>{booking.status}</Pill>
+                          <Pill
+                            tone={
+                              booking.status === "confirmed"
+                                ? "good"
+                                : booking.status === "declined"
+                                  ? "bad"
+                                  : "warn"
+                            }
+                          >
+                            {booking.status}
+                          </Pill>
                         </span>
                         <span className="flex gap-1">
                           {(mine || manager) && booking.status === "requested" && (
                             <>
-                              <button type="button" className="app-chip-button" onClick={() => void act(() => office.setSeat(booking.id, "confirmed"), "Seat confirmed")}>
+                              <button
+                                type="button"
+                                className="app-chip-button"
+                                onClick={() =>
+                                  void act(
+                                    () => office.setSeat(booking.id, "confirmed"),
+                                    "Seat confirmed",
+                                  )
+                                }
+                              >
                                 Confirm
                               </button>
-                              <button type="button" className="app-chip-button" onClick={() => void act(() => office.setSeat(booking.id, "declined"))}>
+                              <button
+                                type="button"
+                                className="app-chip-button"
+                                onClick={() =>
+                                  void act(() => office.setSeat(booking.id, "declined"))
+                                }
+                              >
                                 Decline
                               </button>
                             </>
                           )}
                           {data.myPlayerIds.includes(booking.player_id) && (
-                            <button type="button" className="app-chip-button" onClick={() => void act(() => office.setSeat(booking.id, "cancelled"), "Seat cancelled")}>
+                            <button
+                              type="button"
+                              className="app-chip-button"
+                              onClick={() =>
+                                void act(
+                                  () => office.setSeat(booking.id, "cancelled"),
+                                  "Seat cancelled",
+                                )
+                              }
+                            >
                               Cancel seat
                             </button>
                           )}
@@ -196,7 +312,13 @@ function EventTravel({ event, data, club, role, organisationId, act }: OfficePro
                     ))}
                   {!mine &&
                     data.myPlayerIds
-                      .filter((playerId) => !bookings.some((booking) => booking.player_id === playerId && booking.status !== "cancelled"))
+                      .filter(
+                        (playerId) =>
+                          !bookings.some(
+                            (booking) =>
+                              booking.player_id === playerId && booking.status !== "cancelled",
+                          ),
+                      )
                       .map((playerId) => {
                         const player = club.players.find((item) => item.id === playerId);
                         const junior = player?.isJunior ?? true;
@@ -209,12 +331,21 @@ function EventTravel({ event, data, club, role, organisationId, act }: OfficePro
                           rideCancelled: Boolean(ride.cancelled_at),
                         });
                         return (
-                          <div key={playerId} className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                          <div
+                            key={playerId}
+                            className="flex flex-wrap items-center justify-between gap-2 text-xs"
+                          >
                             <span>{player?.name ?? "Player"}</span>
                             <span className="flex flex-wrap items-center gap-2">
                               {junior && approved && (
                                 <label className="flex items-center gap-1.5">
-                                  <input type="checkbox" checked={consent[key] ?? false} onChange={(item) => setConsent({ ...consent, [key]: item.target.checked })} />
+                                  <input
+                                    type="checkbox"
+                                    checked={consent[key] ?? false}
+                                    onChange={(item) =>
+                                      setConsent({ ...consent, [key]: item.target.checked })
+                                    }
+                                  />
                                   I'm their parent/guardian and agree
                                 </label>
                               )}
@@ -227,7 +358,13 @@ function EventTravel({ event, data, club, role, organisationId, act }: OfficePro
                                   disabled={Boolean(blocker)}
                                   onClick={() =>
                                     void act(
-                                      () => office.requestSeat({ organisationId, rideId: ride.id, playerId, guardianConsent: consent[key] ?? false }),
+                                      () =>
+                                        office.requestSeat({
+                                          organisationId,
+                                          rideId: ride.id,
+                                          playerId,
+                                          guardianConsent: consent[key] ?? false,
+                                        }),
                                       "Seat requested — the driver will confirm",
                                     )
                                   }
@@ -255,18 +392,34 @@ function Drivers({ data, club, organisationId, act }: OfficeProps) {
   const [note, setNote] = useState("");
   const active = data.drivers.filter((driver) => !driver.revoked_at);
   return (
-    <OfficeCard title="Approved drivers" description="Only owners and safeguarding officers can approve. Record what checks you've seen (e.g. DBS / police check, licence, insurance).">
+    <OfficeCard
+      title="Approved drivers"
+      description="Only owners and safeguarding officers can approve. Record what checks you've seen (e.g. DBS / police check, licence, insurance)."
+    >
       <form
         className="mb-3 grid gap-2 sm:grid-cols-[1.3fr_1fr_1.5fr_auto]"
         onSubmit={(item) => {
           item.preventDefault();
           if (!userId) return;
-          void act(() => office.approveDriver({ organisationId, userId, expiresOn: expires || null, checksNote: note.trim() }), "Driver approved").then(
-            (ok) => ok && (setUserId(""), setNote("")),
-          );
+          void act(
+            () =>
+              office.approveDriver({
+                organisationId,
+                userId,
+                expiresOn: expires || null,
+                checksNote: note.trim(),
+              }),
+            "Driver approved",
+          ).then((ok) => ok && (setUserId(""), setNote("")));
         }}
       >
-        <select aria-label="Member" required className="scorer-input" value={userId} onChange={(item) => setUserId(item.target.value)}>
+        <select
+          aria-label="Member"
+          required
+          className="scorer-input"
+          value={userId}
+          onChange={(item) => setUserId(item.target.value)}
+        >
           <option value="">Choose a member</option>
           {club.members
             .filter((member) => member.status === "active")
@@ -276,8 +429,21 @@ function Drivers({ data, club, organisationId, act }: OfficeProps) {
               </option>
             ))}
         </select>
-        <input aria-label="Approval ends" type="date" className="scorer-input" value={expires} onChange={(item) => setExpires(item.target.value)} />
-        <input aria-label="Checks seen" maxLength={300} className="scorer-input" placeholder="Police check seen 2026-03" value={note} onChange={(item) => setNote(item.target.value)} />
+        <input
+          aria-label="Approval ends"
+          type="date"
+          className="scorer-input"
+          value={expires}
+          onChange={(item) => setExpires(item.target.value)}
+        />
+        <input
+          aria-label="Checks seen"
+          maxLength={300}
+          className="scorer-input"
+          placeholder="Police check seen 2026-03"
+          value={note}
+          onChange={(item) => setNote(item.target.value)}
+        />
         <button className="action-primary">Approve</button>
       </form>
       {active.length === 0 ? (
@@ -293,7 +459,11 @@ function Drivers({ data, club, organisationId, act }: OfficeProps) {
                   {driver.expires_on ? ` · until ${day(driver.expires_on)}` : ""}
                 </span>
               </span>
-              <button type="button" className="app-chip-button" onClick={() => void act(() => office.revokeDriver(driver.id), "Approval removed")}>
+              <button
+                type="button"
+                className="app-chip-button"
+                onClick={() => void act(() => office.revokeDriver(driver.id), "Approval removed")}
+              >
                 Remove approval
               </button>
             </div>

@@ -32,7 +32,8 @@ interface PublicBoard {
   liveState?: Record<string, unknown> | null;
 }
 
-const num = (value: unknown): number | null => (typeof value === "number" && Number.isFinite(value) ? value : null);
+const num = (value: unknown): number | null =>
+  typeof value === "number" && Number.isFinite(value) ? value : null;
 const figures = (value: unknown) => {
   if (!value || typeof value !== "object") return null;
   const raw = value as Record<string, unknown>;
@@ -52,11 +53,20 @@ export function buildGroundFeed(board: PublicBoard): GroundFeed {
   const runs = num(state["runs"]) ?? 0;
   const superOver = state["superOver"] === true;
   const oversLimit =
-    "oversLimit" in state ? num(state["oversLimit"]) : superOver ? 1 : num(settings["oversPerInnings"]);
+    "oversLimit" in state
+      ? num(state["oversLimit"])
+      : superOver
+        ? 1
+        : num(settings["oversPerInnings"]);
   const target = num(state["target"]);
   const chase = chaseState(target, runs, legal, oversLimit, bpo);
-  const bowler = state["bowler"] && typeof state["bowler"] === "object" ? (state["bowler"] as Record<string, unknown>) : null;
-  const recent = Array.isArray(state["recent"]) ? (state["recent"] as Array<Record<string, unknown>>) : [];
+  const bowler =
+    state["bowler"] && typeof state["bowler"] === "object"
+      ? (state["bowler"] as Record<string, unknown>)
+      : null;
+  const recent = Array.isArray(state["recent"])
+    ? (state["recent"] as Array<Record<string, unknown>>)
+    : [];
   return {
     status: board.status ?? "scheduled",
     battingTeam: label(batting),
@@ -74,7 +84,11 @@ export function buildGroundFeed(board: PublicBoard): GroundFeed {
     batter1: figures(state["striker"]),
     batter2: figures(state["nonStriker"]),
     bowler: bowler
-      ? { wickets: num(bowler["wickets"]) ?? 0, runs: num(bowler["runs"]) ?? 0, overs: String(bowler["overs"] ?? "0.0") }
+      ? {
+          wickets: num(bowler["wickets"]) ?? 0,
+          runs: num(bowler["runs"]) ?? 0,
+          overs: String(bowler["overs"] ?? "0.0"),
+        }
       : null,
     lastBalls: recent.slice(-6).map((ball) => String(ball["label"] ?? "")),
     freeHit: state["freeHit"] === true,
@@ -98,7 +112,10 @@ export function groundFeedText(feed: GroundFeed): string {
     ["PAR", feed.par],
     ["BAT1", feed.batter1 ? `${feed.batter1.runs} (${feed.batter1.balls})` : null],
     ["BAT2", feed.batter2 ? `${feed.batter2.runs} (${feed.batter2.balls})` : null],
-    ["BOWLER", feed.bowler ? `${feed.bowler.wickets}-${feed.bowler.runs} (${feed.bowler.overs})` : null],
+    [
+      "BOWLER",
+      feed.bowler ? `${feed.bowler.wickets}-${feed.bowler.runs} (${feed.bowler.overs})` : null,
+    ],
     ["LAST6", feed.lastBalls.join(" ")],
     ["RESULT", feed.result],
   ];

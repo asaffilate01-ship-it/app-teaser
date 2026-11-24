@@ -4,7 +4,8 @@
  * comparing two snapshots of the name-free public feed.
  */
 
-export type LiveAlertKind = "wicket" | "six" | "four" | "milestone" | "stoppage" | "innings" | "result" | "start";
+export type LiveAlertKind =
+  "wicket" | "six" | "four" | "milestone" | "stoppage" | "innings" | "result" | "start";
 export type LiveBucket = "live" | "results" | "upcoming";
 
 export interface LiveTeam {
@@ -28,7 +29,12 @@ export interface LiveStateLite {
   inningsNumber?: number;
   settings?: { oversPerInnings?: number | null; inningsPerSide?: number; ballsPerOver?: number };
   oversLimit?: number | null;
-  rain?: { method?: string; revisedOvers?: number | null; officialTarget?: number | null; abandoned?: boolean } | null;
+  rain?: {
+    method?: string;
+    revisedOvers?: number | null;
+    officialTarget?: number | null;
+    abandoned?: boolean;
+  } | null;
   par?: number | null;
   stoppage?: { reason?: string; since?: string } | null;
   days?: { current?: number; atStumps?: boolean } | null;
@@ -94,7 +100,10 @@ export interface LiveFilters {
 
 const clean = (value: string | undefined) => (value ?? "").trim().toLowerCase();
 
-export function filterLiveMatches(matches: readonly LiveMatch[], filters: LiveFilters): LiveMatch[] {
+export function filterLiveMatches(
+  matches: readonly LiveMatch[],
+  filters: LiveFilters,
+): LiveMatch[] {
   const query = clean(filters.query);
   return matches.filter((match) => {
     if (filters.bucket !== "all" && liveBucket(match) !== filters.bucket) return false;
@@ -103,7 +112,14 @@ export function filterLiveMatches(matches: readonly LiveMatch[], filters: LiveFi
     if (filters.competition && match.competition?.id !== filters.competition) return false;
     if (filters.following && !filters.following.has(match.slug)) return false;
     if (query) {
-      const haystack = [match.homeTeam.name, match.awayTeam.name, match.ground, match.competition?.name, match.organisation, match.region]
+      const haystack = [
+        match.homeTeam.name,
+        match.awayTeam.name,
+        match.ground,
+        match.competition?.name,
+        match.organisation,
+        match.region,
+      ]
         .map(clean)
         .join(" ");
       if (!haystack.includes(query)) return false;
@@ -131,13 +147,26 @@ function tally(values: Array<[string, string] | null>): FilterOption[] {
 }
 
 /** Countries for everything; regions within the chosen country; competitions within country and region. */
-export function liveFilterOptions(matches: readonly LiveMatch[], selected: { country?: string; region?: string }) {
-  const inCountry = matches.filter((match) => !selected.country || match.country === selected.country);
-  const inRegion = inCountry.filter((match) => !selected.region || clean(match.region) === clean(selected.region));
+export function liveFilterOptions(
+  matches: readonly LiveMatch[],
+  selected: { country?: string; region?: string },
+) {
+  const inCountry = matches.filter(
+    (match) => !selected.country || match.country === selected.country,
+  );
+  const inRegion = inCountry.filter(
+    (match) => !selected.region || clean(match.region) === clean(selected.region),
+  );
   return {
-    countries: tally(matches.map((match) => (match.country ? [match.country, countryName(match.country)] : null))),
+    countries: tally(
+      matches.map((match) => (match.country ? [match.country, countryName(match.country)] : null)),
+    ),
     regions: tally(inCountry.map((match) => (match.region ? [match.region, match.region] : null))),
-    competitions: tally(inRegion.map((match) => (match.competition ? [match.competition.id, match.competition.name] : null))),
+    competitions: tally(
+      inRegion.map((match) =>
+        match.competition ? [match.competition.id, match.competition.name] : null,
+      ),
+    ),
   };
 }
 
@@ -149,9 +178,53 @@ export function bucketCounts(matches: readonly LiveMatch[]): Record<LiveBucket, 
 
 /** Countries a club or league can pick, cricket nations first. */
 export const liveCountryCodes = [
-  "PK", "IN", "GB", "AU", "NZ", "ZA", "LK", "BD", "AF", "AE", "SA", "QA", "BH", "OM", "KW", "KE", "UG", "TZ", "RW",
-  "ZW", "NA", "BW", "NP", "HK", "SG", "MY", "TH", "JP", "CN", "PG", "IE", "NL", "DE", "FR", "BE", "IT", "ES", "DK",
-  "SE", "NO", "CA", "US", "JM", "TT", "BB", "GY", "FJ",
+  "PK",
+  "IN",
+  "GB",
+  "AU",
+  "NZ",
+  "ZA",
+  "LK",
+  "BD",
+  "AF",
+  "AE",
+  "SA",
+  "QA",
+  "BH",
+  "OM",
+  "KW",
+  "KE",
+  "UG",
+  "TZ",
+  "RW",
+  "ZW",
+  "NA",
+  "BW",
+  "NP",
+  "HK",
+  "SG",
+  "MY",
+  "TH",
+  "JP",
+  "CN",
+  "PG",
+  "IE",
+  "NL",
+  "DE",
+  "FR",
+  "BE",
+  "IT",
+  "ES",
+  "DK",
+  "SE",
+  "NO",
+  "CA",
+  "US",
+  "JM",
+  "TT",
+  "BB",
+  "GY",
+  "FJ",
 ] as const;
 
 export function countryName(code: string): string {
@@ -208,8 +281,11 @@ export function liveSummary(match: LiveMatch): string {
   if (state.target != null) {
     const runsNeeded = Math.max(0, state.target - (state.runs ?? 0));
     const ballsPerOver = state.settings?.ballsPerOver ?? 6;
-    const limit = state.oversLimit !== undefined ? state.oversLimit : (state.settings?.oversPerInnings ?? null);
-    const ballsLeft = limit ? Math.max(0, limit * ballsPerOver - legalBallsFromOvers(state.overs, ballsPerOver)) : null;
+    const limit =
+      state.oversLimit !== undefined ? state.oversLimit : (state.settings?.oversPerInnings ?? null);
+    const ballsLeft = limit
+      ? Math.max(0, limit * ballsPerOver - legalBallsFromOvers(state.overs, ballsPerOver))
+      : null;
     if (runsNeeded === 0) return `${batting} have reached the target`;
     return `${batting} need ${runsNeeded} ${runsNeeded === 1 ? "run" : "runs"}${ballsLeft != null ? ` from ${ballsLeft} ${ballsLeft === 1 ? "ball" : "balls"}` : ""}`;
   }
@@ -217,28 +293,42 @@ export function liveSummary(match: LiveMatch): string {
 }
 
 const ballRuns = (ball: LiveBall) => (/^\d+$/.test(ball.label) ? Number(ball.label) : 0);
-const sameBall = (a: LiveBall | undefined, b: LiveBall | undefined) => a?.label === b?.label && (a?.kind ?? "") === (b?.kind ?? "");
+const sameBall = (a: LiveBall | undefined, b: LiveBall | undefined) =>
+  a?.label === b?.label && (a?.kind ?? "") === (b?.kind ?? "");
 
 /**
  * Balls added between two "last six balls" trails. Finds the smallest shift where the old trail
  * lines up with the new one; when nothing lines up (a long gap) it only trusts the legal balls bowled.
  */
-export function newBallsBetween(prev: readonly LiveBall[], next: readonly LiveBall[], legalBallsAdded: number, runsAdded: number): LiveBall[] {
+export function newBallsBetween(
+  prev: readonly LiveBall[],
+  next: readonly LiveBall[],
+  legalBallsAdded: number,
+  runsAdded: number,
+): LiveBall[] {
   let added: LiveBall[] | null = null;
   for (let shift = 1; shift < next.length; shift += 1) {
     const overlap = next.slice(0, next.length - shift);
     const tail = prev.slice(prev.length - overlap.length);
-    if (tail.length === overlap.length && overlap.every((ball, index) => sameBall(ball, tail[index]))) {
+    if (
+      tail.length === overlap.length &&
+      overlap.every((ball, index) => sameBall(ball, tail[index]))
+    ) {
       added = next.slice(next.length - shift);
       break;
     }
   }
-  if (!added) added = prev.length === 0 ? [...next] : next.slice(-Math.max(1, Math.min(next.length, legalBallsAdded)));
+  if (!added)
+    added =
+      prev.length === 0
+        ? [...next]
+        : next.slice(-Math.max(1, Math.min(next.length, legalBallsAdded)));
   // The balls found can't carry more runs than the score went up by; if they do, the trail didn't line up.
   return added.reduce((sum, ball) => sum + ballRuns(ball), 0) > runsAdded ? [] : added;
 }
 
-const ordinal = (n: number) => `${n}${n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd" : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th"}`;
+const ordinal = (n: number) =>
+  `${n}${n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd" : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th"}`;
 
 /** Moments worth telling a viewer about between two polls of the same match. */
 export function liveEventsBetween(prev: LiveMatch, next: LiveMatch): LiveEvent[] {
@@ -248,11 +338,22 @@ export function liveEventsBetween(prev: LiveMatch, next: LiveMatch): LiveEvent[]
   const innings = n.inningsNumber ?? 1;
   const fixture = `${next.homeTeam.name} v ${next.awayTeam.name}`;
   const push = (kind: LiveAlertKind, title: string, body: string, tag = "") =>
-    events.push({ key: `${next.slug}:${kind}:${innings}:${n.runs ?? 0}/${n.wickets ?? 0}:${n.overs ?? ""}${tag}`, kind, slug: next.slug, title, body });
+    events.push({
+      key: `${next.slug}:${kind}:${innings}:${n.runs ?? 0}/${n.wickets ?? 0}:${n.overs ?? ""}${tag}`,
+      kind,
+      slug: next.slug,
+      title,
+      body,
+    });
 
-  if (liveBucket(prev) === "upcoming" && liveBucket(next) === "live") push("start", `Match started: ${fixture}`, next.competition?.name ?? next.ground ?? "Live now");
+  if (liveBucket(prev) === "upcoming" && liveBucket(next) === "live")
+    push("start", `Match started: ${fixture}`, next.competition?.name ?? next.ground ?? "Live now");
   if (next.status === "completed" && prev.status !== "completed") {
-    push("result", n.result ?? `Match finished: ${fixture}`, next.liveState ? scoreText(next) : fixture);
+    push(
+      "result",
+      n.result ?? `Match finished: ${fixture}`,
+      next.liveState ? scoreText(next) : fixture,
+    );
     return events;
   }
   if (!next.liveState || next.delayed || !prev.liveState || prev.delayed) return events;
@@ -263,12 +364,23 @@ export function liveEventsBetween(prev: LiveMatch, next: LiveMatch): LiveEvent[]
     const ballsPerOver = n.settings?.ballsPerOver ?? 6;
     const runsAdded = (n.runs ?? 0) - (p.runs ?? 0);
     const wicketsAdded = (n.wickets ?? 0) - (p.wickets ?? 0);
-    const ballsAdded = legalBallsFromOvers(n.overs, ballsPerOver) - legalBallsFromOvers(p.overs, ballsPerOver);
+    const ballsAdded =
+      legalBallsFromOvers(n.overs, ballsPerOver) - legalBallsFromOvers(p.overs, ballsPerOver);
     // A correction (undo) moves the score backwards: never announce anything from it.
-    if (runsAdded >= 0 && wicketsAdded >= 0 && ballsAdded >= 0 && (runsAdded > 0 || wicketsAdded > 0 || ballsAdded > 0)) {
+    if (
+      runsAdded >= 0 &&
+      wicketsAdded >= 0 &&
+      ballsAdded >= 0 &&
+      (runsAdded > 0 || wicketsAdded > 0 || ballsAdded > 0)
+    ) {
       const balls = newBallsBetween(p.recent ?? [], n.recent ?? [], ballsAdded, runsAdded);
       if (wicketsAdded > 0) {
-        push("wicket", wicketsAdded > 1 ? `${wicketsAdded} WICKETS!` : "WICKET!", `${score} · ${ordinal(n.wickets ?? 0)} wicket down`, ":w");
+        push(
+          "wicket",
+          wicketsAdded > 1 ? `${wicketsAdded} WICKETS!` : "WICKET!",
+          `${score} · ${ordinal(n.wickets ?? 0)} wicket down`,
+          ":w",
+        );
       }
       const sixes = balls.filter((ball) => ball.label === "6").length;
       const fours = balls.filter((ball) => ball.label === "4" && ball.kind === "boundary").length;
@@ -276,22 +388,45 @@ export function liveEventsBetween(prev: LiveMatch, next: LiveMatch): LiveEvent[]
       if (fours > 0) push("four", fours > 1 ? `${fours} FOURS!` : "FOUR!", score, ":4");
       const before = Math.floor((p.runs ?? 0) / 50);
       const after = Math.floor((n.runs ?? 0) / 50);
-      if (after > before && (n.runs ?? 0) >= 50) push("milestone", `${battingTeam(next).name} reach ${after * 50}`, score, ":m");
+      if (after > before && (n.runs ?? 0) >= 50)
+        push("milestone", `${battingTeam(next).name} reach ${after * 50}`, score, ":m");
     }
     if (next.status === "innings_break" && prev.status === "live") {
-      push("innings", `Innings break: ${score}`, n.declared ? "Declared" : "Next innings coming up", ":ib");
+      push(
+        "innings",
+        `Innings break: ${score}`,
+        n.declared ? "Declared" : "Next innings coming up",
+        ":ib",
+      );
     }
   } else if (innings > (p.inningsNumber ?? 1) && prev.status === "live") {
-    push("innings", `New innings: ${battingTeam(next).name} batting`, n.target != null ? `Target ${n.target}` : fixture, ":ni");
+    push(
+      "innings",
+      `New innings: ${battingTeam(next).name} batting`,
+      n.target != null ? `Target ${n.target}` : fixture,
+      ":ni",
+    );
   }
 
-  if (n.stoppage && !p.stoppage) push("stoppage", `${stoppageLabel(n.stoppage.reason)}: ${fixture}`, `Play has stopped · ${score}`, ":stop");
+  if (n.stoppage && !p.stoppage)
+    push(
+      "stoppage",
+      `${stoppageLabel(n.stoppage.reason)}: ${fixture}`,
+      `Play has stopped · ${score}`,
+      ":stop",
+    );
   if (!n.stoppage && p.stoppage) push("stoppage", `Play resumes: ${fixture}`, score, ":go");
   const revised = n.rain?.revisedOvers ?? null;
   if (revised != null && revised !== (p.rain?.revisedOvers ?? null)) {
-    push("stoppage", `Revised: ${revised} overs`, n.target != null ? `${battingTeam(next).name} now need ${n.target} to win` : fixture, `:r${revised}`);
+    push(
+      "stoppage",
+      `Revised: ${revised} overs`,
+      n.target != null ? `${battingTeam(next).name} now need ${n.target} to win` : fixture,
+      `:r${revised}`,
+    );
   }
-  if (n.days?.atStumps && !p.days?.atStumps) push("innings", `Stumps, Day ${n.days.current ?? 1}`, score, ":stumps");
+  if (n.days?.atStumps && !p.days?.atStumps)
+    push("innings", `Stumps, Day ${n.days.current ?? 1}`, score, ":stumps");
   return events.slice(0, 4);
 }
 
@@ -302,7 +437,16 @@ export interface LiveAlertPrefs {
 }
 
 export const defaultLiveAlertPrefs: LiveAlertPrefs = {
-  kinds: { wicket: true, six: true, four: true, milestone: true, stoppage: true, innings: true, result: true, start: true },
+  kinds: {
+    wicket: true,
+    six: true,
+    four: true,
+    milestone: true,
+    stoppage: true,
+    innings: true,
+    result: true,
+    start: true,
+  },
   scope: "all",
   browser: false,
 };
@@ -315,13 +459,21 @@ export function parseLiveAlertPrefs(raw: string | null): LiveAlertPrefs {
     for (const kind of Object.keys(kinds) as LiveAlertKind[]) {
       if (typeof value.kinds?.[kind] === "boolean") kinds[kind] = value.kinds[kind];
     }
-    return { kinds, scope: value.scope === "following" ? "following" : "all", browser: value.browser === true };
+    return {
+      kinds,
+      scope: value.scope === "following" ? "following" : "all",
+      browser: value.browser === true,
+    };
   } catch {
     return defaultLiveAlertPrefs;
   }
 }
 
-export function shouldAlert(event: LiveEvent, prefs: LiveAlertPrefs, following: ReadonlySet<string>): boolean {
+export function shouldAlert(
+  event: LiveEvent,
+  prefs: LiveAlertPrefs,
+  following: ReadonlySet<string>,
+): boolean {
   if (!prefs.kinds[event.kind]) return false;
   return prefs.scope === "all" || following.has(event.slug);
 }

@@ -12,10 +12,17 @@ export const Route = createFileRoute("/club/$slug/news/$postId")({
     const site = await getClubSite({ data: { slug: params.slug } });
     const post = site?.posts?.find((item) => item.id === params.postId);
     if (!site || !post) throw notFound();
-    return { club: site.name, title: post.title, excerpt: postExcerpt(post.body, 200), domain: site.domain ?? null, id: post.id };
+    return {
+      club: site.name,
+      title: post.title,
+      excerpt: postExcerpt(post.body, 200),
+      domain: site.domain ?? null,
+      id: post.id,
+    };
   },
   head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "Club news — CricLume" }, { name: "robots", content: "noindex" }] };
+    if (!loaderData)
+      return { meta: [{ title: "Club news — CricLume" }, { name: "robots", content: "noindex" }] };
     const title = `${loaderData.title} · ${loaderData.club}`;
     const description = loaderData.excerpt || `News from ${loaderData.club}.`;
     return {
@@ -27,7 +34,9 @@ export const Route = createFileRoute("/club/$slug/news/$postId")({
         { property: "og:type", content: "article" },
         { name: "twitter:card", content: "summary" },
       ],
-      links: loaderData.domain ? [{ rel: "canonical", href: siteUrl(loaderData.domain, `/news/${loaderData.id}`) }] : [],
+      links: loaderData.domain
+        ? [{ rel: "canonical", href: siteUrl(loaderData.domain, `/news/${loaderData.id}`) }]
+        : [],
     };
   },
   component: PostPage,
@@ -58,7 +67,12 @@ function PostPage() {
         </p>
       ))}
       {(post.linkUrl || (isPdf && file)) && (
-        <a href={(isPdf && file) || post.linkUrl || "#"} target="_blank" rel="noopener noreferrer" className="club-button">
+        <a
+          href={(isPdf && file) || post.linkUrl || "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="club-button"
+        >
           <FileText aria-hidden="true" /> Open document
         </a>
       )}

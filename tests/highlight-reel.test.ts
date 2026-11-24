@@ -43,7 +43,10 @@ const deliveries = [
 
 test("boundary reel takes fours and sixes in ball order, 5s either side of the ball", () => {
   const reel = buildHighlightReel({ clips, deliveries, kind: "boundaries", nowMs: now });
-  assert.deepEqual(reel.map((item) => item.deliveryId), ["d1", "d3"]);
+  assert.deepEqual(
+    reel.map((item) => item.deliveryId),
+    ["d1", "d3"],
+  );
   assert.equal(reel[0]?.startSeconds, 55);
   assert.equal(reel[0]?.endSeconds, 65);
   assert.equal(reelLength(reel), 20);
@@ -51,27 +54,63 @@ test("boundary reel takes fours and sixes in ball order, 5s either side of the b
 
 test("balls no camera was recording are left out", () => {
   const reel = buildHighlightReel({ clips, deliveries, kind: "sixes", nowMs: now });
-  assert.deepEqual(reel.map((item) => item.deliveryId), ["d3"]);
+  assert.deepEqual(
+    reel.map((item) => item.deliveryId),
+    ["d3"],
+  );
 });
 
 test("the chosen camera angle is used when it covers the ball", () => {
-  const reel = buildHighlightReel({ clips, deliveries, kind: "wickets", preferDeviceId: "cam-b", nowMs: now });
+  const reel = buildHighlightReel({
+    clips,
+    deliveries,
+    kind: "wickets",
+    preferDeviceId: "cam-b",
+    nowMs: now,
+  });
   assert.equal(reel[0]?.deviceId, "cam-b");
 });
 
 test("a player's reel has their boundaries, their dismissal and wickets they took", () => {
-  const batter = buildHighlightReel({ clips, deliveries, kind: "player", playerId: "bat1", nowMs: now });
-  assert.deepEqual(batter.map((item) => item.deliveryId), ["d1", "d4"]);
-  const bowler = buildHighlightReel({ clips, deliveries, kind: "player", playerId: "bowl1", nowMs: now });
-  assert.deepEqual(bowler.map((item) => item.deliveryId), ["d4"]);
+  const batter = buildHighlightReel({
+    clips,
+    deliveries,
+    kind: "player",
+    playerId: "bat1",
+    nowMs: now,
+  });
+  assert.deepEqual(
+    batter.map((item) => item.deliveryId),
+    ["d1", "d4"],
+  );
+  const bowler = buildHighlightReel({
+    clips,
+    deliveries,
+    kind: "player",
+    playerId: "bowl1",
+    nowMs: now,
+  });
+  assert.deepEqual(
+    bowler.map((item) => item.deliveryId),
+    ["d4"],
+  );
 });
 
 test("manual calibration shifts the cut", () => {
-  const reel = buildHighlightReel({ clips, deliveries, kind: "boundaries", offsets: { c1: 2000 }, nowMs: now });
+  const reel = buildHighlightReel({
+    clips,
+    deliveries,
+    kind: "boundaries",
+    offsets: { c1: 2000 },
+    nowMs: now,
+  });
   assert.equal(reel[0]?.startSeconds, 53);
 });
 
 test("recordings without consent are never used", () => {
   const blocked = clips.map((item) => ({ ...item, recording_consent: "withdrawn" }));
-  assert.equal(buildHighlightReel({ clips: blocked, deliveries, kind: "boundaries", nowMs: now }).length, 0);
+  assert.equal(
+    buildHighlightReel({ clips: blocked, deliveries, kind: "boundaries", nowMs: now }).length,
+    0,
+  );
 });

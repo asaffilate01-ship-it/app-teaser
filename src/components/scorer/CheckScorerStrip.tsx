@@ -52,7 +52,9 @@ export function CheckScorerStrip({ matchId }: { matchId: string }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <ClipboardCheck className="size-4 shrink-0 text-amber-300" aria-hidden="true" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Away check scorer</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+            Away check scorer
+          </span>
           {view.checkers.length === 0 ? (
             <span className="text-xs text-slate-400">None named</span>
           ) : (
@@ -68,14 +70,19 @@ export function CheckScorerStrip({ matchId }: { matchId: string }) {
               {waiting} {waiting === 1 ? "query" : "queries"} waiting
             </span>
           )}
-          {waiting === 0 && confirmed && <span className="text-xs text-emerald-300">Scorecard confirmed</span>}
+          {waiting === 0 && confirmed && (
+            <span className="text-xs text-emerald-300">Scorecard confirmed</span>
+          )}
         </div>
         <Link to="/check/$matchId" params={{ matchId }} className="workspace-nav-item min-h-11">
           {waiting > 0 ? "Answer queries" : "Open check view"}
         </Link>
       </div>
       {view.me.can_name && view.checkers.length < 2 && (
-        <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-2 border-t border-white/10 pt-3 sm:flex-row">
+        <form
+          onSubmit={(event) => void submit(event)}
+          className="flex flex-col gap-2 border-t border-white/10 pt-3 sm:flex-row"
+        >
           <label className="sr-only" htmlFor="check-scorer-email">
             Away check scorer's email
           </label>
@@ -94,7 +101,8 @@ export function CheckScorerStrip({ matchId }: { matchId: string }) {
         </form>
       )}
       <p className="text-[11px] text-slate-400">
-        The away club's check scorer sees every ball and can query it, but can't add or change anything. Only your scorers can.
+        The away club's check scorer sees every ball and can query it, but can't add or change
+        anything. Only your scorers can.
         {message ? ` ${message}` : ""}
       </p>
     </section>

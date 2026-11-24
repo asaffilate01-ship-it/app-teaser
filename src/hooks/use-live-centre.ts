@@ -18,7 +18,16 @@ const VISIBLE_POLL_MS = 15_000;
 const HIDDEN_POLL_MS = 45_000;
 
 /** When one poll brings several moments for a match, the card shows the biggest one. */
-const flashPriority: Record<LiveAlertKind, number> = { result: 7, wicket: 6, stoppage: 5, six: 4, innings: 3, milestone: 2, four: 1, start: 0 };
+const flashPriority: Record<LiveAlertKind, number> = {
+  result: 7,
+  wicket: 6,
+  stoppage: 5,
+  six: 4,
+  innings: 3,
+  milestone: 2,
+  four: 1,
+  start: 0,
+};
 
 export interface FeedEvent extends LiveEvent {
   at: number;
@@ -27,7 +36,11 @@ export interface FeedEvent extends LiveEvent {
 function readFollowing(): Set<string> {
   try {
     const value = JSON.parse(window.localStorage.getItem(FOLLOW_KEY) ?? "[]") as unknown;
-    return new Set(Array.isArray(value) ? value.filter((item): item is string => typeof item === "string").slice(0, 200) : []);
+    return new Set(
+      Array.isArray(value)
+        ? value.filter((item): item is string => typeof item === "string").slice(0, 200)
+        : [],
+    );
   } catch {
     return new Set();
   }
@@ -36,7 +49,9 @@ function readFollowing(): Set<string> {
 /** Polls the public match list, works out new moments and raises toasts / browser notifications. */
 export function useLiveCentre(onOpen: (slug: string) => void) {
   const [matches, setMatches] = useState<LiveMatch[]>([]);
-  const [status, setStatus] = useState<"loading" | "ready" | "error" | "unavailable">(isCloudConfigured() ? "loading" : "unavailable");
+  const [status, setStatus] = useState<"loading" | "ready" | "error" | "unavailable">(
+    isCloudConfigured() ? "loading" : "unavailable",
+  );
   const [loadedAt, setLoadedAt] = useState<number | null>(null);
   const [feed, setFeed] = useState<FeedEvent[]>([]);
   const [flash, setFlash] = useState<Record<string, LiveAlertKind>>({});
@@ -65,12 +80,15 @@ export function useLiveCentre(onOpen: (slug: string) => void) {
     if (fresh.length === 0) return;
     const now = Date.now();
     for (const event of fresh) announced.current.add(event.key);
-    setFeed((items) => [...fresh.map((event) => ({ ...event, at: now })).reverse(), ...items].slice(0, 40));
+    setFeed((items) =>
+      [...fresh.map((event) => ({ ...event, at: now })).reverse(), ...items].slice(0, 40),
+    );
     setFlash((items) => {
       const next = { ...items };
       for (const event of fresh) {
         const current = next[event.slug];
-        if (!current || flashPriority[event.kind] >= flashPriority[current]) next[event.slug] = event.kind;
+        if (!current || flashPriority[event.kind] >= flashPriority[current])
+          next[event.slug] = event.kind;
       }
       return next;
     });
@@ -82,11 +100,22 @@ export function useLiveCentre(onOpen: (slug: string) => void) {
       });
     }, 5_000);
 
-    const wanted = fresh.filter((event) => shouldAlert(event, prefsRef.current, followingRef.current)).slice(0, 3);
+    const wanted = fresh
+      .filter((event) => shouldAlert(event, prefsRef.current, followingRef.current))
+      .slice(0, 3);
     for (const event of wanted) {
-      if (prefsRef.current.browser && document.hidden && "Notification" in window && Notification.permission === "granted") {
+      if (
+        prefsRef.current.browser &&
+        document.hidden &&
+        "Notification" in window &&
+        Notification.permission === "granted"
+      ) {
         try {
-          const note = new Notification(event.title, { body: event.body, tag: event.key, icon: "/favicon.png" });
+          const note = new Notification(event.title, {
+            body: event.body,
+            tag: event.key,
+            icon: "/favicon.png",
+          });
           note.onclick = () => {
             window.focus();
             openRef.current(event.slug);
@@ -134,7 +163,10 @@ export function useLiveCentre(onOpen: (slug: string) => void) {
     const tick = async () => {
       await load();
       if (!active) return;
-      timer = window.setTimeout(() => void tick(), document.hidden ? HIDDEN_POLL_MS : VISIBLE_POLL_MS);
+      timer = window.setTimeout(
+        () => void tick(),
+        document.hidden ? HIDDEN_POLL_MS : VISIBLE_POLL_MS,
+      );
     };
     const onVisible = () => {
       if (document.hidden) return;
@@ -173,5 +205,16 @@ export function useLiveCentre(onOpen: (slug: string) => void) {
     }
   }, []);
 
-  return { matches, status, loadedAt, feed, flash, following, toggleFollow, prefs, setPrefs, refresh: load };
+  return {
+    matches,
+    status,
+    loadedAt,
+    feed,
+    flash,
+    following,
+    toggleFollow,
+    prefs,
+    setPrefs,
+    refresh: load,
+  };
 }

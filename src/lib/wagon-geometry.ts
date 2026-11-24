@@ -30,29 +30,52 @@ export function viewHandFor(balls: readonly WheelBall[], batterId = ""): boolean
 
 /** True when the shots shown come from both right- and left-handers. */
 export function mixedHands(balls: readonly WheelBall[]): boolean {
-  return balls.some((ball) => ball.leftHanded === true) && balls.some((ball) => ball.leftHanded !== true);
+  return (
+    balls.some((ball) => ball.leftHanded === true) && balls.some((ball) => ball.leftHanded !== true)
+  );
 }
 
 export type WheelFilter = "all" | "1" | "2" | "3" | "4" | "6" | "wickets";
 
 const closeAngles: Record<string, number> = {
-  "first slip": 345, "second slip": 338, "third slip": 331, "fourth slip": 324, "fly slip": 336,
-  gully: 315, "silly point": 292, "short extra cover": 252, "silly mid-off": 205,
-  "leg slip": 14, "leg gully": 38, "backward short leg": 58, "short leg": 84, "short mid-wicket": 116, "silly mid-on": 156,
+  "first slip": 345,
+  "second slip": 338,
+  "third slip": 331,
+  "fourth slip": 324,
+  "fly slip": 336,
+  gully: 315,
+  "silly point": 292,
+  "short extra cover": 252,
+  "silly mid-off": 205,
+  "leg slip": 14,
+  "leg gully": 38,
+  "backward short leg": 58,
+  "short leg": 84,
+  "short mid-wicket": 116,
+  "silly mid-on": 156,
 };
 const areaAngles: Record<string, [number, number]> = {
-  "fine leg": [0, 33], "square leg": [33, 99], "mid-wicket": [99, 132], "long on": [132, 165], straight: [165, 195],
-  "long off": [195, 228], cover: [228, 294], point: [294, 327], third: [327, 360],
+  "fine leg": [0, 33],
+  "square leg": [33, 99],
+  "mid-wicket": [99, 132],
+  "long on": [132, 165],
+  straight: [165, 195],
+  "long off": [195, 228],
+  cover: [228, 294],
+  point: [294, 327],
+  third: [327, 360],
 };
 
-const key = (zone: string | null | undefined) => (zone ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+const key = (zone: string | null | undefined) =>
+  (zone ?? "").trim().replace(/\s+/g, " ").toLowerCase();
 
 /** The slice of the ground (start/end angles, right-hander view) a saved position covers. */
 export function zoneSpan(zone: string | null | undefined): [number, number] | null {
   const name = key(zone);
   if (!name || name === "not recorded") return null;
   for (const sector of ringSectors) {
-    if (sector.inner.toLowerCase() === name || sector.deep.toLowerCase() === name) return [sector.start, sector.end];
+    if (sector.inner.toLowerCase() === name || sector.deep.toLowerCase() === name)
+      return [sector.start, sector.end];
   }
   if (name in closeAngles) {
     const a = closeAngles[name]!;
@@ -74,7 +97,8 @@ export function stableSpread(id: string, salt = 0): number {
 export function shotLength(runs: number, depth: ZoneDepth | undefined, wicket: boolean): number {
   if (runs >= 6) return 1.12;
   if (runs === 4) return 0.98;
-  if (wicket || runs <= 0) return depth === "close" ? 0.16 : depth === "deep" ? 0.88 : depth === "centre" ? 0.12 : 0.4;
+  if (wicket || runs <= 0)
+    return depth === "close" ? 0.16 : depth === "deep" ? 0.88 : depth === "centre" ? 0.12 : 0.4;
   if (depth === "close") return 0.2;
   if (depth === "deep") return Math.min(0.9, 0.6 + runs * 0.09);
   return Math.min(0.72, 0.28 + runs * 0.13);
@@ -102,7 +126,9 @@ export function plotShot(ball: WheelBall, leftHanded = false): PlottedShot | nul
   const base = start + width * (0.18 + 0.64 * stableSpread(ball.id));
   const rhAngle = ((base % 360) + 360) % 360;
   const angle = leftHanded ? (360 - rhAngle) % 360 : rhAngle;
-  const length = shotLength(ball.batterRuns, info?.depth, ball.wicket) * (0.97 + 0.06 * stableSpread(ball.id, 7));
+  const length =
+    shotLength(ball.batterRuns, info?.depth, ball.wicket) *
+    (0.97 + 0.06 * stableSpread(ball.id, 7));
   // Keeper at the bottom, bowler at the top; off side on the right for a right-hander.
   const rad = ((angle + 90) * Math.PI) / 180;
   const x = Math.cos(rad) * length;
@@ -140,7 +166,18 @@ export interface WheelSummary {
 
 /** Bat runs split by side and area (right-hander view; sides don't flip for left-handers). */
 export function summarizeWheel(balls: WheelBall[]): WheelSummary {
-  const summary: WheelSummary = { runs: 0, offRuns: 0, legRuns: 0, straightRuns: 0, fours: 0, sixes: 0, dots: 0, scoringShots: 0, unplacedRuns: 0, areas: [] };
+  const summary: WheelSummary = {
+    runs: 0,
+    offRuns: 0,
+    legRuns: 0,
+    straightRuns: 0,
+    fours: 0,
+    sixes: 0,
+    dots: 0,
+    scoringShots: 0,
+    unplacedRuns: 0,
+    areas: [],
+  };
   const areas = new Map<string, { runs: number; shots: number }>();
   for (const ball of balls) {
     summary.runs += ball.batterRuns;
@@ -162,7 +199,9 @@ export function summarizeWheel(balls: WheelBall[]): WheelSummary {
     entry.shots += 1;
     areas.set(shot.area, entry);
   }
-  summary.areas = [...areas.entries()].map(([area, value]) => ({ area, ...value })).sort((a, b) => b.runs - a.runs);
+  summary.areas = [...areas.entries()]
+    .map(([area, value]) => ({ area, ...value }))
+    .sort((a, b) => b.runs - a.runs);
   return summary;
 }
 

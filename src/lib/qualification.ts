@@ -76,7 +76,9 @@ export function qualificationReport(input: {
 }): QualificationReport {
   const { rows, remaining, teamId, spots, winPoints } = input;
   const lossPoints = input.lossPoints ?? 0;
-  const own = remaining.filter((fixture) => fixture.homeTeamId === teamId || fixture.awayTeamId === teamId);
+  const own = remaining.filter(
+    (fixture) => fixture.homeTeamId === teamId || fixture.awayTeamId === teamId,
+  );
   const current = rows.find((row) => row.teamId === teamId)?.points ?? 0;
   const maxPoints = current + own.length * winPoints;
   const estimated = remaining.length > MAX_EXACT;
@@ -127,12 +129,32 @@ export function qualificationReport(input: {
             ? "nrr"
             : "help";
   const status: QualStatus =
-    qualifies === total ? "through" : qualifies + onNrr === 0 ? "out" : ifWinAll === "through" ? "in-hand" : "needs-help";
-  return { teamId, status, maxPoints, remaining: own.length, scenarios: total, qualifies, onNrr, ifWinAll, winsNeeded, estimated };
+    qualifies === total
+      ? "through"
+      : qualifies + onNrr === 0
+        ? "out"
+        : ifWinAll === "through"
+          ? "in-hand"
+          : "needs-help";
+  return {
+    teamId,
+    status,
+    maxPoints,
+    remaining: own.length,
+    scenarios: total,
+    qualifies,
+    onNrr,
+    ifWinAll,
+    winsNeeded,
+    estimated,
+  };
 }
 
 /** Net run rate in runs per over. */
-export function netRunRate(row: Pick<QualTableRow, "runsFor" | "ballsFaced" | "runsAgainst" | "ballsBowled">, ballsPerOver = 6): number {
+export function netRunRate(
+  row: Pick<QualTableRow, "runsFor" | "ballsFaced" | "runsAgainst" | "ballsBowled">,
+  ballsPerOver = 6,
+): number {
   const forRate = row.ballsFaced > 0 ? (row.runsFor * ballsPerOver) / row.ballsFaced : 0;
   const againstRate = row.ballsBowled > 0 ? (row.runsAgainst * ballsPerOver) / row.ballsBowled : 0;
   return forRate - againstRate;
@@ -142,10 +164,22 @@ export function netRunRate(row: Pick<QualTableRow, "runsFor" | "ballsFaced" | "r
  * Batting first and scoring `score` in the full `overs`: the smallest winning margin (runs) that lifts the
  * team's net run rate above `targetNrr`. Null if even bowling the opponent out for 0 is not enough.
  */
-export function marginToPassNrr(row: QualTableRow, targetNrr: number, score: number, overs: number, ballsPerOver = 6): number | null {
+export function marginToPassNrr(
+  row: QualTableRow,
+  targetNrr: number,
+  score: number,
+  overs: number,
+  ballsPerOver = 6,
+): number | null {
   const balls = overs * ballsPerOver;
   for (let margin = 1; margin <= score; margin += 1) {
-    const next = { ...row, runsFor: row.runsFor + score, ballsFaced: row.ballsFaced + balls, runsAgainst: row.runsAgainst + score - margin, ballsBowled: row.ballsBowled + balls };
+    const next = {
+      ...row,
+      runsFor: row.runsFor + score,
+      ballsFaced: row.ballsFaced + balls,
+      runsAgainst: row.runsAgainst + score - margin,
+      ballsBowled: row.ballsBowled + balls,
+    };
     if (netRunRate(next, ballsPerOver) > targetNrr) return margin;
   }
   return null;
@@ -155,10 +189,22 @@ export function marginToPassNrr(row: QualTableRow, targetNrr: number, score: num
  * Chasing `target` (opponent made target − 1 in the full `overs`): the latest ball by which the team must win
  * to lift its net run rate above `targetNrr`, as balls used. Null if no finish is quick enough.
  */
-export function ballsToPassNrr(row: QualTableRow, targetNrr: number, target: number, overs: number, ballsPerOver = 6): number | null {
+export function ballsToPassNrr(
+  row: QualTableRow,
+  targetNrr: number,
+  target: number,
+  overs: number,
+  ballsPerOver = 6,
+): number | null {
   const full = overs * ballsPerOver;
   for (let balls = full; balls >= 1; balls -= 1) {
-    const next = { ...row, runsFor: row.runsFor + target, ballsFaced: row.ballsFaced + balls, runsAgainst: row.runsAgainst + target - 1, ballsBowled: row.ballsBowled + full };
+    const next = {
+      ...row,
+      runsFor: row.runsFor + target,
+      ballsFaced: row.ballsFaced + balls,
+      runsAgainst: row.runsAgainst + target - 1,
+      ballsBowled: row.ballsBowled + full,
+    };
     if (netRunRate(next, ballsPerOver) > targetNrr) return balls;
   }
   return null;

@@ -33,11 +33,18 @@ export interface PromoCreative {
 export type CampaignDraft = Omit<PromoCampaign, "id">;
 
 export async function isPromoStaff(userId: string): Promise<boolean> {
-  const { data, error } = await getCloudClient().rpc("has_role", { _user_id: userId, _role: "admin" });
+  const { data, error } = await getCloudClient().rpc("has_role", {
+    _user_id: userId,
+    _role: "admin",
+  });
   return !error && data === true;
 }
 
-export async function loadDesk(): Promise<{ campaigns: PromoCampaign[]; creatives: PromoCreative[]; plays: Record<string, number> }> {
+export async function loadDesk(): Promise<{
+  campaigns: PromoCampaign[];
+  creatives: PromoCreative[];
+  plays: Record<string, number>;
+}> {
   const client = getCloudClient();
   const [campaigns, creatives, counts] = await Promise.all([
     client.from("promo_campaigns").select("*").order("created_at", { ascending: false }),
@@ -47,8 +54,13 @@ export async function loadDesk(): Promise<{ campaigns: PromoCampaign[]; creative
   if (campaigns.error) throw campaigns.error;
   if (creatives.error) throw creatives.error;
   const plays: Record<string, number> = {};
-  for (const row of counts.data ?? []) plays[row.campaign_id] = (plays[row.campaign_id] ?? 0) + row.plays;
-  return { campaigns: (campaigns.data ?? []) as PromoCampaign[], creatives: (creatives.data ?? []) as PromoCreative[], plays };
+  for (const row of counts.data ?? [])
+    plays[row.campaign_id] = (plays[row.campaign_id] ?? 0) + row.plays;
+  return {
+    campaigns: (campaigns.data ?? []) as PromoCampaign[],
+    creatives: (creatives.data ?? []) as PromoCreative[],
+    plays,
+  };
 }
 
 export async function saveCampaign(id: string | null, draft: CampaignDraft): Promise<string> {
@@ -64,8 +76,14 @@ export async function saveCampaign(id: string | null, draft: CampaignDraft): Pro
   return data.id;
 }
 
-export async function setCampaignStatus(id: string, status: PromoCampaign["status"]): Promise<void> {
-  const { error } = await getCloudClient().from("promo_campaigns").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
+export async function setCampaignStatus(
+  id: string,
+  status: PromoCampaign["status"],
+): Promise<void> {
+  const { error } = await getCloudClient()
+    .from("promo_campaigns")
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq("id", id);
   if (error) throw error;
 }
 
@@ -95,9 +113,13 @@ export async function uploadCreative(
   if (!kind) throw new Error("Use a PNG, JPG, GIF, WebP image or an MP4 video.");
   if (file.size > 50 * 1024 * 1024) throw new Error("Files can be up to 50 MB.");
   const client = getCloudClient();
-  const extension = (file.name.split(".").pop() ?? (kind === "video" ? "mp4" : "png")).toLowerCase().replace(/[^a-z0-9]/g, "");
+  const extension = (file.name.split(".").pop() ?? (kind === "video" ? "mp4" : "png"))
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
   const path = `${campaignId}/${slot}-${crypto.randomUUID().slice(0, 8)}.${extension || "bin"}`;
-  const upload = await client.storage.from("promo-media").upload(path, file, { contentType: file.type, upsert: false });
+  const upload = await client.storage
+    .from("promo-media")
+    .upload(path, file, { contentType: file.type, upsert: false });
   if (upload.error) throw upload.error;
   const { error } = await client.from("promo_creatives").insert({
     campaign_id: campaignId,
@@ -142,7 +164,10 @@ export interface PayoutRow {
 }
 
 export async function loadPayouts(from: string, to: string): Promise<PayoutRow[]> {
-  const { data, error } = await getCloudClient().rpc("admin_promo_payouts", { p_from: from, p_to: to });
+  const { data, error } = await getCloudClient().rpc("admin_promo_payouts", {
+    p_from: from,
+    p_to: to,
+  });
   if (error) throw error;
   return (data ?? []) as PayoutRow[];
 }
@@ -162,7 +187,15 @@ export async function loadClubPlans(): Promise<ClubPlanRow[]> {
   return (data ?? []) as ClubPlanRow[];
 }
 
-export async function setClubPlan(organisationId: string, plan: ClubPlanRow["plan"], videoAddon: boolean): Promise<void> {
-  const { error } = await getCloudClient().rpc("admin_set_club_plan", { p_organisation_id: organisationId, p_plan: plan, p_video_addon: videoAddon });
+export async function setClubPlan(
+  organisationId: string,
+  plan: ClubPlanRow["plan"],
+  videoAddon: boolean,
+): Promise<void> {
+  const { error } = await getCloudClient().rpc("admin_set_club_plan", {
+    p_organisation_id: organisationId,
+    p_plan: plan,
+    p_video_addon: videoAddon,
+  });
   if (error) throw error;
 }

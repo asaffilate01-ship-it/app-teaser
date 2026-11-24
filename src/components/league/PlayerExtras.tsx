@@ -13,11 +13,28 @@ import {
 } from "@/lib/player-hub-cloud";
 
 /** Share one badge as a picture card or a printable certificate. */
-export function ShareAwardButton({ title, detail, playerName, team, date }: { title: string; detail: string; playerName: string; team: string; date?: string | undefined }) {
+export function ShareAwardButton({
+  title,
+  detail,
+  playerName,
+  team,
+  date,
+}: {
+  title: string;
+  detail: string;
+  playerName: string;
+  team: string;
+  date?: string | undefined;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <span className="relative">
-      <button type="button" className="app-chip-button" aria-label={`Share ${title}`} onClick={() => setOpen(!open)}>
+      <button
+        type="button"
+        className="app-chip-button"
+        aria-label={`Share ${title}`}
+        onClick={() => setOpen(!open)}
+      >
         <Share2 className="size-3.5" />
       </button>
       {open && (
@@ -35,7 +52,9 @@ export function ShareAwardButton({ title, detail, playerName, team, date }: { ti
               {kind === "card" ? "Social card" : "Certificate"}
             </button>
           ))}
-          <small className="px-1 text-[10px] text-muted-foreground">Check you have permission before sharing a junior's name.</small>
+          <small className="px-1 text-[10px] text-muted-foreground">
+            Check you have permission before sharing a junior's name.
+          </small>
         </span>
       )}
     </span>
@@ -55,8 +74,12 @@ export function PlayerExtras({ playerId, playerName }: { playerId: string; playe
 
   useEffect(() => {
     if (!cloud || !session) return;
-    void isFollowing(playerId).then(setFollowing).catch(() => undefined);
-    void listPlayerClips(playerId).then(setClips).catch(() => setClips([]));
+    void isFollowing(playerId)
+      .then(setFollowing)
+      .catch(() => undefined);
+    void listPlayerClips(playerId)
+      .then(setClips)
+      .catch(() => setClips([]));
   }, [cloud, playerId, session]);
 
   if (!cloud || !session) return null;
@@ -83,7 +106,10 @@ export function PlayerExtras({ playerId, playerName }: { playerId: string; playe
     setMessage(null);
     try {
       const url = await clipUrl(clip.assetId);
-      setPlaying({ url: `${url}#t=${(clip.startMs / 1000).toFixed(1)},${(clip.endMs / 1000).toFixed(1)}`, label: `${clip.over + 1}.${clip.ball}` });
+      setPlaying({
+        url: `${url}#t=${(clip.startMs / 1000).toFixed(1)},${(clip.endMs / 1000).toFixed(1)}`,
+        label: `${clip.over + 1}.${clip.ball}`,
+      });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "That clip isn't available.");
     }
@@ -95,27 +121,57 @@ export function PlayerExtras({ playerId, playerName }: { playerId: string; playe
         <h3 className="panel-kicker">Follow &amp; profile</h3>
         <div className="flex flex-wrap gap-2">
           <button type="button" className="action-secondary" onClick={() => void toggleFollow()}>
-            {following ? <BellOff className="size-4" /> : <Bell className="size-4" />} {following ? "Unfollow" : `Follow ${playerName.split(" ")[0]}`}
+            {following ? <BellOff className="size-4" /> : <Bell className="size-4" />}{" "}
+            {following ? "Unfollow" : `Follow ${playerName.split(" ")[0]}`}
           </button>
-          <button type="button" className="action-secondary" onClick={() => setClaimOpen(!claimOpen)}>
+          <button
+            type="button"
+            className="action-secondary"
+            onClick={() => setClaimOpen(!claimOpen)}
+          >
             <UserCheck className="size-4" /> This is me
           </button>
         </div>
         {claimOpen && (
           <div className="space-y-2">
-            <textarea className="scorer-input min-h-20" maxLength={300} placeholder="Anything to help the club check it's you (optional)" value={claimText} onChange={(e) => setClaimText(e.target.value)} />
-            <button type="button" className="action-primary" onClick={() => void claim()}>Ask the club to link it</button>
-            <p className="text-[11px] text-muted-foreground">Once linked, your runs and wickets from every club you play for show together under "My career".</p>
+            <textarea
+              className="scorer-input min-h-20"
+              maxLength={300}
+              placeholder="Anything to help the club check it's you (optional)"
+              value={claimText}
+              onChange={(e) => setClaimText(e.target.value)}
+            />
+            <button type="button" className="action-primary" onClick={() => void claim()}>
+              Ask the club to link it
+            </button>
+            <p className="text-[11px] text-muted-foreground">
+              Once linked, your runs and wickets from every club you play for show together under
+              "My career".
+            </p>
           </div>
         )}
-        {message && <p className="text-xs text-muted-foreground" role="status">{message}</p>}
+        {message && (
+          <p className="text-xs text-muted-foreground" role="status">
+            {message}
+          </p>
+        )}
       </article>
       <article className="broadcast-panel space-y-3">
-        <h3 className="panel-kicker flex items-center gap-2"><Film className="size-4" aria-hidden="true" /> Clip library</h3>
+        <h3 className="panel-kicker flex items-center gap-2">
+          <Film className="size-4" aria-hidden="true" /> Clip library
+        </h3>
         {playing && (
           <figure className="space-y-1">
-            <video src={playing.url} controls autoPlay playsInline className="aspect-video w-full rounded-xl bg-black" />
-            <figcaption className="text-[11px] text-muted-foreground">Ball {playing.label}</figcaption>
+            <video
+              src={playing.url}
+              controls
+              autoPlay
+              playsInline
+              className="aspect-video w-full rounded-xl bg-black"
+            />
+            <figcaption className="text-[11px] text-muted-foreground">
+              Ball {playing.label}
+            </figcaption>
           </figure>
         )}
         {clips === null ? (
@@ -125,13 +181,17 @@ export function PlayerExtras({ playerId, playerName }: { playerId: string; playe
             {clips.map((clip) => (
               <li key={`${clip.deliveryId}-${clip.assetId}`}>
                 <button type="button" className="app-chip-button" onClick={() => void play(clip)}>
-                  {clip.role === "batting" ? "Bat" : "Bowl"} {clip.over + 1}.{clip.ball} · {clip.wicket ? "W" : clip.runs}
+                  {clip.role === "batting" ? "Bat" : "Bowl"} {clip.over + 1}.{clip.ball} ·{" "}
+                  {clip.wicket ? "W" : clip.runs}
                 </button>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-muted-foreground">No saved camera clips yet. Clips recorded on match cameras and matched to balls appear here.</p>
+          <p className="text-sm text-muted-foreground">
+            No saved camera clips yet. Clips recorded on match cameras and matched to balls appear
+            here.
+          </p>
         )}
       </article>
     </div>

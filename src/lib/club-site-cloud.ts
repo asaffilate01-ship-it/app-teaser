@@ -31,37 +31,73 @@ export async function loadSiteEditor(organisationId: string): Promise<SiteEditor
   const [site, org, posts, photos] = await Promise.all([
     supabase.from("club_sites").select("*").eq("organisation_id", organisationId).maybeSingle(),
     supabase.from("organisations").select("slug").eq("id", organisationId).single(),
-    supabase.from("club_site_posts").select("*").eq("organisation_id", organisationId).order("created_at", { ascending: false }),
-    supabase.from("club_site_photos").select("*").eq("organisation_id", organisationId).order("created_at", { ascending: false }),
+    supabase
+      .from("club_site_posts")
+      .select("*")
+      .eq("organisation_id", organisationId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("club_site_photos")
+      .select("*")
+      .eq("organisation_id", organisationId)
+      .order("created_at", { ascending: false }),
   ]);
   check(site);
   check(org);
   check(posts);
   check(photos);
-  const paths = [site.data?.hero_path, site.data?.logo_path, ...(photos.data ?? []).map((p) => p.path), ...(posts.data ?? []).map((p) => p.file_path)].filter(
-    (path): path is string => Boolean(path),
-  );
+  const paths = [
+    site.data?.hero_path,
+    site.data?.logo_path,
+    ...(photos.data ?? []).map((p) => p.path),
+    ...(posts.data ?? []).map((p) => p.file_path),
+  ].filter((path): path is string => Boolean(path));
   const files: Record<string, string> = {};
   if (paths.length) {
     const signed = await supabase.storage.from("club-site").createSignedUrls(paths, 3600);
-    for (const row of signed.data ?? []) if (row.path && row.signedUrl) files[row.path] = row.signedUrl;
+    for (const row of signed.data ?? [])
+      if (row.path && row.signedUrl) files[row.path] = row.signedUrl;
   }
-  return { site: site.data, orgSlug: org.data?.slug ?? "", posts: posts.data ?? [], photos: photos.data ?? [], files };
+  return {
+    site: site.data,
+    orgSlug: org.data?.slug ?? "",
+    posts: posts.data ?? [],
+    photos: photos.data ?? [],
+    files,
+  };
 }
 
 export function checkSiteFile(file: File, imagesOnly = false): string | null {
-  const allowed: readonly string[] = imagesOnly ? siteFileTypes.filter((t) => t.startsWith("image/")) : siteFileTypes;
-  if (!allowed.includes(file.type)) return imagesOnly ? "Choose a JPG, PNG or WebP photo." : "Choose a photo (JPG, PNG, WebP) or a PDF.";
+  const allowed: readonly string[] = imagesOnly
+    ? siteFileTypes.filter((t) => t.startsWith("image/"))
+    : siteFileTypes;
+  if (!allowed.includes(file.type))
+    return imagesOnly
+      ? "Choose a JPG, PNG or WebP photo."
+      : "Choose a photo (JPG, PNG, WebP) or a PDF.";
   if (file.size > maxSiteFileBytes) return "That file is over 10 MB. Please choose a smaller one.";
   return null;
 }
 
-export async function uploadSiteFile(organisationId: string, folder: "hero" | "logo" | "photos" | "docs", file: File): Promise<string> {
+export async function uploadSiteFile(
+  organisationId: string,
+  folder: "hero" | "logo" | "photos" | "docs",
+  file: File,
+): Promise<string> {
   const problem = checkSiteFile(file, folder !== "docs");
   if (problem) throw new Error(problem);
-  const ext = file.type === "application/pdf" ? "pdf" : file.type.split("/")[1] === "jpeg" ? "jpg" : file.type.split("/")[1];
+  const ext =
+    file.type === "application/pdf"
+      ? "pdf"
+      : file.type.split("/")[1] === "jpeg"
+        ? "jpg"
+        : file.type.split("/")[1];
   const path = `${organisationId}/${folder}/${crypto.randomUUID()}.${ext}`;
-  check(await supabase.storage.from("club-site").upload(path, file, { contentType: file.type, upsert: false }));
+  check(
+    await supabase.storage
+      .from("club-site")
+      .upload(path, file, { contentType: file.type, upsert: false }),
+  );
   return path;
 }
 
@@ -70,8 +106,15 @@ export async function removeSiteFile(path: string | null | undefined) {
 }
 
 export const siteCloud = {
-  async save(organisationId: string, patch: Omit<Tables["club_sites"]["Insert"], "organisation_id">) {
-    check(await supabase.from("club_sites").upsert({ organisation_id: organisationId, ...patch }, { onConflict: "organisation_id" }));
+  async save(
+    organisationId: string,
+    patch: Omit<Tables["club_sites"]["Insert"], "organisation_id">,
+  ) {
+    check(
+      await supabase
+        .from("club_sites")
+        .upsert({ organisation_id: organisationId, ...patch }, { onConflict: "organisation_id" }),
+    );
   },
   async addPost(input: Tables["club_site_posts"]["Insert"]) {
     check(await supabase.from("club_site_posts").insert(input));
@@ -85,7 +128,9 @@ export const siteCloud = {
   },
   async addPhoto(organisationId: string, file: File, caption: string) {
     const path = await uploadSiteFile(organisationId, "photos", file);
-    const result = await supabase.from("club_site_photos").insert({ organisation_id: organisationId, path, caption, consent_confirmed: true });
+    const result = await supabase
+      .from("club_site_photos")
+      .insert({ organisation_id: organisationId, path, caption, consent_confirmed: true });
     if (result.error) {
       await removeSiteFile(path);
       throw new Error(friendly(result.error.message));

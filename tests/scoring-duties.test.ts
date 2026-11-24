@@ -42,10 +42,30 @@ function fixture() {
 }
 
 test("each duty only unlocks its own part of scoring", () => {
-  assert.deepEqual(dutyAccess(["batting"]), { recordBalls: true, bowlingFielding: false, video: false, onTeam: true });
-  assert.deepEqual(dutyAccess(["bowling"]), { recordBalls: false, bowlingFielding: true, video: false, onTeam: true });
-  assert.deepEqual(dutyAccess(["video"]), { recordBalls: false, bowlingFielding: false, video: true, onTeam: true });
-  assert.deepEqual(dutyAccess(["lead"]), { recordBalls: true, bowlingFielding: true, video: true, onTeam: true });
+  assert.deepEqual(dutyAccess(["batting"]), {
+    recordBalls: true,
+    bowlingFielding: false,
+    video: false,
+    onTeam: true,
+  });
+  assert.deepEqual(dutyAccess(["bowling"]), {
+    recordBalls: false,
+    bowlingFielding: true,
+    video: false,
+    onTeam: true,
+  });
+  assert.deepEqual(dutyAccess(["video"]), {
+    recordBalls: false,
+    bowlingFielding: false,
+    video: true,
+    onTeam: true,
+  });
+  assert.deepEqual(dutyAccess(["lead"]), {
+    recordBalls: true,
+    bowlingFielding: true,
+    video: true,
+    onTeam: true,
+  });
   assert.equal(dutyAccess([]).onTeam, false);
 });
 
@@ -56,7 +76,10 @@ test("the batting scorer leaves bowler and fielding to the bowling scorer only w
   ];
   assert.equal(bowlingHandledByOther(team, "bat"), true);
   assert.equal(bowlingHandledByOther([team[0]!], "bat"), false);
-  const both = [{ ...team[0]!, duties: ["batting", "bowling"] as ScoringTeamMember["duties"] }, team[1]!];
+  const both = [
+    { ...team[0]!, duties: ["batting", "bowling"] as ScoringTeamMember["duties"] },
+    team[1]!,
+  ];
   assert.equal(bowlingHandledByOther(both, "bat"), false);
 });
 
@@ -65,7 +88,11 @@ test("a fielding note fills in the fielder and position on that ball only", () =
   const innings = currentInnings(match);
   const ball = innings.deliveries[0]!;
   const fielder = match.teams.find((team) => team.id === innings.bowlingTeamId)!.players[1]!.id;
-  const tagged = applyDeliveryTag(match, innings.id, ball.id, { fieldZone: "Point", fielderId: fielder, deliveryStyle: "Off spin" });
+  const tagged = applyDeliveryTag(match, innings.id, ball.id, {
+    fieldZone: "Point",
+    fielderId: fielder,
+    deliveryStyle: "Off spin",
+  });
   const after = currentInnings(tagged).deliveries[0]!;
   assert.equal(after.fieldZone, "Point");
   assert.equal(after.fielderId, fielder);
@@ -83,14 +110,22 @@ test("a bowler change applies to the next ball but never to a newer ball already
   const later = new Date(Date.parse(innings.deliveries[0]!.recordedAt) + 1000).toISOString();
   const earlier = new Date(Date.parse(innings.deliveries[0]!.recordedAt) - 1000).toISOString();
   assert.equal(currentInnings(applyBowlingUpdate(match, innings.id, next, later)).bowlerId, next);
-  assert.equal(currentInnings(applyBowlingUpdate(match, innings.id, next, earlier)).bowlerId, innings.bowlerId);
+  assert.equal(
+    currentInnings(applyBowlingUpdate(match, innings.id, next, earlier)).bowlerId,
+    innings.bowlerId,
+  );
 });
 
 test("notes are applied in the order the cloud accepted them, latest wins", () => {
   const match = fixture();
   const innings = currentInnings(match);
   const ball = innings.deliveries[0]!;
-  const base = { inningsId: innings.id, deliveryId: ball.id, occurredAt: ball.recordedAt, kind: "delivery.tagged" as const };
+  const base = {
+    inningsId: innings.id,
+    deliveryId: ball.id,
+    occurredAt: ball.recordedAt,
+    kind: "delivery.tagged" as const,
+  };
   const result = applyPatches(match, [
     { ...base, sequence: 9, tag: { fieldZone: "Cover" } },
     { ...base, sequence: 4, tag: { fieldZone: "Point" } },
@@ -99,8 +134,28 @@ test("notes are applied in the order the cloud accepted them, latest wins", () =
 });
 
 test("malformed fielding events from the network are ignored", () => {
-  assert.equal(readPatchEvent({ eventType: "delivery.tagged", sequence: 1, payload: { inningsId: "i", deliveryId: "d", tag: { fieldZone: "Moon" } } }), null);
-  assert.equal(readPatchEvent({ eventType: "bowling.updated", sequence: 1, payload: { inningsId: "i" } }), null);
-  assert.equal(readPatchEvent({ eventType: "match.snapshot", sequence: 1, payload: { inningsId: "i" } }), null);
-  assert.equal(readPatchEvent({ eventType: "bowling.updated", sequence: 2, payload: { inningsId: "i", bowlerId: "b", end: "Far" } })?.kind, "bowling.updated");
+  assert.equal(
+    readPatchEvent({
+      eventType: "delivery.tagged",
+      sequence: 1,
+      payload: { inningsId: "i", deliveryId: "d", tag: { fieldZone: "Moon" } },
+    }),
+    null,
+  );
+  assert.equal(
+    readPatchEvent({ eventType: "bowling.updated", sequence: 1, payload: { inningsId: "i" } }),
+    null,
+  );
+  assert.equal(
+    readPatchEvent({ eventType: "match.snapshot", sequence: 1, payload: { inningsId: "i" } }),
+    null,
+  );
+  assert.equal(
+    readPatchEvent({
+      eventType: "bowling.updated",
+      sequence: 2,
+      payload: { inningsId: "i", bowlerId: "b", end: "Far" },
+    })?.kind,
+    "bowling.updated",
+  );
 });

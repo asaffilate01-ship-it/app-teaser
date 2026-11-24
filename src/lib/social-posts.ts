@@ -23,12 +23,16 @@ export interface TopPerformers {
 
 /** Best innings (most runs, then fewest balls) and best bowling (most wickets, then fewest runs) of the match. */
 export function topPerformers(sheet: ScorecardSheet): TopPerformers {
-  const bats = sheet.innings.flatMap((inn) => inn.batting).filter((row) => row.balls > 0 || row.runs > 0);
+  const bats = sheet.innings
+    .flatMap((inn) => inn.batting)
+    .filter((row) => row.balls > 0 || row.runs > 0);
   const bowls = sheet.innings.flatMap((inn) => inn.bowling).filter((row) => row.wickets > 0);
   const bat = [...bats].sort((a, b) => b.runs - a.runs || a.balls - b.balls)[0];
   const bowl = [...bowls].sort((a, b) => b.wickets - a.wickets || a.runs - b.runs)[0];
   return {
-    batter: bat ? { name: bat.name, runs: bat.runs, balls: bat.balls, notOut: bat.howOut === "not out" } : null,
+    batter: bat
+      ? { name: bat.name, runs: bat.runs, balls: bat.balls, notOut: bat.howOut === "not out" }
+      : null,
     bowler: bowl ? { name: bowl.name, wickets: bowl.wickets, runs: bowl.runs } : null,
   };
 }
@@ -39,8 +43,12 @@ export function resultPost(sheet: ScorecardSheet, teams: [string, string], link?
   for (const inn of sheet.innings) lines.push(`${inn.team} ${inn.total} (${inn.overs} ov)`);
   if (sheet.result) lines.push("", `✅ ${sheet.result}`);
   if (top.batter || top.bowler) lines.push("");
-  if (top.batter) lines.push(`⭐ Top bat: ${top.batter.name} ${top.batter.runs}${top.batter.notOut ? "*" : ""} (${top.batter.balls})`);
-  if (top.bowler) lines.push(`🎯 Top bowl: ${top.bowler.name} ${top.bowler.wickets}/${top.bowler.runs}`);
+  if (top.batter)
+    lines.push(
+      `⭐ Top bat: ${top.batter.name} ${top.batter.runs}${top.batter.notOut ? "*" : ""} (${top.batter.balls})`,
+    );
+  if (top.bowler)
+    lines.push(`🎯 Top bowl: ${top.bowler.name} ${top.bowler.wickets}/${top.bowler.runs}`);
   if (link) lines.push("", `Full scorecard: ${link}`);
   lines.push("", hashtags(teams[0], teams[1]));
   return lines.join("\n");
@@ -58,7 +66,9 @@ export interface FixturePostInput {
   locale?: string | undefined;
 }
 
-export function fixtureWhen(input: Pick<FixturePostInput, "startsAt" | "timeZone" | "locale">): string | null {
+export function fixtureWhen(
+  input: Pick<FixturePostInput, "startsAt" | "timeZone" | "locale">,
+): string | null {
   if (!input.startsAt || !Number.isFinite(Date.parse(input.startsAt))) return null;
   return new Intl.DateTimeFormat(input.locale ?? "en-GB", {
     weekday: "short",
@@ -73,7 +83,8 @@ export function fixtureWhen(input: Pick<FixturePostInput, "startsAt" | "timeZone
 export function fixturePost(input: FixturePostInput): string {
   const when = fixtureWhen(input);
   const lines = [`📅 MATCH DAY | ${input.home} v ${input.away}`];
-  if (input.competition || input.round) lines.push([input.competition, input.round].filter(Boolean).join(" · "));
+  if (input.competition || input.round)
+    lines.push([input.competition, input.round].filter(Boolean).join(" · "));
   lines.push("");
   if (when) lines.push(`🕐 ${when}`);
   if (input.ground) lines.push(`📍 ${input.ground}`);

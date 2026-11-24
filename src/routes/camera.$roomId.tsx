@@ -50,6 +50,15 @@ export const Route = createFileRoute("/camera/$roomId")({
 });
 
 type CameraAngle = "pavilion_end" | "far_end" | "off_side" | "leg_side" | "roaming" | "other";
+
+// Screen Wake Lock is opportunistic browser support, not native background capture.
+type CameraWakeSentinel = {
+  release: () => Promise<void>;
+  addEventListener: (event: "release", listener: () => void) => void;
+};
+type WakeCapableNavigator = Navigator & {
+  wakeLock?: { request: (type: "screen") => Promise<CameraWakeSentinel> };
+};
 interface PairedDevice {
   id: string;
   room_id: string;
@@ -93,6 +102,7 @@ function MatchCamera() {
   const [devices, setDevices] = useState<CameraPresence[]>([]);
   const [recording, setRecording] = useState(false);
   const [previewing, setPreviewing] = useState(false);
+  const [wakeLockHeld, setWakeLockHeld] = useState(false);
   const [liveSharing, setLiveSharing] = useState(false);
   const [cloudPublishing, setCloudPublishing] = useState(false);
   const [cloudConnecting, setCloudConnecting] = useState(false);
@@ -119,6 +129,48 @@ function MatchCamera() {
     },
     [],
   );
+
+  // Request a foreground screen wake lock when the operator starts a preview.
+  // Screen lock, OS suspension and phone battery policy may still interrupt
+  // web capture; only a tested native capture service could promise otherwise.
+  useEffect(() => {
+    if (!previewing) {
+      setWakeLockHeld(false);
+      return;
+    }
+    let cancelled = false;
+    let held: CameraWakeSentinel | null = null;
+    const requestWakeLock = async () => {
+      if (cancelled || held || document.visibilityState !== "visible") return;
+      const wakeLock = (navigator as WakeCapableNavigator).wakeLock;
+      if (!wakeLock) return;
+      try {
+        const acquired = await wakeLock.request("screen");
+        if (cancelled) {
+          await acquired.release();
+          return;
+        }
+        held = acquired;
+        setWakeLockHeld(true);
+        acquired.addEventListener("release", () => {
+          if (held === acquired) held = null;
+          if (!cancelled) setWakeLockHeld(false);
+        });
+      } catch {
+        if (!cancelled) setWakeLockHeld(false);
+      }
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void requestWakeLock();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    void requestWakeLock();
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", onVisible);
+      void held?.release();
+    };
+  }, [previewing]);
 
   const pair = async (event: FormEvent) => {
     event.preventDefault();
@@ -689,7 +741,11 @@ function MatchCamera() {
             <img src={logoAsset.url} alt="CricLume" className="h-9 w-auto" />
           </Link>
           <span className={`hero-chip ${recording ? "hero-chip-live" : ""}`}>
-            {recording ? <span className="live-dot" aria-hidden="true" /> : <Smartphone className="size-3.5" aria-hidden="true" />}
+            {recording ? (
+              <span className="live-dot" aria-hidden="true" />
+            ) : (
+              <Smartphone className="size-3.5" aria-hidden="true" />
+            )}
             {recording ? "Recording" : "Match camera"}
           </span>
         </div>
@@ -750,10 +806,7 @@ function MatchCamera() {
                       Start preview
                     </button>
                   ) : !recording ? (
-                    <button
-                      onClick={startRecording}
-                      className="wicket-bar"
-                    >
+                    <button onClick={startRecording} className="wicket-bar">
                       <Radio className="size-5" aria-hidden="true" />
                       Record
                     </button>
@@ -767,6 +820,11 @@ function MatchCamera() {
                     </button>
                   )}
                 </div>
+                <p role="status" className="text-xs leading-5 text-slate-400">
+                  {previewing && wakeLockHeld
+                    ? "Keep-awake protection active while this camera page stays foregrounded. Phone lock or OS suspension can still interrupt recording."
+                    : "Keep this phone screen on and CricLume in the foreground during capture. Background or lock-screen recording is not certified for the web app."}
+                </p>
                 {previewing && (
                   <div className="flex flex-wrap items-center gap-2">
                     <button
@@ -821,10 +879,7 @@ function MatchCamera() {
                   <span>{uploadProgress}%</span>
                 </div>
                 <div className="camera-progress">
-                  <div
-                    className="camera-progress-bar"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
+                  <div className="camera-progress-bar" style={{ width: `${uploadProgress}%` }} />
                 </div>
               </div>
             )}
@@ -887,10 +942,10 @@ function MatchCamera() {
                 className="mt-1 camera-check"
               />
               <span>
-                Opt in to <strong>server-side automatic cloud recording</strong> for an adult-only match when it
-                goes live. By enabling this I confirm all recorded participants are adults and the
-                club has authorised this camera's cloud recording. Publishing to LiveKit is a
-                separate button; the platform's auto-cloud switch must also be enabled.
+                Opt in to <strong>server-side automatic cloud recording</strong> for an adult-only
+                match when it goes live. By enabling this I confirm all recorded participants are
+                adults and the club has authorised this camera's cloud recording. Publishing to
+                LiveKit is a separate button; the platform's auto-cloud switch must also be enabled.
               </span>
             </label>
             <label className="mt-3 flex items-center gap-3 text-xs">
@@ -934,10 +989,7 @@ function MatchCamera() {
                 <p className="scoreboard-muted text-xs">Pair this phone to join the room.</p>
               ) : (
                 devices.map((item) => (
-                  <div
-                    key={item.deviceId}
-                    className="camera-device-row"
-                  >
+                  <div key={item.deviceId} className="camera-device-row">
                     <div>
                       <div className="text-xs font-bold">{item.label}</div>
                       <div className="scoreboard-muted text-[10px] capitalize">
@@ -1018,9 +1070,7 @@ function PairingForm({
           <option value="other">Other</option>
         </select>
       </div>
-      <button className="action-primary min-h-12 w-full">
-        Pair phone
-      </button>
+      <button className="action-primary min-h-12 w-full">Pair phone</button>
     </form>
   );
 }
@@ -1043,7 +1093,9 @@ function CameraLogin({
         }}
         className="broadcast-panel w-full max-w-md p-6 md:p-8"
       >
-        <span className="hero-chip"><Smartphone className="size-3.5" aria-hidden="true" /> Match camera</span>
+        <span className="hero-chip">
+          <Smartphone className="size-3.5" aria-hidden="true" /> Match camera
+        </span>
         <h1 className="mt-4 font-display text-2xl font-bold">Sign in to pair this phone</h1>
         <p className="scoreboard-muted mt-2 text-sm">
           Camera-room access is temporary and recorded in the match audit.
@@ -1057,9 +1109,7 @@ function CameraLogin({
           aria-label="Email"
           className="scorer-input mt-5"
         />
-        <button className="action-primary mt-3 min-h-12 w-full">
-          Email sign-in link
-        </button>
+        <button className="action-primary mt-3 min-h-12 w-full">Email sign-in link</button>
       </form>
     </div>
   );
@@ -1072,10 +1122,7 @@ function CameraMessage({ title, detail }: { title: string; detail: string }) {
         <Camera className="mx-auto size-8 text-gold" aria-hidden="true" />
         <h1 className="mt-4 font-display text-2xl font-bold">{title}</h1>
         <p className="scoreboard-muted mt-2 text-sm">{detail}</p>
-        <Link
-          to="/platform"
-          className="action-secondary mt-6"
-        >
+        <Link to="/platform" className="action-secondary mt-6">
           Open club workspace
         </Link>
       </div>

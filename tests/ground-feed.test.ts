@@ -32,7 +32,7 @@ test("ground feed: 142/4 after 17.2 chasing 168 needs 26 from 16 balls", () => {
 
 test("ground feed carries no player names", () => {
   const text = JSON.stringify(buildGroundFeed(board));
-  assert.ok(!text.includes("Striker") && !text.includes("Bowler\""));
+  assert.ok(!text.includes("Striker") && !text.includes('Bowler"'));
 });
 
 test("text format is one KEY VALUE per line", () => {

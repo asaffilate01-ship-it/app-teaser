@@ -26,7 +26,9 @@ export async function loadCameraRoomReview(
       .limit(120),
     client
       .from("deliveries")
-      .select("id,sequence,over_number,ball_in_over,occurred_at,total_runs,wicket,batter_runs,striker_id,bowler_id")
+      .select(
+        "id,sequence,over_number,ball_in_over,occurred_at,total_runs,wicket,batter_runs,striker_id,bowler_id",
+      )
       .eq("match_id", matchId)
       .is("superseded_by", null)
       .is("voided_by_event_id", null)
@@ -93,7 +95,10 @@ export async function loadReelPlayerNames(ids: readonly string[]): Promise<Recor
 }
 
 /** Manual timing offsets saved in the replay workbench, by clip id. */
-export async function loadClipOffsets(roomId: string, clipIds: readonly string[]): Promise<Record<string, number>> {
+export async function loadClipOffsets(
+  roomId: string,
+  clipIds: readonly string[],
+): Promise<Record<string, number>> {
   if (clipIds.length === 0) return {};
   const { data, error } = await getCloudClient()
     .from("camera_clip_calibrations")

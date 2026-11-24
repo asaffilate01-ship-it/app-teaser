@@ -83,7 +83,11 @@ export function conditionsFactor(conditions: MatchConditions, inningsNumber: num
   return factor;
 }
 
-function strengthFactor(conditions: MatchConditions, battingIsHome: boolean | undefined, batting: boolean) {
+function strengthFactor(
+  conditions: MatchConditions,
+  battingIsHome: boolean | undefined,
+  batting: boolean,
+) {
   if (!conditions.edge || battingIsHome === undefined) return 1;
   const homeBatting = batting ? battingIsHome : !battingIsHome;
   const sign = homeBatting ? 1 : -1;
@@ -94,7 +98,14 @@ function strengthFactor(conditions: MatchConditions, battingIsHome: boolean | un
  * Expected further runs from `balls` left with `wicketsInHand`. Runs come at a rate a little above par
  * early on but are capped by how many batters remain, so late wickets slow scoring down.
  */
-export function expectedRuns(balls: number, wicketsInHand: number, maxWickets: number, rpoPar: number, ballsPerOver: number, fullBalls: number) {
+export function expectedRuns(
+  balls: number,
+  wicketsInHand: number,
+  maxWickets: number,
+  rpoPar: number,
+  ballsPerOver: number,
+  fullBalls: number,
+) {
   if (balls <= 0 || wicketsInHand <= 0) return 0;
   const parTotal = (rpoPar * fullBalls) / ballsPerOver;
   const capacityAll = 2 * parTotal;
@@ -111,7 +122,8 @@ function spread(balls: number, expected: number) {
 export function normalCdf(z: number): number {
   const t = 1 / (1 + 0.2316419 * Math.abs(z));
   const d = 0.3989423 * Math.exp((-z * z) / 2);
-  const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  const p =
+    d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
   return z > 0 ? 1 - p : p;
 }
 
@@ -130,25 +142,38 @@ export function predictWin(state: PredictorState): Prediction | null {
   const ballsLeft = Math.max(0, fullBalls - state.legalBalls);
   const wicketsInHand = Math.max(0, maxWickets - state.wickets);
 
-  const batFactor = conditionsFactor(conditions, state.inningsNumber) * strengthFactor(conditions, state.battingIsHome, true);
+  const batFactor =
+    conditionsFactor(conditions, state.inningsNumber) *
+    strengthFactor(conditions, state.battingIsHome, true);
   const rest = expectedRuns(ballsLeft, wicketsInHand, maxWickets, rpo * batFactor, bpo, fullBalls);
   const projected = Math.round(state.runs + rest);
   const sdRest = spread(ballsLeft, rest);
 
   if (state.inningsNumber === 2) {
     const target = state.target ?? 0;
-    const par = Math.round(expectedRuns(fullBalls, maxWickets, maxWickets, rpo * batFactor, bpo, fullBalls));
+    const par = Math.round(
+      expectedRuns(fullBalls, maxWickets, maxWickets, rpo * batFactor, bpo, fullBalls),
+    );
     const needed = target - state.runs;
     if (needed <= 0) return { battingWin: 100, bowlingWin: 0, projected, par };
-    if (ballsLeft === 0 || wicketsInHand === 0) return { battingWin: 0, bowlingWin: 100, projected, par };
+    if (ballsLeft === 0 || wicketsInHand === 0)
+      return { battingWin: 0, bowlingWin: 100, projected, par };
     const chance = 100 * (1 - normalCdf((needed - 0.5 - rest) / sdRest));
     const battingWin = clampOpen(chance);
     return { battingWin, bowlingWin: 100 - battingWin, projected, par };
   }
 
   // First innings: compare the projected total with what the other side should chase down.
-  const chaseFactor = conditionsFactor(conditions, 2) * strengthFactor(conditions, state.battingIsHome, false);
-  const chasePar = expectedRuns(fullBalls, maxWickets, maxWickets, rpo * chaseFactor, bpo, fullBalls);
+  const chaseFactor =
+    conditionsFactor(conditions, 2) * strengthFactor(conditions, state.battingIsHome, false);
+  const chasePar = expectedRuns(
+    fullBalls,
+    maxWickets,
+    maxWickets,
+    rpo * chaseFactor,
+    bpo,
+    fullBalls,
+  );
   const sdChase = spread(fullBalls, chasePar);
   const sd = Math.sqrt(sdRest * sdRest + sdChase * sdChase);
   const battingWin = clampOpen(100 * normalCdf((state.runs + rest - chasePar) / sd));

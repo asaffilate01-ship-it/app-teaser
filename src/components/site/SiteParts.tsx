@@ -1,6 +1,15 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useHydrated } from "@tanstack/react-router";
-import { CalendarDays, ChevronLeft, ChevronRight, FileText, MapPin, Pin, Radio, X } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  MapPin,
+  Pin,
+  Radio,
+  X,
+} from "lucide-react";
 import {
   liveScoreLine,
   postExcerpt,
@@ -90,8 +99,12 @@ export function UpcomingRow({ item }: { item: UpcomingItem }) {
       <div className="club-fixture-date" aria-hidden={!date}>
         {date ? (
           <>
-            <strong>{date.toLocaleDateString(local ? undefined : "en-GB", { day: "numeric", ...zone })}</strong>
-            <span>{date.toLocaleDateString(local ? undefined : "en-GB", { month: "short", ...zone })}</span>
+            <strong>
+              {date.toLocaleDateString(local ? undefined : "en-GB", { day: "numeric", ...zone })}
+            </strong>
+            <span>
+              {date.toLocaleDateString(local ? undefined : "en-GB", { month: "short", ...zone })}
+            </span>
           </>
         ) : (
           <CalendarDays />
@@ -119,14 +132,20 @@ export function ResultRow({ match }: { match: SiteMatch }) {
         <p className="club-fixture-teams">
           {match.home} <span>v</span> {match.away}
         </p>
-        <p className="club-result-text">{match.status === "abandoned" ? "Abandoned" : (match.result ?? "Result to follow")}</p>
+        <p className="club-result-text">
+          {match.status === "abandoned" ? "Abandoned" : (match.result ?? "Result to follow")}
+        </p>
         <p className="club-meta">
           {label(match.completedAt ?? match.startedAt ?? match.scheduledAt, false)}
           {match.ground ? ` · ${match.ground}` : ""}
         </p>
       </div>
       {match.scoreboard && (
-        <Link to="/scoreboard/$slug" params={{ slug: match.scoreboard }} className="club-button club-button-ghost club-button-sm">
+        <Link
+          to="/scoreboard/$slug"
+          params={{ slug: match.scoreboard }}
+          className="club-button club-button-ghost club-button-sm"
+        >
           Scorecard
         </Link>
       )}
@@ -134,7 +153,15 @@ export function ResultRow({ match }: { match: SiteMatch }) {
   );
 }
 
-export function PostCard({ post, slug, files }: { post: SitePost; slug: string; files: Record<string, string> }) {
+export function PostCard({
+  post,
+  slug,
+  files,
+}: {
+  post: SitePost;
+  slug: string;
+  files: Record<string, string>;
+}) {
   const label = useDateLabel();
   const file = post.filePath ? files[post.filePath] : null;
   const isPdf = post.filePath?.toLowerCase().endsWith(".pdf");
@@ -152,7 +179,12 @@ export function PostCard({ post, slug, files }: { post: SitePost; slug: string; 
       </h3>
       {post.body && <p>{postExcerpt(post.body)}</p>}
       {post.kind === "document" && (file || post.linkUrl) && (
-        <a href={(isPdf && file) || post.linkUrl || file || "#"} target="_blank" rel="noopener noreferrer" className="club-doc-link">
+        <a
+          href={(isPdf && file) || post.linkUrl || file || "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="club-doc-link"
+        >
           <FileText aria-hidden="true" /> Open document
         </a>
       )}
@@ -166,7 +198,12 @@ export function LeagueTableView({ table }: { table: SiteTable }) {
       <div className="club-table-head">
         <h3>{table.competition.name}</h3>
         <p className="club-meta">
-          {[table.competition.season, `${table.counted} confirmed result${table.counted === 1 ? "" : "s"}`].filter(Boolean).join(" · ")}
+          {[
+            table.competition.season,
+            `${table.counted} confirmed result${table.counted === 1 ? "" : "s"}`,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
         </p>
       </div>
       <div className="club-table-wrap">
@@ -175,12 +212,24 @@ export function LeagueTableView({ table }: { table: SiteTable }) {
             <tr>
               <th scope="col">#</th>
               <th scope="col">Team</th>
-              <th scope="col" title="Played">P</th>
-              <th scope="col" title="Won">W</th>
-              <th scope="col" title="Lost">L</th>
-              <th scope="col" title="Tied or no result">T/NR</th>
-              <th scope="col" title="Net run rate">NRR</th>
-              <th scope="col" title="Points">Pts</th>
+              <th scope="col" title="Played">
+                P
+              </th>
+              <th scope="col" title="Won">
+                W
+              </th>
+              <th scope="col" title="Lost">
+                L
+              </th>
+              <th scope="col" title="Tied or no result">
+                T/NR
+              </th>
+              <th scope="col" title="Net run rate">
+                NRR
+              </th>
+              <th scope="col" title="Points">
+                Pts
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -204,7 +253,15 @@ export function LeagueTableView({ table }: { table: SiteTable }) {
   );
 }
 
-export function PhotoGrid({ photos, files, limit }: { photos: SitePhoto[]; files: Record<string, string>; limit?: number }) {
+export function PhotoGrid({
+  photos,
+  files,
+  limit,
+}: {
+  photos: SitePhoto[];
+  files: Record<string, string>;
+  limit?: number;
+}) {
   const shown = photos.filter((photo) => files[photo.path]).slice(0, limit ?? photos.length);
   const [open, setOpen] = useState<number | null>(null);
   useEffect(() => {
@@ -212,7 +269,8 @@ export function PhotoGrid({ photos, files, limit }: { photos: SitePhoto[]; files
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(null);
       if (event.key === "ArrowRight") setOpen((i) => (i === null ? i : (i + 1) % shown.length));
-      if (event.key === "ArrowLeft") setOpen((i) => (i === null ? i : (i - 1 + shown.length) % shown.length));
+      if (event.key === "ArrowLeft")
+        setOpen((i) => (i === null ? i : (i - 1 + shown.length) % shown.length));
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -224,15 +282,30 @@ export function PhotoGrid({ photos, files, limit }: { photos: SitePhoto[]; files
       <ul className="club-photos">
         {shown.map((photo, index) => (
           <li key={photo.id}>
-            <button type="button" onClick={() => setOpen(index)} aria-label={photo.caption || `Photo ${index + 1}`}>
+            <button
+              type="button"
+              onClick={() => setOpen(index)}
+              aria-label={photo.caption || `Photo ${index + 1}`}
+            >
               <img src={files[photo.path]} alt={photo.caption} loading="lazy" />
             </button>
           </li>
         ))}
       </ul>
       {current && (
-        <div className="club-lightbox" role="dialog" aria-modal="true" aria-label={current.caption || "Photo"} onClick={() => setOpen(null)}>
-          <button type="button" className="club-lightbox-close" aria-label="Close" onClick={() => setOpen(null)}>
+        <div
+          className="club-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label={current.caption || "Photo"}
+          onClick={() => setOpen(null)}
+        >
+          <button
+            type="button"
+            className="club-lightbox-close"
+            aria-label="Close"
+            onClick={() => setOpen(null)}
+          >
             <X />
           </button>
           {shown.length > 1 && (

@@ -5,7 +5,17 @@ import { can } from "@/lib/platform";
 import { availabilitySummary, eventIcs, repliesClosed, type Availability } from "@/lib/club-office";
 import { office, type ClubEvent } from "@/lib/club-office-cloud";
 import { remindNow } from "./RemindersPanel";
-import { Empty, OfficeCard, OfficeField, Pill, fromLocal, nameOfPlayer, upcoming, when, type OfficeProps } from "./ui";
+import {
+  Empty,
+  OfficeCard,
+  OfficeField,
+  Pill,
+  fromLocal,
+  nameOfPlayer,
+  upcoming,
+  when,
+  type OfficeProps,
+} from "./ui";
 
 const kinds = [
   ["match", "Match"],
@@ -16,7 +26,12 @@ const kinds = [
   ["other", "Other"],
 ] as const;
 
-const answerLabels: Record<Availability, string> = { available: "Available", maybe: "Maybe", unavailable: "Can't make it", waitlist: "Waiting list" };
+const answerLabels: Record<Availability, string> = {
+  available: "Available",
+  maybe: "Maybe",
+  unavailable: "Can't make it",
+  waitlist: "Waiting list",
+};
 const choices = ["available", "maybe", "unavailable"] as const;
 
 function addToCalendar(event: ClubEvent) {
@@ -44,11 +59,15 @@ export function EventsPanel(props: OfficeProps) {
   return (
     <div className="space-y-4">
       {manager && <NewEvent {...props} />}
-      {events.length === 0 && <Empty>No upcoming events yet.{manager ? " Add the first one above." : ""}</Empty>}
+      {events.length === 0 && (
+        <Empty>No upcoming events yet.{manager ? " Add the first one above." : ""}</Empty>
+      )}
       {events.map((event) => {
         const squad = squadFor(event, club);
         const answers = new Map<string, Availability>(
-          data.availability.filter((row) => row.event_id === event.id).map((row) => [row.player_id, row.status as Availability]),
+          data.availability
+            .filter((row) => row.event_id === event.id)
+            .map((row) => [row.player_id, row.status as Availability]),
         );
         const summary = availabilitySummary(squad, answers);
         const mine = data.myPlayerIds.filter((id) => squad.includes(id) || !event.team_id);
@@ -58,14 +77,31 @@ export function EventsPanel(props: OfficeProps) {
           <OfficeCard
             key={event.id}
             title={event.title}
-            description={[when(event.starts_at), event.location, team?.name].filter(Boolean).join(" · ")}
+            description={[when(event.starts_at), event.location, team?.name]
+              .filter(Boolean)
+              .join(" · ")}
             action={<Pill>{kinds.find(([value]) => value === event.kind)?.[1] ?? event.kind}</Pill>}
           >
             {event.notes && <p className="office-meta mb-3">{event.notes}</p>}
             <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
-              {event.reply_by && <Pill tone={repliesClosed(event.reply_by) ? "bad" : "warn"}>Reply by {when(event.reply_by)}</Pill>}
-              {event.squad_cap && <Pill>{summary.available}/{event.squad_cap} places{summary.waitlist ? ` · ${summary.waitlist} waiting` : ""}</Pill>}
-              <button type="button" className="app-chip-button" onClick={() => addToCalendar(event)}><CalendarCheck className="size-3.5" /> Add to calendar</button>
+              {event.reply_by && (
+                <Pill tone={repliesClosed(event.reply_by) ? "bad" : "warn"}>
+                  Reply by {when(event.reply_by)}
+                </Pill>
+              )}
+              {event.squad_cap && (
+                <Pill>
+                  {summary.available}/{event.squad_cap} places
+                  {summary.waitlist ? ` · ${summary.waitlist} waiting` : ""}
+                </Pill>
+              )}
+              <button
+                type="button"
+                className="app-chip-button"
+                onClick={() => addToCalendar(event)}
+              >
+                <CalendarCheck className="size-3.5" /> Add to calendar
+              </button>
             </div>
             {mine.length > 0 && (
               <div className="mb-3 space-y-2">
@@ -73,7 +109,9 @@ export function EventsPanel(props: OfficeProps) {
                   <div key={playerId} className="office-row">
                     <span className="font-bold">{nameOfPlayer(club, playerId)}</span>
                     <span className="flex flex-wrap gap-1.5">
-                      {answers.get(playerId) === "waitlist" && <Pill tone="warn">On the waiting list</Pill>}
+                      {answers.get(playerId) === "waitlist" && (
+                        <Pill tone="warn">On the waiting list</Pill>
+                      )}
                       {choices.map((status) => (
                         <button
                           key={status}
@@ -82,7 +120,16 @@ export function EventsPanel(props: OfficeProps) {
                           aria-pressed={answers.get(playerId) === status}
                           disabled={closed}
                           onClick={() =>
-                            void act(() => office.answer({ organisationId, eventId: event.id, playerId, status }), "Answer saved")
+                            void act(
+                              () =>
+                                office.answer({
+                                  organisationId,
+                                  eventId: event.id,
+                                  playerId,
+                                  status,
+                                }),
+                              "Answer saved",
+                            )
                           }
                         >
                           {answerLabels[status]}
@@ -106,18 +153,37 @@ export function EventsPanel(props: OfficeProps) {
                     <button
                       type="button"
                       className="app-chip-button"
-                      onClick={() => void remindNow(organisationId, "availability", event.id).catch((error: unknown) => toast.error(error instanceof Error ? error.message : "Reminders could not be sent."))}
+                      onClick={() =>
+                        void remindNow(organisationId, "availability", event.id).catch(
+                          (error: unknown) =>
+                            toast.error(
+                              error instanceof Error
+                                ? error.message
+                                : "Reminders could not be sent.",
+                            ),
+                        )
+                      }
                     >
                       <BellRing className="size-3.5" /> Remind no-replies
                     </button>
                   )}
-                  <button type="button" className="app-chip-button" onClick={() => setOpen(open === event.id ? null : event.id)}>
+                  <button
+                    type="button"
+                    className="app-chip-button"
+                    onClick={() => setOpen(open === event.id ? null : event.id)}
+                  >
                     {open === event.id ? "Hide answers" : "See answers"}
                   </button>
                   <button
                     type="button"
                     className="app-chip-button"
-                    onClick={() => void act(() => office.updateEvent(event.id, { availability_open: !event.availability_open }))}
+                    onClick={() =>
+                      void act(() =>
+                        office.updateEvent(event.id, {
+                          availability_open: !event.availability_open,
+                        }),
+                      )
+                    }
                   >
                     {event.availability_open ? "Close answers" : "Reopen answers"}
                   </button>
@@ -126,7 +192,13 @@ export function EventsPanel(props: OfficeProps) {
                     className="app-chip-button"
                     onClick={() => {
                       if (window.confirm(`Cancel "${event.title}"?`))
-                        void act(() => office.updateEvent(event.id, { cancelled_at: new Date().toISOString() }), "Event cancelled");
+                        void act(
+                          () =>
+                            office.updateEvent(event.id, {
+                              cancelled_at: new Date().toISOString(),
+                            }),
+                          "Event cancelled",
+                        );
                     }}
                   >
                     Cancel event
@@ -140,7 +212,17 @@ export function EventsPanel(props: OfficeProps) {
                         <div key={playerId} className="office-row">
                           <span>{nameOfPlayer(club, playerId)}</span>
                           {answer ? (
-                            <Pill tone={answer === "available" ? "good" : answer === "maybe" || answer === "waitlist" ? "warn" : "bad"}>{answerLabels[answer]}</Pill>
+                            <Pill
+                              tone={
+                                answer === "available"
+                                  ? "good"
+                                  : answer === "maybe" || answer === "waitlist"
+                                    ? "warn"
+                                    : "bad"
+                              }
+                            >
+                              {answerLabels[answer]}
+                            </Pill>
                           ) : (
                             <Pill>No reply</Pill>
                           )}
@@ -194,10 +276,20 @@ function NewEvent({ club, organisationId, act }: OfficeProps) {
     }
   };
   return (
-    <OfficeCard title="Add an event" description="Matches, nets, tournaments, socials and meetings. Players and parents answer from their own login.">
-      <form onSubmit={(event) => void submit(event)} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <OfficeCard
+      title="Add an event"
+      description="Matches, nets, tournaments, socials and meetings. Players and parents answer from their own login."
+    >
+      <form
+        onSubmit={(event) => void submit(event)}
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+      >
         <OfficeField label="Type">
-          <select className="scorer-input" value={kind} onChange={(event) => setKind(event.target.value)}>
+          <select
+            className="scorer-input"
+            value={kind}
+            onChange={(event) => setKind(event.target.value)}
+          >
             {kinds.map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
@@ -206,10 +298,21 @@ function NewEvent({ club, organisationId, act }: OfficeProps) {
           </select>
         </OfficeField>
         <OfficeField label="Title" className="lg:col-span-2">
-          <input required maxLength={140} className="scorer-input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="U13 v Riverside" />
+          <input
+            required
+            maxLength={140}
+            className="scorer-input"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="U13 v Riverside"
+          />
         </OfficeField>
         <OfficeField label="Team">
-          <select className="scorer-input" value={teamId} onChange={(event) => setTeamId(event.target.value)}>
+          <select
+            className="scorer-input"
+            value={teamId}
+            onChange={(event) => setTeamId(event.target.value)}
+          >
             <option value="">Whole club</option>
             {club.teams.map((team) => (
               <option key={team.id} value={team.id}>
@@ -219,22 +322,55 @@ function NewEvent({ club, organisationId, act }: OfficeProps) {
           </select>
         </OfficeField>
         <OfficeField label="Starts">
-          <input required type="datetime-local" className="scorer-input" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} />
+          <input
+            required
+            type="datetime-local"
+            className="scorer-input"
+            value={startsAt}
+            onChange={(event) => setStartsAt(event.target.value)}
+          />
         </OfficeField>
         <OfficeField label="Ends (optional)">
-          <input type="datetime-local" className="scorer-input" value={endsAt} onChange={(event) => setEndsAt(event.target.value)} />
+          <input
+            type="datetime-local"
+            className="scorer-input"
+            value={endsAt}
+            onChange={(event) => setEndsAt(event.target.value)}
+          />
         </OfficeField>
         <OfficeField label="Where">
-          <input maxLength={200} className="scorer-input" value={location} onChange={(event) => setLocation(event.target.value)} />
+          <input
+            maxLength={200}
+            className="scorer-input"
+            value={location}
+            onChange={(event) => setLocation(event.target.value)}
+          />
         </OfficeField>
         <OfficeField label="Reply by (optional)">
-          <input type="datetime-local" className="scorer-input" value={replyBy} onChange={(event) => setReplyBy(event.target.value)} />
+          <input
+            type="datetime-local"
+            className="scorer-input"
+            value={replyBy}
+            onChange={(event) => setReplyBy(event.target.value)}
+          />
         </OfficeField>
         <OfficeField label="Places (optional)">
-          <input inputMode="numeric" className="scorer-input" value={cap} onChange={(event) => setCap(event.target.value.replace(/\D/g, ""))} placeholder="e.g. 14 — then a waiting list" />
+          <input
+            inputMode="numeric"
+            className="scorer-input"
+            value={cap}
+            onChange={(event) => setCap(event.target.value.replace(/\D/g, ""))}
+            placeholder="e.g. 14 — then a waiting list"
+          />
         </OfficeField>
         <OfficeField label="Notes" className="sm:col-span-2">
-          <input maxLength={1000} className="scorer-input" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Whites, arrive 45 minutes early" />
+          <input
+            maxLength={1000}
+            className="scorer-input"
+            value={notes}
+            onChange={(event) => setNotes(event.target.value)}
+            placeholder="Whites, arrive 45 minutes early"
+          />
         </OfficeField>
         <div className="flex items-end">
           <button className="action-primary w-full">

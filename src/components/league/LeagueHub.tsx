@@ -1,4 +1,12 @@
-import { ArrowDown, ArrowLeft, ArrowUp, ChevronRight, Radio, RefreshCw, Trophy } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowUp,
+  ChevronRight,
+  Radio,
+  RefreshCw,
+  Trophy,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { TeamCrest } from "@/components/scorer/Broadcast";
 import { InningsDashboard } from "@/components/club/ClubMatchInsights";
@@ -9,7 +17,14 @@ import { ReadAloud } from "@/components/scorer/ReadAloud";
 import { WinPredictor } from "@/components/scorer/WinPredictor";
 import { loadCloudMatchSnapshot } from "@/lib/cloud";
 import { commentaryFeed } from "@/lib/commentary";
-import { currentInnings, findPlayer, findTeam, isSuperOver, matchResult, type CricketMatch } from "@/lib/cricket";
+import {
+  currentInnings,
+  findPlayer,
+  findTeam,
+  isSuperOver,
+  matchResult,
+  type CricketMatch,
+} from "@/lib/cricket";
 import { HeadToHead } from "@/components/league/HeadToHead";
 import { Streaks } from "@/components/league/Streaks";
 import { QualificationCalculator } from "@/components/league/QualificationCalculator";
@@ -31,7 +46,10 @@ type DetailView = "dashboard" | "card" | "balls";
 const liveStatuses = new Set(["live", "innings_break"]);
 
 function useTeamName(data: PlatformDashboardData) {
-  const names = useMemo(() => new Map(data.teams.map((team) => [team.id, team.name])), [data.teams]);
+  const names = useMemo(
+    () => new Map(data.teams.map((team) => [team.id, team.name])),
+    [data.teams],
+  );
   return (id: string | null | undefined) => (id ? (names.get(id) ?? "Team") : "Team");
 }
 
@@ -77,23 +95,37 @@ function MatchTile({
   const row = (teamId: string, name: string) => (
     <div className="flex min-w-0 items-center gap-3">
       <TeamCrest name={name} size="sm" />
-      <span className={`min-w-0 flex-1 truncate text-sm font-bold ${batting === teamId ? "text-foreground" : "text-slate-400"}`}>{name}</span>
+      <span
+        className={`min-w-0 flex-1 truncate text-sm font-bold ${batting === teamId ? "text-foreground" : "text-slate-400"}`}
+      >
+        {name}
+      </span>
       {batting === teamId ? (
         <span className="font-display text-xl font-bold tabular-nums text-gold">
           {situation.runs}/{situation.wickets}
           <small className="ml-1 text-[11px] text-slate-400">({situation.overs})</small>
         </span>
       ) : (
-        <span className="text-xs text-slate-500">{situation.target != null && batting !== teamId ? `${situation.target - 1}` : "Yet to bat"}</span>
+        <span className="text-xs text-slate-500">
+          {situation.target != null && batting !== teamId
+            ? `${situation.target - 1}`
+            : "Yet to bat"}
+        </span>
       )}
     </div>
   );
   return (
-    <button type="button" onClick={onOpen} className="broadcast-panel hub-tile text-left" aria-label={`Open ${home} v ${away}`}>
+    <button
+      type="button"
+      onClick={onOpen}
+      className="broadcast-panel hub-tile text-left"
+      aria-label={`Open ${home} v ${away}`}
+    >
       <div className="mb-3 flex items-center justify-between gap-2">
         {live ? (
           <span className="hero-chip hero-chip-live">
-            <span className="live-dot" aria-hidden="true" /> {match.status === "innings_break" ? "Innings break" : "Live"}
+            <span className="live-dot" aria-hidden="true" />{" "}
+            {match.status === "innings_break" ? "Innings break" : "Live"}
           </span>
         ) : (
           <span className="hero-chip">{match.status.replaceAll("_", " ")}</span>
@@ -110,7 +142,15 @@ function MatchTile({
   );
 }
 
-function MatchDetail({ record, title, onBack }: { record: MatchRecord; title: string; onBack: () => void }) {
+function MatchDetail({
+  record,
+  title,
+  onBack,
+}: {
+  record: MatchRecord;
+  title: string;
+  onBack: () => void;
+}) {
   const [match, setMatch] = useState<CricketMatch | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<DetailView>("dashboard");
@@ -127,7 +167,8 @@ function MatchDetail({ record, title, onBack }: { record: MatchRecord; title: st
           }
         })
         .catch((reason: unknown) => {
-          if (active) setError(reason instanceof Error ? reason.message : "This match could not be loaded.");
+          if (active)
+            setError(reason instanceof Error ? reason.message : "This match could not be loaded.");
         });
     void load();
     const timer = live ? window.setInterval(() => void load(), 15_000) : undefined;
@@ -139,10 +180,18 @@ function MatchDetail({ record, title, onBack }: { record: MatchRecord; title: st
 
   return (
     <section className="space-y-4" aria-label="Match detail">
-      <button type="button" onClick={onBack} className="workspace-nav-item inline-flex min-h-10 items-center gap-2">
+      <button
+        type="button"
+        onClick={onBack}
+        className="workspace-nav-item inline-flex min-h-10 items-center gap-2"
+      >
         <ArrowLeft className="size-4" aria-hidden="true" /> All matches
       </button>
-      {error && <p className="rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-200">{error}</p>}
+      {error && (
+        <p className="rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-200">
+          {error}
+        </p>
+      )}
       {!match && !error && <p className="text-sm text-slate-400">Loading scorecard…</p>}
       <div className="flex flex-wrap items-center gap-3">
         {live ? (
@@ -175,15 +224,21 @@ function MatchDetailBody({
   const prediction = currentPrediction(match);
   const battingIsHome = innings.battingTeamId === home.id;
   const predictor = (
-  <WinPredictor
-    firstName={home.name}
-    secondName={away.name}
-    firstWin={live && prediction ? (battingIsHome ? prediction.battingWin : prediction.bowlingWin) : null}
-    prediction={live ? prediction : null}
-    battingName={findTeam(match, innings.battingTeamId).name}
-    timeline={winTimeline(match)}
-    unavailableReason={live ? undefined : `This match has finished. The line shows how ${home.name}'s chances swung.`}
-  />
+    <WinPredictor
+      firstName={home.name}
+      secondName={away.name}
+      firstWin={
+        live && prediction ? (battingIsHome ? prediction.battingWin : prediction.bowlingWin) : null
+      }
+      prediction={live ? prediction : null}
+      battingName={findTeam(match, innings.battingTeamId).name}
+      timeline={winTimeline(match)}
+      unavailableReason={
+        live
+          ? undefined
+          : `This match has finished. The line shows how ${home.name}'s chances swung.`
+      }
+    />
   );
   const lines = commentaryFeed(innings, match.settings.ballsPerOver, {
     player: (id) => (id ? findPlayer(match, id)?.name : undefined),
@@ -192,7 +247,12 @@ function MatchDetailBody({
   });
   return (
     <>
-      <div className="card-tabs max-w-md" role="tablist" aria-label="Match view" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))", position: "static" }}>
+      <div
+        className="card-tabs max-w-md"
+        role="tablist"
+        aria-label="Match view"
+        style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))", position: "static" }}
+      >
         {(
           [
             ["dashboard", "Dashboard"],
@@ -200,7 +260,13 @@ function MatchDetailBody({
             ["balls", "Ball by ball"],
           ] as [DetailView, string][]
         ).map(([key, text]) => (
-          <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)}>
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={view === key}
+            onClick={() => setView(key)}
+          >
             {text}
           </button>
         ))}
@@ -211,19 +277,19 @@ function MatchDetailBody({
           <MatchDashboard match={match} />
         </div>
       ) : (
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-start">
-        {view === "card" ? (
-          <ScorecardView key={match.innings.length} match={match} />
-        ) : (
-          <div className="broadcast-panel p-4">
-            <div className="mb-3 flex justify-end">
-              <ReadAloud lines={lines} />
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-start">
+          {view === "card" ? (
+            <ScorecardView key={match.innings.length} match={match} />
+          ) : (
+            <div className="broadcast-panel p-4">
+              <div className="mb-3 flex justify-end">
+                <ReadAloud lines={lines} />
+              </div>
+              <CommentaryFeed lines={lines} />
             </div>
-            <CommentaryFeed lines={lines} />
-          </div>
-        )}
-        {predictor}
-      </div>
+          )}
+          {predictor}
+        </div>
       )}
     </>
   );
@@ -235,7 +301,11 @@ function MatchDashboard({ match }: { match: CricketMatch }) {
   const [chosen, setChosen] = useState<string | null>(null);
   const current = innings.find((item) => item.id === chosen) ?? withBalls;
   if (!current || current.balls.length === 0) {
-    return <p className="broadcast-panel p-4 text-sm text-slate-400">Charts fill in as soon as the first ball is scored.</p>;
+    return (
+      <p className="broadcast-panel p-4 text-sm text-slate-400">
+        Charts fill in as soon as the first ball is scored.
+      </p>
+    );
   }
   const teamOf = (id: string) => findTeam(match, id).name;
   const result = matchResult(match);
@@ -251,7 +321,8 @@ function MatchDashboard({ match }: { match: CricketMatch }) {
                 <li key={award.category} className="inline-flex min-w-0 items-center gap-2">
                   <Trophy className="size-4 shrink-0 text-gold" aria-hidden="true" />
                   <span className="truncate">
-                    {award.label}: <strong>{award.name}</strong> <span className="text-xs text-slate-400">({award.value})</span>
+                    {award.label}: <strong>{award.name}</strong>{" "}
+                    <span className="text-xs text-slate-400">({award.value})</span>
                   </span>
                 </li>
               ))}
@@ -262,8 +333,18 @@ function MatchDashboard({ match }: { match: CricketMatch }) {
       {innings.length > 1 && (
         <div className="insights-toggle" role="tablist" aria-label="Innings">
           {innings.map((item) => (
-            <button key={item.id} type="button" role="tab" aria-selected={current.id === item.id} className={current.id === item.id ? "is-active" : ""} onClick={() => setChosen(item.id)}>
-              {teamOf(item.battingTeamId)} {match.innings.find((inn) => inn.id === item.id && isSuperOver(inn)) ? "Super Over" : "innings"}
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              aria-selected={current.id === item.id}
+              className={current.id === item.id ? "is-active" : ""}
+              onClick={() => setChosen(item.id)}
+            >
+              {teamOf(item.battingTeamId)}{" "}
+              {match.innings.find((inn) => inn.id === item.id && isSuperOver(inn))
+                ? "Super Over"
+                : "innings"}
             </button>
           ))}
         </div>
@@ -297,30 +378,63 @@ function LiveTable({
 }) {
   const competition = data.competitions.find((item) => item.id === competitionId);
   const [mode, setMode] = useState<"live" | "official">("live");
-  if (!competition) return <p className="text-sm text-slate-400">Choose a competition to see its table.</p>;
+  if (!competition)
+    return <p className="text-sm text-slate-400">Choose a competition to see its table.</p>;
   const preview = buildLeagueStandings({ competition, fixtures: data.fixtures, teams: data.teams });
   if (preview.blockedReason || !competition.rules) {
-    return <p className="rounded-xl border border-amber-300/25 bg-amber-300/[0.06] p-4 text-sm text-amber-100">{preview.blockedReason ?? "This competition needs rules before a table can be shown."}</p>;
+    return (
+      <p className="rounded-xl border border-amber-300/25 bg-amber-300/[0.06] p-4 text-sm text-amber-100">
+        {preview.blockedReason ?? "This competition needs rules before a table can be shown."}
+      </p>
+    );
   }
   const participants = new Set([
-    ...data.fixtures.filter((fixture) => fixture.competitionId === competitionId).flatMap((fixture) => [fixture.homeTeamId, fixture.awayTeamId]),
+    ...data.fixtures
+      .filter((fixture) => fixture.competitionId === competitionId)
+      .flatMap((fixture) => [fixture.homeTeamId, fixture.awayTeamId]),
     ...situations.flatMap((item) => [item.homeTeamId, item.awayTeamId]),
   ]);
   const base = [...participants].map(
     (teamId) =>
       preview.rows.find((row) => row.teamId === teamId) ?? {
-        teamId, played: 0, won: 0, tied: 0, lost: 0, noResult: 0, points: 0, runsFor: 0, ballsFaced: 0, runsAgainst: 0, ballsBowled: 0, netRunRate: 0,
+        teamId,
+        played: 0,
+        won: 0,
+        tied: 0,
+        lost: 0,
+        noResult: 0,
+        points: 0,
+        runsFor: 0,
+        ballsFaced: 0,
+        runsAgainst: 0,
+        ballsBowled: 0,
+        netRunRate: 0,
       },
   );
   const rows = projectLiveTable(base, mode === "live" ? situations : [], competition.rules);
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="card-tabs" role="tablist" aria-label="Table type" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))", position: "static" }}>
-          <button type="button" role="tab" aria-selected={mode === "live"} onClick={() => setMode("live")}>
+        <div
+          className="card-tabs"
+          role="tablist"
+          aria-label="Table type"
+          style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))", position: "static" }}
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "live"}
+            onClick={() => setMode("live")}
+          >
             Live
           </button>
-          <button type="button" role="tab" aria-selected={mode === "official"} onClick={() => setMode("official")}>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "official"}
+            onClick={() => setMode("official")}
+          >
             Signed off
           </button>
         </div>
@@ -336,37 +450,76 @@ function LiveTable({
           <span role="columnheader">P</span>
           <span role="columnheader">W</span>
           <span role="columnheader">L</span>
-          <span role="columnheader" className="hidden sm:block">T/NR</span>
-          <span role="columnheader" className="hidden sm:block">NRR</span>
+          <span role="columnheader" className="hidden sm:block">
+            T/NR
+          </span>
+          <span role="columnheader" className="hidden sm:block">
+            NRR
+          </span>
           <span role="columnheader">Pts</span>
         </div>
         {rows.map((row) => (
-          <div key={row.teamId} role="row" className={`card-row hub-table ${row.liveOutcome ? "card-live" : ""}`}>
+          <div
+            key={row.teamId}
+            role="row"
+            className={`card-row hub-table ${row.liveOutcome ? "card-live" : ""}`}
+          >
             <span role="cell" className="card-name">
               <strong className="flex min-w-0 items-center gap-2">
                 <span className="w-5 shrink-0 tabular-nums text-slate-400">{row.position}</span>
                 <span className="truncate">{teamName(row.teamId)}</span>
                 {mode === "live" && row.movement !== 0 && (
-                  <span className={`inline-flex shrink-0 items-center text-[10px] ${row.movement > 0 ? "text-emerald-300" : "text-rose-300"}`} aria-label={row.movement > 0 ? `up ${row.movement}` : `down ${-row.movement}`}>
-                    {row.movement > 0 ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />}
+                  <span
+                    className={`inline-flex shrink-0 items-center text-[10px] ${row.movement > 0 ? "text-emerald-300" : "text-rose-300"}`}
+                    aria-label={row.movement > 0 ? `up ${row.movement}` : `down ${-row.movement}`}
+                  >
+                    {row.movement > 0 ? (
+                      <ArrowUp className="size-3" />
+                    ) : (
+                      <ArrowDown className="size-3" />
+                    )}
                     {Math.abs(row.movement)}
                   </span>
                 )}
                 {mode === "live" && row.liveOutcome && (
-                  <span className={`hub-live-dot sm:hidden ${row.liveOutcome === "W" ? "is-win" : row.liveOutcome === "L" ? "is-loss" : ""}`} aria-label={row.liveOutcome === "W" ? "winning now" : row.liveOutcome === "L" ? "losing now" : "level now"} />
+                  <span
+                    className={`hub-live-dot sm:hidden ${row.liveOutcome === "W" ? "is-win" : row.liveOutcome === "L" ? "is-loss" : ""}`}
+                    aria-label={
+                      row.liveOutcome === "W"
+                        ? "winning now"
+                        : row.liveOutcome === "L"
+                          ? "losing now"
+                          : "level now"
+                    }
+                  />
                 )}
-                {mode === "live" && row.liveOutcome && <span className="hub-live-badge hidden sm:inline">{row.liveOutcome === "W" ? "winning" : row.liveOutcome === "L" ? "losing" : "level"}</span>}
+                {mode === "live" && row.liveOutcome && (
+                  <span className="hub-live-badge hidden sm:inline">
+                    {row.liveOutcome === "W"
+                      ? "winning"
+                      : row.liveOutcome === "L"
+                        ? "losing"
+                        : "level"}
+                  </span>
+                )}
               </strong>
             </span>
             <span role="cell">{row.played}</span>
             <span role="cell">{row.won}</span>
             <span role="cell">{row.lost}</span>
-            <span role="cell" className="hidden sm:block">{row.tied + row.noResult}</span>
-            <span role="cell" className="hidden sm:block">{row.netRunRate.toFixed(2)}</span>
+            <span role="cell" className="hidden sm:block">
+              {row.tied + row.noResult}
+            </span>
+            <span role="cell" className="hidden sm:block">
+              {row.netRunRate.toFixed(2)}
+            </span>
             <span role="cell" className="card-big">
               {row.points}
               {row.pointsAdjustment ? (
-                <sup className={`ml-0.5 text-[10px] ${row.pointsAdjustment < 0 ? "text-rose-300" : "text-emerald-300"}`} title="Points changed by the league — see below">
+                <sup
+                  className={`ml-0.5 text-[10px] ${row.pointsAdjustment < 0 ? "text-rose-300" : "text-emerald-300"}`}
+                  title="Points changed by the league — see below"
+                >
                   {row.pointsAdjustment > 0 ? "+" : ""}
                   {row.pointsAdjustment}
                 </sup>
@@ -376,12 +529,25 @@ function LiveTable({
         ))}
         {rows.length === 0 && <p className="card-empty">No teams in this competition yet.</p>}
       </div>
-      <PointAdjustments competitionId={competition.id} teamIds={[...participants]} teamName={teamName} canManage={canManage} onChanged={onChanged} />
-      <p className="text-[11px] text-slate-500">Live placings use the win predictor and are not official until results are signed off. Net run rate only changes when results are signed off.</p>
+      <PointAdjustments
+        competitionId={competition.id}
+        teamIds={[...participants]}
+        teamName={teamName}
+        canManage={canManage}
+        onChanged={onChanged}
+      />
+      <p className="text-[11px] text-slate-500">
+        Live placings use the win predictor and are not official until results are signed off. Net
+        run rate only changes when results are signed off.
+      </p>
       <QualificationCalculator
         rows={base}
         remaining={data.fixtures
-          .filter((fixture) => fixture.competitionId === competitionId && !["completed", "abandoned", "cancelled"].includes(fixture.status))
+          .filter(
+            (fixture) =>
+              fixture.competitionId === competitionId &&
+              !["completed", "abandoned", "cancelled"].includes(fixture.status),
+          )
           .map((fixture) => ({ homeTeamId: fixture.homeTeamId, awayTeamId: fixture.awayTeamId }))}
         teamName={(id) => teamName(id)}
         winPoints={competition.rules.points.win}
@@ -393,15 +559,25 @@ function LiveTable({
   );
 }
 
-
-function StatsBoard({ matches, data, competitionId }: { matches: MatchRecord[]; data: PlatformDashboardData; competitionId: string }) {
+function StatsBoard({
+  matches,
+  data,
+  competitionId,
+}: {
+  matches: MatchRecord[];
+  data: PlatformDashboardData;
+  competitionId: string;
+}) {
   const [stats, setStats] = useState<SeasonStats | null>(null);
   const [loadedMatches, setLoadedMatches] = useState<CricketMatch[]>([]);
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [failed, setFailed] = useState(0);
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState<StatsTab>("awards");
-  const ids = matches.filter((match) => liveStatuses.has(match.status) || match.status === "completed").slice(0, 40).map((match) => match.id);
+  const ids = matches
+    .filter((match) => liveStatuses.has(match.status) || match.status === "completed")
+    .slice(0, 40)
+    .map((match) => match.id);
   const key = ids.join(",");
 
   useEffect(() => {
@@ -413,7 +589,9 @@ function StatsBoard({ matches, data, competitionId }: { matches: MatchRecord[]; 
     setLoading(true);
     void Promise.allSettled(ids.map((id) => loadCloudMatchSnapshot(id))).then((results) => {
       if (!active) return;
-      const loaded = results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+      const loaded = results.flatMap((result) =>
+        result.status === "fulfilled" ? [result.value] : [],
+      );
       setFailed(results.length - loaded.length);
       setLoadedMatches(loaded);
       setStats(seasonStats(loaded));
@@ -425,29 +603,54 @@ function StatsBoard({ matches, data, competitionId }: { matches: MatchRecord[]; 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
-  if (!stats) return <p className="text-sm text-slate-400">{loading ? "Adding up every scorecard…" : "No stats yet."}</p>;
+  if (!stats)
+    return (
+      <p className="text-sm text-slate-400">
+        {loading ? "Adding up every scorecard…" : "No stats yet."}
+      </p>
+    );
   if (playerId)
     return (
       <div className="space-y-4">
-        <PlayerProfileView matches={loadedMatches} playerId={playerId} onBack={() => setPlayerId(null)} />
+        <PlayerProfileView
+          matches={loadedMatches}
+          playerId={playerId}
+          onBack={() => setPlayerId(null)}
+        />
         {data.players.some((player) => player.id === playerId) && (
-          <ScoutingPanel matches={loadedMatches} playerId={playerId} organisationId={data.organisationId} player={data.players.find((player) => player.id === playerId)} />
+          <ScoutingPanel
+            matches={loadedMatches}
+            playerId={playerId}
+            organisationId={data.organisationId}
+            player={data.players.find((player) => player.id === playerId)}
+          />
         )}
       </div>
     );
   const topRuns = stats.batting[0];
   const topScore = [...stats.batting].sort((a, b) => b.highScore - a.highScore)[0];
   const topWickets = stats.bowling[0];
-  const topBest = [...stats.bowling].sort((a, b) => (b.best?.wickets ?? 0) - (a.best?.wickets ?? 0) || (a.best?.runs ?? 0) - (b.best?.runs ?? 0))[0];
+  const topBest = [...stats.bowling].sort(
+    (a, b) =>
+      (b.best?.wickets ?? 0) - (a.best?.wickets ?? 0) || (a.best?.runs ?? 0) - (b.best?.runs ?? 0),
+  )[0];
   const topSixes = [...stats.batting].sort((a, b) => b.sixes - a.sixes)[0];
   const topCatches = [...stats.fielding].sort((a, b) => b.catches - a.catches)[0];
   const highlights = [
     ["Most runs", topRuns?.name, topRuns ? `${topRuns.runs}` : null],
-    ["Highest score", topScore?.name, topScore ? `${topScore.highScore}${topScore.highScoreNotOut ? "*" : ""}` : null],
+    [
+      "Highest score",
+      topScore?.name,
+      topScore ? `${topScore.highScore}${topScore.highScoreNotOut ? "*" : ""}` : null,
+    ],
     ["Most wickets", topWickets?.name, topWickets ? `${topWickets.wickets}` : null],
     ["Best bowling", topBest?.name, topBest ? figures(topBest.best) : null],
     ["Most sixes", topSixes?.name, topSixes && topSixes.sixes ? `${topSixes.sixes}` : null],
-    ["Most catches", topCatches?.name, topCatches && topCatches.catches ? `${topCatches.catches}` : null],
+    [
+      "Most catches",
+      topCatches?.name,
+      topCatches && topCatches.catches ? `${topCatches.catches}` : null,
+    ],
   ] as const;
 
   return (
@@ -465,7 +668,12 @@ function StatsBoard({ matches, data, competitionId }: { matches: MatchRecord[]; 
           </div>
         ))}
       </div>
-      <div className="card-tabs max-w-xl" role="tablist" aria-label="Stats type" style={{ position: "static", gridTemplateColumns: "repeat(6, minmax(0, 1fr))" }}>
+      <div
+        className="card-tabs max-w-xl"
+        role="tablist"
+        aria-label="Stats type"
+        style={{ position: "static", gridTemplateColumns: "repeat(6, minmax(0, 1fr))" }}
+      >
         {(
           [
             ["awards", "Awards"],
@@ -476,7 +684,13 @@ function StatsBoard({ matches, data, competitionId }: { matches: MatchRecord[]; 
             ["streaks", "Streaks"],
           ] as [StatsTab, string][]
         ).map(([item, label]) => (
-          <button key={item} type="button" role="tab" aria-selected={tab === item} onClick={() => setTab(item)}>
+          <button
+            key={item}
+            type="button"
+            role="tab"
+            aria-selected={tab === item}
+            onClick={() => setTab(item)}
+          >
             {label}
           </button>
         ))}
@@ -484,26 +698,74 @@ function StatsBoard({ matches, data, competitionId }: { matches: MatchRecord[]; 
       {tab === "batting" && (
         <StatsTable
           label="Batting averages"
-          headings={["Batter", "M", "Inn", "NO", "Runs", "HS", "Avg", "SR", "50s", "100s", "4s", "6s"]}
+          headings={[
+            "Batter",
+            "M",
+            "Inn",
+            "NO",
+            "Runs",
+            "HS",
+            "Avg",
+            "SR",
+            "50s",
+            "100s",
+            "4s",
+            "6s",
+          ]}
           mobile={[4, 5, 6, 7]}
           onPlayer={setPlayerId}
           rows={stats.batting.map((row) => [
             [row.name, row.team, row.playerId],
-            row.matches, row.innings, row.notOuts, row.runs, `${row.highScore}${row.highScoreNotOut ? "*" : ""}`,
-            row.average ?? "–", row.balls ? row.strikeRate.toFixed(1) : "–", row.fifties, row.hundreds, row.fours, row.sixes,
+            row.matches,
+            row.innings,
+            row.notOuts,
+            row.runs,
+            `${row.highScore}${row.highScoreNotOut ? "*" : ""}`,
+            row.average ?? "–",
+            row.balls ? row.strikeRate.toFixed(1) : "–",
+            row.fifties,
+            row.hundreds,
+            row.fours,
+            row.sixes,
           ])}
         />
       )}
       {tab === "bowling" && (
         <StatsTable
           label="Bowling averages"
-          headings={["Bowler", "M", "O", "Mdn", "R", "W", "BBI", "BBM", "Avg", "Econ", "SR", "4w", "5w", "10m"]}
+          headings={[
+            "Bowler",
+            "M",
+            "O",
+            "Mdn",
+            "R",
+            "W",
+            "BBI",
+            "BBM",
+            "Avg",
+            "Econ",
+            "SR",
+            "4w",
+            "5w",
+            "10m",
+          ]}
           mobile={[5, 6, 8, 9]}
           onPlayer={setPlayerId}
           rows={stats.bowling.map((row) => [
             [row.name, row.team, row.playerId],
-            row.matches, row.overs, row.maidens, row.runs, row.wickets, figures(row.best), figures(row.bestMatch),
-            row.average ?? "–", row.economy ?? "–", row.strikeRate ?? "–", row.fourWickets, row.fiveWickets, row.tenWicketMatches,
+            row.matches,
+            row.overs,
+            row.maidens,
+            row.runs,
+            row.wickets,
+            figures(row.best),
+            figures(row.bestMatch),
+            row.average ?? "–",
+            row.economy ?? "–",
+            row.strikeRate ?? "–",
+            row.fourWickets,
+            row.fiveWickets,
+            row.tenWicketMatches,
           ])}
         />
       )}
@@ -513,13 +775,28 @@ function StatsBoard({ matches, data, competitionId }: { matches: MatchRecord[]; 
           headings={["Fielder", "Ct", "St", "RO", "Total"]}
           mobile={[1, 2, 3, 4]}
           onPlayer={setPlayerId}
-          rows={stats.fielding.map((row) => [[row.name, row.team, row.playerId], row.catches, row.stumpings, row.runOuts, row.catches + row.stumpings + row.runOuts])}
+          rows={stats.fielding.map((row) => [
+            [row.name, row.team, row.playerId],
+            row.catches,
+            row.stumpings,
+            row.runOuts,
+            row.catches + row.stumpings + row.runOuts,
+          ])}
         />
       )}
       {tab === "h2h" && <HeadToHead matches={loadedMatches} onPlayer={setPlayerId} />}
       {tab === "streaks" && <Streaks matches={loadedMatches} onPlayer={setPlayerId} />}
-      {tab === "awards" && <AwardsBoard matches={loadedMatches} competitionId={competitionId} organisationId={data.organisationId} onPlayer={setPlayerId} />}
-      {tab !== "h2h" && tab !== "streaks" && tab !== "awards" && <p className="text-[11px] text-slate-500">Tap a name to open the player's profile.</p>}
+      {tab === "awards" && (
+        <AwardsBoard
+          matches={loadedMatches}
+          competitionId={competitionId}
+          organisationId={data.organisationId}
+          onPlayer={setPlayerId}
+        />
+      )}
+      {tab !== "h2h" && tab !== "streaks" && tab !== "awards" && (
+        <p className="text-[11px] text-slate-500">Tap a name to open the player's profile.</p>
+      )}
     </div>
   );
 }
@@ -539,13 +816,14 @@ function StatsTable({
   mobile: number[];
 }) {
   const [sort, setSort] = useState<number | null>(null);
-  const sorted = sort == null
-    ? rows
-    : [...rows].sort((a, b) => {
-        const x = Number.parseFloat(String(a[sort]));
-        const y = Number.parseFloat(String(b[sort]));
-        return (Number.isNaN(y) ? -1 : y) - (Number.isNaN(x) ? -1 : x);
-      });
+  const sorted =
+    sort == null
+      ? rows
+      : [...rows].sort((a, b) => {
+          const x = Number.parseFloat(String(a[sort]));
+          const y = Number.parseFloat(String(b[sort]));
+          return (Number.isNaN(y) ? -1 : y) - (Number.isNaN(x) ? -1 : x);
+        });
   if (!rows.length) return <p className="card-empty">No figures yet.</p>;
   return (
     <div className="card-table overflow-x-auto">
@@ -553,9 +831,17 @@ function StatsTable({
         <thead>
           <tr>
             {headings.map((heading, index) => (
-              <th key={heading} scope="col" className={index && !mobile.includes(index) ? "hidden md:table-cell" : ""}>
+              <th
+                key={heading}
+                scope="col"
+                className={index && !mobile.includes(index) ? "hidden md:table-cell" : ""}
+              >
                 {index ? (
-                  <button type="button" onClick={() => setSort(index)} aria-pressed={sort === index}>
+                  <button
+                    type="button"
+                    onClick={() => setSort(index)}
+                    aria-pressed={sort === index}
+                  >
                     {heading}
                   </button>
                 ) : (
@@ -572,16 +858,31 @@ function StatsTable({
                 index === 0 ? (
                   <th key={index} scope="row">
                     {onPlayer ? (
-                      <button type="button" className="hub-player-link block" onClick={() => onPlayer((cell as [string, string, string])[2])}>
+                      <button
+                        type="button"
+                        className="hub-player-link block"
+                        onClick={() => onPlayer((cell as [string, string, string])[2])}
+                      >
                         {(cell as [string, string, string])[0]}
                       </button>
                     ) : (
-                      <span className="block truncate">{(cell as [string, string, string])[0]}</span>
+                      <span className="block truncate">
+                        {(cell as [string, string, string])[0]}
+                      </span>
                     )}
                     <small>{(cell as [string, string, string])[1]}</small>
                   </th>
                 ) : (
-                  <td key={index} className={!mobile.includes(index) ? "hidden md:table-cell" : sort === index ? "hub-sorted" : ""}>
+                  <td
+                    key={index}
+                    className={
+                      !mobile.includes(index)
+                        ? "hidden md:table-cell"
+                        : sort === index
+                          ? "hub-sorted"
+                          : ""
+                    }
+                  >
                     {cell as string | number}
                   </td>
                 ),
@@ -613,7 +914,9 @@ export function LeagueHub({
   const [competitionId, setCompetitionId] = useState(data.competitions[0]?.id ?? "");
   const [view, setView] = useState<HubView>(initialView);
   const [openId, setOpenId] = useState<string | null>(null);
-  const matches = data.matches.filter((match) => !competitionId || match.competitionId === competitionId);
+  const matches = data.matches.filter(
+    (match) => !competitionId || match.competitionId === competitionId,
+  );
   const situations = matches.map((match) => readLiveSituation(match));
   const liveMatches = matches.filter((match) => liveStatuses.has(match.status));
   const results = matches
@@ -628,7 +931,14 @@ export function LeagueHub({
   }, [liveMatches.length, openId, onRefresh]);
 
   const open = data.matches.find((match) => match.id === openId);
-  if (open) return <MatchDetail record={open} title={`${teamName(open.homeTeamId)} v ${teamName(open.awayTeamId)}`} onBack={() => setOpenId(null)} />;
+  if (open)
+    return (
+      <MatchDetail
+        record={open}
+        title={`${teamName(open.homeTeamId)} v ${teamName(open.awayTeamId)}`}
+        onBack={() => setOpenId(null)}
+      />
+    );
 
   return (
     <section className="space-y-5" aria-label="League hub">
@@ -653,13 +963,27 @@ export function LeagueHub({
             ))}
             <option value="">All club matches</option>
           </select>
-          <button type="button" className="workspace-nav-item inline-flex min-h-10 items-center gap-2" onClick={onRefresh} disabled={refreshing}>
-            <RefreshCw className={`size-4 ${refreshing ? "animate-spin" : ""}`} aria-hidden="true" /> Refresh
+          <button
+            type="button"
+            className="workspace-nav-item inline-flex min-h-10 items-center gap-2"
+            onClick={onRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw
+              className={`size-4 ${refreshing ? "animate-spin" : ""}`}
+              aria-hidden="true"
+            />{" "}
+            Refresh
           </button>
         </div>
       </div>
 
-      <div className="card-tabs" role="tablist" aria-label="League hub section" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+      <div
+        className="card-tabs"
+        role="tablist"
+        aria-label="League hub section"
+        style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}
+      >
         {(
           [
             ["live", `Live${liveMatches.length ? ` (${liveMatches.length})` : ""}`],
@@ -668,7 +992,13 @@ export function LeagueHub({
             ["stats", "Stats"],
           ] as [HubView, string][]
         ).map(([key, text]) => (
-          <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)}>
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={view === key}
+            onClick={() => setView(key)}
+          >
             {text}
           </button>
         ))}
@@ -678,31 +1008,60 @@ export function LeagueHub({
         (liveMatches.length ? (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {liveMatches.map((match) => (
-              <MatchTile key={match.id} match={match} situation={situationFor(match.id)} teamName={teamName} onOpen={() => setOpenId(match.id)} />
+              <MatchTile
+                key={match.id}
+                match={match}
+                situation={situationFor(match.id)}
+                teamName={teamName}
+                onOpen={() => setOpenId(match.id)}
+              />
             ))}
           </div>
         ) : (
           <div className="broadcast-panel p-6 text-center">
             <Radio className="mx-auto size-7 text-gold" aria-hidden="true" />
             <p className="mt-3 font-bold">No matches are live right now</p>
-            <p className="mt-1 text-sm text-slate-400">When scorers start, every game in this competition shows here side by side.</p>
+            <p className="mt-1 text-sm text-slate-400">
+              When scorers start, every game in this competition shows here side by side.
+            </p>
           </div>
         ))}
 
-      {view === "table" && <LiveTable data={data} competitionId={competitionId} situations={situations.filter((item) => liveMatches.some((match) => match.id === item.matchId))} teamName={teamName} canManage={role === "owner" || role === "league_admin"} onChanged={onRefresh} />}
+      {view === "table" && (
+        <LiveTable
+          data={data}
+          competitionId={competitionId}
+          situations={situations.filter((item) =>
+            liveMatches.some((match) => match.id === item.matchId),
+          )}
+          teamName={teamName}
+          canManage={role === "owner" || role === "league_admin"}
+          onChanged={onRefresh}
+        />
+      )}
 
       {view === "results" &&
         (results.length ? (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {results.map((match) => (
-              <MatchTile key={match.id} match={match} situation={situationFor(match.id)} teamName={teamName} onOpen={() => setOpenId(match.id)} />
+              <MatchTile
+                key={match.id}
+                match={match}
+                situation={situationFor(match.id)}
+                teamName={teamName}
+                onOpen={() => setOpenId(match.id)}
+              />
             ))}
           </div>
         ) : (
-          <p className="text-sm text-slate-400">Finished matches and their full scorecards appear here.</p>
+          <p className="text-sm text-slate-400">
+            Finished matches and their full scorecards appear here.
+          </p>
         ))}
 
-      {view === "stats" && <StatsBoard matches={matches} data={data} competitionId={competitionId} />}
+      {view === "stats" && (
+        <StatsBoard matches={matches} data={data} competitionId={competitionId} />
+      )}
     </section>
   );
 }

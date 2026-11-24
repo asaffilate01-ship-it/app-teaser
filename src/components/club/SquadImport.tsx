@@ -22,7 +22,9 @@ export function SquadImport({ data, run }: { data: PlatformDashboardData; run: R
     setText(await file.text());
   };
   const template = () => {
-    const url = URL.createObjectURL(new Blob([SQUAD_TEMPLATE_CSV], { type: "text/csv;charset=utf-8" }));
+    const url = URL.createObjectURL(
+      new Blob([SQUAD_TEMPLATE_CSV], { type: "text/csv;charset=utf-8" }),
+    );
     const link = document.createElement("a");
     link.href = url;
     link.download = "criclume-squad-template.csv";
@@ -34,10 +36,19 @@ export function SquadImport({ data, run }: { data: PlatformDashboardData; run: R
     setBusy(true);
     try {
       await run(async () => {
-        const teamIds = new Map(data.teams.filter((team) => !team.external).map((team) => [team.name.trim().toLowerCase(), team.id]));
+        const teamIds = new Map(
+          data.teams
+            .filter((team) => !team.external)
+            .map((team) => [team.name.trim().toLowerCase(), team.id]),
+        );
         for (const team of plan.newTeams) {
           setProgress(`Creating ${team.name}…`);
-          const id = await createTeam({ organisationId: data.organisationId, name: team.name, shortName: team.shortName, ...(team.ageGroup ? { ageGroup: team.ageGroup } : {}) });
+          const id = await createTeam({
+            organisationId: data.organisationId,
+            name: team.name,
+            shortName: team.shortName,
+            ...(team.ageGroup ? { ageGroup: team.ageGroup } : {}),
+          });
           teamIds.set(team.name.toLowerCase(), id);
         }
         let done = 0;
@@ -45,13 +56,23 @@ export function SquadImport({ data, run }: { data: PlatformDashboardData; run: R
           setProgress(`Adding players ${++done} of ${plan.players.length}…`);
           const teamId = teamIds.get(player.team.toLowerCase());
           if (!teamId) continue;
-          await createPlayer({ organisationId: data.organisationId, teamId, name: player.name, isJunior: player.isJunior, publicProfile: player.publicProfile });
+          await createPlayer({
+            organisationId: data.organisationId,
+            teamId,
+            name: player.name,
+            isJunior: player.isJunior,
+            publicProfile: player.publicProfile,
+          });
         }
       });
-      toast.success(`Imported ${plan.players.length} players${plan.newTeams.length ? ` and ${plan.newTeams.length} teams` : ""}.`);
+      toast.success(
+        `Imported ${plan.players.length} players${plan.newTeams.length ? ` and ${plan.newTeams.length} teams` : ""}.`,
+      );
       setText("");
     } catch {
-      toast.error("The import stopped part-way. Anything already added is kept — import the same sheet again to add the rest.");
+      toast.error(
+        "The import stopped part-way. Anything already added is kept — import the same sheet again to add the rest.",
+      );
     } finally {
       setBusy(false);
       setProgress("");
@@ -59,14 +80,19 @@ export function SquadImport({ data, run }: { data: PlatformDashboardData; run: R
   };
 
   return (
-    <section className="rounded-xl border border-white/10 bg-white/[0.035] p-5 shadow-2xl shadow-black/10" aria-label="Import from a spreadsheet">
+    <section
+      className="rounded-xl border border-white/10 bg-white/[0.035] p-5 shadow-2xl shadow-black/10"
+      aria-label="Import from a spreadsheet"
+    >
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="flex items-center gap-2 text-lg font-bold">
-            <FileSpreadsheet className="size-5 text-gold" aria-hidden="true" /> Import from a spreadsheet
+            <FileSpreadsheet className="size-5 text-gold" aria-hidden="true" /> Import from a
+            spreadsheet
           </h2>
           <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-400">
-            Columns: Team, Player, and optionally Junior and Public (yes/no). Save from Excel or Google Sheets as CSV, or paste the cells straight in. Juniors are never made public.
+            Columns: Team, Player, and optionally Junior and Public (yes/no). Save from Excel or
+            Google Sheets as CSV, or paste the cells straight in. Juniors are never made public.
           </p>
         </div>
         <button type="button" className="action-secondary" onClick={template}>
@@ -83,17 +109,34 @@ export function SquadImport({ data, run }: { data: PlatformDashboardData; run: R
         />
         <label className="action-secondary h-fit cursor-pointer">
           Choose CSV file
-          <input type="file" accept=".csv,text/csv,text/plain" className="sr-only" onChange={(event) => void readFile(event.target.files?.[0])} />
+          <input
+            type="file"
+            accept=".csv,text/csv,text/plain"
+            className="sr-only"
+            onChange={(event) => void readFile(event.target.files?.[0])}
+          />
         </label>
       </div>
       {plan && (
         <div className="mt-4 space-y-3">
           <div className="flex flex-wrap gap-2 text-xs">
-            <span className="hero-chip">{plan.players.length} player{plan.players.length === 1 ? "" : "s"} to add</span>
-            <span className="hero-chip">{plan.newTeams.length} new team{plan.newTeams.length === 1 ? "" : "s"}</span>
-            {plan.skipped.length > 0 && <span className="hero-chip">{plan.skipped.length} row{plan.skipped.length === 1 ? "" : "s"} skipped</span>}
+            <span className="hero-chip">
+              {plan.players.length} player{plan.players.length === 1 ? "" : "s"} to add
+            </span>
+            <span className="hero-chip">
+              {plan.newTeams.length} new team{plan.newTeams.length === 1 ? "" : "s"}
+            </span>
+            {plan.skipped.length > 0 && (
+              <span className="hero-chip">
+                {plan.skipped.length} row{plan.skipped.length === 1 ? "" : "s"} skipped
+              </span>
+            )}
           </div>
-          {plan.newTeams.length > 0 && <p className="text-xs text-slate-300">New teams: {plan.newTeams.map((team) => team.name).join(", ")}</p>}
+          {plan.newTeams.length > 0 && (
+            <p className="text-xs text-slate-300">
+              New teams: {plan.newTeams.map((team) => team.name).join(", ")}
+            </p>
+          )}
           {plan.skipped.length > 0 && (
             <ul className="max-h-32 overflow-auto rounded-lg border border-white/10 p-2 text-xs text-slate-400">
               {plan.skipped.slice(0, 50).map((row) => (
@@ -103,7 +146,12 @@ export function SquadImport({ data, run }: { data: PlatformDashboardData; run: R
               ))}
             </ul>
           )}
-          <button type="button" className="action-primary" disabled={busy || plan.players.length === 0} onClick={() => void importAll()}>
+          <button
+            type="button"
+            className="action-primary"
+            disabled={busy || plan.players.length === 0}
+            onClick={() => void importAll()}
+          >
             {busy ? progress || "Importing…" : `Import ${plan.players.length} players`}
           </button>
         </div>

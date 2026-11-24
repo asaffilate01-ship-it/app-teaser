@@ -62,20 +62,40 @@ export function PromoSlot({
         aria-label={current.alt}
       />
     ) : (
-      <img key={current.creativeId} src={current.url} alt={current.alt} onError={skip} decoding="async" />
+      <img
+        key={current.creativeId}
+        src={current.url}
+        alt={current.alt}
+        onError={skip}
+        decoding="async"
+      />
     );
 
   const clickable = variant === "page" && current.clickUrl;
   return (
-    <aside className={`promo-slot promo-slot-${slot} promo-${variant} ${className}`} aria-label={`Advert from ${current.advertiser}`}>
+    <aside
+      className={`promo-slot promo-slot-${slot} promo-${variant} ${className}`}
+      aria-label={`Advert from ${current.advertiser}`}
+    >
       {clickable ? (
-        <a href={current.clickUrl!} target="_blank" rel="noopener noreferrer sponsored" className="promo-media">
+        <a
+          href={current.clickUrl!}
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          className="promo-media"
+        >
           {media}
         </a>
       ) : (
         <div className="promo-media">{media}</div>
       )}
-      <span className="promo-tag">{current.source === "club" ? "Club sponsor" : current.source === "house" ? "CricLume" : "Ad"}</span>
+      <span className="promo-tag">
+        {current.source === "club"
+          ? "Club sponsor"
+          : current.source === "house"
+            ? "CricLume"
+            : "Ad"}
+      </span>
     </aside>
   );
 }

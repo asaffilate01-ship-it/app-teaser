@@ -13,7 +13,13 @@ import {
   type CricketMatch,
   type RecordDeliveryInput,
 } from "../src/lib/cricket.ts";
-import { arrPar, arrTarget, defaultMinOversForResult, mpoPar, mpoTarget } from "../src/lib/rain-rules.ts";
+import {
+  arrPar,
+  arrTarget,
+  defaultMinOversForResult,
+  mpoPar,
+  mpoTarget,
+} from "../src/lib/rain-rules.ts";
 
 test("average run rate target: 180 in 20 overs, chase cut to 12 overs → 109", () => {
   assert.equal(arrTarget(180, 20, 12), 109);
@@ -92,7 +98,10 @@ test("MPO: chase cut to 5 overs → target 26", () => {
 });
 
 test("DLS: the official target entered by the scorer is used as-is", () => {
-  const match = { ...firstInnings(), rain: { method: "dls" as const, revisedOvers: 5, officialTarget: 19 } };
+  const match = {
+    ...firstInnings(),
+    rain: { method: "dls" as const, revisedOvers: 5, officialTarget: 19 },
+  };
   assert.equal(targetForCurrentInnings(match), 19);
 });
 
@@ -121,7 +130,10 @@ test("abandoned before the minimum overs: no result", () => {
 });
 
 test("DLS abandonment waits for the official par, then decides on it", () => {
-  let match: CricketMatch = { ...firstInnings(), rain: { method: "dls", revisedOvers: 5, officialTarget: 19 } };
+  let match: CricketMatch = {
+    ...firstInnings(),
+    rain: { method: "dls", revisedOvers: 5, officialTarget: 19 },
+  };
   match = over(match, 6);
   match = over(match, 4); // 10 from 2 overs
   assert.equal(matchResult(abandonForRain(match))?.text, "Awaiting official par score");

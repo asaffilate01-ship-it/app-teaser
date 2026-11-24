@@ -1,13 +1,27 @@
 import type { CricketMatch } from "@/lib/cricket";
-import { BIG_SCORE, battingStreaks, rivalries, teamStreaks, wicketStreaks, type PlayerStreak } from "@/lib/streaks";
+import {
+  BIG_SCORE,
+  battingStreaks,
+  rivalries,
+  teamStreaks,
+  wicketStreaks,
+  type PlayerStreak,
+} from "@/lib/streaks";
 
 /** Team form and runs, rivalries, and player streaks from the loaded scorecards. */
-export function Streaks({ matches, onPlayer }: { matches: readonly CricketMatch[]; onPlayer: (id: string) => void }) {
+export function Streaks({
+  matches,
+  onPlayer,
+}: {
+  matches: readonly CricketMatch[];
+  onPlayer: (id: string) => void;
+}) {
   const teams = teamStreaks(matches);
   const rivals = rivalries(matches).slice(0, 6);
   const bats = battingStreaks(matches).slice(0, 8);
   const balls = wicketStreaks(matches).slice(0, 8);
-  if (teams.length === 0) return <p className="text-sm text-slate-400">Streaks appear once matches have finished.</p>;
+  if (teams.length === 0)
+    return <p className="text-sm text-slate-400">Streaks appear once matches have finished.</p>;
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <article className="broadcast-panel" aria-label="Team form">
@@ -16,7 +30,10 @@ export function Streaks({ matches, onPlayer }: { matches: readonly CricketMatch[
           {teams.map((team) => (
             <li key={team.teamId} className="streak-row">
               <span className="min-w-0 truncate font-semibold">{team.name}</span>
-              <span className="form-chips" aria-label={`Last ${team.form.length}: ${team.form.join(" ")}`}>
+              <span
+                className="form-chips"
+                aria-label={`Last ${team.form.length}: ${team.form.join(" ")}`}
+              >
                 {team.form.map((letter, index) => (
                   <span key={index} data-letter={letter}>
                     {letter}
@@ -24,7 +41,8 @@ export function Streaks({ matches, onPlayer }: { matches: readonly CricketMatch[
                 ))}
               </span>
               <span className="streak-meta">
-                {team.current ? `${team.current.length} ${team.current.letter} in a row` : "–"} · best {team.longestWinning}W · unbeaten {team.longestUnbeaten}
+                {team.current ? `${team.current.length} ${team.current.letter} in a row` : "–"} ·
+                best {team.longestWinning}W · unbeaten {team.longestUnbeaten}
               </span>
             </li>
           ))}
@@ -34,7 +52,9 @@ export function Streaks({ matches, onPlayer }: { matches: readonly CricketMatch[
       <article className="broadcast-panel" aria-label="Rivalries">
         <h3 className="panel-kicker">Rivalries</h3>
         {rivals.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-400">Rivalries appear when two teams have met twice.</p>
+          <p className="mt-3 text-sm text-slate-400">
+            Rivalries appear when two teams have met twice.
+          </p>
         ) : (
           <ul className="mt-3 grid gap-2">
             {rivals.map((pair) => (
@@ -45,7 +65,8 @@ export function Streaks({ matches, onPlayer }: { matches: readonly CricketMatch[
                 </strong>
                 <span className="truncate">{pair.nameB}</span>
                 <small>
-                  {pair.played} played{pair.other ? ` · ${pair.other} other` : ""} · last: {pair.lastResult}
+                  {pair.played} played{pair.other ? ` · ${pair.other} other` : ""} · last:{" "}
+                  {pair.lastResult}
                 </small>
               </li>
             ))}
@@ -53,13 +74,28 @@ export function Streaks({ matches, onPlayer }: { matches: readonly CricketMatch[
         )}
       </article>
 
-      <StreakList title={`${BIG_SCORE}+ scores in a row`} unit="innings" rows={bats} onPlayer={onPlayer} />
+      <StreakList
+        title={`${BIG_SCORE}+ scores in a row`}
+        unit="innings"
+        rows={bats}
+        onPlayer={onPlayer}
+      />
       <StreakList title="Wicket in every match" unit="matches" rows={balls} onPlayer={onPlayer} />
     </div>
   );
 }
 
-function StreakList({ title, unit, rows, onPlayer }: { title: string; unit: string; rows: PlayerStreak[]; onPlayer: (id: string) => void }) {
+function StreakList({
+  title,
+  unit,
+  rows,
+  onPlayer,
+}: {
+  title: string;
+  unit: string;
+  rows: PlayerStreak[];
+  onPlayer: (id: string) => void;
+}) {
   return (
     <article className="broadcast-panel" aria-label={title}>
       <h3 className="panel-kicker">{title}</h3>
@@ -69,7 +105,11 @@ function StreakList({ title, unit, rows, onPlayer }: { title: string; unit: stri
         <ol className="mt-3 grid gap-1.5">
           {rows.map((row) => (
             <li key={row.playerId}>
-              <button type="button" className="streak-player" onClick={() => onPlayer(row.playerId)}>
+              <button
+                type="button"
+                className="streak-player"
+                onClick={() => onPlayer(row.playerId)}
+              >
                 <span className="min-w-0 truncate">
                   <span className="font-semibold">{row.name}</span> <small>{row.team}</small>
                 </span>

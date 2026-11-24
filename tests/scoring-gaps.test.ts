@@ -16,7 +16,15 @@ import {
   type RecordDeliveryInput,
 } from "../src/lib/cricket.ts";
 
-const base: MatchSettings = { format: "T20", oversPerInnings: 20, inningsPerSide: 1, ballsPerOver: 6, ground: "", weather: "", startTime: "2027-05-01T10:00:00Z" };
+const base: MatchSettings = {
+  format: "T20",
+  oversPerInnings: 20,
+  inningsPerSide: 1,
+  ballsPerOver: 6,
+  ground: "",
+  weather: "",
+  startTime: "2027-05-01T10:00:00Z",
+};
 const make = (settings: Partial<MatchSettings> = {}) =>
   createMatch({
     homeTeamName: "Lions",
@@ -28,7 +36,16 @@ const make = (settings: Partial<MatchSettings> = {}) =>
   });
 const ball = (m: CricketMatch, extra: Partial<RecordDeliveryInput> = {}): RecordDeliveryInput => {
   const i = currentInnings(m);
-  return { strikerId: i.strikerId, nonStrikerId: i.nonStrikerId, bowlerId: i.bowlerId, end: "Pavilion", deliveryStyle: "Fast", outcome: "hit", batterRuns: 0, ...extra };
+  return {
+    strikerId: i.strikerId,
+    nonStrikerId: i.nonStrikerId,
+    bowlerId: i.bowlerId,
+    end: "Pavilion",
+    deliveryStyle: "Fast",
+    outcome: "hit",
+    batterRuns: 0,
+    ...extra,
+  };
 };
 const play = (m: CricketMatch, n: number, extra: Partial<RecordDeliveryInput> = {}) => {
   let out = m;
@@ -55,7 +72,10 @@ test("Indoor pairs: a wicket costs 5 runs and the batter stays in", () => {
   let m = make({ format: "Indoor", rules: { pairs: { oversPerPair: 4, runsPerWicket: 5 } } });
   m = play(m, 1, { batterRuns: 4 });
   const i = currentInnings(m);
-  m = recordDelivery(m, ball(m, { outcome: "wicket", dismissal: { type: "bowled", batterId: i.strikerId } }));
+  m = recordDelivery(
+    m,
+    ball(m, { outcome: "wicket", dismissal: { type: "bowled", batterId: i.strikerId } }),
+  );
   assert.equal(summarizeInnings(currentInnings(m)).runs, -1);
   assert.equal(currentInnings(m).strikerId, i.strikerId);
 });
@@ -119,14 +139,19 @@ test("correcting a dot into a wide adds a ball to the over", () => {
 test("a batter who kept batting cannot be given out on an earlier ball", () => {
   const m = play(make(), 3);
   const first = currentInnings(m).deliveries[0]!;
-  const result = correctDelivery(m, first.id, { dismissal: { type: "bowled", batterId: first.strikerId } });
+  const result = correctDelivery(m, first.id, {
+    dismissal: { type: "bowled", batterId: first.strikerId },
+  });
   assert.ok("error" in result);
 });
 
 test("removing a wicket from an earlier ball takes it off the score", () => {
   let m = make();
   const i = currentInnings(m);
-  m = recordDelivery(m, ball(m, { outcome: "wicket", dismissal: { type: "bowled", batterId: i.strikerId } }));
+  m = recordDelivery(
+    m,
+    ball(m, { outcome: "wicket", dismissal: { type: "bowled", batterId: i.strikerId } }),
+  );
   m = play(m, 2);
   const result = correctDelivery(m, currentInnings(m).deliveries[0]!.id, { dismissal: null });
   assert.ok("match" in result);

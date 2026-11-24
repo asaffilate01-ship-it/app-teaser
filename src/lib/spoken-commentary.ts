@@ -6,7 +6,9 @@ export function speechText(line: CommentaryLine): string {
   if (line.tone === "over") return `${line.over}. ${text}`;
   const [over, ball] = line.over.split(".");
   const overNumber = Number(over);
-  return ball && Number.isInteger(overNumber) ? `Over ${overNumber + 1}, ball ${ball}. ${text}` : `${line.over}. ${text}`;
+  return ball && Number.isInteger(overNumber)
+    ? `Over ${overNumber + 1}, ball ${ball}. ${text}`
+    : `${line.over}. ${text}`;
 }
 
 /**
@@ -14,7 +16,11 @@ export function speechText(line: CommentaryLine): string {
  * When nothing has been read yet only the newest line is read, so switching on does not replay the innings.
  * At most `max` lines are read in one go so a reconnect does not queue a long backlog.
  */
-export function linesToSpeak(lines: readonly CommentaryLine[], spoken: ReadonlySet<string>, max = 3): CommentaryLine[] {
+export function linesToSpeak(
+  lines: readonly CommentaryLine[],
+  spoken: ReadonlySet<string>,
+  max = 3,
+): CommentaryLine[] {
   if (lines.length === 0) return [];
   if (spoken.size === 0) return [lines[0]!];
   const fresh: CommentaryLine[] = [];

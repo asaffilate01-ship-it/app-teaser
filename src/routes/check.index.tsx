@@ -6,15 +6,27 @@ import { AppHeader } from "@/components/app-shell/AppHeader";
 import { CheckSignIn } from "@/components/check/CheckSignIn";
 import { Empty, OfficeCard, Pill, when } from "@/components/office/ui";
 import { useCloudSession } from "@/hooks/use-cloud-session";
-import { addCheckScorer, friendlyCheck, loadCheckMatches, type CheckMatchRow } from "@/lib/check-scoring-cloud";
+import {
+  addCheckScorer,
+  friendlyCheck,
+  loadCheckMatches,
+  type CheckMatchRow,
+} from "@/lib/check-scoring-cloud";
 
 export const Route = createFileRoute("/check/")({
   head: () => ({
     meta: [
       { title: "Check scoring — CricLume" },
-      { name: "description", content: "Away-club check scoring: follow every ball, query anything that looks wrong and confirm the scorecard." },
+      {
+        name: "description",
+        content:
+          "Away-club check scoring: follow every ball, query anything that looks wrong and confirm the scorecard.",
+      },
       { property: "og:title", content: "Check scoring — CricLume" },
-      { property: "og:description", content: "Follow every ball as the away club's check scorer and confirm the scorecard." },
+      {
+        property: "og:description",
+        content: "Follow every ball as the away club's check scorer and confirm the scorecard.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
@@ -46,7 +58,11 @@ function CheckHome() {
           )
         }
       />
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl space-y-5 px-4 py-6 pb-24 md:px-8 md:py-10">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto max-w-4xl space-y-5 px-4 py-6 pb-24 md:px-8 md:py-10"
+      >
         {!configured || loading ? (
           <p className="office-meta flex items-center gap-2">
             <LoaderCircle className="size-4 animate-spin" /> Loading…
@@ -76,7 +92,12 @@ function MatchList() {
     void reload();
   }, [reload]);
 
-  if (error) return <p role="alert" className="office-meta">{error}</p>;
+  if (error)
+    return (
+      <p role="alert" className="office-meta">
+        {error}
+      </p>
+    );
   if (!rows) {
     return (
       <p className="office-meta flex items-center gap-2">
@@ -93,14 +114,17 @@ function MatchList() {
           <ClipboardCheck className="size-6 text-gold" aria-hidden="true" /> Check scoring
         </h1>
         <p className="office-meta">
-          When both teams use CricLume, the away club can send a check scorer. They see every ball as it's scored,
-          query anything that looks wrong and confirm the scorecard. Only the home scorers can add or change balls.
+          When both teams use CricLume, the away club can send a check scorer. They see every ball
+          as it's scored, query anything that looks wrong and confirm the scorecard. Only the home
+          scorers can add or change balls.
         </p>
       </header>
 
       <OfficeCard title="Matches you're checking">
         {checking.length === 0 ? (
-          <Empty>You're not checking any matches yet. Your club's admin or team manager can name you.</Empty>
+          <Empty>
+            You're not checking any matches yet. Your club's admin or team manager can name you.
+          </Empty>
         ) : (
           <ul className="space-y-2">
             {checking.map((row) => (
@@ -117,8 +141,14 @@ function MatchList() {
                     <span className="office-meta">{when(row.when_at)}</span>
                   </span>
                   <span className="flex flex-wrap gap-1.5">
-                    <Pill tone={row.status === "live" ? "good" : undefined}>{row.status.replaceAll("_", " ")}</Pill>
-                    {row.open_flags > 0 && <Pill tone="warn">{row.open_flags} open {row.open_flags === 1 ? "query" : "queries"}</Pill>}
+                    <Pill tone={row.status === "live" ? "good" : undefined}>
+                      {row.status.replaceAll("_", " ")}
+                    </Pill>
+                    {row.open_flags > 0 && (
+                      <Pill tone="warn">
+                        {row.open_flags} open {row.open_flags === 1 ? "query" : "queries"}
+                      </Pill>
+                    )}
                     {row.confirmed && <Pill tone="good">Confirmed</Pill>}
                   </span>
                 </Link>
@@ -171,9 +201,17 @@ function NameRow({ row, onDone }: { row: CheckMatchRow; onDone: () => void }) {
           <span className="office-meta">{when(row.when_at)}</span>
         </span>
         <span className="flex flex-wrap items-center gap-1.5">
-          <Pill>{row.checkers === 0 ? "No check scorer" : `${row.checkers} check ${row.checkers === 1 ? "scorer" : "scorers"}`}</Pill>
+          <Pill>
+            {row.checkers === 0
+              ? "No check scorer"
+              : `${row.checkers} check ${row.checkers === 1 ? "scorer" : "scorers"}`}
+          </Pill>
           {row.checkers > 0 && (
-            <Link to="/check/$matchId" params={{ matchId: row.match_id }} className="app-chip-button">
+            <Link
+              to="/check/$matchId"
+              params={{ matchId: row.match_id }}
+              className="app-chip-button"
+            >
               Open
             </Link>
           )}
@@ -193,8 +231,13 @@ function NameRow({ row, onDone }: { row: CheckMatchRow; onDone: () => void }) {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
-          <button type="submit" className="action-secondary inline-flex items-center justify-center gap-2" disabled={busy}>
-            <UserPlus className="size-4" aria-hidden="true" /> {busy ? "Adding…" : "Name check scorer"}
+          <button
+            type="submit"
+            className="action-secondary inline-flex items-center justify-center gap-2"
+            disabled={busy}
+          >
+            <UserPlus className="size-4" aria-hidden="true" />{" "}
+            {busy ? "Adding…" : "Name check scorer"}
           </button>
         </form>
       )}

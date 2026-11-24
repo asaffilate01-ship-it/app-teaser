@@ -1,4 +1,11 @@
-import { inningsTarget, isBowlerWicket, isSuperOver, type CricketMatch, type DismissalType, type FieldZone } from "./cricket.ts";
+import {
+  inningsTarget,
+  isBowlerWicket,
+  isSuperOver,
+  type CricketMatch,
+  type DismissalType,
+  type FieldZone,
+} from "./cricket.ts";
 import { fieldAreas, zoneArea } from "./field-positions.ts";
 
 /** One recorded ball, reduced to what the club dashboard charts need. */
@@ -122,9 +129,7 @@ export function topBatters(balls: InsightBall[], limit = 3): BatterLine[] {
     if (ball.dismissalType) line.out = true;
     lines.set(ball.strikerId, line);
   }
-  return [...lines.values()]
-    .sort((a, b) => b.runs - a.runs || a.balls - b.balls)
-    .slice(0, limit);
+  return [...lines.values()].sort((a, b) => b.runs - a.runs || a.balls - b.balls).slice(0, limit);
 }
 
 export interface BowlerLine {
@@ -177,7 +182,13 @@ export function insightsFromMatch(match: CricketMatch): InsightInningsData[] {
     const previousRuns = previous
       ? previous.deliveries.reduce(
           (sum, ball) =>
-            sum + ball.batterRuns + ball.extras.wide + ball.extras.noBall + ball.extras.bye + ball.extras.legBye + ball.extras.penalty,
+            sum +
+            ball.batterRuns +
+            ball.extras.wide +
+            ball.extras.noBall +
+            ball.extras.bye +
+            ball.extras.legBye +
+            ball.extras.penalty,
           0,
         )
       : 0;
@@ -225,7 +236,10 @@ export function requiredRateByOver(
       const runsLeft = target - point.totalRuns;
       return {
         over: point.over,
-        rate: ballsLeft > 0 && runsLeft > 0 ? Math.round(((runsLeft * ballsPerOver) / ballsLeft) * 100) / 100 : null,
+        rate:
+          ballsLeft > 0 && runsLeft > 0
+            ? Math.round(((runsLeft * ballsPerOver) / ballsLeft) * 100) / 100
+            : null,
       };
     }),
   ];
@@ -241,15 +255,31 @@ export interface AllRounderLine {
 }
 
 /** Players who both batted and bowled, ranked by runs plus 20 per wicket (a simple, explainable impact score). */
-export function topAllRounders(balls: InsightBall[], ballsPerOver = 6, limit = 3): AllRounderLine[] {
-  const batting = new Map(topBatters(balls, Number.POSITIVE_INFINITY).map((line) => [line.playerId, line]));
+export function topAllRounders(
+  balls: InsightBall[],
+  ballsPerOver = 6,
+  limit = 3,
+): AllRounderLine[] {
+  const batting = new Map(
+    topBatters(balls, Number.POSITIVE_INFINITY).map((line) => [line.playerId, line]),
+  );
   return topBowlers(balls, ballsPerOver, Number.POSITIVE_INFINITY)
     .filter((bowl) => bowl.legalBalls > 0 && batting.has(bowl.playerId))
     .map((bowl) => {
       const bat = batting.get(bowl.playerId)!;
-      return { playerId: bowl.playerId, runs: bat.runs, balls: bat.balls, wickets: bowl.wickets, runsConceded: bowl.runs, overs: bowl.overs };
+      return {
+        playerId: bowl.playerId,
+        runs: bat.runs,
+        balls: bat.balls,
+        wickets: bowl.wickets,
+        runsConceded: bowl.runs,
+        overs: bowl.overs,
+      };
     })
-    .sort((a, b) => b.runs + b.wickets * 20 - (a.runs + a.wickets * 20) || a.runsConceded - b.runsConceded)
+    .sort(
+      (a, b) =>
+        b.runs + b.wickets * 20 - (a.runs + a.wickets * 20) || a.runsConceded - b.runsConceded,
+    )
     .slice(0, limit);
 }
 
@@ -286,7 +316,11 @@ export interface WormPoint {
 export function worm(balls: InsightBall[], ballsPerOver = 6): WormPoint[] {
   return [
     { over: 0, total: 0, wickets: 0 },
-    ...overProgression(balls, ballsPerOver).map((point) => ({ over: point.over, total: point.totalRuns, wickets: point.wickets })),
+    ...overProgression(balls, ballsPerOver).map((point) => ({
+      over: point.over,
+      total: point.totalRuns,
+      wickets: point.wickets,
+    })),
   ];
 }
 
@@ -308,8 +342,14 @@ export interface Partnership {
  */
 export function partnerships(balls: InsightBall[]): Partnership[] {
   const result: Partnership[] = [];
-  let current: { order: string[]; runs: Map<string, number>; total: number; balls: number } | null = null;
-  const start = () => ({ order: [] as string[], runs: new Map<string, number>(), total: 0, balls: 0 });
+  let current: { order: string[]; runs: Map<string, number>; total: number; balls: number } | null =
+    null;
+  const start = () => ({
+    order: [] as string[],
+    runs: new Map<string, number>(),
+    total: 0,
+    balls: 0,
+  });
   const close = (unbroken: boolean) => {
     if (!current || (current.balls === 0 && current.total === 0 && unbroken)) return;
     const [a, b] = current.order;

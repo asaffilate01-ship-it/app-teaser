@@ -1,29 +1,79 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createMatch, currentInnings, endCurrentInnings, recordDelivery, startNextInnings, type CricketMatch, type RecordDeliveryInput } from "../src/lib/cricket.ts";
+import {
+  createMatch,
+  currentInnings,
+  endCurrentInnings,
+  recordDelivery,
+  startNextInnings,
+  type CricketMatch,
+  type RecordDeliveryInput,
+} from "../src/lib/cricket.ts";
 import { awardBoard, matchAwards, tournamentAwards } from "../src/lib/awards.ts";
 
 const base = createMatch({
-  homeTeamName: "Lions", awayTeamName: "Tigers",
-  homePlayers: ["Ali", "Ben", "Cal", "Dev", "Eli"], awayPlayers: ["Fin", "Gus", "Hal", "Ian", "Jay"],
+  homeTeamName: "Lions",
+  awayTeamName: "Tigers",
+  homePlayers: ["Ali", "Ben", "Cal", "Dev", "Eli"],
+  awayPlayers: ["Fin", "Gus", "Hal", "Ian", "Jay"],
   battingFirst: "home",
-  settings: { format: "T20", oversPerInnings: 20, inningsPerSide: 1, ballsPerOver: 6, ground: "", weather: "", startTime: "2027-05-01T10:00:00Z" },
+  settings: {
+    format: "T20",
+    oversPerInnings: 20,
+    inningsPerSide: 1,
+    ballsPerOver: 6,
+    ground: "",
+    weather: "",
+    startTime: "2027-05-01T10:00:00Z",
+  },
 });
-const [lions, tigers] = base.teams as [typeof base.teams[0], typeof base.teams[0]];
+const [lions, tigers] = base.teams as [(typeof base.teams)[0], (typeof base.teams)[0]];
 const id = (team: typeof lions, i: number) => team.players[i]!.id;
 const ball = (m: CricketMatch, extra: Partial<RecordDeliveryInput> = {}): RecordDeliveryInput => {
   const i = currentInnings(m);
-  return { strikerId: i.strikerId, nonStrikerId: i.nonStrikerId, bowlerId: i.bowlerId, end: "Pavilion", deliveryStyle: "Medium", outcome: "hit", batterRuns: 0, ...extra };
+  return {
+    strikerId: i.strikerId,
+    nonStrikerId: i.nonStrikerId,
+    bowlerId: i.bowlerId,
+    end: "Pavilion",
+    deliveryStyle: "Medium",
+    outcome: "hit",
+    batterRuns: 0,
+    ...extra,
+  };
 };
 
 /** Ali hits `sixes` sixes; then Tigers lose 2 wickets to Ben (one caught by Cal) and score `tigersRuns`. */
 function play(matchId: string, sixes: number, tigersRuns: number): CricketMatch {
   let match: CricketMatch = { ...structuredClone(base), id: matchId };
-  for (let i = 0; i < sixes; i++) match = recordDelivery(match, ball(match, { strikerId: id(lions, 0), nonStrikerId: id(lions, 1), batterRuns: 6 }));
+  for (let i = 0; i < sixes; i++)
+    match = recordDelivery(
+      match,
+      ball(match, { strikerId: id(lions, 0), nonStrikerId: id(lions, 1), batterRuns: 6 }),
+    );
   match = startNextInnings(endCurrentInnings(match));
-  match = recordDelivery(match, ball(match, { bowlerId: id(lions, 1), outcome: "wicket", dismissal: { type: "caught", batterId: currentInnings(match).strikerId, fielderId: id(lions, 2) } }));
-  match = recordDelivery(match, ball(match, { bowlerId: id(lions, 1), outcome: "wicket", dismissal: { type: "bowled", batterId: currentInnings(match).strikerId } }));
-  for (let left = tigersRuns; left > 0 && match.status === "live"; left -= 4) match = recordDelivery(match, ball(match, { bowlerId: id(lions, 3), batterRuns: 4 }));
+  match = recordDelivery(
+    match,
+    ball(match, {
+      bowlerId: id(lions, 1),
+      outcome: "wicket",
+      dismissal: {
+        type: "caught",
+        batterId: currentInnings(match).strikerId,
+        fielderId: id(lions, 2),
+      },
+    }),
+  );
+  match = recordDelivery(
+    match,
+    ball(match, {
+      bowlerId: id(lions, 1),
+      outcome: "wicket",
+      dismissal: { type: "bowled", batterId: currentInnings(match).strikerId },
+    }),
+  );
+  for (let left = tigersRuns; left > 0 && match.status === "live"; left -= 4)
+    match = recordDelivery(match, ball(match, { bowlerId: id(lions, 3), batterRuns: 4 }));
   if (match.status === "live") match = endCurrentInnings(match);
   return startNextInnings(match);
 }
@@ -55,13 +105,22 @@ test("tournament awards add up across matches and respect minimum balls", () => 
   // Nobody bowled 60 balls or faced 60 balls, so these awards stay empty.
   assert.equal(by["best-economy"], undefined);
   assert.equal(by["best-strike-rate"], undefined);
-  const relaxed = Object.fromEntries(tournamentAwards(matches, { minStrikeRateBalls: 10 }).map((item) => [item.category, item]));
+  const relaxed = Object.fromEntries(
+    tournamentAwards(matches, { minStrikeRateBalls: 10 }).map((item) => [item.category, item]),
+  );
   assert.equal(relaxed["best-strike-rate"]?.name, "Ali");
 });
 
 test("an organiser's choice replaces the automatic winner and prizes show", () => {
   const auto = tournamentAwards([play("m1", 10, 8)]);
-  const board = awardBoard(auto, [{ category: "top-run-scorer", prize: "Bat from Sialkot Sports", winnerPlayerId: id(tigers, 0), winnerName: "Fin" }]);
+  const board = awardBoard(auto, [
+    {
+      category: "top-run-scorer",
+      prize: "Bat from Sialkot Sports",
+      winnerPlayerId: id(tigers, 0),
+      winnerName: "Fin",
+    },
+  ]);
   const row = board.find((item) => item.category === "top-run-scorer")!;
   assert.equal(row.winner?.name, "Fin");
   assert.equal(row.winner?.chosen, true);

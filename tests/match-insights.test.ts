@@ -77,13 +77,18 @@ test("bowlers are not credited with run outs and are not charged byes", () => {
     ball(0, { bowlerId: "y", dismissalType: "run-out" }),
     ball(0, { bowlerId: "y", legal: false, noBall: 1, batterRuns: 2 }),
   ]);
-  assert.deepEqual([first?.playerId, first?.wickets, first?.runs, first?.overs], ["x", 1, 0, "0.2"]);
+  assert.deepEqual(
+    [first?.playerId, first?.wickets, first?.runs, first?.overs],
+    ["x", 1, 0, "0.2"],
+  );
   assert.deepEqual([second?.playerId, second?.wickets, second?.runs], ["y", 0, 3]);
 });
 
 test("required rate falls as the chase scores faster than needed", () => {
   // Chasing 61 in 10 overs: 6.1 an over at the start.
-  const balls = Array.from({ length: 12 }, (_, index) => ball(Math.floor(index / 6), { batterRuns: 2 }));
+  const balls = Array.from({ length: 12 }, (_, index) =>
+    ball(Math.floor(index / 6), { batterRuns: 2 }),
+  );
   const rates = requiredRateByOver(overProgression(balls), 61, 10);
   // After 2 overs: 37 needed from 48 balls = 4.63 an over.
   assert.deepEqual(rates, [
@@ -123,13 +128,23 @@ test("Manhattan lines up each innings' runs per over side by side", () => {
   const second = [ball(0, { batterRuns: 2 })];
   const overs = manhattan([first, second]);
   assert.equal(overs.length, 2);
-  assert.deepEqual(overs[0]?.innings, [{ runs: 4, wickets: 0 }, { runs: 2, wickets: 0 }]);
+  assert.deepEqual(overs[0]?.innings, [
+    { runs: 4, wickets: 0 },
+    { runs: 2, wickets: 0 },
+  ]);
   assert.deepEqual(overs[1]?.innings, [{ runs: 1, wickets: 1 }, null]);
 });
 
 test("worm starts at zero and accumulates runs at the end of each over", () => {
-  const points = worm([ball(0, { batterRuns: 4 }), ball(0, { wide: 1, legal: false }), ball(1, { batterRuns: 6 })]);
-  assert.deepEqual(points.map((point) => point.total), [0, 5, 11]);
+  const points = worm([
+    ball(0, { batterRuns: 4 }),
+    ball(0, { wide: 1, legal: false }),
+    ball(1, { batterRuns: 6 }),
+  ]);
+  assert.deepEqual(
+    points.map((point) => point.total),
+    [0, 5, 11],
+  );
 });
 
 test("partnerships split at each wicket, include extras and credit each batter's bat runs", () => {
@@ -141,6 +156,20 @@ test("partnerships split at each wicket, include extras and credit each batter's
     ball(0, { strikerId: "c", nonStrikerId: "b", batterRuns: 2 }),
   ]);
   assert.equal(stands.length, 2);
-  assert.deepEqual(stands[0], { wicket: 1, batters: ["a", "b"], contributions: [4, 1], runs: 6, balls: 3, unbroken: false });
-  assert.deepEqual(stands[1], { wicket: 2, batters: ["c", "b"], contributions: [2, 0], runs: 2, balls: 1, unbroken: true });
+  assert.deepEqual(stands[0], {
+    wicket: 1,
+    batters: ["a", "b"],
+    contributions: [4, 1],
+    runs: 6,
+    balls: 3,
+    unbroken: false,
+  });
+  assert.deepEqual(stands[1], {
+    wicket: 2,
+    batters: ["c", "b"],
+    contributions: [2, 0],
+    runs: 2,
+    balls: 1,
+    unbroken: true,
+  });
 });

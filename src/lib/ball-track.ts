@@ -9,7 +9,12 @@ export type LengthBand = "Yorker" | "Full" | "Good" | "Short";
 export type LineBand = "Wide outside off" | "Outside off" | "Stumps" | "Leg side";
 
 export const lengthBands: readonly LengthBand[] = ["Yorker", "Full", "Good", "Short"];
-export const lineBands: readonly LineBand[] = ["Wide outside off", "Outside off", "Stumps", "Leg side"];
+export const lineBands: readonly LineBand[] = [
+  "Wide outside off",
+  "Outside off",
+  "Stumps",
+  "Leg side",
+];
 
 /** Half a pitch is about 10 m: yorker under 2 m from the stumps, full 2–6 m, good 6–8 m, short beyond. */
 export function lengthBand(point: BallPoint): LengthBand {
@@ -44,14 +49,20 @@ export interface BandRow {
 const blank = (band: string): BandRow => ({ band, balls: 0, runs: 0, wickets: 0, dots: 0 });
 
 /** Runs, wickets and dots by length (and by line) for balls with a pitch point. */
-export function pitchBreakdown(deliveries: readonly Delivery[], leftHanded: (batterId: string) => boolean = () => false) {
+export function pitchBreakdown(
+  deliveries: readonly Delivery[],
+  leftHanded: (batterId: string) => boolean = () => false,
+) {
   const byLength = new Map(lengthBands.map((band) => [band, blank(band)]));
   const byLine = new Map(lineBands.map((band) => [band, blank(band)]));
   let tracked = 0;
   for (const delivery of deliveries) {
     if (!delivery.pitch) continue;
     tracked += 1;
-    const rows = [byLength.get(lengthBand(delivery.pitch))!, byLine.get(lineBand(delivery.pitch, leftHanded(delivery.strikerId)))!];
+    const rows = [
+      byLength.get(lengthBand(delivery.pitch))!,
+      byLine.get(lineBand(delivery.pitch, leftHanded(delivery.strikerId)))!,
+    ];
     for (const row of rows) {
       row.balls += 1;
       row.runs += delivery.batterRuns;
@@ -64,4 +75,10 @@ export function pitchBreakdown(deliveries: readonly Delivery[], leftHanded: (bat
 
 export type BallTone = "wicket" | "boundary" | "runs" | "dot";
 export const ballTone = (delivery: Delivery): BallTone =>
-  delivery.dismissal ? "wicket" : delivery.batterRuns >= 4 ? "boundary" : delivery.batterRuns > 0 ? "runs" : "dot";
+  delivery.dismissal
+    ? "wicket"
+    : delivery.batterRuns >= 4
+      ? "boundary"
+      : delivery.batterRuns > 0
+        ? "runs"
+        : "dot";

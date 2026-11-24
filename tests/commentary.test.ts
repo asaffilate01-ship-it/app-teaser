@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createMatch, currentInnings, recordDelivery, type CricketMatch } from "../src/lib/cricket.ts";
+import {
+  createMatch,
+  currentInnings,
+  recordDelivery,
+  type CricketMatch,
+} from "../src/lib/cricket.ts";
 import { commentaryFeed } from "../src/lib/commentary.ts";
 import { publicLiveState } from "../src/lib/public-match-state.ts";
 import { fallOfWickets } from "../src/lib/scorecard.ts";
@@ -12,7 +17,15 @@ function match(): CricketMatch {
     homePlayers: ["Amira Junior", "Ben Junior", "Cal Junior"],
     awayPlayers: ["Dev Bowler", "Eli Fielder", "Fin Keeper"],
     battingFirst: "home",
-    settings: { format: "T20", oversPerInnings: 20, inningsPerSide: 1, ballsPerOver: 6, ground: "", weather: "", startTime: "2026-11-23T10:00:00Z" },
+    settings: {
+      format: "T20",
+      oversPerInnings: 20,
+      inningsPerSide: 1,
+      ballsPerOver: 6,
+      ground: "",
+      weather: "",
+      startTime: "2026-11-23T10:00:00Z",
+    },
   });
 }
 
@@ -36,7 +49,10 @@ test("boundaries, wickets and an end-of-over line are described", () => {
   let m = match();
   m = bowl(m, { batterRuns: 4, fieldZone: "Deep extra cover" });
   m = bowl(m, { batterRuns: 6 });
-  m = bowl(m, { dismissal: { type: "bowled", batterId: currentInnings(m).strikerId }, outcome: "wicket" });
+  m = bowl(m, {
+    dismissal: { type: "bowled", batterId: currentInnings(m).strikerId },
+    outcome: "wicket",
+  });
   for (let i = 0; i < 3; i += 1) m = bowl(m);
   const lines = commentaryFeed(currentInnings(m), 6);
   assert.equal(lines[0]?.tone, "over");
@@ -53,13 +69,17 @@ test("public commentary is off unless the scorer shares it, and never names play
   const shared = { ...m, audience: { commentary: true } };
   const json = JSON.stringify(publicLiveState(shared)["commentary"]);
   assert.ok(json.includes("single"));
-  for (const player of m.teams.flatMap((team) => team.players)) assert.equal(json.includes(player.name), false);
+  for (const player of m.teams.flatMap((team) => team.players))
+    assert.equal(json.includes(player.name), false);
 });
 
 test("fall of wickets records score and over at each dismissal", () => {
   let m = match();
   m = bowl(m, { batterRuns: 2 });
-  m = bowl(m, { dismissal: { type: "lbw", batterId: currentInnings(m).strikerId }, outcome: "wicket" });
+  m = bowl(m, {
+    dismissal: { type: "lbw", batterId: currentInnings(m).strikerId },
+    outcome: "wicket",
+  });
   const fow = fallOfWickets(m, currentInnings(m));
   assert.equal(fow.length, 1);
   assert.equal(fow[0]?.score, 2);

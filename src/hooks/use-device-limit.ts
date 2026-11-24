@@ -22,7 +22,12 @@ export function useDeviceLimit(session: Session | null) {
     setSignedOutHere(false);
     let stopped = false;
     const run = async () => {
-      if (busy.current || stopped || (typeof navigator !== "undefined" && navigator.onLine === false)) return;
+      if (
+        busy.current ||
+        stopped ||
+        (typeof navigator !== "undefined" && navigator.onLine === false)
+      )
+        return;
       busy.current = true;
       try {
         if (!hasClaimed(userId)) {
@@ -63,5 +68,10 @@ export function useDeviceLimit(session: Session | null) {
     };
   }, [userId]);
 
-  return { signedOutHere, pushedOut, dismissPushedOut: () => setPushedOut(0), dismissSignedOut: () => setSignedOutHere(false) };
+  return {
+    signedOutHere,
+    pushedOut,
+    dismissPushedOut: () => setPushedOut(0),
+    dismissSignedOut: () => setSignedOutHere(false),
+  };
 }

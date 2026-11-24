@@ -10,12 +10,17 @@ export function retryDelayMs(attempt: number): number {
 
 /** Plain-language line for the scorer's sync chip. */
 export function syncChipLabel(input: { status: string; pending: number; online: boolean }): string {
-  const waiting = input.pending > 0 ? `${input.pending} ${input.pending === 1 ? "change" : "changes"} to send` : "";
+  const waiting =
+    input.pending > 0
+      ? `${input.pending} ${input.pending === 1 ? "change" : "changes"} to send`
+      : "";
   if (input.status === "conflict") return "Needs review";
-  if (!input.online || input.status === "offline") return waiting ? `Offline · saved on phone · ${waiting}` : "Offline · saved on phone";
+  if (!input.online || input.status === "offline")
+    return waiting ? `Offline · saved on phone · ${waiting}` : "Offline · saved on phone";
   if (input.status === "error") return waiting ? `Retrying · ${waiting}` : "Can't reach cloud";
   if (input.status === "connecting") return waiting ? `Sending · ${waiting}` : "Connecting";
-  if (input.pending > 0 || input.status === "queued") return waiting ? `Sending · ${waiting}` : "Sending";
+  if (input.pending > 0 || input.status === "queued")
+    return waiting ? `Sending · ${waiting}` : "Sending";
   if (input.status === "synced") return "All sent";
   return "Saved on phone";
 }

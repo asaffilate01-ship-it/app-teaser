@@ -46,15 +46,27 @@ export const TOURNAMENT_AWARD_LABELS: Record<TournamentAwardCategory, string> = 
   "most-potm": "Most Player of the Match awards",
 };
 
-const teamOf = (match: CricketMatch, playerId: string) => match.teams.find((team) => team.players.some((player) => player.id === playerId));
+const teamOf = (match: CricketMatch, playerId: string) =>
+  match.teams.find((team) => team.players.some((player) => player.id === playerId));
 
 /** The four match awards. Empty until there is something to award; Player of the Match waits for a result. */
 export function matchAwards(match: CricketMatch): AwardWinner<MatchAwardCategory>[] {
   const out: AwardWinner<MatchAwardCategory>[] = [];
   const potm = playerOfTheMatch(match);
   if (potm) {
-    const bits = [potm.runs ? `${potm.runs} runs` : "", potm.wickets ? `${potm.wickets} wkts` : "", potm.dismissalsFielded ? `${potm.dismissalsFielded} fielding` : ""].filter(Boolean);
-    out.push({ category: "player-of-match", label: MATCH_AWARD_LABELS["player-of-match"], playerId: potm.playerId, name: potm.name, team: teamOf(match, potm.playerId)?.name ?? "", value: bits.join(", ") });
+    const bits = [
+      potm.runs ? `${potm.runs} runs` : "",
+      potm.wickets ? `${potm.wickets} wkts` : "",
+      potm.dismissalsFielded ? `${potm.dismissalsFielded} fielding` : "",
+    ].filter(Boolean);
+    out.push({
+      category: "player-of-match",
+      label: MATCH_AWARD_LABELS["player-of-match"],
+      playerId: potm.playerId,
+      name: potm.name,
+      team: teamOf(match, potm.playerId)?.name ?? "",
+      value: bits.join(", "),
+    });
   }
   const innings = match.innings.filter((item) => !isSuperOver(item));
   const bat = new Map<string, { runs: number; balls: number }>();
@@ -71,16 +83,37 @@ export function matchAwards(match: CricketMatch): AwardWinner<MatchAwardCategory
       bowl.set(row.playerId, { wickets: entry.wickets + row.wickets, runs: entry.runs + row.runs });
     }
   }
-  const nameOf = (id: string) => teamOf(match, id)?.players.find((player) => player.id === id)?.name ?? "Player";
+  const nameOf = (id: string) =>
+    teamOf(match, id)?.players.find((player) => player.id === id)?.name ?? "Player";
   const push = (category: MatchAwardCategory, playerId: string, value: string) =>
-    out.push({ category, label: MATCH_AWARD_LABELS[category], playerId, name: nameOf(playerId), team: teamOf(match, playerId)?.name ?? "", value });
+    out.push({
+      category,
+      label: MATCH_AWARD_LABELS[category],
+      playerId,
+      name: nameOf(playerId),
+      team: teamOf(match, playerId)?.name ?? "",
+      value,
+    });
 
-  const batter = [...bat.entries()].sort((a, b) => b[1].runs - a[1].runs || a[1].balls - b[1].balls)[0];
-  if (batter && batter[1].runs > 0) push("best-batter", batter[0], `${batter[1].runs} (${batter[1].balls})`);
-  const bowler = [...bowl.entries()].sort((a, b) => b[1].wickets - a[1].wickets || a[1].runs - b[1].runs)[0];
-  if (bowler && bowler[1].wickets > 0) push("best-bowler", bowler[0], `${bowler[1].wickets}/${bowler[1].runs}`);
-  const fielder = matchImpacts(match).filter((item) => item.dismissalsFielded > 0).sort((a, b) => b.dismissalsFielded - a.dismissalsFielded)[0];
-  if (fielder) push("best-fielder", fielder.playerId, `${fielder.dismissalsFielded} dismissal${fielder.dismissalsFielded === 1 ? "" : "s"}`);
+  const batter = [...bat.entries()].sort(
+    (a, b) => b[1].runs - a[1].runs || a[1].balls - b[1].balls,
+  )[0];
+  if (batter && batter[1].runs > 0)
+    push("best-batter", batter[0], `${batter[1].runs} (${batter[1].balls})`);
+  const bowler = [...bowl.entries()].sort(
+    (a, b) => b[1].wickets - a[1].wickets || a[1].runs - b[1].runs,
+  )[0];
+  if (bowler && bowler[1].wickets > 0)
+    push("best-bowler", bowler[0], `${bowler[1].wickets}/${bowler[1].runs}`);
+  const fielder = matchImpacts(match)
+    .filter((item) => item.dismissalsFielded > 0)
+    .sort((a, b) => b.dismissalsFielded - a.dismissalsFielded)[0];
+  if (fielder)
+    push(
+      "best-fielder",
+      fielder.playerId,
+      `${fielder.dismissalsFielded} dismissal${fielder.dismissalsFielded === 1 ? "" : "s"}`,
+    );
   return out;
 }
 
@@ -92,18 +125,42 @@ export interface TournamentAwardOptions {
 }
 
 /** Season / tournament awards across finished and live match snapshots. */
-export function tournamentAwards(matches: readonly CricketMatch[], options: TournamentAwardOptions = {}): AwardWinner<TournamentAwardCategory>[] {
+export function tournamentAwards(
+  matches: readonly CricketMatch[],
+  options: TournamentAwardOptions = {},
+): AwardWinner<TournamentAwardCategory>[] {
   const stats = seasonStats(matches);
   const out: AwardWinner<TournamentAwardCategory>[] = [];
-  const push = (category: TournamentAwardCategory, row: { playerId: string; name: string; team: string } | undefined, value: string) => {
-    if (row) out.push({ category, label: TOURNAMENT_AWARD_LABELS[category], playerId: row.playerId, name: row.name, team: row.team, value });
+  const push = (
+    category: TournamentAwardCategory,
+    row: { playerId: string; name: string; team: string } | undefined,
+    value: string,
+  ) => {
+    if (row)
+      out.push({
+        category,
+        label: TOURNAMENT_AWARD_LABELS[category],
+        playerId: row.playerId,
+        name: row.name,
+        team: row.team,
+        value,
+      });
   };
 
-  const impact = new Map<string, { playerId: string; name: string; team: string; score: number; potm: number }>();
+  const impact = new Map<
+    string,
+    { playerId: string; name: string; team: string; score: number; potm: number }
+  >();
   for (const match of matches) {
     const star = playerOfTheMatch(match);
     for (const item of matchImpacts(match)) {
-      const entry = impact.get(item.playerId) ?? { playerId: item.playerId, name: item.name, team: teamOf(match, item.playerId)?.name ?? "", score: 0, potm: 0 };
+      const entry = impact.get(item.playerId) ?? {
+        playerId: item.playerId,
+        name: item.name,
+        team: teamOf(match, item.playerId)?.name ?? "",
+        score: 0,
+        potm: 0,
+      };
       entry.score += item.score;
       if (star?.playerId === item.playerId) entry.potm += 1;
       impact.set(item.playerId, entry);
@@ -114,24 +171,54 @@ export function tournamentAwards(matches: readonly CricketMatch[], options: Tour
   push("player-of-tournament", mvp, mvp ? `${mvp.score} impact points` : "");
 
   const runs = [...stats.batting].sort((a, b) => b.runs - a.runs || a.balls - b.balls)[0];
-  if (runs && runs.runs > 0) push("top-run-scorer", runs, `${runs.runs} run${runs.runs === 1 ? "" : "s"}${runs.average != null ? ` · avg ${runs.average.toFixed(1)}` : ""}`);
-  const wickets = [...stats.bowling].sort((a, b) => b.wickets - a.wickets || (a.average ?? 999) - (b.average ?? 999))[0];
-  if (wickets && wickets.wickets > 0) push("top-wicket-taker", wickets, `${wickets.wickets} wicket${wickets.wickets === 1 ? "" : "s"}${wickets.economy != null ? ` · econ ${wickets.economy.toFixed(2)}` : ""}`);
-  const fielding = [...stats.fielding].map((row) => ({ ...row, total: row.catches + row.stumpings + row.runOuts })).sort((a, b) => b.total - a.total)[0];
-  if (fielding && fielding.total > 0) push("best-fielder", fielding, `${fielding.catches} ct · ${fielding.stumpings} st · ${fielding.runOuts} ro`);
-  const figures = stats.bowling.filter((row) => row.best && row.best.wickets > 0).sort((a, b) => b.best!.wickets - a.best!.wickets || a.best!.runs - b.best!.runs)[0];
+  if (runs && runs.runs > 0)
+    push(
+      "top-run-scorer",
+      runs,
+      `${runs.runs} run${runs.runs === 1 ? "" : "s"}${runs.average != null ? ` · avg ${runs.average.toFixed(1)}` : ""}`,
+    );
+  const wickets = [...stats.bowling].sort(
+    (a, b) => b.wickets - a.wickets || (a.average ?? 999) - (b.average ?? 999),
+  )[0];
+  if (wickets && wickets.wickets > 0)
+    push(
+      "top-wicket-taker",
+      wickets,
+      `${wickets.wickets} wicket${wickets.wickets === 1 ? "" : "s"}${wickets.economy != null ? ` · econ ${wickets.economy.toFixed(2)}` : ""}`,
+    );
+  const fielding = [...stats.fielding]
+    .map((row) => ({ ...row, total: row.catches + row.stumpings + row.runOuts }))
+    .sort((a, b) => b.total - a.total)[0];
+  if (fielding && fielding.total > 0)
+    push(
+      "best-fielder",
+      fielding,
+      `${fielding.catches} ct · ${fielding.stumpings} st · ${fielding.runOuts} ro`,
+    );
+  const figures = stats.bowling
+    .filter((row) => row.best && row.best.wickets > 0)
+    .sort((a, b) => b.best!.wickets - a.best!.wickets || a.best!.runs - b.best!.runs)[0];
   if (figures) push("best-figures", figures, `${figures.best!.wickets}/${figures.best!.runs}`);
-  const high = [...stats.batting].sort((a, b) => b.highScore - a.highScore || Number(b.highScoreNotOut) - Number(a.highScoreNotOut))[0];
-  if (high && high.highScore > 0) push("highest-score", high, `${high.highScore}${high.highScoreNotOut ? "*" : ""}`);
+  const high = [...stats.batting].sort(
+    (a, b) => b.highScore - a.highScore || Number(b.highScoreNotOut) - Number(a.highScoreNotOut),
+  )[0];
+  if (high && high.highScore > 0)
+    push("highest-score", high, `${high.highScore}${high.highScoreNotOut ? "*" : ""}`);
   const sixes = [...stats.batting].sort((a, b) => b.sixes - a.sixes)[0];
   if (sixes && sixes.sixes > 0) push("most-sixes", sixes, `${sixes.sixes} sixes`);
   const minEcon = options.minEconomyBalls ?? 60;
-  const econ = stats.bowling.filter((row) => row.balls >= minEcon && row.economy != null).sort((a, b) => a.economy! - b.economy!)[0];
+  const econ = stats.bowling
+    .filter((row) => row.balls >= minEcon && row.economy != null)
+    .sort((a, b) => a.economy! - b.economy!)[0];
   if (econ) push("best-economy", econ, `${econ.economy!.toFixed(2)} an over (${econ.overs} ov)`);
   const minSr = options.minStrikeRateBalls ?? 60;
-  const sr = stats.batting.filter((row) => row.balls >= minSr).sort((a, b) => b.strikeRate - a.strikeRate)[0];
+  const sr = stats.batting
+    .filter((row) => row.balls >= minSr)
+    .sort((a, b) => b.strikeRate - a.strikeRate)[0];
   if (sr) push("best-strike-rate", sr, `${sr.strikeRate.toFixed(1)} (${sr.runs} off ${sr.balls})`);
-  const potm = impacts.filter((item) => item.potm > 0).sort((a, b) => b.potm - a.potm || b.score - a.score)[0];
+  const potm = impacts
+    .filter((item) => item.potm > 0)
+    .sort((a, b) => b.potm - a.potm || b.score - a.score)[0];
   if (potm) push("most-potm", potm, `${potm.potm} award${potm.potm === 1 ? "" : "s"}`);
   return out;
 }
@@ -153,18 +240,38 @@ export interface AwardRow {
 }
 
 /** Every tournament award category with its automatic winner, any organiser override and the prize. */
-export function awardBoard(automatic: AwardWinner<TournamentAwardCategory>[], settings: readonly AwardSetting[]): AwardRow[] {
+export function awardBoard(
+  automatic: AwardWinner<TournamentAwardCategory>[],
+  settings: readonly AwardSetting[],
+): AwardRow[] {
   return (Object.keys(TOURNAMENT_AWARD_LABELS) as TournamentAwardCategory[]).map((category) => {
     const auto = automatic.find((item) => item.category === category) ?? null;
     const setting = settings.find((item) => item.category === category);
-    const chosen = setting?.winnerPlayerId && setting.winnerName
-      ? { playerId: setting.winnerPlayerId, name: setting.winnerName, team: "", value: "Chosen by organiser", chosen: true }
-      : null;
+    const chosen =
+      setting?.winnerPlayerId && setting.winnerName
+        ? {
+            playerId: setting.winnerPlayerId,
+            name: setting.winnerName,
+            team: "",
+            value: "Chosen by organiser",
+            chosen: true,
+          }
+        : null;
     return {
       category,
       label: TOURNAMENT_AWARD_LABELS[category],
       automatic: auto,
-      winner: chosen ?? (auto ? { playerId: auto.playerId, name: auto.name, team: auto.team, value: auto.value, chosen: false } : null),
+      winner:
+        chosen ??
+        (auto
+          ? {
+              playerId: auto.playerId,
+              name: auto.name,
+              team: auto.team,
+              value: auto.value,
+              chosen: false,
+            }
+          : null),
       prize: setting?.prize?.trim() || null,
     };
   });
@@ -195,7 +302,17 @@ export function mvpTable(matches: readonly CricketMatch[]): MvpRow[] {
       let entry = rows.get(playerId);
       if (!entry) {
         const team = teamOf(match, playerId);
-        entry = { playerId, name: team?.players.find((player) => player.id === playerId)?.name ?? "Player", team: team?.name ?? "", matches: 0, batting: 0, bowling: 0, fielding: 0, total: 0, potm: 0 };
+        entry = {
+          playerId,
+          name: team?.players.find((player) => player.id === playerId)?.name ?? "Player",
+          team: team?.name ?? "",
+          matches: 0,
+          batting: 0,
+          bowling: 0,
+          fielding: 0,
+          total: 0,
+          potm: 0,
+        };
         rows.set(playerId, entry);
       }
       if (!seen.has(playerId)) {
@@ -214,7 +331,8 @@ export function mvpTable(matches: readonly CricketMatch[]): MvpRow[] {
       }
       for (const ball of inn.deliveries) {
         const fielder = ball.dismissal?.fielderId;
-        if (fielder && ["caught", "stumped", "run-out"].includes(ball.dismissal!.type)) row(fielder).fielding += 10;
+        if (fielder && ["caught", "stumped", "run-out"].includes(ball.dismissal!.type))
+          row(fielder).fielding += 10;
       }
     }
     if (star) row(star.playerId).potm += 1;

@@ -21,7 +21,11 @@ export function useAppPromos(cloudMatchId?: string | null) {
     void (async () => {
       try {
         if (cloudMatchId) {
-          const { data } = await getCloudClient().from("matches").select("owner_organisation_id").eq("id", cloudMatchId).maybeSingle();
+          const { data } = await getCloudClient()
+            .from("matches")
+            .select("owner_organisation_id")
+            .eq("id", cloudMatchId)
+            .maybeSingle();
           const owner = (data as { owner_organisation_id?: string } | null)?.owner_organisation_id;
           if (owner) {
             if (active) setOrganisationId(owner);

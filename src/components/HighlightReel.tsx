@@ -2,7 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Film, Pause, Play, SkipBack, SkipForward } from "lucide-react";
 import type { CameraClip } from "@/lib/camera-review";
 import { loadClipOffsets, loadReelPlayerNames, signedRoomClipUrl } from "@/lib/camera-review-cloud";
-import { buildHighlightReel, reelLength, type ReelDelivery, type ReelKind } from "@/lib/highlight-reel";
+import {
+  buildHighlightReel,
+  reelLength,
+  type ReelDelivery,
+  type ReelKind,
+} from "@/lib/highlight-reel";
 
 interface DeviceLabel {
   id: string;
@@ -42,7 +47,10 @@ export function HighlightReel({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    void loadClipOffsets(roomId, clips.map((clip) => clip.id)).then(setOffsets);
+    void loadClipOffsets(
+      roomId,
+      clips.map((clip) => clip.id),
+    ).then(setOffsets);
   }, [roomId, clips]);
 
   const playerIds = useMemo(() => {
@@ -148,7 +156,8 @@ export function HighlightReel({
     }
   };
 
-  const deviceName = (id: string) => devices.find((item) => item.id === id)?.label ?? "Camera " + id.slice(0, 6);
+  const deviceName = (id: string) =>
+    devices.find((item) => item.id === id)?.label ?? "Camera " + id.slice(0, 6);
   const seconds = reelLength(reel);
 
   return (
@@ -159,8 +168,8 @@ export function HighlightReel({
             <Film className="size-5" aria-hidden="true" /> Highlight reels
           </h3>
           <p>
-            Built automatically from the scorer’s balls and your recordings — 5 seconds before and after each
-            moment.
+            Built automatically from the scorer’s balls and your recordings — 5 seconds before and
+            after each moment.
           </p>
         </div>
         <span className="hero-chip">
@@ -215,7 +224,14 @@ export function HighlightReel({
       <div className="reel-body">
         <div className="reel-stage">
           {source ? (
-            <video ref={video} src={source} playsInline muted={false} controls={false} preload="metadata" />
+            <video
+              ref={video}
+              src={source}
+              playsInline
+              muted={false}
+              controls={false}
+              preload="metadata"
+            />
           ) : (
             <div className="reel-empty">
               <Film className="size-9" aria-hidden="true" />
@@ -235,11 +251,22 @@ export function HighlightReel({
             </div>
           )}
           <div className="reel-transport">
-            <button type="button" aria-label="Previous clip" disabled={index <= 0} onClick={() => void goTo(index - 1)}>
+            <button
+              type="button"
+              aria-label="Previous clip"
+              disabled={index <= 0}
+              onClick={() => void goTo(index - 1)}
+            >
               <SkipBack className="size-4" />
             </button>
-            <button type="button" className="action-primary" disabled={reel.length === 0} onClick={toggle}>
-              {playing ? <Pause className="size-4" /> : <Play className="size-4" />} {playing ? "Pause" : index < 0 ? "Play reel" : "Resume"}
+            <button
+              type="button"
+              className="action-primary"
+              disabled={reel.length === 0}
+              onClick={toggle}
+            >
+              {playing ? <Pause className="size-4" /> : <Play className="size-4" />}{" "}
+              {playing ? "Pause" : index < 0 ? "Play reel" : "Resume"}
             </button>
             <button
               type="button"
@@ -273,8 +300,8 @@ export function HighlightReel({
         </p>
       )}
       <p className="reel-note">
-        Cuts use each camera’s clock plus any timing correction saved below, so check a clip if it starts early or
-        late. Reels stay private to your club staff.
+        Cuts use each camera’s clock plus any timing correction saved below, so check a clip if it
+        starts early or late. Reels stay private to your club staff.
       </p>
     </section>
   );

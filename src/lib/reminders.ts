@@ -68,14 +68,20 @@ export function formatOwed(minor: unknown, currency: unknown): string {
   const code = typeof currency === "string" && /^[A-Z]{3}$/.test(currency) ? currency : "GBP";
   if (!Number.isFinite(amount)) return "";
   try {
-    return new Intl.NumberFormat("en-GB", { style: "currency", currency: code }).format(amount / 100);
+    return new Intl.NumberFormat("en-GB", { style: "currency", currency: code }).format(
+      amount / 100,
+    );
   } catch {
     return `${code} ${(amount / 100).toFixed(2)}`;
   }
 }
 
 /** The title and text for one reminder. `now` decides whether a fee is overdue. */
-export function reminderMessage(template: string, payload: Payload, options: { timeZone?: string; now?: Date } = {}): ReminderMessage {
+export function reminderMessage(
+  template: string,
+  payload: Payload,
+  options: { timeZone?: string; now?: Date } = {},
+): ReminderMessage {
   const timeZone = options.timeZone || "Europe/London";
   const now = options.now ?? new Date();
   const club = text(payload["club_name"]) || "Your club";
@@ -83,7 +89,10 @@ export function reminderMessage(template: string, payload: Payload, options: { t
     const event = text(payload["event_title"]) || "the next event";
     const starts = dateLabel(payload["starts_at"], timeZone);
     const replyBy = dateLabel(payload["reply_by"], timeZone);
-    const who = payload["self"] === true || !text(payload["player_name"]) ? "" : ` for ${text(payload["player_name"])}`;
+    const who =
+      payload["self"] === true || !text(payload["player_name"])
+        ? ""
+        : ` for ${text(payload["player_name"])}`;
     return {
       title: `Are you available? ${event}`,
       body: `${club}: please reply${who} for ${event}${starts ? ` on ${starts}` : ""}.${replyBy ? ` Replies close ${replyBy}.` : ""}`,
@@ -95,7 +104,10 @@ export function reminderMessage(template: string, payload: Payload, options: { t
     const dueOn = text(payload["due_on"]);
     const overdue = dueOn !== "" && dueOn < now.toISOString().slice(0, 10);
     const due = dueOn ? dateLabel(dueOn, timeZone, false) : "";
-    const who = payload["self"] === true || !text(payload["player_name"]) ? "" : ` for ${text(payload["player_name"])}`;
+    const who =
+      payload["self"] === true || !text(payload["player_name"])
+        ? ""
+        : ` for ${text(payload["player_name"])}`;
     return {
       title: overdue ? `Fee overdue — ${club}` : `Fee reminder — ${club}`,
       body: `${what}${who}: ${owed} still to pay${due ? (overdue ? `, was due ${due}` : `, due ${due}`) : ""}. Pay by transfer and add your reference in CricLume.`,

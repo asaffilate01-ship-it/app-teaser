@@ -77,7 +77,8 @@ export function readVisitorPlace(
   header: (name: string) => string | null | undefined,
   cf?: Record<string, unknown> | null,
 ): VisitorPlace {
-  const text = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
+  const text = (value: unknown) =>
+    typeof value === "string" && value.trim() ? value.trim() : null;
   const country = (text(cf?.["country"]) ?? text(header("cf-ipcountry")) ?? "").toUpperCase();
   return {
     country: blankCountries.has(country) || !/^[A-Z]{2}$/.test(country) ? null : country,
@@ -90,11 +91,16 @@ export function readVisitorPlace(
 /** An ad with no places runs everywhere; each list that is filled in must match the visitor. */
 export function matchesTarget(target: PromoTarget, place: VisitorPlace): boolean {
   if (target.countries.length > 0) {
-    if (!place.country || !target.countries.some((code) => code.toUpperCase() === place.country)) return false;
+    if (!place.country || !target.countries.some((code) => code.toUpperCase() === place.country))
+      return false;
   }
   if (target.regions.length > 0) {
     const mine = [normalisePlace(place.region), normalisePlace(place.regionCode)].filter(Boolean);
-    if (mine.length === 0 || !target.regions.some((region) => mine.includes(normalisePlace(region)))) return false;
+    if (
+      mine.length === 0 ||
+      !target.regions.some((region) => mine.includes(normalisePlace(region)))
+    )
+      return false;
   }
   if (target.cities.length > 0) {
     const city = normalisePlace(place.city);
@@ -144,9 +150,15 @@ export function choosePromos<T extends PromoTarget & { weight: number; slot: Pro
   const fitting = candidates
     .filter((item) => matchesTarget(item, place))
     .map((item, index) => ({ item, index }))
-    .sort((a, b) => targetSpecificity(b.item) - targetSpecificity(a.item) || b.item.weight - a.item.weight || a.index - b.index)
+    .sort(
+      (a, b) =>
+        targetSpecificity(b.item) - targetSpecificity(a.item) ||
+        b.item.weight - a.item.weight ||
+        a.index - b.index,
+    )
     .map(({ item }) => item);
-  const pick = (slot: PromoSlot) => buildRotation(fitting.filter((item) => item.slot === slot).slice(0, limitPerSlot));
+  const pick = (slot: PromoSlot) =>
+    buildRotation(fitting.filter((item) => item.slot === slot).slice(0, limitPerSlot));
   return { top: pick("top"), side: pick("side") };
 }
 

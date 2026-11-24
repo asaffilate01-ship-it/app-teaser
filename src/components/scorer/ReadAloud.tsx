@@ -12,7 +12,8 @@ export function ReadAloud({ lines }: { lines: CommentaryLine[] }) {
   useEffect(() => {
     setSupported(typeof window !== "undefined" && "speechSynthesis" in window);
     return () => {
-      if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
+      if (typeof window !== "undefined" && "speechSynthesis" in window)
+        window.speechSynthesis.cancel();
     };
   }, []);
 
@@ -38,7 +39,11 @@ export function ReadAloud({ lines }: { lines: CommentaryLine[] }) {
   };
   return (
     <button type="button" className="read-aloud" aria-pressed={on} onClick={toggle}>
-      {on ? <Volume2 className="size-4" aria-hidden="true" /> : <VolumeX className="size-4" aria-hidden="true" />}
+      {on ? (
+        <Volume2 className="size-4" aria-hidden="true" />
+      ) : (
+        <VolumeX className="size-4" aria-hidden="true" />
+      )}
       {on ? "Reading out" : "Read out balls"}
     </button>
   );

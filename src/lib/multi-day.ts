@@ -1,5 +1,11 @@
 /** Multi-day cricket: close of play ("stumps"), the next day's start, and a draw when time runs out. */
-import { currentInnings, summarizeInnings, teamTotals, type CloseOfPlay, type CricketMatch } from "./cricket.ts";
+import {
+  currentInnings,
+  summarizeInnings,
+  teamTotals,
+  type CloseOfPlay,
+  type CricketMatch,
+} from "./cricket.ts";
 
 export const isMultiDay = (match: CricketMatch) => match.settings.inningsPerSide === 2;
 
@@ -51,7 +57,11 @@ export function callStumps(match: CricketMatch, now = new Date()): CricketMatch 
 /** Starts the next day's play after stumps. */
 export function startNextDay(match: CricketMatch, now = new Date()): CricketMatch {
   if (!match.days?.atStumps || match.status === "completed") return match;
-  return { ...match, updatedAt: now.toISOString(), days: { ...match.days, current: match.days.current + 1, atStumps: false } };
+  return {
+    ...match,
+    updatedAt: now.toISOString(),
+    days: { ...match.days, current: match.days.current + 1, atStumps: false },
+  };
 }
 
 /** True once stumps have been drawn on the last scheduled day. */
@@ -65,8 +75,22 @@ export function outOfTime(match: CricketMatch): boolean {
 export function endMatchOutOfTime(match: CricketMatch, now = new Date()): CricketMatch {
   if (!isMultiDay(match) || match.status === "completed") return match;
   const stumped = match.days?.atStumps ? match : callStumps(match, now);
-  const innings = stumped.innings.map((item, index) => (index === stumped.innings.length - 1 ? { ...item, status: "completed" as const, ...(item.status === "live" ? { unfinished: true } : {}) } : item));
-  return { ...stumped, innings, days: { ...stumped.days!, timeUp: true }, status: "completed", updatedAt: now.toISOString() };
+  const innings = stumped.innings.map((item, index) =>
+    index === stumped.innings.length - 1
+      ? {
+          ...item,
+          status: "completed" as const,
+          ...(item.status === "live" ? { unfinished: true } : {}),
+        }
+      : item,
+  );
+  return {
+    ...stumped,
+    innings,
+    days: { ...stumped.days!, timeUp: true },
+    status: "completed",
+    updatedAt: now.toISOString(),
+  };
 }
 
 /** "Stumps, Day 2: Lions 245/6 (78.0 ov) — Lions lead by 42". */

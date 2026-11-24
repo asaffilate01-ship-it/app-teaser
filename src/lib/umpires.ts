@@ -111,11 +111,18 @@ function validOn(expires: string | null | undefined, day: string): boolean {
 /** Plain reasons an umpire can't be appointed on `day` (YYYY-MM-DD), matching the database checks. */
 export function missingChecks(umpire: UmpireLike, rules: PanelRules, day: string): string[] {
   const missing: string[] = [];
-  if (umpire.status !== "active") missing.push(umpire.status === "paused" ? "Paused on the panel" : "Left the panel");
-  if (rules.requires_qualification && (!umpire.qualification || (umpire.qualification_expires !== null && umpire.qualification_expires < day)))
+  if (umpire.status !== "active")
+    missing.push(umpire.status === "paused" ? "Paused on the panel" : "Left the panel");
+  if (
+    rules.requires_qualification &&
+    (!umpire.qualification ||
+      (umpire.qualification_expires !== null && umpire.qualification_expires < day))
+  )
     missing.push("Qualification");
-  if (rules.requires_safeguarding && !validOn(umpire.safeguarding_expires, day)) missing.push("Safeguarding check");
-  if (rules.requires_first_aid && !validOn(umpire.first_aid_expires, day)) missing.push("First aid");
+  if (rules.requires_safeguarding && !validOn(umpire.safeguarding_expires, day))
+    missing.push("Safeguarding check");
+  if (rules.requires_first_aid && !validOn(umpire.first_aid_expires, day))
+    missing.push("First aid");
   if (rules.requires_kit && !umpire.kit_ok) missing.push("Kit check");
   return missing;
 }
@@ -142,7 +149,12 @@ export function addDays(day: string, days: number): string {
 /** The calendar day of an instant in a time zone (YYYY-MM-DD). */
 export function dayIn(iso: string, timeZone = "UTC"): string {
   try {
-    return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(iso));
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date(iso));
   } catch {
     return new Date(iso).toISOString().slice(0, 10);
   }
@@ -152,7 +164,12 @@ const CLASH_MS = 8 * 3_600_000;
 const activeStatuses = new Set(["offered", "accepted"]);
 
 /** Another live appointment within 8 hours — the same window the database uses. */
-export function hasClash(umpireId: string, startsAt: string, appointments: AppointmentLike[], ignoreId?: string): boolean {
+export function hasClash(
+  umpireId: string,
+  startsAt: string,
+  appointments: AppointmentLike[],
+  ignoreId?: string,
+): boolean {
   const at = new Date(startsAt).getTime();
   return appointments.some(
     (row) =>
@@ -192,22 +209,36 @@ export function rankUmpires<U extends UmpireLike>(input: {
     .map((umpire): RankedUmpire<U> => {
       const blockers = missingChecks(umpire, input.rules, day);
       const said = umpire.user_id
-        ? (input.availability.find((row) => row.user_id === umpire.user_id && row.day === day)?.status as AvailabilityStatus | undefined)
+        ? (input.availability.find((row) => row.user_id === umpire.user_id && row.day === day)
+            ?.status as AvailabilityStatus | undefined)
         : undefined;
       if (said === "unavailable") blockers.push("Unavailable that day");
-      if (hasClash(umpire.id, input.startsAt, input.appointments)) blockers.push("Another match at that time");
+      if (hasClash(umpire.id, input.startsAt, input.appointments))
+        blockers.push("Another match at that time");
       const seasonCount = input.appointments.filter(
-        (row) => row.umpire_id === umpire.id && row.starts_at.slice(0, 10) >= seasonStart && (row.status === "accepted" || row.status === "completed"),
+        (row) =>
+          row.umpire_id === umpire.id &&
+          row.starts_at.slice(0, 10) >= seasonStart &&
+          (row.status === "accepted" || row.status === "completed"),
       ).length;
       const availabilityScore = said === "available" ? 2 : said === "maybe" ? 1 : 0;
-      const score = (blockers.length ? -1000 : 0) + availabilityScore * 100 - seasonCount * 5 + gradeOrder.indexOf(umpire.grade as UmpireGrade);
+      const score =
+        (blockers.length ? -1000 : 0) +
+        availabilityScore * 100 -
+        seasonCount * 5 +
+        gradeOrder.indexOf(umpire.grade as UmpireGrade);
       return { umpire, blockers, availability: said ?? "unknown", seasonCount, score };
     })
-    .sort((a, b) => b.score - a.score || a.umpire.display_name.localeCompare(b.umpire.display_name));
+    .sort(
+      (a, b) => b.score - a.score || a.umpire.display_name.localeCompare(b.umpire.display_name),
+    );
 }
 
 /** Fee for a new appointment: voluntary umpires get nothing; otherwise their own fee, else the panel default. */
-export function feeFor(umpire: Pick<UmpireLike, "pay_basis" | "match_fee_minor">, rules: PanelRules): number {
+export function feeFor(
+  umpire: Pick<UmpireLike, "pay_basis" | "match_fee_minor">,
+  rules: PanelRules,
+): number {
   if (umpire.pay_basis === "voluntary") return 0;
   return umpire.match_fee_minor ?? rules.default_fee_minor;
 }
@@ -229,7 +260,12 @@ export interface MoneyTotals {
 export function moneyTotals(appointments: AppointmentLike[]): Record<string, MoneyTotals> {
   const totals: Record<string, MoneyTotals> = {};
   for (const row of appointments) {
-    const bucket = (totals[row.currency] ??= { owed: 0, approved: 0, paid: 0, voluntaryMatches: 0 });
+    const bucket = (totals[row.currency] ??= {
+      owed: 0,
+      approved: 0,
+      paid: 0,
+      voluntaryMatches: 0,
+    });
     const amount = row.fee_minor + row.expenses_minor;
     if (row.status === "completed" && row.pay_basis === "voluntary") bucket.voluntaryMatches += 1;
     if (row.payment_status === "due") bucket.owed += amount;
@@ -242,7 +278,11 @@ export function moneyTotals(appointments: AppointmentLike[]): Record<string, Mon
 export function formatMinor(minor: number, currency: string): string {
   const amount = minor / 100;
   try {
-    return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 2 }).format(amount);
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(amount);
   } catch {
     return `${currency} ${amount.toFixed(2)}`;
   }

@@ -7,16 +7,25 @@ const subscription = z.object({
 });
 const subscribeBody = z.object({
   subscription,
-  kinds: z.array(z.enum(["wickets", "milestones", "results"])).min(1).max(3),
+  kinds: z
+    .array(z.enum(["wickets", "milestones", "results"]))
+    .min(1)
+    .max(3),
 });
 const unsubscribeBody = z.object({ endpoint: z.string().url().max(1000) });
-const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
+const json = (body: unknown, status = 200) =>
+  Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 
 /** The public scoreboard row for a slug, only if the club has published it. */
 async function publishedBoard(slug: string) {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 80) return null;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin.from("public_scoreboards").select("id").eq("slug", slug).eq("enabled", true).maybeSingle();
+  const { data } = await supabaseAdmin
+    .from("public_scoreboards")
+    .select("id")
+    .eq("slug", slug)
+    .eq("enabled", true)
+    .maybeSingle();
   return data ? { id: data.id as string, admin: supabaseAdmin } : null;
 }
 
@@ -37,10 +46,14 @@ export const Route = createFileRoute("/api/public/push/$slug")({
         const parsed = subscribeBody.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return json({ error: "Invalid sign-up." }, 400);
         const { isAllowedPushEndpoint } = await import("@/lib/web-push.server");
-        if (!isAllowedPushEndpoint(parsed.data.subscription.endpoint)) return json({ error: "This browser's alert service is not supported." }, 400);
+        if (!isAllowedPushEndpoint(parsed.data.subscription.endpoint))
+          return json({ error: "This browser's alert service is not supported." }, 400);
         const board = await publishedBoard(params.slug);
         if (!board) return json({ error: "This scoreboard is not public." }, 404);
-        const { count } = await board.admin.from("match_push_subscriptions").select("id", { count: "exact", head: true }).eq("scoreboard_id", board.id);
+        const { count } = await board.admin
+          .from("match_push_subscriptions")
+          .select("id", { count: "exact", head: true })
+          .eq("scoreboard_id", board.id);
         if ((count ?? 0) >= 5000) return json({ error: "Alerts for this match are full." }, 429);
         const { error } = await board.admin.from("match_push_subscriptions").upsert(
           {
@@ -61,7 +74,11 @@ export const Route = createFileRoute("/api/public/push/$slug")({
         if (!parsed.success) return json({ error: "Invalid request." }, 400);
         const board = await publishedBoard(params.slug);
         if (!board) return json({ ok: true });
-        await board.admin.from("match_push_subscriptions").delete().eq("scoreboard_id", board.id).eq("endpoint", parsed.data.endpoint);
+        await board.admin
+          .from("match_push_subscriptions")
+          .delete()
+          .eq("scoreboard_id", board.id)
+          .eq("endpoint", parsed.data.endpoint);
         return json({ ok: true });
       },
     },

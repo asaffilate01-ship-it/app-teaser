@@ -33,7 +33,9 @@ export function SetupChecklist({
           <h2 id="setup-title" className="mt-1 font-display text-2xl font-bold">
             {progress.done} of {progress.total} steps done
           </h2>
-          {next && <p className="mt-1 text-sm text-muted-foreground">Next: {next.title.toLowerCase()}.</p>}
+          {next && (
+            <p className="mt-1 text-sm text-muted-foreground">Next: {next.title.toLowerCase()}.</p>
+          )}
         </div>
       </div>
       <ol className="mt-5 grid gap-2 md:grid-cols-5">
@@ -52,7 +54,9 @@ export function SetupChecklist({
                 <span className="block text-sm font-bold">{step.title}</span>
                 <span className="block text-xs text-muted-foreground">{step.detail}</span>
               </span>
-              {!step.done && <ChevronRight className="size-4 shrink-0 opacity-60" aria-hidden="true" />}
+              {!step.done && (
+                <ChevronRight className="size-4 shrink-0 opacity-60" aria-hidden="true" />
+              )}
               <span className="sr-only">{step.done ? "Completed" : "Not done yet"}</span>
             </button>
           </li>

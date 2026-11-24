@@ -2,8 +2,21 @@ import type { LucideIcon } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 export type AppTab =
-  | { id: string; label: string; icon: LucideIcon; to: "/app" | "/platform" | "/"; active?: boolean }
-  | { id: string; label: string; icon: LucideIcon; onSelect: () => void; active?: boolean; emphasis?: boolean };
+  | {
+      id: string;
+      label: string;
+      icon: LucideIcon;
+      to: "/app" | "/platform" | "/";
+      active?: boolean;
+    }
+  | {
+      id: string;
+      label: string;
+      icon: LucideIcon;
+      onSelect: () => void;
+      active?: boolean;
+      emphasis?: boolean;
+    };
 
 /**
  * Native-style bottom menu for phones. Sits above the iPhone home indicator
@@ -25,7 +38,12 @@ export function AppTabBar({ tabs, label }: { tabs: AppTab[]; label: string }) {
             </>
           );
           return "to" in tab ? (
-            <Link key={tab.id} to={tab.to} className={className} aria-current={tab.active ? "page" : undefined}>
+            <Link
+              key={tab.id}
+              to={tab.to}
+              className={className}
+              aria-current={tab.active ? "page" : undefined}
+            >
               {content}
             </Link>
           ) : (

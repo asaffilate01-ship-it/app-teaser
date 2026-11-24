@@ -42,7 +42,13 @@ function applySecurityHeaders(response: Response, pathname = "/"): Response {
   const headers = new Headers(response.headers);
   for (const [name, value] of Object.entries(securityHeaders)) headers.set(name, value);
   const frame = frameHeaders(pathname);
-  headers.set("content-security-policy", securityHeaders["content-security-policy"]!.replace("frame-ancestors 'none'", frame.frameAncestors));
+  headers.set(
+    "content-security-policy",
+    securityHeaders["content-security-policy"]!.replace(
+      "frame-ancestors 'none'",
+      frame.frameAncestors,
+    ),
+  );
   headers.set("cross-origin-resource-policy", frame.resourcePolicy);
   if (frame.xFrameOptions) headers.set("x-frame-options", frame.xFrameOptions);
   else headers.delete("x-frame-options");

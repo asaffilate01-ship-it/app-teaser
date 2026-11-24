@@ -2,7 +2,12 @@ import { useState } from "react";
 import { Copy, FileDown, ImageDown, Megaphone, Share2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import type { CricketMatch } from "@/lib/cricket";
-import { scorecardHtml, scorecardSheet, scorecardText, type ScorecardSheet } from "@/lib/scorecard-share";
+import {
+  scorecardHtml,
+  scorecardSheet,
+  scorecardText,
+  type ScorecardSheet,
+} from "@/lib/scorecard-share";
 import { resultPost, topPerformers } from "@/lib/social-posts";
 import { resultPoster, sharePoster } from "@/lib/posters";
 import logoAsset from "@/assets/criclume-logo-on-dark.png.asset.json";
@@ -19,7 +24,9 @@ function drawScorecard(sheet: ScorecardSheet): Promise<Blob> {
   const width = 1080;
   const pad = 56;
   const rowH = 40;
-  const heights = sheet.innings.map((inn) => 150 + (inn.batting.length + 1) * rowH + 70 + (inn.bowling.length + 1) * rowH + 40);
+  const heights = sheet.innings.map(
+    (inn) => 150 + (inn.batting.length + 1) * rowH + 70 + (inn.bowling.length + 1) * rowH + 40,
+  );
   const height = 260 + (sheet.result ? 50 : 0) + heights.reduce((sum, h) => sum + h, 0) + 90;
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -33,7 +40,8 @@ function drawScorecard(sheet: ScorecardSheet): Promise<Blob> {
   const muted = "#a3a9bf";
   const crimson = "#e0475b";
   const display = "600 1px Oswald, 'Arial Narrow', Arial, sans-serif";
-  const font = (size: number, weight = 400, family = "Arial, sans-serif") => `${weight} ${size}px ${family}`;
+  const font = (size: number, weight = 400, family = "Arial, sans-serif") =>
+    `${weight} ${size}px ${family}`;
   const displayFont = (size: number) => display.replace("1px", `${size}px`);
 
   ctx.fillStyle = navy;
@@ -124,7 +132,10 @@ function drawScorecard(sheet: ScorecardSheet): Promise<Blob> {
   ctx.font = font(20);
   ctx.fillText("Scored with CricLume · criclume.com", pad, height - 40);
   return new Promise((resolve, reject) =>
-    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Image could not be created"))), "image/png"),
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("Image could not be created"))),
+      "image/png",
+    ),
   );
 }
 
@@ -142,7 +153,10 @@ export function ScorecardShare({ match }: { match: CricketMatch }) {
       const blob = await drawScorecard(sheet());
       const file = new File([blob], `${name}.png`, { type: "image/png" });
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: `${match.teams[0].name} v ${match.teams[1].name}` });
+        await navigator.share({
+          files: [file],
+          title: `${match.teams[0].name} v ${match.teams[1].name}`,
+        });
       } else {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -153,7 +167,8 @@ export function ScorecardShare({ match }: { match: CricketMatch }) {
         toast.success("Scorecard image downloaded");
       }
     } catch (error) {
-      if (!(error instanceof DOMException && error.name === "AbortError")) toast.error("The image could not be created.");
+      if (!(error instanceof DOMException && error.name === "AbortError"))
+        toast.error("The image could not be created.");
     } finally {
       setBusy(false);
     }
@@ -214,7 +229,11 @@ export function ScorecardShare({ match }: { match: CricketMatch }) {
     try {
       const data = sheet();
       const blob = await resultPoster({
-        innings: data.innings.map((inn) => ({ team: inn.team, total: inn.total, overs: inn.overs })),
+        innings: data.innings.map((inn) => ({
+          team: inn.team,
+          total: inn.total,
+          overs: inn.overs,
+        })),
         result: data.result,
         subtitle: data.subtitle,
         top: topPerformers(data),
@@ -223,7 +242,8 @@ export function ScorecardShare({ match }: { match: CricketMatch }) {
       const how = await sharePoster(blob, `${name}-result.png`, `${teams[0]} v ${teams[1]}`);
       if (how === "downloaded") toast.success("Result poster downloaded");
     } catch (error) {
-      if (!(error instanceof DOMException && error.name === "AbortError")) toast.error("The poster could not be created.");
+      if (!(error instanceof DOMException && error.name === "AbortError"))
+        toast.error("The poster could not be created.");
     } finally {
       setBusy(false);
     }
@@ -233,8 +253,17 @@ export function ScorecardShare({ match }: { match: CricketMatch }) {
     <div className="card-share" aria-label="Share scorecard">
       <p className="panel-kicker">Share scorecard</p>
       <div className="card-share-actions">
-        <button type="button" className="app-chip-button" onClick={() => void shareImage()} disabled={busy}>
-          {typeof navigator !== "undefined" && "share" in navigator ? <Share2 className="size-4" /> : <ImageDown className="size-4" />}
+        <button
+          type="button"
+          className="app-chip-button"
+          onClick={() => void shareImage()}
+          disabled={busy}
+        >
+          {typeof navigator !== "undefined" && "share" in navigator ? (
+            <Share2 className="size-4" />
+          ) : (
+            <ImageDown className="size-4" />
+          )}
           Image
         </button>
         <button type="button" className="app-chip-button" onClick={savePdf}>
@@ -243,7 +272,12 @@ export function ScorecardShare({ match }: { match: CricketMatch }) {
         <button type="button" className="app-chip-button" onClick={() => void shareText()}>
           <Copy className="size-4" /> Text
         </button>
-        <button type="button" className="app-chip-button" onClick={() => void poster()} disabled={busy}>
+        <button
+          type="button"
+          className="app-chip-button"
+          onClick={() => void poster()}
+          disabled={busy}
+        >
           <Sparkles className="size-4" /> Poster
         </button>
         <button type="button" className="app-chip-button" onClick={() => void copyPost()}>
@@ -251,7 +285,11 @@ export function ScorecardShare({ match }: { match: CricketMatch }) {
         </button>
       </div>
       <label className="card-share-toggle">
-        <input type="checkbox" checked={initials} onChange={(event) => setInitials(event.target.checked)} />
+        <input
+          type="checkbox"
+          checked={initials}
+          onChange={(event) => setInitials(event.target.checked)}
+        />
         Initials only (junior matches)
       </label>
     </div>

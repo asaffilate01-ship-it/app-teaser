@@ -56,8 +56,13 @@ test("only https links are kept on a club website", () => {
   assert.equal(safeLink("https://facebook.com/riverside"), "https://facebook.com/riverside");
   assert.equal(safeLink("http://facebook.com/riverside"), null);
   assert.equal(safeLink("javascript:alert(1)"), null);
-  assert.deepEqual(readSocials({ facebook: "https://fb.com/x", instagram: "ftp://x", evil: "https://x.com" }), { facebook: "https://fb.com/x" });
-  assert.deepEqual(readSponsors([{ name: "Ali Sports", url: "http://x" }, { name: "" }]), [{ name: "Ali Sports", url: null }]);
+  assert.deepEqual(
+    readSocials({ facebook: "https://fb.com/x", instagram: "ftp://x", evil: "https://x.com" }),
+    { facebook: "https://fb.com/x" },
+  );
+  assert.deepEqual(readSponsors([{ name: "Ali Sports", url: "http://x" }, { name: "" }]), [
+    { name: "Ali Sports", url: null },
+  ]);
 });
 
 test("web address is 3–40 lowercase letters, numbers and single dashes", () => {
@@ -86,9 +91,18 @@ test("schedule splits live, coming up (soonest first, no duplicates) and results
     ],
   };
   const { live, upcoming, results } = siteSchedule(site, now);
-  assert.deepEqual(live.map((m) => m.id), ["live"]);
-  assert.deepEqual(upcoming.map((u) => u.id), ["soon", "next"]);
-  assert.deepEqual(results.map((m) => m.id), ["new", "old"]);
+  assert.deepEqual(
+    live.map((m) => m.id),
+    ["live"],
+  );
+  assert.deepEqual(
+    upcoming.map((u) => u.id),
+    ["soon", "next"],
+  );
+  assert.deepEqual(
+    results.map((m) => m.id),
+    ["new", "old"],
+  );
 });
 
 test("public league table counts signed-off results only", () => {
@@ -100,12 +114,38 @@ test("public league table counts signed-off results only", () => {
     points: { win: 4, tie: 2, noResult: 2, loss: 0 },
     tieBreakers: ["points", "wins", "net-run-rate"] as Array<"points" | "wins" | "net-run-rate">,
   };
-  const result = { winnerTeamId: "a", homeRuns: 150, homeLegalBalls: 120, awayRuns: 120, awayLegalBalls: 120 };
+  const result = {
+    winnerTeamId: "a",
+    homeRuns: 150,
+    homeLegalBalls: 120,
+    awayRuns: 120,
+    awayLegalBalls: 120,
+  };
   const tables = siteTables({
-    competitions: [{ id: "c1", name: "Sunday League", format: "T20", season: "2026", ruleVersionId: "r1", rules }],
+    competitions: [
+      {
+        id: "c1",
+        name: "Sunday League",
+        format: "T20",
+        season: "2026",
+        ruleVersionId: "r1",
+        rules,
+      },
+    ],
     fixtures: [
-      fixture({ id: "f1", status: "completed", result, signedOff: true, signedOffAt: "2026-11-20T20:00:00Z" }),
-      fixture({ id: "f2", status: "completed", result: { ...result, winnerTeamId: "b" }, signedOff: false }),
+      fixture({
+        id: "f1",
+        status: "completed",
+        result,
+        signedOff: true,
+        signedOffAt: "2026-11-20T20:00:00Z",
+      }),
+      fixture({
+        id: "f2",
+        status: "completed",
+        result: { ...result, winnerTeamId: "b" },
+        signedOff: false,
+      }),
     ],
   });
   assert.equal(tables.length, 1);
@@ -123,7 +163,18 @@ test("every shown file is listed for signing", () => {
     slug: "r-cc",
     site: { heroPath: "org/hero/a.jpg" } as PublicClubSite["site"],
     photos: [{ id: "p", path: "org/photos/b.jpg", caption: "" }],
-    posts: [{ id: "d", kind: "document", title: "Rules", body: "", filePath: "org/docs/c.pdf", linkUrl: null, pinned: false, publishedAt: "2026-11-01T00:00:00Z" }],
+    posts: [
+      {
+        id: "d",
+        kind: "document",
+        title: "Rules",
+        body: "",
+        filePath: "org/docs/c.pdf",
+        linkUrl: null,
+        pinned: false,
+        publishedAt: "2026-11-01T00:00:00Z",
+      },
+    ],
   };
   assert.deepEqual(siteFilePaths(site), ["org/hero/a.jpg", "org/photos/b.jpg", "org/docs/c.pdf"]);
 });

@@ -10,7 +10,9 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
   const [competitionId, setCompetitionId] = useState(data.competitions[0]?.id ?? "");
   const teamsFor = (id: string) =>
     data.teams.filter((team) => !team.external || (team.competitionIds ?? []).includes(id));
-  const [selected, setSelected] = useState<string[]>(() => teamsFor(data.competitions[0]?.id ?? "").map((team) => team.id));
+  const [selected, setSelected] = useState<string[]>(() =>
+    teamsFor(data.competitions[0]?.id ?? "").map((team) => team.id),
+  );
   const teams = teamsFor(competitionId);
   const [legs, setLegs] = useState<1 | 2>(1);
   const [firstDate, setFirstDate] = useState("");
@@ -21,7 +23,8 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const competition = data.competitions.find((item) => item.id === competitionId);
   const teamName = (id: string) => data.teams.find((team) => team.id === id)?.name ?? "Team";
-  const groundName = (id: string | null) => (id ? (data.grounds.find((ground) => ground.id === id)?.name ?? "") : "");
+  const groundName = (id: string | null) =>
+    id ? (data.grounds.find((ground) => ground.id === id)?.name ?? "") : "";
 
   const plan = useMemo(
     () =>
@@ -32,14 +35,22 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
         startTime,
         daysBetweenRounds: gap,
         groundIds:
-          groundMode === "none" ? [] : groundMode === "rotate" ? data.grounds.map((ground) => ground.id) : [groundMode],
+          groundMode === "none"
+            ? []
+            : groundMode === "rotate"
+              ? data.grounds.map((ground) => ground.id)
+              : [groundMode],
       }),
     [selected, legs, firstDate, startTime, gap, groundMode, data.grounds],
   );
-  const existing = data.fixtures.filter((fixture) => fixture.competitionId === competitionId).length;
+  const existing = data.fixtures.filter(
+    (fixture) => fixture.competitionId === competitionId,
+  ).length;
 
   const toggleTeam = (id: string) =>
-    setSelected((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+    setSelected((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+    );
 
   const create = async () => {
     if (!competition?.ruleVersionId) {
@@ -48,7 +59,9 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
     }
     if (
       existing > 0 &&
-      !window.confirm(`${competition.name} already has ${existing} fixtures. Add ${plan.fixtures.length} more?`)
+      !window.confirm(
+        `${competition.name} already has ${existing} fixtures. Add ${plan.fixtures.length} more?`,
+      )
     )
       return;
     setBusy(true);
@@ -57,7 +70,10 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
       const count = await run(() => createFixtures({ competition, fixtures: plan.fixtures }));
       setMessage({ tone: "ok", text: `${count} fixtures created for ${competition.name}.` });
     } catch (reason) {
-      setMessage({ tone: "error", text: reason instanceof Error ? reason.message : "The fixtures could not be created." });
+      setMessage({
+        tone: "error",
+        text: reason instanceof Error ? reason.message : "The fixtures could not be created.",
+      });
     } finally {
       setBusy(false);
     }
@@ -67,17 +83,27 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
   const rounds = Array.from({ length: plan.rounds }, (_, index) => index + 1);
   const when = (iso: string | null) =>
     iso
-      ? new Date(iso).toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
+      ? new Date(iso).toLocaleString([], {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
       : "Date to be set";
 
   return (
-    <section className="rounded-xl border border-white/10 bg-white/[0.035] p-5 shadow-2xl shadow-black/10" aria-label="Fixture builder">
+    <section
+      className="rounded-xl border border-white/10 bg-white/[0.035] p-5 shadow-2xl shadow-black/10"
+      aria-label="Fixture builder"
+    >
       <div className="mb-4 flex items-start gap-3">
         <Wand2 className="mt-0.5 size-5 shrink-0 text-gold" aria-hidden="true" />
         <div>
           <h2 className="text-lg font-bold">Fixture builder</h2>
           <p className="mt-1 text-xs leading-5 text-slate-400">
-            Every team plays every other team, nobody plays twice in a round, and home games are shared fairly.
+            Every team plays every other team, nobody plays twice in a round, and home games are
+            shared fairly.
           </p>
         </div>
       </div>
@@ -101,14 +127,22 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
         </label>
         <label className="block space-y-2">
           <span className="builder-label">Format</span>
-          <select value={legs} onChange={(event) => setLegs(Number(event.target.value) as 1 | 2)} className="scorer-input">
+          <select
+            value={legs}
+            onChange={(event) => setLegs(Number(event.target.value) as 1 | 2)}
+            className="scorer-input"
+          >
             <option value={1}>Play each team once</option>
             <option value={2}>Home and away (twice)</option>
           </select>
         </label>
         <label className="block space-y-2">
           <span className="builder-label">Grounds</span>
-          <select value={groundMode} onChange={(event) => setGroundMode(event.target.value)} className="scorer-input">
+          <select
+            value={groundMode}
+            onChange={(event) => setGroundMode(event.target.value)}
+            className="scorer-input"
+          >
             <option value="none">Set later</option>
             {data.grounds.length > 1 && <option value="rotate">Share all grounds</option>}
             {data.grounds.map((ground) => (
@@ -120,11 +154,21 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
         </label>
         <label className="block space-y-2">
           <span className="builder-label">First round</span>
-          <input type="date" value={firstDate} onChange={(event) => setFirstDate(event.target.value)} className="scorer-input" />
+          <input
+            type="date"
+            value={firstDate}
+            onChange={(event) => setFirstDate(event.target.value)}
+            className="scorer-input"
+          />
         </label>
         <label className="block space-y-2">
           <span className="builder-label">Start time</span>
-          <input type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} className="scorer-input" />
+          <input
+            type="time"
+            value={startTime}
+            onChange={(event) => setStartTime(event.target.value)}
+            className="scorer-input"
+          />
         </label>
         <label className="block space-y-2">
           <span className="builder-label">Days between rounds</span>
@@ -133,7 +177,9 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
             min={1}
             max={60}
             value={gap}
-            onChange={(event) => setGap(Math.max(1, Math.min(60, Math.round(Number(event.target.value) || 7))))}
+            onChange={(event) =>
+              setGap(Math.max(1, Math.min(60, Math.round(Number(event.target.value) || 7))))
+            }
             className="scorer-input"
           />
         </label>
@@ -168,7 +214,11 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
               <div key={round} className="builder-round">
                 <p className="builder-round-head">
                   Round {round}
-                  <span>{when(plan.fixtures.find((fixture) => fixture.round === round)?.startsAt ?? null)}</span>
+                  <span>
+                    {when(
+                      plan.fixtures.find((fixture) => fixture.round === round)?.startsAt ?? null,
+                    )}
+                  </span>
                 </p>
                 <ul>
                   {plan.fixtures
@@ -176,9 +226,12 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
                     .map((fixture) => (
                       <li key={`${fixture.homeTeamId}-${fixture.awayTeamId}`}>
                         <span className="truncate">
-                          {teamName(fixture.homeTeamId)} <span className="text-slate-500">v</span> {teamName(fixture.awayTeamId)}
+                          {teamName(fixture.homeTeamId)} <span className="text-slate-500">v</span>{" "}
+                          {teamName(fixture.awayTeamId)}
                         </span>
-                        {fixture.groundId && <small className="truncate">{groundName(fixture.groundId)}</small>}
+                        {fixture.groundId && (
+                          <small className="truncate">{groundName(fixture.groundId)}</small>
+                        )}
                       </li>
                     ))}
                   {plan.byes
@@ -193,13 +246,25 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
             ))}
           </div>
           {message && (
-            <p role={message.tone === "error" ? "alert" : "status"} className={`mt-3 text-sm ${message.tone === "error" ? "text-rose-200" : "text-emerald-200"}`}>
+            <p
+              role={message.tone === "error" ? "alert" : "status"}
+              className={`mt-3 text-sm ${message.tone === "error" ? "text-rose-200" : "text-emerald-200"}`}
+            >
               {message.text}
             </p>
           )}
           <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
-            {!firstDate && <span className="text-xs text-slate-400">No date chosen: fixtures are saved as drafts.</span>}
-            <button type="button" className="action-primary" disabled={busy} onClick={() => void create()}>
+            {!firstDate && (
+              <span className="text-xs text-slate-400">
+                No date chosen: fixtures are saved as drafts.
+              </span>
+            )}
+            <button
+              type="button"
+              className="action-primary"
+              disabled={busy}
+              onClick={() => void create()}
+            >
               {busy ? "Creating…" : `Create ${plan.fixtures.length} fixtures`}
             </button>
           </div>

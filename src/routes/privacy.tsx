@@ -147,7 +147,10 @@ export function LegalPage({
           </Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Link to="/" className="inline-flex items-center gap-2 text-xs font-bold text-slate-400">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-xs font-bold text-slate-400"
+            >
               <ArrowLeft className="size-4" /> Back to site
             </Link>
           </div>

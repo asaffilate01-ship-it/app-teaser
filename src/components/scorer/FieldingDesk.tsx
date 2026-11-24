@@ -13,13 +13,27 @@ import {
 } from "@/lib/cricket";
 import { ballsNeedingFielding, type DeliveryTag } from "@/lib/scoring-duties";
 
-const styles: DeliveryStyle[] = ["Fast", "Medium", "Off spin", "Leg spin", "Left-arm spin", "Other"];
+const styles: DeliveryStyle[] = [
+  "Fast",
+  "Medium",
+  "Off spin",
+  "Leg spin",
+  "Left-arm spin",
+  "Other",
+];
 
 function ballText(ball: Delivery) {
-  const extras = ball.extras.wide + ball.extras.noBall + ball.extras.bye + ball.extras.legBye + ball.extras.penalty;
+  const extras =
+    ball.extras.wide +
+    ball.extras.noBall +
+    ball.extras.bye +
+    ball.extras.legBye +
+    ball.extras.penalty;
   if (ball.dismissal) return "Wicket";
   if (extras && !ball.batterRuns) return `${extras} extra${extras === 1 ? "" : "s"}`;
-  return ball.batterRuns === 0 ? "Dot" : `${ball.batterRuns} run${ball.batterRuns === 1 ? "" : "s"}`;
+  return ball.batterRuns === 0
+    ? "Dot"
+    : `${ball.batterRuns} run${ball.batterRuns === 1 ? "" : "s"}`;
 }
 
 /**
@@ -77,11 +91,18 @@ export function FieldingDesk({
 
   return (
     <div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
-      <section className="broadcast-panel space-y-4 self-start" aria-label="Bowler for the next ball">
+      <section
+        className="broadcast-panel space-y-4 self-start"
+        aria-label="Bowler for the next ball"
+      >
         <h2 className="panel-kicker">Next ball</h2>
         <label className="block space-y-1.5">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Bowler</span>
-          <select value={bowlerId} onChange={(event) => setBowlerId(event.target.value)} className="scorer-input">
+          <select
+            value={bowlerId}
+            onChange={(event) => setBowlerId(event.target.value)}
+            className="scorer-input"
+          >
             {bowlingTeam.players.map((player) => (
               <option key={player.id} value={player.id}>
                 {player.name}
@@ -90,8 +111,14 @@ export function FieldingDesk({
           </select>
         </label>
         <label className="block space-y-1.5">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Bowling end</span>
-          <select value={end} onChange={(event) => setEnd(event.target.value as DeliveryEnd)} className="scorer-input">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+            Bowling end
+          </span>
+          <select
+            value={end}
+            onChange={(event) => setEnd(event.target.value as DeliveryEnd)}
+            className="scorer-input"
+          >
             <option>Pavilion</option>
             <option>Far</option>
           </select>
@@ -102,7 +129,9 @@ export function FieldingDesk({
           disabled={!bowlerChanged}
           onClick={() => onBowler(bowlerId, end)}
         >
-          {bowlerChanged ? "Send to batting scorer" : `${findPlayer(match, innings.bowlerId)?.name ?? "Bowler"} is bowling`}
+          {bowlerChanged
+            ? "Send to batting scorer"
+            : `${findPlayer(match, innings.bowlerId)?.name ?? "Bowler"} is bowling`}
         </button>
         <p className="text-[11px] leading-relaxed text-slate-400">
           The batting & runs scorer's next ball uses this bowler. Change it at the end of each over.
@@ -113,7 +142,9 @@ export function FieldingDesk({
         <div className="broadcast-panel">
           <h2 className="panel-kicker mb-3">Recent balls</h2>
           {balls.length === 0 ? (
-            <p className="text-sm text-slate-300">No balls yet. They appear here as soon as they're scored.</p>
+            <p className="text-sm text-slate-300">
+              No balls yet. They appear here as soon as they're scored.
+            </p>
           ) : (
             <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {balls.map(({ ball, needsFielding }) => (
@@ -123,7 +154,9 @@ export function FieldingDesk({
                     aria-pressed={selectedId === ball.id}
                     onClick={() => setSelectedId(selectedId === ball.id ? null : ball.id)}
                     className={`w-full rounded-xl border p-2.5 text-left text-xs ${
-                      selectedId === ball.id ? "border-amber-300 bg-amber-300/10" : "border-white/10 bg-white/[0.03]"
+                      selectedId === ball.id
+                        ? "border-amber-300 bg-amber-300/10"
+                        : "border-white/10 bg-white/[0.03]"
                     }`}
                   >
                     <span className="block font-bold tabular-nums text-slate-100">
@@ -145,10 +178,13 @@ export function FieldingDesk({
         </div>
 
         {selected && (
-          <div className="broadcast-panel shot-card space-y-4" aria-label={`Fielding for ball ${selected.over}.${selected.ball}`}>
+          <div
+            className="broadcast-panel shot-card space-y-4"
+            aria-label={`Fielding for ball ${selected.over}.${selected.ball}`}
+          >
             <h2 className="panel-kicker">
-              Ball {selected.over}.{selected.ball} · {findPlayer(match, selected.strikerId)?.name ?? "Batter"} ·{" "}
-              {ballText(selected)}
+              Ball {selected.over}.{selected.ball} ·{" "}
+              {findPlayer(match, selected.strikerId)?.name ?? "Batter"} · {ballText(selected)}
             </h2>
             <div className="shot-card-grid">
               <ShotZonePicker value={zone} onChange={setZone} />
@@ -161,7 +197,13 @@ export function FieldingDesk({
                 />
                 {needsCatcher && (
                   <FielderChips
-                    label={selected.dismissal!.type === "caught" ? "Caught by" : selected.dismissal!.type === "stumped" ? "Stumped by" : "Run out by"}
+                    label={
+                      selected.dismissal!.type === "caught"
+                        ? "Caught by"
+                        : selected.dismissal!.type === "stumped"
+                          ? "Stumped by"
+                          : "Run out by"
+                    }
                     players={bowlingTeam.players}
                     value={catcherId}
                     onChange={setCatcherId}

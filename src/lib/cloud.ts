@@ -95,9 +95,7 @@ export function isCloudConfigured(): boolean {
 export function getCloudClient(): SupabaseClient {
   const configuration = cloudConfiguration();
   if (!configuration) {
-    throw new Error(
-      "CricLume Cloud is briefly unavailable. Please refresh in a moment.",
-    );
+    throw new Error("CricLume Cloud is briefly unavailable. Please refresh in a moment.");
   }
   // Share the generated Lovable Cloud client so Google sign-in, email links and
   // every data call use one session and the publishable-key request shim.
@@ -528,7 +526,11 @@ export async function appendMatchEvent(event: PendingMatchEvent): Promise<MatchE
     if (event.eventType === "delivery.corrected") {
       // A change to an earlier ball: the server checks the scorer's duty and the squad, then updates the totals.
       const delivery = event.payload["delivery"] as Record<string, unknown> | undefined;
-      if (!delivery || typeof event.payload["inningsId"] !== "string" || typeof delivery["id"] !== "string") {
+      if (
+        !delivery ||
+        typeof event.payload["inningsId"] !== "string" ||
+        typeof delivery["id"] !== "string"
+      ) {
         throw new Error("Ball correction event is incomplete.");
       }
       const { data, error } = await getCloudClient().rpc("correct_delivery_v1", {
@@ -603,10 +605,17 @@ const drainInThisTab = createOrderedQueueDrainer<PendingMatchEvent>({
 });
 
 /** One sender per match across every open tab of this browser, so saved changes go up strictly in order. */
-export function flushPendingEvents(matchId: string): ReturnType<typeof drainInThisTab> {
-  const locks = typeof navigator !== "undefined" ? (navigator as Navigator & { locks?: LockManager }).locks : undefined;
-  if (!locks?.request) return drainInThisTab(matchId);
-  return locks.request(`criclume-sync:${matchId}`, () => drainInThisTab(matchId));
+export async function flushPendingEvents(
+  matchId: string,
+): Promise<Awaited<ReturnType<typeof drainInThisTab>>> {
+  const locks =
+    typeof navigator !== "undefined"
+      ? (navigator as Navigator & { locks?: LockManager }).locks
+      : undefined;
+  if (!locks?.request) return await drainInThisTab(matchId);
+  // Await the Web Locks callback's promise so the public return type remains
+  // the settled receipt, not Promise<Promise<QueueDrainResult>>.
+  return await locks.request(`criclume-sync:${matchId}`, () => drainInThisTab(matchId));
 }
 
 export function subscribeToMatchEvents(
@@ -674,7 +683,8 @@ export async function uploadVideoResumably(input: {
   onProgress?: (uploaded: number, total: number) => void;
 }): Promise<string> {
   const configuration = cloudConfiguration();
-  if (!configuration) throw new Error("CricLume Cloud is briefly unavailable. Please refresh in a moment.");
+  if (!configuration)
+    throw new Error("CricLume Cloud is briefly unavailable. Please refresh in a moment.");
   const { data } = await getCloudClient().auth.getSession();
   if (!data.session) throw new Error("Sign in before uploading video.");
   const extension = input.contentType.includes("mp4") ? "mp4" : "webm";
@@ -751,15 +761,25 @@ function cloudDays(value: unknown) {
     const wickets = finiteOrNull(close["wickets"]);
     const inningsIndex = finiteOrNull(close["inningsIndex"]);
     if (day === null || runs === null || wickets === null || inningsIndex === null) return [];
-    return [{
-      day, runs, wickets, inningsIndex,
-      battingTeamId: String(close["battingTeamId"] ?? ""),
-      overs: String(close["overs"] ?? "0.0"),
-      ...(typeof close["note"] === "string" ? { note: close["note"].slice(0, 120) } : {}),
-      at: String(close["at"] ?? ""),
-    }];
+    return [
+      {
+        day,
+        runs,
+        wickets,
+        inningsIndex,
+        battingTeamId: String(close["battingTeamId"] ?? ""),
+        overs: String(close["overs"] ?? "0.0"),
+        ...(typeof close["note"] === "string" ? { note: close["note"].slice(0, 120) } : {}),
+        at: String(close["at"] ?? ""),
+      },
+    ];
   });
-  return { current, atStumps: raw["atStumps"] === true, closes, ...(raw["timeUp"] === true ? { timeUp: true } : {}) };
+  return {
+    current,
+    atStumps: raw["atStumps"] === true,
+    closes,
+    ...(raw["timeUp"] === true ? { timeUp: true } : {}),
+  };
 }
 
 /** Rain interruption saved in live state, validated field by field. */
@@ -816,7 +836,10 @@ export async function setScoringDuty(input: {
 }
 
 /** Bowling & fielding notes the cloud accepted after a given point (used to catch up after a gap). */
-export async function loadScoringPatches(matchId: string, afterSequence = 0): Promise<ScoringPatch[]> {
+export async function loadScoringPatches(
+  matchId: string,
+  afterSequence = 0,
+): Promise<ScoringPatch[]> {
   const { data, error } = await getCloudClient()
     .from("match_events")
     .select("sequence,event_type,payload,occurred_at")
@@ -839,7 +862,11 @@ export async function loadScoringPatches(matchId: string, afterSequence = 0): Pr
 }
 
 /** Adds a new player to a team's squad for this match (scorers only; their own club's teams). Returns the player id. */
-export async function addCloudSquadPlayer(matchId: string, teamId: string, name: string): Promise<string> {
+export async function addCloudSquadPlayer(
+  matchId: string,
+  teamId: string,
+  name: string,
+): Promise<string> {
   const { data, error } = await getCloudClient().rpc("add_match_squad_player", {
     p_match_id: matchId,
     p_team_id: teamId,

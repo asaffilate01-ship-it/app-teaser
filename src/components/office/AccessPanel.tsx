@@ -4,8 +4,16 @@ import { officeAccess, officeAreas, type AccessLevel } from "@/lib/club-office";
 import { office } from "@/lib/club-office-cloud";
 import { Empty, OfficeCard, Pill, nameOfMember, nameOfPlayer, type OfficeProps } from "./ui";
 
-const levelText: Record<AccessLevel, string> = { manage: "Runs it", request: "Can request", own: "Own / family only" };
-const levelTone: Record<AccessLevel, "good" | "warn" | undefined> = { manage: "good", request: "warn", own: undefined };
+const levelText: Record<AccessLevel, string> = {
+  manage: "Runs it",
+  request: "Can request",
+  own: "Own / family only",
+};
+const levelTone: Record<AccessLevel, "good" | "warn" | undefined> = {
+  manage: "good",
+  request: "warn",
+  own: undefined,
+};
 
 export function AccessPanel(props: OfficeProps) {
   const { role } = props;
@@ -24,7 +32,10 @@ export function AccessPanel(props: OfficeProps) {
           ))}
         </div>
       </OfficeCard>
-      <OfficeCard title="Who can do what" description="Change someone's role from Operations → Members. Admins can only manage roles below their own, and nobody can change their own role.">
+      <OfficeCard
+        title="Who can do what"
+        description="Change someone's role from Operations → Members. Admins can only manage roles below their own, and nobody can change their own role."
+      >
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-xs">
             <thead>
@@ -55,7 +66,9 @@ export function AccessPanel(props: OfficeProps) {
           </table>
         </div>
         <p className="office-meta mt-3">
-          Junior lifts also need a driver approved by an owner or safeguarding officer, plus a parent's yes. Team sheets stay hidden until published. Other clubs never see who booked your ground.
+          Junior lifts also need a driver approved by an owner or safeguarding officer, plus a
+          parent's yes. Team sheets stay hidden until published. Other clubs never see who booked
+          your ground.
         </p>
       </OfficeCard>
       {can(role, "guardians.manage") && <Family {...props} />}
@@ -67,7 +80,9 @@ function Family({ data, club, organisationId, act }: OfficeProps) {
   const [playerId, setPlayerId] = useState("");
   const [userId, setUserId] = useState("");
   const [relationship, setRelationship] = useState("parent");
-  const players = [...club.players].sort((a, b) => Number(b.isJunior) - Number(a.isJunior) || a.name.localeCompare(b.name));
+  const players = [...club.players].sort(
+    (a, b) => Number(b.isJunior) - Number(a.isJunior) || a.name.localeCompare(b.name),
+  );
   return (
     <OfficeCard
       title="Parents and guardians"
@@ -78,10 +93,19 @@ function Family({ data, club, organisationId, act }: OfficeProps) {
         onSubmit={(event) => {
           event.preventDefault();
           if (!playerId || !userId) return;
-          void act(() => office.linkGuardian({ organisationId, playerId, userId, relationship }), "Parent linked").then((ok) => ok && setUserId(""));
+          void act(
+            () => office.linkGuardian({ organisationId, playerId, userId, relationship }),
+            "Parent linked",
+          ).then((ok) => ok && setUserId(""));
         }}
       >
-        <select aria-label="Player" required className="scorer-input" value={playerId} onChange={(event) => setPlayerId(event.target.value)}>
+        <select
+          aria-label="Player"
+          required
+          className="scorer-input"
+          value={playerId}
+          onChange={(event) => setPlayerId(event.target.value)}
+        >
           <option value="">Choose player</option>
           {players.map((player) => (
             <option key={player.id} value={player.id}>
@@ -90,7 +114,13 @@ function Family({ data, club, organisationId, act }: OfficeProps) {
             </option>
           ))}
         </select>
-        <select aria-label="Parent or guardian" required className="scorer-input" value={userId} onChange={(event) => setUserId(event.target.value)}>
+        <select
+          aria-label="Parent or guardian"
+          required
+          className="scorer-input"
+          value={userId}
+          onChange={(event) => setUserId(event.target.value)}
+        >
           <option value="">Choose member</option>
           {club.members.map((member) => (
             <option key={member.userId} value={member.userId}>
@@ -98,7 +128,12 @@ function Family({ data, club, organisationId, act }: OfficeProps) {
             </option>
           ))}
         </select>
-        <select aria-label="Relationship" className="scorer-input" value={relationship} onChange={(event) => setRelationship(event.target.value)}>
+        <select
+          aria-label="Relationship"
+          className="scorer-input"
+          value={relationship}
+          onChange={(event) => setRelationship(event.target.value)}
+        >
           <option value="parent">Parent</option>
           <option value="guardian">Guardian</option>
           <option value="carer">Carer</option>
@@ -117,7 +152,11 @@ function Family({ data, club, organisationId, act }: OfficeProps) {
                   {link.relationship} of {nameOfPlayer(club, link.player_id)}
                 </span>
               </span>
-              <button type="button" className="app-chip-button" onClick={() => void act(() => office.unlinkGuardian(link.id), "Link removed")}>
+              <button
+                type="button"
+                className="app-chip-button"
+                onClick={() => void act(() => office.unlinkGuardian(link.id), "Link removed")}
+              >
                 Remove
               </button>
             </div>

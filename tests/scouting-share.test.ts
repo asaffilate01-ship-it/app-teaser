@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { hashShareToken, newShareToken, shareExpiry, shareLink } from "../src/lib/scouting-share.ts";
+import {
+  hashShareToken,
+  newShareToken,
+  shareExpiry,
+  shareLink,
+} from "../src/lib/scouting-share.ts";
 
 test("share tokens are long, random and stored only as a 64-character hash", async () => {
   const a = newShareToken();
@@ -10,7 +15,10 @@ test("share tokens are long, random and stored only as a 64-character hash", asy
   assert.match(a, /^[A-Za-z0-9_-]+$/);
   const hash = await hashShareToken(a);
   assert.match(hash, /^[0-9a-f]{64}$/);
-  assert.equal(await hashShareToken("abc"), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+  assert.equal(
+    await hashShareToken("abc"),
+    "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+  );
 });
 
 test("shared links expire after at most 180 days", () => {

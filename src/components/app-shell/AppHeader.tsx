@@ -26,7 +26,12 @@ export function AppHeader({
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2.5">
           {onBack && (
-            <button type="button" onClick={onBack} aria-label={backLabel} className="app-icon-button">
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label={backLabel}
+              className="app-icon-button"
+            >
               <ArrowLeft className="size-4" aria-hidden="true" />
             </button>
           )}

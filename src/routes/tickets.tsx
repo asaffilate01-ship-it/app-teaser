@@ -11,9 +11,17 @@ export const Route = createFileRoute("/tickets")({
   head: () => ({
     meta: [
       { title: "My match tickets — CricLume" },
-      { name: "description", content: "Your CricLume match tickets: payment status and the ticket code to show at the gate." },
+      {
+        name: "description",
+        content:
+          "Your CricLume match tickets: payment status and the ticket code to show at the gate.",
+      },
       { property: "og:title", content: "My match tickets — CricLume" },
-      { property: "og:description", content: "Your CricLume match tickets: payment status and the ticket code to show at the gate." },
+      {
+        property: "og:description",
+        content:
+          "Your CricLume match tickets: payment status and the ticket code to show at the gate.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -39,7 +47,9 @@ function MyTicketsPage() {
     void refresh();
   }, [refresh]);
   const now = Date.now();
-  const upcoming = (tickets ?? []).filter((t) => new Date(t.startsAt).getTime() > now - 6 * 3600_000 && t.status !== "cancelled");
+  const upcoming = (tickets ?? []).filter(
+    (t) => new Date(t.startsAt).getTime() > now - 6 * 3600_000 && t.status !== "cancelled",
+  );
   const past = (tickets ?? []).filter((t) => !upcoming.includes(t));
   return (
     <div className="club-site" data-accent="crimson">
@@ -51,7 +61,11 @@ function MyTicketsPage() {
           </Link>
           <div className="club-header-tools">
             {session && (
-              <button type="button" className="club-button club-button-ghost club-button-sm" onClick={() => void signOut()}>
+              <button
+                type="button"
+                className="club-button club-button-ghost club-button-sm"
+                onClick={() => void signOut()}
+              >
                 Sign out
               </button>
             )}
@@ -63,7 +77,9 @@ function MyTicketsPage() {
         <div className="club-page-head">
           <div>
             <h1>My tickets</h1>
-            <p className="mt-1 text-sm opacity-80">Show the ticket code at the gate. Tickets you buy on any club's website appear here.</p>
+            <p className="mt-1 text-sm opacity-80">
+              Show the ticket code at the gate. Tickets you buy on any club's website appear here.
+            </p>
           </div>
         </div>
         {loading ? (
@@ -87,21 +103,33 @@ function MyTicketsPage() {
           <section className="club-card text-center">
             <Ticket className="mx-auto size-8 opacity-60" aria-hidden="true" />
             <p className="mt-2 font-bold">No tickets yet</p>
-            <p className="text-sm opacity-75">Open your club's website and tap Tickets to buy some.</p>
+            <p className="text-sm opacity-75">
+              Open your club's website and tap Tickets to buy some.
+            </p>
           </section>
         ) : (
           <>
             <section className="space-y-3" aria-label="Coming up">
               {upcoming.length === 0 && <p className="text-sm opacity-75">No upcoming tickets.</p>}
               {upcoming.map((ticket) => (
-                <MyTicketCard key={ticket.id} ticket={ticket} showClub onChange={() => void refresh()} />
+                <MyTicketCard
+                  key={ticket.id}
+                  ticket={ticket}
+                  showClub
+                  onChange={() => void refresh()}
+                />
               ))}
             </section>
             {past.length > 0 && (
               <section className="space-y-3" aria-label="Past and cancelled">
                 <h2 className="text-lg font-bold opacity-80">Past and cancelled</h2>
                 {past.map((ticket) => (
-                  <MyTicketCard key={ticket.id} ticket={ticket} showClub onChange={() => void refresh()} />
+                  <MyTicketCard
+                    key={ticket.id}
+                    ticket={ticket}
+                    showClub
+                    onChange={() => void refresh()}
+                  />
                 ))}
               </section>
             )}

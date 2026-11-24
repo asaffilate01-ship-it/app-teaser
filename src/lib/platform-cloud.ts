@@ -1,4 +1,6 @@
 import type { RealtimeChannel, User } from "@supabase/supabase-js";
+import { externalTeams } from "./external-teams.ts";
+export { externalTeams } from "./external-teams.ts";
 import { getCloudClient, invokePlatformFunction } from "@/lib/cloud";
 import type { CompetitionRules, PlatformRole, PointAdjustment } from "@/lib/platform";
 
@@ -682,34 +684,6 @@ export function subscribeToOrganisationOperations(
   };
 }
 
-/** Other clubs' teams entered in this organisation's competitions, named with their club so fixtures read clearly. */
-export function externalTeams(
-  rows: ReadonlyArray<{ competition_id: string; team_id: string; name: string; short_name: string; club_name: string }>,
-  ownIds: ReadonlySet<string>,
-): TeamRecord[] {
-  const byId = new Map<string, TeamRecord>();
-  for (const row of rows) {
-    if (ownIds.has(row.team_id)) continue;
-    const existing = byId.get(row.team_id);
-    if (existing) {
-      existing.competitionIds = [...(existing.competitionIds ?? []), row.competition_id];
-      continue;
-    }
-    const named = row.name.toLowerCase().includes(row.club_name.toLowerCase()) ? row.name : `${row.club_name} ${row.name}`;
-    byId.set(row.team_id, {
-      id: row.team_id,
-      name: named,
-      shortName: row.short_name,
-      ageGroup: null,
-      playerIds: [],
-      external: true,
-      clubName: row.club_name,
-      competitionIds: [row.competition_id],
-    });
-  }
-  return [...byId.values()];
-}
-
 export async function createTeam(input: {
   organisationId: string;
   name: string;
@@ -916,7 +890,10 @@ export async function createCameraRoom(input: {
 
 /** How many phones may join a camera room (1–16). Only camera directors for the match can change it. */
 export async function setCameraRoomCapacity(roomId: string, maxDevices: number): Promise<void> {
-  const { error } = await getCloudClient().rpc("set_camera_room_capacity", { p_room_id: roomId, p_max_devices: maxDevices });
+  const { error } = await getCloudClient().rpc("set_camera_room_capacity", {
+    p_room_id: roomId,
+    p_max_devices: maxDevices,
+  });
   if (error) throw error;
 }
 
@@ -981,7 +958,12 @@ export async function inviteMember(input: {
 }): Promise<void> {
   const { inviteClubMember } = await import("./members.functions");
   const result = await inviteClubMember({
-    data: { organisationId: input.organisationId, email: input.email, role: input.role, origin: window.location.origin },
+    data: {
+      organisationId: input.organisationId,
+      email: input.email,
+      role: input.role,
+      origin: window.location.origin,
+    },
   });
   if (!result.ok) throw new Error(result.reason);
 }

@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import { Bell, BellRing } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { browserServiceWorkerAllowed } from "@/lib/sw-guard";
 import { installMode } from "@/lib/install-app";
@@ -10,13 +17,18 @@ type Kind = "wickets" | "milestones" | "results";
 const KINDS: { id: Kind; label: string; hint: string }[] = [
   { id: "wickets", label: "Wickets", hint: "Every wicket, with the score" },
   { id: "milestones", label: "Milestones", hint: "Fifties, hundreds and five-fors" },
-  { id: "results", label: "Innings and result", hint: "End of each innings, stumps and the result" },
+  {
+    id: "results",
+    label: "Innings and result",
+    hint: "End of each innings, stumps and the result",
+  },
 ];
 type Support = "checking" | "ok" | "preview" | "ios-install" | "unsupported" | "denied";
 
 const storageKey = (slug: string) => `criclume-alerts:${slug}`;
 const toKey = (base64: string) => {
-  const padded = base64.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((base64.length + 3) % 4);
+  const padded =
+    base64.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((base64.length + 3) % 4);
   return Uint8Array.from(atob(padded), (char) => char.charCodeAt(0));
 };
 
@@ -28,10 +40,19 @@ export function MatchAlerts({ slug }: { slug: string }) {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    const standalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as { standalone?: boolean }).standalone === true;
-    const mode = installMode({ userAgent: navigator.userAgent, standalone, canPrompt: false, maxTouchPoints: navigator.maxTouchPoints });
-    if (!browserServiceWorkerAllowed()) setSupport(import.meta.env.PROD || "serviceWorker" in navigator ? "preview" : "unsupported");
-    else if (!("PushManager" in window) || !("Notification" in window)) setSupport(mode === "ios-safari" || mode === "ios-other" ? "ios-install" : "unsupported");
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (navigator as { standalone?: boolean }).standalone === true;
+    const mode = installMode({
+      userAgent: navigator.userAgent,
+      standalone,
+      canPrompt: false,
+      maxTouchPoints: navigator.maxTouchPoints,
+    });
+    if (!browserServiceWorkerAllowed())
+      setSupport(import.meta.env.PROD || "serviceWorker" in navigator ? "preview" : "unsupported");
+    else if (!("PushManager" in window) || !("Notification" in window))
+      setSupport(mode === "ios-safari" || mode === "ios-other" ? "ios-install" : "unsupported");
     else if (Notification.permission === "denied") setSupport("denied");
     else setSupport("ok");
     const saved = window.localStorage.getItem(storageKey(slug));
@@ -68,7 +89,10 @@ export function MatchAlerts({ slug }: { slug: string }) {
       await navigator.serviceWorker.ready;
       const subscription =
         (await registration.pushManager.getSubscription()) ??
-        (await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toKey(publicKey) }));
+        (await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: toKey(publicKey),
+        }));
       const response = await fetch(`/api/public/push/${slug}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -106,20 +130,34 @@ export function MatchAlerts({ slug }: { slug: string }) {
     }
   }
 
-  const toggle = (id: Kind) => setKinds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+  const toggle = (id: Kind) =>
+    setKinds((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+    );
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button type="button" className={`hero-chip ${on ? "hero-chip-live" : ""}`} aria-label={on ? "Match alerts on" : "Get match alerts"}>
-          {on ? <BellRing className="size-3.5" aria-hidden="true" /> : <Bell className="size-3.5" aria-hidden="true" />}
+        <button
+          type="button"
+          className={`hero-chip ${on ? "hero-chip-live" : ""}`}
+          aria-label={on ? "Match alerts on" : "Get match alerts"}
+        >
+          {on ? (
+            <BellRing className="size-3.5" aria-hidden="true" />
+          ) : (
+            <Bell className="size-3.5" aria-hidden="true" />
+          )}
           <span className="hidden sm:inline">{on ? "Alerts on" : "Alerts"}</span>
         </button>
       </DialogTrigger>
       <DialogContent className="alerts-dialog max-w-md">
         <DialogHeader>
           <DialogTitle>Match alerts</DialogTitle>
-          <DialogDescription>Get a phone notification when something big happens in this match. No account or email needed.</DialogDescription>
+          <DialogDescription>
+            Get a phone notification when something big happens in this match. No account or email
+            needed.
+          </DialogDescription>
         </DialogHeader>
         {support === "ok" || support === "checking" ? (
           <div className="space-y-4">
@@ -127,7 +165,12 @@ export function MatchAlerts({ slug }: { slug: string }) {
               {KINDS.map((kind) => (
                 <li key={kind.id}>
                   <label className="flex cursor-pointer items-start gap-3">
-                    <Checkbox checked={kinds.includes(kind.id)} onCheckedChange={() => toggle(kind.id)} disabled={on || busy} className="mt-0.5" />
+                    <Checkbox
+                      checked={kinds.includes(kind.id)}
+                      onCheckedChange={() => toggle(kind.id)}
+                      disabled={on || busy}
+                      className="mt-0.5"
+                    />
                     <span>
                       <span className="block font-semibold">{kind.label}</span>
                       <span className="block text-sm text-muted-foreground">{kind.hint}</span>
@@ -137,11 +180,21 @@ export function MatchAlerts({ slug }: { slug: string }) {
               ))}
             </ul>
             {on ? (
-              <button type="button" className="action-secondary w-full" onClick={() => void turnOff()} disabled={busy}>
+              <button
+                type="button"
+                className="action-secondary w-full"
+                onClick={() => void turnOff()}
+                disabled={busy}
+              >
                 Turn off alerts
               </button>
             ) : (
-              <button type="button" className="action-primary w-full" onClick={() => void turnOn()} disabled={busy || support === "checking"}>
+              <button
+                type="button"
+                className="action-primary w-full"
+                onClick={() => void turnOn()}
+                disabled={busy || support === "checking"}
+              >
                 {busy ? "Turning on…" : "Turn on alerts"}
               </button>
             )}
@@ -150,9 +203,12 @@ export function MatchAlerts({ slug }: { slug: string }) {
         ) : (
           <p className="text-sm" role="status">
             {support === "preview" && "Alerts work on the live CricLume site, not in this preview."}
-            {support === "ios-install" && "On iPhone, first add CricLume to your Home Screen (Share → Add to Home Screen), then open this scoreboard from there to turn on alerts."}
-            {support === "denied" && "Notifications are blocked for this site. Allow them in your browser settings, then try again."}
-            {support === "unsupported" && "This browser can't show match alerts. Try Chrome, Edge, Firefox or Safari."}
+            {support === "ios-install" &&
+              "On iPhone, first add CricLume to your Home Screen (Share → Add to Home Screen), then open this scoreboard from there to turn on alerts."}
+            {support === "denied" &&
+              "Notifications are blocked for this site. Allow them in your browser settings, then try again."}
+            {support === "unsupported" &&
+              "This browser can't show match alerts. Try Chrome, Edge, Firefox or Safari."}
           </p>
         )}
       </DialogContent>

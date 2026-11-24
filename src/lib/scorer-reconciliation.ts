@@ -5,7 +5,13 @@ import type { CricketMatch, Delivery } from "./cricket";
  * scorer on another phone after a ball is recorded, so they never count as a scoring conflict.
  */
 function scoringPart(delivery: Delivery): unknown {
-  const { fieldZone: _zone, fielderId: _fielder, deliveryStyle: _style, dismissal, ...rest } = delivery;
+  const {
+    fieldZone: _zone,
+    fielderId: _fielder,
+    deliveryStyle: _style,
+    dismissal,
+    ...rest
+  } = delivery;
   if (!dismissal) return rest;
   const { fielderId: _catcher, catchZone: _catchZone, ...out } = dismissal;
   return { ...rest, dismissal: out };
@@ -71,14 +77,17 @@ export function reviewRemoteScorerSnapshot(
       if (!cloudDelivery || deviceDelivery.id !== cloudDelivery.id) {
         return reject(`Delivery ${j + 1} of innings ${i + 1} differs between scorers.`);
       }
-      if (JSON.stringify(scoringPart(deviceDelivery)) !== JSON.stringify(scoringPart(cloudDelivery))) {
+      if (
+        JSON.stringify(scoringPart(deviceDelivery)) !== JSON.stringify(scoringPart(cloudDelivery))
+      ) {
         return reject(`Delivery ${j + 1} of innings ${i + 1} was edited on another scorer.`);
       }
     }
     if (
       fromCloud.deliveries.length === onDevice.deliveries.length &&
       // The bowler and end may be changed by the bowling & fielding scorer between balls.
-      (onDevice.strikerId !== fromCloud.strikerId || onDevice.nonStrikerId !== fromCloud.nonStrikerId)
+      (onDevice.strikerId !== fromCloud.strikerId ||
+        onDevice.nonStrikerId !== fromCloud.nonStrikerId)
     ) {
       return reject(`Scorer assignments in innings ${i + 1} were changed without a new delivery.`);
     }

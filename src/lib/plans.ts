@@ -7,15 +7,35 @@ export type PlanFeature = "basicScoring" | "scoringAnalytics" | "video" | "custo
 export type FeatureAccess = "included" | "addon" | "none";
 
 export const planOrder: PlanId[] = ["starter", "club", "league"];
-export const featureOrder: PlanFeature[] = ["basicScoring", "scoringAnalytics", "video", "customDomain"];
+export const featureOrder: PlanFeature[] = [
+  "basicScoring",
+  "scoringAnalytics",
+  "video",
+  "customDomain",
+];
 
 export const planFeatures: Record<PlanId, Record<PlanFeature, FeatureAccess>> = {
   // Free: basic scoring only, supported by ads. No analytics, no cameras.
-  starter: { basicScoring: "included", scoringAnalytics: "none", video: "none", customDomain: "none" },
+  starter: {
+    basicScoring: "included",
+    scoringAnalytics: "none",
+    video: "none",
+    customDomain: "none",
+  },
   // Paid plans: full scoring analytics. Video & video analytics cost extra.
-  club: { basicScoring: "included", scoringAnalytics: "included", video: "addon", customDomain: "none" },
+  club: {
+    basicScoring: "included",
+    scoringAnalytics: "included",
+    video: "addon",
+    customDomain: "none",
+  },
   // League: co-branded club website on the club's own domain (database: club_custom_domain_allowed).
-  league: { basicScoring: "included", scoringAnalytics: "included", video: "addon", customDomain: "included" },
+  league: {
+    basicScoring: "included",
+    scoringAnalytics: "included",
+    video: "addon",
+    customDomain: "included",
+  },
 };
 
 /** Whether a plan can use a feature, given whether the video add-on was bought. */
@@ -40,7 +60,10 @@ export function showsAds(_plan: PlanId): boolean {
  * Free: 0% (ads cover CricLume's costs). Paid plan: 30%. Paid plan with the video add-on ("full system"): 50%.
  * Must match the database function `promo_share_percent`, which is what payouts use.
  */
-export function adRevenueSharePercent(plan: PlanId, options: { videoAddon?: boolean } = {}): number {
+export function adRevenueSharePercent(
+  plan: PlanId,
+  options: { videoAddon?: boolean } = {},
+): number {
   if (plan === "starter") return 0;
   return options.videoAddon === true ? 50 : 30;
 }
@@ -68,6 +91,16 @@ export const sectionFeature: Partial<Record<string, PlanFeature>> = {
 };
 
 export type PlanGate = "open" | "badge" | "locked";
+
+/** If the club entitlement RPC fails, NEVER grant an unverified paid feature
+ * once paid locks are enabled. The backend must separately enforce entitlements. */
+export function gateWhenPlanUnknown(
+  feature: PlanFeature | undefined,
+  enforced = planLocksEnforced,
+): PlanGate {
+  if (!feature) return "open";
+  return enforced ? "locked" : "badge";
+}
 
 /** What a club sees on a section: open, open with a "Paid plan" badge (before go-live), or locked. */
 export function planGate(

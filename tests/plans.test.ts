@@ -1,6 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { adRevenueSharePercent, canUseFeature, planGate, planLocksEnforced, sectionFeature, showsAds } from "../src/lib/plans.ts";
+import {
+  adRevenueSharePercent,
+  canUseFeature,
+  gateWhenPlanUnknown,
+  planGate,
+  planLocksEnforced,
+  sectionFeature,
+  showsAds,
+} from "../src/lib/plans.ts";
 
 test("free plan is basic scoring only, with ads", () => {
   assert.equal(canUseFeature("starter", "basicScoring"), true);
@@ -62,4 +70,11 @@ test("once locks are on, free clubs are locked out of analysis and cameras; paid
   assert.equal(planGate("club", "video", { enforced: true }), "locked");
   assert.equal(planGate("club", "video", { enforced: true, videoAddon: true }), "open");
   assert.equal(planGate("league", "video", { enforced: true, videoAddon: true }), "open");
+});
+
+test("unverified club entitlements do not unlock paid features when production locks are enabled", () => {
+  assert.equal(gateWhenPlanUnknown("video", true), "locked");
+  assert.equal(gateWhenPlanUnknown("scoringAnalytics", true), "locked");
+  assert.equal(gateWhenPlanUnknown(undefined, true), "open");
+  assert.equal(gateWhenPlanUnknown("video", false), "badge");
 });

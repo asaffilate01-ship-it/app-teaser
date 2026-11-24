@@ -13,7 +13,9 @@ export function devicesToSignOut<T extends { id: string; signedInAt: string }>(
   limit: number = deviceLimit,
 ): T[] {
   const newestFirst = [...active].sort(
-    (a, b) => new Date(b.signedInAt).getTime() - new Date(a.signedInAt).getTime() || a.id.localeCompare(b.id),
+    (a, b) =>
+      new Date(b.signedInAt).getTime() - new Date(a.signedInAt).getTime() ||
+      a.id.localeCompare(b.id),
   );
   return newestFirst.slice(limit).reverse();
 }
@@ -26,7 +28,9 @@ export function deviceLabel(userAgent: string): string {
     : /iPhone/.test(ua)
       ? "iPhone"
       : /Android/.test(ua)
-        ? /Mobile/.test(ua) ? "Android phone" : "Android tablet"
+        ? /Mobile/.test(ua)
+          ? "Android phone"
+          : "Android tablet"
         : /Macintosh|Mac OS X/.test(ua)
           ? "Mac"
           : /Windows/.test(ua)

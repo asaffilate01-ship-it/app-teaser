@@ -8,10 +8,26 @@ import { allFieldZones } from "./field-positions.ts";
 export type ScoringDuty = "lead" | "batting" | "bowling" | "video";
 
 export const scoringDuties: { id: ScoringDuty; label: string; detail: string }[] = [
-  { id: "lead", label: "Lead scorer", detail: "Everything: balls, bowling, fielding, corrections and video." },
-  { id: "batting", label: "Batting & runs", detail: "Records every ball: runs, extras, wickets and who's on strike." },
-  { id: "bowling", label: "Bowling & fielding", detail: "Picks the bowler and adds fielder, fielding position and ball type." },
-  { id: "video", label: "Video feed", detail: "Runs the camera room and phones. Can't change the score." },
+  {
+    id: "lead",
+    label: "Lead scorer",
+    detail: "Everything: balls, bowling, fielding, corrections and video.",
+  },
+  {
+    id: "batting",
+    label: "Batting & runs",
+    detail: "Records every ball: runs, extras, wickets and who's on strike.",
+  },
+  {
+    id: "bowling",
+    label: "Bowling & fielding",
+    detail: "Picks the bowler and adds fielder, fielding position and ball type.",
+  },
+  {
+    id: "video",
+    label: "Video feed",
+    detail: "Runs the camera room and phones. Can't change the score.",
+  },
 ];
 
 export function dutyLabel(duty: ScoringDuty): string {
@@ -76,8 +92,22 @@ export interface DeliveryTag {
 }
 
 export type ScoringPatch =
-  | { kind: "delivery.tagged"; sequence: number; occurredAt: string; inningsId: string; deliveryId: string; tag: DeliveryTag }
-  | { kind: "bowling.updated"; sequence: number; occurredAt: string; inningsId: string; bowlerId: string; end?: DeliveryEnd | undefined };
+  | {
+      kind: "delivery.tagged";
+      sequence: number;
+      occurredAt: string;
+      inningsId: string;
+      deliveryId: string;
+      tag: DeliveryTag;
+    }
+  | {
+      kind: "bowling.updated";
+      sequence: number;
+      occurredAt: string;
+      inningsId: string;
+      bowlerId: string;
+      end?: DeliveryEnd | undefined;
+    };
 
 export const patchEventTypes = ["delivery.tagged", "bowling.updated"] as const;
 
@@ -85,7 +115,14 @@ export function isPatchEventType(eventType: string): boolean {
   return (patchEventTypes as readonly string[]).includes(eventType);
 }
 
-const styles: readonly DeliveryStyle[] = ["Fast", "Medium", "Off spin", "Leg spin", "Left-arm spin", "Other"];
+const styles: readonly DeliveryStyle[] = [
+  "Fast",
+  "Medium",
+  "Off spin",
+  "Leg spin",
+  "Left-arm spin",
+  "Other",
+];
 
 function readTag(value: unknown): DeliveryTag | null {
   if (!value || typeof value !== "object") return null;
@@ -122,7 +159,14 @@ export function readPatchEvent(event: {
     const deliveryId = event.payload["deliveryId"];
     const tag = readTag(event.payload["tag"]);
     if (typeof deliveryId !== "string" || !deliveryId || !tag) return null;
-    return { kind: "delivery.tagged", sequence: event.sequence, occurredAt, inningsId, deliveryId, tag };
+    return {
+      kind: "delivery.tagged",
+      sequence: event.sequence,
+      occurredAt,
+      inningsId,
+      deliveryId,
+      tag,
+    };
   }
   if (event.eventType === "bowling.updated") {
     const bowlerId = event.payload["bowlerId"];
@@ -227,7 +271,8 @@ export function ballsNeedingFielding(match: CricketMatch, limit = 12) {
     .map((ball) => ({
       ball,
       needsFielding:
-        (ball.fieldZone === "Not recorded" && (ball.batterRuns > 0 || ball.extras.bye + ball.extras.legBye > 0)) ||
+        (ball.fieldZone === "Not recorded" &&
+          (ball.batterRuns > 0 || ball.extras.bye + ball.extras.legBye > 0)) ||
         (Boolean(ball.dismissal) &&
           ["caught", "run-out", "stumped"].includes(ball.dismissal!.type) &&
           !ball.dismissal!.fielderId),

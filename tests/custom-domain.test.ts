@@ -25,9 +25,7 @@ test("sitemap lists only the primary custom domain", () => {
 
 test("robots.txt advertises the sitemap on the primary domain", () => {
   const robots = read("../public/robots.txt");
-  const sitemapLine = robots
-    .split("\n")
-    .find((line) => line.toLowerCase().startsWith("sitemap:"));
+  const sitemapLine = robots.split("\n").find((line) => line.toLowerCase().startsWith("sitemap:"));
 
   assert.ok(sitemapLine, "robots.txt must declare a Sitemap line");
   assert.equal(sitemapLine.trim(), `Sitemap: https://${PRIMARY_DOMAIN}/sitemap.xml`);
@@ -39,7 +37,11 @@ test("no page metadata still points at the old Lovable address", () => {
     .filter((name) => name.endsWith(".tsx"))
     .filter((name) => read(`../src/routes/${name}`).includes(STALE_HOST));
 
-  assert.deepEqual(offenders, [], `routes still referencing ${STALE_HOST}: ${offenders.join(", ")}`);
+  assert.deepEqual(
+    offenders,
+    [],
+    `routes still referencing ${STALE_HOST}: ${offenders.join(", ")}`,
+  );
 });
 
 test("homepage declares the primary domain as canonical and as its share URL", () => {

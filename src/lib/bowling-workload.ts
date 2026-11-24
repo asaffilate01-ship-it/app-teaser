@@ -60,7 +60,10 @@ function currentOverIndex(legalBalls: number, ballsPerOver: number) {
 }
 
 /** Every pace bowler's workload in the current innings, worst first. Empty when no limits are set. */
-export function bowlingWorkload(match: CricketMatch, band: YouthBand | null | undefined = match.settings.rules?.youthBowling): BowlerLoad[] {
+export function bowlingWorkload(
+  match: CricketMatch,
+  band: YouthBand | null | undefined = match.settings.rules?.youthBowling,
+): BowlerLoad[] {
   if (!band) return [];
   const limit = youthBowlingLimits[band];
   const bpo = match.settings.ballsPerOver;
@@ -72,19 +75,33 @@ export function bowlingWorkload(match: CricketMatch, band: YouthBand | null | un
   const loads: BowlerLoad[] = [];
   const bowlerIds = [...new Set(innings.deliveries.map((delivery) => delivery.bowlerId))];
   for (const bowlerId of bowlerIds) {
-    const own = match.innings.flatMap((item) => item.deliveries.filter((delivery) => delivery.bowlerId === bowlerId));
-    const pace = own.filter((delivery) => paceStyles.includes(delivery.deliveryStyle)).length * 2 >= own.length;
+    const own = match.innings.flatMap((item) =>
+      item.deliveries.filter((delivery) => delivery.bowlerId === bowlerId),
+    );
+    const pace =
+      own.filter((delivery) => paceStyles.includes(delivery.deliveryStyle)).length * 2 >=
+      own.length;
     // Overs today: distinct overs per innings, only balls on the same date as the latest ball.
     let dayOvers = 0;
     for (const item of match.innings) {
       const overs = new Set(
         item.deliveries
-          .filter((delivery) => delivery.bowlerId === bowlerId && (!lastDate || delivery.recordedAt.slice(0, 10) === lastDate))
+          .filter(
+            (delivery) =>
+              delivery.bowlerId === bowlerId &&
+              (!lastDate || delivery.recordedAt.slice(0, 10) === lastDate),
+          )
           .map((delivery) => delivery.over),
       );
       dayOvers += overs.size;
     }
-    const overs = [...new Set(innings.deliveries.filter((delivery) => delivery.bowlerId === bowlerId).map((delivery) => delivery.over))].sort((a, b) => a - b);
+    const overs = [
+      ...new Set(
+        innings.deliveries
+          .filter((delivery) => delivery.bowlerId === bowlerId)
+          .map((delivery) => delivery.over),
+      ),
+    ].sort((a, b) => a - b);
     // Spells: overs from alternate ends (gap of 2). A bigger gap starts a new spell.
     let spell: number[] = [];
     for (const over of overs) {
@@ -106,25 +123,50 @@ export function bowlingWorkload(match: CricketMatch, band: YouthBand | null | un
       if (!inSpell && restOversLeft > 0) {
         status = "resting";
         message = `Resting: ${restOversLeft} more over${restOversLeft === 1 ? "" : "s"} from that end before bowling again.`;
-      } else if (bowlingNow ? spell.length > limit.spell || dayOvers > limit.day : spell.length >= limit.spell && dueNext) {
+      } else if (
+        bowlingNow
+          ? spell.length > limit.spell || dayOvers > limit.day
+          : spell.length >= limit.spell && dueNext
+      ) {
         status = "limit";
-        message = dayOvers > limit.day ? `Over the ${band} day limit of ${limit.day} overs.` : `Spell limit reached (${limit.spell} overs for ${band}). Needs a rest.`;
+        message =
+          dayOvers > limit.day
+            ? `Over the ${band} day limit of ${limit.day} overs.`
+            : `Spell limit reached (${limit.spell} overs for ${band}). Needs a rest.`;
       } else if (!bowlingNow && dayOvers >= limit.day) {
         status = "limit";
         message = `Day limit reached (${limit.day} overs for ${band}).`;
-      } else if (bowlingNow ? spell.length === limit.spell || dayOvers === limit.day : (dueNext ? spell.length + 1 : 1) === limit.spell || dayOvers + 1 === limit.day) {
+      } else if (
+        bowlingNow
+          ? spell.length === limit.spell || dayOvers === limit.day
+          : (dueNext ? spell.length + 1 : 1) === limit.spell || dayOvers + 1 === limit.day
+      ) {
         status = "last-over";
-        message = bowlingNow ? "Last over allowed in this spell or day." : "Next over would be the last one allowed.";
+        message = bowlingNow
+          ? "Last over allowed in this spell or day."
+          : "Next over would be the last one allowed.";
       }
     }
-    loads.push({ bowlerId, pace, dayOvers, spellOvers: spell.length, inSpell, restOversLeft, status, message });
+    loads.push({
+      bowlerId,
+      pace,
+      dayOvers,
+      spellOvers: spell.length,
+      inSpell,
+      restOversLeft,
+      status,
+      message,
+    });
   }
   const order: Record<LoadStatus, number> = { limit: 0, resting: 1, "last-over": 2, ok: 3 };
   return loads.sort((a, b) => order[a.status] - order[b.status] || b.dayOvers - a.dayOvers);
 }
 
 /** Whether this bowler may start a new over now under the junior limits; null when there are no limits. */
-export function canBowlNextOver(match: CricketMatch, bowlerId: string): { allowed: boolean; message: string } | null {
+export function canBowlNextOver(
+  match: CricketMatch,
+  bowlerId: string,
+): { allowed: boolean; message: string } | null {
   const band = match.settings.rules?.youthBowling;
   if (!band) return null;
   const load = bowlingWorkload(match, band).find((item) => item.bowlerId === bowlerId);

@@ -1,10 +1,27 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Banknote } from "lucide-react";
 import { can } from "@/lib/platform";
-import { currencyDigits, feeTotals, formatMoney, isOverdue, maxPayment, toMinor, type ChargeLike } from "@/lib/club-office";
+import {
+  currencyDigits,
+  feeTotals,
+  formatMoney,
+  isOverdue,
+  maxPayment,
+  toMinor,
+  type ChargeLike,
+} from "@/lib/club-office";
 import { office, type FeeCharge, type FeeSchedule } from "@/lib/club-office-cloud";
 import { findRegion, regionFromLocale } from "@/lib/pricing";
-import { Empty, OfficeCard, OfficeField, Pill, currencies, day, nameOfPlayer, type OfficeProps } from "./ui";
+import {
+  Empty,
+  OfficeCard,
+  OfficeField,
+  Pill,
+  currencies,
+  day,
+  nameOfPlayer,
+  type OfficeProps,
+} from "./ui";
 import { ClaimsQueue, HowToPay, MyClaims, PaymentAccounts, PayForm } from "./FeePayments";
 
 const methods = [
@@ -72,7 +89,10 @@ function MemberFees(props: OfficeProps) {
     return (
       <div className="space-y-4">
         {mine.some((charge) => maxPayment(asCharge(charge)) > 0) && <HowToPay {...props} />}
-        <OfficeCard title="My fees" description="Only you, your family and the club's treasurer can see these.">
+        <OfficeCard
+          title="My fees"
+          description="Only you, your family and the club's treasurer can see these."
+        >
           {mine.length === 0 ? (
             <Empty>Nothing to pay right now.</Empty>
           ) : (
@@ -87,14 +107,21 @@ function MemberFees(props: OfficeProps) {
                     </span>
                   </span>
                   <span className="flex flex-wrap items-center gap-2">
-                    {formatMoney(maxPayment(asCharge(charge)), charge.currency)} left {statusPill(charge)}
+                    {formatMoney(maxPayment(asCharge(charge)), charge.currency)} left{" "}
+                    {statusPill(charge)}
                     {maxPayment(asCharge(charge)) > 0 && (
-                      <button type="button" className="action-primary" onClick={() => setPaying(paying === charge.id ? null : charge.id)}>
+                      <button
+                        type="button"
+                        className="action-primary"
+                        onClick={() => setPaying(paying === charge.id ? null : charge.id)}
+                      >
                         I've paid
                       </button>
                     )}
                   </span>
-                  {paying === charge.id && <PayForm {...props} charge={charge} onDone={() => setPaying(null)} />}
+                  {paying === charge.id && (
+                    <PayForm {...props} charge={charge} onDone={() => setPaying(null)} />
+                  )}
                 </div>
               ))}
             </div>
@@ -117,7 +144,8 @@ function FeeList({ schedules }: { schedules: FeeSchedule[] }) {
           <div key={item.id} className="office-row">
             <span className="font-bold">{item.name}</span>
             <span>
-              {formatMoney(Number(item.amount_minor), item.currency)} · {frequencies.find(([value]) => value === item.frequency)?.[1]}
+              {formatMoney(Number(item.amount_minor), item.currency)} ·{" "}
+              {frequencies.find(([value]) => value === item.frequency)?.[1]}
             </span>
           </div>
         ))}
@@ -184,23 +212,51 @@ function NewSchedule({ data, organisationId, club, act }: OfficeProps) {
     }
   };
   return (
-    <OfficeCard title="Add a fee" description="Subs, match fees, tour costs or kit levies. Then charge a team or the whole club in one tap.">
-      <form onSubmit={(event) => void submit(event)} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <OfficeCard
+      title="Add a fee"
+      description="Subs, match fees, tour costs or kit levies. Then charge a team or the whole club in one tap."
+    >
+      <form
+        onSubmit={(event) => void submit(event)}
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+      >
         <OfficeField label="Name" className="lg:col-span-2">
-          <input required maxLength={120} className="scorer-input" value={name} onChange={(event) => setName(event.target.value)} placeholder="Senior season subs" />
+          <input
+            required
+            maxLength={120}
+            className="scorer-input"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Senior season subs"
+          />
         </OfficeField>
         <OfficeField label="Amount">
-          <input required inputMode="decimal" className="scorer-input" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="25,000" />
+          <input
+            required
+            inputMode="decimal"
+            className="scorer-input"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            placeholder="25,000"
+          />
         </OfficeField>
         <OfficeField label="Currency">
-          <select className="scorer-input" value={currency} onChange={(event) => setCurrency(event.target.value)}>
+          <select
+            className="scorer-input"
+            value={currency}
+            onChange={(event) => setCurrency(event.target.value)}
+          >
             {currencies.map((code) => (
               <option key={code}>{code}</option>
             ))}
           </select>
         </OfficeField>
         <OfficeField label="How often">
-          <select className="scorer-input" value={frequency} onChange={(event) => setFrequency(event.target.value)}>
+          <select
+            className="scorer-input"
+            value={frequency}
+            onChange={(event) => setFrequency(event.target.value)}
+          >
             {frequencies.map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
@@ -209,10 +265,19 @@ function NewSchedule({ data, organisationId, club, act }: OfficeProps) {
           </select>
         </OfficeField>
         <OfficeField label="Due by">
-          <input type="date" className="scorer-input" value={dueOn} onChange={(event) => setDueOn(event.target.value)} />
+          <input
+            type="date"
+            className="scorer-input"
+            value={dueOn}
+            onChange={(event) => setDueOn(event.target.value)}
+          />
         </OfficeField>
         <OfficeField label="Team">
-          <select className="scorer-input" value={teamId} onChange={(event) => setTeamId(event.target.value)}>
+          <select
+            className="scorer-input"
+            value={teamId}
+            onChange={(event) => setTeamId(event.target.value)}
+          >
             <option value="">Whole club</option>
             {club.teams.map((team) => (
               <option key={team.id} value={team.id}>
@@ -234,25 +299,36 @@ function NewSchedule({ data, organisationId, club, act }: OfficeProps) {
 function Schedules({ data, club, act }: OfficeProps) {
   if (!data.schedules.length) return null;
   return (
-    <OfficeCard title="Fees" description="Charging twice is safe — anyone already charged is skipped.">
+    <OfficeCard
+      title="Fees"
+      description="Charging twice is safe — anyone already charged is skipped."
+    >
       <div className="space-y-2">
         {data.schedules.map((schedule) => {
           const team = club.teams.find((item) => item.id === schedule.team_id);
           const playerIds = team ? team.playerIds : club.players.map((player) => player.id);
-          const charged = data.charges.filter((charge) => charge.schedule_id === schedule.id).length;
+          const charged = data.charges.filter(
+            (charge) => charge.schedule_id === schedule.id,
+          ).length;
           return (
             <div key={schedule.id} className="office-row">
               <span>
                 <span className="font-bold">{schedule.name}</span>
                 <span className="office-meta block">
-                  {formatMoney(Number(schedule.amount_minor), schedule.currency)} · {team?.name ?? "Whole club"} · {charged} charged
+                  {formatMoney(Number(schedule.amount_minor), schedule.currency)} ·{" "}
+                  {team?.name ?? "Whole club"} · {charged} charged
                 </span>
               </span>
               <button
                 type="button"
                 className="app-chip-button"
                 disabled={!playerIds.length}
-                onClick={() => void act(() => office.chargePlayers(schedule, playerIds), `Charged ${playerIds.length} players`)}
+                onClick={() =>
+                  void act(
+                    () => office.chargePlayers(schedule, playerIds),
+                    `Charged ${playerIds.length} players`,
+                  )
+                }
               >
                 Charge {playerIds.length} players
               </button>
@@ -270,17 +346,29 @@ function Charges({ data, club, organisationId, act }: OfficeProps) {
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState<string>("cash");
   const [reference, setReference] = useState("");
-  const rows = data.charges.filter((charge) => filter === "all" || charge.status === "due" || charge.status === "part_paid");
+  const rows = data.charges.filter(
+    (charge) => filter === "all" || charge.status === "due" || charge.status === "part_paid",
+  );
   return (
     <OfficeCard
       title="Who owes what"
       description="Every payment is logged with who recorded it."
       action={
         <span className="flex gap-1">
-          <button type="button" className="office-choice" aria-pressed={filter === "owed"} onClick={() => setFilter("owed")}>
+          <button
+            type="button"
+            className="office-choice"
+            aria-pressed={filter === "owed"}
+            onClick={() => setFilter("owed")}
+          >
             Still owed
           </button>
-          <button type="button" className="office-choice" aria-pressed={filter === "all"} onClick={() => setFilter("all")}>
+          <button
+            type="button"
+            className="office-choice"
+            aria-pressed={filter === "all"}
+            onClick={() => setFilter("all")}
+          >
             All
           </button>
         </span>
@@ -299,12 +387,19 @@ function Charges({ data, club, organisationId, act }: OfficeProps) {
                 <span className="min-w-0">
                   <span className="font-bold">{nameOfPlayer(club, charge.player_id)}</span>
                   <span className="office-meta block">
-                    {charge.description} · {formatMoney(Number(charge.amount_minor), charge.currency)}
-                    {payments.length ? ` · ${payments.length} payment${payments.length === 1 ? "" : "s"}` : ""}
+                    {charge.description} ·{" "}
+                    {formatMoney(Number(charge.amount_minor), charge.currency)}
+                    {payments.length
+                      ? ` · ${payments.length} payment${payments.length === 1 ? "" : "s"}`
+                      : ""}
                   </span>
                 </span>
                 <span className="flex flex-wrap items-center gap-2">
-                  {left > 0 && <span className="text-xs font-bold">{formatMoney(left, charge.currency)} left</span>}
+                  {left > 0 && (
+                    <span className="text-xs font-bold">
+                      {formatMoney(left, charge.currency)} left
+                    </span>
+                  )}
                   {statusPill(charge)}
                   {left > 0 && (
                     <button
@@ -338,15 +433,33 @@ function Charges({ data, club, organisationId, act }: OfficeProps) {
                       ).then((ok) => ok && setPaying(null));
                     }}
                   >
-                    <input aria-label="Amount paid" inputMode="decimal" className="scorer-input" value={amount} onChange={(event) => setAmount(event.target.value)} />
-                    <select aria-label="Paid by" className="scorer-input" value={method} onChange={(event) => setMethod(event.target.value)}>
+                    <input
+                      aria-label="Amount paid"
+                      inputMode="decimal"
+                      className="scorer-input"
+                      value={amount}
+                      onChange={(event) => setAmount(event.target.value)}
+                    />
+                    <select
+                      aria-label="Paid by"
+                      className="scorer-input"
+                      value={method}
+                      onChange={(event) => setMethod(event.target.value)}
+                    >
                       {methods.map(([value, label]) => (
                         <option key={value} value={value}>
                           {label}
                         </option>
                       ))}
                     </select>
-                    <input aria-label="Reference" maxLength={120} className="scorer-input" placeholder="Receipt / ref (optional)" value={reference} onChange={(event) => setReference(event.target.value)} />
+                    <input
+                      aria-label="Reference"
+                      maxLength={120}
+                      className="scorer-input"
+                      placeholder="Receipt / ref (optional)"
+                      value={reference}
+                      onChange={(event) => setReference(event.target.value)}
+                    />
                     <button disabled={!minor || minor > left} className="action-primary">
                       Save
                     </button>
@@ -355,7 +468,8 @@ function Charges({ data, club, organisationId, act }: OfficeProps) {
                       className="action-secondary"
                       onClick={() => {
                         const reason = window.prompt("Why is this being waived?") ?? "";
-                        if (reason) void act(() => office.waive(charge.id, reason), "Charge waived");
+                        if (reason)
+                          void act(() => office.waive(charge.id, reason), "Charge waived");
                       }}
                     >
                       Waive

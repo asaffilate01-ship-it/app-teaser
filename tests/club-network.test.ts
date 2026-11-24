@@ -1,13 +1,28 @@
-import { describe, expect, test } from "bun:test";
-import { cleanPlace, placeLine, provinceNames, regionNames, townNames, type GeoCountry } from "../src/lib/geo";
-import { canAddTeam, suggestedShortName, suggestedTeamName } from "../src/lib/team-types";
-import { teamLimit } from "../src/lib/plans";
-import { externalTeams } from "../src/lib/platform-cloud";
+import { describe, test } from "node:test";
+import { expect } from "./assert-expect.ts";
+import {
+  cleanPlace,
+  placeLine,
+  provinceNames,
+  regionNames,
+  townNames,
+  type GeoCountry,
+} from "../src/lib/geo.ts";
+import { canAddTeam, suggestedShortName, suggestedTeamName } from "../src/lib/team-types.ts";
+import { teamLimit } from "../src/lib/plans.ts";
+import { externalTeams } from "../src/lib/external-teams.ts";
 
 const sample: GeoCountry = {
   v: 1,
   p: [
-    { n: "Punjab", r: [{ n: "Lahore", t: ["Lahore", "Model Town"] }, { n: "Multan", t: ["Multan"] }], t: [] },
+    {
+      n: "Punjab",
+      r: [
+        { n: "Lahore", t: ["Lahore", "Model Town"] },
+        { n: "Multan", t: ["Multan"] },
+      ],
+      t: [],
+    },
     { n: "Islamabad", r: [], t: ["Islamabad", "Saidpur"] },
   ],
 };
@@ -24,14 +39,21 @@ describe("club location lists", () => {
     expect(townNames(sample, "Islamabad", "")).toEqual(["Islamabad", "Saidpur"]);
   });
   test("saved places are trimmed to the database limits", () => {
-    const clean = cleanPlace({ country: "PK", province: ` ${"P".repeat(70)} `, district: "x".repeat(90), town: " Lahore " });
+    const clean = cleanPlace({
+      country: "PK",
+      province: ` ${"P".repeat(70)} `,
+      district: "x".repeat(90),
+      town: " Lahore ",
+    });
     expect(clean.province.length).toBe(60);
     expect(clean.district.length).toBe(80);
     expect(clean.town).toBe("Lahore");
     expect(cleanPlace({ country: "pk", province: "", district: "", town: "" }).country).toBe("");
   });
   test("place line reads town first and drops repeats", () => {
-    expect(placeLine({ town: "Lahore", district: "Lahore", province: "Punjab" })).toBe("Lahore, Punjab");
+    expect(placeLine({ town: "Lahore", district: "Lahore", province: "Punjab" })).toBe(
+      "Lahore, Punjab",
+    );
   });
 });
 
@@ -58,9 +80,27 @@ describe("invited clubs' teams", () => {
   test("carry their club name and every competition they entered", () => {
     const teams = externalTeams(
       [
-        { competition_id: "c1", team_id: "t1", name: "1st XI", short_name: "KIN", club_name: "Kingsmead CC" },
-        { competition_id: "c2", team_id: "t1", name: "1st XI", short_name: "KIN", club_name: "Kingsmead CC" },
-        { competition_id: "c1", team_id: "own", name: "Ours", short_name: "OUR", club_name: "Riverside" },
+        {
+          competition_id: "c1",
+          team_id: "t1",
+          name: "1st XI",
+          short_name: "KIN",
+          club_name: "Kingsmead CC",
+        },
+        {
+          competition_id: "c2",
+          team_id: "t1",
+          name: "1st XI",
+          short_name: "KIN",
+          club_name: "Kingsmead CC",
+        },
+        {
+          competition_id: "c1",
+          team_id: "own",
+          name: "Ours",
+          short_name: "OUR",
+          club_name: "Riverside",
+        },
       ],
       new Set(["own"]),
     );

@@ -29,5 +29,9 @@ test("Pakistan price list shows the yearly prices", () => {
   assert.equal(pk.clubPrice, "₨25,000");
   assert.equal(pk.period, "per team / year");
   assert.equal(pk.addonPrice, "₨25,000");
-  assert.equal(findRegion("GB")!.addonPrice, undefined, "outside Pakistan the add-on stays quoted per club");
+  assert.equal(
+    findRegion("GB")!.addonPrice,
+    undefined,
+    "outside Pakistan the add-on stays quoted per club",
+  );
 });

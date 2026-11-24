@@ -43,7 +43,9 @@ export async function claimThisDevice(): Promise<number> {
 }
 
 export async function checkThisDevice(): Promise<DeviceStatus> {
-  const { data, error } = await getCloudClient().rpc("check_login_device", { p_device_key: thisDeviceKey() });
+  const { data, error } = await getCloudClient().rpc("check_login_device", {
+    p_device_key: thisDeviceKey(),
+  });
   if (error) throw error;
   return data === "active" || data === "revoked" ? data : "unknown";
 }

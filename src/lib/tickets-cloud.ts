@@ -46,16 +46,35 @@ export interface TicketPaymentOption {
 
 export type CheckInResult =
   | { result: "unknown" }
-  | { result: "admitted" | "already" | "not_valid"; title: string; name: string; quantity: number; at?: string; status?: string };
+  | {
+      result: "admitted" | "already" | "not_valid";
+      title: string;
+      name: string;
+      quantity: number;
+      at?: string;
+      status?: string;
+    };
 
 function fail(error: { message: string } | null) {
   if (error) throw new Error(friendly(error.message));
 }
 
-export async function loadTicketDesk(organisationId: string): Promise<{ listings: TicketListing[]; orders: TicketOrder[] }> {
+export async function loadTicketDesk(
+  organisationId: string,
+): Promise<{ listings: TicketListing[]; orders: TicketOrder[] }> {
   const [listings, orders] = await Promise.all([
-    supabase.from("ticket_listings").select("*").eq("organisation_id", organisationId).order("starts_at", { ascending: false }).limit(100),
-    supabase.from("ticket_orders").select("*").eq("organisation_id", organisationId).order("created_at", { ascending: false }).limit(1000),
+    supabase
+      .from("ticket_listings")
+      .select("*")
+      .eq("organisation_id", organisationId)
+      .order("starts_at", { ascending: false })
+      .limit(100),
+    supabase
+      .from("ticket_orders")
+      .select("*")
+      .eq("organisation_id", organisationId)
+      .order("created_at", { ascending: false })
+      .limit(1000),
   ]);
   fail(listings.error);
   fail(orders.error);
@@ -70,13 +89,24 @@ export const ticketDesk = {
     fail((await supabase.from("ticket_listings").update(patch).eq("id", id)).error);
   },
   async decide(orderId: string, confirm: boolean, note = "") {
-    fail((await supabase.rpc("decide_ticket_order", { p_order: orderId, p_confirm: confirm, p_note: note })).error);
+    fail(
+      (
+        await supabase.rpc("decide_ticket_order", {
+          p_order: orderId,
+          p_confirm: confirm,
+          p_note: note,
+        })
+      ).error,
+    );
   },
   async cancel(orderId: string) {
     fail((await supabase.rpc("cancel_ticket_order", { p_order: orderId })).error);
   },
   async checkIn(organisationId: string, code: string): Promise<CheckInResult> {
-    const { data, error } = await supabase.rpc("check_in_ticket", { p_org: organisationId, p_code: code });
+    const { data, error } = await supabase.rpc("check_in_ticket", {
+      p_org: organisationId,
+      p_code: code,
+    });
     fail(error);
     return data as unknown as CheckInResult;
   },
@@ -94,7 +124,14 @@ export async function loadTicketPaymentOptions(listingId: string): Promise<Ticke
   return (data ?? []) as TicketPaymentOption[];
 }
 
-export async function requestTickets(input: { listingId: string; quantity: number; name: string; phone: string; method: string; reference: string }) {
+export async function requestTickets(input: {
+  listingId: string;
+  quantity: number;
+  name: string;
+  phone: string;
+  method: string;
+  reference: string;
+}) {
   const { data, error } = await supabase.rpc("request_tickets", {
     p_listing: input.listingId,
     p_quantity: input.quantity,
@@ -110,5 +147,7 @@ export async function requestTickets(input: { listingId: string; quantity: numbe
 export async function fetchClubTickets(slug: string): Promise<PublicTicketListing[]> {
   const { data, error } = await supabase.rpc("get_club_tickets", { p_slug: slug });
   fail(error);
-  return ((data as unknown as { listings?: PublicTicketListing[] } | null)?.listings ?? []).map((row) => ({ ...row, priceMinor: Number(row.priceMinor), remaining: Number(row.remaining) }));
+  return ((data as unknown as { listings?: PublicTicketListing[] } | null)?.listings ?? []).map(
+    (row) => ({ ...row, priceMinor: Number(row.priceMinor), remaining: Number(row.remaining) }),
+  );
 }

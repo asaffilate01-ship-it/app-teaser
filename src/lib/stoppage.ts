@@ -8,7 +8,11 @@ export const stoppageReasons: ReadonlyArray<{ id: StoppageReason; label: string 
 ];
 
 /** Stops play: scoring pauses and viewers see the delay until play resumes. */
-export function stopPlay(match: CricketMatch, reason: StoppageReason, now = new Date()): CricketMatch {
+export function stopPlay(
+  match: CricketMatch,
+  reason: StoppageReason,
+  now = new Date(),
+): CricketMatch {
   if (match.status !== "live" || match.stoppage) return match;
   return { ...match, stoppage: { reason, since: now.toISOString() }, updatedAt: now.toISOString() };
 }

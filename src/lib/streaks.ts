@@ -1,8 +1,16 @@
-import { battingCard, bowlingCard, isSuperOver, matchResult, type CricketMatch } from "./cricket.ts";
+import {
+  battingCard,
+  bowlingCard,
+  isSuperOver,
+  matchResult,
+  type CricketMatch,
+} from "./cricket.ts";
 
 const dateOf = (match: CricketMatch) => match.settings.startTime || match.createdAt;
 const byDate = (matches: readonly CricketMatch[]) =>
-  [...matches].filter((match) => matchResult(match) !== null).sort((a, b) => dateOf(a).localeCompare(dateOf(b)));
+  [...matches]
+    .filter((match) => matchResult(match) !== null)
+    .sort((a, b) => dateOf(a).localeCompare(dateOf(b)));
 
 export type FormLetter = "W" | "L" | "T" | "D";
 
@@ -81,7 +89,17 @@ export function rivalries(matches: readonly CricketMatch[]): Rivalry[] {
     const [home, away] = match.teams;
     const [a, b] = home.id < away.id ? [home, away] : [away, home];
     const key = `${a.id}|${b.id}`;
-    const entry = pairs.get(key) ?? { teamA: a.id, teamB: b.id, nameA: a.name, nameB: b.name, played: 0, winsA: 0, winsB: 0, other: 0, lastResult: "" };
+    const entry = pairs.get(key) ?? {
+      teamA: a.id,
+      teamB: b.id,
+      nameA: a.name,
+      nameB: b.name,
+      played: 0,
+      winsA: 0,
+      winsB: 0,
+      other: 0,
+      lastResult: "",
+    };
     const result = matchResult(match)!;
     entry.played += 1;
     if (result.winnerTeamId === a.id) entry.winsA += 1;
@@ -92,7 +110,9 @@ export function rivalries(matches: readonly CricketMatch[]): Rivalry[] {
   }
   return [...pairs.values()]
     .filter((pair) => pair.played >= 2)
-    .sort((x, y) => y.played - x.played || Math.abs(x.winsA - x.winsB) - Math.abs(y.winsA - y.winsB));
+    .sort(
+      (x, y) => y.played - x.played || Math.abs(x.winsA - x.winsB) - Math.abs(y.winsA - y.winsB),
+    );
 }
 
 export interface PlayerStreak {
@@ -105,7 +125,9 @@ export interface PlayerStreak {
 
 export const BIG_SCORE = 30;
 
-function streakTable(sequences: Map<string, { name: string; team: string; hits: boolean[] }>): PlayerStreak[] {
+function streakTable(
+  sequences: Map<string, { name: string; team: string; hits: boolean[] }>,
+): PlayerStreak[] {
   return [...sequences.entries()]
     .map(([playerId, { name, team, hits }]) => {
       let longest = 0;
@@ -130,7 +152,10 @@ export function battingStreaks(matches: readonly CricketMatch[]): PlayerStreak[]
       const batted = (id: string) =>
         innings.strikerId === id ||
         innings.nonStrikerId === id ||
-        innings.deliveries.some((ball) => ball.strikerId === id || ball.nonStrikerId === id || ball.dismissal?.batterId === id);
+        innings.deliveries.some(
+          (ball) =>
+            ball.strikerId === id || ball.nonStrikerId === id || ball.dismissal?.batterId === id,
+        );
       for (const row of battingCard(match, innings)) {
         if (!batted(row.playerId)) continue; // did not bat
         const entry = sequences.get(row.playerId) ?? { name: row.name, team, hits: [] };

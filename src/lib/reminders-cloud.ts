@@ -33,13 +33,21 @@ export async function loadMyReminders(limit = 40): Promise<NotificationRow[]> {
 
 export async function markRead(ids: string[]): Promise<void> {
   if (!ids.length) return;
-  const { error } = await supabase.from("notifications").update({ read_at: new Date().toISOString() }).in("id", ids).is("read_at", null);
+  const { error } = await supabase
+    .from("notifications")
+    .update({ read_at: new Date().toISOString() })
+    .in("id", ids)
+    .is("read_at", null);
   fail(error);
 }
 
 export async function loadPreferences(): Promise<ReminderPreferences> {
   const userId = await me();
-  const { data, error } = await supabase.from("notification_preferences").select("*").eq("user_id", userId).maybeSingle();
+  const { data, error } = await supabase
+    .from("notification_preferences")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
   fail(error);
   if (!data) return defaultPreferences;
   const { push, email, whatsapp, sms, phone, availability, fees, umpire_jobs } = data;
@@ -50,12 +58,17 @@ export async function savePreferences(prefs: ReminderPreferences): Promise<void>
   const userId = await me();
   const { error } = await supabase
     .from("notification_preferences")
-    .upsert({ ...prefs, user_id: userId, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+    .upsert(
+      { ...prefs, user_id: userId, updated_at: new Date().toISOString() },
+      { onConflict: "user_id" },
+    );
   fail(error);
 }
 
 export async function countMyDevices(): Promise<number> {
-  const { count, error } = await supabase.from("user_push_subscriptions").select("id", { count: "exact", head: true });
+  const { count, error } = await supabase
+    .from("user_push_subscriptions")
+    .select("id", { count: "exact", head: true });
   fail(error);
   return count ?? 0;
 }
@@ -70,22 +83,42 @@ export async function saveDevice(subscription: PushSubscriptionJSON): Promise<vo
 }
 
 export async function removeDevice(endpoint: string): Promise<void> {
-  const { error } = await supabase.from("user_push_subscriptions").delete().eq("endpoint", endpoint);
+  const { error } = await supabase
+    .from("user_push_subscriptions")
+    .delete()
+    .eq("endpoint", endpoint);
   fail(error);
 }
 
-export const defaultClubSettings = { availability: true, fees: true, umpire_jobs: true, availability_hours: 24, fee_days: 3, texts: true };
+export const defaultClubSettings = {
+  availability: true,
+  fees: true,
+  umpire_jobs: true,
+  availability_hours: 24,
+  fee_days: 3,
+  texts: true,
+};
 
 export async function loadClubReminderSettings(organisationId: string) {
   const [{ data, error }, paid] = await Promise.all([
-    supabase.from("reminder_settings").select("*").eq("organisation_id", organisationId).maybeSingle(),
+    supabase
+      .from("reminder_settings")
+      .select("*")
+      .eq("organisation_id", organisationId)
+      .maybeSingle(),
     supabase.rpc("org_on_paid_plan", { p_org: organisationId }),
   ]);
   fail(error);
-  return { settings: data ? { ...defaultClubSettings, ...data } : defaultClubSettings, paidPlan: paid.data === true };
+  return {
+    settings: data ? { ...defaultClubSettings, ...data } : defaultClubSettings,
+    paidPlan: paid.data === true,
+  };
 }
 
-export async function saveClubReminderSettings(organisationId: string, settings: typeof defaultClubSettings): Promise<void> {
+export async function saveClubReminderSettings(
+  organisationId: string,
+  settings: typeof defaultClubSettings,
+): Promise<void> {
   const userId = await me();
   const { error } = await supabase.from("reminder_settings").upsert(
     {
