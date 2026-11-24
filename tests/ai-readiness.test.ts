@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assessCricketAIRequest } from "../src/lib/ai-readiness.ts";
+import { assessCricketAIRequest, assessIntelligenceHistory } from "../src/lib/ai-readiness.ts";
 import { coachBriefingMarkdown } from "../src/lib/coach-briefing.ts";
 
 const connection = {
@@ -56,4 +56,44 @@ test("free briefing is labelled as rules-based, dated and subject to human appro
   assert.match(briefing, /No media was analysed/);
   assert.match(briefing, /Human review.*Required/);
   assert.match(briefing, /2026-11-20T15:00:00Z/);
+});
+
+test("paid task requests require successfully loaded history", () => {
+  const input = { task: "match_insights" as const, requests: [] };
+  assert.equal(assessIntelligenceHistory({ ...input, historyLoaded: false }).ready, false);
+  assert.equal(assessIntelligenceHistory({ ...input, historyLoaded: true }).ready, true);
+});
+
+test("active, uncertain and unknown task outcomes require review before another run", () => {
+  for (const status of [
+    "starting",
+    "queued",
+    "running",
+    "waiting_review",
+    "reconcile_required",
+    "unknown",
+  ]) {
+    const result = assessIntelligenceHistory({
+      historyLoaded: true,
+      task: "match_insights",
+      requests: [{ task: "match_insights", status }],
+    });
+    assert.equal(result.ready, false, status);
+  }
+});
+
+test("terminal history and unrelated tasks do not block a reviewed request", () => {
+  for (const status of ["completed", "failed", "cancelled", "stale"]) {
+    assert.equal(
+      assessIntelligenceHistory({
+        historyLoaded: true,
+        task: "match_insights",
+        requests: [
+          { task: "match_insights", status },
+          { task: "bowling_coach", status: "running" },
+        ],
+      }).ready,
+      true,
+    );
+  }
 });

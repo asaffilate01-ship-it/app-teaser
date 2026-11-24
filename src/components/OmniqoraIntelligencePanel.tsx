@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { LoaderCircle, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
 import { buildCricketPreview } from "@/lib/cricket-insights";
-import { assessCricketAIRequest } from "@/lib/ai-readiness";
+import { assessCricketAIRequest, assessIntelligenceHistory } from "@/lib/ai-readiness";
 import { coachBriefingMarkdown } from "@/lib/coach-briefing";
 import type { MatchRecord } from "@/lib/platform-cloud";
 import {
@@ -71,6 +71,8 @@ function ScopedIntelligencePanel({
   const [task, setTask] = useState<IntelligenceTask>("match_insights");
   const [history, setHistory] = useState<IntelligenceRequest[]>([]);
   const [historyWarning, setHistoryWarning] = useState("");
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const requestLock = useRef(false);
   const [report, setReport] = useState<IntelligenceRequest | null>(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -85,7 +87,8 @@ function ScopedIntelligencePanel({
     hasMatch: Boolean(selectedMatch),
     connection,
   });
-  const canStartPaid = readiness.ready;
+  const historyReadiness = assessIntelligenceHistory({ historyLoaded, requests: history, task });
+  const canStartPaid = readiness.ready && historyReadiness.ready;
   const downloadBriefing = () => {
     if (!preview) return;
     const content = coachBriefingMarkdown(preview);
@@ -101,6 +104,7 @@ function ScopedIntelligencePanel({
     let active = true;
     setReport(null);
     setHistory([]);
+    setHistoryLoaded(false);
     setHistoryWarning("");
     setMessage("");
     setConnection(null);
@@ -108,7 +112,11 @@ function ScopedIntelligencePanel({
     setLoading(true);
     void listIntelligence({ organisationId, matchId })
       .then((result) => {
-        if (active) setHistory(result.requests);
+        if (!Array.isArray(result.requests)) throw new Error("Invalid task history");
+        if (active) {
+          setHistory(result.requests);
+          setHistoryLoaded(true);
+        }
       })
       .catch(() => {
         if (active)
@@ -127,10 +135,15 @@ function ScopedIntelligencePanel({
   const reloadHistory = async () => {
     if (!matchId || !mayRequest) return;
     setLoading(true);
+    setHistoryLoaded(false);
     setHistoryWarning("");
     try {
       const result = await listIntelligence({ organisationId, matchId });
-      if (mounted.current) setHistory(result.requests);
+      if (!Array.isArray(result.requests)) throw new Error("Invalid task history");
+      if (mounted.current) {
+        setHistory(result.requests);
+        setHistoryLoaded(true);
+      }
     } catch {
       if (mounted.current)
         setHistoryWarning(
@@ -160,7 +173,8 @@ function ScopedIntelligencePanel({
   };
 
   const requestBudgeted = async () => {
-    if (!matchId || !mayRequest || !canStartPaid || busy || loading) return;
+    if (!matchId || !mayRequest || !canStartPaid || busy || loading || requestLock.current) return;
+    requestLock.current = true;
     setBusy(true);
     setMessage("");
     setReport(null);
@@ -180,7 +194,10 @@ function ScopedIntelligencePanel({
           ? error.message
           : "The budgeted request could not be confirmed. Do not retry automatically.",
       );
+      setHistoryLoaded(false);
+      setHistoryWarning("Request outcome needs reconciliation. Refresh history before retrying.");
     } finally {
+      requestLock.current = false;
       if (mounted.current) setBusy(false);
     }
   };
@@ -329,7 +346,7 @@ function ScopedIntelligencePanel({
                   role="status"
                   className="rounded-xl border border-emerald-300/20 p-3 text-xs text-emerald-100"
                 >
-                  {canStartPaid
+                  {readiness.ready
                     ? "Scoped access and budgeted worker readiness verified. Any run remains subject to server-side admission and budget checks."
                     : "Scoped Omniqora credential and entitlement verified. Paid execution remains disabled until the budgeted worker is ready."}
                 </p>
@@ -341,14 +358,23 @@ function ScopedIntelligencePanel({
                 title={
                   canStartPaid
                     ? "Request a capped, approved model run"
-                    : "Requires independently verified budgeted Agent Factory execution"
+                    : readiness.ready
+                      ? historyReadiness.reason
+                      : "Requires independently verified budgeted Agent Factory execution"
                 }
                 className="w-full rounded-xl border border-white/10 px-4 py-3 text-xs font-bold text-slate-400 disabled:cursor-not-allowed disabled:opacity-50 enabled:hover:border-fuchsia-300"
               >
                 {canStartPaid
                   ? "Request reviewed GenAI · Budget enforced"
-                  : "Generate with Omniqora · Awaiting certified worker"}
+                  : readiness.ready
+                    ? "Review task history before generating"
+                    : "Generate with Omniqora · Awaiting certified worker"}
               </button>
+              {!historyReadiness.ready && (
+                <p role="status" className="text-xs text-amber-200">
+                  {historyReadiness.reason}
+                </p>
+              )}
               {message && (
                 <p
                   role="alert"
