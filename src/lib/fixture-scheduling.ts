@@ -104,7 +104,10 @@ export function findFixtureStartConflict(
 
 /** Find proposed starts that clash with the currently visible fixture schedule. */
 export function reviewProposedFixtureStarts(
-  proposed: readonly Pick<ScheduledFixture, "startsAt" | "homeTeamId" | "awayTeamId" | "groundId">[],
+  proposed: readonly Pick<
+    ScheduledFixture,
+    "startsAt" | "homeTeamId" | "awayTeamId" | "groundId"
+  >[],
   existing: readonly ScheduledFixture[],
 ) {
   return proposed.flatMap((fixture, index) => {
