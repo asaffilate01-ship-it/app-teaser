@@ -76,3 +76,21 @@ test("grounds rotate across matches", () => {
   const round1 = fixtures.filter((f) => f.round === 1).map((f) => f.groundId);
   assert.deepEqual(round1, ["g1", "g2"]);
 });
+
+test("one ground can host only one simultaneous fixture in each round", () => {
+  const { fixtures, rounds } = buildRoundRobin({
+    ...base,
+    teamIds: ["a", "b", "c", "d"],
+    groundIds: ["g1", "g1"],
+  });
+  assert.equal(fixtures.length, 6);
+  for (let round = 1; round <= rounds; round += 1) {
+    const matches = fixtures.filter((fixture) => fixture.round === round);
+    const scheduled = matches.filter((fixture) => fixture.startsAt !== null);
+    const drafts = matches.filter((fixture) => fixture.startsAt === null);
+    assert.equal(scheduled.length, 1);
+    assert.equal(scheduled[0]?.groundId, "g1");
+    assert.equal(drafts.length, 1);
+    assert.equal(drafts[0]?.groundId, null);
+  }
+});

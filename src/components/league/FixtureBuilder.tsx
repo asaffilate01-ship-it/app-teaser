@@ -43,6 +43,7 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
       }),
     [selected, legs, firstDate, startTime, gap, groundMode, data.grounds],
   );
+  const unallocated = groundMode === "none" ? 0 : plan.fixtures.filter((f) => !f.groundId).length;
   const existing = data.fixtures.filter(
     (fixture) => fixture.competitionId === competitionId,
   ).length;
@@ -209,6 +210,15 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
             <strong>{plan.fixtures.length} fixtures</strong> over {plan.rounds} rounds
             {plan.byes.length > 0 ? " · one team rests each round" : ""}
           </p>
+          {unallocated > 0 && (
+            <p
+              role="status"
+              className="mt-3 rounded-lg border border-amber-300/30 p-3 text-sm text-amber-200"
+            >
+              {unallocated} matches have no available ground in their round. They will be saved as
+              undated drafts so you can arrange another venue or time.
+            </p>
+          )}
           <div className="builder-preview mt-3" aria-label="Fixture preview">
             {rounds.map((round) => (
               <div key={round} className="builder-round">
@@ -229,9 +239,11 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
                           {teamName(fixture.homeTeamId)} <span className="text-slate-500">v</span>{" "}
                           {teamName(fixture.awayTeamId)}
                         </span>
-                        {fixture.groundId && (
+                        {fixture.groundId ? (
                           <small className="truncate">{groundName(fixture.groundId)}</small>
-                        )}
+                        ) : groundMode !== "none" ? (
+                          <small className="text-amber-200">Draft · venue needed</small>
+                        ) : null}
                       </li>
                     ))}
                   {plan.byes
@@ -254,6 +266,11 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
             </p>
           )}
           <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
+            {plan.fixtures.length > 400 && (
+              <span role="alert" className="text-xs text-amber-200">
+                Select fewer teams or one leg: at most 400 fixtures can be created at once.
+              </span>
+            )}
             {!firstDate && (
               <span className="text-xs text-slate-400">
                 No date chosen: fixtures are saved as drafts.
@@ -262,7 +279,7 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
             <button
               type="button"
               className="action-primary"
-              disabled={busy}
+              disabled={busy || plan.fixtures.length > 400}
               onClick={() => void create()}
             >
               {busy ? "Creating…" : `Create ${plan.fixtures.length} fixtures`}
