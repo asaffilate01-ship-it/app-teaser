@@ -102,7 +102,7 @@ export function SectionNavigation<T extends string>({
                 side="top"
                 align="end"
                 sideOffset={12}
-                className="w-64 max-w-[calc(100vw-2rem)] rounded-xl border-white/20 bg-card p-2 text-slate-100"
+                className="max-h-[var(--radix-dropdown-menu-content-available-height)] w-64 max-w-[calc(100vw-2rem)] overflow-y-auto overscroll-contain rounded-xl border-white/20 bg-card p-2 text-slate-100"
               >
                 <DropdownMenuLabel>Other workspace sections</DropdownMenuLabel>
                 {secondary.map(([key, Icon, text]) => (
@@ -114,7 +114,7 @@ export function SectionNavigation<T extends string>({
                     }`}
                   >
                     <Icon className="size-5" aria-hidden="true" />
-                    <span>{text}</span>
+                    <span className="min-w-0 flex-1 whitespace-normal">{text}</span>
                     {value === key && <span className="ml-auto text-xs">Selected</span>}
                   </DropdownMenuItem>
                 ))}

@@ -236,6 +236,7 @@ export function evaluateReleaseEvidence(
     bundle &&
     bundle.projectRef === approvedProjectRef &&
     /^[a-f0-9]{40}$/i.test(expectedSha) &&
+    typeof bundle.releaseSha === "string" &&
     bundle.releaseSha.toLowerCase() === expectedSha.toLowerCase(),
   );
   const phaseIndex = releasePhases.indexOf(phase);
