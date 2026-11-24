@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "node:test";
+import { expect } from "./assert-expect.ts";
 import {
   filterLiveMatches,
   liveEventsBetween,
@@ -7,7 +8,7 @@ import {
   parseLiveAlertPrefs,
   shouldAlert,
   type LiveMatch,
-} from "../src/lib/live-centre";
+} from "../src/lib/live-centre.ts";
 
 const base: LiveMatch = {
   slug: "riverside-v-kingsmead",
