@@ -84,6 +84,8 @@ import { ResultsDesk } from "@/components/league/ResultsDesk";
 import { GoogleButton } from "@/components/app-shell/GoogleButton";
 import { SetupChecklist } from "@/components/SetupChecklist";
 import { ClubMatchInsights } from "@/components/club/ClubMatchInsights";
+import { MatchDayDesk } from "@/components/club/MatchDayDesk";
+import { matchDeskCounts } from "@/lib/match-desk";
 import { TeamCrest } from "@/components/scorer/Broadcast";
 import scoreboardShot from "@/assets/shot-ground-score.webp";
 import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPanel";
@@ -966,15 +968,17 @@ function Overview({
   onOpenSection: (section: PlatformTab) => void;
   onViewStats: () => void;
 }) {
-  const liveMatches = data.matches.filter((match) => match.status === "live");
-  const upcoming = data.matches.filter((match) => ["draft", "scheduled"].includes(match.status));
+  const matchCounts = matchDeskCounts(data.matches);
   const cards = [
-    [Radio, "Live matches", String(liveMatches.length), `${upcoming.length} upcoming`],
+    [Radio, "In progress", String(matchCounts.live), `${matchCounts.scheduled} scheduled`],
     [
       Camera,
       "Camera devices",
       String(
-        data.matches.flatMap((match) => match.cameraRooms).flatMap((room) => room.devices).length,
+        data.matches
+          .flatMap((match) => match.cameraRooms)
+          .filter((room) => room.status === "open")
+          .flatMap((room) => room.devices).length,
       ),
       "Across open rooms",
     ],
@@ -1035,11 +1039,12 @@ function Overview({
             detail="Register two teams and their players, then create the first match above."
           />
         ) : (
-          <div className="grid gap-3 lg:grid-cols-2">
-            {data.matches.map((match) => (
+          <MatchDayDesk
+            data={data}
+            renderMatch={(match) => (
               <MatchCard key={match.id} match={match} data={data} role={role} run={run} />
-            ))}
-          </div>
+            )}
+          />
         )}
       </Panel>
     </div>
