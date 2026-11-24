@@ -18,6 +18,7 @@ import { CameraCommandConfirmations } from "@/components/CameraCommandConfirmati
 import { CameraCloudRecordingPanel } from "@/components/CameraCloudRecordingPanel";
 import { Cloud } from "lucide-react";
 import { directorGridClass, MAX_CAMERA_PHONES } from "@/lib/camera-limits";
+import { freshCameraPresence } from "@/lib/camera-command-receipts";
 import { getCloudClient, isCloudConfigured, type CameraPresence } from "@/lib/cloud";
 import {
   connectLiveCamera,
@@ -54,10 +55,27 @@ interface RecordingArm {
 type ViewMode = "one" | "two" | "four";
 
 function CameraDirector() {
+  const { roomId } = Route.useParams();
+  const cloud = useCloudSession();
+  return (
+    <ScopedCameraDirector
+      key={`${roomId}:${cloud.session?.user.id ?? "guest"}`}
+      roomId={roomId}
+      cloud={cloud}
+    />
+  );
+}
+
+function ScopedCameraDirector({
+  roomId,
+  cloud,
+}: {
+  roomId: string;
+  cloud: ReturnType<typeof useCloudSession>;
+}) {
   // Broadcast and camera screens always stay dark, whatever look the visitor picked.
   useEffect(() => lockDarkWhileMounted(), []);
-  const { roomId } = Route.useParams();
-  const { session, configured, loading, requestLink } = useCloudSession();
+  const { session, configured, loading, requestLink } = cloud;
   const [email, setEmail] = useState("");
   const [room, setRoom] = useState<RoomRecord | null>(null);
   const [authorised, setAuthorised] = useState<boolean | null>(null);
@@ -66,6 +84,17 @@ function CameraDirector() {
   const [streams, setStreams] = useState<Record<string, MediaStream>>({});
   const [states, setStates] = useState<Record<string, LiveConnectionState>>({});
   const [presence, setPresence] = useState<Record<string, CameraPresence>>({});
+  const [presenceNow, setPresenceNow] = useState(() => Date.now());
+  const commandLock = useRef(false);
+  useEffect(() => {
+    const tick = () => setPresenceNow(Date.now());
+    const interval = window.setInterval(tick, 5_000);
+    document.addEventListener("visibilitychange", tick);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", tick);
+    };
+  }, []);
   const [view, setView] = useState<ViewMode>("four");
   const [focus, setFocus] = useState<string | null>(null);
   const [soundDevice, setSoundDevice] = useState<string | null>(null);
@@ -224,14 +253,27 @@ function CameraDirector() {
   };
 
   const command = async (action: "start" | "stop", deviceIds: string[]) => {
-    if (!session || busy || deviceIds.length === 0) return;
+    if (!session || !authorised || busy || commandLock.current) return;
+    const allowed = new Set(
+      devices
+        .filter((device) =>
+          action === "stop"
+            ? true
+            : room?.status === "open" &&
+              arms.some((arm) => arm.device_id === device.id && arm.armed && arm.consent_confirmed),
+        )
+        .map((device) => device.id),
+    );
+    const targets = [...new Set(deviceIds)].filter((id) => allowed.has(id));
+    if (!targets.length) return;
+    commandLock.current = true;
     setBusy(true);
     setMessage("");
     try {
       const { error } = await getCloudClient()
         .from("camera_recording_commands")
         .insert(
-          deviceIds.map((deviceId) => ({
+          targets.map((deviceId) => ({
             room_id: roomId,
             device_id: deviceId,
             action,
@@ -244,12 +286,13 @@ function CameraDirector() {
       setMessage(
         action === "start"
           ? "Recording request sent. Verify each phone reports Recording before relying on the footage."
-          : "Stop request sent. Each connected phone uploads its captured recording.",
+          : "Stop request sent. Check phone acknowledgments and verify uploads separately.",
       );
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Camera control was denied.");
     } finally {
-      setBusy(false);
+      commandLock.current = false;
+      if (activeRef.current) setBusy(false);
     }
   };
 
@@ -304,7 +347,9 @@ function CameraDirector() {
   const armedDevices = devices.filter((device) =>
     arms.some((arm) => arm.device_id === device.id && arm.armed && arm.consent_confirmed),
   );
-  const recordingCount = devices.filter((device) => presence[device.id]?.recording).length;
+  const currentPresence = (deviceId: string) =>
+    freshCameraPresence(presence[deviceId], deviceId, presenceNow);
+  const recordingCount = devices.filter((device) => currentPresence(device.id)?.recording).length;
   const displayed =
     view === "one"
       ? devices.filter((device) => device.id === (focus ?? devices[0]?.id))
@@ -334,7 +379,7 @@ function CameraDirector() {
               <span className="hero-chip">{armedDevices.length} armed</span>
               <span className={`hero-chip ${recordingCount > 0 ? "hero-chip-live" : ""}`}>
                 {recordingCount > 0 && <span className="live-dot" aria-hidden="true" />}
-                {recordingCount} recording
+                {recordingCount} phones report REC
               </span>
               <span className="hero-chip">Room {room.status}</span>
             </div>
@@ -359,7 +404,7 @@ function CameraDirector() {
             ))}
           </div>
           <button
-            disabled={busy || armedDevices.length === 0}
+            disabled={busy || room.status !== "open" || armedDevices.length === 0}
             onClick={() =>
               void command(
                 "start",
@@ -407,10 +452,11 @@ function CameraDirector() {
           {displayed.map((device) => {
             const stream = streams[device.id] ?? null;
             const armed = armedDevices.some((item) => item.id === device.id);
+            const phone = currentPresence(device.id);
             return (
               <section
                 key={device.id}
-                className={`camera-tile ${presence[device.id]?.recording ? "camera-tile-rec" : ""}`}
+                className={`camera-tile ${phone?.recording ? "camera-tile-rec" : ""}`}
               >
                 <div className="camera-tile-screen">
                   <DirectorVideo stream={stream} muted={soundDevice !== device.id} />
@@ -440,7 +486,7 @@ function CameraDirector() {
                       <span className="live-dot" aria-hidden="true" /> Live
                     </span>
                   )}
-                  {presence[device.id]?.recording && (
+                  {phone?.recording && (
                     <span className="hero-chip hero-chip-live camera-tile-badge camera-tile-badge-right">
                       <CircleStop className="size-3" aria-hidden="true" /> Rec
                     </span>
@@ -454,9 +500,9 @@ function CameraDirector() {
                       {" · "}
                       {armed ? "Auto-record armed" : "Not armed"}
                       {" · "}
-                      {presence[device.id]?.recording
+                      {phone?.recording
                         ? "Phone reports REC"
-                        : presence[device.id]
+                        : phone
                           ? "Phone not recording"
                           : "Phone offline/unverified"}
                     </p>
@@ -483,7 +529,7 @@ function CameraDirector() {
                     </button>
                     {armed && (
                       <button
-                        disabled={busy}
+                        disabled={busy || room.status !== "open"}
                         onClick={() => void command("start", [device.id])}
                         className="action-primary min-h-9 text-xs"
                       >
