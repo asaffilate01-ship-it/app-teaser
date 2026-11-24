@@ -26,7 +26,7 @@ import {
 import { SectionNavigation } from "@/components/SectionNavigation";
 import { readLimitedOvers, validateCloudMatchSetup } from "@/lib/match-setup";
 import { fixtureCalendarIcs } from "@/lib/fixture-calendar";
-import { reviewFixtureSchedule } from "@/lib/fixture-scheduling";
+import { findFixtureStartConflict, reviewFixtureSchedule } from "@/lib/fixture-scheduling";
 import { FixtureBuilder } from "@/components/league/FixtureBuilder";
 import { readSection, platformSections } from "@/lib/navigation";
 import { cameraLimitChoices } from "@/lib/camera-limits";
@@ -1717,6 +1717,16 @@ function FixtureForm({ data, run }: { data: PlatformDashboardData; run: RunActio
     (team) => !team.external || (team.competitionIds ?? []).includes(competitionId),
   );
   const [error, setError] = useState<string | null>(null);
+  const start = startsAt ? new Date(startsAt) : null;
+  const conflict = findFixtureStartConflict(
+    {
+      startsAt: start && Number.isFinite(start.getTime()) ? start.toISOString() : null,
+      homeTeamId: home,
+      awayTeamId: away,
+      groundId: ground || null,
+    },
+    data.fixtures,
+  );
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (busy) return;
@@ -1739,6 +1749,10 @@ function FixtureForm({ data, run }: { data: PlatformDashboardData; run: RunActio
     }
     if (startsAt && !Number.isFinite(new Date(startsAt).getTime())) {
       setError("Enter a valid start date and time.");
+      return;
+    }
+    if (conflict) {
+      setError("A team or ground already has a fixture at this start time.");
       return;
     }
     if (round.trim().length > 120) {
@@ -1821,13 +1835,22 @@ function FixtureForm({ data, run }: { data: PlatformDashboardData; run: RunActio
               placeholder="Round 1"
             />
           </Field>
+          {conflict && (
+            <p role="alert" className="text-sm text-amber-200 md:col-span-3">
+              A team or ground already has a fixture at this start time. Choose another time or{" "}
+              <a href={`#fixture-${conflict.id}`} className="underline">
+                review the existing fixture
+              </a>
+              .
+            </p>
+          )}
           {error && (
             <p role="alert" className="text-sm text-rose-200 md:col-span-3">
               {error}
             </p>
           )}
           <button
-            disabled={busy || home === away}
+            disabled={busy || home === away || Boolean(conflict)}
             className="action-primary md:col-span-3 md:justify-self-end"
           >
             Schedule fixture
