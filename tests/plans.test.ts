@@ -1,6 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { adRevenueSharePercent, canUseFeature, planGate, planLocksEnforced, sectionFeature, showsAds } from "../src/lib/plans.ts";
+import {
+  adRevenueSharePercent,
+  canUseFeature,
+  gateWhenPlanUnknown,
+  planGate,
+  planLocksEnforced,
+  sectionFeature,
+  showsAds,
+} from "../src/lib/plans.ts";
 
 test("free plan is basic scoring only, with ads", () => {
   assert.equal(canUseFeature("starter", "basicScoring"), true);
