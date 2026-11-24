@@ -33,11 +33,8 @@ jobs:
         run: bun audit --production
 
   database-lint:
-    # Multiple CricLume PRs can start the fixed-port local Supabase stack at once.
-    # Serialise this one host-port-sensitive check; leave CodeQL/audit parallel.
-    concurrency:
-      group: criclume-local-database-lint
-      cancel-in-progress: false
+    # Every job gets a distinct local project and listener ports. GitHub's
+    # single-pending concurrency slot can otherwise cancel unrelated PR checks.
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -45,6 +42,9 @@ jobs:
       - uses: supabase/setup-cli@v3
         with:
           version: 3.2.0
+      - name: Prepare job-local Supabase configuration
+        id: isolate
+        run: python3 .github/scripts/isolate-local-supabase.py
       - name: Start isolated Supabase stack
         run: supabase start -x studio,imgproxy,mailpit,logflare,vector,supavisor
       - name: Lint database functions and policies
@@ -52,5 +52,5 @@ jobs:
       - name: Run database and RLS tests
         run: supabase test db
       - name: Stop isolated stack
-        if: always()
+        if: always() && steps.isolate.outcome == 'success'
         run: supabase stop --no-backup
