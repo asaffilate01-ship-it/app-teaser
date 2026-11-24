@@ -22,7 +22,7 @@ jobs:
             "tests/**/*.{ts,tsx,js,mjs,cjs}" \
             "verification/**/*.{ts,tsx,js,mjs,cjs}" \
             "workers/**/*.{ts,tsx,js,mjs,cjs}" \
-            "*.ts" "*.js" "*.mjs"
+            "*.ts" "*.js"
       - name: Commit deterministic formatting only
         run: |
           git config user.name 'github-actions[bot]'
