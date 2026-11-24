@@ -101,3 +101,25 @@ test("not offered for unlimited-overs or two-innings matches", () => {
     null,
   );
 });
+
+test("a chase without a valid target does not report a false win", () => {
+  for (const target of [null, 0, -1, Number.NaN, Infinity]) {
+    assert.equal(
+      predictWin({ ...t20, inningsNumber: 2, runs: 80, wickets: 3, legalBalls: 70, target }),
+      null,
+    );
+  }
+});
+
+test("an exhausted chase with scores level is not a bowling-side win", () => {
+  assert.equal(
+    predictWin({ ...t20, inningsNumber: 2, runs: 149, wickets: 4, legalBalls: 120, target: 150 }),
+    null,
+  );
+});
+
+test("invalid delivery counters cannot produce misleading probabilities", () => {
+  for (const legalBalls of [Number.NaN, Infinity, -1, 1.5]) {
+    assert.equal(predictWin({ ...t20, inningsNumber: 1, runs: 20, wickets: 1, legalBalls }), null);
+  }
+});
