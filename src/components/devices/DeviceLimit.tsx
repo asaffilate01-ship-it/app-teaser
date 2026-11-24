@@ -68,7 +68,13 @@ export function DevicesButton() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" type="button" className="app-chip-button" aria-label="Signed-in devices" title="Signed-in devices">
+        <Button
+          variant="ghost"
+          type="button"
+          className="app-chip-button"
+          aria-label="Signed-in devices"
+          title="Signed-in devices"
+        >
           <MonitorSmartphone className="size-4" aria-hidden="true" />
           <span className="hidden md:inline">Devices</span>
         </Button>
