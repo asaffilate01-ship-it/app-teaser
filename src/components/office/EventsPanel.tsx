@@ -2,7 +2,13 @@ import { useState, type FormEvent } from "react";
 import { BellRing, CalendarCheck, CalendarPlus } from "lucide-react";
 import { toast } from "sonner";
 import { can } from "@/lib/platform";
-import { availabilitySummary, eventIcs, repliesClosed, type Availability } from "@/lib/club-office";
+import {
+  availabilitySummary,
+  eventIcs,
+  eventSquad,
+  repliesClosed,
+  type Availability,
+} from "@/lib/club-office";
 import { office, type ClubEvent } from "@/lib/club-office-cloud";
 import { remindNow } from "./RemindersPanel";
 import {
@@ -44,11 +50,11 @@ function addToCalendar(event: ClubEvent) {
 }
 
 export function squadFor(event: ClubEvent, club: OfficeProps["club"]): string[] {
-  if (event.team_id) {
-    const team = club.teams.find((item) => item.id === event.team_id);
-    if (team && team.playerIds.length) return team.playerIds;
-  }
-  return club.players.map((player) => player.id);
+  return eventSquad(
+    event.team_id,
+    club.teams,
+    club.players.map((player) => player.id),
+  );
 }
 
 export function EventsPanel(props: OfficeProps) {
@@ -83,6 +89,11 @@ export function EventsPanel(props: OfficeProps) {
             action={<Pill>{kinds.find(([value]) => value === event.kind)?.[1] ?? event.kind}</Pill>}
           >
             {event.notes && <p className="office-meta mb-3">{event.notes}</p>}
+            {manager && event.team_id && squad.length === 0 && (
+              <p role="status" className="mb-3 text-sm text-amber-200">
+                No eligible players in this team. Check its roster before collecting availability.
+              </p>
+            )}
             <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
               {event.reply_by && (
                 <Pill tone={repliesClosed(event.reply_by) ? "bad" : "warn"}>
@@ -250,10 +261,12 @@ function NewEvent({ club, organisationId, act }: OfficeProps) {
   const [notes, setNotes] = useState("");
   const [replyBy, setReplyBy] = useState("");
   const [cap, setCap] = useState("");
+  const ownTeams = club.teams.filter((team) => !team.external);
+  const validTeam = !teamId || ownTeams.some((team) => team.id === teamId);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     const start = fromLocal(startsAt);
-    if (!start) return;
+    if (!start || !validTeam || !title.trim()) return;
     const ok = await act(
       () =>
         office.createEvent({
@@ -314,7 +327,7 @@ function NewEvent({ club, organisationId, act }: OfficeProps) {
             onChange={(event) => setTeamId(event.target.value)}
           >
             <option value="">Whole club</option>
-            {club.teams.map((team) => (
+            {ownTeams.map((team) => (
               <option key={team.id} value={team.id}>
                 {team.name}
               </option>
@@ -372,8 +385,13 @@ function NewEvent({ club, organisationId, act }: OfficeProps) {
             placeholder="Whites, arrive 45 minutes early"
           />
         </OfficeField>
+        {!validTeam && (
+          <p role="alert" className="text-sm text-amber-200 sm:col-span-2">
+            Choose an available club team or explicitly select Whole club.
+          </p>
+        )}
         <div className="flex items-end">
-          <button className="action-primary w-full">
+          <button disabled={!validTeam || !title.trim()} className="action-primary w-full">
             <CalendarPlus className="size-4" /> Add event
           </button>
         </div>

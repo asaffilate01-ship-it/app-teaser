@@ -103,9 +103,18 @@ export function maxPayment(charge: ChargeLike): number {
 /** "waitlist" is set by the database when an event's places are full. */
 export type Availability = "available" | "unavailable" | "maybe" | "waitlist";
 
+/** A team-scoped event must never expand to the whole club when its team is absent. */
+export function eventSquad(
+  teamId: string | null,
+  teams: readonly { id: string; playerIds: readonly string[]; external?: boolean }[],
+  playerIds: readonly string[],
+): string[] {
+  return feeScheduleTargets({ active: true, team_id: teamId }, teams, playerIds);
+}
+
 export function availabilitySummary(playerIds: string[], answers: Map<string, Availability>) {
   const summary = { available: 0, maybe: 0, unavailable: 0, waitlist: 0, noReply: [] as string[] };
-  for (const id of playerIds) {
+  for (const id of new Set(playerIds)) {
     const answer = answers.get(id);
     if (answer) summary[answer] += 1;
     else summary.noReply.push(id);
@@ -130,8 +139,18 @@ export function selectionWarnings(
   const playing = picks.filter((pick) => pick.slot === "playing");
   if (playing.length !== sideSize)
     warnings.push(`${playing.length} of ${sideSize} players picked to play.`);
-  if (!picks.some((pick) => pick.captain)) warnings.push("No captain chosen.");
-  if (!picks.some((pick) => pick.wicketkeeper)) warnings.push("No wicketkeeper chosen.");
+  const captains = playing.filter((pick) => pick.captain);
+  const keepers = playing.filter((pick) => pick.wicketkeeper);
+  if (!captains.length) warnings.push("No captain chosen.");
+  if (captains.length > 1) warnings.push("More than one playing captain chosen.");
+  if (!keepers.length) warnings.push("No wicketkeeper chosen.");
+  if (keepers.length > 1) warnings.push("More than one playing wicketkeeper chosen.");
+  if (picks.some((pick) => pick.slot !== "playing" && (pick.captain || pick.wicketkeeper))) {
+    warnings.push("Captain and wicketkeeper must be selected to play.");
+  }
+  if (new Set(picks.map((pick) => pick.playerId)).size !== picks.length) {
+    warnings.push("The team sheet contains duplicate players.");
+  }
   const unavailable = picks.filter((pick) => answers.get(pick.playerId) === "unavailable").length;
   if (unavailable)
     warnings.push(
