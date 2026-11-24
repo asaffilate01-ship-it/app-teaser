@@ -1,5 +1,6 @@
 import {
   battingCard,
+  deliveryRuns,
   findPlayer,
   summarizeInnings,
   type CricketMatch,
@@ -18,23 +19,26 @@ export function fallOfWickets(match: CricketMatch, innings: Innings): FallOfWick
   const result: FallOfWicket[] = [];
   let runs = 0;
   let legal = 0;
-  for (const ball of innings.deliveries) {
-    runs +=
-      ball.batterRuns +
-      ball.extras.wide +
-      ball.extras.noBall +
-      ball.extras.bye +
-      ball.extras.legBye +
-      ball.extras.penalty;
-    if (ball.legal) legal += 1;
-    if (ball.dismissal) {
-      result.push({
-        wicket: result.length + 1,
-        score: runs,
-        batter: findPlayer(match, ball.dismissal.batterId)?.name ?? "Batter",
-        over: `${Math.floor(legal / match.settings.ballsPerOver)}.${legal % match.settings.ballsPerOver}`,
-      });
+  const recordWicket = (batterId: string) => {
+    result.push({
+      wicket: result.length + 1,
+      score: runs,
+      batter: findPlayer(match, batterId)?.name ?? "Batter",
+      over: `${Math.floor(legal / match.settings.ballsPerOver)}.${legal % match.settings.ballsPerOver}`,
+    });
+  };
+  const retirements = innings.retirements ?? [];
+  const recordRetirements = (afterBall: number) => {
+    for (const item of retirements) {
+      if (item.afterBall === afterBall && item.kind !== "hurt") recordWicket(item.batterId);
     }
+  };
+  recordRetirements(0);
+  for (const [index, ball] of innings.deliveries.entries()) {
+    runs += deliveryRuns(ball) - (ball.wicketPenalty ?? 0);
+    if (ball.legal) legal += 1;
+    if (ball.dismissal) recordWicket(ball.dismissal.batterId);
+    recordRetirements(index + 1);
   }
   return result;
 }
