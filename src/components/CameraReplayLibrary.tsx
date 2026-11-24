@@ -2,7 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CirclePlay, Clock3, RefreshCw, ShieldCheck, Video } from "lucide-react";
 import { CameraReplayWorkbench } from "@/components/CameraReplayWorkbench";
 import { HighlightReel } from "@/components/HighlightReel";
-import { estimateDeliveryCues, type CameraClip } from "@/lib/camera-review";
+import {
+  estimateDeliveryCues,
+  privateReplayDeadline,
+  replaySeekPosition,
+  sameReplaySource,
+  type CameraClip,
+} from "@/lib/camera-review";
 import { loadCameraRoomReview, signedRoomClipUrl } from "@/lib/camera-review-cloud";
 
 interface DeviceLabel {
@@ -11,15 +17,17 @@ interface DeviceLabel {
   angle: string;
 }
 
-export function CameraReplayLibrary({
-  roomId,
-  matchId,
-  devices,
-}: {
+type ReplayLibraryProps = {
   roomId: string;
   matchId: string;
   devices: DeviceLabel[];
-}) {
+};
+
+export function CameraReplayLibrary(props: ReplayLibraryProps) {
+  return <ScopedReplayLibrary key={`${props.roomId}:${props.matchId}`} {...props} />;
+}
+
+function ScopedReplayLibrary({ roomId, matchId, devices }: ReplayLibraryProps) {
   const player = useRef<HTMLVideoElement>(null);
   const [clips, setClips] = useState<CameraClip[]>([]);
   const [deliveries, setDeliveries] = useState<
@@ -28,6 +36,12 @@ export function CameraReplayLibrary({
   const [selectedDevice, setSelectedDevice] = useState("all");
   const [selectedClipId, setSelectedClipId] = useState<string | null>(null);
   const [source, setSource] = useState("");
+  const [deadline, setDeadline] = useState<number | null>(null);
+  const sourceClip = useRef<CameraClip | null>(null);
+  const playRequest = useRef(0);
+  const loadRequest = useRef(0);
+  const mounted = useRef(false);
+  const speedRef = useRef(1);
   const [position, setPosition] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [busy, setBusy] = useState(false);
@@ -35,11 +49,34 @@ export function CameraReplayLibrary({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
+  const closePlayback = useCallback(() => {
+    playRequest.current += 1;
+    player.current?.pause();
+    sourceClip.current = null;
+    setSelectedClipId(null);
+    setSource("");
+    setDeadline(null);
+    setBusy(false);
+  }, []);
+
   const refresh = useCallback(async () => {
+    const request = ++loadRequest.current;
     setLoading(true);
     setError("");
     try {
       const result = await loadCameraRoomReview(roomId, matchId);
+      if (!mounted.current || request !== loadRequest.current) return;
+      const previous = sourceClip.current;
+      if (previous) {
+        const current = result.clips.find((clip) => clip.id === previous.id);
+        if (
+          !current ||
+          !sameReplaySource(previous, current) ||
+          privateReplayDeadline(current, Date.now()) === null
+        ) {
+          closePlayback();
+        }
+      }
       setClips(result.clips);
       setDeliveries(result.deliveries);
       setMessage(
@@ -48,17 +85,42 @@ export function CameraReplayLibrary({
           : "",
       );
     } catch (reason) {
+      if (!mounted.current || request !== loadRequest.current) return;
+      closePlayback();
+      setClips([]);
+      setDeliveries([]);
       setError(
         reason instanceof Error ? reason.message : "Private recording library could not be loaded.",
       );
     } finally {
-      setLoading(false);
+      if (mounted.current && request === loadRequest.current) setLoading(false);
     }
-  }, [roomId, matchId]);
+  }, [roomId, matchId, closePlayback]);
 
   useEffect(() => {
+    mounted.current = true;
     void refresh();
+    return () => {
+      mounted.current = false;
+      loadRequest.current += 1;
+      playRequest.current += 1;
+    };
   }, [refresh]);
+
+  useEffect(() => {
+    if (deadline === null) return;
+    const expire = () => {
+      if (Date.now() < deadline) return;
+      closePlayback();
+      setMessage("Private preview expired. Open the recording again to review access.");
+    };
+    const timer = window.setTimeout(expire, Math.max(0, deadline - Date.now()));
+    document.addEventListener("visibilitychange", expire);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", expire);
+    };
+  }, [deadline, closePlayback]);
 
   const deviceName = (id: string) => {
     const device = devices.find((item) => item.id === id);
@@ -74,19 +136,34 @@ export function CameraReplayLibrary({
   const selectedClip = clips.find((clip) => clip.id === selectedClipId);
 
   const play = async (clip: CameraClip, seconds = 0) => {
+    const request = ++playRequest.current;
+    const expires = privateReplayDeadline(clip, Date.now());
+    if (expires === null) {
+      closePlayback();
+      setError("This recording is no longer eligible for private review.");
+      return;
+    }
+    player.current?.pause();
+    setSource("");
+    setSelectedClipId(null);
+    setDeadline(null);
+    sourceClip.current = clip;
     setBusy(true);
     setError("");
     try {
       const url = await signedRoomClipUrl(clip);
+      if (!mounted.current || request !== playRequest.current) return;
+      if (expires <= Date.now()) throw new Error("Preview expired. Reopen this recording.");
       setSource(url);
       setSelectedClipId(clip.id);
       setPosition(seconds);
+      setDeadline(expires);
     } catch (reason) {
-      setSource("");
-      setSelectedClipId(null);
+      if (!mounted.current || request !== playRequest.current) return;
+      closePlayback();
       setError(reason instanceof Error ? reason.message : "Recording cannot be played.");
     } finally {
-      setBusy(false);
+      if (mounted.current && request === playRequest.current) setBusy(false);
     }
   };
 
@@ -94,16 +171,20 @@ export function CameraReplayLibrary({
     const video = player.current;
     if (!video || !source) return;
     const seek = () => {
-      if (Number.isFinite(video.duration) && video.duration > 0) {
-        video.currentTime = Math.min(Math.max(position, 0), video.duration - 0.01);
-      }
-      video.playbackRate = speed;
+      const target = replaySeekPosition(position, video.duration);
+      if (target !== null) video.currentTime = target;
+      video.playbackRate = speedRef.current;
       void video.play().catch(() => {});
     };
     video.addEventListener("loadedmetadata", seek);
     if (video.readyState >= 1) seek();
     return () => video.removeEventListener("loadedmetadata", seek);
-  }, [source, position, speed]);
+  }, [source, position]);
+
+  useEffect(() => {
+    speedRef.current = speed;
+    if (player.current) player.current.playbackRate = speed;
+  }, [speed, source]);
 
   return (
     <section
@@ -122,7 +203,7 @@ export function CameraReplayLibrary({
           </p>
         </div>
         <button
-          disabled={loading}
+          disabled={loading || busy}
           type="button"
           onClick={() => void refresh()}
           className="inline-flex min-h-11 items-center gap-2 rounded-md border border-white/20 px-3 text-sm disabled:opacity-50"
@@ -161,6 +242,10 @@ export function CameraReplayLibrary({
                   controls
                   playsInline
                   preload="metadata"
+                  onError={() => {
+                    closePlayback();
+                    setError("Private video could not play. Reopen the clip to check access.");
+                  }}
                   className="aspect-video w-full object-contain"
                 />
               </div>
@@ -186,6 +271,9 @@ export function CameraReplayLibrary({
                     <option value="2">2×</option>
                   </select>
                 </label>
+                <button type="button" className="action-secondary" onClick={closePlayback}>
+                  Close preview
+                </button>
               </div>
             </>
           ) : (
@@ -207,7 +295,10 @@ export function CameraReplayLibrary({
             Camera angle
             <select
               value={selectedDevice}
-              onChange={(event) => setSelectedDevice(event.target.value)}
+              onChange={(event) => {
+                closePlayback();
+                setSelectedDevice(event.target.value);
+              }}
               className="min-h-11 rounded-md border border-white/20 bg-card px-3 text-sm"
             >
               <option value="all">All paired cameras</option>
@@ -233,7 +324,7 @@ export function CameraReplayLibrary({
                 <button
                   type="button"
                   key={clip.id}
-                  disabled={busy}
+                  disabled={busy || loading}
                   onClick={() => void play(clip)}
                   aria-pressed={clip.id === selectedClipId}
                   className={
