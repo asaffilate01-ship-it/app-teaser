@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { channelsFor, defaultPreferences, normalisePhone, reminderMessage, textMessage } from "@/lib/reminders";
+import { describe, it } from "node:test";
+import { expect } from "./assert-expect.ts";
+import { channelsFor, defaultPreferences, normalisePhone, reminderMessage, textMessage } from "../src/lib/reminders.ts";
 
 const base = { devices: 1, email: "a@b.com", paidPlan: true, clubTexts: true };
 
