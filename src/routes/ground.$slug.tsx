@@ -14,7 +14,13 @@ import {
   type GroundScreenSettings,
   type PublicBoardInput,
 } from "@/lib/ground-board";
-import { fetchGroundNames, fetchGroundSettings, fetchPublicBoard, loadGroundControl, type GroundControlRow } from "@/lib/ground-screen-cloud";
+import {
+  fetchGroundNames,
+  fetchGroundSettings,
+  fetchPublicBoard,
+  loadGroundControl,
+  type GroundControlRow,
+} from "@/lib/ground-screen-cloud";
 import { GroundPage } from "@/components/ground/GroundPages";
 import { GroundReplay } from "@/components/ground/GroundReplay";
 import { PromoSlot } from "@/components/promo/PromoSlot";
@@ -24,9 +30,17 @@ export const Route = createFileRoute("/ground/$slug")({
   head: () => ({
     meta: [
       { title: "Ground big screen — CricLume" },
-      { name: "description", content: "Widescreen HD scoreboard for TVs, projectors and LED screens at the ground, with rotating score pages." },
+      {
+        name: "description",
+        content:
+          "Widescreen HD scoreboard for TVs, projectors and LED screens at the ground, with rotating score pages.",
+      },
       { property: "og:title", content: "Ground big screen — CricLume" },
-      { property: "og:description", content: "Scoreboard, batting, bowling, Manhattan, worm and run chase pages for the big screen at the ground." },
+      {
+        property: "og:description",
+        content:
+          "Scoreboard, batting, bowling, Manhattan, worm and run chase pages for the big screen at the ground.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -59,7 +73,10 @@ function GroundScreen() {
     }
     let active = true;
     const load = async () => {
-      const [next, nextSettings] = await Promise.all([fetchPublicBoard(slug), fetchGroundSettings(slug)]);
+      const [next, nextSettings] = await Promise.all([
+        fetchPublicBoard(slug),
+        fetchGroundSettings(slug),
+      ]);
       if (!active) return;
       setBoard(next);
       setMissing(!next);
@@ -127,16 +144,23 @@ function GroundScreen() {
   }, []);
 
   const view = useMemo(() => (board ? buildGroundBoard(board, names) : null), [board, names]);
-  const available = useMemo(() => (view ? availablePages(view) : (["score"] as GroundPageId[])), [view]);
+  const available = useMemo(
+    () => (view ? availablePages(view) : (["score"] as GroundPageId[])),
+    [view],
+  );
   const shown = pageOnScreen(settings, available, now);
-  const page = local && local.until > now && available.includes(local.page) ? local.page : shown.page;
+  const page =
+    local && local.until > now && available.includes(local.page) ? local.page : shown.page;
   const rotation = settings.pages.filter((id) => available.includes(id));
 
   const step = useCallback(
     (delta: number) => {
       if (rotation.length === 0) return;
       const index = Math.max(0, rotation.indexOf(page));
-      setLocal({ page: rotation[(index + delta + rotation.length) % rotation.length]!, until: Date.now() + 60_000 });
+      setLocal({
+        page: rotation[(index + delta + rotation.length) % rotation.length]!,
+        until: Date.now() + 60_000,
+      });
     },
     [page, rotation],
   );
@@ -209,9 +233,15 @@ function GroundScreen() {
               <i key={id} className={id === page ? "is-on" : ""} />
             ))}
           </div>
-          <span className="gs-brand">{view.sponsor ? `Sponsored by ${view.sponsor} · ` : ""}CricLume live</span>
+          <span className="gs-brand">
+            {view.sponsor ? `Sponsored by ${view.sponsor} · ` : ""}CricLume live
+          </span>
           {settings.mode === "auto" && !local && rotation.length > 1 && (
-            <div className="gs-progress" style={{ transform: `scaleX(${shown.progress})` }} aria-hidden="true" />
+            <div
+              className="gs-progress"
+              style={{ transform: `scaleX(${shown.progress})` }}
+              aria-hidden="true"
+            />
           )}
         </footer>
         {session && matchId && replays !== "off" && (
@@ -225,11 +255,15 @@ function GroundScreen() {
         )}
         {chrome && (
           <div className="gs-chrome">
-            {replayNote && session && replays !== "off" && <span className="gs-note">{replayNote}</span>}
+            {replayNote && session && replays !== "off" && (
+              <span className="gs-note">{replayNote}</span>
+            )}
             <button
               type="button"
               className="gs-chrome-button"
-              onClick={() => void document.documentElement.requestFullscreen?.().catch(() => undefined)}
+              onClick={() =>
+                void document.documentElement.requestFullscreen?.().catch(() => undefined)
+              }
             >
               <Maximize aria-hidden="true" /> Full screen
             </button>

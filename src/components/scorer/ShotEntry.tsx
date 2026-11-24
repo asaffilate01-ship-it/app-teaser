@@ -127,11 +127,20 @@ export function ShotZonePicker({
     buzz();
     onChange(value === zone ? "Not recorded" : zone);
   };
-  const span = (start: number, end: number) => (leftHanded ? [360 - end, 360 - start] : [start, end]) as [number, number];
+  const span = (start: number, end: number) =>
+    (leftHanded ? [360 - end, 360 - start] : [start, end]) as [number, number];
   const selectedInfo = value === "Not recorded" ? undefined : zoneInfo(value);
   const centre: { zone: FieldZone; d: string; y: number }[] = [
-    { zone: "Keeper", d: `M${C - CENTRE},${C} A${CENTRE},${CENTRE} 0 0 1 ${C + CENTRE},${C} Z`, y: C - 22 },
-    { zone: "Bowler", d: `M${C + CENTRE},${C} A${CENTRE},${CENTRE} 0 0 1 ${C - CENTRE},${C} Z`, y: C + 30 },
+    {
+      zone: "Keeper",
+      d: `M${C - CENTRE},${C} A${CENTRE},${CENTRE} 0 0 1 ${C + CENTRE},${C} Z`,
+      y: C - 22,
+    },
+    {
+      zone: "Bowler",
+      d: `M${C + CENTRE},${C} A${CENTRE},${CENTRE} 0 0 1 ${C - CENTRE},${C} Z`,
+      y: C + 30,
+    },
   ];
   const recentShown = recent.filter((zone) => zone !== value).slice(0, 4);
 
@@ -139,8 +148,14 @@ export function ShotZonePicker({
     <div className="zone-picker-wrap" role="group" aria-label={label}>
       <div className="zone-toolbar">
         <div className="zone-legend" aria-hidden="true">
-          <span><i className="zone-key zone-key-ring" />Ring</span>
-          <span><i className="zone-key zone-key-deep" />Deep</span>
+          <span>
+            <i className="zone-key zone-key-ring" />
+            Ring
+          </span>
+          <span>
+            <i className="zone-key zone-key-deep" />
+            Deep
+          </span>
         </div>
         {onHandChange && (
           <div className="zone-hand" role="group" aria-label="Batter hand">
@@ -154,7 +169,11 @@ export function ShotZonePicker({
         )}
       </div>
 
-      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="zone-picker" aria-label={`${label} — ground view`}>
+      <svg
+        viewBox={`0 0 ${SIZE} ${SIZE}`}
+        className="zone-picker"
+        aria-label={`${label} — ground view`}
+      >
         <circle cx={C} cy={C} r={OUTER + 5} className="zone-boundary" />
         {ringSectors.map((sector, index) => {
           const [start, end] = span(sector.start, sector.end);
@@ -207,8 +226,12 @@ export function ShotZonePicker({
           </g>
         ))}
         <rect x={C - 5} y={C - 16} width={10} height={32} rx={2} className="zone-pitch" />
-        <text x={12} y={20} className="zone-side">{leftHanded ? "LEG" : "OFF"}</text>
-        <text x={SIZE - 12} y={20} textAnchor="end" className="zone-side">{leftHanded ? "OFF" : "LEG"}</text>
+        <text x={12} y={20} className="zone-side">
+          {leftHanded ? "LEG" : "OFF"}
+        </text>
+        <text x={SIZE - 12} y={20} textAnchor="end" className="zone-side">
+          {leftHanded ? "OFF" : "LEG"}
+        </text>
       </svg>
 
       <div className="zone-readout" aria-live="polite">
@@ -256,7 +279,12 @@ export function ShotZonePicker({
           </p>
           <div className="zone-chips">
             {recentShown.map((zone) => (
-              <button key={zone} type="button" onClick={() => pick(zone)} className="zone-chip zone-chip-recent">
+              <button
+                key={zone}
+                type="button"
+                onClick={() => pick(zone)}
+                className="zone-chip zone-chip-recent"
+              >
                 {zone}
               </button>
             ))}
@@ -377,11 +405,17 @@ export function ShotSummary({
         Next ball: <strong>{zone === "Not recorded" ? "position not set" : zone}</strong>
         {fielderName ? (
           <>
-            {" "}· fielded by <strong>{fielderName}</strong>
+            {" "}
+            · fielded by <strong>{fielderName}</strong>
           </>
         ) : null}
       </span>
-      <button type="button" onClick={onClear} className="shot-summary-clear" aria-label="Clear position and fielder">
+      <button
+        type="button"
+        onClick={onClear}
+        className="shot-summary-clear"
+        aria-label="Clear position and fielder"
+      >
         <X className="size-3.5" aria-hidden="true" /> Clear
       </button>
     </div>

@@ -8,7 +8,10 @@ function cacheKey(matchId: string, userId: string) {
   return `criclume:duties:${matchId}:${userId}`;
 }
 
-function readCache(matchId: string, userId: string): { duties: ScoringDuty[]; team: ScoringTeamMember[] } | null {
+function readCache(
+  matchId: string,
+  userId: string,
+): { duties: ScoringDuty[]; team: ScoringTeamMember[] } | null {
   try {
     const raw = JSON.parse(localStorage.getItem(cacheKey(matchId, userId)) ?? "null") as unknown;
     if (!raw || typeof raw !== "object") return null;
@@ -46,7 +49,10 @@ export function useMatchDuties(cloudMatchId: string | null, userId: string | nul
       setTeam(members);
       setError(null);
       try {
-        localStorage.setItem(cacheKey(cloudMatchId, userId), JSON.stringify({ duties: mine, team: members }));
+        localStorage.setItem(
+          cacheKey(cloudMatchId, userId),
+          JSON.stringify({ duties: mine, team: members }),
+        );
       } catch {
         /* storage full or blocked: the screen still works */
       }

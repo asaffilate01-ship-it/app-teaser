@@ -890,7 +890,10 @@ export async function createCameraRoom(input: {
 
 /** How many phones may join a camera room (1–16). Only camera directors for the match can change it. */
 export async function setCameraRoomCapacity(roomId: string, maxDevices: number): Promise<void> {
-  const { error } = await getCloudClient().rpc("set_camera_room_capacity", { p_room_id: roomId, p_max_devices: maxDevices });
+  const { error } = await getCloudClient().rpc("set_camera_room_capacity", {
+    p_room_id: roomId,
+    p_max_devices: maxDevices,
+  });
   if (error) throw error;
 }
 
@@ -955,7 +958,12 @@ export async function inviteMember(input: {
 }): Promise<void> {
   const { inviteClubMember } = await import("./members.functions");
   const result = await inviteClubMember({
-    data: { organisationId: input.organisationId, email: input.email, role: input.role, origin: window.location.origin },
+    data: {
+      organisationId: input.organisationId,
+      email: input.email,
+      role: input.role,
+      origin: window.location.origin,
+    },
   });
   if (!result.ok) throw new Error(result.reason);
 }

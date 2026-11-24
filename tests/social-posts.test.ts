@@ -9,20 +9,60 @@ const sheet: ScorecardSheet = {
   result: "Lions won by 16 runs",
   innings: [
     {
-      title: "1st innings", team: "Lions", total: "156/7", overs: "20.0", runRate: "7.80",
+      title: "1st innings",
+      team: "Lions",
+      total: "156/7",
+      overs: "20.0",
+      runRate: "7.80",
       batting: [
-        { name: "Ali Khan", howOut: "b Fin", runs: 72, balls: 48, fours: 8, sixes: 2, strikeRate: "150.0" },
-        { name: "Ben Shah", howOut: "not out", runs: 72, balls: 40, fours: 6, sixes: 3, strikeRate: "180.0" },
+        {
+          name: "Ali Khan",
+          howOut: "b Fin",
+          runs: 72,
+          balls: 48,
+          fours: 8,
+          sixes: 2,
+          strikeRate: "150.0",
+        },
+        {
+          name: "Ben Shah",
+          howOut: "not out",
+          runs: 72,
+          balls: 40,
+          fours: 6,
+          sixes: 3,
+          strikeRate: "180.0",
+        },
       ],
-      extras: "", extrasTotal: 4,
-      bowling: [{ name: "Fin Hale", overs: "4.0", maidens: 0, runs: 30, wickets: 3, economy: "7.50" }],
+      extras: "",
+      extrasTotal: 4,
+      bowling: [
+        { name: "Fin Hale", overs: "4.0", maidens: 0, runs: 30, wickets: 3, economy: "7.50" },
+      ],
       fallOfWickets: "",
     },
     {
-      title: "2nd innings", team: "Tigers", total: "140", overs: "19.2", runRate: "7.24",
-      batting: [{ name: "Gus Moor", howOut: "c Ali b Cal", runs: 40, balls: 30, fours: 3, sixes: 1, strikeRate: "133.3" }],
-      extras: "", extrasTotal: 2,
-      bowling: [{ name: "Cal Reid", overs: "4.0", maidens: 1, runs: 21, wickets: 3, economy: "5.25" }],
+      title: "2nd innings",
+      team: "Tigers",
+      total: "140",
+      overs: "19.2",
+      runRate: "7.24",
+      batting: [
+        {
+          name: "Gus Moor",
+          howOut: "c Ali b Cal",
+          runs: 40,
+          balls: 30,
+          fours: 3,
+          sixes: 1,
+          strikeRate: "133.3",
+        },
+      ],
+      extras: "",
+      extrasTotal: 2,
+      bowling: [
+        { name: "Cal Reid", overs: "4.0", maidens: 1, runs: 21, wickets: 3, economy: "5.25" },
+      ],
       fallOfWickets: "",
     },
   ],
@@ -44,11 +84,23 @@ test("result post lists both scores, the result and performers", () => {
 });
 
 test("hashtags strip spaces and punctuation", () => {
-  assert.equal(hashtags("St. John's CC", "Riverside 2nd XI"), "#StJohnsCCvRiverside2ndXI #Cricket #CricLume");
+  assert.equal(
+    hashtags("St. John's CC", "Riverside 2nd XI"),
+    "#StJohnsCCvRiverside2ndXI #Cricket #CricLume",
+  );
 });
 
 test("fixture post shows date, ground and live link", () => {
-  const post = fixturePost({ home: "Lions", away: "Tigers", startsAt: "2027-06-12T12:30:00Z", ground: "Riverside", competition: "Sunday League", round: "Round 3", link: "https://criclume.com/scoreboard/abc", timeZone: "UTC" });
+  const post = fixturePost({
+    home: "Lions",
+    away: "Tigers",
+    startsAt: "2027-06-12T12:30:00Z",
+    ground: "Riverside",
+    competition: "Sunday League",
+    round: "Round 3",
+    link: "https://criclume.com/scoreboard/abc",
+    timeZone: "UTC",
+  });
   assert.match(post, /Sat 12 Jun/);
   assert.match(post, /12:30/);
   assert.match(post, /📍 Riverside/);

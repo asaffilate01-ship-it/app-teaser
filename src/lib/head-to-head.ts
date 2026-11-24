@@ -1,4 +1,10 @@
-import { isBowlerWicket, isSuperOver, matchResult, summarizeInnings, type CricketMatch } from "./cricket.ts";
+import {
+  isBowlerWicket,
+  isSuperOver,
+  matchResult,
+  summarizeInnings,
+  type CricketMatch,
+} from "./cricket.ts";
 
 export interface TeamHeadToHead {
   played: number;
@@ -15,11 +21,20 @@ const hasTeam = (match: CricketMatch, id: string) => match.teams.some((team) => 
 const dateOf = (match: CricketMatch) => match.settings.startTime || match.createdAt;
 
 /** Record between two teams over finished matches. */
-export function teamHeadToHead(matches: readonly CricketMatch[], teamA: string, teamB: string): TeamHeadToHead {
+export function teamHeadToHead(
+  matches: readonly CricketMatch[],
+  teamA: string,
+  teamB: string,
+): TeamHeadToHead {
   const meetings = matches
     .filter((match) => hasTeam(match, teamA) && hasTeam(match, teamB))
     .map((match) => ({ match, result: matchResult(match) }))
-    .filter((item): item is { match: CricketMatch; result: NonNullable<ReturnType<typeof matchResult>> } => item.result !== null)
+    .filter(
+      (
+        item,
+      ): item is { match: CricketMatch; result: NonNullable<ReturnType<typeof matchResult>> } =>
+        item.result !== null,
+    )
     .sort((a, b) => dateOf(b.match).localeCompare(dateOf(a.match)));
   const summary: TeamHeadToHead = {
     played: meetings.length,
@@ -30,7 +45,8 @@ export function teamHeadToHead(matches: readonly CricketMatch[], teamA: string, 
     recent: [],
   };
   for (const { match, result } of meetings) {
-    if (result.winnerTeamId) summary.wins[result.winnerTeamId] = (summary.wins[result.winnerTeamId] ?? 0) + 1;
+    if (result.winnerTeamId)
+      summary.wins[result.winnerTeamId] = (summary.wins[result.winnerTeamId] ?? 0) + 1;
     else if (result.tied) summary.tied += 1;
     else summary.other += 1;
     for (const innings of match.innings) {
@@ -41,7 +57,12 @@ export function teamHeadToHead(matches: readonly CricketMatch[], teamA: string, 
       if (current === null || runs > current) summary.highest[innings.battingTeamId] = runs;
     }
     if (summary.recent.length < 5) {
-      summary.recent.push({ matchId: match.id, date: dateOf(match), text: result.text, winnerTeamId: result.winnerTeamId });
+      summary.recent.push({
+        matchId: match.id,
+        date: dateOf(match),
+        text: result.text,
+        winnerTeamId: result.winnerTeamId,
+      });
     }
   }
   return summary;
@@ -67,9 +88,17 @@ export function matchups(matches: readonly CricketMatch[]): Matchup[] {
       if (isSuperOver(innings)) continue;
       for (const ball of innings.deliveries) {
         const key = `${ball.strikerId}|${ball.bowlerId}`;
-        const line =
-          lines.get(key) ??
-          { batterId: ball.strikerId, bowlerId: ball.bowlerId, balls: 0, runs: 0, dots: 0, fours: 0, sixes: 0, dismissals: 0, strikeRate: 0 };
+        const line = lines.get(key) ?? {
+          batterId: ball.strikerId,
+          bowlerId: ball.bowlerId,
+          balls: 0,
+          runs: 0,
+          dots: 0,
+          fours: 0,
+          sixes: 0,
+          dismissals: 0,
+          strikeRate: 0,
+        };
         if (ball.extras.wide === 0) {
           line.balls += 1;
           if (ball.batterRuns === 0) line.dots += 1;
@@ -77,13 +106,21 @@ export function matchups(matches: readonly CricketMatch[]): Matchup[] {
         line.runs += ball.batterRuns;
         if (ball.batterRuns === 4) line.fours += 1;
         if (ball.batterRuns === 6) line.sixes += 1;
-        if (ball.dismissal && ball.dismissal.batterId === ball.strikerId && isBowlerWicket(ball.dismissal.type)) line.dismissals += 1;
+        if (
+          ball.dismissal &&
+          ball.dismissal.batterId === ball.strikerId &&
+          isBowlerWicket(ball.dismissal.type)
+        )
+          line.dismissals += 1;
         lines.set(key, line);
       }
     }
   }
   return [...lines.values()]
-    .map((line) => ({ ...line, strikeRate: line.balls ? Math.round((line.runs * 1000) / line.balls) / 10 : 0 }))
+    .map((line) => ({
+      ...line,
+      strikeRate: line.balls ? Math.round((line.runs * 1000) / line.balls) / 10 : 0,
+    }))
     .sort((a, b) => b.balls - a.balls);
 }
 
@@ -91,7 +128,9 @@ export function matchups(matches: readonly CricketMatch[]): Matchup[] {
 export function knownPlayers(matches: readonly CricketMatch[]) {
   const players = new Map<string, { id: string; name: string; team: string }>();
   for (const match of matches) {
-    for (const team of match.teams) for (const player of team.players) players.set(player.id, { id: player.id, name: player.name, team: team.name });
+    for (const team of match.teams)
+      for (const player of team.players)
+        players.set(player.id, { id: player.id, name: player.name, team: team.name });
   }
   return [...players.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -100,6 +139,7 @@ export function knownPlayers(matches: readonly CricketMatch[]) {
 export function knownTeams(matches: readonly CricketMatch[]) {
   const teams = new Map<string, string>();
   for (const match of matches) for (const team of match.teams) teams.set(team.id, team.name);
-  return [...teams.entries()].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  return [...teams.entries()]
+    .map(([id, name]) => ({ id, name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
-

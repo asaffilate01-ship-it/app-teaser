@@ -8,7 +8,13 @@ function minutesSince(iso: string, now: number) {
 }
 
 /** Rain delay / bad light: pauses scoring and tells everyone watching that play has stopped. */
-export function StoppagePanel({ match, onSave }: { match: CricketMatch; onSave: (match: CricketMatch, eventType?: string) => void }) {
+export function StoppagePanel({
+  match,
+  onSave,
+}: {
+  match: CricketMatch;
+  onSave: (match: CricketMatch, eventType?: string) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const stoppage = match.stoppage;
@@ -20,17 +26,25 @@ export function StoppagePanel({ match, onSave }: { match: CricketMatch; onSave: 
   if (match.status !== "live" || match.days?.atStumps) return null;
 
   if (stoppage) {
-    const label = stoppageReasons.find((item) => item.id === stoppage.reason)?.label ?? "Play suspended";
+    const label =
+      stoppageReasons.find((item) => item.id === stoppage.reason)?.label ?? "Play suspended";
     return (
       <section className="rule-banner mb-4" role="status" aria-label="Play stopped">
         <span className="flex min-w-0 items-center gap-3">
           <CloudRain className="size-5 shrink-0 text-gold" aria-hidden="true" />
           <span className="min-w-0">
             <strong>{label}</strong>
-            <span className="block">Scoring is paused · {minutesSince(stoppage.since, now)} min so far. Viewers can see play has stopped.</span>
+            <span className="block">
+              Scoring is paused · {minutesSince(stoppage.since, now)} min so far. Viewers can see
+              play has stopped.
+            </span>
           </span>
         </span>
-        <button type="button" className="action-primary shrink-0" onClick={() => onSave(resumePlay(match), "match.play_resumed")}>
+        <button
+          type="button"
+          className="action-primary shrink-0"
+          onClick={() => onSave(resumePlay(match), "match.play_resumed")}
+        >
           <Play className="size-4" aria-hidden="true" /> Resume play
         </button>
       </section>

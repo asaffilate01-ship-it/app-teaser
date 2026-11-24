@@ -54,17 +54,28 @@ test("rain FAQ offers the built rain rules and DLS only from official inputs", (
     assert.ok(rain, `${language}: expected rain rule FAQ`);
     assert.doesNotMatch(rain.a, /^(Not yet|Noch nicht|Nog niet|Nog nie|Pas encore)\b/i);
     assert.match(rain.a, /DLS/, `${language}: DLS option must be named`);
-    assert.match(rain.a, /offici|offiziell|amptelik/i, `${language}: DLS comes from the official resource`);
+    assert.match(
+      rain.a,
+      /offici|offiziell|amptelik/i,
+      `${language}: DLS comes from the official resource`,
+    );
   }
 });
 
 test("camera copy states the real 16-phone match limit, never unlimited", () => {
   for (const [language, copy] of Object.entries(languages)) {
     const text = JSON.stringify(copy);
-    assert.doesNotMatch(text, /Unlimited camera|Unbegrenzte Kamera|Onbeperkt camera|Onbeperkte kamera|caméra illimités/i);
+    assert.doesNotMatch(
+      text,
+      /Unlimited camera|Unbegrenzte Kamera|Onbeperkt camera|Onbeperkte kamera|caméra illimités/i,
+    );
     const cameras = copy.faq.items[1]!;
     assert.match(cameras.a, /\b16\b/, `${language}: camera FAQ names the 16-phone limit`);
-    assert.doesNotMatch(text, /\b8 (phones|Handys|telefoons|fone|téléphones)/, `${language}: no leftover 8-phone limit`);
+    assert.doesNotMatch(
+      text,
+      /\b8 (phones|Handys|telefoons|fone|téléphones)/,
+      `${language}: no leftover 8-phone limit`,
+    );
   }
 });
 

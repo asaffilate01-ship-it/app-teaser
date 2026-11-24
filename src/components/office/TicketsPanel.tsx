@@ -2,17 +2,41 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, LoaderCircle, ScanLine, Ticket, XCircle } from "lucide-react";
 import { formatMoney, toMinor, transferMethods } from "@/lib/club-office";
-import { formatTicketCode, isTicketGate, isTicketManager, listingTotals, normaliseTicketCode } from "@/lib/tickets";
-import { loadTicketDesk, ticketDesk, type CheckInResult, type TicketListing, type TicketOrder } from "@/lib/tickets-cloud";
-import { Empty, OfficeCard, OfficeField, Pill, currencies, fromLocal, when, type OfficeProps } from "./ui";
+import {
+  formatTicketCode,
+  isTicketGate,
+  isTicketManager,
+  listingTotals,
+  normaliseTicketCode,
+} from "@/lib/tickets";
+import {
+  loadTicketDesk,
+  ticketDesk,
+  type CheckInResult,
+  type TicketListing,
+  type TicketOrder,
+} from "@/lib/tickets-cloud";
+import {
+  Empty,
+  OfficeCard,
+  OfficeField,
+  Pill,
+  currencies,
+  fromLocal,
+  when,
+  type OfficeProps,
+} from "./ui";
 
-const methodName = (method: string | null) => transferMethods.find(([value]) => value === method)?.[1] ?? method ?? "";
+const methodName = (method: string | null) =>
+  transferMethods.find(([value]) => value === method)?.[1] ?? method ?? "";
 
 /** Match tickets: set up sales, check transfer payments, and check fans in at the gate. */
 export function TicketsPanel(props: OfficeProps) {
   const { organisationId, role } = props;
   const manager = isTicketManager(role);
-  const [desk, setDesk] = useState<{ listings: TicketListing[]; orders: TicketOrder[] } | null>(null);
+  const [desk, setDesk] = useState<{ listings: TicketListing[]; orders: TicketOrder[] } | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const reload = useCallback(async () => {
     try {
@@ -53,7 +77,10 @@ export function TicketsPanel(props: OfficeProps) {
     <div className="space-y-4">
       <GateCheck organisationId={organisationId} onDone={() => void reload()} />
       {manager && pending.length > 0 && (
-        <OfficeCard title={`Ticket payments to check (${pending.length})`} description="Find each reference in your bank or wallet app. Confirm it to send the fan their ticket code.">
+        <OfficeCard
+          title={`Ticket payments to check (${pending.length})`}
+          description="Find each reference in your bank or wallet app. Confirm it to send the fan their ticket code."
+        >
           <div className="space-y-2">
             {pending.map((order) => {
               const listing = desk.listings.find((row) => row.id === order.listing_id);
@@ -61,23 +88,38 @@ export function TicketsPanel(props: OfficeProps) {
                 <div key={order.id} className="office-row">
                   <span className="min-w-0">
                     <span className="font-bold">
-                      {formatMoney(Number(order.amount_minor), order.currency)} · {methodName(order.method)} · ref {order.reference}
+                      {formatMoney(Number(order.amount_minor), order.currency)} ·{" "}
+                      {methodName(order.method)} · ref {order.reference}
                     </span>
                     <span className="office-meta block">
                       {order.quantity} × {listing?.title ?? "Tickets"} · {order.buyer_name}
-                      {order.buyer_phone ? ` · ${order.buyer_phone}` : ""} · {when(order.created_at)}
+                      {order.buyer_phone ? ` · ${order.buyer_phone}` : ""} ·{" "}
+                      {when(order.created_at)}
                     </span>
                   </span>
                   <span className="flex flex-wrap gap-1.5">
-                    <button type="button" className="app-chip-button" onClick={() => void run(() => ticketDesk.decide(order.id, true), "Confirmed — the fan can see their code")}>
+                    <button
+                      type="button"
+                      className="app-chip-button"
+                      onClick={() =>
+                        void run(
+                          () => ticketDesk.decide(order.id, true),
+                          "Confirmed — the fan can see their code",
+                        )
+                      }
+                    >
                       <CheckCircle2 className="size-3.5" /> Confirm
                     </button>
                     <button
                       type="button"
                       className="app-chip-button"
                       onClick={() => {
-                        const note = window.prompt("Why? The fan sees this (e.g. reference not found)") ?? "";
-                        void run(() => ticketDesk.decide(order.id, false, note), "Marked not found — the seats are free again");
+                        const note =
+                          window.prompt("Why? The fan sees this (e.g. reference not found)") ?? "";
+                        void run(
+                          () => ticketDesk.decide(order.id, false, note),
+                          "Marked not found — the seats are free again",
+                        );
                       }}
                     >
                       <XCircle className="size-3.5" /> Not found
@@ -89,7 +131,13 @@ export function TicketsPanel(props: OfficeProps) {
           </div>
         </OfficeCard>
       )}
-      {manager && <NewListing {...props} payments={props.data.paymentAccounts.filter((a) => a.active).length} onDone={() => void reload()} />}
+      {manager && (
+        <NewListing
+          {...props}
+          payments={props.data.paymentAccounts.filter((a) => a.active).length}
+          onDone={() => void reload()}
+        />
+      )}
       <OfficeCard
         title="Ticket sales"
         description="Fans buy on your published club website's Tickets page with a free CricLume account."
@@ -99,7 +147,13 @@ export function TicketsPanel(props: OfficeProps) {
         ) : (
           <div className="space-y-3">
             {desk.listings.map((listing) => (
-              <ListingRow key={listing.id} listing={listing} orders={desk.orders.filter((order) => order.listing_id === listing.id)} manager={manager} run={run} />
+              <ListingRow
+                key={listing.id}
+                listing={listing}
+                orders={desk.orders.filter((order) => order.listing_id === listing.id)}
+                manager={manager}
+                run={run}
+              />
             ))}
           </div>
         )}
@@ -127,9 +181,13 @@ function GateCheck({ organisationId, onDone }: { organisationId: string; onDone:
       setBusy(false);
     }
   };
-  const tone = result?.result === "admitted" ? "good" : result?.result === "already" ? "warn" : "bad";
+  const tone =
+    result?.result === "admitted" ? "good" : result?.result === "already" ? "warn" : "bad";
   return (
-    <OfficeCard title="Gate check-in" description="Type the code on the fan's phone. Each ticket code lets its tickets in once.">
+    <OfficeCard
+      title="Gate check-in"
+      description="Type the code on the fan's phone. Each ticket code lets its tickets in once."
+    >
       <form className="flex flex-wrap gap-2" onSubmit={(event) => void submit(event)}>
         <input
           aria-label="Ticket code"
@@ -159,7 +217,8 @@ function GateCheck({ organisationId, onDone }: { organisationId: string; onDone:
           )}
           {result.result === "not_valid" && (
             <strong>
-              Not valid — payment {result.status === "pending" ? "still being checked" : result.status} · {result.name}
+              Not valid — payment{" "}
+              {result.status === "pending" ? "still being checked" : result.status} · {result.name}
             </strong>
           )}
         </div>
@@ -168,7 +227,17 @@ function GateCheck({ organisationId, onDone }: { organisationId: string; onDone:
   );
 }
 
-function ListingRow({ listing, orders, manager, run }: { listing: TicketListing; orders: TicketOrder[]; manager: boolean; run: (action: () => Promise<void>, done: string) => Promise<boolean> }) {
+function ListingRow({
+  listing,
+  orders,
+  manager,
+  run,
+}: {
+  listing: TicketListing;
+  orders: TicketOrder[];
+  manager: boolean;
+  run: (action: () => Promise<void>, done: string) => Promise<boolean>;
+}) {
   const [showOrders, setShowOrders] = useState(false);
   const totals = listingTotals(listing.capacity, orders);
   const past = new Date(listing.starts_at).getTime() < Date.now() - 6 * 3600_000;
@@ -180,23 +249,54 @@ function ListingRow({ listing, orders, manager, run }: { listing: TicketListing;
           <span className="font-bold">{listing.title}</span>
           <span className="office-meta block">
             {when(listing.starts_at)}
-            {listing.venue ? ` · ${listing.venue}` : ""} · {Number(listing.price_minor) === 0 ? "Free" : formatMoney(Number(listing.price_minor), listing.currency)} each
+            {listing.venue ? ` · ${listing.venue}` : ""} ·{" "}
+            {Number(listing.price_minor) === 0
+              ? "Free"
+              : formatMoney(Number(listing.price_minor), listing.currency)}{" "}
+            each
           </span>
         </span>
         <span className="flex flex-wrap items-center gap-1.5">
-          {past ? <Pill>Finished</Pill> : listing.on_sale ? <Pill tone="good">On sale</Pill> : <Pill tone="warn">Paused</Pill>}
+          {past ? (
+            <Pill>Finished</Pill>
+          ) : listing.on_sale ? (
+            <Pill tone="good">On sale</Pill>
+          ) : (
+            <Pill tone="warn">Paused</Pill>
+          )}
         </span>
       </div>
       <div className="ticket-desk-stats">
-        <span><strong>{totals.sold}</strong> sold</span>
-        <span><strong>{totals.waiting}</strong> being checked</span>
-        <span><strong>{totals.left}</strong> left of {listing.capacity}</span>
-        <span><strong>{totals.admitted}</strong> through the gate</span>
-        {manager && <span><strong>{formatMoney(totals.takenMinor, listing.currency)}</strong> confirmed</span>}
+        <span>
+          <strong>{totals.sold}</strong> sold
+        </span>
+        <span>
+          <strong>{totals.waiting}</strong> being checked
+        </span>
+        <span>
+          <strong>{totals.left}</strong> left of {listing.capacity}
+        </span>
+        <span>
+          <strong>{totals.admitted}</strong> through the gate
+        </span>
+        {manager && (
+          <span>
+            <strong>{formatMoney(totals.takenMinor, listing.currency)}</strong> confirmed
+          </span>
+        )}
       </div>
       <div className="flex flex-wrap gap-1.5">
         {manager && !past && (
-          <button type="button" className="app-chip-button" onClick={() => void run(() => ticketDesk.updateListing(listing.id, { on_sale: !listing.on_sale }), listing.on_sale ? "Sales paused" : "Back on sale")}>
+          <button
+            type="button"
+            className="app-chip-button"
+            onClick={() =>
+              void run(
+                () => ticketDesk.updateListing(listing.id, { on_sale: !listing.on_sale }),
+                listing.on_sale ? "Sales paused" : "Back on sale",
+              )
+            }
+          >
             {listing.on_sale ? "Pause sales" : "Put on sale"}
           </button>
         )}
@@ -206,14 +306,23 @@ function ListingRow({ listing, orders, manager, run }: { listing: TicketListing;
             className="app-chip-button"
             onClick={() => {
               const value = window.prompt("Total seats", String(listing.capacity));
-              if (value != null && /^\d+$/.test(value) && Number(value) >= 1) void run(() => ticketDesk.updateListing(listing.id, { capacity: Number(value) }), "Seats updated");
+              if (value != null && /^\d+$/.test(value) && Number(value) >= 1)
+                void run(
+                  () => ticketDesk.updateListing(listing.id, { capacity: Number(value) }),
+                  "Seats updated",
+                );
             }}
           >
             Change seats
           </button>
         )}
         {confirmed.length > 0 && (
-          <button type="button" className="app-chip-button" aria-expanded={showOrders} onClick={() => setShowOrders(!showOrders)}>
+          <button
+            type="button"
+            className="app-chip-button"
+            aria-expanded={showOrders}
+            onClick={() => setShowOrders(!showOrders)}
+          >
             {showOrders ? "Hide ticket list" : `Ticket list (${confirmed.length})`}
           </button>
         )}
@@ -222,17 +331,26 @@ function ListingRow({ listing, orders, manager, run }: { listing: TicketListing;
         <div className="space-y-1.5">
           {confirmed.map((order) => (
             <div key={order.id} className="ticket-desk-order">
-              <span className="font-mono text-xs tracking-wider">{formatTicketCode(order.code)}</span>
+              <span className="font-mono text-xs tracking-wider">
+                {formatTicketCode(order.code)}
+              </span>
               <span className="min-w-0 flex-1 truncate">
                 {order.buyer_name} · {order.quantity}
                 {order.reference ? ` · ref ${order.reference}` : ""}
               </span>
-              {order.checked_in_at ? <Pill tone="good">In</Pill> : manager ? (
+              {order.checked_in_at ? (
+                <Pill tone="good">In</Pill>
+              ) : manager ? (
                 <button
                   type="button"
                   className="app-chip-button"
                   onClick={() => {
-                    if (window.confirm(`Cancel ${order.buyer_name}'s ${order.quantity} ticket(s)? Refund them by hand.`)) void run(() => ticketDesk.cancel(order.id), "Ticket cancelled");
+                    if (
+                      window.confirm(
+                        `Cancel ${order.buyer_name}'s ${order.quantity} ticket(s)? Refund them by hand.`,
+                      )
+                    )
+                      void run(() => ticketDesk.cancel(order.id), "Ticket cancelled");
                   }}
                 >
                   Cancel
@@ -246,12 +364,19 @@ function ListingRow({ listing, orders, manager, run }: { listing: TicketListing;
   );
 }
 
-function NewListing({ data, organisationId, payments, onDone }: OfficeProps & { payments: number; onDone: () => void }) {
+function NewListing({
+  data,
+  organisationId,
+  payments,
+  onDone,
+}: OfficeProps & { payments: number; onDone: () => void }) {
   const [title, setTitle] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [venue, setVenue] = useState("");
   const [price, setPrice] = useState("");
-  const [currency, setCurrency] = useState(data.schedules[0]?.currency ?? data.items.find((item) => item.currency)?.currency ?? "GBP");
+  const [currency, setCurrency] = useState(
+    data.schedules[0]?.currency ?? data.items.find((item) => item.currency)?.currency ?? "GBP",
+  );
   const [capacity, setCapacity] = useState(200);
   const [maxPerOrder, setMaxPerOrder] = useState(6);
   const [details, setDetails] = useState("");
@@ -288,40 +413,97 @@ function NewListing({ data, organisationId, payments, onDone }: OfficeProps & { 
     }
   };
   return (
-    <OfficeCard title="Sell tickets for a match" description="Fans pay by bank or wallet transfer and add the reference; you confirm it here. Free tickets are confirmed straight away.">
+    <OfficeCard
+      title="Sell tickets for a match"
+      description="Fans pay by bank or wallet transfer and add the reference; you confirm it here. Free tickets are confirmed straight away."
+    >
       {payments === 0 && (
         <p className="office-meta mb-3">
-          <Pill tone="warn">Add payment details first</Pill> Fans need your Raast, wallet or bank details — add them under Fees → Club payment details.
+          <Pill tone="warn">Add payment details first</Pill> Fans need your Raast, wallet or bank
+          details — add them under Fees → Club payment details.
         </p>
       )}
-      <form onSubmit={(event) => void submit(event)} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <form
+        onSubmit={(event) => void submit(event)}
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+      >
         <OfficeField label="Match or event" className="sm:col-span-2">
-          <input required minLength={3} maxLength={120} className="scorer-input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="1st XI v Lahore Gymkhana — final" />
+          <input
+            required
+            minLength={3}
+            maxLength={120}
+            className="scorer-input"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="1st XI v Lahore Gymkhana — final"
+          />
         </OfficeField>
         <OfficeField label="Starts">
-          <input required type="datetime-local" className="scorer-input" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} />
+          <input
+            required
+            type="datetime-local"
+            className="scorer-input"
+            value={startsAt}
+            onChange={(event) => setStartsAt(event.target.value)}
+          />
         </OfficeField>
         <OfficeField label="Venue (optional)">
-          <input maxLength={160} className="scorer-input" value={venue} onChange={(event) => setVenue(event.target.value)} />
+          <input
+            maxLength={160}
+            className="scorer-input"
+            value={venue}
+            onChange={(event) => setVenue(event.target.value)}
+          />
         </OfficeField>
         <OfficeField label="Price per ticket (blank = free)">
-          <input inputMode="decimal" className="scorer-input" value={price} onChange={(event) => setPrice(event.target.value)} />
+          <input
+            inputMode="decimal"
+            className="scorer-input"
+            value={price}
+            onChange={(event) => setPrice(event.target.value)}
+          />
         </OfficeField>
         <OfficeField label="Currency">
-          <select className="scorer-input" value={currency} onChange={(event) => setCurrency(event.target.value)}>
+          <select
+            className="scorer-input"
+            value={currency}
+            onChange={(event) => setCurrency(event.target.value)}
+          >
             {currencies.map((code) => (
               <option key={code}>{code}</option>
             ))}
           </select>
         </OfficeField>
         <OfficeField label="Seats">
-          <input type="number" min={1} max={100000} className="scorer-input" value={capacity} onChange={(event) => setCapacity(Math.max(1, Number(event.target.value) || 1))} />
+          <input
+            type="number"
+            min={1}
+            max={100000}
+            className="scorer-input"
+            value={capacity}
+            onChange={(event) => setCapacity(Math.max(1, Number(event.target.value) || 1))}
+          />
         </OfficeField>
         <OfficeField label="Most per fan">
-          <input type="number" min={1} max={20} className="scorer-input" value={maxPerOrder} onChange={(event) => setMaxPerOrder(Math.min(20, Math.max(1, Number(event.target.value) || 1)))} />
+          <input
+            type="number"
+            min={1}
+            max={20}
+            className="scorer-input"
+            value={maxPerOrder}
+            onChange={(event) =>
+              setMaxPerOrder(Math.min(20, Math.max(1, Number(event.target.value) || 1)))
+            }
+          />
         </OfficeField>
         <OfficeField label="Details (optional)" className="sm:col-span-2 lg:col-span-3">
-          <input maxLength={500} className="scorer-input" value={details} onChange={(event) => setDetails(event.target.value)} placeholder="Gates open 1pm. Under-12s free with an adult." />
+          <input
+            maxLength={500}
+            className="scorer-input"
+            value={details}
+            onChange={(event) => setDetails(event.target.value)}
+            placeholder="Gates open 1pm. Under-12s free with an adult."
+          />
         </OfficeField>
         <div className="flex items-end">
           <button className="action-primary w-full" disabled={busy}>

@@ -78,10 +78,16 @@ export function drawAwardCard(canvas: HTMLCanvasElement, input: AwardCardInput) 
   ctx.fillStyle = text;
   ctx.globalAlpha = 0.85;
   ctx.font = "500 42px system-ui, sans-serif";
-  wrapWords(input.detail, (line) => ctx.measureText(line).width < W - 260, 3).forEach((line, i) => ctx.fillText(line, W / 2, afterTitle + 160 + i * 56));
+  wrapWords(input.detail, (line) => ctx.measureText(line).width < W - 260, 3).forEach((line, i) =>
+    ctx.fillText(line, W / 2, afterTitle + 160 + i * 56),
+  );
   ctx.globalAlpha = 0.7;
   ctx.font = "500 34px system-ui, sans-serif";
-  ctx.fillText([certificate ? input.team : "", input.date ?? ""].filter(Boolean).join(" · "), W / 2, H - 190);
+  ctx.fillText(
+    [certificate ? input.team : "", input.date ?? ""].filter(Boolean).join(" · "),
+    W / 2,
+    H - 190,
+  );
   ctx.globalAlpha = 1;
   ctx.fillStyle = gold;
   ctx.font = "700 30px system-ui, sans-serif";

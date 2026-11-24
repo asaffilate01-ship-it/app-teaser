@@ -1,7 +1,22 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createMatch, currentInnings, endCurrentInnings, matchResult, recordDelivery, startNextInnings, type CricketMatch, type RecordDeliveryInput } from "../src/lib/cricket.ts";
-import { callStumps, closeOfPlayText, endMatchOutOfTime, outOfTime, startNextDay } from "../src/lib/multi-day.ts";
+import {
+  createMatch,
+  currentInnings,
+  endCurrentInnings,
+  matchResult,
+  recordDelivery,
+  startNextInnings,
+  type CricketMatch,
+  type RecordDeliveryInput,
+} from "../src/lib/cricket.ts";
+import {
+  callStumps,
+  closeOfPlayText,
+  endMatchOutOfTime,
+  outOfTime,
+  startNextDay,
+} from "../src/lib/multi-day.ts";
 
 function newMatch(days = 3): CricketMatch {
   return createMatch({
@@ -10,19 +25,44 @@ function newMatch(days = 3): CricketMatch {
     homePlayers: ["A", "B", "C", "D", "E"],
     awayPlayers: ["F", "G", "H", "I", "J"],
     battingFirst: "home",
-    settings: { format: "Multi-day", oversPerInnings: null, inningsPerSide: 2, ballsPerOver: 6, ground: "", weather: "", startTime: "", rules: { followOnLead: 150, days } },
+    settings: {
+      format: "Multi-day",
+      oversPerInnings: null,
+      inningsPerSide: 2,
+      ballsPerOver: 6,
+      ground: "",
+      weather: "",
+      startTime: "",
+      rules: { followOnLead: 150, days },
+    },
   });
 }
 const ball = (m: CricketMatch, extra: Partial<RecordDeliveryInput> = {}): RecordDeliveryInput => {
   const i = currentInnings(m);
-  return { strikerId: i.strikerId, nonStrikerId: i.nonStrikerId, bowlerId: i.bowlerId, end: "Pavilion", deliveryStyle: "Medium", outcome: "hit", batterRuns: 0, ...extra };
+  return {
+    strikerId: i.strikerId,
+    nonStrikerId: i.nonStrikerId,
+    bowlerId: i.bowlerId,
+    end: "Pavilion",
+    deliveryStyle: "Medium",
+    outcome: "hit",
+    batterRuns: 0,
+    ...extra,
+  };
 };
 const fours = (m: CricketMatch, n: number) => {
   for (let i = 0; i < n; i++) m = recordDelivery(m, ball(m, { batterRuns: 4 }));
   return m;
 };
 const allOut = (m: CricketMatch) => {
-  while (m.status === "live") m = recordDelivery(m, ball(m, { outcome: "wicket", dismissal: { type: "bowled", batterId: currentInnings(m).strikerId } }));
+  while (m.status === "live")
+    m = recordDelivery(
+      m,
+      ball(m, {
+        outcome: "wicket",
+        dismissal: { type: "bowled", batterId: currentInnings(m).strikerId },
+      }),
+    );
   return m;
 };
 
@@ -30,7 +70,10 @@ test("stumps records the close-of-play score and stops scoring until the next da
   let match = fours(newMatch(), 10); // Lions 40/0
   match = callStumps(match, new Date("2027-06-01T18:30:00Z"));
   assert.equal(match.days?.atStumps, true);
-  assert.equal(closeOfPlayText(match, match.days!.closes[0]!), "Stumps, Day 1: Lions 40/0 (1.4 ov)");
+  assert.equal(
+    closeOfPlayText(match, match.days!.closes[0]!),
+    "Stumps, Day 1: Lions 40/0 (1.4 ov)",
+  );
   assert.equal(recordDelivery(match, ball(match, { batterRuns: 4 })), match);
   match = startNextDay(match);
   assert.equal(match.days?.current, 2);

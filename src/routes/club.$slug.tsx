@@ -47,7 +47,9 @@ function ClubSiteLayout() {
   const criclumeHref = site.domain ? "https://criclume.com/" : "/";
   return (
     <div className="club-site" data-accent={accent}>
-      <a href="#site-main" className="club-skip">Skip to content</a>
+      <a href="#site-main" className="club-skip">
+        Skip to content
+      </a>
       <header className="club-header">
         <div className="club-shell club-header-row">
           <Link to="/club/$slug" params={{ slug }} className="club-brand">
@@ -59,21 +61,21 @@ function ClubSiteLayout() {
             <span className="club-brand-name">{site.name}</span>
           </Link>
           <div className="club-header-tools">
-          <nav aria-label={`${site.name} website`} className="club-nav">
-            {nav.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                params={{ slug }}
-                activeOptions={{ exact: item.exact }}
-                activeProps={{ "aria-current": "page" }}
-                className="club-nav-link"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-          <ThemeToggle pageDefault="light" />
+            <nav aria-label={`${site.name} website`} className="club-nav">
+              {nav.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  params={{ slug }}
+                  activeOptions={{ exact: item.exact }}
+                  activeProps={{ "aria-current": "page" }}
+                  className="club-nav-link"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+            <ThemeToggle pageDefault="light" />
           </div>
         </div>
       </header>
@@ -92,7 +94,9 @@ function ClubSiteLayout() {
             )}
             {site.site?.contactPhone && (
               <p>
-                <a href={`tel:${site.site.contactPhone.replace(/[^+\d]/g, "")}`}>{site.site.contactPhone}</a>
+                <a href={`tel:${site.site.contactPhone.replace(/[^+\d]/g, "")}`}>
+                  {site.site.contactPhone}
+                </a>
               </p>
             )}
           </div>
@@ -108,10 +112,27 @@ function ClubSiteLayout() {
             </ul>
           )}
           {site.coBranded ? (
-            <a href={criclumeHref} className="club-cobrand" aria-label={`Official ${site.name} website, powered by CricLume`}>
+            <a
+              href={criclumeHref}
+              className="club-cobrand"
+              aria-label={`Official ${site.name} website, powered by CricLume`}
+            >
               <span className="club-cobrand-label">Official website · powered by</span>
-              <img src={logoMark.url} alt="CricLume" width={1600} height={600} className="club-cobrand-logo club-cobrand-on-light" />
-              <img src={logoMarkOnDark.url} alt="" aria-hidden="true" width={840} height={276} className="club-cobrand-logo club-cobrand-on-dark" />
+              <img
+                src={logoMark.url}
+                alt="CricLume"
+                width={1600}
+                height={600}
+                className="club-cobrand-logo club-cobrand-on-light"
+              />
+              <img
+                src={logoMarkOnDark.url}
+                alt=""
+                aria-hidden="true"
+                width={840}
+                height={276}
+                className="club-cobrand-logo club-cobrand-on-dark"
+              />
             </a>
           ) : (
             <p className="club-powered">

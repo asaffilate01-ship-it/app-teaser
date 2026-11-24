@@ -1,7 +1,18 @@
 import { useEffect, useState } from "react";
 import { Download, Share, SquarePlus, X } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { INSTALL_DISMISS_KEY, installMode, installSnoozed, type InstallMode } from "@/lib/install-app";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  INSTALL_DISMISS_KEY,
+  installMode,
+  installSnoozed,
+  type InstallMode,
+} from "@/lib/install-app";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -30,7 +41,9 @@ function useInstallMode(): InstallMode {
       setMode(
         installMode({
           userAgent: navigator.userAgent,
-          standalone: window.matchMedia("(display-mode: standalone)").matches || (navigator as { standalone?: boolean }).standalone === true,
+          standalone:
+            window.matchMedia("(display-mode: standalone)").matches ||
+            (navigator as { standalone?: boolean }).standalone === true,
           canPrompt: deferredPrompt !== null,
           maxTouchPoints: navigator.maxTouchPoints,
         }),
@@ -56,14 +69,23 @@ async function runPrompt() {
 function IosSteps({ mode }: { mode: InstallMode }) {
   return (
     <ol className="install-steps">
-      {mode === "ios-other" && <li>Open this page in <strong>Safari</strong> (copy the link, then paste it into Safari).</li>}
+      {mode === "ios-other" && (
+        <li>
+          Open this page in <strong>Safari</strong> (copy the link, then paste it into Safari).
+        </li>
+      )}
       <li>
-        Tap <Share className="inline size-4 align-text-bottom" aria-label="Share" /> <strong>Share</strong> at the bottom of the screen.
+        Tap <Share className="inline size-4 align-text-bottom" aria-label="Share" />{" "}
+        <strong>Share</strong> at the bottom of the screen.
       </li>
       <li>
-        Scroll down and tap <SquarePlus className="inline size-4 align-text-bottom" aria-hidden="true" /> <strong>Add to Home Screen</strong>.
+        Scroll down and tap{" "}
+        <SquarePlus className="inline size-4 align-text-bottom" aria-hidden="true" />{" "}
+        <strong>Add to Home Screen</strong>.
       </li>
-      <li>Tap <strong>Add</strong>. CricLume opens full screen from its icon, like any app.</li>
+      <li>
+        Tap <strong>Add</strong>. CricLume opens full screen from its icon, like any app.
+      </li>
     </ol>
   );
 }
@@ -89,7 +111,9 @@ export function InstallButton() {
         <DialogContent className="install-dialog">
           <DialogHeader>
             <DialogTitle>Add CricLume to your home screen</DialogTitle>
-            <DialogDescription>Score from an icon on your phone, full screen and quicker to open.</DialogDescription>
+            <DialogDescription>
+              Score from an icon on your phone, full screen and quicker to open.
+            </DialogDescription>
           </DialogHeader>
           <IosSteps mode={mode} />
         </DialogContent>
@@ -124,15 +148,23 @@ export function InstallBanner() {
       <div className="min-w-0 flex-1">
         <p className="font-semibold">Get the CricLume app</p>
         {mode === "prompt" ? (
-          <p className="text-xs text-muted-foreground">Install it on this device — free, no app store needed.</p>
+          <p className="text-xs text-muted-foreground">
+            Install it on this device — free, no app store needed.
+          </p>
         ) : (
           <p className="text-xs text-muted-foreground">
-            {mode === "ios-other" ? "Open in Safari, then " : ""}Tap <Share className="inline size-3.5 align-text-bottom" aria-label="Share" /> then “Add to Home Screen”.
+            {mode === "ios-other" ? "Open in Safari, then " : ""}Tap{" "}
+            <Share className="inline size-3.5 align-text-bottom" aria-label="Share" /> then “Add to
+            Home Screen”.
           </p>
         )}
       </div>
       {mode === "prompt" && (
-        <button type="button" className="action-primary min-h-10 px-4" onClick={() => void runPrompt()}>
+        <button
+          type="button"
+          className="action-primary min-h-10 px-4"
+          onClick={() => void runPrompt()}
+        >
           Install
         </button>
       )}

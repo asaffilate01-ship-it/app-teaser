@@ -55,7 +55,9 @@ export function chaseState(
 export type BallTone = "boundary" | "wicket" | "extra" | "dot" | "run";
 
 /** Colour family for a delivery chip on the recent-balls trail. */
-export function ballTone(delivery: Pick<Delivery, "dismissal" | "extras" | "batterRuns">): BallTone {
+export function ballTone(
+  delivery: Pick<Delivery, "dismissal" | "extras" | "batterRuns">,
+): BallTone {
   if (delivery.dismissal) return "wicket";
   if (delivery.extras.wide || delivery.extras.noBall) return "extra";
   if (delivery.batterRuns === 4 || delivery.batterRuns === 6) return "boundary";
@@ -64,7 +66,9 @@ export function ballTone(delivery: Pick<Delivery, "dismissal" | "extras" | "batt
 }
 
 /** Short caption under a delivery chip. */
-export function ballCaption(delivery: Pick<Delivery, "dismissal" | "extras" | "batterRuns">): string {
+export function ballCaption(
+  delivery: Pick<Delivery, "dismissal" | "extras" | "batterRuns">,
+): string {
   if (delivery.dismissal) return "Wicket";
   if (delivery.extras.wide) return "Wide";
   if (delivery.extras.noBall) return "No ball";

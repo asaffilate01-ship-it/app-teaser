@@ -180,12 +180,17 @@ function RootComponent() {
     if (browserServiceWorkerAllowed()) {
       // Scorers and club users get the offline app (about 4 MB, downloaded once in the background);
       // visitors to the public pages don't, unless they already have it or turn on match alerts.
-      if (/^\/(app|platform)(\/|$)/.test(window.location.pathname)) void navigator.serviceWorker.register("/sw.js");
+      if (/^\/(app|platform)(\/|$)/.test(window.location.pathname))
+        void navigator.serviceWorker.register("/sw.js");
     } else if ("serviceWorker" in navigator) {
       // Preview, editor frame or ?sw=off: remove any old app worker so it can't serve stale pages.
-      void navigator.serviceWorker.getRegistrations().then((registrations) =>
-        registrations.filter((item) => item.active?.scriptURL.endsWith("/sw.js")).forEach((item) => void item.unregister()),
-      );
+      void navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) =>
+          registrations
+            .filter((item) => item.active?.scriptURL.endsWith("/sw.js"))
+            .forEach((item) => void item.unregister()),
+        );
     }
   }, []);
 

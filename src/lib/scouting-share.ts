@@ -3,7 +3,10 @@ export const SHARE_DAYS = [7, 30, 90, 180] as const;
 
 export function newShareToken(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
-  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 }
 
 export async function hashShareToken(token: string): Promise<string> {
@@ -16,4 +19,5 @@ export function shareExpiry(days: number, now = new Date()): string {
   return new Date(now.getTime() + safe * 86_400_000).toISOString();
 }
 
-export const shareLink = (origin: string, token: string) => `${origin.replace(/\/$/, "")}/scout/${token}`;
+export const shareLink = (origin: string, token: string) =>
+  `${origin.replace(/\/$/, "")}/scout/${token}`;

@@ -59,7 +59,8 @@ export function createDashboardScene(
     ctx.font = "600 30px sans-serif";
     // Labels sit on the page background, so match the light/dark choice when the chart is drawn.
     const lightPage =
-      document.documentElement.getAttribute("data-theme") === "light" && !host.closest(".stay-dark");
+      document.documentElement.getAttribute("data-theme") === "light" &&
+      !host.closest(".stay-dark");
     ctx.fillStyle = lightPage ? "#1e2638" : "#ece8df";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";

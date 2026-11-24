@@ -11,7 +11,13 @@ export interface ExternalTeamRecord {
 
 /** Other clubs' teams entered in this organisation's competitions, named with their club so fixtures read clearly. */
 export function externalTeams(
-  rows: ReadonlyArray<{ competition_id: string; team_id: string; name: string; short_name: string; club_name: string }>,
+  rows: ReadonlyArray<{
+    competition_id: string;
+    team_id: string;
+    name: string;
+    short_name: string;
+    club_name: string;
+  }>,
   ownIds: ReadonlySet<string>,
 ): ExternalTeamRecord[] {
   const byId = new Map<string, ExternalTeamRecord>();
@@ -22,7 +28,9 @@ export function externalTeams(
       existing.competitionIds = [...(existing.competitionIds ?? []), row.competition_id];
       continue;
     }
-    const named = row.name.toLowerCase().includes(row.club_name.toLowerCase()) ? row.name : `${row.club_name} ${row.name}`;
+    const named = row.name.toLowerCase().includes(row.club_name.toLowerCase())
+      ? row.name
+      : `${row.club_name} ${row.name}`;
     byId.set(row.team_id, {
       id: row.team_id,
       name: named,
@@ -36,4 +44,3 @@ export function externalTeams(
   }
   return [...byId.values()];
 }
-

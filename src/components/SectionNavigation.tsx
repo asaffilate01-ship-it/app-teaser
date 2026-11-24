@@ -44,7 +44,9 @@ export function SectionNavigation<T extends string>({
       </div>
       <nav
         aria-label={label}
-        className={layout === "rail" ? "workspace-rail hidden lg:flex" : "hidden flex-wrap gap-2 lg:flex"}
+        className={
+          layout === "rail" ? "workspace-rail hidden lg:flex" : "hidden flex-wrap gap-2 lg:flex"
+        }
       >
         {items.map(([key, Icon, text]) => (
           <button
@@ -59,10 +61,7 @@ export function SectionNavigation<T extends string>({
           </button>
         ))}
       </nav>
-      <nav
-        aria-label={`${label} quick navigation`}
-        className="app-tabbar lg:hidden"
-      >
+      <nav aria-label={`${label} quick navigation`} className="app-tabbar lg:hidden">
         <div className="mx-auto flex max-w-lg items-stretch justify-around gap-1">
           {primary.map(([key, Icon, text]) => (
             <button

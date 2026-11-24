@@ -11,7 +11,14 @@ import {
   summarizeInnings,
   type CricketMatch,
 } from "@/lib/cricket";
-import { isCalculatedMethod, rainMethods, rainMethodShort, revisedTarget, type RainMethod, type RainState } from "@/lib/rain-rules";
+import {
+  isCalculatedMethod,
+  rainMethods,
+  rainMethodShort,
+  revisedTarget,
+  type RainMethod,
+  type RainState,
+} from "@/lib/rain-rules";
 
 const wholeNumber = (value: string) => {
   const parsed = Number(value);
@@ -28,7 +35,8 @@ export function RainPanel({
 }) {
   const allotted = match.settings.oversPerInnings;
   const bpo = match.settings.ballsPerOver;
-  const applies = match.settings.inningsPerSide === 1 && allotted !== null && !match.innings.some(isSuperOver);
+  const applies =
+    match.settings.inningsPerSide === 1 && allotted !== null && !match.innings.some(isSuperOver);
   const [open, setOpen] = useState(false);
   const rain = match.rain;
   const method: RainMethod = rain?.method ?? match.settings.rules?.rainMethod ?? "arr";
@@ -45,7 +53,13 @@ export function RainPanel({
     setTargetText(rain?.officialTarget != null ? String(rain.officialTarget) : "");
     setParText(rain?.officialPar != null ? String(rain.officialPar) : "");
     setMinText(rain?.minOversForResult != null ? String(rain.minOversForResult) : "");
-  }, [method, rain?.revisedOvers, rain?.officialTarget, rain?.officialPar, rain?.minOversForResult]);
+  }, [
+    method,
+    rain?.revisedOvers,
+    rain?.officialTarget,
+    rain?.officialPar,
+    rain?.minOversForResult,
+  ]);
 
   if (!applies || allotted === null) return null;
 
@@ -104,14 +118,20 @@ export function RainPanel({
   };
 
   const abandon = () => {
-    if (!window.confirm("No more play is possible? The match will be decided on the par score and closed.")) return;
+    if (
+      !window.confirm(
+        "No more play is possible? The match will be decided on the par score and closed.",
+      )
+    )
+      return;
     save(abandonForRain(match), "match.completed");
   };
 
   const summary = rain
     ? [
         rainMethodShort(rain.method),
-        rain.revisedOvers != null && `chase ${rain.revisedOvers} over${rain.revisedOvers === 1 ? "" : "s"}`,
+        rain.revisedOvers != null &&
+          `chase ${rain.revisedOvers} over${rain.revisedOvers === 1 ? "" : "s"}`,
         target !== null && `target ${target}`,
         par !== null && `par ${par}`,
       ]
@@ -143,7 +163,11 @@ export function RainPanel({
             Par score <strong>{par}</strong>
           </span>
           <span className={chaseRuns > par ? "is-ahead" : chaseRuns === par ? "" : "is-behind"}>
-            {chaseRuns > par ? `Ahead by ${chaseRuns - par}` : chaseRuns === par ? "Level on par" : `Behind by ${par - chaseRuns}`}
+            {chaseRuns > par
+              ? `Ahead by ${chaseRuns - par}`
+              : chaseRuns === par
+                ? "Level on par"
+                : `Behind by ${par - chaseRuns}`}
           </span>
         </div>
       )}
@@ -165,10 +189,14 @@ export function RainPanel({
                 />
               </label>
               <p className="text-xs text-muted-foreground">
-                When both sides lose the same overs, the target stays the first-innings score plus one. If only the
-                chase is shortened, set it here after the first innings.
+                When both sides lose the same overs, the target stays the first-innings score plus
+                one. If only the chase is shortened, set it here after the first innings.
               </p>
-              <button type="button" className="action-secondary justify-self-start" onClick={reduceOvers}>
+              <button
+                type="button"
+                className="action-secondary justify-self-start"
+                onClick={reduceOvers}
+              >
                 Shorten the match
               </button>
             </div>
@@ -233,8 +261,8 @@ export function RainPanel({
                   </label>
                   {draftMethod === "dls" && (
                     <p className="text-xs text-muted-foreground sm:col-span-2">
-                      DLS figures need a licence, so CricLume never calculates them. Copy the target and par from the
-                      official DLS calculator or the umpires’ sheet.
+                      DLS figures need a licence, so CricLume never calculates them. Copy the target
+                      and par from the official DLS calculator or the umpires’ sheet.
                     </p>
                   )}
                 </>
@@ -244,7 +272,11 @@ export function RainPanel({
                   Apply
                 </button>
                 {rain && (
-                  <button type="button" className="action-secondary" onClick={() => save({ ...match, rain: undefined })}>
+                  <button
+                    type="button"
+                    className="action-secondary"
+                    onClick={() => save({ ...match, rain: undefined })}
+                  >
                     Clear rain
                   </button>
                 )}

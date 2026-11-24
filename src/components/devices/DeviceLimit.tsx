@@ -2,7 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { LoaderCircle, MonitorSmartphone } from "lucide-react";
 import { toast } from "sonner";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useDeviceLimit } from "@/hooks/use-device-limit";
 import { deviceLimit } from "@/lib/device-limit";
 import { listMyDevices, signOutDevice, type LoginDevice } from "@/lib/device-limit-cloud";
@@ -31,7 +38,12 @@ export function DeviceLimitGuard({ session }: { session: Session | null }) {
 }
 
 const when = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  new Date(iso).toLocaleString(undefined, {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
 /** Header button listing the devices signed in with this login, with a sign-out for each. */
 export function DevicesButton() {
@@ -64,8 +76,8 @@ export function DevicesButton() {
         <SheetHeader>
           <SheetTitle>Signed-in devices</SheetTitle>
           <SheetDescription>
-            One login works on up to {deviceLimit} phones or computers at once. Signing in on another signs out the
-            oldest. Camera phones and ground screens don’t count.
+            One login works on up to {deviceLimit} phones or computers at once. Signing in on
+            another signs out the oldest. Camera phones and ground screens don’t count.
           </SheetDescription>
         </SheetHeader>
         <div className="mt-5 space-y-3">
@@ -85,7 +97,9 @@ export function DevicesButton() {
                 <div>
                   <p className="text-sm font-semibold">
                     {device.label}
-                    {device.thisDevice && <span className="ml-2 text-xs font-bold text-primary">This device</span>}
+                    {device.thisDevice && (
+                      <span className="ml-2 text-xs font-bold text-primary">This device</span>
+                    )}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Signed in {when(device.signedInAt)} · last used {when(device.lastSeenAt)}
@@ -117,7 +131,9 @@ export function DevicesButton() {
           ))}
           {earlier.length > 0 && (
             <div className="pt-2">
-              <p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">Signed out</p>
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                Signed out
+              </p>
               <ul className="space-y-1 text-xs text-muted-foreground">
                 {earlier.map((device) => (
                   <li key={device.id}>

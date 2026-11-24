@@ -1,6 +1,12 @@
 import type { CommentaryLine } from "@/lib/commentary";
 
-export function CommentaryFeed({ lines, empty = "Ball-by-ball text appears here after the first ball." }: { lines: CommentaryLine[]; empty?: string }) {
+export function CommentaryFeed({
+  lines,
+  empty = "Ball-by-ball text appears here after the first ball.",
+}: {
+  lines: CommentaryLine[];
+  empty?: string;
+}) {
   if (!lines.length) return <p className="scoreboard-muted text-sm">{empty}</p>;
   return (
     <ol className="commentary-feed" aria-live="polite">

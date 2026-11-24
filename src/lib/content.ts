@@ -21,10 +21,30 @@ export const en = {
     previewLabel: "Example scorecard",
     kicker: "Cricket scoring, video and club platform",
     featuresLabel: "Everything in one app",
-    features: ["Offline scoring with safe sync", "Split scoring duties", "Up to 16 phone cameras", "Win predictor & ball-by-ball text", "Live scoreboards & phone alerts", "Ground big screen & stream overlay", "League hub & live tables", "Rain rules incl. DLS", "Club office, fees & bookings", "Club websites", "Awards & scouting reports", "Light & dark mode", "Live scores page for fans", "Umpire panels & results desk"],
+    features: [
+      "Offline scoring with safe sync",
+      "Split scoring duties",
+      "Up to 16 phone cameras",
+      "Win predictor & ball-by-ball text",
+      "Live scoreboards & phone alerts",
+      "Ground big screen & stream overlay",
+      "League hub & live tables",
+      "Rain rules incl. DLS",
+      "Club office, fees & bookings",
+      "Club websites",
+      "Awards & scouting reports",
+      "Light & dark mode",
+      "Live scores page for fans",
+      "Umpire panels & results desk",
+    ],
     plansLabel: "Plans",
     addonName: "Video add-on",
-    planNotes: ["Free · basic offline scoring · ads", "Full analytics & club office · 30% ad share", "Whole competition · own club website", "Up to 16 cameras, streaming · 50% ad share"],
+    planNotes: [
+      "Free · basic offline scoring · ads",
+      "Full analytics & club office · 30% ad share",
+      "Whole competition · own club website",
+      "Up to 16 cameras, streaming · 50% ad share",
+    ],
     plansCta: "Compare plans",
   },
   stats: [
@@ -172,19 +192,52 @@ export const en = {
   screensTab: {
     kicker: "Product tour",
     title: "Screens",
-    intro: "Real CricLume screens from a sample club match — phone scoring, the ground big screen, analysis, video review and league tables.",
-    filters: { all: "All", scoring: "Scoring", screens: "Big screen", analysis: "Analysis & video", league: "Leagues" },
+    intro:
+      "Real CricLume screens from a sample club match — phone scoring, the ground big screen, analysis, video review and league tables.",
+    filters: {
+      all: "All",
+      scoring: "Scoring",
+      screens: "Big screen",
+      analysis: "Analysis & video",
+      league: "Leagues",
+    },
     enlarge: "Tap to enlarge",
     close: "Close",
     chips: ["Live on every screen", "Works offline"],
     items: [
-      { label: "Ground big screen", caption: "TV or LED screen • score, partnership and last balls, rotating through batting, bowling, Manhattan, worm and run chase" },
-      { label: "Match centre", caption: "Desktop • live score, full scorecard and the win predictor side by side" },
-      { label: "Phone scoring", caption: "Phone • tap where the ball went, pick the fielder, then the runs — one-handed and offline" },
-      { label: "Club match dashboard", caption: "Desktop • run rate against the required rate, colour wagon wheel, Manhattan, worm and partnerships" },
-      { label: "Run chase on the big screen", caption: "Big screen • runs needed, balls left, current and required rate, and live win chances" },
-      { label: "Ball-by-ball commentary", caption: "Phone • written automatically from every ball, ready to share with followers" },
-      { label: "Phone scorecard", caption: "Phone • batting, bowling and fall of wickets, shared as an image, PDF or social post" },
+      {
+        label: "Ground big screen",
+        caption:
+          "TV or LED screen • score, partnership and last balls, rotating through batting, bowling, Manhattan, worm and run chase",
+      },
+      {
+        label: "Match centre",
+        caption: "Desktop • live score, full scorecard and the win predictor side by side",
+      },
+      {
+        label: "Phone scoring",
+        caption:
+          "Phone • tap where the ball went, pick the fielder, then the runs — one-handed and offline",
+      },
+      {
+        label: "Club match dashboard",
+        caption:
+          "Desktop • run rate against the required rate, colour wagon wheel, Manhattan, worm and partnerships",
+      },
+      {
+        label: "Run chase on the big screen",
+        caption:
+          "Big screen • runs needed, balls left, current and required rate, and live win chances",
+      },
+      {
+        label: "Ball-by-ball commentary",
+        caption: "Phone • written automatically from every ball, ready to share with followers",
+      },
+      {
+        label: "Phone scorecard",
+        caption:
+          "Phone • batting, bowling and fall of wickets, shared as an image, PDF or social post",
+      },
       {
         label: "Coaching review",
         caption:
@@ -254,7 +307,8 @@ export const en = {
       {
         name: "League",
         period: "per competition / season",
-        blurb: "Everything in Club for every club in the competition, plus tools to run the league.",
+        blurb:
+          "Everything in Club for every club in the competition, plus tools to run the league.",
         perks: [
           "Every club in the competition included, with full scoring analytics",
           "Live scorecards from every match side by side",
@@ -271,7 +325,8 @@ export const en = {
     addon: {
       badge: "Add-on",
       name: "Video & video analytics",
-      blurb: "Add to any Club or League plan for an extra fee. Uses the phones or cameras your club already has, at fixed angles. Not available on the free plan.",
+      blurb:
+        "Add to any Club or League plan for an extra fee. Uses the phones or cameras your club already has, at fixed angles. Not available on the free plan.",
       price: "Extra fee",
       period: "quoted per club",
       perks: [
@@ -289,7 +344,12 @@ export const en = {
     compare: {
       title: "What each plan includes",
       plan: "Feature",
-      rows: ["Basic scoring", "Full scoring analytics", "Video & video analytics", "Co-branded website on your own domain"],
+      rows: [
+        "Basic scoring",
+        "Full scoring analytics",
+        "Video & video analytics",
+        "Co-branded website on your own domain",
+      ],
       included: "Included",
       notIncluded: "Not included",
       addon: "Add-on",
@@ -427,10 +487,30 @@ export const de: Content = {
     previewLabel: "Beispiel-Spielstand",
     kicker: "Cricket-Scoring, Video & Vereinsplattform",
     featuresLabel: "Alles in einer App",
-    features: ["Offline-Scoring mit sicherer Synchronisierung", "Geteilte Scoring-Aufgaben", "Bis zu 16 Handykameras", "Siegchancen & Ball-für-Ball-Text", "Live-Anzeigetafeln & Handy-Alarme", "Stadionbildschirm & Stream-Overlay", "Liga-Hub & Live-Tabellen", "Regenregeln inkl. DLS", "Vereinsbüro, Beiträge & Buchungen", "Vereinswebsites", "Auszeichnungen & Scouting-Berichte", "Hell- & Dunkelmodus", "Live-Scores-Seite für Fans", "Schiedsrichter & Ergebnis-Desk"],
+    features: [
+      "Offline-Scoring mit sicherer Synchronisierung",
+      "Geteilte Scoring-Aufgaben",
+      "Bis zu 16 Handykameras",
+      "Siegchancen & Ball-für-Ball-Text",
+      "Live-Anzeigetafeln & Handy-Alarme",
+      "Stadionbildschirm & Stream-Overlay",
+      "Liga-Hub & Live-Tabellen",
+      "Regenregeln inkl. DLS",
+      "Vereinsbüro, Beiträge & Buchungen",
+      "Vereinswebsites",
+      "Auszeichnungen & Scouting-Berichte",
+      "Hell- & Dunkelmodus",
+      "Live-Scores-Seite für Fans",
+      "Schiedsrichter & Ergebnis-Desk",
+    ],
     plansLabel: "Pläne",
     addonName: "Video-Zusatz",
-    planNotes: ["Kostenlos · Offline-Scoring · Werbung", "Volle Analysen & Vereinsbüro · 30 % Werbeanteil", "Ganzer Wettbewerb · eigene Vereinswebsite", "Bis zu 16 Kameras, Streaming · 50 % Werbeanteil"],
+    planNotes: [
+      "Kostenlos · Offline-Scoring · Werbung",
+      "Volle Analysen & Vereinsbüro · 30 % Werbeanteil",
+      "Ganzer Wettbewerb · eigene Vereinswebsite",
+      "Bis zu 16 Kameras, Streaming · 50 % Werbeanteil",
+    ],
     plansCta: "Pläne vergleichen",
   },
   stats: [
@@ -581,19 +661,52 @@ export const de: Content = {
   screensTab: {
     kicker: "Produkttour",
     title: "Ansichten",
-    intro: "Echte CricLume-Ansichten aus einem Beispielspiel – Scoring am Handy, die Großbildleinwand am Platz, Analyse, Videoprüfung und Ligatabellen.",
-    filters: { all: "Alle", scoring: "Scoring", screens: "Großbild", analysis: "Analyse & Video", league: "Ligen" },
+    intro:
+      "Echte CricLume-Ansichten aus einem Beispielspiel – Scoring am Handy, die Großbildleinwand am Platz, Analyse, Videoprüfung und Ligatabellen.",
+    filters: {
+      all: "Alle",
+      scoring: "Scoring",
+      screens: "Großbild",
+      analysis: "Analyse & Video",
+      league: "Ligen",
+    },
     enlarge: "Zum Vergrößern tippen",
     close: "Schließen",
     chips: ["Live auf jedem Bildschirm", "Funktioniert offline"],
     items: [
-      { label: "Großbildleinwand am Platz", caption: "TV- oder LED-Wand • Punktestand, Partnerschaft und letzte Bälle, wechselnd mit Batting, Bowling, Manhattan, Worm und Run Chase" },
-      { label: "Spielzentrale", caption: "Desktop • Live-Stand, vollständige Scorecard und Siegprognose nebeneinander" },
-      { label: "Scoring am Handy", caption: "Handy • tippen, wohin der Ball ging, Fielder wählen, dann die Runs – mit einer Hand und offline" },
-      { label: "Club-Spiel-Dashboard", caption: "Desktop • Run-Rate gegen benötigte Rate, farbiges Wagon Wheel, Manhattan, Worm und Partnerschaften" },
-      { label: "Run Chase auf der Leinwand", caption: "Großbild • benötigte Runs, verbleibende Bälle, aktuelle und benötigte Rate sowie Live-Siegchancen" },
-      { label: "Ball-für-Ball-Kommentar", caption: "Handy • automatisch zu jedem Ball geschrieben, bereit zum Teilen mit Fans" },
-      { label: "Scorecard am Handy", caption: "Handy • Batting, Bowling und Wicket-Verlauf, teilbar als Bild, PDF oder Social-Post" },
+      {
+        label: "Großbildleinwand am Platz",
+        caption:
+          "TV- oder LED-Wand • Punktestand, Partnerschaft und letzte Bälle, wechselnd mit Batting, Bowling, Manhattan, Worm und Run Chase",
+      },
+      {
+        label: "Spielzentrale",
+        caption: "Desktop • Live-Stand, vollständige Scorecard und Siegprognose nebeneinander",
+      },
+      {
+        label: "Scoring am Handy",
+        caption:
+          "Handy • tippen, wohin der Ball ging, Fielder wählen, dann die Runs – mit einer Hand und offline",
+      },
+      {
+        label: "Club-Spiel-Dashboard",
+        caption:
+          "Desktop • Run-Rate gegen benötigte Rate, farbiges Wagon Wheel, Manhattan, Worm und Partnerschaften",
+      },
+      {
+        label: "Run Chase auf der Leinwand",
+        caption:
+          "Großbild • benötigte Runs, verbleibende Bälle, aktuelle und benötigte Rate sowie Live-Siegchancen",
+      },
+      {
+        label: "Ball-für-Ball-Kommentar",
+        caption: "Handy • automatisch zu jedem Ball geschrieben, bereit zum Teilen mit Fans",
+      },
+      {
+        label: "Scorecard am Handy",
+        caption:
+          "Handy • Batting, Bowling und Wicket-Verlauf, teilbar als Bild, PDF oder Social-Post",
+      },
       {
         label: "Trainingsanalyse",
         caption:
@@ -700,7 +813,12 @@ export const de: Content = {
     compare: {
       title: "Was jeder Tarif enthält",
       plan: "Funktion",
-      rows: ["Einfaches Scoring", "Vollständige Scoring-Analyse", "Video & Videoanalyse", "Co-Branding-Website unter eigener Domain"],
+      rows: [
+        "Einfaches Scoring",
+        "Vollständige Scoring-Analyse",
+        "Video & Videoanalyse",
+        "Co-Branding-Website unter eigener Domain",
+      ],
       included: "Enthalten",
       notIncluded: "Nicht enthalten",
       addon: "Add-on",
@@ -836,10 +954,30 @@ export const nl: Content = {
     previewLabel: "Voorbeeldscore",
     kicker: "Cricketscores, video & clubplatform",
     featuresLabel: "Alles in één app",
-    features: ["Offline scoren met veilige synchronisatie", "Gedeelde scoortaken", "Tot 16 telefooncamera's", "Winkansen & bal-voor-bal tekst", "Live scoreborden & meldingen", "Groot scherm & stream-overlay", "Competitiehub & live standen", "Regenregels incl. DLS", "Clubkantoor, contributie & reserveringen", "Clubwebsites", "Prijzen & scoutingrapporten", "Lichte & donkere modus", "Live scores-pagina voor fans", "Scheidsrechters & uitslagenbalie"],
+    features: [
+      "Offline scoren met veilige synchronisatie",
+      "Gedeelde scoortaken",
+      "Tot 16 telefooncamera's",
+      "Winkansen & bal-voor-bal tekst",
+      "Live scoreborden & meldingen",
+      "Groot scherm & stream-overlay",
+      "Competitiehub & live standen",
+      "Regenregels incl. DLS",
+      "Clubkantoor, contributie & reserveringen",
+      "Clubwebsites",
+      "Prijzen & scoutingrapporten",
+      "Lichte & donkere modus",
+      "Live scores-pagina voor fans",
+      "Scheidsrechters & uitslagenbalie",
+    ],
     plansLabel: "Abonnementen",
     addonName: "Video-uitbreiding",
-    planNotes: ["Gratis · offline basis scoren · advertenties", "Volledige analyses & clubkantoor · 30% advertentie-aandeel", "Hele competitie · eigen clubwebsite", "Tot 16 camera's, streaming · 50% advertentie-aandeel"],
+    planNotes: [
+      "Gratis · offline basis scoren · advertenties",
+      "Volledige analyses & clubkantoor · 30% advertentie-aandeel",
+      "Hele competitie · eigen clubwebsite",
+      "Tot 16 camera's, streaming · 50% advertentie-aandeel",
+    ],
     plansCta: "Abonnementen vergelijken",
   },
   stats: [
@@ -988,19 +1126,52 @@ export const nl: Content = {
   screensTab: {
     kicker: "Producttour",
     title: "Schermen",
-    intro: "Echte CricLume-schermen uit een voorbeeldwedstrijd – scoren op de telefoon, het grote scherm op de club, analyse, videoreview en standen.",
-    filters: { all: "Alles", scoring: "Scoren", screens: "Groot scherm", analysis: "Analyse & video", league: "Competities" },
+    intro:
+      "Echte CricLume-schermen uit een voorbeeldwedstrijd – scoren op de telefoon, het grote scherm op de club, analyse, videoreview en standen.",
+    filters: {
+      all: "Alles",
+      scoring: "Scoren",
+      screens: "Groot scherm",
+      analysis: "Analyse & video",
+      league: "Competities",
+    },
     enlarge: "Tik om te vergroten",
     close: "Sluiten",
     chips: ["Live op elk scherm", "Werkt offline"],
     items: [
-      { label: "Groot scherm op de club", caption: "Tv- of ledscherm • score, partnership en laatste ballen, wisselend met slag, worp, Manhattan, worm en run chase" },
-      { label: "Wedstrijdcentrum", caption: "Desktop • live score, volledig scorebord en de winvoorspelling naast elkaar" },
-      { label: "Scoren op de telefoon", caption: "Telefoon • tik waar de bal ging, kies de veldspeler en dan de runs – met één hand en offline" },
-      { label: "Clubwedstrijddashboard", caption: "Desktop • run rate tegen de benodigde rate, gekleurd wagon wheel, Manhattan, worm en partnerships" },
-      { label: "Run chase op het grote scherm", caption: "Groot scherm • benodigde runs, resterende ballen, huidige en benodigde rate en live winkansen" },
-      { label: "Bal-voor-bal-commentaar", caption: "Telefoon • automatisch bij elke bal geschreven, klaar om te delen met volgers" },
-      { label: "Scorebord op de telefoon", caption: "Telefoon • slag, worp en wicketverloop, te delen als afbeelding, pdf of social post" },
+      {
+        label: "Groot scherm op de club",
+        caption:
+          "Tv- of ledscherm • score, partnership en laatste ballen, wisselend met slag, worp, Manhattan, worm en run chase",
+      },
+      {
+        label: "Wedstrijdcentrum",
+        caption: "Desktop • live score, volledig scorebord en de winvoorspelling naast elkaar",
+      },
+      {
+        label: "Scoren op de telefoon",
+        caption:
+          "Telefoon • tik waar de bal ging, kies de veldspeler en dan de runs – met één hand en offline",
+      },
+      {
+        label: "Clubwedstrijddashboard",
+        caption:
+          "Desktop • run rate tegen de benodigde rate, gekleurd wagon wheel, Manhattan, worm en partnerships",
+      },
+      {
+        label: "Run chase op het grote scherm",
+        caption:
+          "Groot scherm • benodigde runs, resterende ballen, huidige en benodigde rate en live winkansen",
+      },
+      {
+        label: "Bal-voor-bal-commentaar",
+        caption: "Telefoon • automatisch bij elke bal geschreven, klaar om te delen met volgers",
+      },
+      {
+        label: "Scorebord op de telefoon",
+        caption:
+          "Telefoon • slag, worp en wicketverloop, te delen als afbeelding, pdf of social post",
+      },
       {
         label: "Coachingsanalyse",
         caption:
@@ -1071,7 +1242,8 @@ export const nl: Content = {
       {
         name: "Competitie",
         period: "per competitie / seizoen",
-        blurb: "Alles uit Club voor elke club in de competitie, plus hulpmiddelen om de competitie te leiden.",
+        blurb:
+          "Alles uit Club voor elke club in de competitie, plus hulpmiddelen om de competitie te leiden.",
         perks: [
           "Elke club in de competitie inbegrepen, met volledige scoreanalyses",
           "Live scorekaarten van elke wedstrijd naast elkaar",
@@ -1107,7 +1279,12 @@ export const nl: Content = {
     compare: {
       title: "Wat elk abonnement bevat",
       plan: "Functie",
-      rows: ["Basis scoren", "Volledige score-analyse", "Video & videoanalyse", "Co-branded website op je eigen domein"],
+      rows: [
+        "Basis scoren",
+        "Volledige score-analyse",
+        "Video & videoanalyse",
+        "Co-branded website op je eigen domein",
+      ],
       included: "Inbegrepen",
       notIncluded: "Niet inbegrepen",
       addon: "Add-on",
@@ -1243,10 +1420,30 @@ export const af: Content = {
     previewLabel: "Voorbeeldtelbord",
     kicker: "Krieket-telling, video & klubplatform",
     featuresLabel: "Alles in een app",
-    features: ["Vanlyn telling met veilige sinkronisering", "Verdeelde tellingstake", "Tot 16 foonkameras", "Wenkanse & bal-vir-bal teks", "Regstreekse telborde & foonwaarskuwings", "Grondskerm & stroom-oorleg", "Ligasentrum & regstreekse punteleer", "Reënreëls insl. DLS", "Klubkantoor, fooie & besprekings", "Klubwebwerwe", "Toekennings & verkenningsverslae", "Lig- & donkermodus", "Regstreekse tellings vir ondersteuners", "Skeidsregters en uitslaetoonbank"],
+    features: [
+      "Vanlyn telling met veilige sinkronisering",
+      "Verdeelde tellingstake",
+      "Tot 16 foonkameras",
+      "Wenkanse & bal-vir-bal teks",
+      "Regstreekse telborde & foonwaarskuwings",
+      "Grondskerm & stroom-oorleg",
+      "Ligasentrum & regstreekse punteleer",
+      "Reënreëls insl. DLS",
+      "Klubkantoor, fooie & besprekings",
+      "Klubwebwerwe",
+      "Toekennings & verkenningsverslae",
+      "Lig- & donkermodus",
+      "Regstreekse tellings vir ondersteuners",
+      "Skeidsregters en uitslaetoonbank",
+    ],
     plansLabel: "Planne",
     addonName: "Video-byvoeging",
-    planNotes: ["Gratis · basiese vanlyn telling · advertensies", "Volle ontleding en klubkantoor · 30% advertensie-aandeel", "Hele kompetisie · eie klubwebwerf", "Tot 16 kameras, stroming · 50% advertensie-aandeel"],
+    planNotes: [
+      "Gratis · basiese vanlyn telling · advertensies",
+      "Volle ontleding en klubkantoor · 30% advertensie-aandeel",
+      "Hele kompetisie · eie klubwebwerf",
+      "Tot 16 kameras, stroming · 50% advertensie-aandeel",
+    ],
     plansCta: "Vergelyk planne",
   },
   stats: [
@@ -1398,19 +1595,52 @@ export const af: Content = {
   screensTab: {
     kicker: "Produkttoer",
     title: "Skerms",
-    intro: "Regte CricLume-skerms uit ’n voorbeeldwedstryd – aantekening op die foon, die grondskerm, ontleding, videohersiening en punteleers.",
-    filters: { all: "Alles", scoring: "Aantekening", screens: "Grootskerm", analysis: "Ontleding & video", league: "Ligas" },
+    intro:
+      "Regte CricLume-skerms uit ’n voorbeeldwedstryd – aantekening op die foon, die grondskerm, ontleding, videohersiening en punteleers.",
+    filters: {
+      all: "Alles",
+      scoring: "Aantekening",
+      screens: "Grootskerm",
+      analysis: "Ontleding & video",
+      league: "Ligas",
+    },
     enlarge: "Tik om te vergroot",
     close: "Maak toe",
     chips: ["Regstreeks op elke skerm", "Werk vanlyn"],
     items: [
-      { label: "Grondskerm", caption: "TV- of LED-skerm • telling, vennootskap en laaste balle, wat afwissel met kolf, boul, Manhattan, wurm en lopiejag" },
-      { label: "Wedstrydsentrum", caption: "Rekenaar • regstreekse telling, volle telkaart en die wenvoorspeller langs mekaar" },
-      { label: "Aantekening op die foon", caption: "Foon • tik waar die bal gegaan het, kies die veldwerker, dan die lopies – met een hand en vanlyn" },
-      { label: "Klubwedstryd-paneelbord", caption: "Rekenaar • lopietempo teen die vereiste tempo, gekleurde wawiel, Manhattan, wurm en vennootskappe" },
-      { label: "Lopiejag op die grootskerm", caption: "Grootskerm • lopies nodig, balle oor, huidige en vereiste tempo, en regstreekse wenkanse" },
-      { label: "Bal-vir-bal-kommentaar", caption: "Foon • outomaties vir elke bal geskryf, gereed om met volgers te deel" },
-      { label: "Telkaart op die foon", caption: "Foon • kolf, boul en paaltjieverlies, deelbaar as prent, PDF of sosiale plasing" },
+      {
+        label: "Grondskerm",
+        caption:
+          "TV- of LED-skerm • telling, vennootskap en laaste balle, wat afwissel met kolf, boul, Manhattan, wurm en lopiejag",
+      },
+      {
+        label: "Wedstrydsentrum",
+        caption:
+          "Rekenaar • regstreekse telling, volle telkaart en die wenvoorspeller langs mekaar",
+      },
+      {
+        label: "Aantekening op die foon",
+        caption:
+          "Foon • tik waar die bal gegaan het, kies die veldwerker, dan die lopies – met een hand en vanlyn",
+      },
+      {
+        label: "Klubwedstryd-paneelbord",
+        caption:
+          "Rekenaar • lopietempo teen die vereiste tempo, gekleurde wawiel, Manhattan, wurm en vennootskappe",
+      },
+      {
+        label: "Lopiejag op die grootskerm",
+        caption:
+          "Grootskerm • lopies nodig, balle oor, huidige en vereiste tempo, en regstreekse wenkanse",
+      },
+      {
+        label: "Bal-vir-bal-kommentaar",
+        caption: "Foon • outomaties vir elke bal geskryf, gereed om met volgers te deel",
+      },
+      {
+        label: "Telkaart op die foon",
+        caption: "Foon • kolf, boul en paaltjieverlies, deelbaar as prent, PDF of sosiale plasing",
+      },
       {
         label: "Afrigtersontleding",
         caption:
@@ -1480,7 +1710,8 @@ export const af: Content = {
       {
         name: "Liga",
         period: "per kompetisie / seisoen",
-        blurb: "Alles in Klub vir elke klub in die kompetisie, plus gereedskap om die liga te bestuur.",
+        blurb:
+          "Alles in Klub vir elke klub in die kompetisie, plus gereedskap om die liga te bestuur.",
         perks: [
           "Elke klub in die kompetisie ingesluit, met volle telling-ontleding",
           "Regstreekse telkaarte van elke wedstryd langs mekaar",
@@ -1516,7 +1747,12 @@ export const af: Content = {
     compare: {
       title: "Wat elke plan insluit",
       plan: "Funksie",
-      rows: ["Basiese aantekening", "Volledige telling-ontleding", "Video en video-ontleding", "Mede-handelsmerk webwerf op jou eie domein"],
+      rows: [
+        "Basiese aantekening",
+        "Volledige telling-ontleding",
+        "Video en video-ontleding",
+        "Mede-handelsmerk webwerf op jou eie domein",
+      ],
       included: "Ingesluit",
       notIncluded: "Nie ingesluit nie",
       addon: "Byvoeging",
@@ -1652,10 +1888,30 @@ export const fr: Content = {
     previewLabel: "Score d'exemple",
     kicker: "Score, vidéo et plateforme de club pour le cricket",
     featuresLabel: "Tout dans une seule app",
-    features: ["Score hors ligne, synchro fiable", "Tâches de score partagées", "Jusqu'à 16 caméras de téléphone", "Chances de victoire & texte balle par balle", "Tableaux en direct & alertes", "Grand écran & incrustation stream", "Espace ligue & classements en direct", "Règles de pluie dont DLS", "Secrétariat, cotisations & réservations", "Sites web de club", "Récompenses & rapports de scouting", "Mode clair & sombre", "Page de scores en direct", "Arbitres & bureau des résultats"],
+    features: [
+      "Score hors ligne, synchro fiable",
+      "Tâches de score partagées",
+      "Jusqu'à 16 caméras de téléphone",
+      "Chances de victoire & texte balle par balle",
+      "Tableaux en direct & alertes",
+      "Grand écran & incrustation stream",
+      "Espace ligue & classements en direct",
+      "Règles de pluie dont DLS",
+      "Secrétariat, cotisations & réservations",
+      "Sites web de club",
+      "Récompenses & rapports de scouting",
+      "Mode clair & sombre",
+      "Page de scores en direct",
+      "Arbitres & bureau des résultats",
+    ],
     plansLabel: "Formules",
     addonName: "Option vidéo",
-    planNotes: ["Gratuit · score de base hors ligne · publicité", "Analyses complètes & bureau du club · 30 % des revenus pub", "Toute la compétition · site du club", "Jusqu'à 16 caméras, streaming · 50 % des revenus pub"],
+    planNotes: [
+      "Gratuit · score de base hors ligne · publicité",
+      "Analyses complètes & bureau du club · 30 % des revenus pub",
+      "Toute la compétition · site du club",
+      "Jusqu'à 16 caméras, streaming · 50 % des revenus pub",
+    ],
     plansCta: "Comparer les formules",
   },
   stats: [
@@ -1804,19 +2060,54 @@ export const fr: Content = {
   screensTab: {
     kicker: "Visite du produit",
     title: "Écrans",
-    intro: "De vrais écrans CricLume tirés d'un match d'exemple – marquage sur téléphone, grand écran du terrain, analyse, revue vidéo et classements.",
-    filters: { all: "Tous", scoring: "Marquage", screens: "Grand écran", analysis: "Analyse & vidéo", league: "Ligues" },
+    intro:
+      "De vrais écrans CricLume tirés d'un match d'exemple – marquage sur téléphone, grand écran du terrain, analyse, revue vidéo et classements.",
+    filters: {
+      all: "Tous",
+      scoring: "Marquage",
+      screens: "Grand écran",
+      analysis: "Analyse & vidéo",
+      league: "Ligues",
+    },
     enlarge: "Touchez pour agrandir",
     close: "Fermer",
     chips: ["En direct sur chaque écran", "Fonctionne hors ligne"],
     items: [
-      { label: "Grand écran du terrain", caption: "Écran TV ou LED • score, partenariat et dernières balles, en alternance avec batte, lancer, Manhattan, worm et poursuite" },
-      { label: "Centre du match", caption: "Ordinateur • score en direct, feuille de match complète et prédiction de victoire côte à côte" },
-      { label: "Marquage sur téléphone", caption: "Téléphone • touchez où la balle est allée, choisissez le joueur de champ, puis les points – d'une main et hors ligne" },
-      { label: "Tableau de bord du match du club", caption: "Ordinateur • run rate face au taux requis, wagon wheel en couleurs, Manhattan, worm et partenariats" },
-      { label: "Poursuite sur grand écran", caption: "Grand écran • points nécessaires, balles restantes, taux actuel et requis, et chances de victoire en direct" },
-      { label: "Commentaire balle par balle", caption: "Téléphone • écrit automatiquement à chaque balle, prêt à partager avec les supporters" },
-      { label: "Feuille de match sur téléphone", caption: "Téléphone • batte, lancer et chute des guichets, à partager en image, PDF ou publication" },
+      {
+        label: "Grand écran du terrain",
+        caption:
+          "Écran TV ou LED • score, partenariat et dernières balles, en alternance avec batte, lancer, Manhattan, worm et poursuite",
+      },
+      {
+        label: "Centre du match",
+        caption:
+          "Ordinateur • score en direct, feuille de match complète et prédiction de victoire côte à côte",
+      },
+      {
+        label: "Marquage sur téléphone",
+        caption:
+          "Téléphone • touchez où la balle est allée, choisissez le joueur de champ, puis les points – d'une main et hors ligne",
+      },
+      {
+        label: "Tableau de bord du match du club",
+        caption:
+          "Ordinateur • run rate face au taux requis, wagon wheel en couleurs, Manhattan, worm et partenariats",
+      },
+      {
+        label: "Poursuite sur grand écran",
+        caption:
+          "Grand écran • points nécessaires, balles restantes, taux actuel et requis, et chances de victoire en direct",
+      },
+      {
+        label: "Commentaire balle par balle",
+        caption:
+          "Téléphone • écrit automatiquement à chaque balle, prêt à partager avec les supporters",
+      },
+      {
+        label: "Feuille de match sur téléphone",
+        caption:
+          "Téléphone • batte, lancer et chute des guichets, à partager en image, PDF ou publication",
+      },
       {
         label: "Analyse d'entraînement",
         caption:
@@ -1924,7 +2215,12 @@ export const fr: Content = {
     compare: {
       title: "Ce que comprend chaque offre",
       plan: "Fonction",
-      rows: ["Marquage de base", "Analyse complète du marquage", "Vidéo et analyse vidéo", "Site co-marqué sur votre propre domaine"],
+      rows: [
+        "Marquage de base",
+        "Analyse complète du marquage",
+        "Vidéo et analyse vidéo",
+        "Site co-marqué sur votre propre domaine",
+      ],
       included: "Inclus",
       notIncluded: "Non inclus",
       addon: "Option",

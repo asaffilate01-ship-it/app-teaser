@@ -29,7 +29,11 @@ export const Route = createFileRoute("/check/$matchId")({
   head: () => ({
     meta: [
       { title: "Check the scorecard — CricLume" },
-      { name: "description", content: "Follow every ball as the away check scorer, query anything that looks wrong and confirm the scorecard." },
+      {
+        name: "description",
+        content:
+          "Follow every ball as the away check scorer, query anything that looks wrong and confirm the scorecard.",
+      },
       { property: "og:title", content: "Check the scorecard — CricLume" },
       { property: "og:description", content: "Away-club check scoring on CricLume." },
       { property: "og:type", content: "website" },
@@ -53,14 +57,22 @@ function CheckMatchPage() {
               All matches
             </Link>
             {session && (
-              <button type="button" className="app-chip-button hidden sm:inline-flex" onClick={() => void signOut()}>
+              <button
+                type="button"
+                className="app-chip-button hidden sm:inline-flex"
+                onClick={() => void signOut()}
+              >
                 Sign out
               </button>
             )}
           </span>
         }
       />
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl space-y-5 px-4 py-6 pb-24 md:px-8 md:py-10">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto max-w-4xl space-y-5 px-4 py-6 pb-24 md:px-8 md:py-10"
+      >
         {!configured || loading ? (
           <p className="office-meta flex items-center gap-2">
             <LoaderCircle className="size-4 animate-spin" /> Loading…
@@ -68,7 +80,11 @@ function CheckMatchPage() {
         ) : !session ? (
           <CheckSignIn requestLink={requestLink} />
         ) : (
-          <CheckMatch key={`${session.user.id}:${matchId}`} matchId={matchId} myUserId={session.user.id} />
+          <CheckMatch
+            key={`${session.user.id}:${matchId}`}
+            matchId={matchId}
+            myUserId={session.user.id}
+          />
         )}
       </main>
     </div>
@@ -103,11 +119,23 @@ function CheckMatch({ matchId, myUserId }: { matchId: string; myUserId: string }
 
   const [inningsId, setInningsId] = useState<string | null>(null);
   const innings = view?.innings ?? [];
-  const current = innings.find((row) => row.id === inningsId) ?? innings[innings.length - 1] ?? null;
-  const overs = useMemo(() => (view && current ? oversOf(view.balls, current.id) : []), [view, current]);
-  const flaggedBalls = useMemo(() => new Set((view?.flags ?? []).filter((f) => f.status === "open").map((f) => f.delivery_id)), [view]);
+  const current =
+    innings.find((row) => row.id === inningsId) ?? innings[innings.length - 1] ?? null;
+  const overs = useMemo(
+    () => (view && current ? oversOf(view.balls, current.id) : []),
+    [view, current],
+  );
+  const flaggedBalls = useMemo(
+    () => new Set((view?.flags ?? []).filter((f) => f.status === "open").map((f) => f.delivery_id)),
+    [view],
+  );
 
-  if (error) return <p role="alert" className="office-card office-meta">{error}</p>;
+  if (error)
+    return (
+      <p role="alert" className="office-card office-meta">
+        {error}
+      </p>
+    );
   if (!view?.match) {
     return (
       <p className="office-meta flex items-center gap-2">
@@ -124,7 +152,9 @@ function CheckMatch({ matchId, myUserId }: { matchId: string; myUserId: string }
     <>
       <header className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
-          <Pill tone={match.status === "live" ? "good" : undefined}>{match.status.replaceAll("_", " ")}</Pill>
+          <Pill tone={match.status === "live" ? "good" : undefined}>
+            {match.status.replaceAll("_", " ")}
+          </Pill>
           {me.checker && (
             <Pill>
               <ShieldCheck className="mr-1 inline size-3.5" aria-hidden="true" />
@@ -144,14 +174,20 @@ function CheckMatch({ matchId, myUserId }: { matchId: string; myUserId: string }
               onClick={() => setInningsId(row.id)}
               className={`rounded-xl border px-3 py-2 text-left text-sm ${current?.id === row.id ? "border-gold bg-gold/10" : "border-border"}`}
             >
-              <span className="block text-xs text-muted-foreground">Innings {row.number} · {teamName(row.batting_team_id)}</span>
+              <span className="block text-xs text-muted-foreground">
+                Innings {row.number} · {teamName(row.batting_team_id)}
+              </span>
               <span className="font-display text-lg font-bold">
                 {row.runs}/{row.wickets}
               </span>{" "}
-              <span className="text-xs text-muted-foreground">({oversText(row.legal_balls)} ov)</span>
+              <span className="text-xs text-muted-foreground">
+                ({oversText(row.legal_balls)} ov)
+              </span>
             </button>
           ))}
-          {innings.length === 0 && <p className="office-meta">No balls scored yet. This page updates by itself.</p>}
+          {innings.length === 0 && (
+            <p className="office-meta">No balls scored yet. This page updates by itself.</p>
+          )}
         </div>
       </header>
 
@@ -164,7 +200,11 @@ function CheckMatch({ matchId, myUserId }: { matchId: string; myUserId: string }
               : "When you agree with every ball, confirm the scorecard. All queries need an answer first."
           }
           action={
-            <button type="button" className="app-chip-button" onClick={() => setQuery({ ball: null })}>
+            <button
+              type="button"
+              className="app-chip-button"
+              onClick={() => setQuery({ ball: null })}
+            >
               <CircleHelp className="size-4" aria-hidden="true" /> Query the scorecard
             </button>
           }
@@ -183,12 +223,20 @@ function CheckMatch({ matchId, myUserId }: { matchId: string; myUserId: string }
 
       <OfficeCard
         title={`Queries${open.length ? ` · ${open.length} open` : ""}`}
-        {...(me.home ? { description: "Answer each query once you've checked it. Fix the ball on the scoring screen if it was wrong." } : {})}
+        {...(me.home
+          ? {
+              description:
+                "Answer each query once you've checked it. Fix the ball on the scoring screen if it was wrong.",
+            }
+          : {})}
       >
         <FlagList flags={view.flags} canAnswer={me.home} onChanged={() => void reload()} />
       </OfficeCard>
 
-      <OfficeCard title="Ball by ball" {...(me.checker ? { description: "Tap Query on any ball you disagree with." } : {})}>
+      <OfficeCard
+        title="Ball by ball"
+        {...(me.checker ? { description: "Tap Query on any ball you disagree with." } : {})}
+      >
         {overs.length === 0 ? (
           <Empty>No balls in this innings yet.</Empty>
         ) : (
@@ -204,10 +252,19 @@ function CheckMatch({ matchId, myUserId }: { matchId: string; myUserId: string }
                 </div>
                 <ul className="divide-y divide-border">
                   {[...over.balls].reverse().map((ball) => (
-                    <li key={ball.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+                    <li
+                      key={ball.id}
+                      className="flex flex-wrap items-center justify-between gap-2 px-3 py-2"
+                    >
                       <span className="min-w-0">
-                        <span className="mr-2 font-mono text-xs text-muted-foreground">{ballLabel(ball)}</span>
-                        <span className={`text-sm font-semibold ${ball.wicket ? "text-destructive" : ""}`}>{ballText(ball)}</span>
+                        <span className="mr-2 font-mono text-xs text-muted-foreground">
+                          {ballLabel(ball)}
+                        </span>
+                        <span
+                          className={`text-sm font-semibold ${ball.wicket ? "text-destructive" : ""}`}
+                        >
+                          {ballText(ball)}
+                        </span>
                         {(ball.bowler || ball.striker) && (
                           <span className="block text-xs text-muted-foreground">
                             {[ball.bowler, ball.striker].filter(Boolean).join(" to ")}
@@ -217,7 +274,11 @@ function CheckMatch({ matchId, myUserId }: { matchId: string; myUserId: string }
                       <span className="flex items-center gap-2">
                         {flaggedBalls.has(ball.id) && <Pill tone="warn">Queried</Pill>}
                         {me.checker && (
-                          <button type="button" className="app-chip-button" onClick={() => setQuery({ ball })}>
+                          <button
+                            type="button"
+                            className="app-chip-button"
+                            onClick={() => setQuery({ ball })}
+                          >
                             Query
                           </button>
                         )}
@@ -231,20 +292,28 @@ function CheckMatch({ matchId, myUserId }: { matchId: string; myUserId: string }
         )}
       </OfficeCard>
 
-      <OfficeCard title="Check scorers" description="From the away club. They can follow and query the scoring, but never change it.">
+      <OfficeCard
+        title="Check scorers"
+        description="From the away club. They can follow and query the scoring, but never change it."
+      >
         {view.checkers.length === 0 ? (
           <Empty>No check scorer for this match.</Empty>
         ) : (
           <ul className="space-y-2">
             {view.checkers.map((checker) => (
-              <li key={checker.user_id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-3">
+              <li
+                key={checker.user_id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-3"
+              >
                 <span>
                   <span className="block font-semibold">
                     {checker.name}
                     {checker.user_id === myUserId ? " (you)" : ""}
                   </span>
                   <span className="office-meta">
-                    {checker.confirmed_at ? `Confirmed the scorecard ${when(checker.confirmed_at)}` : "Not confirmed yet"}
+                    {checker.confirmed_at
+                      ? `Confirmed the scorecard ${when(checker.confirmed_at)}`
+                      : "Not confirmed yet"}
                   </span>
                 </span>
                 {(me.can_name || checker.user_id === myUserId) && (
@@ -260,7 +329,8 @@ function CheckMatch({ matchId, myUserId }: { matchId: string; myUserId: string }
                         .catch((reason: unknown) => toast.error(friendlyCheck(reason)));
                     }}
                   >
-                    <Trash2 className="size-4" aria-hidden="true" /> {checker.user_id === myUserId ? "Stop checking" : "Remove"}
+                    <Trash2 className="size-4" aria-hidden="true" />{" "}
+                    {checker.user_id === myUserId ? "Stop checking" : "Remove"}
                   </button>
                 )}
               </li>
@@ -323,15 +393,31 @@ function ConfirmBox({
         value={note}
         onChange={(event) => setNote(event.target.value)}
       />
-      <button type="submit" className="action-primary inline-flex items-center justify-center gap-2" disabled={disabled || busy}>
+      <button
+        type="submit"
+        className="action-primary inline-flex items-center justify-center gap-2"
+        disabled={disabled || busy}
+      >
         <CheckCircle2 className="size-4" aria-hidden="true" />
-        {disabled ? `${openCount} open ${openCount === 1 ? "query" : "queries"}` : confirmed ? "Confirm again" : "Confirm scorecard"}
+        {disabled
+          ? `${openCount} open ${openCount === 1 ? "query" : "queries"}`
+          : confirmed
+            ? "Confirm again"
+            : "Confirm scorecard"}
       </button>
     </form>
   );
 }
 
-function QueryDialog({ ball, onClose, onSend }: { ball: CheckBall | null; onClose: () => void; onSend: (note: string) => Promise<void> }) {
+function QueryDialog({
+  ball,
+  onClose,
+  onSend,
+}: {
+  ball: CheckBall | null;
+  onClose: () => void;
+  onSend: (note: string) => Promise<void>;
+}) {
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const submit = async (event: FormEvent) => {
@@ -346,8 +432,16 @@ function QueryDialog({ ball, onClose, onSend }: { ball: CheckBall | null; onClos
     }
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/70 p-4 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-labelledby="query-title">
-      <form onSubmit={(event) => void submit(event)} className="office-card w-full max-w-md space-y-3">
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-background/70 p-4 backdrop-blur-sm sm:items-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="query-title"
+    >
+      <form
+        onSubmit={(event) => void submit(event)}
+        className="office-card w-full max-w-md space-y-3"
+      >
         <h2 id="query-title" className="font-display text-xl font-bold">
           {ball ? `Query ball ${ballLabel(ball)}` : "Query the scorecard"}
         </h2>
@@ -369,7 +463,11 @@ function QueryDialog({ ball, onClose, onSend }: { ball: CheckBall | null; onClos
           <button type="button" className="action-secondary" onClick={onClose}>
             Cancel
           </button>
-          <button type="submit" className="action-primary" disabled={busy || note.trim().length < 3}>
+          <button
+            type="submit"
+            className="action-primary"
+            disabled={busy || note.trim().length < 3}
+          >
             {busy ? "Sending…" : "Send query"}
           </button>
         </div>

@@ -1,14 +1,32 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { Coins, Globe, ImagePlus, LoaderCircle, MapPin, Megaphone, Pause, Play, Plus, Trash2, Users } from "lucide-react";
+import {
+  Coins,
+  Globe,
+  ImagePlus,
+  LoaderCircle,
+  MapPin,
+  Megaphone,
+  Pause,
+  Play,
+  Plus,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { AppHeader } from "@/components/app-shell/AppHeader";
 import { GoogleButton } from "@/components/app-shell/GoogleButton";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { currencies } from "@/components/office/ui";
 import { adRevenueSharePercent } from "@/lib/plans";
 import { formatMoney, periodRange, type EarningsPeriod } from "@/lib/promo-earnings";
-import { matchesTarget, parsePlaceList, slotArtwork, type PromoSlot, type PromoSurface } from "@/lib/promo-targeting";
+import {
+  matchesTarget,
+  parsePlaceList,
+  slotArtwork,
+  type PromoSlot,
+  type PromoSurface,
+} from "@/lib/promo-targeting";
 import {
   deleteCampaign,
   deleteCreative,
@@ -29,15 +47,26 @@ import {
   type PromoCreative,
 } from "@/lib/promo-desk-cloud";
 import { staffDomainCloud, type StaffDomainRow } from "@/lib/club-domains-cloud";
-import { criclumeStaffRecords, domainStatusLabels, type DomainStatus } from "@/lib/club-domain-records";
+import {
+  criclumeStaffRecords,
+  domainStatusLabels,
+  type DomainStatus,
+} from "@/lib/club-domain-records";
 
 export const Route = createFileRoute("/sponsor-desk")({
   head: () => ({
     meta: [
       { title: "Ads desk — CricLume" },
-      { name: "description", content: "CricLume staff desk for booking rotating top and side ad banners, local targeting and club revenue share." },
+      {
+        name: "description",
+        content:
+          "CricLume staff desk for booking rotating top and side ad banners, local targeting and club revenue share.",
+      },
       { property: "og:title", content: "Ads desk — CricLume" },
-      { property: "og:description", content: "Book image, GIF and video ads on CricLume big screens, scoreboards and apps." },
+      {
+        property: "og:description",
+        content: "Book image, GIF and video ads on CricLume big screens, scoreboards and apps.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
@@ -47,12 +76,27 @@ export const Route = createFileRoute("/sponsor-desk")({
 });
 
 type DeskTab = "campaigns" | "payouts" | "plans" | "domains";
-const surfaceLabels: Record<PromoSurface, string> = { ground: "Ground big screen", scoreboard: "Public scoreboard", app: "App (phone & desktop)" };
-const statusTone: Record<PromoCampaign["status"], string> = { live: "office-pill-good", paused: "office-pill-warn", draft: "", ended: "office-pill-bad" };
+const surfaceLabels: Record<PromoSurface, string> = {
+  ground: "Ground big screen",
+  scoreboard: "Public scoreboard",
+  app: "App (phone & desktop)",
+};
+const statusTone: Record<PromoCampaign["status"], string> = {
+  live: "office-pill-good",
+  paused: "office-pill-warn",
+  draft: "",
+  ended: "office-pill-bad",
+};
 
 function friendly(reason: unknown): string {
-  const message = reason instanceof Error ? reason.message : typeof reason === "object" && reason && "message" in reason ? String((reason as { message: unknown }).message) : "";
-  if (/staff only|row-level security|permission/i.test(message)) return "Only CricLume's ads team can do that.";
+  const message =
+    reason instanceof Error
+      ? reason.message
+      : typeof reason === "object" && reason && "message" in reason
+        ? String((reason as { message: unknown }).message)
+        : "";
+  if (/staff only|row-level security|permission/i.test(message))
+    return "Only CricLume's ads team can do that.";
   return message || "That didn't work. Please try again.";
 }
 
@@ -90,7 +134,11 @@ function SponsorDesk() {
           )
         }
       />
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl space-y-6 px-4 py-6 md:px-8 md:py-10">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto max-w-6xl space-y-6 px-4 py-6 md:px-8 md:py-10"
+      >
         {!configured || loading || (session && staff === null) ? (
           <p className="office-meta flex items-center gap-2">
             <LoaderCircle className="size-4 animate-spin" /> Loading…
@@ -111,8 +159,11 @@ function SponsorDesk() {
               <p className="panel-kicker">CricLume ads</p>
               <h1 className="font-display text-3xl font-bold md:text-4xl">Ads desk</h1>
               <p className="office-meta mt-1">
-                Book rotating top and side banners for big screens, public scoreboards and the app. Free clubs earn {adRevenueSharePercent("starter")}%, paid clubs{" "}
-                {adRevenueSharePercent("club")}%, paid + video {adRevenueSharePercent("club", { videoAddon: true })}% of the ad money from their screens.
+                Book rotating top and side banners for big screens, public scoreboards and the app.
+                Free clubs earn {adRevenueSharePercent("starter")}%, paid clubs{" "}
+                {adRevenueSharePercent("club")}%, paid + video{" "}
+                {adRevenueSharePercent("club", { videoAddon: true })}% of the ad money from their
+                screens.
               </p>
             </div>
             <div className="office-tabs" role="tablist" aria-label="Ads desk">
@@ -124,7 +175,14 @@ function SponsorDesk() {
                   ["domains", "Club domains", Globe],
                 ] as const
               ).map(([value, label, Icon]) => (
-                <button key={value} type="button" role="tab" aria-selected={tab === value} className="office-tab" onClick={() => setTab(value)}>
+                <button
+                  key={value}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === value}
+                  className="office-tab"
+                  onClick={() => setTab(value)}
+                >
                   <Icon className="size-4" /> {label}
                 </button>
               ))}
@@ -140,7 +198,11 @@ function SponsorDesk() {
   );
 }
 
-function SignIn({ requestLink }: { requestLink: (email: string, redirectTo?: string) => Promise<void> }) {
+function SignIn({
+  requestLink,
+}: {
+  requestLink: (email: string, redirectTo?: string) => Promise<void>;
+}) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -158,7 +220,9 @@ function SignIn({ requestLink }: { requestLink: (email: string, redirectTo?: str
   };
   const google = async () => {
     const { lovable } = await import("@/integrations/lovable");
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/sponsor-desk` });
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: `${window.location.origin}/sponsor-desk`,
+    });
     if (result.error) toast.error("Google sign-in didn't finish. Please try again.");
   };
   return (
@@ -168,7 +232,14 @@ function SignIn({ requestLink }: { requestLink: (email: string, redirectTo?: str
       <form onSubmit={(event) => void submit(event)} className="space-y-3">
         <label className="block">
           <span className="office-label">Email</span>
-          <input type="email" required className="scorer-input" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="media@criclume.com" />
+          <input
+            type="email"
+            required
+            className="scorer-input"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="media@criclume.com"
+          />
         </label>
         <button type="submit" className="action-primary w-full" disabled={busy}>
           {sent ? "Link sent — check your inbox" : "Email me a sign-in link"}
@@ -224,7 +295,12 @@ function Campaigns() {
   };
 
   const testing = place.country || place.region || place.city;
-  const visitor = { country: place.country.trim().toUpperCase() || null, region: place.region || null, regionCode: null, city: place.city || null };
+  const visitor = {
+    country: place.country.trim().toUpperCase() || null,
+    region: place.region || null,
+    regionCode: null,
+    city: place.city || null,
+  };
 
   if (!data) {
     return (
@@ -238,7 +314,8 @@ function Campaigns() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="office-meta">
-          {data.campaigns.filter((item) => item.status === "live").length} live · {data.campaigns.length} total
+          {data.campaigns.filter((item) => item.status === "live").length} live ·{" "}
+          {data.campaigns.length} total
         </p>
         <button type="button" className="action-primary" onClick={() => setEditing("new")}>
           <Plus className="size-4" /> New campaign
@@ -250,7 +327,10 @@ function Campaigns() {
           initial={editing === "new" ? blankDraft() : editing}
           onCancel={() => setEditing(null)}
           onSave={async (draft) => {
-            await run(() => saveCampaign(editing === "new" ? null : editing.id, draft), editing === "new" ? "Campaign created" : "Campaign saved");
+            await run(
+              () => saveCampaign(editing === "new" ? null : editing.id, draft),
+              editing === "new" ? "Campaign created" : "Campaign saved",
+            );
             setEditing(null);
           }}
         />
@@ -260,11 +340,29 @@ function Campaigns() {
         <h3 className="flex items-center gap-2">
           <MapPin className="size-4 text-gold" /> Check a place
         </h3>
-        <p className="office-meta mb-3">See which live campaigns a viewer in this place would get.</p>
+        <p className="office-meta mb-3">
+          See which live campaigns a viewer in this place would get.
+        </p>
         <div className="grid gap-2 sm:grid-cols-3">
-          <input className="scorer-input" placeholder="Country code (PK)" maxLength={2} value={place.country} onChange={(event) => setPlace({ ...place, country: event.target.value })} />
-          <input className="scorer-input" placeholder="Region (Punjab)" value={place.region} onChange={(event) => setPlace({ ...place, region: event.target.value })} />
-          <input className="scorer-input" placeholder="City (Lahore)" value={place.city} onChange={(event) => setPlace({ ...place, city: event.target.value })} />
+          <input
+            className="scorer-input"
+            placeholder="Country code (PK)"
+            maxLength={2}
+            value={place.country}
+            onChange={(event) => setPlace({ ...place, country: event.target.value })}
+          />
+          <input
+            className="scorer-input"
+            placeholder="Region (Punjab)"
+            value={place.region}
+            onChange={(event) => setPlace({ ...place, region: event.target.value })}
+          />
+          <input
+            className="scorer-input"
+            placeholder="City (Lahore)"
+            value={place.city}
+            onChange={(event) => setPlace({ ...place, city: event.target.value })}
+          />
         </div>
       </section>
 
@@ -279,27 +377,50 @@ function Campaigns() {
         const creatives = data.creatives.filter((item) => item.campaign_id === campaign.id);
         const reaches = matchesTarget(campaign, visitor);
         return (
-          <section key={campaign.id} className={`office-card space-y-3 ${testing && !reaches ? "opacity-50" : ""}`}>
+          <section
+            key={campaign.id}
+            className={`office-card space-y-3 ${testing && !reaches ? "opacity-50" : ""}`}
+          >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3>{campaign.advertiser}</h3>
-                  <span className={`office-pill ${statusTone[campaign.status]}`}>{campaign.status}</span>
-                  {testing && <span className={`office-pill ${reaches ? "office-pill-good" : ""}`}>{reaches ? "Shows here" : "Not shown here"}</span>}
+                  <span className={`office-pill ${statusTone[campaign.status]}`}>
+                    {campaign.status}
+                  </span>
+                  {testing && (
+                    <span className={`office-pill ${reaches ? "office-pill-good" : ""}`}>
+                      {reaches ? "Shows here" : "Not shown here"}
+                    </span>
+                  )}
                 </div>
                 <p className="office-meta">
                   {campaign.name} · {campaign.starts_on}
-                  {campaign.ends_on ? ` to ${campaign.ends_on}` : " onwards"} · {formatMoney(Number(campaign.price_amount), campaign.currency)} ·{" "}
+                  {campaign.ends_on ? ` to ${campaign.ends_on}` : " onwards"} ·{" "}
+                  {formatMoney(Number(campaign.price_amount), campaign.currency)} ·{" "}
                   {(data.plays[campaign.id] ?? 0).toLocaleString()} plays
                 </p>
                 <p className="office-meta">
-                  Where: {[campaign.countries.join(", "), campaign.regions.join(", "), campaign.cities.join(", ")].filter(Boolean).join(" · ") || "Everywhere"} · On:{" "}
-                  {campaign.surfaces.map((value) => surfaceLabels[value]).join(", ")}
+                  Where:{" "}
+                  {[
+                    campaign.countries.join(", "),
+                    campaign.regions.join(", "),
+                    campaign.cities.join(", "),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ") || "Everywhere"}{" "}
+                  · On: {campaign.surfaces.map((value) => surfaceLabels[value]).join(", ")}
                 </p>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {campaign.status === "live" ? (
-                  <button type="button" className="action-secondary" onClick={() => void run(() => setCampaignStatus(campaign.id, "paused"), "Campaign paused")}>
+                  <button
+                    type="button"
+                    className="action-secondary"
+                    onClick={() =>
+                      void run(() => setCampaignStatus(campaign.id, "paused"), "Campaign paused")
+                    }
+                  >
                     <Pause className="size-4" /> Pause
                   </button>
                 ) : (
@@ -308,12 +429,18 @@ function Campaigns() {
                     className="action-primary"
                     disabled={creatives.length === 0}
                     title={creatives.length === 0 ? "Upload a banner first" : undefined}
-                    onClick={() => void run(() => setCampaignStatus(campaign.id, "live"), "Campaign is live")}
+                    onClick={() =>
+                      void run(() => setCampaignStatus(campaign.id, "live"), "Campaign is live")
+                    }
                   >
                     <Play className="size-4" /> Go live
                   </button>
                 )}
-                <button type="button" className="action-secondary" onClick={() => setEditing(campaign)}>
+                <button
+                  type="button"
+                  className="action-secondary"
+                  onClick={() => setEditing(campaign)}
+                >
                   Edit
                 </button>
                 <button
@@ -321,8 +448,19 @@ function Campaigns() {
                   className="action-secondary"
                   aria-label={`Delete ${campaign.name}`}
                   onClick={() => {
-                    if (window.confirm(`Delete "${campaign.name}" and its banners? Play counts for it are removed too.`))
-                      void run(() => deleteCampaign(campaign.id, creatives.map((item) => item.media_path)), "Campaign deleted");
+                    if (
+                      window.confirm(
+                        `Delete "${campaign.name}" and its banners? Play counts for it are removed too.`,
+                      )
+                    )
+                      void run(
+                        () =>
+                          deleteCampaign(
+                            campaign.id,
+                            creatives.map((item) => item.media_path),
+                          ),
+                        "Campaign deleted",
+                      );
                   }}
                 >
                   <Trash2 className="size-4" />
@@ -336,8 +474,15 @@ function Campaigns() {
                   slot={slot}
                   creatives={creatives.filter((item) => item.slot === slot)}
                   links={links}
-                  onUpload={(file, options) => run(() => uploadCreative(campaign.id, slot, file, options), "Banner uploaded")}
-                  onToggle={(item) => void run(() => setCreativeActive(item.id, !item.active), item.active ? "Banner switched off" : "Banner switched on")}
+                  onUpload={(file, options) =>
+                    run(() => uploadCreative(campaign.id, slot, file, options), "Banner uploaded")
+                  }
+                  onToggle={(item) =>
+                    void run(
+                      () => setCreativeActive(item.id, !item.active),
+                      item.active ? "Banner switched off" : "Banner switched on",
+                    )
+                  }
                   onDelete={(item) => void run(() => deleteCreative(item), "Banner removed")}
                 />
               ))}
@@ -376,21 +521,45 @@ function SlotCreatives({
       </div>
       {creatives.map((item) => (
         <div key={item.id} className="flex items-center gap-2">
-          <div className={`promo-slot promo-page promo-slot-${slot} shrink-0 ${slot === "top" ? "!w-48" : "!w-16"}`}>
+          <div
+            className={`promo-slot promo-page promo-slot-${slot} shrink-0 ${slot === "top" ? "!w-48" : "!w-16"}`}
+          >
             {links[item.media_path] &&
               (item.media_kind === "video" ? (
-                <video className="promo-media object-contain" src={links[item.media_path]} muted autoPlay loop playsInline />
+                <video
+                  className="promo-media object-contain"
+                  src={links[item.media_path]}
+                  muted
+                  autoPlay
+                  loop
+                  playsInline
+                />
               ) : (
-                <img className="promo-media object-contain" src={links[item.media_path]} alt={item.alt_text} />
+                <img
+                  className="promo-media object-contain"
+                  src={links[item.media_path]}
+                  alt={item.alt_text}
+                />
               ))}
           </div>
           <span className="office-meta min-w-0 flex-1 truncate">
-            {item.media_kind === "video" ? "MP4 · plays through" : `${item.duration_seconds}s`} {item.active ? "" : "· off"}
+            {item.media_kind === "video" ? "MP4 · plays through" : `${item.duration_seconds}s`}{" "}
+            {item.active ? "" : "· off"}
           </span>
-          <button type="button" className="office-choice" aria-pressed={item.active} onClick={() => onToggle(item)}>
+          <button
+            type="button"
+            className="office-choice"
+            aria-pressed={item.active}
+            onClick={() => onToggle(item)}
+          >
             {item.active ? "On" : "Off"}
           </button>
-          <button type="button" className="office-choice" aria-label="Remove banner" onClick={() => onDelete(item)}>
+          <button
+            type="button"
+            className="office-choice"
+            aria-label="Remove banner"
+            onClick={() => onDelete(item)}
+          >
             <Trash2 className="size-3.5" />
           </button>
         </div>
@@ -398,15 +567,31 @@ function SlotCreatives({
       <div className="grid gap-2 sm:grid-cols-[5rem_minmax(0,1fr)]">
         <label>
           <span className="office-label">Seconds</span>
-          <input type="number" min={3} max={60} className="scorer-input" value={seconds} onChange={(event) => setSeconds(Number(event.target.value) || 10)} />
+          <input
+            type="number"
+            min={3}
+            max={60}
+            className="scorer-input"
+            value={seconds}
+            onChange={(event) => setSeconds(Number(event.target.value) || 10)}
+          />
         </label>
         <label>
           <span className="office-label">Describe it</span>
-          <input className="scorer-input" maxLength={200} value={alt} onChange={(event) => setAlt(event.target.value)} placeholder="Ali Sports — 20% off bats" />
+          <input
+            className="scorer-input"
+            maxLength={200}
+            value={alt}
+            onChange={(event) => setAlt(event.target.value)}
+            placeholder="Ali Sports — 20% off bats"
+          />
         </label>
       </div>
-      <label className={`action-secondary cursor-pointer justify-center ${busy ? "opacity-60" : ""}`}>
-        {busy ? <LoaderCircle className="size-4 animate-spin" /> : <ImagePlus className="size-4" />} Upload image, GIF or MP4
+      <label
+        className={`action-secondary cursor-pointer justify-center ${busy ? "opacity-60" : ""}`}
+      >
+        {busy ? <LoaderCircle className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}{" "}
+        Upload image, GIF or MP4
         <input
           type="file"
           accept="image/png,image/jpeg,image/gif,image/webp,video/mp4"
@@ -428,12 +613,28 @@ function SlotCreatives({
   );
 }
 
-function CampaignForm({ initial, onCancel, onSave }: { initial: CampaignDraft; onCancel: () => void; onSave: (draft: CampaignDraft) => Promise<void> }) {
+function CampaignForm({
+  initial,
+  onCancel,
+  onSave,
+}: {
+  initial: CampaignDraft;
+  onCancel: () => void;
+  onSave: (draft: CampaignDraft) => Promise<void>;
+}) {
   const [draft, setDraft] = useState<CampaignDraft>(initial);
-  const [places, setPlaces] = useState({ countries: initial.countries.join(", "), regions: initial.regions.join(", "), cities: initial.cities.join(", ") });
+  const [places, setPlaces] = useState({
+    countries: initial.countries.join(", "),
+    regions: initial.regions.join(", "),
+    cities: initial.cities.join(", "),
+  });
   const [busy, setBusy] = useState(false);
-  const set = <K extends keyof CampaignDraft>(key: K, value: CampaignDraft[K]) => setDraft((prev) => ({ ...prev, [key]: value }));
-  const currencyOptions = useMemo(() => [...new Set([draft.currency, "PKR", "GBP", "USD", ...currencies])], [draft.currency]);
+  const set = <K extends keyof CampaignDraft>(key: K, value: CampaignDraft[K]) =>
+    setDraft((prev) => ({ ...prev, [key]: value }));
+  const currencyOptions = useMemo(
+    () => [...new Set([draft.currency, "PKR", "GBP", "USD", ...currencies])],
+    [draft.currency],
+  );
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (draft.surfaces.length === 0) return void toast.error("Choose at least one screen.");
@@ -455,28 +656,66 @@ function CampaignForm({ initial, onCancel, onSave }: { initial: CampaignDraft; o
       <div className="grid gap-3 md:grid-cols-2">
         <label>
           <span className="office-label">Advertiser</span>
-          <input required maxLength={120} className="scorer-input" value={draft.advertiser} onChange={(event) => set("advertiser", event.target.value)} placeholder="Ali Sports, Lahore" />
+          <input
+            required
+            maxLength={120}
+            className="scorer-input"
+            value={draft.advertiser}
+            onChange={(event) => set("advertiser", event.target.value)}
+            placeholder="Ali Sports, Lahore"
+          />
         </label>
         <label>
           <span className="office-label">Campaign name</span>
-          <input required maxLength={120} className="scorer-input" value={draft.name} onChange={(event) => set("name", event.target.value)} placeholder="Summer bat sale" />
+          <input
+            required
+            maxLength={120}
+            className="scorer-input"
+            value={draft.name}
+            onChange={(event) => set("name", event.target.value)}
+            placeholder="Summer bat sale"
+          />
         </label>
         <label>
           <span className="office-label">Starts</span>
-          <input type="date" required className="scorer-input" value={draft.starts_on} onChange={(event) => set("starts_on", event.target.value)} />
+          <input
+            type="date"
+            required
+            className="scorer-input"
+            value={draft.starts_on}
+            onChange={(event) => set("starts_on", event.target.value)}
+          />
         </label>
         <label>
           <span className="office-label">Ends (optional)</span>
-          <input type="date" className="scorer-input" min={draft.starts_on} value={draft.ends_on ?? ""} onChange={(event) => set("ends_on", event.target.value || null)} />
+          <input
+            type="date"
+            className="scorer-input"
+            min={draft.starts_on}
+            value={draft.ends_on ?? ""}
+            onChange={(event) => set("ends_on", event.target.value || null)}
+          />
         </label>
         <div className="grid grid-cols-[minmax(0,1fr)_6rem] gap-2">
           <label>
             <span className="office-label">Advertiser pays</span>
-            <input type="number" min={0} step="0.01" required className="scorer-input" value={draft.price_amount} onChange={(event) => set("price_amount", Number(event.target.value) || 0)} />
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              required
+              className="scorer-input"
+              value={draft.price_amount}
+              onChange={(event) => set("price_amount", Number(event.target.value) || 0)}
+            />
           </label>
           <label>
             <span className="office-label">Currency</span>
-            <select className="scorer-input" value={draft.currency} onChange={(event) => set("currency", event.target.value)}>
+            <select
+              className="scorer-input"
+              value={draft.currency}
+              onChange={(event) => set("currency", event.target.value)}
+            >
               {currencyOptions.map((code) => (
                 <option key={code}>{code}</option>
               ))}
@@ -485,23 +724,54 @@ function CampaignForm({ initial, onCancel, onSave }: { initial: CampaignDraft; o
         </div>
         <label>
           <span className="office-label">Link when tapped (https://…)</span>
-          <input type="url" pattern="https://.*" className="scorer-input" value={draft.click_url ?? ""} onChange={(event) => set("click_url", event.target.value)} placeholder="https://alisports.pk" />
+          <input
+            type="url"
+            pattern="https://.*"
+            className="scorer-input"
+            value={draft.click_url ?? ""}
+            onChange={(event) => set("click_url", event.target.value)}
+            placeholder="https://alisports.pk"
+          />
         </label>
         <label>
           <span className="office-label">Countries (codes, blank = all)</span>
-          <input className="scorer-input" value={places.countries} onChange={(event) => setPlaces({ ...places, countries: event.target.value })} placeholder="PK, AE" />
+          <input
+            className="scorer-input"
+            value={places.countries}
+            onChange={(event) => setPlaces({ ...places, countries: event.target.value })}
+            placeholder="PK, AE"
+          />
         </label>
         <label>
           <span className="office-label">Regions (blank = all)</span>
-          <input className="scorer-input" value={places.regions} onChange={(event) => setPlaces({ ...places, regions: event.target.value })} placeholder="Punjab, Sindh" />
+          <input
+            className="scorer-input"
+            value={places.regions}
+            onChange={(event) => setPlaces({ ...places, regions: event.target.value })}
+            placeholder="Punjab, Sindh"
+          />
         </label>
         <label>
           <span className="office-label">Cities (blank = all)</span>
-          <input className="scorer-input" value={places.cities} onChange={(event) => setPlaces({ ...places, cities: event.target.value })} placeholder="Lahore, Karachi" />
+          <input
+            className="scorer-input"
+            value={places.cities}
+            onChange={(event) => setPlaces({ ...places, cities: event.target.value })}
+            placeholder="Lahore, Karachi"
+          />
         </label>
         <label>
           <span className="office-label">How often (1–10)</span>
-          <input type="number" min={1} max={10} className="scorer-input" value={draft.weight} onChange={(event) => set("weight", Math.max(1, Math.min(10, Number(event.target.value) || 1)))} />
+          <input
+            type="number"
+            min={1}
+            max={10}
+            className="scorer-input"
+            value={draft.weight}
+            onChange={(event) =>
+              set("weight", Math.max(1, Math.min(10, Number(event.target.value) || 1)))
+            }
+          />
         </label>
       </div>
       <fieldset>
@@ -515,7 +785,14 @@ function CampaignForm({ initial, onCancel, onSave }: { initial: CampaignDraft; o
                 type="button"
                 className="office-choice"
                 aria-pressed={on}
-                onClick={() => set("surfaces", on ? draft.surfaces.filter((item) => item !== value) : [...draft.surfaces, value])}
+                onClick={() =>
+                  set(
+                    "surfaces",
+                    on
+                      ? draft.surfaces.filter((item) => item !== value)
+                      : [...draft.surfaces, value],
+                  )
+                }
               >
                 {surfaceLabels[value]}
               </button>
@@ -557,7 +834,10 @@ function Payouts() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h3>What each club has earned</h3>
-          <p className="office-meta">Campaign price × the club's share of that campaign's plays × the club's revenue share at the time.</p>
+          <p className="office-meta">
+            Campaign price × the club's share of that campaign's plays × the club's revenue share at
+            the time.
+          </p>
         </div>
         <div className="flex gap-1.5">
           {(
@@ -567,7 +847,13 @@ function Payouts() {
               ["year", "This year"],
             ] as const
           ).map(([value, label]) => (
-            <button key={value} type="button" className="office-choice" aria-pressed={period === value} onClick={() => setPeriod(value)}>
+            <button
+              key={value}
+              type="button"
+              className="office-choice"
+              aria-pressed={period === value}
+              onClick={() => setPeriod(value)}
+            >
               {label}
             </button>
           ))}
@@ -582,7 +868,10 @@ function Payouts() {
       ) : (
         <ul className="divide-y divide-border">
           {rows.map((row) => (
-            <li key={`${row.organisation_id}-${row.currency}`} className="flex items-center justify-between gap-2 py-2.5 text-sm">
+            <li
+              key={`${row.organisation_id}-${row.currency}`}
+              className="flex items-center justify-between gap-2 py-2.5 text-sm"
+            >
               <div>
                 <p className="font-semibold">{row.organisation_name}</p>
                 <p className="office-meta">{Number(row.plays).toLocaleString()} plays</p>
@@ -610,7 +899,9 @@ function Plans() {
   const change = async (row: ClubPlanRow, plan: ClubPlanRow["plan"], video: boolean) => {
     try {
       await setClubPlan(row.organisation_id, plan, video);
-      toast.success(`${row.organisation_name} now earns ${adRevenueSharePercent(plan, { videoAddon: video })}% of its ad money`);
+      toast.success(
+        `${row.organisation_name} now earns ${adRevenueSharePercent(plan, { videoAddon: video })}% of its ad money`,
+      );
       reload();
     } catch (reason) {
       toast.error(friendly(reason));
@@ -620,7 +911,10 @@ function Plans() {
     <section className="office-card space-y-3">
       <div>
         <h3>Club plans</h3>
-        <p className="office-meta">Set each club's plan while payments are arranged directly. The plan decides its ad revenue share.</p>
+        <p className="office-meta">
+          Set each club's plan while payments are arranged directly. The plan decides its ad revenue
+          share.
+        </p>
       </div>
       {!rows ? (
         <p className="office-meta flex items-center gap-2">
@@ -635,11 +929,19 @@ function Plans() {
               <div className="min-w-0">
                 <p className="font-semibold">{row.organisation_name}</p>
                 <p className="office-meta">
-                  {row.kind} · earns {adRevenueSharePercent(row.plan, { videoAddon: row.video_addon })}%
+                  {row.kind} · earns{" "}
+                  {adRevenueSharePercent(row.plan, { videoAddon: row.video_addon })}%
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
-                <select aria-label={`Plan for ${row.organisation_name}`} className="scorer-input !h-10 !w-auto" value={row.plan} onChange={(event) => void change(row, event.target.value as ClubPlanRow["plan"], row.video_addon)}>
+                <select
+                  aria-label={`Plan for ${row.organisation_name}`}
+                  className="scorer-input !h-10 !w-auto"
+                  value={row.plan}
+                  onChange={(event) =>
+                    void change(row, event.target.value as ClubPlanRow["plan"], row.video_addon)
+                  }
+                >
                   <option value="starter">Free</option>
                   <option value="club">Club</option>
                   <option value="league">League</option>
@@ -686,12 +988,14 @@ function ClubDomains() {
       <div>
         <h3>Club website addresses</h3>
         <p className="office-meta">
-          League plan only. Own domain: connect it to CricLume hosting first, paste the records it shows (address, then any extra records as
-          “TYPE NAME VALUE”, one per line) so the club can add them, then set it live once hosting shows it active.
+          League plan only. Own domain: connect it to CricLume hosting first, paste the records it
+          shows (address, then any extra records as “TYPE NAME VALUE”, one per line) so the club can
+          add them, then set it live once hosting shows it active.
         </p>
         <p className="office-meta">
-          Free CricLume address (name.criclume.com): connect it to CricLume hosting yourself and add its records in criclume.com's DNS — the
-          club has nothing to add. Set it live once hosting shows it active.
+          Free CricLume address (name.criclume.com): connect it to CricLume hosting yourself and add
+          its records in criclume.com's DNS — the club has nothing to add. Set it live once hosting
+          shows it active.
         </p>
       </div>
       {!rows ? (
@@ -736,21 +1040,33 @@ function DomainRequest({ row, onSaved }: { row: StaffDomainRow; onSaved: () => v
         <div className="min-w-0">
           <p className="flex flex-wrap items-center gap-2 font-semibold">
             {row.hostname}
-            <span className="office-pill">{row.kind === "criclume" ? "Free CricLume address" : "Own domain"}</span>
+            <span className="office-pill">
+              {row.kind === "criclume" ? "Free CricLume address" : "Own domain"}
+            </span>
           </p>
           <p className="office-meta">
-            {row.organisation_name} · /club/{row.site_slug} · {row.site_published ? "site published" : "site not published"}
+            {row.organisation_name} · /club/{row.site_slug} ·{" "}
+            {row.site_published ? "site published" : "site not published"}
             {row.plan_allowed ? "" : " · not on League plan"}
           </p>
         </div>
-        <span className={`office-pill ${row.status === "live" ? "office-pill-good" : row.status === "declined" || row.status === "paused" ? "office-pill-bad" : "office-pill-warn"}`}>
+        <span
+          className={`office-pill ${row.status === "live" ? "office-pill-good" : row.status === "declined" || row.status === "paused" ? "office-pill-bad" : "office-pill-warn"}`}
+        >
           {domainStatusLabels[row.status as DomainStatus]}
         </span>
       </div>
-      <form className="grid gap-2 md:grid-cols-[10rem_12rem_1fr]" onSubmit={(event) => void save(event)}>
+      <form
+        className="grid gap-2 md:grid-cols-[10rem_12rem_1fr]"
+        onSubmit={(event) => void save(event)}
+      >
         <label className="grid gap-1 text-xs font-semibold">
           Status
-          <select className="scorer-input !h-10" value={status} onChange={(e) => setStatus(e.target.value as DomainStatus)}>
+          <select
+            className="scorer-input !h-10"
+            value={status}
+            onChange={(e) => setStatus(e.target.value as DomainStatus)}
+          >
             {domainStatusOrder.map((value) => (
               <option key={value} value={value}>
                 {domainStatusLabels[value]}
@@ -760,11 +1076,21 @@ function DomainRequest({ row, onSaved }: { row: StaffDomainRow; onSaved: () => v
         </label>
         <label className="grid gap-1 text-xs font-semibold">
           Address (A record)
-          <input className="scorer-input !h-10" value={aTarget} onChange={(e) => setATarget(e.target.value)} placeholder="IP from hosting" />
+          <input
+            className="scorer-input !h-10"
+            value={aTarget}
+            onChange={(e) => setATarget(e.target.value)}
+            placeholder="IP from hosting"
+          />
         </label>
         <label className="grid gap-1 text-xs font-semibold">
           Note for the club
-          <input className="scorer-input !h-10" value={note} maxLength={300} onChange={(e) => setNote(e.target.value)} />
+          <input
+            className="scorer-input !h-10"
+            value={note}
+            maxLength={300}
+            onChange={(e) => setNote(e.target.value)}
+          />
         </label>
         <label className="grid gap-1 text-xs font-semibold md:col-span-3">
           Extra records (one per line)
@@ -775,21 +1101,23 @@ function DomainRequest({ row, onSaved }: { row: StaffDomainRow; onSaved: () => v
             placeholder={"TXT _lovable lovable_verify=…\nTXT _lovable.www lovable_verify=…"}
           />
         </label>
-        {row.kind === "criclume" && criclumeStaffRecords(row.hostname, aTarget, records).length > 0 && (
-          <div className="md:col-span-3 rounded-xl border border-border p-3 text-xs">
-            <p className="mb-2 font-semibold">Add in criclume.com DNS</p>
-            <ul className="space-y-1 font-mono">
-              {criclumeStaffRecords(row.hostname, aTarget, records).map((record) => (
-                <li key={`${record.type}-${record.name}-${record.value}`}>
-                  {record.type} {record.name} → {record.value}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {row.kind === "criclume" &&
+          criclumeStaffRecords(row.hostname, aTarget, records).length > 0 && (
+            <div className="md:col-span-3 rounded-xl border border-border p-3 text-xs">
+              <p className="mb-2 font-semibold">Add in criclume.com DNS</p>
+              <ul className="space-y-1 font-mono">
+                {criclumeStaffRecords(row.hostname, aTarget, records).map((record) => (
+                  <li key={`${record.type}-${record.name}-${record.value}`}>
+                    {record.type} {record.name} → {record.value}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         <div className="md:col-span-3">
           <button type="submit" className="action-primary" disabled={busy}>
-            {busy ? <LoaderCircle className="size-4 animate-spin" /> : <Globe className="size-4" />} Save
+            {busy ? <LoaderCircle className="size-4 animate-spin" /> : <Globe className="size-4" />}{" "}
+            Save
           </button>
         </div>
       </form>

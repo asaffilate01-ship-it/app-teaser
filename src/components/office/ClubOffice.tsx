@@ -1,6 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { BellRing, Banknote, Car, Coins, ClipboardList, Gavel, HandHeart, History, KeyRound, LoaderCircle, MapPin, Shirt, Ticket, UserPlus, UsersRound } from "lucide-react";
+import {
+  BellRing,
+  Banknote,
+  Car,
+  Coins,
+  ClipboardList,
+  Gavel,
+  HandHeart,
+  History,
+  KeyRound,
+  LoaderCircle,
+  MapPin,
+  Shirt,
+  Ticket,
+  UserPlus,
+  UsersRound,
+} from "lucide-react";
 import { can } from "@/lib/platform";
 import type { PlatformRole } from "@/lib/platform";
 import type { PlatformDashboardData } from "@/lib/platform-cloud";
@@ -41,9 +57,22 @@ const tabs = [
 type Tab = (typeof tabs)[number][0];
 
 const remindersVisible = (role: PlatformRole) =>
-  role === "owner" || role === "club_admin" || role === "league_admin" || can(role, "events.manage") || can(role, "fees.manage") || can(role, "umpires.manage");
+  role === "owner" ||
+  role === "club_admin" ||
+  role === "league_admin" ||
+  can(role, "events.manage") ||
+  can(role, "fees.manage") ||
+  can(role, "umpires.manage");
 
-export function ClubOffice({ organisationId, role, club }: { organisationId: string; role: PlatformRole; club: PlatformDashboardData }) {
+export function ClubOffice({
+  organisationId,
+  role,
+  club,
+}: {
+  organisationId: string;
+  role: PlatformRole;
+  club: PlatformDashboardData;
+}) {
   const [tab, setTab] = useState<Tab>("events");
   const [data, setData] = useState<ClubOfficeData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +86,10 @@ export function ClubOffice({ organisationId, role, club }: { organisationId: str
         setError(null);
       }
     } catch (reason) {
-      if (id === request.current) setError(reason instanceof Error ? friendly(reason.message) : "The club office could not load.");
+      if (id === request.current)
+        setError(
+          reason instanceof Error ? friendly(reason.message) : "The club office could not load.",
+        );
     }
   }, [organisationId]);
   useEffect(() => {
@@ -85,14 +117,31 @@ export function ClubOffice({ organisationId, role, club }: { organisationId: str
       <div>
         <p className="panel-kicker">Club office</p>
         <h2 className="text-2xl font-bold tracking-tight">Run the club</h2>
-        <p className="office-meta">Events, availability, selection, fees, bookings, lifts, kit, tickets, volunteers and umpires — each person sees only what their role allows.</p>
+        <p className="office-meta">
+          Events, availability, selection, fees, bookings, lifts, kit, tickets, volunteers and
+          umpires — each person sees only what their role allows.
+        </p>
       </div>
       <div className="office-tabs" role="tablist" aria-label="Club office">
-        {tabs.filter(([value]) => (value !== "umpires" || can(role, "umpires.pay")) && (value !== "reminders" || remindersVisible(role)) && (value !== "tickets" || isTicketGate(role))).map(([value, label, Icon]) => (
-          <button key={value} type="button" role="tab" aria-selected={tab === value} className="office-tab" onClick={() => setTab(value)}>
-            <Icon className="size-4" /> {label}
-          </button>
-        ))}
+        {tabs
+          .filter(
+            ([value]) =>
+              (value !== "umpires" || can(role, "umpires.pay")) &&
+              (value !== "reminders" || remindersVisible(role)) &&
+              (value !== "tickets" || isTicketGate(role)),
+          )
+          .map(([value, label, Icon]) => (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={tab === value}
+              className="office-tab"
+              onClick={() => setTab(value)}
+            >
+              <Icon className="size-4" /> {label}
+            </button>
+          ))}
       </div>
       {error && !data && (
         <div className="office-card">
@@ -115,9 +164,13 @@ export function ClubOffice({ organisationId, role, club }: { organisationId: str
           {tab === "bookings" && <BookingsPanel {...props} />}
           {tab === "travel" && <TravelPanel {...props} />}
           {tab === "store" && <StorePanel {...props} />}
-          {tab === "tickets" && isTicketGate(role) && <TicketsPanel key={organisationId} {...props} />}
+          {tab === "tickets" && isTicketGate(role) && (
+            <TicketsPanel key={organisationId} {...props} />
+          )}
           {tab === "volunteers" && <VolunteersPanel key={organisationId} {...props} />}
-          {tab === "umpires" && can(role, "umpires.pay") && <UmpiresPanel key={organisationId} {...props} />}
+          {tab === "umpires" && can(role, "umpires.pay") && (
+            <UmpiresPanel key={organisationId} {...props} />
+          )}
           {tab === "ads" && (
             <div className="space-y-4">
               <AdEarningsPanel organisationId={organisationId} role={role} />
@@ -125,7 +178,9 @@ export function ClubOffice({ organisationId, role, club }: { organisationId: str
             </div>
           )}
           {tab === "access" && <AccessPanel {...props} />}
-          {tab === "reminders" && remindersVisible(role) && <RemindersPanel key={organisationId} {...props} />}
+          {tab === "reminders" && remindersVisible(role) && (
+            <RemindersPanel key={organisationId} {...props} />
+          )}
           {tab === "people" && <PeoplePanel key={organisationId} {...props} />}
           {tab === "activity" && <ActivityPanel key={organisationId} {...props} />}
         </div>

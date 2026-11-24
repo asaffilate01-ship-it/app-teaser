@@ -1,4 +1,10 @@
-import { currentInnings, inningsOversLimit, inningsTarget, summarizeInnings, type CricketMatch } from "./cricket.ts";
+import {
+  currentInnings,
+  inningsOversLimit,
+  inningsTarget,
+  summarizeInnings,
+  type CricketMatch,
+} from "./cricket.ts";
 import { predictWin, type Prediction } from "./win-predictor.ts";
 
 export interface WinPoint {
@@ -13,8 +19,7 @@ function stateFor(match: CricketMatch, inningsIndex: number, deliveriesCount: nu
   const balls = innings.deliveries.slice(0, deliveriesCount);
   const summary = summarizeInnings({ ...innings, deliveries: balls }, match.settings.ballsPerOver);
   const battingTeam = match.teams.find((team) => team.id === innings.battingTeamId);
-  const target =
-    inningsIndex === 1 ? inningsTarget(match, 1) : null;
+  const target = inningsIndex === 1 ? inningsTarget(match, 1) : null;
   return {
     innings,
     prediction: predictWin({
@@ -50,7 +55,10 @@ export function winTimeline(match: CricketMatch): WinPoint[] {
       const { prediction } = stateFor(match, inningsIndex, count);
       if (!prediction) return;
       const firstBatting = innings.battingTeamId === match.teams[0].id;
-      points.push({ label, firstTeamWin: firstBatting ? prediction.battingWin : prediction.bowlingWin });
+      points.push({
+        label,
+        firstTeamWin: firstBatting ? prediction.battingWin : prediction.bowlingWin,
+      });
     };
     const tag = inningsIndex === 0 ? "1st" : "2nd";
     push(0, `${tag} 0.0`);

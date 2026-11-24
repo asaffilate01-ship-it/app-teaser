@@ -70,7 +70,10 @@ export function GroundReplay({
     const key = `${requestedId}@${requestedAt}`;
     if (lastRequest.current === key || Date.parse(requestedAt) < mountedAt.current - 5_000) return;
     lastRequest.current = key;
-    queue.current = [{ deliveryId: requestedId, deadline: Date.now() + 3 * 60_000 }, ...queue.current];
+    queue.current = [
+      { deliveryId: requestedId, deadline: Date.now() + 3 * 60_000 },
+      ...queue.current,
+    ];
   }, [mode, requestedId, requestedAt]);
 
   useEffect(() => {
@@ -91,7 +94,10 @@ export function GroundReplay({
         else if (mode === "auto") {
           for (const ball of [...candidates.current].reverse()) {
             if (ball.sequence > baseline.current) {
-              queue.current.push({ deliveryId: ball.id, deadline: Date.parse(ball.occurred_at) + 4 * 60_000 });
+              queue.current.push({
+                deliveryId: ball.id,
+                deadline: Date.parse(ball.occurred_at) + 4 * 60_000,
+              });
             }
           }
           baseline.current = Math.max(baseline.current, newest);
@@ -116,13 +122,24 @@ export function GroundReplay({
         const item = reel[0];
         if (!item) {
           if (Date.now() > next.deadline || !ball) queue.current.shift();
-          onStatus?.(ball ? "Waiting for the camera recording to upload…" : "That ball can't be replayed publicly.");
+          onStatus?.(
+            ball
+              ? "Waiting for the camera recording to upload…"
+              : "That ball can't be replayed publicly.",
+          );
           return;
         }
         queue.current.shift();
         const clip = footage.current.clips.find((entry) => entry.id === item.clipId)!;
         const url = await signedRoomClipUrl(clip);
-        if (active) setPlaying({ url, start: item.startSeconds, end: item.endSeconds, label: item.label, tone: item.tone });
+        if (active)
+          setPlaying({
+            url,
+            start: item.startSeconds,
+            end: item.endSeconds,
+            label: item.label,
+            tone: item.tone,
+          });
       } catch (error) {
         onStatus?.(error instanceof Error ? error.message : "Replay unavailable");
         queue.current.shift();
@@ -140,7 +157,10 @@ export function GroundReplay({
 
   useEffect(() => {
     if (!playing) return;
-    const safety = window.setTimeout(() => setPlaying(null), (playing.end - playing.start + 10) * 1000);
+    const safety = window.setTimeout(
+      () => setPlaying(null),
+      (playing.end - playing.start + 10) * 1000,
+    );
     return () => window.clearTimeout(safety);
   }, [playing]);
 

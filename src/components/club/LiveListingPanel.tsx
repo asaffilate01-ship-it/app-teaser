@@ -51,7 +51,10 @@ export function LiveListingPanel({ organisationId }: { organisationId: string })
           <h2 className="text-lg font-bold">Where you play</h2>
           <p className="mt-1 text-xs leading-5 text-slate-400">
             Leagues and other clubs find you by this, and your public matches appear under it on{" "}
-            <Link to="/live" className="font-bold text-amber-300 underline-offset-2 hover:underline">
+            <Link
+              to="/live"
+              className="font-bold text-amber-300 underline-offset-2 hover:underline"
+            >
               Live scores
             </Link>
             .
@@ -69,12 +72,20 @@ export function LiveListingPanel({ organisationId }: { organisationId: string })
         />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-slate-400">{placeLine(place) || "Not set yet"}</p>
-          <button type="submit" className="action-primary" disabled={state === "loading" || state === "saving"}>
+          <button
+            type="submit"
+            className="action-primary"
+            disabled={state === "loading" || state === "saving"}
+          >
             {state === "saving" ? "Saving…" : state === "saved" ? "Saved" : "Save"}
           </button>
         </div>
       </form>
-      {error && <p role="alert" className="mt-3 text-sm text-red-300">{error}</p>}
+      {error && (
+        <p role="alert" className="mt-3 text-sm text-red-300">
+          {error}
+        </p>
+      )}
     </section>
   );
 }

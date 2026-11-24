@@ -49,7 +49,11 @@ export interface FeeTotals {
 }
 
 export function isOverdue(charge: ChargeLike, today: string): boolean {
-  return (charge.status === "due" || charge.status === "part_paid") && !!charge.dueOn && charge.dueOn < today;
+  return (
+    (charge.status === "due" || charge.status === "part_paid") &&
+    !!charge.dueOn &&
+    charge.dueOn < today
+  );
 }
 
 /** Totals per currency; waived charges are left out of what is owed. */
@@ -57,7 +61,13 @@ export function feeTotals(charges: ChargeLike[], today: string): FeeTotals[] {
   const map = new Map<string, FeeTotals>();
   for (const charge of charges) {
     if (charge.status === "waived") continue;
-    const row = map.get(charge.currency) ?? { currency: charge.currency, billed: 0, paid: 0, outstanding: 0, overdue: 0 };
+    const row = map.get(charge.currency) ?? {
+      currency: charge.currency,
+      billed: 0,
+      paid: 0,
+      outstanding: 0,
+      overdue: 0,
+    };
     row.billed += charge.amountMinor;
     row.paid += charge.paidMinor;
     row.outstanding += Math.max(0, charge.amountMinor - charge.paidMinor);
@@ -100,18 +110,25 @@ export function selectionWarnings(
 ): string[] {
   const warnings: string[] = [];
   const playing = picks.filter((pick) => pick.slot === "playing");
-  if (playing.length !== sideSize) warnings.push(`${playing.length} of ${sideSize} players picked to play.`);
+  if (playing.length !== sideSize)
+    warnings.push(`${playing.length} of ${sideSize} players picked to play.`);
   if (!picks.some((pick) => pick.captain)) warnings.push("No captain chosen.");
   if (!picks.some((pick) => pick.wicketkeeper)) warnings.push("No wicketkeeper chosen.");
   const unavailable = picks.filter((pick) => answers.get(pick.playerId) === "unavailable").length;
-  if (unavailable) warnings.push(`${unavailable} picked player${unavailable === 1 ? " has" : "s have"} said they can't make it.`);
+  if (unavailable)
+    warnings.push(
+      `${unavailable} picked player${unavailable === 1 ? " has" : "s have"} said they can't make it.`,
+    );
   return warnings;
 }
 
 export type BookingStatus = "requested" | "confirmed" | "declined" | "cancelled";
 
 export function seatsLeft(seats: number, bookings: { status: BookingStatus }[]): number {
-  return Math.max(0, seats - bookings.filter((b) => b.status === "requested" || b.status === "confirmed").length);
+  return Math.max(
+    0,
+    seats - bookings.filter((b) => b.status === "requested" || b.status === "confirmed").length,
+  );
 }
 
 /** Why a child can't take this seat, or null when they can. Mirrors the database rule. */
@@ -143,8 +160,14 @@ export function clashes<T extends TimeSlot>(candidate: TimeSlot, taken: T[]): T[
   return taken.filter((slot) => overlaps(candidate, slot));
 }
 
-export function availableToLend(stock: number, loans: { quantity: number; returnedAt: string | null }[]): number {
-  return Math.max(0, stock - loans.filter((loan) => !loan.returnedAt).reduce((sum, loan) => sum + loan.quantity, 0));
+export function availableToLend(
+  stock: number,
+  loans: { quantity: number; returnedAt: string | null }[],
+): number {
+  return Math.max(
+    0,
+    stock - loans.filter((loan) => !loan.returnedAt).reduce((sum, loan) => sum + loan.quantity, 0),
+  );
 }
 
 export const officeAreas = [
@@ -193,10 +216,26 @@ export const transferMethods = [
 ] as const;
 
 /** A calendar file (.ics) for one event, so players can add it to their phone's calendar. */
-export function eventIcs(event: { id: string; title: string; starts_at: string; ends_at?: string | null; location?: string | null; notes?: string | null }, now = new Date()): string {
-  const stamp = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-  const escape = (text: string) => text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
-  const end = event.ends_at ?? new Date(new Date(event.starts_at).getTime() + 3 * 3_600_000).toISOString();
+export function eventIcs(
+  event: {
+    id: string;
+    title: string;
+    starts_at: string;
+    ends_at?: string | null;
+    location?: string | null;
+    notes?: string | null;
+  },
+  now = new Date(),
+): string {
+  const stamp = (iso: string) =>
+    new Date(iso)
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace(/\.\d{3}/, "");
+  const escape = (text: string) =>
+    text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  const end =
+    event.ends_at ?? new Date(new Date(event.starts_at).getTime() + 3 * 3_600_000).toISOString();
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -215,4 +254,5 @@ export function eventIcs(event: { id: string; title: string; starts_at: string; 
 }
 
 /** Replies close at the deadline (managers can still change them). */
-export const repliesClosed = (replyBy: string | null | undefined, now = Date.now()) => Boolean(replyBy && new Date(replyBy).getTime() < now);
+export const repliesClosed = (replyBy: string | null | undefined, now = Date.now()) =>
+  Boolean(replyBy && new Date(replyBy).getTime() < now);

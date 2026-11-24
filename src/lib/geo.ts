@@ -63,7 +63,11 @@ export function regionNames(country: GeoCountry | null, province: string): strin
 }
 
 /** Towns for the chosen province and region. */
-export function townNames(country: GeoCountry | null, province: string, district: string): string[] {
+export function townNames(
+  country: GeoCountry | null,
+  province: string,
+  district: string,
+): string[] {
   const found = findProvince(country, province);
   if (!found) return [];
   if (found.r.length === 0) return found.t;
@@ -74,13 +78,38 @@ export function townNames(country: GeoCountry | null, province: string, district
 /** What to call each level in a country ("State" in India, "County" in the US…). */
 export function placeLabels(country: string): { province: string; district: string; town: string } {
   const province: Record<string, string> = {
-    IN: "State", US: "State", AU: "State", MY: "State", NG: "State", DE: "State",
-    GB: "Nation", IE: "Province", CA: "Province", PK: "Province", ZA: "Province", LK: "Province",
-    AE: "Emirate", NZ: "Region", KE: "County", BD: "Division", NL: "Province", FR: "Region",
+    IN: "State",
+    US: "State",
+    AU: "State",
+    MY: "State",
+    NG: "State",
+    DE: "State",
+    GB: "Nation",
+    IE: "Province",
+    CA: "Province",
+    PK: "Province",
+    ZA: "Province",
+    LK: "Province",
+    AE: "Emirate",
+    NZ: "Region",
+    KE: "County",
+    BD: "Division",
+    NL: "Province",
+    FR: "Region",
   };
   const district: Record<string, string> = {
-    GB: "County or area", US: "County", IE: "County", IN: "District", PK: "District", BD: "District",
-    LK: "District", NP: "District", AF: "District", ZA: "District", AU: "Area", CA: "Area",
+    GB: "County or area",
+    US: "County",
+    IE: "County",
+    IN: "District",
+    PK: "District",
+    BD: "District",
+    LK: "District",
+    NP: "District",
+    AF: "District",
+    ZA: "District",
+    AU: "Area",
+    CA: "Area",
   };
   return {
     province: province[country] ?? "Province or state",
@@ -101,6 +130,8 @@ export function cleanPlace(value: PlaceValue): PlaceValue {
 
 /** "Model Town, Lahore, Punjab" — most specific first, blanks skipped, repeats dropped. */
 export function placeLine(value: Partial<PlaceValue>): string {
-  const parts = [value.town, value.district, value.province].map((part) => part?.trim() ?? "").filter(Boolean);
+  const parts = [value.town, value.district, value.province]
+    .map((part) => part?.trim() ?? "")
+    .filter(Boolean);
   return parts.filter((part, index) => parts.indexOf(part) === index).join(", ");
 }

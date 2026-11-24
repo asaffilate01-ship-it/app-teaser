@@ -5,8 +5,21 @@ import logoOnLight from "@/assets/criclume-logo-header.png.asset.json";
 export function BrandLogo({ className = "h-9 w-auto" }: { className?: string }) {
   return (
     <>
-      <img src={logoOnDark.url} alt="CricLume" width={840} height={276} className={`theme-dark-only ${className}`} />
-      <img src={logoOnLight.url} alt="" aria-hidden="true" width={1600} height={600} className={`theme-light-only ${className}`} />
+      <img
+        src={logoOnDark.url}
+        alt="CricLume"
+        width={840}
+        height={276}
+        className={`theme-dark-only ${className}`}
+      />
+      <img
+        src={logoOnLight.url}
+        alt=""
+        aria-hidden="true"
+        width={1600}
+        height={600}
+        className={`theme-light-only ${className}`}
+      />
     </>
   );
 }

@@ -10,7 +10,12 @@ test("with no saved choice the app is dark and club websites are light", () => {
 test("a saved choice applies everywhere except big screens, overlays and camera screens", () => {
   assert.equal(effectiveTheme("light", "dark", "/platform"), "light");
   assert.equal(effectiveTheme("dark", "light", "/club/riverside"), "dark");
-  for (const path of ["/ground/riverside", "/overlay/riverside", "/camera/room", "/director/room"]) {
+  for (const path of [
+    "/ground/riverside",
+    "/overlay/riverside",
+    "/camera/room",
+    "/director/room",
+  ]) {
     assert.equal(effectiveTheme("light", "dark", path), "dark", path);
   }
 });

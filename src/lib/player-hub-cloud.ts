@@ -20,7 +20,9 @@ export async function listPlayerClips(playerId: string): Promise<PlayerClip[]> {
   if (!isCloudPlayerId(playerId)) return [];
   const { data, error } = await getCloudClient()
     .from("deliveries")
-    .select("id,over_number,ball_in_over,batter_runs,wicket,striker_id,bowler_id,delivery_media_links(asset_id,offset_start_ms,offset_end_ms)")
+    .select(
+      "id,over_number,ball_in_over,batter_runs,wicket,striker_id,bowler_id,delivery_media_links(asset_id,offset_start_ms,offset_end_ms)",
+    )
     .or(`striker_id.eq.${playerId},bowler_id.eq.${playerId}`)
     .is("voided_by_event_id", null)
     .order("occurred_at", { ascending: false })
@@ -28,7 +30,11 @@ export async function listPlayerClips(playerId: string): Promise<PlayerClip[]> {
   if (error) throw error;
   const clips: PlayerClip[] = [];
   for (const row of data ?? []) {
-    for (const link of (row.delivery_media_links ?? []) as { asset_id: string; offset_start_ms: number; offset_end_ms: number }[]) {
+    for (const link of (row.delivery_media_links ?? []) as {
+      asset_id: string;
+      offset_start_ms: number;
+      offset_end_ms: number;
+    }[]) {
       clips.push({
         deliveryId: row.id,
         over: row.over_number,
@@ -49,7 +55,8 @@ export async function followPlayer(playerId: string, follow: boolean) {
   const db = getCloudClient();
   if (follow) {
     const { error } = await db.from("player_follows").insert({ player_id: playerId });
-    if (error && error.code !== "23505") throw new Error("Only adult players with a public profile can be followed.");
+    if (error && error.code !== "23505")
+      throw new Error("Only adult players with a public profile can be followed.");
   } else {
     const { error } = await db.from("player_follows").delete().eq("player_id", playerId);
     if (error) throw error;
@@ -57,17 +64,37 @@ export async function followPlayer(playerId: string, follow: boolean) {
 }
 
 export async function isFollowing(playerId: string) {
-  const { data } = await getCloudClient().from("player_follows").select("player_id").eq("player_id", playerId).maybeSingle();
+  const { data } = await getCloudClient()
+    .from("player_follows")
+    .select("player_id")
+    .eq("player_id", playerId)
+    .maybeSingle();
   return Boolean(data);
 }
 
 export async function requestProfileClaim(playerId: string, message: string) {
   const db = getCloudClient();
-  const player = await db.from("players").select("id,organisation_id,linked_user_id").eq("id", playerId).maybeSingle();
-  if (player.error || !player.data) throw new Error("You can only claim a profile at a club you belong to.");
+  const player = await db
+    .from("players")
+    .select("id,organisation_id,linked_user_id")
+    .eq("id", playerId)
+    .maybeSingle();
+  if (player.error || !player.data)
+    throw new Error("You can only claim a profile at a club you belong to.");
   if (player.data.linked_user_id) throw new Error("This profile is already linked to an account.");
-  const { error } = await db.from("player_claims").insert({ player_id: playerId, organisation_id: player.data.organisation_id, message: message.trim().slice(0, 300) || null });
-  if (error) throw new Error(error.code === "23505" ? "You've already asked to claim this profile." : "The claim could not be sent.");
+  const { error } = await db
+    .from("player_claims")
+    .insert({
+      player_id: playerId,
+      organisation_id: player.data.organisation_id,
+      message: message.trim().slice(0, 300) || null,
+    });
+  if (error)
+    throw new Error(
+      error.code === "23505"
+        ? "You've already asked to claim this profile."
+        : "The claim could not be sent.",
+    );
 }
 
 export interface CareerRow {
@@ -111,7 +138,11 @@ export interface RankingRow {
   runOuts: number | null;
 }
 
-export async function playerRankings(filters: { country?: string; region?: string; town?: string }): Promise<RankingRow[]> {
+export async function playerRankings(filters: {
+  country?: string;
+  region?: string;
+  town?: string;
+}): Promise<RankingRow[]> {
   const { data, error } = await getCloudClient().rpc("player_rankings", {
     ...(filters.country ? { p_country: filters.country } : {}),
     ...(filters.region ? { p_region: filters.region } : {}),
@@ -144,6 +175,9 @@ export async function pendingClaims(organisationId: string): Promise<ClaimRow[]>
 }
 
 export async function decideClaim(id: string, approve: boolean) {
-  const { error } = await getCloudClient().rpc("decide_player_claim", { p_claim_id: id, p_approve: approve });
+  const { error } = await getCloudClient().rpc("decide_player_claim", {
+    p_claim_id: id,
+    p_approve: approve,
+  });
   if (error) throw new Error(error.message);
 }

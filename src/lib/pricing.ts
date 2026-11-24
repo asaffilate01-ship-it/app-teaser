@@ -49,7 +49,8 @@ export const regions: Region[] = [
     note: "Yearly prices for Pakistan clubs and leagues.",
     leaguePrice: "from ₨15,000",
     leaguePeriod: "per team / year",
-    leagueNote: "Teams 1–10: ₨20,000 each · teams 11–20: ₨17,500 · teams 21+ (divisions): ₨15,000. Each band is charged only on the teams in it.",
+    leagueNote:
+      "Teams 1–10: ₨20,000 each · teams 11–20: ₨17,500 · teams 21+ (divisions): ₨15,000. Each band is charged only on the teams in it.",
     addonPrice: "₨25,000",
     addonPeriod: "per club team / year (₨50,000 with the Club plan) · ₨20,000 per league team",
   },
@@ -206,7 +207,10 @@ export function regionFromLocale(locale: string | null | undefined): string | nu
  * only when that is unknown do we fall back to the browser's language setting.
  * Any country not on our list is shown UK prices in GBP.
  */
-export function pricingRegionFor(networkCountry: string | null | undefined, locales: readonly string[] = []): Region {
+export function pricingRegionFor(
+  networkCountry: string | null | undefined,
+  locales: readonly string[] = [],
+): Region {
   if (networkCountry) return findRegion(networkCountry) ?? defaultRegion;
   for (const locale of locales) {
     const code = regionFromLocale(locale);
@@ -240,7 +244,9 @@ export const pakistanPrices = {
 /** A Pakistan club's yearly fee: per team, video doubles it. */
 export function pakistanClubFee(teams: number, options: { video?: boolean } = {}): number {
   const count = Math.max(0, Math.floor(teams));
-  return count * (pakistanPrices.clubPerTeam + (options.video ? pakistanPrices.clubVideoPerTeam : 0));
+  return (
+    count * (pakistanPrices.clubPerTeam + (options.video ? pakistanPrices.clubVideoPerTeam : 0))
+  );
 }
 
 /** A Pakistan league's yearly fee: each price band applies only to the teams inside it, plus video per team. */

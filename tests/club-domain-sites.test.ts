@@ -8,10 +8,20 @@ import {
   toExternalPath,
   toInternalPath,
 } from "../src/lib/club-domains.ts";
-import { cleanDomainInput, dnsRecordsFor, looksLikeDomain } from "../src/lib/club-domain-records.ts";
+import {
+  cleanDomainInput,
+  dnsRecordsFor,
+  looksLikeDomain,
+} from "../src/lib/club-domain-records.ts";
 
 test("CricLume's own addresses and previews are never treated as club domains", () => {
-  for (const host of ["criclume.com", "www.criclume.com", "localhost", "app-teaser.lovable.app", "id-preview--x.lovable.app"]) {
+  for (const host of [
+    "criclume.com",
+    "www.criclume.com",
+    "localhost",
+    "app-teaser.lovable.app",
+    "id-preview--x.lovable.app",
+  ]) {
     assert.equal(isPlatformHost(host), true, host);
   }
   assert.equal(isPlatformHost("riversidecc.com"), false);
@@ -31,9 +41,18 @@ test("on a club domain, app pages go to criclume.com and long club addresses go 
   const slug = "riverside";
   assert.equal(clubDomainRedirect(new URL("https://riversidecc.com/"), slug), null);
   assert.equal(clubDomainRedirect(new URL("https://riversidecc.com/news"), slug), null);
-  assert.equal(clubDomainRedirect(new URL("https://riversidecc.com/app?x=1"), slug), "https://criclume.com/app?x=1");
-  assert.equal(clubDomainRedirect(new URL("https://riversidecc.com/club/other"), slug), "https://criclume.com/club/other");
-  assert.equal(clubDomainRedirect(new URL("https://riversidecc.com/club/riverside/news"), slug), "/news");
+  assert.equal(
+    clubDomainRedirect(new URL("https://riversidecc.com/app?x=1"), slug),
+    "https://criclume.com/app?x=1",
+  );
+  assert.equal(
+    clubDomainRedirect(new URL("https://riversidecc.com/club/other"), slug),
+    "https://criclume.com/club/other",
+  );
+  assert.equal(
+    clubDomainRedirect(new URL("https://riversidecc.com/club/riverside/news"), slug),
+    "/news",
+  );
   assert.equal(clubDomainRedirect(new URL("https://riversidecc.com/assets/app.js"), slug), null);
   assert.equal(clubDomainRedirect(new URL("https://riversidecc.com/_serverFn/abc"), slug), null);
 });
@@ -81,16 +100,26 @@ test("free CricLume address names: 3-40 letters, numbers or single dashes, and C
 
 test("staff add the free address in criclume.com's DNS by its name", async () => {
   const { criclumeStaffRecords } = await import("../src/lib/club-domain-records.ts");
-  assert.deepEqual(criclumeStaffRecords("riverside.criclume.com", "185.158.133.1", "TXT _lovable.riverside lovable_verify=abc"), [
-    { type: "A", name: "riverside", value: "185.158.133.1" },
-    { type: "TXT", name: "_lovable.riverside", value: "lovable_verify=abc" },
-  ]);
+  assert.deepEqual(
+    criclumeStaffRecords(
+      "riverside.criclume.com",
+      "185.158.133.1",
+      "TXT _lovable.riverside lovable_verify=abc",
+    ),
+    [
+      { type: "A", name: "riverside", value: "185.158.133.1" },
+      { type: "TXT", name: "_lovable.riverside", value: "lovable_verify=abc" },
+    ],
+  );
 });
 
 test("the app and the database keep the same list of CricLume-only names", async () => {
   const { readFileSync } = await import("node:fs");
   const { reservedClubLabels } = await import("../src/lib/club-domain-records.ts");
-  const sql = readFileSync(new URL("../drizzle/migrations/0032_club_criclume_addresses.sql", import.meta.url), "utf8");
+  const sql = readFileSync(
+    new URL("../drizzle/migrations/0032_club_criclume_addresses.sql", import.meta.url),
+    "utf8",
+  );
   const list = sql.match(/any \(array\[([\s\S]*?)\]\)/)?.[1] ?? "";
   const dbNames = new Set([...list.matchAll(/'([a-z0-9]+)'/g)].map((m) => m[1]));
   assert.deepEqual([...dbNames].sort(), [...reservedClubLabels].sort());

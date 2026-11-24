@@ -8,7 +8,13 @@
 export const CLUB_SITE_META = "criclume-club-site";
 export const PLATFORM_ORIGIN = "https://criclume.com";
 
-const platformExact = new Set(["criclume.com", "www.criclume.com", "localhost", "127.0.0.1", "[::1]"]);
+const platformExact = new Set([
+  "criclume.com",
+  "www.criclume.com",
+  "localhost",
+  "127.0.0.1",
+  "[::1]",
+]);
 const platformSuffixes = [
   ".lovable.app",
   ".lovable.dev",
@@ -49,14 +55,20 @@ export function isClubSitePath(pathname: string): boolean {
 
 /** Files, server calls and dev-server internals pass straight through on any domain. */
 export function isInfraPath(pathname: string): boolean {
-  if (/^\/(?:_serverFn|_build|assets|api|__l5e|@|src|node_modules|\.well-known|~)(?:\/|$)/.test(pathname)) return true;
+  if (
+    /^\/(?:_serverFn|_build|assets|api|__l5e|@|src|node_modules|\.well-known|~)(?:\/|$)/.test(
+      pathname,
+    )
+  )
+    return true;
   const last = pathname.split("/").pop() ?? "";
   return last.includes(".");
 }
 
 /** Clean address on the club's domain → the app's own page address. */
 export function toInternalPath(pathname: string, slug: string): string {
-  if (pathname.startsWith(`/club/${slug}`) || isInfraPath(pathname) || !isClubSitePath(pathname)) return pathname;
+  if (pathname.startsWith(`/club/${slug}`) || isInfraPath(pathname) || !isClubSitePath(pathname))
+    return pathname;
   const rest = pathname.replace(/\/$/, "");
   return `/club/${slug}${rest}`;
 }
@@ -92,7 +104,12 @@ type CacheEntry = { slug: string | null; expires: number };
 const hostCache = new Map<string, CacheEntry>();
 const MAX_HOSTS = 500;
 
-export function rememberClubHost(host: string, slug: string | null, ttlMs: number, now = Date.now()) {
+export function rememberClubHost(
+  host: string,
+  slug: string | null,
+  ttlMs: number,
+  now = Date.now(),
+) {
   if (hostCache.size >= MAX_HOSTS) hostCache.delete(hostCache.keys().next().value as string);
   hostCache.set(normaliseHost(host), { slug, expires: now + ttlMs });
 }
@@ -111,7 +128,8 @@ export function clubSlugForHost(hostname: string): string | null {
   if (isPlatformHost(hostname)) return null;
   if (typeof document === "undefined") return cachedClubHost(hostname) ?? null;
   if (metaSlug === undefined) {
-    metaSlug = document.querySelector(`meta[name="${CLUB_SITE_META}"]`)?.getAttribute("content") ?? null;
+    metaSlug =
+      document.querySelector(`meta[name="${CLUB_SITE_META}"]`)?.getAttribute("content") ?? null;
   }
   return metaSlug;
 }

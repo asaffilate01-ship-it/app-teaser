@@ -1,7 +1,14 @@
 import { readSection, publicSections } from "@/lib/navigation";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { regions, defaultRegion, findRegion, pricingRegionFor, browserLocales, type Region } from "@/lib/pricing";
+import {
+  regions,
+  defaultRegion,
+  findRegion,
+  pricingRegionFor,
+  browserLocales,
+  type Region,
+} from "@/lib/pricing";
 import { getVisitorCountry } from "@/lib/visitor-country.functions";
 import { I18nProvider, useI18n, LanguageSelect } from "@/lib/i18n";
 import type { Content } from "@/lib/content";
@@ -36,7 +43,13 @@ import {
   Award,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { planOrder, featureOrder, planFeatures, adRevenueSharePercent, type FeatureAccess } from "@/lib/plans";
+import {
+  planOrder,
+  featureOrder,
+  planFeatures,
+  adRevenueSharePercent,
+  type FeatureAccess,
+} from "@/lib/plans";
 
 import logoAsset from "@/assets/criclume-logo-header.png.asset.json";
 import fullLogoAsset from "@/assets/criclume-logo-full.png.asset.json";
@@ -121,14 +134,42 @@ const workflowIcons = [Zap, BellRing, Building2];
 /** Same order as t.screensTab.items. Real CricLume screens captured from a sample club match. */
 const screenShots: ScreenShot[] = [
   { src: shotGroundScore, w: 1600, h: 900, kind: "tv", cat: "screens" },
-  { src: shotMatchCentre, w: 1600, h: 1000, kind: "desktop", cat: "scoring", url: "criclume.com/app" },
+  {
+    src: shotMatchCentre,
+    w: 1600,
+    h: 1000,
+    kind: "desktop",
+    cat: "scoring",
+    url: "criclume.com/app",
+  },
   { src: shotPhoneScoring, w: 860, h: 1864, kind: "phone", cat: "scoring" },
-  { src: shotClubDashboard, w: 1600, h: 1000, kind: "desktop", cat: "analysis", url: "criclume.com/platform" },
+  {
+    src: shotClubDashboard,
+    w: 1600,
+    h: 1000,
+    kind: "desktop",
+    cat: "analysis",
+    url: "criclume.com/platform",
+  },
   { src: shotGroundChase, w: 1600, h: 900, kind: "tv", cat: "screens" },
   { src: shotPhoneCommentary, w: 860, h: 1864, kind: "phone", cat: "scoring" },
   { src: shotPhoneScorecard, w: 860, h: 1864, kind: "phone", cat: "scoring" },
-  { src: shotReview, w: 1600, h: 1008, kind: "desktop", cat: "analysis", url: "criclume.com/app · video lab" },
-  { src: shotLeagueStats, w: 1600, h: 1008, kind: "desktop", cat: "league", url: "criclume.com/platform · league hub" },
+  {
+    src: shotReview,
+    w: 1600,
+    h: 1008,
+    kind: "desktop",
+    cat: "analysis",
+    url: "criclume.com/app · video lab",
+  },
+  {
+    src: shotLeagueStats,
+    w: 1600,
+    h: 1008,
+    kind: "desktop",
+    cat: "league",
+    url: "criclume.com/platform · league hub",
+  },
   { src: shotLeagueLive, w: 768, h: 1408, kind: "phone", cat: "league" },
   { src: shotLiveTable, w: 768, h: 1408, kind: "phone", cat: "league" },
 ];
@@ -310,10 +351,31 @@ function HomeTab({ onNavigate, region }: { onNavigate: (t: TabId) => void; regio
   const { t } = useI18n();
   const highlights = [3, 2, 4, 1, 8, 10];
   const heroPlans = [
-    { name: t.pricing.plans[0]!.name, price: t.pricing.free, period: t.pricing.plans[0]!.period, icon: Zap },
-    { name: t.pricing.plans[1]!.name, price: region.clubPrice, period: region.period, icon: Building2, featured: true },
-    { name: t.pricing.plans[2]!.name, price: region.leaguePrice ?? t.pricing.custom, period: region.leaguePeriod ?? t.pricing.plans[2]!.period, icon: Trophy },
-    { name: t.hero.addonName, price: region.addonPrice ? `+${region.addonPrice}` : t.pricing.addon.price, period: region.addonPrice ? "per team / year" : t.pricing.addon.period, icon: Video },
+    {
+      name: t.pricing.plans[0]!.name,
+      price: t.pricing.free,
+      period: t.pricing.plans[0]!.period,
+      icon: Zap,
+    },
+    {
+      name: t.pricing.plans[1]!.name,
+      price: region.clubPrice,
+      period: region.period,
+      icon: Building2,
+      featured: true,
+    },
+    {
+      name: t.pricing.plans[2]!.name,
+      price: region.leaguePrice ?? t.pricing.custom,
+      period: region.leaguePeriod ?? t.pricing.plans[2]!.period,
+      icon: Trophy,
+    },
+    {
+      name: t.hero.addonName,
+      price: region.addonPrice ? `+${region.addonPrice}` : t.pricing.addon.price,
+      period: region.addonPrice ? "per team / year" : t.pricing.addon.period,
+      icon: Video,
+    },
   ];
 
   return (
@@ -383,7 +445,10 @@ function HomeTab({ onNavigate, region }: { onNavigate: (t: TabId) => void; regio
 
       <section aria-labelledby="hero-plans" className="space-y-3">
         <div className="flex items-end justify-between gap-3">
-          <h2 id="hero-plans" className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+          <h2
+            id="hero-plans"
+            className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground"
+          >
             {t.hero.plansLabel}
           </h2>
           <button
@@ -406,15 +471,21 @@ function HomeTab({ onNavigate, region }: { onNavigate: (t: TabId) => void; regio
                   <span className="icon-tile flex size-8 items-center justify-center md:size-9">
                     <Icon className="size-4 text-gold" aria-hidden />
                   </span>
-                  <span className="font-display text-base font-bold tracking-tight md:text-lg">{plan.name}</span>
+                  <span className="font-display text-base font-bold tracking-tight md:text-lg">
+                    {plan.name}
+                  </span>
                 </span>
                 <span className="flex flex-wrap items-baseline gap-x-1.5">
-                  <span className="font-display text-xl font-bold leading-none md:text-2xl">{plan.price}</span>
+                  <span className="font-display text-xl font-bold leading-none md:text-2xl">
+                    {plan.price}
+                  </span>
                   <span className="text-[10px] uppercase tracking-wide text-muted-foreground md:text-[11px]">
                     {plan.period}
                   </span>
                 </span>
-                <span className="text-xs leading-snug text-muted-foreground">{t.hero.planNotes[i]}</span>
+                <span className="text-xs leading-snug text-muted-foreground">
+                  {t.hero.planNotes[i]}
+                </span>
               </button>
             );
           })}
@@ -699,8 +770,12 @@ function ScreensTab() {
             className="showcase-card brand-gradient glow h-full justify-between gap-6 p-5 text-primary-foreground md:p-7"
           >
             <span className="space-y-2">
-              <span className="block text-[11px] font-bold uppercase tracking-[0.14em] opacity-80">{t.screensTab.chips[1]}</span>
-              <span className="block font-display text-2xl font-bold leading-tight md:text-3xl">{t.hero.ctaPrimary}</span>
+              <span className="block text-[11px] font-bold uppercase tracking-[0.14em] opacity-80">
+                {t.screensTab.chips[1]}
+              </span>
+              <span className="block font-display text-2xl font-bold leading-tight md:text-3xl">
+                {t.hero.ctaPrimary}
+              </span>
             </span>
             <span className="inline-flex size-11 items-center justify-center rounded-full border border-current/30">
               <ArrowRight className="size-5" aria-hidden="true" />
@@ -717,9 +792,17 @@ function PricingTab({ regionState }: { regionState: RegionState }) {
   const { region, setRegion, detected } = regionState;
 
   const priceFor = (i: number) =>
-    i === 0 ? t.pricing.free : i === 1 ? region.clubPrice : (region.leaguePrice ?? t.pricing.custom);
+    i === 0
+      ? t.pricing.free
+      : i === 1
+        ? region.clubPrice
+        : (region.leaguePrice ?? t.pricing.custom);
   const periodFor = (i: number) =>
-    i === 1 ? region.period : i === 2 && region.leaguePeriod ? region.leaguePeriod : t.pricing.plans[i]!.period;
+    i === 1
+      ? region.period
+      : i === 2 && region.leaguePeriod
+        ? region.leaguePeriod
+        : t.pricing.plans[i]!.period;
 
   return (
     <div className="space-y-8 md:space-y-12">
@@ -859,7 +942,9 @@ function PricingTab({ regionState }: { regionState: RegionState }) {
           <table className="mt-3 w-full text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <th className="py-3 pl-4 pr-2 font-semibold sm:px-5 md:px-6">{t.pricing.compare.plan}</th>
+                <th className="py-3 pl-4 pr-2 font-semibold sm:px-5 md:px-6">
+                  {t.pricing.compare.plan}
+                </th>
                 {planOrder.map((plan, i) => (
                   <th key={plan} className="px-1 py-3 text-center font-semibold sm:px-3">
                     {t.pricing.plans[i]!.name}
@@ -889,7 +974,9 @@ function PricingTab({ regionState }: { regionState: RegionState }) {
                   const withVideo = adRevenueSharePercent(plan, { videoAddon: true });
                   return (
                     <td key={plan} className="px-1 py-3 text-center sm:px-3">
-                      <span className="font-display text-base font-bold text-foreground">{base}%</span>
+                      <span className="font-display text-base font-bold text-foreground">
+                        {base}%
+                      </span>
                       {withVideo !== base && (
                         <span className="block text-[11px] leading-tight text-muted-foreground">
                           {t.pricing.compare.shareWithVideo}

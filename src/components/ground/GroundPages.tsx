@@ -3,7 +3,15 @@ import { wormLine } from "@/lib/ground-board";
 import { predictWin, type MatchConditions } from "@/lib/win-predictor";
 
 /** One widescreen (16:9) page of the ground screen. Sizes use the stage's container units so it stays sharp at HD or 4K. */
-export function GroundPage({ page, board, state }: { page: GroundPageId; board: GroundBoard; state: Record<string, unknown> }) {
+export function GroundPage({
+  page,
+  board,
+  state,
+}: {
+  page: GroundPageId;
+  board: GroundBoard;
+  state: Record<string, unknown>;
+}) {
   switch (page) {
     case "score":
       return <ScorePage board={board} />;
@@ -22,14 +30,19 @@ export function GroundPage({ page, board, state }: { page: GroundPageId; board: 
 
 function ScorePage({ board }: { board: GroundBoard }) {
   const { feed } = board;
-  const striker = board.batting.find((row) => row.onStrike) ?? board.batting.find((row) => row.atCrease);
+  const striker =
+    board.batting.find((row) => row.onStrike) ?? board.batting.find((row) => row.atCrease);
   const other = board.batting.find((row) => row.atCrease && row !== striker);
   const bowler = board.bowling.find((row) => row.current);
   const cells: Array<[string, string | number]> = [
     ["Overs", feed.oversLimit ? `${feed.overs} / ${feed.oversLimit}` : feed.overs],
     ["Run rate", feed.runRate?.toFixed(2) ?? "–"],
     ...(feed.target ? ([["Target", feed.target]] as Array<[string, number]>) : []),
-    ...(board.partnership ? ([["Partnership", `${board.partnership.runs} (${board.partnership.balls})`]] as Array<[string, string]>) : []),
+    ...(board.partnership
+      ? ([["Partnership", `${board.partnership.runs} (${board.partnership.balls})`]] as Array<
+          [string, string]
+        >)
+      : []),
   ];
   return (
     <div className="gs-score">
@@ -40,7 +53,9 @@ function ScorePage({ board }: { board: GroundBoard }) {
           <span className="gs-slash">/</span>
           {feed.wickets}
         </span>
-        {(feed.freeHit || feed.superOver) && <span className="gs-alert">{feed.freeHit ? "FREE HIT" : "SUPER OVER"}</span>}
+        {(feed.freeHit || feed.superOver) && (
+          <span className="gs-alert">{feed.freeHit ? "FREE HIT" : "SUPER OVER"}</span>
+        )}
       </div>
       <div className="gs-cells">
         {cells.map(([key, value]) => (
@@ -53,7 +68,13 @@ function ScorePage({ board }: { board: GroundBoard }) {
       <div className="gs-crease">
         {[striker, other].map((row, index) => (
           <div key={index} className={row?.onStrike ? "is-strike" : ""}>
-            <span>{row ? `${row.name}${row.onStrike ? " *" : ""}` : index === 0 ? "Striker" : "Non-striker"}</span>
+            <span>
+              {row
+                ? `${row.name}${row.onStrike ? " *" : ""}`
+                : index === 0
+                  ? "Striker"
+                  : "Non-striker"}
+            </span>
             <strong>{row ? `${row.runs} (${row.balls})` : "–"}</strong>
           </div>
         ))}
@@ -73,7 +94,10 @@ function ScorePage({ board }: { board: GroundBoard }) {
           <span className="gs-muted">Waiting for the first ball</span>
         ) : (
           feed.lastBalls.map((ball, index) => (
-            <span key={index} className={`gs-ball ${ball === "W" ? "is-wicket" : ball === "4" || ball === "6" ? "is-boundary" : ""}`}>
+            <span
+              key={index}
+              className={`gs-ball ${ball === "W" ? "is-wicket" : ball === "4" || ball === "6" ? "is-boundary" : ""}`}
+            >
               {ball}
             </span>
           ))
@@ -101,7 +125,10 @@ function BattingPage({ board }: { board: GroundBoard }) {
         </thead>
         <tbody>
           {board.batting.slice(0, 11).map((row) => (
-            <tr key={row.no} className={row.atCrease ? "is-live" : row.how !== "not out" ? "is-out" : ""}>
+            <tr
+              key={row.no}
+              className={row.atCrease ? "is-live" : row.how !== "not out" ? "is-out" : ""}
+            >
               <td className="gs-left">
                 {row.name}
                 {row.onStrike ? " *" : ""}
@@ -186,7 +213,11 @@ function Legend({ board }: { board: GroundBoard }) {
 
 function ManhattanPage({ board }: { board: GroundBoard }) {
   const innings = board.progress.filter((item) => !item.superOver).slice(-2);
-  const overs = Math.max(1, ...innings.map((item) => item.overs.length), board.feed.oversLimit ?? 0);
+  const overs = Math.max(
+    1,
+    ...innings.map((item) => item.overs.length),
+    board.feed.oversLimit ?? 0,
+  );
   const top = Math.max(6, ...innings.flatMap((item) => item.overs.map(([runs]) => runs)));
   const scaleMax = Math.ceil(top / 4) * 4;
   const slot = (W - PAD.left - PAD.right) / overs;
@@ -194,10 +225,21 @@ function ManhattanPage({ board }: { board: GroundBoard }) {
   const y = (runs: number) => H - PAD.bottom - (runs / scaleMax) * (H - PAD.top - PAD.bottom);
   return (
     <div className="gs-chart-page">
-      <svg viewBox={`0 0 ${W} ${H}`} className="gs-chart" role="img" aria-label="Runs per over for each innings">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="gs-chart"
+        role="img"
+        aria-label="Runs per over for each innings"
+      >
         {Array.from({ length: 5 }, (_, i) => (scaleMax / 4) * i).map((value) => (
           <g key={value}>
-            <line x1={PAD.left} x2={W - PAD.right} y1={y(value)} y2={y(value)} className="gs-grid" />
+            <line
+              x1={PAD.left}
+              x2={W - PAD.right}
+              y1={y(value)}
+              y2={y(value)}
+              className="gs-grid"
+            />
             <text x={PAD.left - 16} y={y(value) + 10} className="gs-axis" textAnchor="end">
               {value}
             </text>
@@ -217,7 +259,13 @@ function ManhattanPage({ board }: { board: GroundBoard }) {
                   rx={3}
                 />
                 {Array.from({ length: wickets }, (_, w) => (
-                  <circle key={w} cx={x + (bar - 3) / 2} cy={y(runs) - 16 - w * 26} r={10} className="gs-wicket" />
+                  <circle
+                    key={w}
+                    cx={x + (bar - 3) / 2}
+                    cy={y(runs) - 16 - w * 26}
+                    r={10}
+                    className="gs-wicket"
+                  />
                 ))}
               </g>
             );
@@ -226,7 +274,13 @@ function ManhattanPage({ board }: { board: GroundBoard }) {
         {Array.from({ length: overs }, (_, over) => over + 1)
           .filter((over) => over === 1 || over % tickStep(overs) === 0)
           .map((over) => (
-            <text key={over} x={PAD.left + (over - 0.5) * slot} y={H - PAD.bottom + 44} className="gs-axis" textAnchor="middle">
+            <text
+              key={over}
+              x={PAD.left + (over - 0.5) * slot}
+              y={H - PAD.bottom + 44}
+              className="gs-axis"
+              textAnchor="middle"
+            >
               {over}
             </text>
           ))}
@@ -239,17 +293,32 @@ function ManhattanPage({ board }: { board: GroundBoard }) {
 function WormPage({ board }: { board: GroundBoard }) {
   const innings = board.progress.filter((item) => !item.superOver).slice(-2);
   const lines = innings.map((item) => wormLine(item.overs));
-  const overs = Math.max(1, ...innings.map((item) => item.overs.length), board.feed.oversLimit ?? 0);
+  const overs = Math.max(
+    1,
+    ...innings.map((item) => item.overs.length),
+    board.feed.oversLimit ?? 0,
+  );
   const top = Math.max(20, board.feed.target ?? 0, ...lines.flat());
   const scaleMax = Math.ceil(top / 20) * 20;
   const x = (over: number) => PAD.left + (over / overs) * (W - PAD.left - PAD.right);
   const y = (runs: number) => H - PAD.bottom - (runs / scaleMax) * (H - PAD.top - PAD.bottom);
   return (
     <div className="gs-chart-page">
-      <svg viewBox={`0 0 ${W} ${H}`} className="gs-chart" role="img" aria-label="Running total by over for each innings">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="gs-chart"
+        role="img"
+        aria-label="Running total by over for each innings"
+      >
         {Array.from({ length: 5 }, (_, i) => (scaleMax / 4) * i).map((value) => (
           <g key={value}>
-            <line x1={PAD.left} x2={W - PAD.right} y1={y(value)} y2={y(value)} className="gs-grid" />
+            <line
+              x1={PAD.left}
+              x2={W - PAD.right}
+              y1={y(value)}
+              y2={y(value)}
+              className="gs-grid"
+            />
             <text x={PAD.left - 16} y={y(value) + 10} className="gs-axis" textAnchor="end">
               {value}
             </text>
@@ -257,24 +326,52 @@ function WormPage({ board }: { board: GroundBoard }) {
         ))}
         {board.feed.target != null && (
           <g>
-            <line x1={PAD.left} x2={W - PAD.right} y1={y(board.feed.target)} y2={y(board.feed.target)} className="gs-target" />
-            <text x={W - PAD.right} y={y(board.feed.target) - 12} className="gs-axis" textAnchor="end">
+            <line
+              x1={PAD.left}
+              x2={W - PAD.right}
+              y1={y(board.feed.target)}
+              y2={y(board.feed.target)}
+              className="gs-target"
+            />
+            <text
+              x={W - PAD.right}
+              y={y(board.feed.target) - 12}
+              className="gs-axis"
+              textAnchor="end"
+            >
               Target {board.feed.target}
             </text>
           </g>
         )}
         {lines.map((line, index) => (
           <g key={index}>
-            <polyline points={line.map((runs, over) => `${x(over)},${y(runs)}`).join(" ")} className={`gs-line gs-line-${index % 2}`} />
+            <polyline
+              points={line.map((runs, over) => `${x(over)},${y(runs)}`).join(" ")}
+              className={`gs-line gs-line-${index % 2}`}
+            />
             {innings[index]!.overs.map(([, wickets], over) =>
-              wickets > 0 ? <circle key={over} cx={x(over + 1)} cy={y(line[over + 1] ?? 0)} r={11} className="gs-wicket" /> : null,
+              wickets > 0 ? (
+                <circle
+                  key={over}
+                  cx={x(over + 1)}
+                  cy={y(line[over + 1] ?? 0)}
+                  r={11}
+                  className="gs-wicket"
+                />
+              ) : null,
             )}
           </g>
         ))}
         {Array.from({ length: overs + 1 }, (_, over) => over)
           .filter((over) => over > 0 && over % tickStep(overs) === 0)
           .map((over) => (
-            <text key={over} x={x(over)} y={H - PAD.bottom + 44} className="gs-axis" textAnchor="middle">
+            <text
+              key={over}
+              x={x(over)}
+              y={H - PAD.bottom + 44}
+              className="gs-axis"
+              textAnchor="middle"
+            >
               {over}
             </text>
           ))}
@@ -287,7 +384,8 @@ function WormPage({ board }: { board: GroundBoard }) {
 function ChasePage({ board, state }: { board: GroundBoard; state: Record<string, unknown> }) {
   const { feed } = board;
   const settings = (state["settings"] ?? {}) as Record<string, unknown>;
-  const numberOr = (value: unknown, fallback: number) => (typeof value === "number" && Number.isFinite(value) ? value : fallback);
+  const numberOr = (value: unknown, fallback: number) =>
+    typeof value === "number" && Number.isFinite(value) ? value : fallback;
   const bpo = numberOr(settings["ballsPerOver"], 6);
   const maxWickets = numberOr(state["maxWickets"], 10);
   const parts = /^(\d+)\.(\d+)$/.exec(feed.overs);
@@ -355,7 +453,10 @@ function ChasePage({ board, state }: { board: GroundBoard; state: Record<string,
           <div key={label} className="gs-rate">
             <span>{label}</span>
             <div className="gs-rate-track">
-              <div className={`gs-rate-fill ${tone}`} style={{ width: `${Math.min(100, ((value ?? 0) / rateMax) * 100)}%` }} />
+              <div
+                className={`gs-rate-fill ${tone}`}
+                style={{ width: `${Math.min(100, ((value ?? 0) / rateMax) * 100)}%` }}
+              />
             </div>
             <strong>{value != null ? value.toFixed(2) : "–"}</strong>
           </div>
@@ -365,7 +466,10 @@ function ChasePage({ board, state }: { board: GroundBoard; state: Record<string,
         <div className="gs-win">
           <span>Win chance</span>
           <div className="gs-win-bar">
-            <div className="gs-win-bat" style={{ width: `${Math.max(8, Math.min(92, prediction.battingWin))}%` }}>
+            <div
+              className="gs-win-bat"
+              style={{ width: `${Math.max(8, Math.min(92, prediction.battingWin))}%` }}
+            >
               {feed.battingTeam} {prediction.battingWin}%
             </div>
             <div className="gs-win-bowl">

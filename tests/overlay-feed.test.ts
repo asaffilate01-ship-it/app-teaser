@@ -45,14 +45,28 @@ test("chase headline counts balls left", () => {
 test("moments: wicket beats boundary; fifty beats four; nothing on first load", () => {
   const before = buildOverlayFeed(board({}));
   assert.equal(detectMoment(null, before), null);
-  const fifty = buildOverlayFeed(board({
-    runs: 104, overs: "12.1", recent: [{ label: "4", kind: "boundary" }],
-    card: { batting: [{ no: 3, runs: 52, balls: 31, atCrease: true, onStrike: true }, { no: 4, runs: 20, balls: 15, atCrease: true }], bowling: [] },
-  }));
+  const fifty = buildOverlayFeed(
+    board({
+      runs: 104,
+      overs: "12.1",
+      recent: [{ label: "4", kind: "boundary" }],
+      card: {
+        batting: [
+          { no: 3, runs: 52, balls: 31, atCrease: true, onStrike: true },
+          { no: 4, runs: 20, balls: 15, atCrease: true },
+        ],
+        bowling: [],
+      },
+    }),
+  );
   assert.equal(detectMoment(before, fifty)?.kind, "fifty");
-  const wicket = buildOverlayFeed(board({ wickets: 3, overs: "12.1", recent: [{ label: "W", kind: "wicket" }] }));
+  const wicket = buildOverlayFeed(
+    board({ wickets: 3, overs: "12.1", recent: [{ label: "W", kind: "wicket" }] }),
+  );
   assert.equal(detectMoment(before, wicket)?.kind, "wicket");
-  const six = buildOverlayFeed(board({ runs: 106, overs: "12.1", recent: [{ label: "6", kind: "boundary" }] }));
+  const six = buildOverlayFeed(
+    board({ runs: 106, overs: "12.1", recent: [{ label: "6", kind: "boundary" }] }),
+  );
   assert.equal(detectMoment(before, six)?.title, "SIX");
   assert.equal(detectMoment(before, before), null);
 });

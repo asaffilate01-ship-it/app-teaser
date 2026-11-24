@@ -35,6 +35,9 @@ export const sendRemindersNow = createServerFn({ method: "POST" })
     });
     if (error) return { ok: false as const, error: error.message, queued: 0, sent: {} };
     const { deliverPendingReminders } = await import("./reminders.server");
-    const result = await deliverPendingReminders({ organisationId: data.organisationId, limit: 300 });
+    const result = await deliverPendingReminders({
+      organisationId: data.organisationId,
+      limit: 300,
+    });
     return { ok: true as const, error: null, queued: Number(queued ?? 0), sent: result.sent };
   });

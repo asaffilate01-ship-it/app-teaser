@@ -21,22 +21,36 @@ function headers() {
 
 let accountNumber: Promise<string | null> | null = null;
 function firstAccountNumber(): Promise<string | null> {
-  accountNumber ??= fetch(`${GATEWAY_URL}/IncomingPhoneNumbers.json?PageSize=20`, { headers: headers() })
+  accountNumber ??= fetch(`${GATEWAY_URL}/IncomingPhoneNumbers.json?PageSize=20`, {
+    headers: headers(),
+  })
     .then(async (response) => {
       if (!response.ok) {
         console.error(`Twilio number lookup failed [${response.status}]: ${await response.text()}`);
         return null;
       }
-      const body = (await response.json()) as { incoming_phone_numbers?: { phone_number?: string; capabilities?: { sms?: boolean } }[] };
-      return body.incoming_phone_numbers?.find((item) => item.capabilities?.sms !== false)?.phone_number ?? null;
+      const body = (await response.json()) as {
+        incoming_phone_numbers?: { phone_number?: string; capabilities?: { sms?: boolean } }[];
+      };
+      return (
+        body.incoming_phone_numbers?.find((item) => item.capabilities?.sms !== false)
+          ?.phone_number ?? null
+      );
     })
     .catch(() => null);
   return accountNumber;
 }
 
-export async function sendText(input: { to: string; title: string; text: string; whatsapp: boolean }): Promise<TextOutcome> {
+export async function sendText(input: {
+  to: string;
+  title: string;
+  text: string;
+  whatsapp: boolean;
+}): Promise<TextOutcome> {
   if (!textsConfigured()) return "not-set-up";
-  const configured = input.whatsapp ? process.env["TWILIO_WHATSAPP_FROM"] || process.env["TWILIO_SMS_FROM"] : process.env["TWILIO_SMS_FROM"];
+  const configured = input.whatsapp
+    ? process.env["TWILIO_WHATSAPP_FROM"] || process.env["TWILIO_SMS_FROM"]
+    : process.env["TWILIO_SMS_FROM"];
   const from = configured || (await firstAccountNumber());
   if (!from) return "not-set-up";
   const body = new URLSearchParams({
@@ -46,7 +60,10 @@ export async function sendText(input: { to: string; title: string; text: string;
   const contentSid = process.env["TWILIO_WHATSAPP_CONTENT_SID"];
   if (input.whatsapp && contentSid) {
     body.set("ContentSid", contentSid);
-    body.set("ContentVariables", JSON.stringify({ 1: input.title.slice(0, 120), 2: input.text.slice(0, 900) }));
+    body.set(
+      "ContentVariables",
+      JSON.stringify({ 1: input.title.slice(0, 120), 2: input.text.slice(0, 900) }),
+    );
   } else {
     body.set("Body", input.text);
   }

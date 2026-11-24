@@ -7,10 +7,25 @@ export interface SheetInnings {
   total: string;
   overs: string;
   runRate: string;
-  batting: { name: string; howOut: string; runs: number; balls: number; fours: number; sixes: number; strikeRate: string }[];
+  batting: {
+    name: string;
+    howOut: string;
+    runs: number;
+    balls: number;
+    fours: number;
+    sixes: number;
+    strikeRate: string;
+  }[];
   extras: string;
   extrasTotal: number;
-  bowling: { name: string; overs: string; maidens: number; runs: number; wickets: number; economy: string }[];
+  bowling: {
+    name: string;
+    overs: string;
+    maidens: number;
+    runs: number;
+    wickets: number;
+    economy: string;
+  }[];
   fallOfWickets: string;
 }
 
@@ -33,7 +48,10 @@ export const initialsOf = (name: string) =>
  * Everything a shared scorecard (image, PDF or text) shows. With `initials`, every player name
  * (batters, bowlers, fielders inside dismissals) is reduced to initials.
  */
-export function scorecardSheet(match: CricketMatch, options: { initials?: boolean } = {}): ScorecardSheet {
+export function scorecardSheet(
+  match: CricketMatch,
+  options: { initials?: boolean } = {},
+): ScorecardSheet {
   const players = match.teams.flatMap((team) => team.players);
   const hide = (text: string) => {
     if (!options.initials) return text;
@@ -105,16 +123,27 @@ export function scorecardText(sheet: ScorecardSheet): string {
   for (const inn of sheet.innings) {
     lines.push("", `${inn.team} ${inn.total} (${inn.overs} ov) · ${inn.title}`);
     const bats = [...inn.batting].sort((a, b) => b.runs - a.runs).slice(0, 3);
-    if (bats.length) lines.push(`Bat: ${bats.map((row) => `${row.name} ${row.runs}${row.howOut === "not out" ? "*" : ""} (${row.balls})`).join(", ")}`);
-    const bowls = [...inn.bowling].sort((a, b) => b.wickets - a.wickets || a.runs - b.runs).slice(0, 3);
-    if (bowls.length) lines.push(`Bowl: ${bowls.map((row) => `${row.name} ${row.wickets}/${row.runs} (${row.overs})`).join(", ")}`);
+    if (bats.length)
+      lines.push(
+        `Bat: ${bats.map((row) => `${row.name} ${row.runs}${row.howOut === "not out" ? "*" : ""} (${row.balls})`).join(", ")}`,
+      );
+    const bowls = [...inn.bowling]
+      .sort((a, b) => b.wickets - a.wickets || a.runs - b.runs)
+      .slice(0, 3);
+    if (bowls.length)
+      lines.push(
+        `Bowl: ${bowls.map((row) => `${row.name} ${row.wickets}/${row.runs} (${row.overs})`).join(", ")}`,
+      );
   }
   lines.push("", "Scored with CricLume · criclume.com");
   return lines.join("\n");
 }
 
 const escapeHtml = (text: string) =>
-  text.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!);
+  text.replace(
+    /[&<>"']/g,
+    (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!,
+  );
 
 /** A complete, print-ready HTML document; the browser's "Save as PDF" turns it into a PDF. */
 export function scorecardHtml(sheet: ScorecardSheet): string {
@@ -128,7 +157,10 @@ export function scorecardHtml(sheet: ScorecardSheet): string {
     <table>
       <thead><tr><th class="l">Batter</th><th class="l">How out</th><th>R</th><th>B</th><th>4s</th><th>6s</th><th>SR</th></tr></thead>
       <tbody>${inn.batting
-        .map((row) => `<tr><td class="l"><b>${e(row.name)}</b></td><td class="l">${e(row.howOut)}</td><td><b>${row.runs}</b></td><td>${row.balls}</td><td>${row.fours}</td><td>${row.sixes}</td><td>${e(row.strikeRate)}</td></tr>`)
+        .map(
+          (row) =>
+            `<tr><td class="l"><b>${e(row.name)}</b></td><td class="l">${e(row.howOut)}</td><td><b>${row.runs}</b></td><td>${row.balls}</td><td>${row.fours}</td><td>${row.sixes}</td><td>${e(row.strikeRate)}</td></tr>`,
+        )
         .join("")}
       <tr class="sub"><td class="l">Extras</td><td class="l">${e(inn.extras)}</td><td>${inn.extrasTotal}</td><td colspan="4"></td></tr>
       <tr class="sub"><td class="l"><b>Total</b></td><td class="l">${e(inn.overs)} overs</td><td><b>${e(inn.total)}</b></td><td colspan="4"></td></tr>
@@ -138,7 +170,10 @@ export function scorecardHtml(sheet: ScorecardSheet): string {
     <table>
       <thead><tr><th class="l">Bowler</th><th>O</th><th>M</th><th>R</th><th>W</th><th>Econ</th></tr></thead>
       <tbody>${inn.bowling
-        .map((row) => `<tr><td class="l"><b>${e(row.name)}</b></td><td>${e(row.overs)}</td><td>${row.maidens}</td><td>${row.runs}</td><td><b>${row.wickets}</b></td><td>${e(row.economy)}</td></tr>`)
+        .map(
+          (row) =>
+            `<tr><td class="l"><b>${e(row.name)}</b></td><td>${e(row.overs)}</td><td>${row.maidens}</td><td>${row.runs}</td><td><b>${row.wickets}</b></td><td>${e(row.economy)}</td></tr>`,
+        )
         .join("")}</tbody>
     </table>
   </section>`,

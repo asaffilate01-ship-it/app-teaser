@@ -17,7 +17,15 @@ const base = createMatch({
   homePlayers: ["Ali", "Ben", "Cal", "Dev", "Eli"],
   awayPlayers: ["Fin", "Gus", "Hal", "Ian", "Jay"],
   battingFirst: "home",
-  settings: { format: "T20", oversPerInnings: 20, inningsPerSide: 1, ballsPerOver: 6, ground: "", weather: "", startTime: "" },
+  settings: {
+    format: "T20",
+    oversPerInnings: 20,
+    inningsPerSide: 1,
+    ballsPerOver: 6,
+    ground: "",
+    weather: "",
+    startTime: "",
+  },
 });
 const [lions, tigers] = base.teams;
 const ali = lions.players[0]!.id;
@@ -25,24 +33,53 @@ const bowler = tigers.players[0]!.id;
 
 function ball(match: CricketMatch, extra: Partial<RecordDeliveryInput> = {}): RecordDeliveryInput {
   const innings = currentInnings(match);
-  return { strikerId: innings.strikerId, nonStrikerId: innings.nonStrikerId, bowlerId: innings.bowlerId, end: "Pavilion", deliveryStyle: "Medium", outcome: "hit", batterRuns: 0, ...extra };
+  return {
+    strikerId: innings.strikerId,
+    nonStrikerId: innings.nonStrikerId,
+    bowlerId: innings.bowlerId,
+    end: "Pavilion",
+    deliveryStyle: "Medium",
+    outcome: "hit",
+    batterRuns: 0,
+    ...extra,
+  };
 }
 
 /** Lions bat first; Ali scores `aliRuns` in fours; Tigers' first bowler takes `wickets`; Tigers make `tigersRuns`. */
 function play(day: number, aliRuns: number, tigersRuns: number, wickets = 0): CricketMatch {
-  let match: CricketMatch = { ...structuredClone(base), id: `m${day}`, settings: { ...base.settings, startTime: `2027-05-${String(day).padStart(2, "0")}T10:00:00Z` } };
+  let match: CricketMatch = {
+    ...structuredClone(base),
+    id: `m${day}`,
+    settings: { ...base.settings, startTime: `2027-05-${String(day).padStart(2, "0")}T10:00:00Z` },
+  };
   for (let i = 0; i < wickets; i++) {
-    match = recordDelivery(match, ball(match, { bowlerId: bowler, outcome: "wicket", dismissal: { type: "bowled", batterId: currentInnings(match).nonStrikerId } }));
+    match = recordDelivery(
+      match,
+      ball(match, {
+        bowlerId: bowler,
+        outcome: "wicket",
+        dismissal: { type: "bowled", batterId: currentInnings(match).nonStrikerId },
+      }),
+    );
   }
-  for (let left = aliRuns; left > 0; left -= 4) match = recordDelivery(match, ball(match, { strikerId: ali, bowlerId: bowler, batterRuns: 4 }));
+  for (let left = aliRuns; left > 0; left -= 4)
+    match = recordDelivery(match, ball(match, { strikerId: ali, bowlerId: bowler, batterRuns: 4 }));
   match = startNextInnings(endCurrentInnings(match));
-  for (let left = tigersRuns; left > 0 && match.status === "live"; left -= 4) match = recordDelivery(match, ball(match, { batterRuns: 4 }));
+  for (let left = tigersRuns; left > 0 && match.status === "live"; left -= 4)
+    match = recordDelivery(match, ball(match, { batterRuns: 4 }));
   if (match.status === "live") match = endCurrentInnings(match);
   return startNextInnings(match);
 }
 
 // Lions: W, W, L, W, W, W (Tigers chase 1 more than Lions in match 3).
-const season = [play(1, 40, 20, 1), play(2, 32, 12, 1), play(3, 8, 12), play(4, 36, 8, 2), play(5, 44, 4), play(6, 48, 0, 1)];
+const season = [
+  play(1, 40, 20, 1),
+  play(2, 32, 12, 1),
+  play(3, 8, 12),
+  play(4, 36, 8, 2),
+  play(5, 44, 4),
+  play(6, 48, 0, 1),
+];
 
 test("team streaks: Lions are on a 3-match winning run; best is 3", () => {
   const lionsRow = teamStreaks(season).find((row) => row.teamId === lions.id)!;

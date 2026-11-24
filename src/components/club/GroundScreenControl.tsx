@@ -2,7 +2,13 @@ import { useEffect, useState } from "react";
 import { ExternalLink, MonitorPlay, Play, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { GroundPreview } from "@/components/ground/GroundPreview";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   defaultGroundSettings,
   groundPageIds,
@@ -23,11 +29,23 @@ const intervals = [8, 10, 15, 20, 30, 45, 60, 90, 120];
 const replayModes: Array<{ id: ReplayMode; label: string; hint: string }> = [
   { id: "off", label: "Off", hint: "No video on the big screen." },
   { id: "manual", label: "When I send one", hint: "Pick a wicket or boundary below to play it." },
-  { id: "auto", label: "Automatic", hint: "Each new wicket and boundary plays once its recording has uploaded." },
+  {
+    id: "auto",
+    label: "Automatic",
+    hint: "Each new wicket and boundary plays once its recording has uploaded.",
+  },
 ];
 
 /** Control panel for the ground big screen: page rotation, manual pages, names and replays. */
-export function GroundScreenControl({ matchId, slug, matchTitle }: { matchId: string; slug: string; matchTitle: string }) {
+export function GroundScreenControl({
+  matchId,
+  slug,
+  matchTitle,
+}: {
+  matchId: string;
+  slug: string;
+  matchTitle: string;
+}) {
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState<GroundScreenSettings>(defaultGroundSettings);
   const [saving, setSaving] = useState(false);
@@ -69,7 +87,9 @@ export function GroundScreenControl({ matchId, slug, matchTitle }: { matchId: st
   };
 
   const togglePage = (id: GroundPageId) => {
-    const pages = settings.pages.includes(id) ? settings.pages.filter((page) => page !== id) : groundPageIds.filter((page) => page === id || settings.pages.includes(page));
+    const pages = settings.pages.includes(id)
+      ? settings.pages.filter((page) => page !== id)
+      : groundPageIds.filter((page) => page === id || settings.pages.includes(page));
     if (pages.length === 0) return;
     void save({ ...settings, pages });
   };
@@ -87,7 +107,12 @@ export function GroundScreenControl({ matchId, slug, matchTitle }: { matchId: st
 
   return (
     <>
-      <button type="button" className="action-secondary" onClick={() => setOpen(true)} title="Choose what the big screen at the ground shows">
+      <button
+        type="button"
+        className="action-secondary"
+        onClick={() => setOpen(true)}
+        title="Choose what the big screen at the ground shows"
+      >
         Screen control <MonitorPlay className="size-3.5" />
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -95,8 +120,8 @@ export function GroundScreenControl({ matchId, slug, matchTitle }: { matchId: st
           <DialogHeader>
             <DialogTitle>Ground screen · {matchTitle}</DialogTitle>
             <DialogDescription>
-              Open the screen link on the laptop or smart TV connected to the big screen, then press Full screen. Changes here
-              reach every screen within a few seconds.
+              Open the screen link on the laptop or smart TV connected to the big screen, then press
+              Full screen. Changes here reach every screen within a few seconds.
             </DialogDescription>
           </DialogHeader>
 
@@ -126,18 +151,32 @@ export function GroundScreenControl({ matchId, slug, matchTitle }: { matchId: st
             <h3>Pages</h3>
             <div className="insights-toggle" role="group" aria-label="Page switching">
               {(["auto", "manual"] as const).map((mode) => (
-                <button key={mode} type="button" aria-pressed={settings.mode === mode} className={settings.mode === mode ? "is-active" : ""} disabled={saving} onClick={() => void save({ ...settings, mode })}>
+                <button
+                  key={mode}
+                  type="button"
+                  aria-pressed={settings.mode === mode}
+                  className={settings.mode === mode ? "is-active" : ""}
+                  disabled={saving}
+                  onClick={() => void save({ ...settings, mode })}
+                >
                   {mode === "auto" ? "Change automatically" : "I choose the page"}
                 </button>
               ))}
             </div>
             {settings.mode === "auto" ? (
               <>
-                <p className="ground-control-hint">Tick the pages to rotate through. Pages with nothing to show yet are skipped.</p>
+                <p className="ground-control-hint">
+                  Tick the pages to rotate through. Pages with nothing to show yet are skipped.
+                </p>
                 <div className="ground-control-pages">
                   {groundPageIds.map((id) => (
                     <label key={id} className={settings.pages.includes(id) ? "is-on" : ""}>
-                      <input type="checkbox" checked={settings.pages.includes(id)} onChange={() => togglePage(id)} disabled={saving} />
+                      <input
+                        type="checkbox"
+                        checked={settings.pages.includes(id)}
+                        onChange={() => togglePage(id)}
+                        disabled={saving}
+                      />
                       {groundPageLabels[id]}
                     </label>
                   ))}
@@ -146,7 +185,9 @@ export function GroundScreenControl({ matchId, slug, matchTitle }: { matchId: st
                   Seconds per page
                   <select
                     value={settings.intervalSeconds}
-                    onChange={(event) => void save({ ...settings, intervalSeconds: Number(event.target.value) })}
+                    onChange={(event) =>
+                      void save({ ...settings, intervalSeconds: Number(event.target.value) })
+                    }
                     disabled={saving}
                   >
                     {intervals.map((value) => (
@@ -159,7 +200,9 @@ export function GroundScreenControl({ matchId, slug, matchTitle }: { matchId: st
               </>
             ) : (
               <>
-                <p className="ground-control-hint">Tap a page to put it on the big screen now. It stays until you pick another.</p>
+                <p className="ground-control-hint">
+                  Tap a page to put it on the big screen now. It stays until you pick another.
+                </p>
                 <div className="ground-control-pages">
                   {groundPageIds.map((id) => (
                     <button
@@ -184,11 +227,17 @@ export function GroundScreenControl({ matchId, slug, matchTitle }: { matchId: st
               <span>
                 Show names on the batting and bowling pages
                 <small>
-                  Adults are named. Junior players are named only when a parent-signed publicity consent is recorded and current;
-                  everyone else shows as their batting position or bowling order.
+                  Adults are named. Junior players are named only when a parent-signed publicity
+                  consent is recorded and current; everyone else shows as their batting position or
+                  bowling order.
                 </small>
               </span>
-              <input type="checkbox" checked={settings.showNames} onChange={(event) => void save({ ...settings, showNames: event.target.checked })} disabled={saving} />
+              <input
+                type="checkbox"
+                checked={settings.showNames}
+                onChange={(event) => void save({ ...settings, showNames: event.target.checked })}
+                disabled={saving}
+              />
             </label>
           </section>
 
@@ -196,34 +245,55 @@ export function GroundScreenControl({ matchId, slug, matchTitle }: { matchId: st
             <h3>Video replays</h3>
             <div className="insights-toggle" role="group" aria-label="Replays">
               {replayModes.map((mode) => (
-                <button key={mode.id} type="button" aria-pressed={settings.replays === mode.id} className={settings.replays === mode.id ? "is-active" : ""} disabled={saving} onClick={() => void save({ ...settings, replays: mode.id })}>
+                <button
+                  key={mode.id}
+                  type="button"
+                  aria-pressed={settings.replays === mode.id}
+                  className={settings.replays === mode.id ? "is-active" : ""}
+                  disabled={saving}
+                  onClick={() => void save({ ...settings, replays: mode.id })}
+                >
                   {mode.label}
                 </button>
               ))}
             </div>
             <p className="ground-control-hint">
-              {replayModes.find((mode) => mode.id === settings.replays)?.hint} Replays play only on a screen signed in with a club
-              account, use the angles your phones or club cameras filmed, and only for balls where the batter and bowler have
-              public-highlight consent. Each phone uploads its video every minute, so a replay is ready a minute or two after the ball.
+              {replayModes.find((mode) => mode.id === settings.replays)?.hint} Replays play only on
+              a screen signed in with a club account, use the angles your phones or club cameras
+              filmed, and only for balls where the batter and bowler have public-highlight consent.
+              Each phone uploads its video every minute, so a replay is ready a minute or two after
+              the ball.
             </p>
             {settings.replays !== "off" && (
               <div className="grid gap-2">
                 <div className="flex items-center justify-between gap-2">
                   <strong className="text-sm">Recent wickets and boundaries</strong>
-                  <button type="button" className="app-chip-button" onClick={() => void refreshBalls()} disabled={loadingBalls}>
+                  <button
+                    type="button"
+                    className="app-chip-button"
+                    onClick={() => void refreshBalls()}
+                    disabled={loadingBalls}
+                  >
                     <RefreshCw className="size-4" /> Refresh
                   </button>
                 </div>
                 {balls.length === 0 ? (
-                  <p className="ground-control-hint">No wickets or boundaries with public-highlight consent yet.</p>
+                  <p className="ground-control-hint">
+                    No wickets or boundaries with public-highlight consent yet.
+                  </p>
                 ) : (
                   <ul className="ground-control-balls">
                     {balls.slice(0, 12).map((ball) => (
                       <li key={ball.id}>
                         <span>
-                          Over {ball.over_number}.{ball.ball_in_over} · {ball.wicket ? "Wicket" : ball.batter_runs === 6 ? "Six" : "Four"}
+                          Over {ball.over_number}.{ball.ball_in_over} ·{" "}
+                          {ball.wicket ? "Wicket" : ball.batter_runs === 6 ? "Six" : "Four"}
                         </span>
-                        <button type="button" className="app-chip-button" onClick={() => void sendReplay(ball)}>
+                        <button
+                          type="button"
+                          className="app-chip-button"
+                          onClick={() => void sendReplay(ball)}
+                        >
                           <Play className="size-4" /> Play on screen
                         </button>
                       </li>

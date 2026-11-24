@@ -17,7 +17,8 @@ export const streamPlatforms: PlatformGuide[] = [
   {
     id: "youtube",
     name: "YouTube",
-    keyWhere: "YouTube Studio → Create → Go live → Stream. Copy the stream key (new channels must verify by phone and can wait up to 24 hours the first time).",
+    keyWhere:
+      "YouTube Studio → Create → Go live → Stream. Copy the stream key (new channels must verify by phone and can wait up to 24 hours the first time).",
     obsService: "YouTube - RTMPS (or connect your account in OBS)",
     canvas: { width: 1920, height: 1080 },
     vertical: false,
@@ -26,7 +27,8 @@ export const streamPlatforms: PlatformGuide[] = [
   {
     id: "facebook",
     name: "Facebook",
-    keyWhere: "Facebook → your club Page → Live video → Streaming software. Copy the stream key (tick “Use persistent stream key” to reuse it every match).",
+    keyWhere:
+      "Facebook → your club Page → Live video → Streaming software. Copy the stream key (tick “Use persistent stream key” to reuse it every match).",
     obsService: "Facebook Live",
     canvas: { width: 1920, height: 1080 },
     vertical: false,
@@ -35,7 +37,8 @@ export const streamPlatforms: PlatformGuide[] = [
   {
     id: "tiktok",
     name: "TikTok",
-    keyWhere: "TikTok LIVE Studio / LIVE Center → Go LIVE → Streaming software (OBS). The server URL and stream key appear there. TikTok only gives this to eligible accounts — often 1,000+ followers and 18+.",
+    keyWhere:
+      "TikTok LIVE Studio / LIVE Center → Go LIVE → Streaming software (OBS). The server URL and stream key appear there. TikTok only gives this to eligible accounts — often 1,000+ followers and 18+.",
     obsService: "Custom… (paste TikTok's server URL and key)",
     canvas: { width: 1080, height: 1920 },
     vertical: true,

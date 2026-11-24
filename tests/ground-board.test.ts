@@ -1,6 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { availablePages, buildGroundBoard, pageOnScreen, readGroundSettings, wormLine } from "../src/lib/ground-board.ts";
+import {
+  availablePages,
+  buildGroundBoard,
+  pageOnScreen,
+  readGroundSettings,
+  wormLine,
+} from "../src/lib/ground-board.ts";
 
 const board = {
   status: "live",
@@ -16,12 +22,49 @@ const board = {
     card: {
       batting: [
         { no: 1, ref: "aaaa", runs: 12, balls: 10, fours: 2, sixes: 0, how: "caught" },
-        { no: 2, ref: "bbbb", runs: 15, balls: 8, fours: 1, sixes: 1, how: null, atCrease: true, onStrike: true },
+        {
+          no: 2,
+          ref: "bbbb",
+          runs: 15,
+          balls: 8,
+          fours: 1,
+          sixes: 1,
+          how: null,
+          atCrease: true,
+          onStrike: true,
+        },
       ],
-      bowling: [{ no: 1, ref: "cccc", overs: "2.0", maidens: 0, runs: 18, wickets: 1, economy: 9, current: true }],
+      bowling: [
+        {
+          no: 1,
+          ref: "cccc",
+          overs: "2.0",
+          maidens: 0,
+          runs: 18,
+          wickets: 1,
+          economy: 9,
+          current: true,
+        },
+      ],
       extras: 3,
     },
-    progress: [{ battingTeamId: "h", overs: [[8, 0], [10, 1]] }, { battingTeamId: "a", overs: [[6, 0], [12, 1], [12, 0]] }],
+    progress: [
+      {
+        battingTeamId: "h",
+        overs: [
+          [8, 0],
+          [10, 1],
+        ],
+      },
+      {
+        battingTeamId: "a",
+        overs: [
+          [6, 0],
+          [12, 1],
+          [12, 0],
+        ],
+      },
+    ],
     partnership: { runs: 18, balls: 9 },
   },
 };
@@ -40,7 +83,14 @@ test("names handed out for this board replace positions only for those players",
 });
 
 test("worm is the running total from 0", () => {
-  assert.deepEqual(wormLine([[6, 0], [12, 1], [12, 0]]), [0, 6, 18, 30]);
+  assert.deepEqual(
+    wormLine([
+      [6, 0],
+      [12, 1],
+      [12, 0],
+    ]),
+    [0, 6, 18, 30],
+  );
 });
 
 test("automatic pages turn every 15 seconds by default, in order, on every screen together", () => {

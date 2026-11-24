@@ -136,8 +136,14 @@ test("reopening with unsent changes carries on only when no other phone scored s
   assert.equal(canResumeQueuedScoring({ ...base, latestCloudDeviceId: "phone-a" }), true);
   assert.equal(canResumeQueuedScoring({ ...base, latestCloudDeviceId: null }), true);
   assert.equal(canResumeQueuedScoring({ ...base, latestCloudDeviceId: "phone-b" }), false);
-  assert.equal(canResumeQueuedScoring({ ...base, pendingEvents: 0, latestCloudDeviceId: "phone-a" }), false);
-  assert.equal(canResumeQueuedScoring({ ...base, hasLocalCopy: false, latestCloudDeviceId: "phone-a" }), false);
+  assert.equal(
+    canResumeQueuedScoring({ ...base, pendingEvents: 0, latestCloudDeviceId: "phone-a" }),
+    false,
+  );
+  assert.equal(
+    canResumeQueuedScoring({ ...base, hasLocalCopy: false, latestCloudDeviceId: "phone-a" }),
+    false,
+  );
 });
 
 test("fielding notes or a new bowler from the bowling & fielding scorer are not a conflict", () => {

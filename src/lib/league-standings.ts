@@ -1,8 +1,15 @@
-import { calculateCompetitionTable, type CompletedFixture, type PointAdjustment, type TableRow } from "./platform.ts";
+import {
+  calculateCompetitionTable,
+  type CompletedFixture,
+  type PointAdjustment,
+  type TableRow,
+} from "./platform.ts";
 import type { CompetitionRecord, FixtureRecord, TeamRecord } from "./platform-cloud";
 
 type LeagueInput = {
-  competition: Pick<CompetitionRecord, "id" | "rules" | "ruleVersionId"> & { adjustments?: readonly PointAdjustment[] | undefined };
+  competition: Pick<CompetitionRecord, "id" | "rules" | "ruleVersionId"> & {
+    adjustments?: readonly PointAdjustment[] | undefined;
+  };
   fixtures: readonly FixtureRecord[];
   teams: readonly Pick<TeamRecord, "id" | "name">[];
 };

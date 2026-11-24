@@ -35,7 +35,12 @@ export interface SiteSettings {
   logoPath?: string | null;
   updatedAt: string;
 }
-export interface SiteTeam { id: string; name: string; shortName: string | null; ageGroup: string | null }
+export interface SiteTeam {
+  id: string;
+  name: string;
+  shortName: string | null;
+  ageGroup: string | null;
+}
 export interface SiteMatch {
   id: string;
   status: string;
@@ -91,7 +96,11 @@ export interface SitePost {
   pinned: boolean;
   publishedAt: string;
 }
-export interface SitePhoto { id: string; path: string; caption: string }
+export interface SitePhoto {
+  id: string;
+  path: string;
+  caption: string;
+}
 
 export const siteAccents = ["crimson", "gold", "emerald", "royal", "teal", "orange"] as const;
 export type SiteAccent = (typeof siteAccents)[number];
@@ -107,7 +116,15 @@ export function readAccent(value: unknown): SiteAccent {
   return siteAccents.includes(value as SiteAccent) ? (value as SiteAccent) : "crimson";
 }
 
-export const socialKeys = ["website", "facebook", "instagram", "youtube", "tiktok", "x", "whatsapp"] as const;
+export const socialKeys = [
+  "website",
+  "facebook",
+  "instagram",
+  "youtube",
+  "tiktok",
+  "x",
+  "whatsapp",
+] as const;
 export type SocialKey = (typeof socialKeys)[number];
 export const socialLabels: Record<SocialKey, string> = {
   website: "Website",
@@ -132,7 +149,8 @@ export function safeLink(value: unknown): string | null {
 }
 
 export function readSocials(raw: unknown): Partial<Record<SocialKey, string>> {
-  const source = raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
+  const source =
+    raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
   const out: Partial<Record<SocialKey, string>> = {};
   for (const key of socialKeys) {
     const link = safeLink(source[key]);
@@ -141,13 +159,18 @@ export function readSocials(raw: unknown): Partial<Record<SocialKey, string>> {
   return out;
 }
 
-export interface Sponsor { name: string; url: string | null }
+export interface Sponsor {
+  name: string;
+  url: string | null;
+}
 export function readSponsors(raw: unknown): Sponsor[] {
   if (!Array.isArray(raw)) return [];
   const out: Sponsor[] = [];
   for (const item of raw) {
     if (!item || typeof item !== "object") continue;
-    const name = String((item as Record<string, unknown>)["name"] ?? "").trim().slice(0, 80);
+    const name = String((item as Record<string, unknown>)["name"] ?? "")
+      .trim()
+      .slice(0, 80);
     if (!name) continue;
     out.push({ name, url: safeLink((item as Record<string, unknown>)["url"]) });
   }
@@ -189,18 +212,31 @@ export function siteSchedule(site: Pick<PublicClubSite, "matches" | "fixtures">,
   const live = matches.filter((m) => liveStatuses.has(m.status));
   const results = matches
     .filter((m) => resultStatuses.has(m.status))
-    .sort((a, b) => time(b.completedAt ?? b.startedAt ?? b.scheduledAt) - time(a.completedAt ?? a.startedAt ?? a.scheduledAt));
+    .sort(
+      (a, b) =>
+        time(b.completedAt ?? b.startedAt ?? b.scheduledAt) -
+        time(a.completedAt ?? a.startedAt ?? a.scheduledAt),
+    );
   const cutoff = nowMs - 6 * 3_600_000;
   const upcoming: UpcomingItem[] = [];
   const seen = new Set<string>();
-  const key = (home: string, away: string, when: string | null) => `${home}|${away}|${when ? when.slice(0, 10) : ""}`;
+  const key = (home: string, away: string, when: string | null) =>
+    `${home}|${away}|${when ? when.slice(0, 10) : ""}`;
   for (const m of matches) {
     if (m.status !== "scheduled" || time(m.scheduledAt) < cutoff) continue;
     seen.add(key(m.home, m.away, m.scheduledAt));
-    upcoming.push({ id: m.id, when: m.scheduledAt, home: m.home, away: m.away, ground: m.ground, label: null });
+    upcoming.push({
+      id: m.id,
+      when: m.scheduledAt,
+      home: m.home,
+      away: m.away,
+      ground: m.ground,
+      label: null,
+    });
   }
   for (const f of site.fixtures ?? []) {
-    if (!["scheduled", "postponed"].includes(f.status) || !f.startsAt || time(f.startsAt) < cutoff) continue;
+    if (!["scheduled", "postponed"].includes(f.status) || !f.startsAt || time(f.startsAt) < cutoff)
+      continue;
     if (seen.has(key(f.home, f.away, f.startsAt))) continue;
     upcoming.push({
       id: f.id,
@@ -208,7 +244,10 @@ export function siteSchedule(site: Pick<PublicClubSite, "matches" | "fixtures">,
       home: f.home,
       away: f.away,
       ground: f.ground,
-      label: [f.competition, f.round, f.status === "postponed" ? "Postponed" : null].filter(Boolean).join(" · ") || null,
+      label:
+        [f.competition, f.round, f.status === "postponed" ? "Postponed" : null]
+          .filter(Boolean)
+          .join(" · ") || null,
     });
   }
   upcoming.sort((a, b) => time(a.when) - time(b.when));
@@ -229,7 +268,11 @@ export function liveScoreLine(match: SiteMatch): string {
   return `${side} ${match.runs}/${match.wickets ?? 0}${overs}${chase}`;
 }
 
-export interface SiteTable { competition: SiteCompetition; rows: Array<TableRow & { name: string }>; counted: number }
+export interface SiteTable {
+  competition: SiteCompetition;
+  rows: Array<TableRow & { name: string }>;
+  counted: number;
+}
 
 /** League tables from signed-off results only, using the same rules as the league workspace. */
 export function siteTables(site: Pick<PublicClubSite, "competitions" | "fixtures">): SiteTable[] {
@@ -261,7 +304,10 @@ export function siteTables(site: Pick<PublicClubSite, "competitions" | "fixtures
         id: competition.id,
         rules: competition.rules,
         ruleVersionId: competition.ruleVersionId,
-        adjustments: (competition.adjustments ?? []).map((item) => ({ ...item, points: Number(item.points) })),
+        adjustments: (competition.adjustments ?? []).map((item) => ({
+          ...item,
+          points: Number(item.points),
+        })),
       },
       fixtures,
       teams: [...names].map(([id, name]) => ({ id, name })),
@@ -281,7 +327,11 @@ export function postExcerpt(body: string, length = 180): string {
   return text.length <= length ? text : `${text.slice(0, length - 1).trimEnd()}…`;
 }
 
-export const postKindLabels: Record<PostKind, string> = { news: "News", notice: "Notice", document: "Document" };
+export const postKindLabels: Record<PostKind, string> = {
+  news: "News",
+  notice: "Notice",
+  document: "Document",
+};
 
 /** Every stored file the public page shows, so the server can sign them in one request. */
 export function siteFilePaths(site: PublicClubSite): string[] {

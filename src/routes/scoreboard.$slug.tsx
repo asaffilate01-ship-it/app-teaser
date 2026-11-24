@@ -28,7 +28,8 @@ export const Route = createFileRoute("/scoreboard/$slug")({
       { property: "og:title", content: "Live cricket score — CricLume" },
       {
         property: "og:description",
-        content: "Follow the score ball by ball: runs, wickets, run rate and the chase, live from the ground.",
+        content:
+          "Follow the score ball by ball: runs, wickets, run rate and the chase, live from the ground.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -154,7 +155,8 @@ function PublicScoreboard() {
     );
 
   const state = scoreboard.liveState;
-  const batting = state.battingTeamId === scoreboard.homeTeam.id ? scoreboard.homeTeam : scoreboard.awayTeam;
+  const batting =
+    state.battingTeamId === scoreboard.homeTeam.id ? scoreboard.homeTeam : scoreboard.awayTeam;
   const bowling = batting.id === scoreboard.homeTeam.id ? scoreboard.awayTeam : scoreboard.homeTeam;
   const ballsPerOver = state.settings?.ballsPerOver ?? 6;
   const runs = state.runs ?? 0;
@@ -170,7 +172,9 @@ function PublicScoreboard() {
   const chase = chaseState(state.target ?? null, runs, legalBalls, oversLimit, ballsPerOver);
   const isLive = scoreboard.status === "live" || scoreboard.status === "innings_break";
   const tossLine =
-    state.toss && (state.inningsNumber ?? 1) === 1 && legalBallsFromOvers(state.overs, ballsPerOver) < 12
+    state.toss &&
+    (state.inningsNumber ?? 1) === 1 &&
+    legalBallsFromOvers(state.overs, ballsPerOver) < 12
       ? `${(state.toss.winnerIsHome ? scoreboard.homeTeam : scoreboard.awayTeam).name} won the toss and chose to ${state.toss.decision}`
       : null;
   const ribbon = state.result
@@ -182,19 +186,21 @@ function PublicScoreboard() {
         : (tossLine ?? state.message ?? `${batting.name} batting`);
   const recent = state.recent ?? [];
   const commentary = state.commentary ?? null;
-  const prediction = state.result ? null : predictWin({
-    oversPerInnings: oversLimit,
-    inningsPerSide: state.settings?.inningsPerSide ?? 1,
-    ballsPerOver,
-    inningsNumber: state.inningsNumber ?? (state.target ? 2 : 1),
-    runs,
-    wickets,
-    legalBalls,
-    target: state.target ?? null,
-    maxWickets: state.maxWickets ?? 10,
-    battingIsHome: state.battingIsHome ?? batting.id === scoreboard.homeTeam.id,
-    conditions: state.conditions ?? undefined,
-  });
+  const prediction = state.result
+    ? null
+    : predictWin({
+        oversPerInnings: oversLimit,
+        inningsPerSide: state.settings?.inningsPerSide ?? 1,
+        ballsPerOver,
+        inningsNumber: state.inningsNumber ?? (state.target ? 2 : 1),
+        runs,
+        wickets,
+        legalBalls,
+        target: state.target ?? null,
+        maxWickets: state.maxWickets ?? 10,
+        battingIsHome: state.battingIsHome ?? batting.id === scoreboard.homeTeam.id,
+        conditions: state.conditions ?? undefined,
+      });
   const homeBatting = batting.id === scoreboard.homeTeam.id;
   const homeWin = prediction ? (homeBatting ? prediction.battingWin : prediction.bowlingWin) : null;
   const updated = new Date(scoreboard.updatedAt).toLocaleTimeString([], {
@@ -239,199 +245,251 @@ function PublicScoreboard() {
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-3 py-4 md:px-8 md:py-8">
         <PromoSlot items={promos.top} slot="top" onPlay={onPlay} className="mb-4" />
         <div className={promos.side.length > 0 ? "promo-with-side" : ""}>
-        <section className="scoreboard-frame min-w-0">
-          <div className="scoreboard-meta">
-            <span className="inline-flex min-w-0 items-center gap-1.5">
-              <MapPin className="size-3.5 shrink-0 text-gold" aria-hidden="true" />
-              <span className="truncate">{scoreboard.ground?.name ?? "Ground to be confirmed"}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock3 className="size-3.5 text-gold" aria-hidden="true" />
-              Updated {updated}
-            </span>
-          </div>
+          <section className="scoreboard-frame min-w-0">
+            <div className="scoreboard-meta">
+              <span className="inline-flex min-w-0 items-center gap-1.5">
+                <MapPin className="size-3.5 shrink-0 text-gold" aria-hidden="true" />
+                <span className="truncate">
+                  {scoreboard.ground?.name ?? "Ground to be confirmed"}
+                </span>
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Clock3 className="size-3.5 text-gold" aria-hidden="true" />
+                Updated {updated}
+              </span>
+            </div>
 
-          <div className="scoreboard-hero">
-            <div className="flex min-w-0 flex-col items-center gap-2 text-center md:flex-row md:text-left">
-              <TeamCrest name={batting.name} size="lg" />
-              <div className="min-w-0">
-                <p className="scoreboard-team-tag">Batting</p>
-                <p className="scoreboard-team">{batting.name}</p>
+            <div className="scoreboard-hero">
+              <div className="flex min-w-0 flex-col items-center gap-2 text-center md:flex-row md:text-left">
+                <TeamCrest name={batting.name} size="lg" />
+                <div className="min-w-0">
+                  <p className="scoreboard-team-tag">Batting</p>
+                  <p className="scoreboard-team">{batting.name}</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-center">
+                <p className="scoreboard-score">
+                  {runs}
+                  <span>/{wickets}</span>
+                </p>
+                <p className="scoreboard-overs">
+                  <strong>{state.overs ?? "0.0"}</strong> overs
+                  {state.settings?.oversPerInnings ? ` of ${state.settings.oversPerInnings}` : ""}
+                </p>
+              </div>
+              <div className="flex min-w-0 flex-col items-center gap-2 text-center md:flex-row-reverse md:text-right">
+                <TeamCrest name={bowling.name} size="lg" />
+                <div className="min-w-0">
+                  <p className="scoreboard-team-tag">Bowling</p>
+                  <p className="scoreboard-team">{bowling.name}</p>
+                </div>
               </div>
             </div>
-            <div className="flex flex-col items-center">
-              <p className="scoreboard-score">
-                {runs}
-                <span>/{wickets}</span>
-              </p>
-              <p className="scoreboard-overs">
-                <strong>{state.overs ?? "0.0"}</strong> overs
-                {state.settings?.oversPerInnings ? ` of ${state.settings.oversPerInnings}` : ""}
-              </p>
+
+            <p className="hero-ribbon scoreboard-ribbon">{ribbon}</p>
+
+            <div className="mt-4">
+              <WinPredictor
+                firstName={scoreboard.homeTeam.name}
+                secondName={scoreboard.awayTeam.name}
+                firstWin={homeWin}
+                prediction={prediction}
+                battingName={batting.name}
+              />
             </div>
-            <div className="flex min-w-0 flex-col items-center gap-2 text-center md:flex-row-reverse md:text-right">
-              <TeamCrest name={bowling.name} size="lg" />
-              <div className="min-w-0">
-                <p className="scoreboard-team-tag">Bowling</p>
-                <p className="scoreboard-team">{bowling.name}</p>
+
+            {commentary && (
+              <div
+                className="card-tabs mt-4 md:hidden"
+                role="tablist"
+                aria-label="Scoreboard view"
+                style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))", top: "64px" }}
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={panel === "live"}
+                  onClick={() => setPanel("live")}
+                >
+                  Live
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={panel === "commentary"}
+                  onClick={() => setPanel("commentary")}
+                >
+                  Ball by ball
+                </button>
               </div>
-            </div>
-          </div>
+            )}
 
-          <p className="hero-ribbon scoreboard-ribbon">{ribbon}</p>
+            <div
+              className={`mt-4 grid gap-3 ${commentary ? "md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] md:items-start" : ""}`}
+            >
+              <div className={commentary && panel !== "live" ? "hidden md:block" : ""}>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="broadcast-panel">
+                    <table className="scoreboard-table">
+                      <caption className="sr-only">Batters at the crease</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col" className="panel-kicker">
+                            Batters
+                          </th>
+                          <th scope="col">R</th>
+                          <th scope="col">B</th>
+                          <th scope="col">SR</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { key: "striker", label: "Striker", line: state.striker, onStrike: true },
+                          {
+                            key: "non",
+                            label: "Non-striker",
+                            line: state.nonStriker,
+                            onStrike: false,
+                          },
+                        ].map((row) => (
+                          <tr key={row.key}>
+                            <th scope="row">
+                              <span className="inline-flex items-center gap-2">
+                                {row.onStrike ? (
+                                  <span className="strike-dot" aria-label="On strike" />
+                                ) : (
+                                  <span className="inline-block w-[0.45rem]" />
+                                )}
+                                {row.label}
+                              </span>
+                            </th>
+                            <td className="scoreboard-figure">
+                              {row.line ? `${row.line.runs}${row.onStrike ? "*" : ""}` : "—"}
+                            </td>
+                            <td>{row.line?.balls ?? "—"}</td>
+                            <td>{row.line ? strikeRate(row.line.runs, row.line.balls) : "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="broadcast-panel">
+                    <table className="scoreboard-table">
+                      <caption className="sr-only">Current bowler</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col" className="panel-kicker">
+                            Bowler
+                          </th>
+                          <th scope="col">O</th>
+                          <th scope="col">R</th>
+                          <th scope="col">W</th>
+                          <th scope="col">Econ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <th scope="row">Bowler</th>
+                          <td>{state.bowler?.overs ?? "—"}</td>
+                          <td>{state.bowler?.runs ?? "—"}</td>
+                          <td className="scoreboard-wickets">{state.bowler?.wickets ?? "—"}</td>
+                          <td>
+                            {state.bowler
+                              ? (() => {
+                                  const balls = legalBallsFromOvers(
+                                    state.bowler.overs,
+                                    ballsPerOver,
+                                  );
+                                  return balls > 0
+                                    ? ((state.bowler.runs * ballsPerOver) / balls).toFixed(2)
+                                    : "—";
+                                })()
+                              : "—"}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
 
-          <div className="mt-4">
-            <WinPredictor
-              firstName={scoreboard.homeTeam.name}
-              secondName={scoreboard.awayTeam.name}
-              firstWin={homeWin}
-              prediction={prediction}
-              battingName={batting.name}
-            />
-          </div>
-
-          {commentary && (
-            <div className="card-tabs mt-4 md:hidden" role="tablist" aria-label="Scoreboard view" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))", top: "64px" }}>
-              <button type="button" role="tab" aria-selected={panel === "live"} onClick={() => setPanel("live")}>
-                Live
-              </button>
-              <button type="button" role="tab" aria-selected={panel === "commentary"} onClick={() => setPanel("commentary")}>
-                Ball by ball
-              </button>
-            </div>
-          )}
-
-          <div className={`mt-4 grid gap-3 ${commentary ? "md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] md:items-start" : ""}`}>
-            <div className={commentary && panel !== "live" ? "hidden md:block" : ""}>
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="broadcast-panel">
-                <table className="scoreboard-table">
-                  <caption className="sr-only">Batters at the crease</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col" className="panel-kicker">Batters</th>
-                      <th scope="col">R</th>
-                      <th scope="col">B</th>
-                      <th scope="col">SR</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { key: "striker", label: "Striker", line: state.striker, onStrike: true },
-                      { key: "non", label: "Non-striker", line: state.nonStriker, onStrike: false },
-                    ].map((row) => (
-                      <tr key={row.key}>
-                        <th scope="row">
-                          <span className="inline-flex items-center gap-2">
-                            {row.onStrike ? <span className="strike-dot" aria-label="On strike" /> : <span className="inline-block w-[0.45rem]" />}
-                            {row.label}
+                <div className="broadcast-panel mt-3">
+                  <p className="panel-kicker">Recent balls</p>
+                  {recent.length === 0 ? (
+                    <p className="scoreboard-muted mt-3 text-sm">
+                      The first ball hasn't been bowled yet.
+                    </p>
+                  ) : (
+                    <ol className="mt-3 flex flex-wrap gap-2 md:gap-3">
+                      {recent.map((ball, index) => (
+                        <li key={`${ball.label}-${index}`}>
+                          <span className="ball-chip md:size-12" data-tone={ballKind(ball)}>
+                            {ball.label}
                           </span>
-                        </th>
-                        <td className="scoreboard-figure">{row.line ? `${row.line.runs}${row.onStrike ? "*" : ""}` : "—"}</td>
-                        <td>{row.line?.balls ?? "—"}</td>
-                        <td>{row.line ? strikeRate(row.line.runs, row.line.balls) : "—"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="broadcast-panel">
-                <table className="scoreboard-table">
-                  <caption className="sr-only">Current bowler</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col" className="panel-kicker">Bowler</th>
-                      <th scope="col">O</th>
-                      <th scope="col">R</th>
-                      <th scope="col">W</th>
-                      <th scope="col">Econ</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row">Bowler</th>
-                      <td>{state.bowler?.overs ?? "—"}</td>
-                      <td>{state.bowler?.runs ?? "—"}</td>
-                      <td className="scoreboard-wickets">{state.bowler?.wickets ?? "—"}</td>
-                      <td>
-                        {state.bowler
-                          ? (() => {
-                              const balls = legalBallsFromOvers(state.bowler.overs, ballsPerOver);
-                              return balls > 0 ? ((state.bowler.runs * ballsPerOver) / balls).toFixed(2) : "—";
-                            })()
-                          : "—"}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
 
-            <div className="broadcast-panel mt-3">
-              <p className="panel-kicker">Recent balls</p>
-              {recent.length === 0 ? (
-                <p className="scoreboard-muted mt-3 text-sm">The first ball hasn't been bowled yet.</p>
-              ) : (
-                <ol className="mt-3 flex flex-wrap gap-2 md:gap-3">
-                  {recent.map((ball, index) => (
-                    <li key={`${ball.label}-${index}`}>
-                      <span className="ball-chip md:size-12" data-tone={ballKind(ball)}>
-                        {ball.label}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
+                <div className="mt-3 grid grid-cols-3 gap-2 md:gap-3">
+                  <div className="broadcast-panel scoreboard-stat">
+                    <p className="panel-kicker">Run rate</p>
+                    <p className="scoreboard-stat-value">{runRate.toFixed(2)}</p>
+                    <p className="scoreboard-muted text-[11px] uppercase tracking-wider">Current</p>
+                  </div>
+                  <div className="broadcast-panel scoreboard-stat">
+                    <p className="panel-kicker">
+                      {chase?.requiredRate != null ? "Required" : "Target"}
+                    </p>
+                    <p className="scoreboard-stat-value text-gold">
+                      {chase?.requiredRate != null
+                        ? chase.requiredRate.toFixed(2)
+                        : (state.target ?? "—")}
+                    </p>
+                    <p className="scoreboard-muted text-[11px] uppercase tracking-wider">
+                      {chase?.requiredRate != null
+                        ? "Run rate"
+                        : state.target
+                          ? "To win"
+                          : "First innings"}
+                    </p>
+                  </div>
+                  <div className="broadcast-panel scoreboard-stat">
+                    <p className="panel-kicker">Wickets in hand</p>
+                    <p className="scoreboard-stat-value">{Math.max(0, 10 - wickets)}</p>
+                    <p className="scoreboard-muted text-[11px] uppercase tracking-wider">of 10</p>
+                  </div>
+                </div>
+              </div>
+              {commentary && (
+                <div
+                  className={`broadcast-panel ${panel !== "commentary" ? "hidden md:block" : ""}`}
+                >
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <p className="panel-kicker">Ball by ball</p>
+                    <ReadAloud lines={commentary} />
+                  </div>
+                  <div className="md:max-h-[42rem] md:overflow-y-auto md:pr-1">
+                    <CommentaryFeed lines={commentary} />
+                  </div>
+                </div>
               )}
             </div>
 
-            <div className="mt-3 grid grid-cols-3 gap-2 md:gap-3">
-              <div className="broadcast-panel scoreboard-stat">
-                <p className="panel-kicker">Run rate</p>
-                <p className="scoreboard-stat-value">{runRate.toFixed(2)}</p>
-                <p className="scoreboard-muted text-[11px] uppercase tracking-wider">Current</p>
-              </div>
-              <div className="broadcast-panel scoreboard-stat">
-                <p className="panel-kicker">{chase?.requiredRate != null ? "Required" : "Target"}</p>
-                <p className="scoreboard-stat-value text-gold">
-                  {chase?.requiredRate != null ? chase.requiredRate.toFixed(2) : (state.target ?? "—")}
-                </p>
-                <p className="scoreboard-muted text-[11px] uppercase tracking-wider">
-                  {chase?.requiredRate != null ? "Run rate" : state.target ? "To win" : "First innings"}
-                </p>
-              </div>
-              <div className="broadcast-panel scoreboard-stat">
-                <p className="panel-kicker">Wickets in hand</p>
-                <p className="scoreboard-stat-value">{Math.max(0, 10 - wickets)}</p>
-                <p className="scoreboard-muted text-[11px] uppercase tracking-wider">of 10</p>
-              </div>
+            <div className="mt-4">
+              <FanVote slug={slug} />
             </div>
+
+            <p className="scoreboard-muted mt-4 text-center text-[11px]">
+              Player names stay hidden on public scoreboards until the club confirms they can be
+              shown.
+            </p>
+          </section>
+          {promos.side.length > 0 && (
+            <div className="promo-side-rail">
+              <PromoSlot items={promos.side} slot="side" onPlay={onPlay} />
             </div>
-            {commentary && (
-              <div className={`broadcast-panel ${panel !== "commentary" ? "hidden md:block" : ""}`}>
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <p className="panel-kicker">Ball by ball</p>
-                  <ReadAloud lines={commentary} />
-                </div>
-                <div className="md:max-h-[42rem] md:overflow-y-auto md:pr-1">
-                  <CommentaryFeed lines={commentary} />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="mt-4">
-            <FanVote slug={slug} />
-          </div>
-
-          <p className="scoreboard-muted mt-4 text-center text-[11px]">
-            Player names stay hidden on public scoreboards until the club confirms they can be shown.
-          </p>
-        </section>
-        {promos.side.length > 0 && (
-          <div className="promo-side-rail">
-            <PromoSlot items={promos.side} slot="side" onPlay={onPlay} />
-          </div>
-        )}
+          )}
         </div>
       </main>
 

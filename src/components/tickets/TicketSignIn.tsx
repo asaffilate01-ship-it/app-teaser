@@ -3,7 +3,11 @@ import { toast } from "sonner";
 import { GoogleButton } from "@/components/app-shell/GoogleButton";
 
 /** Free account sign-in for fans buying tickets; comes back to the same page. */
-export function TicketSignIn({ requestLink }: { requestLink: (email: string, redirectTo?: string) => Promise<void> }) {
+export function TicketSignIn({
+  requestLink,
+}: {
+  requestLink: (email: string, redirectTo?: string) => Promise<void>;
+}) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -28,7 +32,10 @@ export function TicketSignIn({ requestLink }: { requestLink: (email: string, red
   return (
     <section className="club-card ticket-signin" aria-label="Sign in to buy tickets">
       <h2 className="text-xl font-bold">Sign in to buy tickets</h2>
-      <p className="mt-1 text-sm opacity-80">A free CricLume account keeps your tickets safe on your phone. No card needed — you pay the club by bank or wallet transfer.</p>
+      <p className="mt-1 text-sm opacity-80">
+        A free CricLume account keeps your tickets safe on your phone. No card needed — you pay the
+        club by bank or wallet transfer.
+      </p>
       <div className="mt-3 grid gap-3">
         <GoogleButton onClick={() => void google()} />
         <form onSubmit={(event) => void submit(event)} className="flex flex-wrap gap-2">

@@ -43,7 +43,8 @@ function StatusPill({ match }: { match: LiveMatch }) {
         {stoppageLabel(state.stoppage.reason)}
       </span>
     );
-  if (match.status === "innings_break") return <span className="live-pill live-pill-warn">Innings break</span>;
+  if (match.status === "innings_break")
+    return <span className="live-pill live-pill-warn">Innings break</span>;
   if (state?.days?.atStumps) return <span className="live-pill live-pill-warn">Stumps</span>;
   return (
     <span className="live-pill live-pill-live">
@@ -57,7 +58,13 @@ function TeamRow({ team, match }: { team: LiveTeam; match: LiveMatch }) {
   const started = liveBucket(match) !== "upcoming" && state && !match.delayed;
   const batting = started && battingTeam(match).id === team.id;
   let side: string | null = null;
-  if (started && !batting) side = state.target != null ? `Target ${state.target}` : liveBucket(match) === "live" ? "Bowling" : null;
+  if (started && !batting)
+    side =
+      state.target != null
+        ? `Target ${state.target}`
+        : liveBucket(match) === "live"
+          ? "Bowling"
+          : null;
   return (
     <div className={`live-team ${batting ? "live-team-batting" : ""}`}>
       <TeamCrest name={team.name} size="sm" />
@@ -94,22 +101,46 @@ export function LiveMatchCard({
   const upcoming = liveBucket(match) === "upcoming";
   const recent = match.liveState?.recent ?? [];
   const minutes = Math.max(0, Math.round((now - new Date(match.updatedAt).getTime()) / 60_000));
-  const updated = minutes < 1 ? "just now" : minutes < 60 ? `${minutes} min ago` : `${Math.round(minutes / 60)} h ago`;
+  const updated =
+    minutes < 1
+      ? "just now"
+      : minutes < 60
+        ? `${minutes} min ago`
+        : `${Math.round(minutes / 60)} h ago`;
   const when = match.scheduledAt
-    ? new Date(match.scheduledAt).toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
+    ? new Date(match.scheduledAt).toLocaleString([], {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : "Time to be confirmed";
-  const place = [match.region, match.country ? countryFlag(match.country) : ""].filter(Boolean).join(" ");
+  const place = [match.region, match.country ? countryFlag(match.country) : ""]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <article className="live-card" data-flash={flash} data-bucket={liveBucket(match)} aria-label={`${match.homeTeam.name} v ${match.awayTeam.name}`}>
+    <article
+      className="live-card"
+      data-flash={flash}
+      data-bucket={liveBucket(match)}
+      aria-label={`${match.homeTeam.name} v ${match.awayTeam.name}`}
+    >
       {flash && (
         <span className="live-flash" data-kind={flash} role="status">
-          {flash === "stoppage" ? (match.liveState?.stoppage ? stoppageLabel(match.liveState.stoppage.reason) : "Play resumes") : flashWords[flash]}
+          {flash === "stoppage"
+            ? match.liveState?.stoppage
+              ? stoppageLabel(match.liveState.stoppage.reason)
+              : "Play resumes"
+            : flashWords[flash]}
         </span>
       )}
       <div className="flex items-center justify-between gap-2">
         <p className="live-card-kicker">
-          <span className="truncate">{match.competition?.name ?? match.organisation ?? "Match"}</span>
+          <span className="truncate">
+            {match.competition?.name ?? match.organisation ?? "Match"}
+          </span>
           {place && <span className="shrink-0 opacity-80">· {place}</span>}
         </p>
         <StatusPill match={match} />
@@ -157,7 +188,8 @@ export function LiveMatchCard({
             <Star className="size-4" aria-hidden="true" fill={followed ? "currentColor" : "none"} />
           </button>
           <Link to="/scoreboard/$slug" params={{ slug: match.slug }} className="live-open">
-            {upcoming ? "Details" : "Scorecard"} <ChevronRight className="size-3.5" aria-hidden="true" />
+            {upcoming ? "Details" : "Scorecard"}{" "}
+            <ChevronRight className="size-3.5" aria-hidden="true" />
           </Link>
         </span>
       </div>

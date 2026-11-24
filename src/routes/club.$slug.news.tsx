@@ -8,7 +8,11 @@ const layoutRoute = getRouteApi("/club/$slug");
 
 export const Route = createFileRoute("/club/$slug/news")({
   head: ({ matches }) =>
-    siteHead(siteFromMatches(matches), { path: "/news", title: "News and notices", description: (name) => `News, notices and documents from ${name}.` }),
+    siteHead(siteFromMatches(matches), {
+      path: "/news",
+      title: "News and notices",
+      description: (name) => `News, notices and documents from ${name}.`,
+    }),
   component: NewsPage,
 });
 
@@ -28,7 +32,12 @@ function NewsPage() {
         <h1>News and notices</h1>
         <div className="club-segment" role="group" aria-label="Show">
           {filters.map((value) => (
-            <button key={value} type="button" aria-pressed={kind === value} onClick={() => setKind(value)}>
+            <button
+              key={value}
+              type="button"
+              aria-pressed={kind === value}
+              onClick={() => setKind(value)}
+            >
               {value === "all" ? "All" : postKindLabels[value]}
             </button>
           ))}

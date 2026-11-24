@@ -1,8 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getMemberPromos, getPromos, reportMemberPromoPlays, reportPromoPlays, reportViewerBoardPlays } from "@/lib/promo.functions";
+import {
+  getMemberPromos,
+  getPromos,
+  reportMemberPromoPlays,
+  reportPromoPlays,
+  reportViewerBoardPlays,
+} from "@/lib/promo.functions";
 import { currentCloudSession } from "@/lib/cloud";
-import { countsTowardShare, fillPromoSlots, type PromoItem, type PromoSlot, type PromoSurface } from "@/lib/promo-targeting";
+import {
+  countsTowardShare,
+  fillPromoSlots,
+  type PromoItem,
+  type PromoSlot,
+  type PromoSurface,
+} from "@/lib/promo-targeting";
 import { housePromos } from "@/lib/house-promos";
 
 type PromoSet = Record<PromoSlot, PromoItem[]>;
@@ -13,10 +25,17 @@ type PromoSet = Record<PromoSlot, PromoItem[]>;
  * Order per banner: paid CricLume adverts, then the club's own, then iTechLounge house adverts
  * (also shown offline). Only paid adverts are counted toward a club's revenue share.
  */
-export function usePromos(options: { surface: PromoSurface; slug?: string; member?: { organisationId: string | null } | null }) {
+export function usePromos(options: {
+  surface: PromoSurface;
+  slug?: string;
+  member?: { organisationId: string | null } | null;
+}) {
   const { surface, slug, member } = options;
   const [loaded, setLoaded] = useState<PromoSet>({ top: [], side: [] });
-  const promos = useMemo(() => fillPromoSlots(loaded, { top: [], side: [] }, housePromos), [loaded]);
+  const promos = useMemo(
+    () => fillPromoSlots(loaded, { top: [], side: [] }, housePromos),
+    [loaded],
+  );
   const fetchPublic = useServerFn(getPromos);
   const fetchMember = useServerFn(getMemberPromos);
   const reportPublic = useServerFn(reportPromoPlays);
@@ -33,7 +52,9 @@ export function usePromos(options: { surface: PromoSurface; slug?: string; membe
     const load = async () => {
       if (typeof navigator !== "undefined" && navigator.onLine === false) return;
       try {
-        const next = signedIn ? await fetchMember({ data: { organisationId } }) : await fetchPublic({ data: slug ? { surface, slug } : { surface } });
+        const next = signedIn
+          ? await fetchMember({ data: { organisationId } })
+          : await fetchPublic({ data: slug ? { surface, slug } : { surface } });
         if (active) setLoaded(next);
       } catch {
         // No ads is a fine outcome.
@@ -70,7 +91,9 @@ export function usePromos(options: { surface: PromoSurface; slug?: string; membe
         ? reportMember({ data: { organisationId, creativeIds: batch } })
         : viewerSignedIn && slug && surface === "scoreboard"
           ? reportViewer({ data: { slug, creativeIds: batch } })
-          : reportPublic({ data: slug ? { surface, slug, creativeIds: batch } : { surface, creativeIds: batch } });
+          : reportPublic({
+              data: slug ? { surface, slug, creativeIds: batch } : { surface, creativeIds: batch },
+            });
       void sent.catch(() => undefined);
     };
     const timer = window.setInterval(flush, 30_000);
@@ -78,14 +101,26 @@ export function usePromos(options: { surface: PromoSurface; slug?: string; membe
       window.clearInterval(timer);
       flush();
     };
-  }, [surface, slug, signedIn, viewerSignedIn, organisationId, reportMember, reportPublic, reportViewer]);
+  }, [
+    surface,
+    slug,
+    signedIn,
+    viewerSignedIn,
+    organisationId,
+    reportMember,
+    reportPublic,
+    reportViewer,
+  ]);
 
-  const onPlay = useCallback((creativeId: string) => {
-    const item = [...promos.top, ...promos.side].find((entry) => entry.creativeId === creativeId);
-    if (!item || !countsTowardShare(item)) return;
-    if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
-    queue.current.push(creativeId);
-  }, [promos]);
+  const onPlay = useCallback(
+    (creativeId: string) => {
+      const item = [...promos.top, ...promos.side].find((entry) => entry.creativeId === creativeId);
+      if (!item || !countsTowardShare(item)) return;
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
+      queue.current.push(creativeId);
+    },
+    [promos],
+  );
 
   return { promos, onPlay };
 }

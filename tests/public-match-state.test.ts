@@ -99,5 +99,8 @@ test("ground screen card refs are per-match pseudonyms, never player ids or name
   }
   const striker = currentInnings(match).strikerId;
   assert.ok(json.includes(playerScreenRef("cloud-match-1", striker)));
-  assert.notEqual(playerScreenRef("cloud-match-1", striker), playerScreenRef("cloud-match-2", striker));
+  assert.notEqual(
+    playerScreenRef("cloud-match-1", striker),
+    playerScreenRef("cloud-match-2", striker),
+  );
 });

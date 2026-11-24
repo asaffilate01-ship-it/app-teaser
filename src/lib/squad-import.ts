@@ -36,7 +36,9 @@ export function parseCsv(text: string): string[][] {
     row.push(field);
     rows.push(row);
   }
-  return rows.map((cells) => cells.map((cell) => cell.trim())).filter((cells) => cells.some(Boolean));
+  return rows
+    .map((cells) => cells.map((cell) => cell.trim()))
+    .filter((cells) => cells.some(Boolean));
 }
 
 const yes = new Set(["y", "yes", "true", "1", "x", "ja", "oui"]);
@@ -53,7 +55,12 @@ const columnNames: Record<string, string[]> = {
 function shortNameFor(name: string): string {
   const words = name.split(/\s+/).filter(Boolean);
   const initials = words.length > 1 ? words.map((word) => word[0]).join("") : name.slice(0, 3);
-  return initials.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12) || "TEAM";
+  return (
+    initials
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 12) || "TEAM"
+  );
 }
 
 /**
@@ -63,7 +70,10 @@ function shortNameFor(name: string): string {
  */
 export function planSquadImport(
   csv: string,
-  existing: { teams: readonly { id: string; name: string }[]; players: readonly { name: string; teamIds: readonly string[] }[] },
+  existing: {
+    teams: readonly { id: string; name: string }[];
+    players: readonly { name: string; teamIds: readonly string[] }[];
+  },
   maxPlayers = 500,
 ): ImportPlan {
   const rows = parseCsv(csv);
@@ -71,13 +81,26 @@ export function planSquadImport(
   if (rows.length === 0) return plan;
   const header = rows[0]!.map((cell) => cell.toLowerCase());
   const index = (key: string) => header.findIndex((cell) => columnNames[key]!.includes(cell));
-  const col = { team: index("team"), player: index("player"), junior: index("junior"), public: index("public"), short: index("short"), age: index("age") };
+  const col = {
+    team: index("team"),
+    player: index("player"),
+    junior: index("junior"),
+    public: index("public"),
+    short: index("short"),
+    age: index("age"),
+  };
   if (col.team < 0 || col.player < 0) {
     plan.skipped.push({ line: 1, reason: "Header row needs “Team” and “Player” columns" });
     return plan;
   }
-  const teamByName = new Map(existing.teams.map((team) => [team.name.trim().toLowerCase(), team.id]));
-  const onTeam = new Set(existing.players.flatMap((player) => player.teamIds.map((teamId) => `${teamId}|${player.name.trim().toLowerCase()}`)));
+  const teamByName = new Map(
+    existing.teams.map((team) => [team.name.trim().toLowerCase(), team.id]),
+  );
+  const onTeam = new Set(
+    existing.players.flatMap((player) =>
+      player.teamIds.map((teamId) => `${teamId}|${player.name.trim().toLowerCase()}`),
+    ),
+  );
   const seen = new Set<string>();
   const newTeams = new Map<string, ImportPlan["newTeams"][number]>();
 
@@ -86,7 +109,8 @@ export function planSquadImport(
     const team = (cells[col.team] ?? "").replace(/\s+/g, " ");
     const name = (cells[col.player] ?? "").replace(/\s+/g, " ");
     if (!team || !name) return plan.skipped.push({ line, reason: "Missing team or player name" });
-    if (team.length > 80 || name.length > 80) return plan.skipped.push({ line, reason: "Name longer than 80 characters" });
+    if (team.length > 80 || name.length > 80)
+      return plan.skipped.push({ line, reason: "Name longer than 80 characters" });
     const flag = (position: number) => {
       if (position < 0) return false;
       const value = (cells[position] ?? "").toLowerCase();
@@ -96,14 +120,19 @@ export function planSquadImport(
     };
     const isJunior = flag(col.junior);
     const publicProfile = flag(col.public);
-    if (isJunior === null || publicProfile === null) return plan.skipped.push({ line, reason: "Junior/Public must be yes or no" });
+    if (isJunior === null || publicProfile === null)
+      return plan.skipped.push({ line, reason: "Junior/Public must be yes or no" });
     const teamKey = team.toLowerCase();
     const playerKey = `${teamKey}|${name.toLowerCase()}`;
     const existingTeamId = teamByName.get(teamKey);
-    if (seen.has(playerKey) || (existingTeamId && onTeam.has(`${existingTeamId}|${name.toLowerCase()}`))) {
+    if (
+      seen.has(playerKey) ||
+      (existingTeamId && onTeam.has(`${existingTeamId}|${name.toLowerCase()}`))
+    ) {
       return plan.skipped.push({ line, reason: `${name} is already on ${team}` });
     }
-    if (plan.players.length >= maxPlayers) return plan.skipped.push({ line, reason: `Only ${maxPlayers} players per import` });
+    if (plan.players.length >= maxPlayers)
+      return plan.skipped.push({ line, reason: `Only ${maxPlayers} players per import` });
     seen.add(playerKey);
     if (!existingTeamId && !newTeams.has(teamKey)) {
       newTeams.set(teamKey, {
@@ -119,4 +148,5 @@ export function planSquadImport(
   return plan;
 }
 
-export const SQUAD_TEMPLATE_CSV = "Team,Player,Junior,Public\nFirst XI,Sam Patel,no,yes\nUnder 13s,Alex Khan,yes,no\n";
+export const SQUAD_TEMPLATE_CSV =
+  "Team,Player,Junior,Public\nFirst XI,Sam Patel,no,yes\nUnder 13s,Alex Khan,yes,no\n";

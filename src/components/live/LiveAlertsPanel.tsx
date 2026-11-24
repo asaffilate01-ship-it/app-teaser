@@ -38,7 +38,10 @@ export function LiveAlertsPanel({
       return;
     }
     if (!("Notification" in window)) return;
-    const result = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
+    const result =
+      Notification.permission === "default"
+        ? await Notification.requestPermission()
+        : Notification.permission;
     setPermission(result);
     if (result === "granted") setPrefs({ ...prefs, browser: true });
   };
@@ -57,23 +60,40 @@ export function LiveAlertsPanel({
               type="button"
               className="live-toggle"
               aria-pressed={prefs.kinds[kind.id]}
-              onClick={() => setPrefs({ ...prefs, kinds: { ...prefs.kinds, [kind.id]: !prefs.kinds[kind.id] } })}
+              onClick={() =>
+                setPrefs({ ...prefs, kinds: { ...prefs.kinds, [kind.id]: !prefs.kinds[kind.id] } })
+              }
             >
               {kind.label}
             </button>
           ))}
         </div>
         <div className="live-segment mt-3" role="radiogroup" aria-label="Which matches">
-          <button type="button" role="radio" aria-checked={prefs.scope === "all"} onClick={() => setPrefs({ ...prefs, scope: "all" })}>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={prefs.scope === "all"}
+            onClick={() => setPrefs({ ...prefs, scope: "all" })}
+          >
             All matches
           </button>
-          <button type="button" role="radio" aria-checked={prefs.scope === "following"} onClick={() => setPrefs({ ...prefs, scope: "following" })}>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={prefs.scope === "following"}
+            onClick={() => setPrefs({ ...prefs, scope: "following" })}
+          >
             Followed ({followingCount})
           </button>
         </div>
         {permission !== "unsupported" && (
           <label className="rule-toggle mt-3">
-            <input type="checkbox" checked={prefs.browser} disabled={permission === "denied"} onChange={() => void toggleBrowser()} />
+            <input
+              type="checkbox"
+              checked={prefs.browser}
+              disabled={permission === "denied"}
+              onChange={() => void toggleBrowser()}
+            />
             <span>
               <span className="rule-toggle-title">Notify me in another tab</span>
               <span className="rule-toggle-hint">
@@ -90,23 +110,38 @@ export function LiveAlertsPanel({
       </section>
 
       <section className="broadcast-panel" aria-labelledby="latest-moments">
-        <h2 id="latest-moments" className="panel-kicker">Latest moments</h2>
+        <h2 id="latest-moments" className="panel-kicker">
+          Latest moments
+        </h2>
         {feed.length === 0 ? (
-          <p className="mt-2 text-sm scoreboard-muted">Wickets, boundaries, rain delays and results appear here as they happen.</p>
+          <p className="mt-2 text-sm scoreboard-muted">
+            Wickets, boundaries, rain delays and results appear here as they happen.
+          </p>
         ) : (
           <ol className="mt-2 space-y-1" aria-live="polite">
             {feed.map((event) => {
               const Icon = kindIcon[event.kind];
               return (
                 <li key={event.key}>
-                  <button type="button" className="live-feed-item" data-kind={event.kind} onClick={() => onOpen(event.slug)}>
+                  <button
+                    type="button"
+                    className="live-feed-item"
+                    data-kind={event.kind}
+                    onClick={() => onOpen(event.slug)}
+                  >
                     <Icon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                     <span className="min-w-0 flex-1 text-left">
                       <span className="block text-sm font-bold">{event.title}</span>
                       <span className="block truncate text-xs scoreboard-muted">{event.body}</span>
                     </span>
-                    <time className="shrink-0 text-[10px] scoreboard-muted" dateTime={new Date(event.at).toISOString()}>
-                      {new Date(event.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    <time
+                      className="shrink-0 text-[10px] scoreboard-muted"
+                      dateTime={new Date(event.at).toISOString()}
+                    >
+                      {new Date(event.at).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </time>
                   </button>
                 </li>

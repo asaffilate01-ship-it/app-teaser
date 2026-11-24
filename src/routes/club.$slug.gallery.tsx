@@ -5,7 +5,12 @@ import { PhotoGrid } from "@/components/site/SiteParts";
 const layoutRoute = getRouteApi("/club/$slug");
 
 export const Route = createFileRoute("/club/$slug/gallery")({
-  head: ({ matches }) => siteHead(siteFromMatches(matches), { path: "/gallery", title: "Gallery", description: (name) => `Photos from ${name}.` }),
+  head: ({ matches }) =>
+    siteHead(siteFromMatches(matches), {
+      path: "/gallery",
+      title: "Gallery",
+      description: (name) => `Photos from ${name}.`,
+    }),
   component: GalleryPage,
 });
 

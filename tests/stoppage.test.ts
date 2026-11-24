@@ -12,7 +12,15 @@ function liveMatch(): CricketMatch {
     homePlayers: ["A One", "A Two", "A Three"],
     awayPlayers: ["B One", "B Two", "B Three"],
     battingFirst: "home",
-    settings: { format: "T20", oversPerInnings: 20, inningsPerSide: 1, ballsPerOver: 6, ground: "Park", weather: "Dry", startTime: new Date().toISOString() },
+    settings: {
+      format: "T20",
+      oversPerInnings: 20,
+      inningsPerSide: 1,
+      ballsPerOver: 6,
+      ground: "Park",
+      weather: "Dry",
+      startTime: new Date().toISOString(),
+    },
   } as Parameters<typeof createMatch>[0]);
   return { ...match, status: "live" };
 }

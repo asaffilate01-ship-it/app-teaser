@@ -4,7 +4,12 @@ import { lockDarkWhileMounted } from "@/lib/theme";
 import { getCloudClient, isCloudConfigured } from "@/lib/cloud";
 import { fetchGroundNames } from "@/lib/ground-screen-cloud";
 import type { PublicBoardInput } from "@/lib/ground-board";
-import { buildOverlayFeed, detectMoment, type OverlayFeed, type OverlayMoment } from "@/lib/overlay-feed";
+import {
+  buildOverlayFeed,
+  detectMoment,
+  type OverlayFeed,
+  type OverlayMoment,
+} from "@/lib/overlay-feed";
 
 type OverlayLayout = "bar" | "corner";
 type OverlaySearch = { layout?: OverlayLayout; names?: "off" };
@@ -17,9 +22,15 @@ export const Route = createFileRoute("/overlay/$slug")({
   head: () => ({
     meta: [
       { title: "Live score overlay — CricLume" },
-      { name: "description", content: "Transparent TV-style live cricket score overlay for live streams, from CricLume." },
+      {
+        name: "description",
+        content: "Transparent TV-style live cricket score overlay for live streams, from CricLume.",
+      },
       { property: "og:title", content: "Live score overlay — CricLume" },
-      { property: "og:description", content: "Add a TV-style live CricLume score to OBS, Streamlabs or any streaming software." },
+      {
+        property: "og:description",
+        content: "Add a TV-style live CricLume score to OBS, Streamlabs or any streaming software.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -56,7 +67,9 @@ function ScoreOverlay() {
     if (!isCloudConfigured()) return;
     let active = true;
     const load = async () => {
-      const { data: next, error } = await getCloudClient().rpc("get_public_scoreboard", { p_slug: slug });
+      const { data: next, error } = await getCloudClient().rpc("get_public_scoreboard", {
+        p_slug: slug,
+      });
       if (!active) return;
       if (error || !next) setOffline(true);
       else {
@@ -78,7 +91,10 @@ function ScoreOverlay() {
       return;
     }
     let active = true;
-    const load = () => void fetchGroundNames(slug).then((next) => active && setNames(next)).catch(() => undefined);
+    const load = () =>
+      void fetchGroundNames(slug)
+        .then((next) => active && setNames(next))
+        .catch(() => undefined);
     load();
     const timer = window.setInterval(load, 60_000);
     return () => {
@@ -135,7 +151,9 @@ function ScoreOverlay() {
             </strong>
             <span className="tv-overs">{oversText}</span>
           </div>
-          <div className={`tv-card-line ${feed.freeHit ? "is-alert" : ""}`}>{feed.freeHit ? "FREE HIT" : feed.headline}</div>
+          <div className={`tv-card-line ${feed.freeHit ? "is-alert" : ""}`}>
+            {feed.freeHit ? "FREE HIT" : feed.headline}
+          </div>
           {moment && <div className={`tv-card-moment tv-m-${moment.kind}`}>{moment.title}</div>}
         </div>
       </div>
@@ -159,7 +177,9 @@ function ScoreOverlay() {
           ) : feed.superOver && !feed.finished ? (
             <div className="tv-tab is-alert">SUPER OVER</div>
           ) : fact ? (
-            <div key={fact} className="tv-tab">{fact}</div>
+            <div key={fact} className="tv-tab">
+              {fact}
+            </div>
           ) : null}
         </div>
 
@@ -211,7 +231,9 @@ function ScoreOverlay() {
             </div>
           )}
 
-          <div className={`tv-headline ${feed.stopped ? "is-stopped" : ""} ${feed.finished ? "is-final" : ""}`}>
+          <div
+            className={`tv-headline ${feed.stopped ? "is-stopped" : ""} ${feed.finished ? "is-final" : ""}`}
+          >
             <span>{feed.headline}</span>
             <em>CricLume</em>
           </div>

@@ -38,7 +38,15 @@ export function OfficeCard({
   );
 }
 
-export function OfficeField({ label, children, className = "" }: { label: string; children: ReactNode; className?: string }) {
+export function OfficeField({
+  label,
+  children,
+  className = "",
+}: {
+  label: string;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <label className={`block ${className}`}>
       <span className="office-label">{label}</span>
@@ -48,10 +56,20 @@ export function OfficeField({ label, children, className = "" }: { label: string
 }
 
 export function Empty({ children }: { children: ReactNode }) {
-  return <p className="office-meta rounded-xl border border-dashed border-border p-4 text-center">{children}</p>;
+  return (
+    <p className="office-meta rounded-xl border border-dashed border-border p-4 text-center">
+      {children}
+    </p>
+  );
 }
 
-export function Pill({ tone, children }: { tone?: "good" | "warn" | "bad" | undefined; children: ReactNode }) {
+export function Pill({
+  tone,
+  children,
+}: {
+  tone?: "good" | "warn" | "bad" | undefined;
+  children: ReactNode;
+}) {
   return <span className={`office-pill ${tone ? `office-pill-${tone}` : ""}`}>{children}</span>;
 }
 
@@ -61,18 +79,31 @@ export function nameOfPlayer(club: PlatformDashboardData, id: string | null | un
   return club.players.find((player) => player.id === id)?.name ?? "Player";
 }
 
-export function nameOfMember(club: PlatformDashboardData, userId: string | null | undefined): string {
+export function nameOfMember(
+  club: PlatformDashboardData,
+  userId: string | null | undefined,
+): string {
   return club.members.find((member) => member.userId === userId)?.displayName ?? "Club member";
 }
 
 export function when(iso: string | null | undefined): string {
   if (!iso) return "";
-  return new Date(iso).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleString(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export function day(iso: string | null | undefined): string {
   if (!iso) return "";
-  return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  return new Date(iso).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 /** datetime-local value → ISO string (local time), or null. */
@@ -82,7 +113,10 @@ export function fromLocal(value: string): string | null {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
-export function upcoming<T extends { starts_at: string; cancelled_at?: string | null }>(rows: T[], hoursBack = 6): T[] {
+export function upcoming<T extends { starts_at: string; cancelled_at?: string | null }>(
+  rows: T[],
+  hoursBack = 6,
+): T[] {
   const cutoff = Date.now() - hoursBack * 3_600_000;
   return rows.filter((row) => new Date(row.starts_at).getTime() >= cutoff && !row.cancelled_at);
 }

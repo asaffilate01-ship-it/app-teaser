@@ -14,7 +14,13 @@ import { GroundPage } from "@/components/ground/GroundPages";
  * Small live copy of the big screen inside the control panel. It is drawn here rather than framed,
  * because the site refuses to load inside frames (protection against click-jacking).
  */
-export function GroundPreview({ slug, settings }: { slug: string; settings: GroundScreenSettings }) {
+export function GroundPreview({
+  slug,
+  settings,
+}: {
+  slug: string;
+  settings: GroundScreenSettings;
+}) {
   const [board, setBoard] = useState<PublicBoardInput | null>(null);
   const [names, setNames] = useState<Record<string, string>>({});
   const [now, setNow] = useState(() => Date.now());
@@ -65,7 +71,11 @@ export function GroundPreview({ slug, settings }: { slug: string; settings: Grou
         <div className="gs-head-status" />
       </header>
       <section className="gs-body">
-        <GroundPage page={page} board={view} state={(board.liveState ?? {}) as Record<string, unknown>} />
+        <GroundPage
+          page={page}
+          board={view}
+          state={(board.liveState ?? {}) as Record<string, unknown>}
+        />
       </section>
       <footer className="gs-foot">
         <span className="gs-brand">Preview</span>

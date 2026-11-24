@@ -8,13 +8,25 @@ test("a brand-new club has only the club step done", () => {
 });
 
 test("the teams step needs two teams", () => {
-  assert.equal(buildSetupChecklist({ teams: 1, players: 0, members: 1, matches: 0 })[1]?.done, false);
-  assert.equal(buildSetupChecklist({ teams: 2, players: 0, members: 1, matches: 0 })[1]?.done, true);
+  assert.equal(
+    buildSetupChecklist({ teams: 1, players: 0, members: 1, matches: 0 })[1]?.done,
+    false,
+  );
+  assert.equal(
+    buildSetupChecklist({ teams: 2, players: 0, members: 1, matches: 0 })[1]?.done,
+    true,
+  );
 });
 
 test("the players step needs four players (two per team)", () => {
-  assert.equal(buildSetupChecklist({ teams: 2, players: 3, members: 1, matches: 0 })[2]?.done, false);
-  assert.equal(buildSetupChecklist({ teams: 2, players: 4, members: 1, matches: 0 })[2]?.done, true);
+  assert.equal(
+    buildSetupChecklist({ teams: 2, players: 3, members: 1, matches: 0 })[2]?.done,
+    false,
+  );
+  assert.equal(
+    buildSetupChecklist({ teams: 2, players: 4, members: 1, matches: 0 })[2]?.done,
+    true,
+  );
 });
 
 test("the checklist is complete with a second member and a first match", () => {

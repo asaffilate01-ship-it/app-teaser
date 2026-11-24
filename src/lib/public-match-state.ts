@@ -57,8 +57,14 @@ function publicCard(match: CricketMatch, innings: Innings, salt: string | undefi
     const retired = [...(innings.retirements ?? [])].reverse().find((item) => item.batterId === id);
     const out =
       innings.deliveries.find((delivery) => delivery.dismissal?.batterId === id)?.dismissal?.type ??
-      (retired?.kind === "out" ? "retired-out" : retired?.kind === "timed-out" ? "timed-out" : null) ??
-      (retired?.kind === "hurt" && retiredHurtWaiting(innings).includes(id) ? "retired-hurt" : null);
+      (retired?.kind === "out"
+        ? "retired-out"
+        : retired?.kind === "timed-out"
+          ? "timed-out"
+          : null) ??
+      (retired?.kind === "hurt" && retiredHurtWaiting(innings).includes(id)
+        ? "retired-hurt"
+        : null);
     return {
       no: index + 1,
       ...ref(id),
@@ -72,7 +78,8 @@ function publicCard(match: CricketMatch, innings: Innings, salt: string | undefi
     };
   });
   const bowlingOrder: string[] = [];
-  for (const delivery of innings.deliveries) if (!bowlingOrder.includes(delivery.bowlerId)) bowlingOrder.push(delivery.bowlerId);
+  for (const delivery of innings.deliveries)
+    if (!bowlingOrder.includes(delivery.bowlerId)) bowlingOrder.push(delivery.bowlerId);
   const bowling = bowlingOrder.map((id, index) => {
     const row = bowlers.find((item) => item.playerId === id);
     return {
@@ -88,7 +95,12 @@ function publicCard(match: CricketMatch, innings: Innings, salt: string | undefi
   });
   const extras = innings.deliveries.reduce(
     (sum, delivery) =>
-      sum + delivery.extras.wide + delivery.extras.noBall + delivery.extras.bye + delivery.extras.legBye + delivery.extras.penalty,
+      sum +
+      delivery.extras.wide +
+      delivery.extras.noBall +
+      delivery.extras.bye +
+      delivery.extras.legBye +
+      delivery.extras.penalty,
     0,
   );
   return { batting, bowling, extras };
@@ -101,7 +113,12 @@ function publicProgress(match: CricketMatch) {
     for (const delivery of innings.deliveries) {
       const entry = byOver.get(delivery.over) ?? [0, 0];
       entry[0] +=
-        delivery.batterRuns + delivery.extras.wide + delivery.extras.noBall + delivery.extras.bye + delivery.extras.legBye + delivery.extras.penalty;
+        delivery.batterRuns +
+        delivery.extras.wide +
+        delivery.extras.noBall +
+        delivery.extras.bye +
+        delivery.extras.legBye +
+        delivery.extras.penalty;
       if (delivery.dismissal) entry[1] += 1;
       byOver.set(delivery.over, entry);
     }
@@ -120,7 +137,12 @@ function publicPartnership(innings: Innings) {
   let balls = 0;
   for (const delivery of innings.deliveries) {
     runs +=
-      delivery.batterRuns + delivery.extras.wide + delivery.extras.noBall + delivery.extras.bye + delivery.extras.legBye + delivery.extras.penalty;
+      delivery.batterRuns +
+      delivery.extras.wide +
+      delivery.extras.noBall +
+      delivery.extras.bye +
+      delivery.extras.legBye +
+      delivery.extras.penalty;
     if (delivery.legal) balls += 1;
     if (delivery.dismissal) {
       runs = 0;
@@ -130,7 +152,10 @@ function publicPartnership(innings: Innings) {
   return { runs, balls };
 }
 
-export function publicLiveState(match: CricketMatch, options: PublicStateOptions = {}): Record<string, unknown> {
+export function publicLiveState(
+  match: CricketMatch,
+  options: PublicStateOptions = {},
+): Record<string, unknown> {
   const innings = currentInnings(match);
   const summary = summarizeInnings(innings, match.settings.ballsPerOver);
   const striker = findPlayer(match, innings.strikerId);
@@ -180,18 +205,22 @@ export function publicLiveState(match: CricketMatch, options: PublicStateOptions
     result: result?.text ?? null,
     // Toss: team names only.
     toss: match.toss
-      ? { winnerIsHome: match.toss.winnerTeamId === match.teams[0].id, decision: match.toss.decision }
+      ? {
+          winnerIsHome: match.toss.winnerTeamId === match.teams[0].id,
+          decision: match.toss.decision,
+        }
       : null,
     striker: striker
       ? { name: "Striker", runs: strikerFigures?.runs ?? 0, balls: strikerFigures?.balls ?? 0 }
       : null,
-    nonStriker: nonStriker && !batterAlone
-      ? {
-          name: "Non-striker",
-          runs: nonStrikerFigures?.runs ?? 0,
-          balls: nonStrikerFigures?.balls ?? 0,
-        }
-      : null,
+    nonStriker:
+      nonStriker && !batterAlone
+        ? {
+            name: "Non-striker",
+            runs: nonStrikerFigures?.runs ?? 0,
+            balls: nonStrikerFigures?.balls ?? 0,
+          }
+        : null,
     bowler: bowler
       ? {
           name: "Bowler",

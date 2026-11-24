@@ -1,6 +1,9 @@
 /** Shapes drawn over a paused clip, in canvas pixels (1280×720). */
 export type Tool = "pen" | "line" | "arrow" | "circle" | "angle";
-export interface Pt { x: number; y: number }
+export interface Pt {
+  x: number;
+  y: number;
+}
 export interface Shape {
   tool: Tool;
   color: string;
@@ -18,7 +21,8 @@ export function angleAt(a: Pt, vertex: Pt, b: Pt): number {
 }
 
 /** Time in clip B that matches time `t` in clip A once both were lined up (e.g. at ball release). */
-export const syncedTime = (t: number, offset: number, durationB: number) => Math.min(Math.max(0, t + offset), Math.max(0, durationB));
+export const syncedTime = (t: number, offset: number, durationB: number) =>
+  Math.min(Math.max(0, t + offset), Math.max(0, durationB));
 
 /** How many taps/drags each tool needs before it is finished. */
 export const pointsNeeded = (tool: Tool) => (tool === "angle" ? 3 : tool === "pen" ? Infinity : 2);

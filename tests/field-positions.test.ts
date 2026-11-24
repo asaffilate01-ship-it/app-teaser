@@ -1,13 +1,40 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { allFieldZones, closeCatchers, ringSectors, zoneArea, zoneInfo } from "../src/lib/field-positions.ts";
+import {
+  allFieldZones,
+  closeCatchers,
+  ringSectors,
+  zoneArea,
+  zoneInfo,
+} from "../src/lib/field-positions.ts";
 import { recentZones, lastFielderInZone } from "../src/lib/shot-entry.ts";
 import { wagonWheel } from "../src/lib/match-insights.ts";
 
 test("offers inside-the-ring, deep and close-catcher positions", () => {
   assert.equal(ringSectors.length * 2, 22);
   assert.equal(closeCatchers.length, 15);
-  for (const name of ["Third man", "Deep mid-wicket", "Extra cover", "Gully", "First slip", "Second slip", "Third slip", "Fourth slip", "Fly slip", "Silly point", "Silly mid-off", "Silly mid-on", "Short leg", "Backward short leg", "Leg slip", "Leg gully", "Short mid-wicket", "Short extra cover", "Keeper", "Bowler"]) {
+  for (const name of [
+    "Third man",
+    "Deep mid-wicket",
+    "Extra cover",
+    "Gully",
+    "First slip",
+    "Second slip",
+    "Third slip",
+    "Fourth slip",
+    "Fly slip",
+    "Silly point",
+    "Silly mid-off",
+    "Silly mid-on",
+    "Short leg",
+    "Backward short leg",
+    "Leg slip",
+    "Leg gully",
+    "Short mid-wicket",
+    "Short extra cover",
+    "Keeper",
+    "Bowler",
+  ]) {
     assert.ok(allFieldZones.includes(name as never), name);
   }
 });

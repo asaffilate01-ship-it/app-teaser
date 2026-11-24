@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { getCloudClient } from "@/lib/cloud";
-import { formatMoney, periodRange, totalsByCurrency, type EarningsPeriod, type PromoEarningRow } from "@/lib/promo-earnings";
+import {
+  formatMoney,
+  periodRange,
+  totalsByCurrency,
+  type EarningsPeriod,
+  type PromoEarningRow,
+} from "@/lib/promo-earnings";
 import { Empty, OfficeCard, type OfficeProps } from "./ui";
 
 const periods: Array<[EarningsPeriod, string]> = [
@@ -12,7 +18,10 @@ const periods: Array<[EarningsPeriod, string]> = [
 const financeRoles = new Set(["owner", "club_admin", "league_admin", "treasurer"]);
 
 /** The club's share of CricLume ad money from its own screens (estimated until the campaign ends). */
-export function AdEarningsPanel({ organisationId, role }: Pick<OfficeProps, "organisationId" | "role">) {
+export function AdEarningsPanel({
+  organisationId,
+  role,
+}: Pick<OfficeProps, "organisationId" | "role">) {
   const allowed = financeRoles.has(role);
   const [period, setPeriod] = useState<EarningsPeriod>("month");
   const [rows, setRows] = useState<PromoEarningRow[] | null>(null);
@@ -66,8 +75,9 @@ export function AdEarningsPanel({ organisationId, role }: Pick<OfficeProps, "org
           </div>
         </div>
         <p className="office-meta mt-3">
-          When no paid advert is booked, your own club adverts run first, then CricLume adverts from iTechLounge. No revenue
-          share is due on CricLume adverts or on your own club adverts, and they are not counted below.
+          When no paid advert is booked, your own club adverts run first, then CricLume adverts from
+          iTechLounge. No revenue share is due on CricLume adverts or on your own club adverts, and
+          they are not counted below.
         </p>
       </OfficeCard>
 
@@ -77,7 +87,13 @@ export function AdEarningsPanel({ organisationId, role }: Pick<OfficeProps, "org
         action={
           <div className="flex flex-wrap gap-1.5" role="group" aria-label="Period">
             {periods.map(([value, label]) => (
-              <button key={value} type="button" className="office-choice px-3 text-xs font-bold" aria-pressed={period === value} onClick={() => setPeriod(value)}>
+              <button
+                key={value}
+                type="button"
+                className="office-choice px-3 text-xs font-bold"
+                aria-pressed={period === value}
+                onClick={() => setPeriod(value)}
+              >
                 {label}
               </button>
             ))}
@@ -90,7 +106,9 @@ export function AdEarningsPanel({ organisationId, role }: Pick<OfficeProps, "org
             <LoaderCircle className="size-4 animate-spin" /> Loading…
           </p>
         )}
-        {rows && rows.length === 0 && <Empty>No ads have run on your screens in this period yet.</Empty>}
+        {rows && rows.length === 0 && (
+          <Empty>No ads have run on your screens in this period yet.</Empty>
+        )}
         {rows && rows.length > 0 && (
           <div className="space-y-3">
             <div className="grid gap-2 sm:grid-cols-3">
@@ -103,11 +121,15 @@ export function AdEarningsPanel({ organisationId, role }: Pick<OfficeProps, "org
             </div>
             <ul className="divide-y divide-border">
               {rows.map((row) => (
-                <li key={row.campaign_id} className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
+                <li
+                  key={row.campaign_id}
+                  className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm"
+                >
                   <div className="min-w-0">
                     <p className="font-semibold">{row.advertiser}</p>
                     <p className="office-meta">
-                      {row.campaign_name} · {Number(row.club_plays).toLocaleString()} plays · {row.share_percent}% share
+                      {row.campaign_name} · {Number(row.club_plays).toLocaleString()} plays ·{" "}
+                      {row.share_percent}% share
                     </p>
                   </div>
                   <strong>{formatMoney(Number(row.estimated_earnings), row.currency)}</strong>

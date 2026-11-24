@@ -19,7 +19,13 @@ import {
 
 /** Over limit for the current innings: a Super Over is one over. */
 const oversLimit = (match: CricketMatch) => inningsOversLimit(match, currentInnings(match));
-import { ballCaption, ballTone, chaseState, projectedScore, teamInitials } from "@/lib/match-broadcast";
+import {
+  ballCaption,
+  ballTone,
+  chaseState,
+  projectedScore,
+  teamInitials,
+} from "@/lib/match-broadcast";
 
 /** Shield crest with the team's monogram — used wherever a team logo would go. */
 export function TeamCrest({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg" }) {
@@ -41,7 +47,9 @@ export function TeamCrest({ name, size = "md" }: { name: string; size?: "sm" | "
           strokeWidth="3"
         />
       </svg>
-      <span className={`relative font-display font-bold tracking-wide ${text}`}>{teamInitials(name)}</span>
+      <span className={`relative font-display font-bold tracking-wide ${text}`}>
+        {teamInitials(name)}
+      </span>
     </span>
   );
 }
@@ -59,7 +67,10 @@ export function ScoreHero({ match, sync }: { match: CricketMatch; sync?: ReactNo
   const result = matchResult(match);
   const freeHit = match.status === "live" && nextBallIsFreeHit(match);
   const earlier = match.innings.filter(
-    (item) => item.battingTeamId === bowling.id && item.id !== innings.id && isSuperOver(item) === superOver,
+    (item) =>
+      item.battingTeamId === bowling.id &&
+      item.id !== innings.id &&
+      isSuperOver(item) === superOver,
   );
   const bowlingScore = earlier.length
     ? earlier.map((item) => {
@@ -90,7 +101,9 @@ export function ScoreHero({ match, sync }: { match: CricketMatch; sync?: ReactNo
         <span className="hero-chip">{match.settings.format}</span>
         {superOver && <span className="hero-chip hero-chip-alert">Super Over</span>}
         {freeHit && <span className="hero-chip hero-chip-alert">Free hit</span>}
-        {match.settings.ground && <span className="hero-chip hidden sm:inline-flex">{match.settings.ground}</span>}
+        {match.settings.ground && (
+          <span className="hero-chip hidden sm:inline-flex">{match.settings.ground}</span>
+        )}
         {sync}
       </div>
 
@@ -98,23 +111,30 @@ export function ScoreHero({ match, sync }: { match: CricketMatch; sync?: ReactNo
         <div className="flex min-w-0 items-center gap-3 md:gap-4">
           <TeamCrest name={batting.name} size="lg" />
           <div className="min-w-0">
-            <p className="line-clamp-2 break-words text-[11px] font-bold uppercase leading-tight tracking-[0.06em] sm:text-xs sm:tracking-[0.12em] md:text-sm">{batting.name}</p>
+            <p className="line-clamp-2 break-words text-[11px] font-bold uppercase leading-tight tracking-[0.06em] sm:text-xs sm:tracking-[0.12em] md:text-sm">
+              {batting.name}
+            </p>
             <p className="font-display text-4xl font-bold leading-none tabular-nums text-gold md:text-6xl">
               {summary.runs}
               <span className="text-2xl md:text-4xl">/{summary.wickets}</span>
             </p>
             <p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground md:text-xs">
               {summary.overs}
-              {oversLimit(match) ? ` / ${oversLimit(match)}` : ""} {oversLimit(match) === 1 ? "over" : "overs"}
+              {oversLimit(match) ? ` / ${oversLimit(match)}` : ""}{" "}
+              {oversLimit(match) === 1 ? "over" : "overs"}
               {innings.declared ? " · dec" : ""}
             </p>
           </div>
         </div>
-        <span className="hero-vs" aria-hidden="true">v</span>
+        <span className="hero-vs" aria-hidden="true">
+          v
+        </span>
         <div className="flex min-w-0 flex-row-reverse items-center gap-3 text-right md:gap-4">
           <TeamCrest name={bowling.name} size="lg" />
           <div className="min-w-0">
-            <p className="line-clamp-2 break-words text-[11px] font-bold uppercase leading-tight tracking-[0.06em] sm:text-xs sm:tracking-[0.12em] md:text-sm">{bowling.name}</p>
+            <p className="line-clamp-2 break-words text-[11px] font-bold uppercase leading-tight tracking-[0.06em] sm:text-xs sm:tracking-[0.12em] md:text-sm">
+              {bowling.name}
+            </p>
             <p className="mt-1 font-display text-lg text-muted-foreground md:text-2xl">
               {bowlingScore ? bowlingScore.join(" & ") : "Yet to bat"}
             </p>
@@ -168,7 +188,9 @@ export function CreaseStrip({
       <div className="min-w-0 text-right">
         <p className="truncate text-sm font-semibold">{findPlayer(match, bowlerId)?.name ?? "—"}</p>
         <p className="text-sm tabular-nums text-gold">
-          {bowler ? `${bowler.overs}-${bowler.maidens}-${bowler.runs}-${bowler.wickets}` : "0-0-0-0"}
+          {bowler
+            ? `${bowler.overs}-${bowler.maidens}-${bowler.runs}-${bowler.wickets}`
+            : "0-0-0-0"}
         </p>
       </div>
     </div>
@@ -182,7 +204,9 @@ export function BallTrail({ match, limit = 6 }: { match: CricketMatch; limit?: n
     <section className="broadcast-panel" aria-label="Recent deliveries">
       <p className="panel-kicker text-center">Recent deliveries</p>
       {balls.length === 0 ? (
-        <p className="mt-3 text-center text-sm text-muted-foreground">No balls recorded yet — tap a run to start.</p>
+        <p className="mt-3 text-center text-sm text-muted-foreground">
+          No balls recorded yet — tap a run to start.
+        </p>
       ) : (
         <ol className="ball-trail mt-3">
           {balls.map((ball) => (
@@ -216,7 +240,11 @@ export function RateStrip({ match }: { match: CricketMatch }) {
     { icon: Gauge, label: "Run rate", value: summary.runRate.toFixed(2) },
     chase?.requiredRate != null
       ? { icon: Target, label: "Required rate", value: chase.requiredRate.toFixed(2) }
-      : { icon: TrendingUp, label: "Projected", value: projected != null ? String(projected) : "—" },
+      : {
+          icon: TrendingUp,
+          label: "Projected",
+          value: projected != null ? String(projected) : "—",
+        },
   ];
   return (
     <div className="broadcast-panel grid grid-cols-2 divide-x divide-white/10 py-4">
@@ -224,7 +252,9 @@ export function RateStrip({ match }: { match: CricketMatch }) {
         <div key={label} className="flex items-center justify-center gap-3">
           <Icon className="size-7 text-gold" aria-hidden="true" />
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              {label}
+            </p>
             <p className="font-display text-2xl font-bold tabular-nums">{value}</p>
           </div>
         </div>

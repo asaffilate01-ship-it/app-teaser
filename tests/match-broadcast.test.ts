@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { ballCaption, ballTone, chaseState, projectedScore, teamInitials } from "../src/lib/match-broadcast.ts";
+import {
+  ballCaption,
+  ballTone,
+  chaseState,
+  projectedScore,
+  teamInitials,
+} from "../src/lib/match-broadcast.ts";
 
 const none = { wide: 0, noBall: 0, bye: 0, legBye: 0, penalty: 0 };
 
@@ -16,7 +22,11 @@ test("projected score uses the current run rate over the full innings", () => {
 });
 
 test("chase needs runs, balls left and required rate", () => {
-  assert.deepEqual(chaseState(150, 113, 110, 20), { runsNeeded: 37, ballsLeft: 10, requiredRate: 22.2 });
+  assert.deepEqual(chaseState(150, 113, 110, 20), {
+    runsNeeded: 37,
+    ballsLeft: 10,
+    requiredRate: 22.2,
+  });
   assert.equal(chaseState(null, 10, 6, 20), null);
 });
 

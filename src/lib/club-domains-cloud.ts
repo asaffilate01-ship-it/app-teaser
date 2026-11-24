@@ -4,7 +4,8 @@ import { friendly } from "./club-office-cloud";
 import type { DomainStatus } from "./club-domain-records";
 
 export type ClubDomainRow = Database["public"]["Tables"]["club_site_domains"]["Row"];
-export type StaffDomainRow = Database["public"]["Functions"]["admin_club_site_domains"]["Returns"][number];
+export type StaffDomainRow =
+  Database["public"]["Functions"]["admin_club_site_domains"]["Returns"][number];
 
 function fail(error: { message: string } | null) {
   if (error) throw new Error(friendly(error.message));
@@ -26,15 +27,23 @@ export const clubDomainCloud = {
     return { allowed: allowed.data === true, domain: domain.data };
   },
   async request(organisationId: string, hostname: string) {
-    const { error } = await supabase.rpc("request_club_site_domain", { p_organisation_id: organisationId, p_hostname: hostname });
+    const { error } = await supabase.rpc("request_club_site_domain", {
+      p_organisation_id: organisationId,
+      p_hostname: hostname,
+    });
     fail(error);
   },
   async requestCriclume(organisationId: string, label: string) {
-    const { error } = await supabase.rpc("request_club_criclume_address", { p_organisation_id: organisationId, p_label: label });
+    const { error } = await supabase.rpc("request_club_criclume_address", {
+      p_organisation_id: organisationId,
+      p_label: label,
+    });
     fail(error);
   },
   async remove(organisationId: string) {
-    const { error } = await supabase.rpc("remove_club_site_domain", { p_organisation_id: organisationId });
+    const { error } = await supabase.rpc("remove_club_site_domain", {
+      p_organisation_id: organisationId,
+    });
     fail(error);
   },
 };
@@ -45,7 +54,10 @@ export const staffDomainCloud = {
     fail(error);
     return data ?? [];
   },
-  async update(id: string, patch: { status: DomainStatus; aTarget: string; records: string; note: string }) {
+  async update(
+    id: string,
+    patch: { status: DomainStatus; aTarget: string; records: string; note: string },
+  ) {
     const { error } = await supabase.rpc("admin_update_club_site_domain", {
       p_id: id,
       p_status: patch.status,

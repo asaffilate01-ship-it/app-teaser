@@ -16,7 +16,8 @@ export const getPromos = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PromoSet> => {
     try {
       const { promosFor, organisationForBoard } = await import("./promo.server");
-      const organisationId = data.slug && data.surface !== "app" ? await organisationForBoard(data.slug) : null;
+      const organisationId =
+        data.slug && data.surface !== "app" ? await organisationForBoard(data.slug) : null;
       return await promosFor(data.surface, organisationId);
     } catch (error) {
       console.error("Ads could not load", error);
@@ -26,11 +27,14 @@ export const getPromos = createServerFn({ method: "POST" })
 
 /** Count plays on a public screen; plays credit the club that owns the published scoreboard. */
 export const reportPromoPlays = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => z.object({ surface, slug: slug.optional(), creativeIds: ids }).parse(data))
+  .inputValidator((data: unknown) =>
+    z.object({ surface, slug: slug.optional(), creativeIds: ids }).parse(data),
+  )
   .handler(async ({ data }) => {
     try {
       const { countPlays, organisationForBoard } = await import("./promo.server");
-      const organisationId = data.slug && data.surface !== "app" ? await organisationForBoard(data.slug) : null;
+      const organisationId =
+        data.slug && data.surface !== "app" ? await organisationForBoard(data.slug) : null;
       return { counted: await countPlays(data.surface, organisationId, data.creativeIds) };
     } catch (error) {
       console.error("Ad plays could not be counted", error);
@@ -41,13 +45,17 @@ export const reportPromoPlays = createServerFn({ method: "POST" })
 /** Ads inside the signed-in app. */
 export const getMemberPromos = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => z.object({ organisationId: z.string().uuid().nullable().optional() }).parse(data ?? {}))
+  .inputValidator((data: unknown) =>
+    z.object({ organisationId: z.string().uuid().nullable().optional() }).parse(data ?? {}),
+  )
   .handler(async ({ data, context }): Promise<PromoSet> => {
     try {
       // Club adverts only for a club the signed-in person really belongs to.
       let organisationId: string | null = null;
       if (data.organisationId) {
-        const { data: member } = await context.supabase.rpc("is_org_member", { p_organisation_id: data.organisationId });
+        const { data: member } = await context.supabase.rpc("is_org_member", {
+          p_organisation_id: data.organisationId,
+        });
         organisationId = member === true ? data.organisationId : null;
       }
       const { promosFor } = await import("./promo.server");
@@ -61,12 +69,16 @@ export const getMemberPromos = createServerFn({ method: "POST" })
 /** Count plays inside the app; they only credit a club the signed-in person really belongs to. */
 export const reportMemberPromoPlays = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => z.object({ organisationId: z.string().uuid().nullable(), creativeIds: ids }).parse(data))
+  .inputValidator((data: unknown) =>
+    z.object({ organisationId: z.string().uuid().nullable(), creativeIds: ids }).parse(data),
+  )
   .handler(async ({ data, context }) => {
     try {
       let organisationId: string | null = null;
       if (data.organisationId) {
-        const { data: member } = await context.supabase.rpc("is_org_member", { p_organisation_id: data.organisationId });
+        const { data: member } = await context.supabase.rpc("is_org_member", {
+          p_organisation_id: data.organisationId,
+        });
         organisationId = member === true ? data.organisationId : null;
       }
       const { countPlays } = await import("./promo.server");
@@ -91,10 +103,16 @@ export const reportViewerBoardPlays = createServerFn({ method: "POST" })
       if (!clubs) return { counted: 0 };
       const memberOf: string[] = [];
       for (const organisationId of clubs.playing) {
-        const { data: member } = await context.supabase.rpc("is_org_member", { p_organisation_id: organisationId });
+        const { data: member } = await context.supabase.rpc("is_org_member", {
+          p_organisation_id: organisationId,
+        });
         if (member === true) memberOf.push(organisationId);
       }
-      const organisationId = creditedClub({ host: clubs.host, playing: clubs.playing, viewerClubs: memberOf });
+      const organisationId = creditedClub({
+        host: clubs.host,
+        playing: clubs.playing,
+        viewerClubs: memberOf,
+      });
       return { counted: await countPlays("scoreboard", organisationId, data.creativeIds) };
     } catch (error) {
       console.error("Ad plays could not be counted", error);

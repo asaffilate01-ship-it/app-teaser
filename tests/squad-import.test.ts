@@ -5,12 +5,18 @@ import { parseCsv, planSquadImport } from "../src/lib/squad-import.ts";
 const none = { teams: [], players: [] };
 
 test("CSV parsing handles quotes, commas inside quotes and CRLF", () => {
-  assert.deepEqual(parseCsv('Team,Player\r\n"Lions, 1st XI","O""Brien"\r\n'), [["Team", "Player"], ["Lions, 1st XI", 'O"Brien']]);
+  assert.deepEqual(parseCsv('Team,Player\r\n"Lions, 1st XI","O""Brien"\r\n'), [
+    ["Team", "Player"],
+    ["Lions, 1st XI", 'O"Brien'],
+  ]);
 });
 
 test("new teams are created once and players are attached", () => {
   const plan = planSquadImport("Team,Player\nLions,Ali\nLions,Ben\nTigers,Cal\n", none);
-  assert.deepEqual(plan.newTeams.map((team) => team.name), ["Lions", "Tigers"]);
+  assert.deepEqual(
+    plan.newTeams.map((team) => team.name),
+    ["Lions", "Tigers"],
+  );
   assert.equal(plan.players.length, 3);
 });
 
@@ -20,12 +26,18 @@ test("existing teams match by name in any case and existing players are skipped"
     players: [{ name: "Ali", teamIds: ["t1"] }],
   });
   assert.equal(plan.newTeams.length, 0);
-  assert.deepEqual(plan.players.map((player) => player.name), ["Dev"]);
+  assert.deepEqual(
+    plan.players.map((player) => player.name),
+    ["Dev"],
+  );
   assert.equal(plan.skipped[0]?.line, 2);
 });
 
 test("junior players are never given a public profile", () => {
-  const plan = planSquadImport("Team,Player,Junior,Public\nU13,Alex,yes,yes\nFirst XI,Sam,no,yes\n", none);
+  const plan = planSquadImport(
+    "Team,Player,Junior,Public\nU13,Alex,yes,yes\nFirst XI,Sam,no,yes\n",
+    none,
+  );
   assert.equal(plan.players[0]?.publicProfile, false);
   assert.equal(plan.players[1]?.publicProfile, true);
 });

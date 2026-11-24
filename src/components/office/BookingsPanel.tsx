@@ -25,15 +25,26 @@ export function BookingsPanel(props: OfficeProps) {
   const manager = can(role, "bookings.manage");
   const requester = can(role, "bookings.request");
   const ours = data.bookings.filter((booking) => booking.organisation_id === organisationId);
-  const sent = data.bookings.filter((booking) => booking.requester_organisation_id === organisationId && booking.organisation_id !== organisationId);
-  const groundName = (id: string) => data.grounds.find((ground) => ground.id === id)?.name ?? data.bookableGrounds.find((g) => g.ground_id === id)?.ground_name ?? "Ground";
-  const visible = ours.filter((booking) => new Date(booking.ends_at).getTime() > Date.now() && booking.status !== "cancelled");
+  const sent = data.bookings.filter(
+    (booking) =>
+      booking.requester_organisation_id === organisationId &&
+      booking.organisation_id !== organisationId,
+  );
+  const groundName = (id: string) =>
+    data.grounds.find((ground) => ground.id === id)?.name ??
+    data.bookableGrounds.find((g) => g.ground_id === id)?.ground_name ??
+    "Ground";
+  const visible = ours.filter(
+    (booking) => new Date(booking.ends_at).getTime() > Date.now() && booking.status !== "cancelled",
+  );
   return (
     <div className="space-y-4">
       {requester && data.grounds.length > 0 && <BookOwn {...props} />}
       <OfficeCard title="Our ground calendar" description="Approved bookings can never overlap.">
         {visible.length === 0 ? (
-          <Empty>{data.grounds.length ? "No upcoming bookings." : "Add a ground in Competitions first."}</Empty>
+          <Empty>
+            {data.grounds.length ? "No upcoming bookings." : "Add a ground in Competitions first."}
+          </Empty>
         ) : (
           <div className="space-y-2">
             {visible.map((booking) => (
@@ -41,8 +52,15 @@ export function BookingsPanel(props: OfficeProps) {
                 <span>
                   <span className="font-bold">{booking.title}</span>
                   <span className="office-meta block">
-                    {groundName(booking.ground_id)} · {when(booking.starts_at)} – {new Date(booking.ends_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    {booking.requester_organisation_id && booking.requester_organisation_id !== organisationId ? " · request from another club" : ""}
+                    {groundName(booking.ground_id)} · {when(booking.starts_at)} –{" "}
+                    {new Date(booking.ends_at).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    {booking.requester_organisation_id &&
+                    booking.requester_organisation_id !== organisationId
+                      ? " · request from another club"
+                      : ""}
                   </span>
                   {booking.note && <span className="office-meta block">“{booking.note}”</span>}
                 </span>
@@ -50,16 +68,40 @@ export function BookingsPanel(props: OfficeProps) {
                   {statusPill(booking)}
                   {manager && booking.status === "requested" && (
                     <>
-                      <button type="button" className="app-chip-button" onClick={() => void act(() => office.decideBooking(booking.id, "approved"), "Booking approved")}>
+                      <button
+                        type="button"
+                        className="app-chip-button"
+                        onClick={() =>
+                          void act(
+                            () => office.decideBooking(booking.id, "approved"),
+                            "Booking approved",
+                          )
+                        }
+                      >
                         Approve
                       </button>
-                      <button type="button" className="app-chip-button" onClick={() => void act(() => office.decideBooking(booking.id, "declined"), "Booking declined")}>
+                      <button
+                        type="button"
+                        className="app-chip-button"
+                        onClick={() =>
+                          void act(
+                            () => office.decideBooking(booking.id, "declined"),
+                            "Booking declined",
+                          )
+                        }
+                      >
                         Decline
                       </button>
                     </>
                   )}
                   {(manager || booking.requested_by === data.userId) && (
-                    <button type="button" className="app-chip-button" onClick={() => void act(() => office.cancelBooking(booking.id), "Booking cancelled")}>
+                    <button
+                      type="button"
+                      className="app-chip-button"
+                      onClick={() =>
+                        void act(() => office.cancelBooking(booking.id), "Booking cancelled")
+                      }
+                    >
                       Cancel
                     </button>
                   )}
@@ -70,7 +112,10 @@ export function BookingsPanel(props: OfficeProps) {
         )}
       </OfficeCard>
       {manager && data.grounds.length > 0 && (
-        <OfficeCard title="Open our grounds to other clubs" description="Other clubs see the ground name, your note and busy times — never who booked.">
+        <OfficeCard
+          title="Open our grounds to other clubs"
+          description="Other clubs see the ground name, your note and busy times — never who booked."
+        >
           <div className="space-y-2">
             {data.grounds.map((ground) => (
               <div key={ground.id} className="office-row">
@@ -81,8 +126,19 @@ export function BookingsPanel(props: OfficeProps) {
                     type="button"
                     className="app-chip-button"
                     onClick={() => {
-                      const note = ground.bookable ? ground.booking_note : window.prompt("Note for other clubs (price, nets, contact)", ground.booking_note ?? "") ?? null;
-                      void act(() => office.setGroundBookable(ground.id, !ground.bookable, note?.slice(0, 300) || null));
+                      const note = ground.bookable
+                        ? ground.booking_note
+                        : (window.prompt(
+                            "Note for other clubs (price, nets, contact)",
+                            ground.booking_note ?? "",
+                          ) ?? null);
+                      void act(() =>
+                        office.setGroundBookable(
+                          ground.id,
+                          !ground.bookable,
+                          note?.slice(0, 300) || null,
+                        ),
+                      );
                     }}
                   >
                     {ground.bookable ? "Close to requests" : "Open to requests"}
@@ -109,7 +165,13 @@ export function BookingsPanel(props: OfficeProps) {
                 <span className="flex items-center gap-1.5">
                   {statusPill(booking)}
                   {booking.status !== "cancelled" && booking.status !== "declined" && (
-                    <button type="button" className="app-chip-button" onClick={() => void act(() => office.cancelBooking(booking.id), "Request cancelled")}>
+                    <button
+                      type="button"
+                      className="app-chip-button"
+                      onClick={() =>
+                        void act(() => office.cancelBooking(booking.id), "Request cancelled")
+                      }
+                    >
                       Cancel
                     </button>
                   )}
@@ -123,14 +185,33 @@ export function BookingsPanel(props: OfficeProps) {
   );
 }
 
-function BookingFields({ purpose, setPurpose, title, setTitle, startsAt, setStartsAt, endsAt, setEndsAt }: {
-  purpose: string; setPurpose: (value: string) => void; title: string; setTitle: (value: string) => void;
-  startsAt: string; setStartsAt: (value: string) => void; endsAt: string; setEndsAt: (value: string) => void;
+function BookingFields({
+  purpose,
+  setPurpose,
+  title,
+  setTitle,
+  startsAt,
+  setStartsAt,
+  endsAt,
+  setEndsAt,
+}: {
+  purpose: string;
+  setPurpose: (value: string) => void;
+  title: string;
+  setTitle: (value: string) => void;
+  startsAt: string;
+  setStartsAt: (value: string) => void;
+  endsAt: string;
+  setEndsAt: (value: string) => void;
 }) {
   return (
     <>
       <OfficeField label="What for">
-        <select className="scorer-input" value={purpose} onChange={(event) => setPurpose(event.target.value)}>
+        <select
+          className="scorer-input"
+          value={purpose}
+          onChange={(event) => setPurpose(event.target.value)}
+        >
           {purposes.map(([value, label]) => (
             <option key={value} value={value}>
               {label}
@@ -139,13 +220,32 @@ function BookingFields({ purpose, setPurpose, title, setTitle, startsAt, setStar
         </select>
       </OfficeField>
       <OfficeField label="Title">
-        <input required maxLength={120} className="scorer-input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="2nd XI nets" />
+        <input
+          required
+          maxLength={120}
+          className="scorer-input"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="2nd XI nets"
+        />
       </OfficeField>
       <OfficeField label="From">
-        <input required type="datetime-local" className="scorer-input" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} />
+        <input
+          required
+          type="datetime-local"
+          className="scorer-input"
+          value={startsAt}
+          onChange={(event) => setStartsAt(event.target.value)}
+        />
       </OfficeField>
       <OfficeField label="Until">
-        <input required type="datetime-local" className="scorer-input" value={endsAt} onChange={(event) => setEndsAt(event.target.value)} />
+        <input
+          required
+          type="datetime-local"
+          className="scorer-input"
+          value={endsAt}
+          onChange={(event) => setEndsAt(event.target.value)}
+        />
       </OfficeField>
     </>
   );
@@ -161,7 +261,11 @@ function BookOwn({ data, role, organisationId, act }: OfficeProps) {
   const end = fromLocal(endsAt);
   const taken = data.bookings
     .filter((booking) => booking.ground_id === groundId && booking.status === "approved")
-    .map((booking) => ({ startsAt: booking.starts_at, endsAt: booking.ends_at, title: booking.title }));
+    .map((booking) => ({
+      startsAt: booking.starts_at,
+      endsAt: booking.ends_at,
+      title: booking.title,
+    }));
   const clash = start && end ? clashes({ startsAt: start, endsAt: end }, taken) : [];
   const direct = can(role, "bookings.manage");
   const submit = async (event: FormEvent) => {
@@ -183,10 +287,22 @@ function BookOwn({ data, role, organisationId, act }: OfficeProps) {
     if (ok) setTitle("");
   };
   return (
-    <OfficeCard title="Book our ground or nets" description={direct ? "Your booking is approved straight away." : "A club admin approves your request."}>
-      <form onSubmit={(event) => void submit(event)} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+    <OfficeCard
+      title="Book our ground or nets"
+      description={
+        direct ? "Your booking is approved straight away." : "A club admin approves your request."
+      }
+    >
+      <form
+        onSubmit={(event) => void submit(event)}
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5"
+      >
         <OfficeField label="Ground">
-          <select className="scorer-input" value={groundId} onChange={(event) => setGroundId(event.target.value)}>
+          <select
+            className="scorer-input"
+            value={groundId}
+            onChange={(event) => setGroundId(event.target.value)}
+          >
             {data.grounds.map((ground) => (
               <option key={ground.id} value={ground.id}>
                 {ground.name}
@@ -194,7 +310,9 @@ function BookOwn({ data, role, organisationId, act }: OfficeProps) {
             ))}
           </select>
         </OfficeField>
-        <BookingFields {...{ purpose, setPurpose, title, setTitle, startsAt, setStartsAt, endsAt, setEndsAt }} />
+        <BookingFields
+          {...{ purpose, setPurpose, title, setTitle, startsAt, setStartsAt, endsAt, setEndsAt }}
+        />
         {clash.length > 0 && (
           <p className="sm:col-span-2 lg:col-span-4">
             <Pill tone="bad">Clashes with {clash.map((item) => item.title).join(", ")}</Pill>
@@ -221,7 +339,13 @@ function RequestOther({ data, organisationId, act }: OfficeProps) {
   const ground = data.bookableGrounds.find((item) => item.ground_id === groundId);
   const start = fromLocal(startsAt);
   const end = fromLocal(endsAt);
-  const clash = start && end && busy ? clashes({ startsAt: start, endsAt: end }, busy.map((slot) => ({ startsAt: slot.starts_at, endsAt: slot.ends_at }))) : [];
+  const clash =
+    start && end && busy
+      ? clashes(
+          { startsAt: start, endsAt: end },
+          busy.map((slot) => ({ startsAt: slot.starts_at, endsAt: slot.ends_at })),
+        )
+      : [];
   const choose = async (id: string) => {
     setGroundId(id);
     setBusy(null);
@@ -236,20 +360,37 @@ function RequestOther({ data, organisationId, act }: OfficeProps) {
   };
   if (!data.bookableGrounds.length) return null;
   return (
-    <OfficeCard title="Book another club's ground" description="Clubs that open their grounds appear here. They approve or decline your request.">
+    <OfficeCard
+      title="Book another club's ground"
+      description="Clubs that open their grounds appear here. They approve or decline your request."
+    >
       <form
         className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
         onSubmit={(event) => {
           event.preventDefault();
           if (!ground || !start || !end || clash.length) return;
           void act(
-            () => office.requestOtherGround({ groundId: ground.ground_id, requesterOrg: organisationId, title: title.trim(), purpose, startsAt: start, endsAt: end, note: note.trim() }),
+            () =>
+              office.requestOtherGround({
+                groundId: ground.ground_id,
+                requesterOrg: organisationId,
+                title: title.trim(),
+                purpose,
+                startsAt: start,
+                endsAt: end,
+                note: note.trim(),
+              }),
             `Request sent to ${ground.organisation_name}`,
           ).then((ok) => ok && setTitle(""));
         }}
       >
         <OfficeField label="Ground" className="sm:col-span-2">
-          <select required className="scorer-input" value={groundId} onChange={(event) => void choose(event.target.value)}>
+          <select
+            required
+            className="scorer-input"
+            value={groundId}
+            onChange={(event) => void choose(event.target.value)}
+          >
             <option value="">Choose a ground</option>
             {data.bookableGrounds.map((item) => (
               <option key={item.ground_id} value={item.ground_id}>
@@ -258,13 +399,26 @@ function RequestOther({ data, organisationId, act }: OfficeProps) {
             ))}
           </select>
         </OfficeField>
-        {ground?.booking_note && <p className="office-meta sm:col-span-2 self-end">{ground.booking_note}</p>}
-        <BookingFields {...{ purpose, setPurpose, title, setTitle, startsAt, setStartsAt, endsAt, setEndsAt }} />
+        {ground?.booking_note && (
+          <p className="office-meta sm:col-span-2 self-end">{ground.booking_note}</p>
+        )}
+        <BookingFields
+          {...{ purpose, setPurpose, title, setTitle, startsAt, setStartsAt, endsAt, setEndsAt }}
+        />
         <OfficeField label="Message" className="sm:col-span-2 lg:col-span-3">
-          <input maxLength={500} className="scorer-input" value={note} onChange={(event) => setNote(event.target.value)} placeholder="Two teams, 40 overs, we bring our own balls" />
+          <input
+            maxLength={500}
+            className="scorer-input"
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder="Two teams, 40 overs, we bring our own balls"
+          />
         </OfficeField>
         <div className="flex items-end">
-          <button disabled={!ground || !start || !end || clash.length > 0} className="action-primary w-full">
+          <button
+            disabled={!ground || !start || !end || clash.length > 0}
+            className="action-primary w-full"
+          >
             Send request
           </button>
         </div>
@@ -273,7 +427,10 @@ function RequestOther({ data, organisationId, act }: OfficeProps) {
             <span className="office-label">Already booked (next 90 days)</span>
             <div className="flex flex-wrap gap-1.5">
               {busy.slice(0, 24).map((slot) => (
-                <Pill key={slot.starts_at} tone={clash.some((item) => item.startsAt === slot.starts_at) ? "bad" : undefined}>
+                <Pill
+                  key={slot.starts_at}
+                  tone={clash.some((item) => item.startsAt === slot.starts_at) ? "bad" : undefined}
+                >
                   {when(slot.starts_at)}
                 </Pill>
               ))}

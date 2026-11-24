@@ -17,7 +17,14 @@ import {
   Triangle,
   Undo2,
 } from "lucide-react";
-import { angleAt, pointsNeeded, syncedTime, type Pt, type Shape, type Tool } from "@/lib/video-annotate";
+import {
+  angleAt,
+  pointsNeeded,
+  syncedTime,
+  type Pt,
+  type Shape,
+  type Tool,
+} from "@/lib/video-annotate";
 
 type Angle = { id: string; name: string; url: string };
 const W = 1280;
@@ -32,7 +39,9 @@ const tools: { id: Tool; label: string; icon: typeof PenLine }[] = [
 ];
 
 const cssColor = (token: string) =>
-  typeof window === "undefined" ? "#f5c542" : getComputedStyle(document.documentElement).getPropertyValue(token).trim() || "#f5c542";
+  typeof window === "undefined"
+    ? "#f5c542"
+    : getComputedStyle(document.documentElement).getPropertyValue(token).trim() || "#f5c542";
 
 function paint(ctx: CanvasRenderingContext2D, shapes: readonly Shape[]) {
   ctx.clearRect(0, 0, W, H);
@@ -112,7 +121,10 @@ function Clip({
   }, [shapes]);
   const point = (event: PointerEvent<HTMLCanvasElement>): Pt => {
     const rect = event.currentTarget.getBoundingClientRect();
-    return { x: ((event.clientX - rect.left) / rect.width) * W, y: ((event.clientY - rect.top) / rect.height) * H };
+    return {
+      x: ((event.clientX - rect.left) / rect.width) * W,
+      y: ((event.clientY - rect.top) / rect.height) * H,
+    };
   };
   const redraw = () => {
     const ctx = canvasRef.current?.getContext("2d");
@@ -135,7 +147,10 @@ function Clip({
     if (!draft.current || event.buttons === 0) return;
     const p = point(event);
     const d = draft.current;
-    draft.current = d.tool === "pen" ? { ...d, points: [...d.points, p] } : { ...d, points: [d.points[0]!, p, ...d.points.slice(2)] };
+    draft.current =
+      d.tool === "pen"
+        ? { ...d, points: [...d.points, p] }
+        : { ...d, points: [d.points[0]!, p, ...d.points.slice(2)] };
     redraw();
   };
   const up = () => {
@@ -162,8 +177,19 @@ function Clip({
         muted
         preload="auto"
       />
-      <canvas ref={canvasRef} width={W} height={H} onPointerDown={down} onPointerMove={move} onPointerUp={up} className="absolute inset-0 size-full touch-none" aria-label={`Drawing layer for ${angle.name}`} />
-      <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold text-white/90">{angle.name}</span>
+      <canvas
+        ref={canvasRef}
+        width={W}
+        height={H}
+        onPointerDown={down}
+        onPointerMove={move}
+        onPointerUp={up}
+        className="absolute inset-0 size-full touch-none"
+        aria-label={`Drawing layer for ${angle.name}`}
+      />
+      <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold text-white/90">
+        {angle.name}
+      </span>
     </div>
   );
 }
@@ -193,7 +219,11 @@ export function VideoLab() {
     const added = Array.from(event.target.files ?? []).map((file, index) => {
       const url = URL.createObjectURL(file);
       urls.current.push(url);
-      return { id: `${file.name}-${file.lastModified}-${index}-${Date.now()}`, name: file.name.replace(/\.[^.]+$/, "").slice(0, 40), url };
+      return {
+        id: `${file.name}-${file.lastModified}-${index}-${Date.now()}`,
+        name: file.name.replace(/\.[^.]+$/, "").slice(0, 40),
+        url,
+      };
     });
     event.target.value = "";
     setAngles((current) => [...current, ...added]);
@@ -207,12 +237,17 @@ export function VideoLab() {
   };
   const follow = () => {
     if (!b || offset === null || !aRef.current || !bRef.current) return;
-    bRef.current.currentTime = syncedTime(aRef.current.currentTime, offset, bRef.current.duration || 0);
+    bRef.current.currentTime = syncedTime(
+      aRef.current.currentTime,
+      offset,
+      bRef.current.duration || 0,
+    );
   };
   const step = (frames: number) => {
     aRef.current?.pause();
     bRef.current?.pause();
-    if (aRef.current) aRef.current.currentTime = Math.max(0, aRef.current.currentTime + frames / 30);
+    if (aRef.current)
+      aRef.current.currentTime = Math.max(0, aRef.current.currentTime + frames / 30);
     if (b && bRef.current) {
       if (offset !== null) follow();
       else bRef.current.currentTime = Math.max(0, bRef.current.currentTime + frames / 30);
@@ -256,7 +291,8 @@ export function VideoLab() {
     link.click();
   };
   const color = cssColor(colorToken);
-  const setFor = (id: string) => (next: Shape[]) => setShapes((current) => ({ ...current, [id]: next }));
+  const setFor = (id: string) => (next: Shape[]) =>
+    setShapes((current) => ({ ...current, [id]: next }));
 
   return (
     <section className="space-y-5">
@@ -264,7 +300,9 @@ export function VideoLab() {
         <div>
           <p className="panel-kicker">Coaching review</p>
           <h2 className="font-display text-3xl font-bold">Video lab</h2>
-          <p className="text-xs text-muted-foreground">Draw on a paused frame, measure body angles, and compare two clips side by side.</p>
+          <p className="text-xs text-muted-foreground">
+            Draw on a paused frame, measure body angles, and compare two clips side by side.
+          </p>
         </div>
         <label className="action-primary cursor-pointer">
           <Camera className="size-4" /> Add clips
@@ -274,20 +312,45 @@ export function VideoLab() {
       {a ? (
         <>
           <div className="flex flex-wrap items-center gap-2">
-            <select className="scorer-input w-auto" value={aId} onChange={(e) => setAId(e.target.value)} aria-label="Main clip">
+            <select
+              className="scorer-input w-auto"
+              value={aId}
+              onChange={(e) => setAId(e.target.value)}
+              aria-label="Main clip"
+            >
               {angles.map((x) => (
-                <option key={x.id} value={x.id}>{x.name}</option>
+                <option key={x.id} value={x.id}>
+                  {x.name}
+                </option>
               ))}
             </select>
-            <button type="button" className="app-chip-button" aria-pressed={compare} disabled={angles.length < 2} onClick={() => setCompare(!compare)}>
+            <button
+              type="button"
+              className="app-chip-button"
+              aria-pressed={compare}
+              disabled={angles.length < 2}
+              onClick={() => setCompare(!compare)}
+            >
               <Columns2 className="size-4" /> Side by side
             </button>
             {compare && (
-              <select className="scorer-input w-auto" value={bId} onChange={(e) => { setBId(e.target.value); setOffset(null); }} aria-label="Second clip">
+              <select
+                className="scorer-input w-auto"
+                value={bId}
+                onChange={(e) => {
+                  setBId(e.target.value);
+                  setOffset(null);
+                }}
+                aria-label="Second clip"
+              >
                 <option value="">Choose second clip</option>
-                {angles.filter((x) => x.id !== aId).map((x) => (
-                  <option key={x.id} value={x.id}>{x.name}</option>
-                ))}
+                {angles
+                  .filter((x) => x.id !== aId)
+                  .map((x) => (
+                    <option key={x.id} value={x.id}>
+                      {x.name}
+                    </option>
+                  ))}
               </select>
             )}
             {b && (
@@ -295,22 +358,84 @@ export function VideoLab() {
                 type="button"
                 className="app-chip-button"
                 aria-pressed={offset !== null}
-                onClick={() => setOffset(offset !== null ? null : (bRef.current?.currentTime ?? 0) - (aRef.current?.currentTime ?? 0))}
+                onClick={() =>
+                  setOffset(
+                    offset !== null
+                      ? null
+                      : (bRef.current?.currentTime ?? 0) - (aRef.current?.currentTime ?? 0),
+                  )
+                }
                 title="Pause both clips on the same moment (e.g. ball release), then lock them together"
               >
-                <Link2 className="size-4" /> {offset !== null ? `Locked (${offset >= 0 ? "+" : ""}${offset.toFixed(2)}s)` : "Lock in step"}
+                <Link2 className="size-4" />{" "}
+                {offset !== null
+                  ? `Locked (${offset >= 0 ? "+" : ""}${offset.toFixed(2)}s)`
+                  : "Lock in step"}
               </button>
             )}
           </div>
-          <div className={`overflow-hidden rounded-3xl border border-border bg-black ${b ? "grid gap-px md:grid-cols-2" : ""}`}>
-            <Clip angle={a} videoRef={aRef} zoom={zoom} shapes={shapes[a.id] ?? []} onShapes={setFor(a.id)} tool={tool} color={color} onPlayState={setPlaying} />
-            {b && <Clip angle={b} videoRef={bRef} zoom={zoom} shapes={shapes[b.id] ?? []} onShapes={setFor(b.id)} tool={tool} color={color} />}
+          <div
+            className={`overflow-hidden rounded-3xl border border-border bg-black ${b ? "grid gap-px md:grid-cols-2" : ""}`}
+          >
+            <Clip
+              angle={a}
+              videoRef={aRef}
+              zoom={zoom}
+              shapes={shapes[a.id] ?? []}
+              onShapes={setFor(a.id)}
+              tool={tool}
+              color={color}
+              onPlayState={setPlaying}
+            />
+            {b && (
+              <Clip
+                angle={b}
+                videoRef={bRef}
+                zoom={zoom}
+                shapes={shapes[b.id] ?? []}
+                onShapes={setFor(b.id)}
+                tool={tool}
+                color={color}
+              />
+            )}
           </div>
           <div className="broadcast-panel flex flex-wrap items-center gap-2 p-3">
-            <button type="button" onClick={() => step(-1)} className="video-control" aria-label="Previous frame"><SkipBack className="size-4" /></button>
-            <button type="button" onClick={toggle} className="video-control" aria-label={playing ? "Pause" : "Play"}>{playing ? <Pause className="size-4" /> : <Play className="size-4" />}</button>
-            <button type="button" onClick={() => step(1)} className="video-control" aria-label="Next frame"><SkipForward className="size-4" /></button>
-            <select value={rate} onChange={(e) => { const next = Number(e.target.value); setRate(next); both((v) => { v.playbackRate = next; }); }} className="scorer-input w-auto" aria-label="Speed">
+            <button
+              type="button"
+              onClick={() => step(-1)}
+              className="video-control"
+              aria-label="Previous frame"
+            >
+              <SkipBack className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={toggle}
+              className="video-control"
+              aria-label={playing ? "Pause" : "Play"}
+            >
+              {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => step(1)}
+              className="video-control"
+              aria-label="Next frame"
+            >
+              <SkipForward className="size-4" />
+            </button>
+            <select
+              value={rate}
+              onChange={(e) => {
+                const next = Number(e.target.value);
+                setRate(next);
+                both((v) => {
+                  v.playbackRate = next;
+                });
+              }}
+              className="scorer-input w-auto"
+              aria-label="Speed"
+            >
               <option value={0.1}>0.1×</option>
               <option value={0.25}>0.25×</option>
               <option value={0.5}>0.5×</option>
@@ -318,25 +443,77 @@ export function VideoLab() {
             </select>
             <span className="mx-1 h-6 w-px bg-border" aria-hidden="true" />
             {tools.map((item) => (
-              <button key={item.id} type="button" className="app-chip-button" aria-pressed={tool === item.id} onClick={() => setTool(item.id)} title={item.label}>
-                <item.icon className="size-4" /> <span className="hidden sm:inline">{item.label}</span>
+              <button
+                key={item.id}
+                type="button"
+                className="app-chip-button"
+                aria-pressed={tool === item.id}
+                onClick={() => setTool(item.id)}
+                title={item.label}
+              >
+                <item.icon className="size-4" />{" "}
+                <span className="hidden sm:inline">{item.label}</span>
               </button>
             ))}
             {palette.map((token) => (
-              <button key={token} type="button" aria-label={`Colour ${token.slice(2)}`} aria-pressed={colorToken === token} onClick={() => setColorToken(token)}
-                className="size-7 rounded-full border-2 border-border aria-pressed:border-foreground" style={{ background: `var(${token})` }} />
+              <button
+                key={token}
+                type="button"
+                aria-label={`Colour ${token.slice(2)}`}
+                aria-pressed={colorToken === token}
+                onClick={() => setColorToken(token)}
+                className="size-7 rounded-full border-2 border-border aria-pressed:border-foreground"
+                style={{ background: `var(${token})` }}
+              />
             ))}
             <span className="mx-1 h-6 w-px bg-border" aria-hidden="true" />
-            <button type="button" className="video-control" aria-label="Undo last drawing" onClick={() => setShapes((c) => ({ ...c, [a.id]: (c[a.id] ?? []).slice(0, -1), ...(b ? { [b.id]: c[b.id] ?? [] } : {}) }))}><Undo2 className="size-4" /></button>
-            <button type="button" className="video-control" aria-label="Clear drawings" onClick={() => setShapes((c) => ({ ...c, [a.id]: [], ...(b ? { [b.id]: [] } : {}) }))}><Trash2 className="size-4" /></button>
-            <button type="button" className="video-control" aria-label="Save frame as picture" onClick={snapshot}><Download className="size-4" /></button>
+            <button
+              type="button"
+              className="video-control"
+              aria-label="Undo last drawing"
+              onClick={() =>
+                setShapes((c) => ({
+                  ...c,
+                  [a.id]: (c[a.id] ?? []).slice(0, -1),
+                  ...(b ? { [b.id]: c[b.id] ?? [] } : {}),
+                }))
+              }
+            >
+              <Undo2 className="size-4" />
+            </button>
+            <button
+              type="button"
+              className="video-control"
+              aria-label="Clear drawings"
+              onClick={() => setShapes((c) => ({ ...c, [a.id]: [], ...(b ? { [b.id]: [] } : {}) }))}
+            >
+              <Trash2 className="size-4" />
+            </button>
+            <button
+              type="button"
+              className="video-control"
+              aria-label="Save frame as picture"
+              onClick={snapshot}
+            >
+              <Download className="size-4" />
+            </button>
             <label className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
               Zoom
-              <input type="range" min="1" max="3" step="0.1" value={zoom} onChange={(e) => setZoom(Number(e.target.value))} className="w-24" />
+              <input
+                type="range"
+                min="1"
+                max="3"
+                step="0.1"
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+                className="w-24"
+              />
             </label>
           </div>
           <p className="text-xs text-muted-foreground">
-            Angle tool: tap three points (e.g. hip, knee, ankle) to read the angle at the middle one. To compare, pause both clips at the same moment, press "Lock in step", then play or step frame by frame. Clips stay on this device.
+            Angle tool: tap three points (e.g. hip, knee, ankle) to read the angle at the middle
+            one. To compare, pause both clips at the same moment, press "Lock in step", then play or
+            step frame by frame. Clips stay on this device.
           </p>
         </>
       ) : (
@@ -344,7 +521,10 @@ export function VideoLab() {
           <FileVideo className="size-8 text-gold" />
           <div>
             <h3 className="font-bold">Add one or more clips</h3>
-            <p className="mt-1 max-w-md text-sm text-muted-foreground">Choose videos from this phone or computer: slow them down, step frame by frame, draw lines and angles, and put two side by side.</p>
+            <p className="mt-1 max-w-md text-sm text-muted-foreground">
+              Choose videos from this phone or computer: slow them down, step frame by frame, draw
+              lines and angles, and put two side by side.
+            </p>
           </div>
         </div>
       )}

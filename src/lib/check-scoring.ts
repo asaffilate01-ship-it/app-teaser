@@ -85,7 +85,9 @@ const dismissalNames: Record<string, string> = {
 };
 
 /** Short plain-English description of one ball, e.g. "Wide +1", "4 runs", "WICKET (caught)". */
-export function ballText(ball: Pick<CheckBall, "batter_runs" | "extras" | "total_runs" | "wicket" | "dismissal">): string {
+export function ballText(
+  ball: Pick<CheckBall, "batter_runs" | "extras" | "total_runs" | "wicket" | "dismissal">,
+): string {
   const extras = ball.extras ?? {};
   const parts: string[] = [];
   const wide = extras["wide"] ?? 0;
@@ -97,7 +99,8 @@ export function ballText(ball: Pick<CheckBall, "batter_runs" | "extras" | "total
   else if (noBall > 0) parts.push(`No-ball +${ball.total_runs}`);
   if (wide === 0 && bye > 0) parts.push(`${bye} ${bye === 1 ? "bye" : "byes"}`);
   if (wide === 0 && legBye > 0) parts.push(`${legBye} ${legBye === 1 ? "leg-bye" : "leg-byes"}`);
-  if (wide === 0 && ball.batter_runs > 0) parts.push(`${ball.batter_runs} ${ball.batter_runs === 1 ? "run" : "runs"}`);
+  if (wide === 0 && ball.batter_runs > 0)
+    parts.push(`${ball.batter_runs} ${ball.batter_runs === 1 ? "run" : "runs"}`);
   if (penalty > 0) parts.push(`${penalty} penalty`);
   if (ball.wicket) {
     const how = dismissalNames[ball.dismissal?.type ?? ""];
@@ -107,9 +110,14 @@ export function ballText(ball: Pick<CheckBall, "batter_runs" | "extras" | "total
 }
 
 /** Balls of one innings grouped by over, newest over first, with the runs in each over. */
-export function oversOf(balls: readonly CheckBall[], inningsId: string): { over: number; balls: CheckBall[]; runs: number; wickets: number }[] {
+export function oversOf(
+  balls: readonly CheckBall[],
+  inningsId: string,
+): { over: number; balls: CheckBall[]; runs: number; wickets: number }[] {
   const groups = new Map<number, CheckBall[]>();
-  for (const ball of [...balls].filter((b) => b.innings_id === inningsId).sort((a, b) => a.sequence - b.sequence)) {
+  for (const ball of [...balls]
+    .filter((b) => b.innings_id === inningsId)
+    .sort((a, b) => a.sequence - b.sequence)) {
     const list = groups.get(ball.over) ?? [];
     list.push(ball);
     groups.set(ball.over, list);

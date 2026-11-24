@@ -27,7 +27,12 @@ const KPH_PER_MPS = 3.6;
 const MPH_PER_KPH = 0.621371;
 const round1 = (value: number) => Math.round(value * 10) / 10;
 
-export function ballSpeed(releaseSeconds: number, arrivalSeconds: number, metres: number, fps: number): SpeedReading | null {
+export function ballSpeed(
+  releaseSeconds: number,
+  arrivalSeconds: number,
+  metres: number,
+  fps: number,
+): SpeedReading | null {
   const seconds = arrivalSeconds - releaseSeconds;
   if (!Number.isFinite(seconds) || seconds <= 0 || !(metres > 0) || !(fps > 0)) return null;
   const frame = 1 / fps;
@@ -37,7 +42,9 @@ export function ballSpeed(releaseSeconds: number, arrivalSeconds: number, metres
   let warning: string | null = null;
   if (kph > 170) warning = "Faster than anyone has bowled. Check the two marks and the distance.";
   else if (kph < 25) warning = "Very slow. Check the arrival mark is on the right ball.";
-  else if (seconds <= 4 * frame) warning = "Only a few frames apart, so the reading is rough. Slow-motion video (120 or 240 fps) is much more accurate.";
+  else if (seconds <= 4 * frame)
+    warning =
+      "Only a few frames apart, so the reading is rough. Slow-motion video (120 or 240 fps) is much more accurate.";
   return {
     kph: round1(kph),
     mph: round1(kph * MPH_PER_KPH),
@@ -60,11 +67,16 @@ export function detectFps(frameTimes: readonly number[]): number | null {
   const median = gaps[Math.floor(gaps.length / 2)]!;
   const raw = 1 / median;
   const common = [24, 25, 30, 50, 60, 100, 120, 240];
-  return common.reduce((best, rate) => (Math.abs(rate - raw) < Math.abs(best - raw) ? rate : best), common[0]!);
+  return common.reduce(
+    (best, rate) => (Math.abs(rate - raw) < Math.abs(best - raw) ? rate : best),
+    common[0]!,
+  );
 }
 
 /** Fastest and average measured speed per bowler, from balls that carry a speed. */
-export function speedsByBowler(deliveries: readonly { bowlerId: string; speedKph?: number | undefined }[]) {
+export function speedsByBowler(
+  deliveries: readonly { bowlerId: string; speedKph?: number | undefined }[],
+) {
   const map = new Map<string, number[]>();
   for (const ball of deliveries) {
     if (ball.speedKph == null) continue;
@@ -166,8 +178,9 @@ export function ballCandidates(
       count += bins.get(key)!.count;
       sumT += bins.get(key)!.sumT;
     }
-    const spread = (group.length * binWidth);
-    if (count >= minSize && count <= maxSize && spread <= 0.12) out.push({ t: sumT / count, size: count });
+    const spread = group.length * binWidth;
+    if (count >= minSize && count <= maxSize && spread <= 0.12)
+      out.push({ t: sumT / count, size: count });
     group = [];
   };
   for (const key of keys) {

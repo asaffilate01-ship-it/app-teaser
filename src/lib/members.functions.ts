@@ -37,7 +37,9 @@ export const inviteClubMember = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: existingId } = await supabaseAdmin.rpc("find_user_id_by_email", { p_email: data.email });
+    const { data: existingId } = await supabaseAdmin.rpc("find_user_id_by_email", {
+      p_email: data.email,
+    });
     let userId = (existingId as string | null) ?? null;
     let confirmed = false;
     if (userId) {
@@ -48,22 +50,39 @@ export const inviteClubMember = createServerFn({ method: "POST" })
         .eq("user_id", userId)
         .maybeSingle();
       if (existing && !assignableRoles(actor).includes(existing.role as PlatformRole)) {
-        return { ok: false as const, reason: "That person already has a higher role in this club." };
+        return {
+          ok: false as const,
+          reason: "That person already has a higher role in this club.",
+        };
       }
       const { data: found } = await supabaseAdmin.auth.admin.getUserById(userId);
       confirmed = Boolean(found.user?.email_confirmed_at);
     } else {
-      const { data: invited, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
-        redirectTo: safeInviteRedirect(data.origin),
-      });
-      if (error || !invited.user) return { ok: false as const, reason: "The invitation email could not be sent. Try again shortly." };
+      const { data: invited, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+        data.email,
+        {
+          redirectTo: safeInviteRedirect(data.origin),
+        },
+      );
+      if (error || !invited.user)
+        return {
+          ok: false as const,
+          reason: "The invitation email could not be sent. Try again shortly.",
+        };
       userId = invited.user.id;
     }
 
-    const { error: memberError } = await supabaseAdmin.from("organisation_members").upsert(
-      { organisation_id: data.organisationId, user_id: userId, role: data.role, status: confirmed ? "active" : "invited" },
-      { onConflict: "organisation_id,user_id" },
-    );
+    const { error: memberError } = await supabaseAdmin
+      .from("organisation_members")
+      .upsert(
+        {
+          organisation_id: data.organisationId,
+          user_id: userId,
+          role: data.role,
+          status: confirmed ? "active" : "invited",
+        },
+        { onConflict: "organisation_id,user_id" },
+      );
     if (memberError) return { ok: false as const, reason: "The membership could not be saved." };
     await supabaseAdmin.from("invitations").insert({
       organisation_id: data.organisationId,

@@ -47,12 +47,23 @@ test("a safeguarding check that ends before match day blocks the appointment", (
 });
 
 test("only the checks the panel asks for are required", () => {
-  const strict = { ...defaultPanelRules, requires_first_aid: true, requires_kit: true, requires_qualification: true };
-  assert.deepEqual(missingChecks(base, strict, "2026-12-01"), ["Qualification", "First aid", "Kit check"]);
+  const strict = {
+    ...defaultPanelRules,
+    requires_first_aid: true,
+    requires_kit: true,
+    requires_qualification: true,
+  };
+  assert.deepEqual(missingChecks(base, strict, "2026-12-01"), [
+    "Qualification",
+    "First aid",
+    "Kit check",
+  ]);
 });
 
 test("paused umpires can't be appointed", () => {
-  assert.deepEqual(missingChecks({ ...base, status: "paused" }, defaultPanelRules, "2026-12-01"), ["Paused on the panel"]);
+  assert.deepEqual(missingChecks({ ...base, status: "paused" }, defaultPanelRules, "2026-12-01"), [
+    "Paused on the panel",
+  ]);
 });
 
 test("matches less than 8 hours apart clash; 8 hours apart don't", () => {
@@ -85,7 +96,10 @@ test("ranking puts available, fair-share umpires first and blocked ones last", (
     umpires,
     rules: defaultPanelRules,
     startsAt: "2026-12-12T10:00:00Z",
-    appointments: [appt({ id: "1", umpire_id: "busy", starts_at: "2026-06-01T10:00:00Z" }), appt({ id: "2", umpire_id: "busy", starts_at: "2026-07-01T10:00:00Z" })],
+    appointments: [
+      appt({ id: "1", umpire_id: "busy", starts_at: "2026-06-01T10:00:00Z" }),
+      appt({ id: "2", umpire_id: "busy", starts_at: "2026-07-01T10:00:00Z" }),
+    ],
     availability: [
       { user_id: "pb", day: "2026-12-12", status: "available" },
       { user_id: "pf", day: "2026-12-12", status: "available" },
@@ -95,7 +109,9 @@ test("ranking puts available, fair-share umpires first and blocked ones last", (
   assert.equal(ranked[0]!.umpire.id, "fresh");
   assert.equal(ranked[1]!.umpire.id, "busy");
   assert.ok(ranked.slice(2).every((row) => row.blockers.length > 0));
-  assert.deepEqual(ranked.find((row) => row.umpire.id === "away")!.blockers, ["Unavailable that day"]);
+  assert.deepEqual(ranked.find((row) => row.umpire.id === "away")!.blockers, [
+    "Unavailable that day",
+  ]);
 });
 
 test("money totals split owed, approved and paid and count voluntary matches", () => {
@@ -122,7 +138,14 @@ test("owners, club admins and league admins run the umpire panel; treasurers onl
   }
   assert.equal(can("treasurer", "umpires.manage"), false);
   assert.equal(can("treasurer", "umpires.pay"), true);
-  for (const role of ["team_manager", "scorer", "coach", "player", "viewer", "safeguarding_officer"] as const) {
+  for (const role of [
+    "team_manager",
+    "scorer",
+    "coach",
+    "player",
+    "viewer",
+    "safeguarding_officer",
+  ] as const) {
     assert.equal(can(role, "umpires.pay"), false, role);
   }
 });

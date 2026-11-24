@@ -48,7 +48,10 @@ export function useMatchCloudSync(
   const onRemotePatchRef = useRef(onRemotePatch);
   onRemotePatchRef.current = onRemotePatch;
   const enabled = Boolean(cloudMatchId && isCloudConfigured());
-  const deviceId = useMemo(() => (typeof window === "undefined" ? "server" : scoringDeviceId()), []);
+  const deviceId = useMemo(
+    () => (typeof window === "undefined" ? "server" : scoringDeviceId()),
+    [],
+  );
   const [status, setStatus] = useState<ScorerSyncStatus>(enabled ? "connecting" : "local");
   const [pendingCount, setPendingCount] = useState(0);
   const [queueUnreadable, setQueueUnreadable] = useState(false);
@@ -237,7 +240,11 @@ export function useMatchCloudSync(
       if (!enabled || !cloudMatchId || pausedForReview || queueUnreadable) return;
       const innings = currentInnings(match);
       const delivery = eventType === "delivery.recorded" ? innings.deliveries.at(-1) : null;
-      const canonicalInningsEvent = ["delivery.recorded", "delivery.voided", "delivery.corrected"].includes(eventType);
+      const canonicalInningsEvent = [
+        "delivery.recorded",
+        "delivery.voided",
+        "delivery.corrected",
+      ].includes(eventType);
       const liveState = publicLiveState(match, { screenRefSalt: cloudMatchId });
       const event: PendingMatchEvent = {
         matchId: cloudMatchId,

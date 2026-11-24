@@ -25,7 +25,9 @@ export function MatchCharts({
   const [kind, setKind] = useState<ChartKind>("manhattan");
   const withBalls = allInnings.filter((item) => item.balls.length > 0).slice(0, 4);
   const labels = withBalls.map((item, index) => {
-    const repeat = withBalls.slice(0, index).filter((other) => other.battingTeamId === item.battingTeamId).length;
+    const repeat = withBalls
+      .slice(0, index)
+      .filter((other) => other.battingTeamId === item.battingTeamId).length;
     return `${teamInitials(teamName(item.battingTeamId))}${repeat ? ` (${repeat + 1})` : ""}`;
   });
   return (
@@ -69,7 +71,9 @@ export function MatchCharts({
       )}
       <div className="mt-3">
         {kind === "manhattan" && <ManhattanChart innings={withBalls} ballsPerOver={ballsPerOver} />}
-        {kind === "worm" && <WormChart innings={withBalls} ballsPerOver={ballsPerOver} maxOvers={maxOvers} />}
+        {kind === "worm" && (
+          <WormChart innings={withBalls} ballsPerOver={ballsPerOver} maxOvers={maxOvers} />
+        )}
         {kind === "partnerships" && (
           <PartnershipList innings={innings} playerName={playerName} teamName={teamName} />
         )}
@@ -90,7 +94,17 @@ function yTicks(max: number) {
   return { top, ticks: Array.from({ length: top / step + 1 }, (_, index) => index * step) };
 }
 
-function Axes({ top, ticks, overs, x }: { top: number; ticks: number[]; overs: number; x: (over: number) => number }) {
+function Axes({
+  top,
+  ticks,
+  overs,
+  x,
+}: {
+  top: number;
+  ticks: number[];
+  overs: number;
+  x: (over: number) => number;
+}) {
   const y = (value: number) => PAD.top + plotH - (value / top) * plotH;
   const xStep = overs > 50 ? 10 : overs > 20 ? 5 : overs > 10 ? 2 : 1;
   return (
@@ -103,26 +117,44 @@ function Axes({ top, ticks, overs, x }: { top: number; ticks: number[]; overs: n
           </text>
         </g>
       ))}
-      {Array.from({ length: Math.floor(overs / xStep) }, (_, index) => (index + 1) * xStep).map((over) => (
-        <text key={over} x={x(over)} y={H - 8} textAnchor="middle" className="chart-label">
-          {over}
-        </text>
-      ))}
+      {Array.from({ length: Math.floor(overs / xStep) }, (_, index) => (index + 1) * xStep).map(
+        (over) => (
+          <text key={over} x={x(over)} y={H - 8} textAnchor="middle" className="chart-label">
+            {over}
+          </text>
+        ),
+      )}
     </>
   );
 }
 
-function ManhattanChart({ innings, ballsPerOver }: { innings: InsightInningsData[]; ballsPerOver: number }) {
-  const overs = manhattan(innings.map((item) => item.balls), ballsPerOver);
+function ManhattanChart({
+  innings,
+  ballsPerOver,
+}: {
+  innings: InsightInningsData[];
+  ballsPerOver: number;
+}) {
+  const overs = manhattan(
+    innings.map((item) => item.balls),
+    ballsPerOver,
+  );
   if (!overs.length) return <p className="insights-muted text-sm">No overs yet.</p>;
-  const { top, ticks } = yTicks(Math.max(6, ...overs.flatMap((over) => over.innings.map((item) => item?.runs ?? 0))));
+  const { top, ticks } = yTicks(
+    Math.max(6, ...overs.flatMap((over) => over.innings.map((item) => item?.runs ?? 0))),
+  );
   const count = Math.max(5, overs.length);
   const slot = plotW / count;
   const x = (over: number) => PAD.left + (over - 0.5) * slot;
   const y = (value: number) => PAD.top + plotH - (value / top) * plotH;
   const barW = Math.max(2, Math.min(18, (slot * 0.8) / Math.max(1, innings.length)));
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="insights-chart" role="img" aria-label={`Manhattan chart over ${overs.length} overs`}>
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      className="insights-chart"
+      role="img"
+      aria-label={`Manhattan chart over ${overs.length} overs`}
+    >
       <Axes top={top} ticks={ticks} overs={count} x={x} />
       {overs.map((over) =>
         over.innings.map((item, index) => {
@@ -141,7 +173,13 @@ function ManhattanChart({ innings, ballsPerOver }: { innings: InsightInningsData
                 <title>{`Over ${over.over}: ${item.runs} runs${item.wickets ? `, ${item.wickets} wkt` : ""}`}</title>
               </rect>
               {Array.from({ length: item.wickets }, (_, w) => (
-                <circle key={w} cx={left + (barW - 1) / 2} cy={y(item.runs) - 5 - w * 7} r={2.8} className="chart-wicket-dot" />
+                <circle
+                  key={w}
+                  cx={left + (barW - 1) / 2}
+                  cy={y(item.runs) - 5 - w * 7}
+                  r={2.8}
+                  className="chart-wicket-dot"
+                />
               ))}
             </g>
           );
@@ -163,22 +201,40 @@ function WormChart({
   const series = innings.map((item) => worm(item.balls, ballsPerOver));
   const lastOver = Math.max(1, ...series.map((points) => points.at(-1)?.over ?? 0));
   const overs = Math.max(5, maxOvers && maxOvers >= lastOver ? maxOvers : lastOver);
-  const { top, ticks } = yTicks(Math.max(10, ...series.flatMap((points) => points.map((point) => point.total))));
+  const { top, ticks } = yTicks(
+    Math.max(10, ...series.flatMap((points) => points.map((point) => point.total))),
+  );
   const x = (over: number) => PAD.left + (over / overs) * plotW;
   const y = (value: number) => PAD.top + plotH - (value / top) * plotH;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="insights-chart" role="img" aria-label="Worm chart of cumulative runs">
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      className="insights-chart"
+      role="img"
+      aria-label="Worm chart of cumulative runs"
+    >
       <Axes top={top} ticks={ticks} overs={overs} x={x} />
       {series.map((points, index) => (
         <g key={innings[index]!.id}>
           <path
-            d={points.map((point, i) => `${i === 0 ? "M" : "L"}${x(point.over).toFixed(1)},${y(point.total).toFixed(1)}`).join(" ")}
+            d={points
+              .map(
+                (point, i) =>
+                  `${i === 0 ? "M" : "L"}${x(point.over).toFixed(1)},${y(point.total).toFixed(1)}`,
+              )
+              .join(" ")}
             className={`chart-worm ${SERIES[index]}`}
           />
           {points
             .filter((point) => point.wickets > 0)
             .map((point) => (
-              <circle key={point.over} cx={x(point.over)} cy={y(point.total)} r={3.5} className="chart-wicket-dot">
+              <circle
+                key={point.over}
+                cx={x(point.over)}
+                cy={y(point.total)}
+                r={3.5}
+                className="chart-wicket-dot"
+              >
                 <title>{`Over ${point.over}: ${point.total}, ${point.wickets} wkt`}</title>
               </circle>
             ))}
@@ -203,7 +259,9 @@ function PartnershipList({
   const ordinal = (n: number) => `${n}${n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th"}`;
   return (
     <div>
-      <p className="insights-muted mb-3 text-xs">{teamName(innings.battingTeamId)} · runs include extras</p>
+      <p className="insights-muted mb-3 text-xs">
+        {teamName(innings.battingTeamId)} · runs include extras
+      </p>
       <ol className="space-y-3">
         {stands.map((stand) => {
           const [a, b] = stand.batters;

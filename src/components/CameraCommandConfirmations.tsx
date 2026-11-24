@@ -99,10 +99,7 @@ export function CameraCommandConfirmations({
   }, [refresh, refreshKey]);
 
   return (
-    <section
-      aria-label="Camera recording command acknowledgments"
-      className="broadcast-panel mt-5"
-    >
+    <section aria-label="Camera recording command acknowledgments" className="broadcast-panel mt-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-bold">Recording command acknowledgments</h2>

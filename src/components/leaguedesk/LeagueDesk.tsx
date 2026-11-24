@@ -26,13 +26,32 @@ export function LeagueDesk(props: DeskProps) {
     <div className="space-y-4">
       <div>
         <p className="panel-kicker">{league ? "League admin" : "Leagues & registration"}</p>
-        <h2 className="text-2xl font-bold tracking-tight">{league ? "Entries, eligibility and discipline" : "Enter competitions and register players"}</h2>
-        <p className="office-meta">{league ? "Open registration with fees and rules, approve teams, grant permits, handle discipline, and see captains' marks." : "Enter teams, register players, check a match XI is eligible, transfer players and mark umpires."}</p>
+        <h2 className="text-2xl font-bold tracking-tight">
+          {league
+            ? "Entries, eligibility and discipline"
+            : "Enter competitions and register players"}
+        </h2>
+        <p className="office-meta">
+          {league
+            ? "Open registration with fees and rules, approve teams, grant permits, handle discipline, and see captains' marks."
+            : "Enter teams, register players, check a match XI is eligible, transfer players and mark umpires."}
+        </p>
       </div>
       <div className="office-tabs" role="tablist" aria-label="League desk">
-        {tabs.filter(([value]) => !(league && (value === "transfers" || value === "history"))).map(([value, label, Icon]) => (
-          <button key={value} type="button" role="tab" aria-selected={tab === value} className="office-tab" onClick={() => setTab(value)}><Icon className="size-4" /> {label}</button>
-        ))}
+        {tabs
+          .filter(([value]) => !(league && (value === "transfers" || value === "history")))
+          .map(([value, label, Icon]) => (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={tab === value}
+              className="office-tab"
+              onClick={() => setTab(value)}
+            >
+              <Icon className="size-4" /> {label}
+            </button>
+          ))}
       </div>
       <div role="tabpanel">
         {tab === "registration" && <RegistrationPanel {...props} />}

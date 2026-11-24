@@ -9,9 +9,17 @@ test("hero plan notes quote the paid ad share (30%) and the video add-on share (
   assert.equal(paid, 30);
   assert.equal(video, 50);
   for (const [language, copy] of Object.entries(languages)) {
-    assert.equal(copy.hero.planNotes.length, 4, `${language}: Starter, Club, League and video add-on`);
+    assert.equal(
+      copy.hero.planNotes.length,
+      4,
+      `${language}: Starter, Club, League and video add-on`,
+    );
     assert.match(copy.hero.planNotes[1]!, new RegExp(`${paid}\\s?%`), `${language}: Club note`);
-    assert.match(copy.hero.planNotes[3]!, new RegExp(`${video}\\s?%`), `${language}: video add-on note`);
+    assert.match(
+      copy.hero.planNotes[3]!,
+      new RegExp(`${video}\\s?%`),
+      `${language}: video add-on note`,
+    );
     assert.match(copy.hero.planNotes[3]!, /16/, `${language}: up to 16 cameras with the add-on`);
   }
 });
@@ -24,11 +32,26 @@ test("every language lists the same number of hero features", () => {
 test("plan cards state the ad share each tier earns, in every language", () => {
   for (const [language, copy] of Object.entries(languages)) {
     const [, club, league] = copy.pricing.plans;
-    assert.ok(club!.perks.some((p) => /30\s?%/.test(p)), `${language}: Club card names 30%`);
-    assert.ok(league!.perks.some((p) => /30\s?%/.test(p)), `${language}: League card names 30%`);
-    assert.ok(copy.pricing.addon.perks.some((p) => /50\s?%/.test(p)), `${language}: video add-on names 50%`);
-    assert.ok(copy.pricing.addon.perks.some((p) => /\b16\b/.test(p)), `${language}: video add-on names 16 cameras`);
-    assert.ok(league!.perks.some((p) => /criclume\.com/.test(p)), `${language}: League card offers the free criclume.com address`);
+    assert.ok(
+      club!.perks.some((p) => /30\s?%/.test(p)),
+      `${language}: Club card names 30%`,
+    );
+    assert.ok(
+      league!.perks.some((p) => /30\s?%/.test(p)),
+      `${language}: League card names 30%`,
+    );
+    assert.ok(
+      copy.pricing.addon.perks.some((p) => /50\s?%/.test(p)),
+      `${language}: video add-on names 50%`,
+    );
+    assert.ok(
+      copy.pricing.addon.perks.some((p) => /\b16\b/.test(p)),
+      `${language}: video add-on names 16 cameras`,
+    );
+    assert.ok(
+      league!.perks.some((p) => /criclume\.com/.test(p)),
+      `${language}: League card offers the free criclume.com address`,
+    );
   }
 });
 

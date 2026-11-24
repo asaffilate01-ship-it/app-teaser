@@ -9,23 +9,34 @@ export interface DeskProps {
   club: PlatformDashboardData;
 }
 
-export const isLeagueAdmin = (p: DeskProps) => p.kind === "league" && (p.role === "owner" || p.role === "league_admin");
-export const isClubAdmin = (p: DeskProps) => p.kind !== "league" && (p.role === "owner" || p.role === "club_admin");
-export const isTeamManager = (p: DeskProps) => p.kind !== "league" && ["owner", "club_admin", "team_manager", "coach"].includes(p.role);
+export const isLeagueAdmin = (p: DeskProps) =>
+  p.kind === "league" && (p.role === "owner" || p.role === "league_admin");
+export const isClubAdmin = (p: DeskProps) =>
+  p.kind !== "league" && (p.role === "owner" || p.role === "club_admin");
+export const isTeamManager = (p: DeskProps) =>
+  p.kind !== "league" && ["owner", "club_admin", "team_manager", "coach"].includes(p.role);
 
-export async function must<T = unknown>(request: PromiseLike<{ error: { message: string } | null; data?: T }>): Promise<T | undefined> {
+export async function must<T = unknown>(
+  request: PromiseLike<{ error: { message: string } | null; data?: T }>,
+): Promise<T | undefined> {
   const { error, data } = await request;
   if (error) throw new Error(error.message);
   return data;
 }
 
 /** Run a change, show the outcome, then reload. */
-export async function attempt(action: () => Promise<unknown>, done: string, reload?: () => Promise<void> | void) {
+export async function attempt(
+  action: () => Promise<unknown>,
+  done: string,
+  reload?: () => Promise<void> | void,
+) {
   try {
     await action();
     toast.success(done);
   } catch (reason) {
-    toast.error(reason instanceof Error ? reason.message.replace(/^.*?ERROR:\s*/, "") : "That didn't work.");
+    toast.error(
+      reason instanceof Error ? reason.message.replace(/^.*?ERROR:\s*/, "") : "That didn't work.",
+    );
   } finally {
     await reload?.();
   }

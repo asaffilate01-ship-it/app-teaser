@@ -109,7 +109,9 @@ export function HeroShowcase({
           <span className="live-dot" aria-hidden="true" /> {chips[0]}
         </span>
       )}
-      {chips[1] && <span className="showcase-chip absolute bottom-2 left-3 z-20 sm:left-6">{chips[1]}</span>}
+      {chips[1] && (
+        <span className="showcase-chip absolute bottom-2 left-3 z-20 sm:left-6">{chips[1]}</span>
+      )}
     </div>
   );
 }
@@ -120,7 +122,11 @@ const displayOrder = [0, 1, 2, 5, 6, 3, 4, 7, 8, 9, 10];
  * On phones and tablets phone shots sit two to a row; the last one of an odd run would leave a gap,
  * so it gets the full row (shot beside its caption). Desktop keeps three to a row.
  */
-export function isLonePhone(order: readonly number[], shots: readonly ScreenShot[], at: number): boolean {
+export function isLonePhone(
+  order: readonly number[],
+  shots: readonly ScreenShot[],
+  at: number,
+): boolean {
   let start = at;
   while (start > 0 && shots[order[start - 1]!]!.kind === "phone") start--;
   let end = at;
@@ -180,7 +186,10 @@ export function ScreensGallery({
 
   return (
     <div className="space-y-5 md:space-y-7">
-      <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 no-scrollbar md:mx-0 md:flex-wrap md:px-0" role="group">
+      <div
+        className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 no-scrollbar md:mx-0 md:flex-wrap md:px-0"
+        role="group"
+      >
         {tabs.map((id) => (
           <button
             key={id}
@@ -207,7 +216,13 @@ export function ScreensGallery({
           return (
             <li
               key={i}
-              className={wide ? "col-span-2 lg:col-span-3" : lone ? "col-span-2 lg:col-span-2" : "col-span-1 lg:col-span-2"}
+              className={
+                wide
+                  ? "col-span-2 lg:col-span-3"
+                  : lone
+                    ? "col-span-2 lg:col-span-2"
+                    : "col-span-1 lg:col-span-2"
+              }
             >
               <button
                 type="button"
@@ -215,7 +230,9 @@ export function ScreensGallery({
                 className={`showcase-card group h-full w-full text-left ${lone ? "showcase-card-lone" : ""}`}
                 aria-label={`${text.label} — ${enlarge}`}
               >
-                <div className={`showcase-card-stage ${wide ? "px-4 pt-5 md:px-7 md:pt-7" : "px-5 pt-5 md:px-8 md:pt-7"}`}>
+                <div
+                  className={`showcase-card-stage ${wide ? "px-4 pt-5 md:px-7 md:pt-7" : "px-5 pt-5 md:px-8 md:pt-7"}`}
+                >
                   <DeviceFrame
                     shot={shot}
                     alt={`${text.label} — ${text.caption}`}
@@ -252,23 +269,43 @@ export function ScreensGallery({
                 alt={`${current.text.label} — ${current.text.caption}`}
                 eager
                 className={
-                  current.shot.kind === "phone" ? "mx-auto w-full max-w-[340px]" : "mx-auto w-full max-w-5xl"
+                  current.shot.kind === "phone"
+                    ? "mx-auto w-full max-w-[340px]"
+                    : "mx-auto w-full max-w-5xl"
                 }
               />
             </div>
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div className="min-w-0 space-y-1">
-                <DialogTitle className="font-display text-xl font-bold text-gold md:text-2xl">{current.text.label}</DialogTitle>
-                <DialogDescription className="text-sm text-muted-foreground">{current.text.caption}</DialogDescription>
+                <DialogTitle className="font-display text-xl font-bold text-gold md:text-2xl">
+                  {current.text.label}
+                </DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  {current.text.caption}
+                </DialogDescription>
               </div>
               <div className="flex gap-2">
-                <button type="button" className="showcase-nav" onClick={() => step(-1)} aria-label="Previous screen">
+                <button
+                  type="button"
+                  className="showcase-nav"
+                  onClick={() => step(-1)}
+                  aria-label="Previous screen"
+                >
                   <ArrowLeft className="size-4" />
                 </button>
-                <button type="button" className="showcase-nav" onClick={() => step(1)} aria-label="Next screen">
+                <button
+                  type="button"
+                  className="showcase-nav"
+                  onClick={() => step(1)}
+                  aria-label="Next screen"
+                >
                   <ArrowRight className="size-4" />
                 </button>
-                <button type="button" className="showcase-nav px-4 text-sm font-semibold" onClick={() => setOpen(null)}>
+                <button
+                  type="button"
+                  className="showcase-nav px-4 text-sm font-semibold"
+                  onClick={() => setOpen(null)}
+                >
                   {close}
                 </button>
               </div>

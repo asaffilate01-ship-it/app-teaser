@@ -6,7 +6,13 @@ import { battingSplit, fallOfWickets, inningsHeadline } from "@/lib/scorecard";
 type View = "batting" | "bowling" | "wickets";
 
 /** Mobile-first scorecard: innings switcher, batting/bowling/wickets tabs, no sideways scrolling. */
-export function ScorecardView({ match, shareable = true }: { match: CricketMatch; shareable?: boolean }) {
+export function ScorecardView({
+  match,
+  shareable = true,
+}: {
+  match: CricketMatch;
+  shareable?: boolean;
+}) {
   const [selected, setSelected] = useState(match.innings.length - 1);
   const [view, setView] = useState<View>("batting");
   const innings = match.innings[selected] ?? match.innings.at(-1)!;
@@ -48,7 +54,9 @@ export function ScorecardView({ match, shareable = true }: { match: CricketMatch
             {innings.declared ? " · declared" : ""}
           </p>
           <h2 className="truncate font-display text-2xl font-bold">{team.name}</h2>
-          {tossSummary(match) && <p className="text-xs text-muted-foreground">{tossSummary(match)}</p>}
+          {tossSummary(match) && (
+            <p className="text-xs text-muted-foreground">{tossSummary(match)}</p>
+          )}
         </div>
         <div className="text-right">
           <p className="card-total">{head.label}</p>
@@ -66,7 +74,13 @@ export function ScorecardView({ match, shareable = true }: { match: CricketMatch
             ["wickets", `Wickets ${wickets.length ? `(${wickets.length})` : ""}`],
           ] as [View, string][]
         ).map(([key, text]) => (
-          <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)}>
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={view === key}
+            onClick={() => setView(key)}
+          >
             {text}
           </button>
         ))}
@@ -84,7 +98,11 @@ export function ScorecardView({ match, shareable = true }: { match: CricketMatch
           </div>
           {batted.length === 0 && <p className="card-empty">No one has batted yet.</p>}
           {batted.map((row) => (
-            <div key={row.playerId} className={`card-row card-bat ${row.atCrease ? "card-live" : ""}`} role="row">
+            <div
+              key={row.playerId}
+              className={`card-row card-bat ${row.atCrease ? "card-live" : ""}`}
+              role="row"
+            >
               <span role="cell" className="card-name">
                 <strong className="truncate">
                   {row.name}
@@ -92,7 +110,9 @@ export function ScorecardView({ match, shareable = true }: { match: CricketMatch
                 </strong>
                 <small className="truncate">{row.atCrease ? "batting" : row.dismissal}</small>
               </span>
-              <span role="cell" className="card-big">{row.runs}</span>
+              <span role="cell" className="card-big">
+                {row.runs}
+              </span>
               <span role="cell">{row.balls}</span>
               <span role="cell">{row.fours}</span>
               <span role="cell">{row.sixes}</span>
@@ -124,7 +144,11 @@ export function ScorecardView({ match, shareable = true }: { match: CricketMatch
       )}
 
       {view === "bowling" && (
-        <div className="card-table" role="table" aria-label={`${findTeam(match, innings.bowlingTeamId).name} bowling`}>
+        <div
+          className="card-table"
+          role="table"
+          aria-label={`${findTeam(match, innings.bowlingTeamId).name} bowling`}
+        >
           <div className="card-row card-head card-bowl" role="row">
             <span role="columnheader">Bowler</span>
             <span role="columnheader">O</span>
@@ -135,7 +159,11 @@ export function ScorecardView({ match, shareable = true }: { match: CricketMatch
           </div>
           {bowling.length === 0 && <p className="card-empty">No bowling figures yet.</p>}
           {bowling.map((row) => (
-            <div key={row.playerId} className={`card-row card-bowl ${row.playerId === innings.bowlerId && innings.status === "live" ? "card-live" : ""}`} role="row">
+            <div
+              key={row.playerId}
+              className={`card-row card-bowl ${row.playerId === innings.bowlerId && innings.status === "live" ? "card-live" : ""}`}
+              role="row"
+            >
               <span role="cell" className="card-name">
                 <strong className="truncate">{row.name}</strong>
                 {row.wides || row.noBalls ? (
@@ -147,7 +175,9 @@ export function ScorecardView({ match, shareable = true }: { match: CricketMatch
               <span role="cell">{row.overs}</span>
               <span role="cell">{row.maidens}</span>
               <span role="cell">{row.runs}</span>
-              <span role="cell" className="card-big">{row.wickets}</span>
+              <span role="cell" className="card-big">
+                {row.wickets}
+              </span>
               <span role="cell">{row.balls ? row.economy.toFixed(1) : "–"}</span>
             </div>
           ))}

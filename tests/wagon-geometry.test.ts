@@ -1,9 +1,22 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { matchesFilter, plotShot, summarizeWheel, type WheelBall } from "../src/lib/wagon-geometry.ts";
+import {
+  matchesFilter,
+  plotShot,
+  summarizeWheel,
+  type WheelBall,
+} from "../src/lib/wagon-geometry.ts";
 
 const ball = (over: Partial<WheelBall>): WheelBall => ({
-  id: "b1", over: 0, ball: 1, strikerId: "s", bowlerId: "b", batterRuns: 1, fieldZone: "Cover", wicket: false, ...over,
+  id: "b1",
+  over: 0,
+  ball: 1,
+  strikerId: "s",
+  bowlerId: "b",
+  batterRuns: 1,
+  fieldZone: "Cover",
+  wicket: false,
+  ...over,
 });
 
 test("off-side shots for a right-hander are drawn on the right, leg side on the left", () => {

@@ -19,7 +19,12 @@ import {
   type RecordDeliveryInput,
 } from "../src/lib/cricket.ts";
 
-function makeMatch(rules: MatchRules, overs: number | null = 2, inningsPerSide: 1 | 2 = 1, players = 4): CricketMatch {
+function makeMatch(
+  rules: MatchRules,
+  overs: number | null = 2,
+  inningsPerSide: 1 | 2 = 1,
+  players = 4,
+): CricketMatch {
   const names = (side: string) => Array.from({ length: players }, (_, i) => `${side} ${i + 1}`);
   return createMatch({
     homeTeamName: "Home XI",
@@ -40,7 +45,10 @@ function makeMatch(rules: MatchRules, overs: number | null = 2, inningsPerSide: 
   });
 }
 
-function ball(match: CricketMatch, overrides: Partial<RecordDeliveryInput> = {}): RecordDeliveryInput {
+function ball(
+  match: CricketMatch,
+  overrides: Partial<RecordDeliveryInput> = {},
+): RecordDeliveryInput {
   const innings = currentInnings(match);
   return {
     strikerId: innings.strikerId,
@@ -55,7 +63,13 @@ function ball(match: CricketMatch, overrides: Partial<RecordDeliveryInput> = {})
 }
 
 const wicket = (match: CricketMatch) =>
-  recordDelivery(match, ball(match, { outcome: "wicket", dismissal: { type: "bowled", batterId: currentInnings(match).strikerId } }));
+  recordDelivery(
+    match,
+    ball(match, {
+      outcome: "wicket",
+      dismissal: { type: "bowled", batterId: currentInnings(match).strikerId },
+    }),
+  );
 
 /** Score `runs` then end the innings by hand. */
 function scoreAndEnd(match: CricketMatch, runs: number): CricketMatch {
@@ -93,7 +107,10 @@ test("on a free hit the batter can only be run out (or obstructing the field)", 
   assert.equal(bowled, match, "a bowled dismissal on a free hit is not recorded");
   const runOut = recordDelivery(
     match,
-    ball(match, { outcome: "wicket", dismissal: { type: "run-out", batterId: currentInnings(match).strikerId } }),
+    ball(match, {
+      outcome: "wicket",
+      dismissal: { type: "run-out", batterId: currentInnings(match).strikerId },
+    }),
   );
   assert.equal(summarizeInnings(currentInnings(runOut)).wickets, 1);
 });
@@ -135,7 +152,8 @@ test("a tie with Super Overs on goes to a one-over, two-wicket Super Over; team 
   assert.equal(currentInnings(match).kind, "super-over");
   assert.equal(inningsWicketLimit(match, currentInnings(match)), 2);
   // One over only.
-  for (let i = 0; i < 6; i += 1) match = recordDelivery(match, ball(match, i === 0 ? { outcome: "hit", batterRuns: 6 } : {}));
+  for (let i = 0; i < 6; i += 1)
+    match = recordDelivery(match, ball(match, i === 0 ? { outcome: "hit", batterRuns: 6 } : {}));
   assert.equal(match.status, "innings-break");
   match = startNextInnings(match);
   assert.equal(targetForCurrentInnings(match), 7);

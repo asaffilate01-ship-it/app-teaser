@@ -2,13 +2,24 @@ import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import { useState } from "react";
 import { siteFromMatches, siteHead } from "@/lib/club-site-query";
 import { siteSchedule, siteTables } from "@/lib/club-site";
-import { LeagueTableView, LiveCard, ResultRow, SectionHead, UpcomingRow } from "@/components/site/SiteParts";
+import {
+  LeagueTableView,
+  LiveCard,
+  ResultRow,
+  SectionHead,
+  UpcomingRow,
+} from "@/components/site/SiteParts";
 
 const layoutRoute = getRouteApi("/club/$slug");
 
 export const Route = createFileRoute("/club/$slug/fixtures")({
   head: ({ matches }) =>
-    siteHead(siteFromMatches(matches), { path: "/fixtures", title: "Fixtures and results", description: (name) => `Upcoming fixtures, live scores, results and league tables for ${name}.` }),
+    siteHead(siteFromMatches(matches), {
+      path: "/fixtures",
+      title: "Fixtures and results",
+      description: (name) =>
+        `Upcoming fixtures, live scores, results and league tables for ${name}.`,
+    }),
   component: FixturesPage,
 });
 

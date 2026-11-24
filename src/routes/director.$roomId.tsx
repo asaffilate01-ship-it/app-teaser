@@ -163,7 +163,11 @@ function CameraDirector() {
           .subscribe();
         const [roomResult, deviceResult, armResult] = await Promise.all([
           client.from("camera_rooms").select("id,name,status,match_id").eq("id", roomId).single(),
-          client.from("camera_devices").select("id,label,angle").eq("room_id", roomId).is("removed_at", null),
+          client
+            .from("camera_devices")
+            .select("id,label,angle")
+            .eq("room_id", roomId)
+            .is("removed_at", null),
           client
             .from("camera_recording_arms")
             .select("device_id,armed,consent_confirmed")
@@ -198,7 +202,11 @@ function CameraDirector() {
     try {
       const client = getCloudClient();
       const [deviceResult, armResult] = await Promise.all([
-        client.from("camera_devices").select("id,label,angle").eq("room_id", roomId).is("removed_at", null),
+        client
+          .from("camera_devices")
+          .select("id,label,angle")
+          .eq("room_id", roomId)
+          .is("removed_at", null),
         client
           .from("camera_recording_arms")
           .select("device_id,armed,consent_confirmed")
@@ -245,7 +253,10 @@ function CameraDirector() {
     }
   };
 
-  if (!isCloudConfigured()) return <DirectorGate text="Camera control is briefly unavailable. Please refresh in a moment." />;
+  if (!isCloudConfigured())
+    return (
+      <DirectorGate text="Camera control is briefly unavailable. Please refresh in a moment." />
+    );
   if (loading) return <DirectorGate text="Checking camera director access…" />;
   if (!session) {
     const signIn = (event: FormEvent) => {
@@ -257,22 +268,30 @@ function CameraDirector() {
     return (
       <main className="scoreboard-stage flex min-h-screen items-center justify-center px-4 py-16">
         <div className="broadcast-panel w-full max-w-md p-6 md:p-8">
-        <span className="hero-chip"><Video className="size-3.5" aria-hidden="true" /> Camera director</span>
-        <h1 className="mt-4 font-display text-2xl font-bold">Private camera director</h1>
-        <p className="scoreboard-muted mt-2 text-sm">Sign in with your club account to watch and control this match's cameras.</p>
-        <form onSubmit={signIn} className="mt-5 flex flex-col gap-2 sm:flex-row">
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="Club email"
-            aria-label="Club email"
-            className="scorer-input min-w-0 flex-1"
-          />
-          <button className="action-primary min-h-12">Email me a link</button>
-        </form>
-        {message && <p role="status" className="hero-ribbon text-left">{message}</p>}
+          <span className="hero-chip">
+            <Video className="size-3.5" aria-hidden="true" /> Camera director
+          </span>
+          <h1 className="mt-4 font-display text-2xl font-bold">Private camera director</h1>
+          <p className="scoreboard-muted mt-2 text-sm">
+            Sign in with your club account to watch and control this match's cameras.
+          </p>
+          <form onSubmit={signIn} className="mt-5 flex flex-col gap-2 sm:flex-row">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="Club email"
+              aria-label="Club email"
+              className="scorer-input min-w-0 flex-1"
+            />
+            <button className="action-primary min-h-12">Email me a link</button>
+          </form>
+          {message && (
+            <p role="status" className="hero-ribbon text-left">
+              {message}
+            </p>
+          )}
         </div>
       </main>
     );
@@ -298,11 +317,7 @@ function CameraDirector() {
       className="scoreboard-stage min-h-screen px-4 py-5 md:px-8 md:py-6"
     >
       <div className="mx-auto max-w-7xl">
-        <Link
-          to="/platform"
-          search={{ section: "capture" }}
-          className="app-chip-button"
-        >
+        <Link to="/platform" search={{ section: "capture" }} className="app-chip-button">
           <ArrowLeft className="size-4" /> Club workspace
         </Link>
         <header className="mt-5 flex flex-wrap items-start justify-between gap-4">
@@ -312,7 +327,10 @@ function CameraDirector() {
             </span>
             <h1 className="mt-2 font-display text-3xl font-bold md:text-5xl">{room.name}</h1>
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className="hero-chip"><Camera className="size-3.5" aria-hidden="true" />{devices.length} angles</span>
+              <span className="hero-chip">
+                <Camera className="size-3.5" aria-hidden="true" />
+                {devices.length} angles
+              </span>
               <span className="hero-chip">{armedDevices.length} armed</span>
               <span className={`hero-chip ${recordingCount > 0 ? "hero-chip-live" : ""}`}>
                 {recordingCount > 0 && <span className="live-dot" aria-hidden="true" />}
@@ -321,27 +339,24 @@ function CameraDirector() {
               <span className="hero-chip">Room {room.status}</span>
             </div>
           </div>
-          <button
-            onClick={() => void refresh()}
-            className="action-secondary min-h-11"
-          >
+          <button onClick={() => void refresh()} className="action-secondary min-h-11">
             <RefreshCw className="size-4" /> Refresh devices
           </button>
         </header>
 
         <div className="director-toolbar mt-6">
           <div className="insights-toggle" role="group" aria-label="Camera layout">
-          {(["one", "two", "four"] as const).map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => setView(mode)}
-              aria-pressed={view === mode}
-              className={view === mode ? "is-active" : ""}
-            >
-              {mode === "one" ? "Focus" : mode === "two" ? "2 cameras" : "Grid"}
-            </button>
-          ))}
+            {(["one", "two", "four"] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setView(mode)}
+                aria-pressed={view === mode}
+                className={view === mode ? "is-active" : ""}
+              >
+                {mode === "one" ? "Focus" : mode === "two" ? "2 cameras" : "Grid"}
+              </button>
+            ))}
           </div>
           <button
             disabled={busy || armedDevices.length === 0}
@@ -369,10 +384,7 @@ function CameraDirector() {
           </button>
         </div>
         {message && (
-          <p
-            role="status"
-            className="hero-ribbon mt-3 text-left"
-          >
+          <p role="status" className="hero-ribbon mt-3 text-left">
             {message}
           </p>
         )}
@@ -385,7 +397,11 @@ function CameraDirector() {
         <div
           className={
             "mt-5 grid gap-4 " +
-            (view === "one" ? "grid-cols-1" : view === "two" ? "md:grid-cols-2" : directorGridClass(displayed.length))
+            (view === "one"
+              ? "grid-cols-1"
+              : view === "two"
+                ? "md:grid-cols-2"
+                : directorGridClass(displayed.length))
           }
         >
           {displayed.map((device) => {
@@ -564,11 +580,7 @@ function DirectorGate({ text }: { text: string }) {
       <div className="broadcast-panel max-w-md p-8">
         <Camera className="mx-auto mb-4 size-10 text-gold" aria-hidden="true" />
         <p>{text}</p>
-        <Link
-          to="/platform"
-          search={{ section: "capture" }}
-          className="action-secondary mt-5"
-        >
+        <Link to="/platform" search={{ section: "capture" }} className="action-secondary mt-5">
           Back to club workspace
         </Link>
       </div>

@@ -1,6 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { cameraLimitChoices, DEFAULT_CAMERA_PHONES, directorGridClass, MAX_CAMERA_PHONES } from "../src/lib/camera-limits.ts";
+import {
+  cameraLimitChoices,
+  DEFAULT_CAMERA_PHONES,
+  directorGridClass,
+  MAX_CAMERA_PHONES,
+} from "../src/lib/camera-limits.ts";
 
 test("a match camera room allows up to 16 phones", () => {
   assert.equal(MAX_CAMERA_PHONES, 16);

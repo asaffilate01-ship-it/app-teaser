@@ -23,11 +23,36 @@ export interface RainState {
   minOversForResult?: number | null | undefined;
 }
 
-export const rainMethods: ReadonlyArray<{ id: RainMethod; label: string; short: string; hint: string }> = [
-  { id: "arr", label: "Average run rate", short: "ARR", hint: "Target scales with the overs the chasing side gets." },
-  { id: "mpo", label: "Most productive overs", short: "MPO", hint: "Target is the runs from the first side's best overs." },
-  { id: "dls", label: "DLS (official)", short: "DLS", hint: "Enter the target and par from the official DLS calculator." },
-  { id: "manual", label: "Umpires' target", short: "Revised", hint: "Enter the target set by the umpires or league." },
+export const rainMethods: ReadonlyArray<{
+  id: RainMethod;
+  label: string;
+  short: string;
+  hint: string;
+}> = [
+  {
+    id: "arr",
+    label: "Average run rate",
+    short: "ARR",
+    hint: "Target scales with the overs the chasing side gets.",
+  },
+  {
+    id: "mpo",
+    label: "Most productive overs",
+    short: "MPO",
+    hint: "Target is the runs from the first side's best overs.",
+  },
+  {
+    id: "dls",
+    label: "DLS (official)",
+    short: "DLS",
+    hint: "Enter the target and par from the official DLS calculator.",
+  },
+  {
+    id: "manual",
+    label: "Umpires' target",
+    short: "Revised",
+    hint: "Enter the target set by the umpires or league.",
+  },
 ];
 
 export const rainMethodShort = (method: RainMethod) =>
@@ -50,7 +75,12 @@ export function arrTarget(firstRuns: number, firstOvers: number, revisedOvers: n
 }
 
 /** ARR par: the score that would tie if no more play were possible after `ballsFaced`. */
-export function arrPar(firstRuns: number, firstOvers: number, ballsFaced: number, ballsPerOver: number): number {
+export function arrPar(
+  firstRuns: number,
+  firstOvers: number,
+  ballsFaced: number,
+  ballsPerOver: number,
+): number {
   if (firstOvers <= 0) return firstRuns;
   return Math.floor((firstRuns * (ballsFaced / ballsPerOver)) / firstOvers);
 }
@@ -60,11 +90,17 @@ const bestOvers = (overRuns: readonly number[]) => [...overRuns].sort((a, b) => 
 /** MPO revised target: the first side's best `revisedOvers` overs, plus one. */
 export function mpoTarget(overRuns: readonly number[], revisedOvers: number): number {
   const best = bestOvers(overRuns);
-  return best.slice(0, Math.max(0, Math.floor(revisedOvers))).reduce((sum, runs) => sum + runs, 0) + 1;
+  return (
+    best.slice(0, Math.max(0, Math.floor(revisedOvers))).reduce((sum, runs) => sum + runs, 0) + 1
+  );
 }
 
 /** MPO par after `ballsFaced`: best whole overs plus the matching share of the next best over. */
-export function mpoPar(overRuns: readonly number[], ballsFaced: number, ballsPerOver: number): number {
+export function mpoPar(
+  overRuns: readonly number[],
+  ballsFaced: number,
+  ballsPerOver: number,
+): number {
   const best = bestOvers(overRuns);
   const whole = Math.floor(ballsFaced / ballsPerOver);
   const part = (ballsFaced % ballsPerOver) / ballsPerOver;
@@ -92,7 +128,11 @@ export function revisedTarget(rain: RainState | undefined, inputs: ChaseInputs):
 }
 
 /** Live par score during the chase, or null when the method has no CricLume-calculated par. */
-export function parScore(rain: RainState | undefined, inputs: ChaseInputs, ballsFaced: number): number | null {
+export function parScore(
+  rain: RainState | undefined,
+  inputs: ChaseInputs,
+  ballsFaced: number,
+): number | null {
   if (!rain) return null;
   if (!isCalculatedMethod(rain.method)) return rain.officialPar ?? null;
   return rain.method === "arr"

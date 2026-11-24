@@ -21,7 +21,13 @@ export interface SetupCounts {
  */
 export function buildSetupChecklist(counts: SetupCounts): SetupStep[] {
   return [
-    { id: "club", title: "Create your club", detail: "Done — you are the owner.", done: true, section: "overview" },
+    {
+      id: "club",
+      title: "Create your club",
+      detail: "Done — you are the owner.",
+      done: true,
+      section: "overview",
+    },
     {
       id: "teams",
       title: "Add two teams",
@@ -53,7 +59,11 @@ export function buildSetupChecklist(counts: SetupCounts): SetupStep[] {
   ];
 }
 
-export function setupProgress(steps: SetupStep[]): { done: number; total: number; percent: number } {
+export function setupProgress(steps: SetupStep[]): {
+  done: number;
+  total: number;
+  percent: number;
+} {
   const done = steps.filter((step) => step.done).length;
   return { done, total: steps.length, percent: Math.round((done / steps.length) * 100) };
 }

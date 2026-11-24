@@ -30,7 +30,12 @@ function playerName(data: PlatformDashboardData, id: string) {
 }
 function shortDate(value: string | null) {
   return value
-    ? new Date(value).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
+    ? new Date(value).toLocaleString([], {
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : "Date TBC";
 }
 function liveScore(match: MatchRecord) {
@@ -57,16 +62,28 @@ function oversPerInnings(match: MatchRecord): number | null {
 export function pickFeaturedMatch(matches: MatchRecord[]): MatchRecord | null {
   const started = matches
     .filter((match) => STARTED.has(match.status))
-    .sort((a, b) => Number(LIVE.has(b.status)) - Number(LIVE.has(a.status)) || b.updatedAt.localeCompare(a.updatedAt));
+    .sort(
+      (a, b) =>
+        Number(LIVE.has(b.status)) - Number(LIVE.has(a.status)) ||
+        b.updatedAt.localeCompare(a.updatedAt),
+    );
   return started[0] ?? null;
 }
 
-export function ClubMatchInsights({ data, onViewStats }: { data: PlatformDashboardData; onViewStats?: (() => void) | undefined }) {
+export function ClubMatchInsights({
+  data,
+  onViewStats,
+}: {
+  data: PlatformDashboardData;
+  onViewStats?: (() => void) | undefined;
+}) {
   const started = useMemo(
     () => data.matches.filter((match) => STARTED.has(match.status)),
     [data.matches],
   );
-  const [matchId, setMatchId] = useState<string | null>(() => pickFeaturedMatch(data.matches)?.id ?? null);
+  const [matchId, setMatchId] = useState<string | null>(
+    () => pickFeaturedMatch(data.matches)?.id ?? null,
+  );
   const match = started.find((item) => item.id === matchId) ?? pickFeaturedMatch(data.matches);
   return (
     <div className="space-y-4">
@@ -86,7 +103,8 @@ export function ClubMatchInsights({ data, onViewStats }: { data: PlatformDashboa
           <div>
             <p className="panel-kicker">Match insights</p>
             <p className="insights-muted mt-1 text-sm">
-              Run-rate charts, the wagon wheel and top performers appear here once your first match is scored.
+              Run-rate charts, the wagon wheel and top performers appear here once your first match
+              is scored.
             </p>
           </div>
         </section>
@@ -111,10 +129,17 @@ function MatchDayStrip({ data }: { data: PlatformDashboardData }) {
   return (
     <div className="grid gap-3 md:grid-cols-3">
       {cards.map((card) => (
-        <article key={card.key} className={`broadcast-panel matchday-card ${card.key === "live" && card.match ? "matchday-card-live" : ""}`}>
+        <article
+          key={card.key}
+          className={`broadcast-panel matchday-card ${card.key === "live" && card.match ? "matchday-card-live" : ""}`}
+        >
           <div className="flex items-center justify-between">
-            <span className={`hero-chip ${card.key === "live" && card.match ? "hero-chip-live" : ""}`}>
-              {card.key === "live" && card.match && <span className="live-dot" aria-hidden="true" />}
+            <span
+              className={`hero-chip ${card.key === "live" && card.match ? "hero-chip-live" : ""}`}
+            >
+              {card.key === "live" && card.match && (
+                <span className="live-dot" aria-hidden="true" />
+              )}
               {card.label}
             </span>
           </div>
@@ -129,11 +154,21 @@ function MatchDayStrip({ data }: { data: PlatformDashboardData }) {
   );
 }
 
-function MatchDayBody({ data, match, mode }: { data: PlatformDashboardData; match: MatchRecord; mode: "live" | "next" | "last" }) {
+function MatchDayBody({
+  data,
+  match,
+  mode,
+}: {
+  data: PlatformDashboardData;
+  match: MatchRecord;
+  mode: "live" | "next" | "last";
+}) {
   const score = liveScore(match);
   const home = teamName(data, match.homeTeamId);
   const away = teamName(data, match.awayTeamId);
-  const ground = match.groundId ? data.grounds.find((item) => item.id === match.groundId)?.name : null;
+  const ground = match.groundId
+    ? data.grounds.find((item) => item.id === match.groundId)?.name
+    : null;
   return (
     <>
       <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
@@ -148,7 +183,9 @@ function MatchDayBody({ data, match, mode }: { data: PlatformDashboardData; matc
             <span className="font-display text-2xl font-bold tabular-nums text-gold">
               {score.runs}/{score.wickets}
             </span>
-            <span className="insights-muted text-[11px] uppercase tracking-wider">{score.overs} ov</span>
+            <span className="insights-muted text-[11px] uppercase tracking-wider">
+              {score.overs} ov
+            </span>
           </div>
         )}
         <div className="flex min-w-0 flex-col items-center gap-1.5 text-center">
@@ -158,11 +195,19 @@ function MatchDayBody({ data, match, mode }: { data: PlatformDashboardData; matc
       </div>
       <div className="matchday-foot">
         {mode !== "next" && score.message ? (
-          <span className={`truncate ${mode === "last" ? "matchday-result" : ""}`}>{score.message}</span>
+          <span className={`truncate ${mode === "last" ? "matchday-result" : ""}`}>
+            {score.message}
+          </span>
         ) : (
           <>
-            <span className="inline-flex items-center gap-1"><CalendarDays className="size-3.5" aria-hidden="true" />{shortDate(match.scheduledAt ?? match.startedAt)}</span>
-            <span className="inline-flex min-w-0 items-center gap-1"><MapPin className="size-3.5 shrink-0" aria-hidden="true" /><span className="truncate">{ground ?? "Ground TBC"}</span></span>
+            <span className="inline-flex items-center gap-1">
+              <CalendarDays className="size-3.5" aria-hidden="true" />
+              {shortDate(match.scheduledAt ?? match.startedAt)}
+            </span>
+            <span className="inline-flex min-w-0 items-center gap-1">
+              <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
+              <span className="truncate">{ground ?? "Ground TBC"}</span>
+            </span>
           </>
         )}
       </div>
@@ -239,7 +284,9 @@ function InsightsBoard({
       </div>
       {query.isError ? (
         <div className="broadcast-panel insights-empty" role="alert">
-          <p className="text-sm">Match insights could not be loaded. They'll retry automatically.</p>
+          <p className="text-sm">
+            Match insights could not be loaded. They'll retry automatically.
+          </p>
         </div>
       ) : query.isPending ? (
         <div className="grid gap-4 lg:grid-cols-5" aria-busy="true">
@@ -249,16 +296,36 @@ function InsightsBoard({
       ) : !current || current.balls.length === 0 ? (
         <div className="broadcast-panel insights-empty">
           <Activity className="size-6 text-gold" aria-hidden="true" />
-          <p className="insights-muted text-sm">No balls recorded in this innings yet. Charts fill in as the scorer records deliveries.</p>
+          <p className="insights-muted text-sm">
+            No balls recorded in this innings yet. Charts fill in as the scorer records deliveries.
+          </p>
         </div>
       ) : (
-        <InningsInsights data={data} match={match} innings={current} all={innings} onViewStats={onViewStats} />
+        <InningsInsights
+          data={data}
+          match={match}
+          innings={current}
+          all={innings}
+          onViewStats={onViewStats}
+        />
       )}
     </section>
   );
 }
 
-function InningsInsights({ data, match, innings, all, onViewStats }: { data: PlatformDashboardData; match: MatchRecord; innings: InsightInnings; all: InsightInnings[]; onViewStats?: (() => void) | undefined }) {
+function InningsInsights({
+  data,
+  match,
+  innings,
+  all,
+  onViewStats,
+}: {
+  data: PlatformDashboardData;
+  match: MatchRecord;
+  innings: InsightInnings;
+  all: InsightInnings[];
+  onViewStats?: (() => void) | undefined;
+}) {
   return (
     <InningsDashboard
       innings={innings}
@@ -294,13 +361,21 @@ export function InningsDashboard({
   const wheelBalls = toWheelBalls(innings.balls);
   const batters = topBatters(innings.balls);
   const bowlers = topBowlers(innings.balls, perOver);
-  const allRounders = topAllRounders(allInnings.flatMap((item) => item.balls), perOver);
+  const allRounders = topAllRounders(
+    allInnings.flatMap((item) => item.balls),
+    perOver,
+  );
   const last = points.at(-1);
   const legalBalls = innings.balls.filter((ball) => ball.legal).length;
   const ballsLeft = maxOvers ? Math.max(0, maxOvers * perOver - legalBalls) : null;
   const required =
-    innings.target && ballsLeft && last ? Math.max(0, ((innings.target - last.totalRuns) * perOver) / ballsLeft) : null;
-  const requiredLine = innings.target && maxOvers ? requiredRateByOver(points, innings.target, maxOvers, perOver) : null;
+    innings.target && ballsLeft && last
+      ? Math.max(0, ((innings.target - last.totalRuns) * perOver) / ballsLeft)
+      : null;
+  const requiredLine =
+    innings.target && maxOvers
+      ? requiredRateByOver(points, innings.target, maxOvers, perOver)
+      : null;
   const projected = maxOvers && last ? Math.round(last.runRate * maxOvers) : null;
   const oversText = (balls: number) => `${Math.floor(balls / perOver)}.${balls % perOver}`;
   return (
@@ -310,31 +385,58 @@ export function InningsDashboard({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="panel-kicker">Run rate over time</h3>
             <div className="insights-legend">
-              <span><i className="legend-bar" />Runs per over</span>
-              <span><i className="legend-line" />Run rate</span>
-              {requiredLine && <span><i className="legend-dash" />Required rate</span>}
+              <span>
+                <i className="legend-bar" />
+                Runs per over
+              </span>
+              <span>
+                <i className="legend-line" />
+                Run rate
+              </span>
+              {requiredLine && (
+                <span>
+                  <i className="legend-dash" />
+                  Required rate
+                </span>
+              )}
             </div>
           </div>
           <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_9.5rem]">
             <RunRateChart points={points} maxOvers={maxOvers} required={requiredLine} />
             <dl className="grid grid-cols-2 gap-2 sm:grid-cols-1">
-              <RateStat label="Current run rate" value={(last?.runRate ?? 0).toFixed(2)} tone="crimson" />
+              <RateStat
+                label="Current run rate"
+                value={(last?.runRate ?? 0).toFixed(2)}
+                tone="crimson"
+              />
               {required !== null ? (
                 <RateStat label="Required rate" value={required.toFixed(2)} tone="gold" />
               ) : (
-                <RateStat label="Projected score" value={projected !== null ? String(projected) : "—"} tone="gold" />
+                <RateStat
+                  label="Projected score"
+                  value={projected !== null ? String(projected) : "—"}
+                  tone="gold"
+                />
               )}
               {innings.target ? (
                 <RateStat label="Target" value={String(innings.target)} />
               ) : (
                 <RateStat label="Score" value={`${last?.totalRuns ?? 0}`} />
               )}
-              <RateStat label={ballsLeft !== null ? "Overs left" : "Overs bowled"} value={ballsLeft !== null ? oversText(ballsLeft) : oversText(legalBalls)} />
+              <RateStat
+                label={ballsLeft !== null ? "Overs left" : "Overs bowled"}
+                value={ballsLeft !== null ? oversText(ballsLeft) : oversText(legalBalls)}
+              />
             </dl>
           </div>
         </article>
         <div className="lg:col-span-2">
-          <WagonWheelField balls={wheelBalls} playerName={nameOfPlayer} kicker={`${oversText(legalBalls)} overs · shot map`} compact />
+          <WagonWheelField
+            balls={wheelBalls}
+            playerName={nameOfPlayer}
+            kicker={`${oversText(legalBalls)} overs · shot map`}
+            compact
+          />
         </div>
       </div>
       <MatchCharts
@@ -349,38 +451,68 @@ export function InningsDashboard({
         <div className="flex items-center justify-between gap-2">
           <h3 className="panel-kicker">Top performers</h3>
           {onViewStats && (
-            <button type="button" className="action-secondary min-h-9 px-3 text-xs" onClick={onViewStats}>
+            <button
+              type="button"
+              className="action-secondary min-h-9 px-3 text-xs"
+              onClick={onViewStats}
+            >
               View full stats
             </button>
           )}
         </div>
         <div className="mt-3 grid gap-5 md:grid-cols-3">
           <div>
-            <p className="performer-head"><Trophy className="size-3.5" aria-hidden="true" />Batters · {nameOfTeam(innings.battingTeamId)}</p>
+            <p className="performer-head">
+              <Trophy className="size-3.5" aria-hidden="true" />
+              Batters · {nameOfTeam(innings.battingTeamId)}
+            </p>
             <ul className="mt-2 divide-y divide-[var(--broadcast-border)]">
               {batters.map((line) => (
-                <PerformerRow key={line.playerId} name={nameOfPlayer(line.playerId)} detail={`${line.fours}×4 · ${line.sixes}×6`} figure={`${line.runs}${line.out ? "" : "*"} (${line.balls})`} />
+                <PerformerRow
+                  key={line.playerId}
+                  name={nameOfPlayer(line.playerId)}
+                  detail={`${line.fours}×4 · ${line.sixes}×6`}
+                  figure={`${line.runs}${line.out ? "" : "*"} (${line.balls})`}
+                />
               ))}
             </ul>
           </div>
           <div>
-            <p className="performer-head"><Target className="size-3.5" aria-hidden="true" />Bowlers · {nameOfTeam(innings.bowlingTeamId)}</p>
+            <p className="performer-head">
+              <Target className="size-3.5" aria-hidden="true" />
+              Bowlers · {nameOfTeam(innings.bowlingTeamId)}
+            </p>
             <ul className="mt-2 divide-y divide-[var(--broadcast-border)]">
               {bowlers.map((line) => (
-                <PerformerRow key={line.playerId} name={nameOfPlayer(line.playerId)} detail={`${line.overs} overs`} figure={`${line.wickets}/${line.runs}`} />
+                <PerformerRow
+                  key={line.playerId}
+                  name={nameOfPlayer(line.playerId)}
+                  detail={`${line.overs} overs`}
+                  figure={`${line.wickets}/${line.runs}`}
+                />
               ))}
             </ul>
           </div>
           <div>
-            <p className="performer-head"><Users className="size-3.5" aria-hidden="true" />All-rounders</p>
+            <p className="performer-head">
+              <Users className="size-3.5" aria-hidden="true" />
+              All-rounders
+            </p>
             {allRounders.length ? (
               <ul className="mt-2 divide-y divide-[var(--broadcast-border)]">
                 {allRounders.map((line) => (
-                  <PerformerRow key={line.playerId} name={nameOfPlayer(line.playerId)} detail={`${line.runs} (${line.balls}) & ${line.wickets}/${line.runsConceded} (${line.overs})`} figure={`${line.runs + line.wickets * 20}`} />
+                  <PerformerRow
+                    key={line.playerId}
+                    name={nameOfPlayer(line.playerId)}
+                    detail={`${line.runs} (${line.balls}) & ${line.wickets}/${line.runsConceded} (${line.overs})`}
+                    figure={`${line.runs + line.wickets * 20}`}
+                  />
                 ))}
               </ul>
             ) : (
-              <p className="insights-muted mt-3 text-xs">Shows players who have both batted and bowled in this match.</p>
+              <p className="insights-muted mt-3 text-xs">
+                Shows players who have both batted and bowled in this match.
+              </p>
             )}
           </div>
         </div>
@@ -389,11 +521,21 @@ export function InningsDashboard({
   );
 }
 
-function RateStat({ label, value, tone }: { label: string; value: string; tone?: "crimson" | "gold" }) {
+function RateStat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: "crimson" | "gold";
+}) {
   return (
     <div className="rate-stat">
       <dt>{label}</dt>
-      <dd className={tone === "crimson" ? "rate-stat-crimson" : tone === "gold" ? "text-gold" : ""}>{value}</dd>
+      <dd className={tone === "crimson" ? "rate-stat-crimson" : tone === "gold" ? "text-gold" : ""}>
+        {value}
+      </dd>
     </div>
   );
 }
@@ -401,7 +543,9 @@ function RateStat({ label, value, tone }: { label: string; value: string; tone?:
 function PerformerRow({ name, detail, figure }: { name: string; detail: string; figure: string }) {
   return (
     <li className="flex items-center gap-3 py-2.5">
-      <span className="performer-avatar" aria-hidden="true">{teamInitials(name)}</span>
+      <span className="performer-avatar" aria-hidden="true">
+        {teamInitials(name)}
+      </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-semibold">{name}</span>
         <span className="insights-muted block text-[11px]">{detail}</span>
@@ -425,35 +569,67 @@ function RunRateChart({
   const pad = { left: 30, right: 10, top: 12, bottom: 26 };
   // Without a known match length, leave room for a few more overs so bars keep a sensible width.
   const overs = Math.max(maxOvers ?? (points.at(-1)?.over ?? 0) + 3, points.at(-1)?.over ?? 1, 5);
-  const requiredRates = (required ?? []).flatMap((item) => (item.rate == null ? [] : [Math.min(item.rate, 24)]));
-  const top = Math.max(6, ...points.map((point) => point.runs), ...points.map((point) => point.runRate), ...requiredRates);
+  const requiredRates = (required ?? []).flatMap((item) =>
+    item.rate == null ? [] : [Math.min(item.rate, 24)],
+  );
+  const top = Math.max(
+    6,
+    ...points.map((point) => point.runs),
+    ...points.map((point) => point.runRate),
+    ...requiredRates,
+  );
   const yMax = Math.ceil(top / 2) * 2;
   const plotW = width - pad.left - pad.right;
   const plotH = height - pad.top - pad.bottom;
   const x = (over: number) => pad.left + ((over - 0.5) / overs) * plotW;
   const y = (value: number) => pad.top + plotH - (value / yMax) * plotH;
   const barW = Math.min(26, Math.max(3, (plotW / overs) * 0.55));
-  const ticks = Array.from({ length: yMax / 2 + 1 }, (_, index) => index * 2).filter((_, index, all) => all.length <= 8 || index % 2 === 0);
+  const ticks = Array.from({ length: yMax / 2 + 1 }, (_, index) => index * 2).filter(
+    (_, index, all) => all.length <= 8 || index % 2 === 0,
+  );
   const xStep = overs > 50 ? 10 : overs > 20 ? 5 : overs > 10 ? 2 : 1;
-  const line = points.map((point, index) => `${index === 0 ? "M" : "L"}${x(point.over).toFixed(1)},${y(point.runRate).toFixed(1)}`).join(" ");
+  const line = points
+    .map(
+      (point, index) =>
+        `${index === 0 ? "M" : "L"}${x(point.over).toFixed(1)},${y(point.runRate).toFixed(1)}`,
+    )
+    .join(" ");
   // Required rate is measured at over boundaries, so it is drawn from x = 0 (start of the chase).
   const atBoundary = (over: number) => pad.left + (over / overs) * plotW;
   const requiredPath = (required ?? [])
     .filter((item) => item.rate != null)
-    .map((item, index) => `${index === 0 ? "M" : "L"}${atBoundary(item.over).toFixed(1)},${y(Math.min(item.rate!, 24)).toFixed(1)}`)
+    .map(
+      (item, index) =>
+        `${index === 0 ? "M" : "L"}${atBoundary(item.over).toFixed(1)},${y(Math.min(item.rate!, 24)).toFixed(1)}`,
+    )
     .join(" ");
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="insights-chart" role="img" aria-label={`Run rate chart over ${points.length} overs`}>
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className="insights-chart"
+      role="img"
+      aria-label={`Run rate chart over ${points.length} overs`}
+    >
       {ticks.map((tick) => (
         <g key={tick}>
-          <line x1={pad.left} x2={width - pad.right} y1={y(tick)} y2={y(tick)} className="chart-grid" />
-          <text x={pad.left - 6} y={y(tick) + 3} textAnchor="end" className="chart-label">{tick}</text>
+          <line
+            x1={pad.left}
+            x2={width - pad.right}
+            y1={y(tick)}
+            y2={y(tick)}
+            className="chart-grid"
+          />
+          <text x={pad.left - 6} y={y(tick) + 3} textAnchor="end" className="chart-label">
+            {tick}
+          </text>
         </g>
       ))}
       {Array.from({ length: Math.floor(overs / xStep) + 1 }, (_, index) => index * xStep)
         .filter((over) => over > 0)
         .map((over) => (
-          <text key={over} x={x(over)} y={height - 8} textAnchor="middle" className="chart-label">{over}</text>
+          <text key={over} x={x(over)} y={height - 8} textAnchor="middle" className="chart-label">
+            {over}
+          </text>
         ))}
       {points.map((point) => (
         <rect
@@ -471,13 +647,17 @@ function RunRateChart({
       {requiredPath && <path d={requiredPath} className="chart-required" />}
       <path d={line} className="chart-line" />
       {points.map((point) => (
-        <circle key={point.over} cx={x(point.over)} cy={y(point.runRate)} r={3} className="chart-dot" />
+        <circle
+          key={point.over}
+          cx={x(point.over)}
+          cy={y(point.runRate)}
+          r={3}
+          className="chart-dot"
+        />
       ))}
     </svg>
   );
 }
-
-
 
 /** Club dashboard balls in the wagon wheel's shape (ball number counted within each over). */
 function toWheelBalls(balls: InsightBall[]): WheelBall[] {

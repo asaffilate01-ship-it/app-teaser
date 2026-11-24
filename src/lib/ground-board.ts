@@ -36,20 +36,26 @@ export const defaultGroundSettings: GroundScreenSettings = {
 export const minPageSeconds = 5;
 export const maxPageSeconds = 120;
 
-const isPage = (value: unknown): value is GroundPageId => groundPageIds.includes(value as GroundPageId);
+const isPage = (value: unknown): value is GroundPageId =>
+  groundPageIds.includes(value as GroundPageId);
 
 /** Reads saved or public settings defensively; unknown values fall back to the defaults. */
 export function readGroundSettings(raw: unknown): GroundScreenSettings {
-  if (!raw || typeof raw !== "object") return { ...defaultGroundSettings, pages: [...defaultGroundSettings.pages] };
+  if (!raw || typeof raw !== "object")
+    return { ...defaultGroundSettings, pages: [...defaultGroundSettings.pages] };
   const value = raw as Record<string, unknown>;
-  const pages = Array.isArray(value["pages"]) ? groundPageIds.filter((id) => (value["pages"] as unknown[]).includes(id)) : [];
+  const pages = Array.isArray(value["pages"])
+    ? groundPageIds.filter((id) => (value["pages"] as unknown[]).includes(id))
+    : [];
   const interval = Number(value["intervalSeconds"] ?? value["interval_seconds"]);
   const replays = value["replays"];
   const manual = value["manualPage"] ?? value["manual_page"];
   return {
     mode: value["mode"] === "manual" ? "manual" : "auto",
     pages: pages.length ? pages : [...groundPageIds],
-    intervalSeconds: Number.isFinite(interval) ? Math.min(maxPageSeconds, Math.max(minPageSeconds, Math.round(interval))) : 15,
+    intervalSeconds: Number.isFinite(interval)
+      ? Math.min(maxPageSeconds, Math.max(minPageSeconds, Math.round(interval)))
+      : 15,
     manualPage: isPage(manual) ? manual : "score",
     replays: replays === "manual" || replays === "auto" ? replays : "off",
     showNames: (value["showNames"] ?? value["show_names"]) === true,
@@ -108,21 +114,28 @@ export interface PublicBoardInput {
   sponsor?: Record<string, unknown> | null;
 }
 
-const num = (value: unknown, fallback = 0) => (typeof value === "number" && Number.isFinite(value) ? value : fallback);
-const howOut = (type: unknown) => (typeof type === "string" && type ? type.replaceAll("-", " ") : "not out");
+const num = (value: unknown, fallback = 0) =>
+  typeof value === "number" && Number.isFinite(value) ? value : fallback;
+const howOut = (type: unknown) =>
+  typeof type === "string" && type ? type.replaceAll("-", " ") : "not out";
 
 /**
  * Builds every ground-screen page from the public, name-free live state. Names appear only when the
  * database handed them out for this board (club switched names on; juniors need granted consent).
  */
-export function buildGroundBoard(board: PublicBoardInput, names: Readonly<Record<string, string>> = {}): GroundBoard {
+export function buildGroundBoard(
+  board: PublicBoardInput,
+  names: Readonly<Record<string, string>> = {},
+): GroundBoard {
   const state = (board.liveState ?? {}) as Record<string, unknown>;
   const card = (state["card"] ?? {}) as Record<string, unknown>;
   const label = (prefix: string, row: Record<string, unknown>) => {
     const ref = typeof row["ref"] === "string" ? (row["ref"] as string) : "";
     return (ref && names[ref]) || `${prefix} ${num(row["no"])}`;
   };
-  const batting = (Array.isArray(card["batting"]) ? (card["batting"] as Record<string, unknown>[]) : []).map((row) => {
+  const batting = (
+    Array.isArray(card["batting"]) ? (card["batting"] as Record<string, unknown>[]) : []
+  ).map((row) => {
     const runs = num(row["runs"]);
     const balls = num(row["balls"]);
     return {
@@ -138,7 +151,9 @@ export function buildGroundBoard(board: PublicBoardInput, names: Readonly<Record
       onStrike: row["onStrike"] === true,
     };
   });
-  const bowling = (Array.isArray(card["bowling"]) ? (card["bowling"] as Record<string, unknown>[]) : []).map((row) => ({
+  const bowling = (
+    Array.isArray(card["bowling"]) ? (card["bowling"] as Record<string, unknown>[]) : []
+  ).map((row) => ({
     no: num(row["no"]),
     name: label("Bowler", row),
     overs: String(row["overs"] ?? "0.0"),
@@ -149,16 +164,23 @@ export function buildGroundBoard(board: PublicBoardInput, names: Readonly<Record
     current: row["current"] === true,
   }));
   const teamName = (id: unknown) =>
-    id === board.awayTeam.id ? board.awayTeam.shortName || board.awayTeam.name : board.homeTeam.shortName || board.homeTeam.name;
-  const progress = (Array.isArray(state["progress"]) ? (state["progress"] as Record<string, unknown>[]) : []).map((item) => ({
+    id === board.awayTeam.id
+      ? board.awayTeam.shortName || board.awayTeam.name
+      : board.homeTeam.shortName || board.homeTeam.name;
+  const progress = (
+    Array.isArray(state["progress"]) ? (state["progress"] as Record<string, unknown>[]) : []
+  ).map((item) => ({
     team: teamName(item["battingTeamId"]),
     superOver: item["superOver"] === true,
-    overs: (Array.isArray(item["overs"]) ? (item["overs"] as unknown[]) : []).map((over): [number, number] =>
-      Array.isArray(over) ? [num(over[0]), num(over[1])] : [0, 0],
+    overs: (Array.isArray(item["overs"]) ? (item["overs"] as unknown[]) : []).map(
+      (over): [number, number] => (Array.isArray(over) ? [num(over[0]), num(over[1])] : [0, 0]),
     ),
   }));
   const stand = state["partnership"] as Record<string, unknown> | undefined;
-  const sponsorName = board.sponsor && typeof board.sponsor["name"] === "string" ? (board.sponsor["name"] as string) : null;
+  const sponsorName =
+    board.sponsor && typeof board.sponsor["name"] === "string"
+      ? (board.sponsor["name"] as string)
+      : null;
   return {
     feed: buildGroundFeed(board),
     batting,
@@ -203,13 +225,26 @@ export function pageOnScreen(
 ): { page: GroundPageId; index: number; count: number; progress: number } {
   const rotation = settings.pages.filter((id) => available.includes(id));
   if (settings.mode === "manual" || rotation.length <= 1) {
-    const page = settings.mode === "manual" && available.includes(settings.manualPage) ? settings.manualPage : (rotation[0] ?? "score");
-    return { page, index: Math.max(0, rotation.indexOf(page)), count: Math.max(1, rotation.length), progress: 0 };
+    const page =
+      settings.mode === "manual" && available.includes(settings.manualPage)
+        ? settings.manualPage
+        : (rotation[0] ?? "score");
+    return {
+      page,
+      index: Math.max(0, rotation.indexOf(page)),
+      count: Math.max(1, rotation.length),
+      progress: 0,
+    };
   }
   const intervalMs = settings.intervalSeconds * 1000;
   const tick = Math.floor(nowMs / intervalMs);
   const index = tick % rotation.length;
-  return { page: rotation[index]!, index, count: rotation.length, progress: (nowMs % intervalMs) / intervalMs };
+  return {
+    page: rotation[index]!,
+    index,
+    count: rotation.length,
+    progress: (nowMs % intervalMs) / intervalMs,
+  };
 }
 
 /** Cumulative total at the end of each over (starts at 0) for the worm chart. */

@@ -50,7 +50,10 @@ export const summariseOver = createServerFn({ method: "POST" })
       return { summary };
     } catch (error) {
       const status =
-        error && typeof error === "object" && "statusCode" in error && typeof error.statusCode === "number"
+        error &&
+        typeof error === "object" &&
+        "statusCode" in error &&
+        typeof error.statusCode === "number"
           ? error.statusCode
           : 500;
       const message =

@@ -31,7 +31,13 @@ export default defineConfig({
         outDir: "dist/client",
         workbox: {
           globDirectory: "dist/client",
-          globPatterns: ["assets/**/*.{js,css,woff,woff2,png,jpg,svg,webp}", "offline.html", "icon-192.png", "icon-maskable-192.png", "favicon.png"],
+          globPatterns: [
+            "assets/**/*.{js,css,woff,woff2,png,jpg,svg,webp}",
+            "offline.html",
+            "icon-192.png",
+            "icon-maskable-192.png",
+            "favicon.png",
+          ],
           maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
           navigateFallback: null,
           cleanupOutdatedCaches: true,
@@ -43,13 +49,18 @@ export default defineConfig({
           runtimeCaching: [
             {
               // App images (logo, icons) served by hosting under fixed per-file addresses: keep for offline.
-              urlPattern: ({ request, url }) => request.destination === "image" && url.pathname.startsWith("/__l5e/assets-v1/"),
+              urlPattern: ({ request, url }) =>
+                request.destination === "image" && url.pathname.startsWith("/__l5e/assets-v1/"),
               handler: "CacheFirst",
-              options: { cacheName: "criclume-images", expiration: { maxEntries: 60, maxAgeSeconds: 30 * 24 * 3600 } },
+              options: {
+                cacheName: "criclume-images",
+                expiration: { maxEntries: 60, maxAgeSeconds: 30 * 24 * 3600 },
+              },
             },
             {
               // Scorer: always try the network first; offline, use the last copy or the installed one.
-              urlPattern: ({ request, url }) => request.mode === "navigate" && url.pathname === "/app",
+              urlPattern: ({ request, url }) =>
+                request.mode === "navigate" && url.pathname === "/app",
               handler: "NetworkFirst",
               options: {
                 cacheName: `criclume-scorer-${buildId}`,
@@ -59,9 +70,17 @@ export default defineConfig({
                   {
                     // Fall back to the copy saved when this version installed (never an older version's).
                     handlerDidError: async () => {
-                      const name = (await caches.keys()).find((key) => key.startsWith("workbox-precache"));
-                      const installed = name ? await (await caches.open(name)).match("/app", { ignoreSearch: true }) : undefined;
-                      return installed ?? (await caches.match("/offline.html", { ignoreSearch: true })) ?? Response.error();
+                      const name = (await caches.keys()).find((key) =>
+                        key.startsWith("workbox-precache"),
+                      );
+                      const installed = name
+                        ? await (await caches.open(name)).match("/app", { ignoreSearch: true })
+                        : undefined;
+                      return (
+                        installed ??
+                        (await caches.match("/offline.html", { ignoreSearch: true })) ??
+                        Response.error()
+                      );
                     },
                   },
                 ],
@@ -69,12 +88,15 @@ export default defineConfig({
             },
             {
               // Every other page needs the internet (sign-in, club data); offline shows a friendly page.
-              urlPattern: ({ request, url }) => request.mode === "navigate" && !url.pathname.startsWith("/~oauth"),
+              urlPattern: ({ request, url }) =>
+                request.mode === "navigate" && !url.pathname.startsWith("/~oauth"),
               handler: "NetworkOnly",
               options: {
                 plugins: [
                   {
-                    handlerDidError: async () => (await caches.match("/offline.html", { ignoreSearch: true })) ?? Response.error(),
+                    handlerDidError: async () =>
+                      (await caches.match("/offline.html", { ignoreSearch: true })) ??
+                      Response.error(),
                   },
                 ],
               },

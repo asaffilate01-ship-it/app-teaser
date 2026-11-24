@@ -7,7 +7,12 @@ import {
   type CricketMatch,
   type Innings,
 } from "./cricket.ts";
-import { seasonStats, type BattingStat, type BowlingStat, type FieldingStat } from "./season-stats.ts";
+import {
+  seasonStats,
+  type BattingStat,
+  type BowlingStat,
+  type FieldingStat,
+} from "./season-stats.ts";
 
 const regular = (match: CricketMatch) => match.innings.filter((innings) => !isSuperOver(innings));
 
@@ -148,13 +153,20 @@ const byDate = (a: CricketMatch, b: CricketMatch) =>
   (a.settings.startTime || a.createdAt).localeCompare(b.settings.startTime || b.createdAt);
 
 /** Career page for one player across loaded match snapshots (Super Overs excluded). */
-export function playerProfile(matches: readonly CricketMatch[], playerId: string): PlayerProfile | null {
+export function playerProfile(
+  matches: readonly CricketMatch[],
+  playerId: string,
+): PlayerProfile | null {
   const played = matches
-    .filter((match) => match.teams.some((team) => team.players.some((player) => player.id === playerId)))
+    .filter((match) =>
+      match.teams.some((team) => team.players.some((player) => player.id === playerId)),
+    )
     .sort(byDate);
   if (!played.length) return null;
   const stats = seasonStats(played);
-  const team = played.at(-1)!.teams.find((item) => item.players.some((player) => player.id === playerId))!;
+  const team = played
+    .at(-1)!
+    .teams.find((item) => item.players.some((player) => player.id === playerId))!;
   const name = team.players.find((player) => player.id === playerId)!.name;
   const badges: Badge[] = [];
   const form: FormLine[] = [];
@@ -162,7 +174,13 @@ export function playerProfile(matches: readonly CricketMatch[], playerId: string
   let careerWickets = 0;
   let awards = 0;
   const milestone = (kind: BadgeKind, label: string, detail: string, match: CricketMatch) =>
-    badges.push({ kind, label, detail, matchId: match.id, date: match.settings.startTime || match.createdAt });
+    badges.push({
+      kind,
+      label,
+      detail,
+      matchId: match.id,
+      date: match.settings.startTime || match.createdAt,
+    });
 
   for (const match of played) {
     const own = match.teams.find((item) => item.players.some((player) => player.id === playerId))!;
@@ -177,30 +195,43 @@ export function playerProfile(matches: readonly CricketMatch[], playerId: string
     for (const innings of regular(match)) {
       if (innings.battingTeamId === own.id) {
         const row = battingCard(match, innings).find((item) => item.playerId === playerId);
-        const batted = innings.deliveries.some((ball) => ball.strikerId === playerId || ball.nonStrikerId === playerId);
+        const batted = innings.deliveries.some(
+          (ball) => ball.strikerId === playerId || ball.nonStrikerId === playerId,
+        );
         if (row && batted) {
           runs = (runs ?? 0) + row.runs;
           balls = (balls ?? 0) + row.balls;
           out = out || row.dismissal !== "not out";
           if (row.runs >= 100) milestone("hundred", "Century", `${row.runs} ${versus}`, match);
           else if (row.runs >= 50) milestone("fifty", "Fifty", `${row.runs} ${versus}`, match);
-          if (row.sixes >= 5) milestone("six-hitter", "Six hitter", `${row.sixes} sixes ${versus}`, match);
+          if (row.sixes >= 5)
+            milestone("six-hitter", "Six hitter", `${row.sixes} sixes ${versus}`, match);
           const before = careerRuns;
           careerRuns += row.runs;
-          if (before < 500 && careerRuns >= 500) milestone("runs-500", "500 runs", `Reached ${versus}`, match);
-          if (before < 1000 && careerRuns >= 1000) milestone("runs-1000", "1,000 runs", `Reached ${versus}`, match);
+          if (before < 500 && careerRuns >= 500)
+            milestone("runs-500", "500 runs", `Reached ${versus}`, match);
+          if (before < 1000 && careerRuns >= 1000)
+            milestone("runs-1000", "1,000 runs", `Reached ${versus}`, match);
         }
       } else {
         const row = bowlingCard(match, innings).find((item) => item.playerId === playerId);
         if (row) {
           wickets = (wickets ?? 0) + row.wickets;
           conceded = (conceded ?? 0) + row.runs;
-          if (row.wickets >= 5) milestone("five-for", "Five-wicket haul", `${row.wickets}/${row.runs} ${versus}`, match);
+          if (row.wickets >= 5)
+            milestone(
+              "five-for",
+              "Five-wicket haul",
+              `${row.wickets}/${row.runs} ${versus}`,
+              match,
+            );
           if (hasHatTrick(innings, playerId)) milestone("hat-trick", "Hat-trick", versus, match);
           const before = careerWickets;
           careerWickets += row.wickets;
-          if (before < 25 && careerWickets >= 25) milestone("wickets-25", "25 wickets", `Reached ${versus}`, match);
-          if (before < 50 && careerWickets >= 50) milestone("wickets-50", "50 wickets", `Reached ${versus}`, match);
+          if (before < 25 && careerWickets >= 25)
+            milestone("wickets-25", "25 wickets", `Reached ${versus}`, match);
+          if (before < 50 && careerWickets >= 50)
+            milestone("wickets-50", "50 wickets", `Reached ${versus}`, match);
         }
         catches += innings.deliveries.filter(
           (ball) => ball.dismissal?.type === "caught" && ball.dismissal.fielderId === playerId,

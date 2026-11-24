@@ -3,13 +3,7 @@ import { ScorerBackupImport } from "@/components/ScorerBackupImport";
 import { ScorerMatchNavigation } from "@/components/ScorerMatchNavigation";
 import { defaultScorerDestination, type ScorerDestination } from "@/lib/scorer-navigation";
 import { createFileRoute, Link, useHydrated } from "@tanstack/react-router";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   Ban,
@@ -65,7 +59,13 @@ import { RainPanel } from "@/components/scorer/RainPanel";
 import { DayPanel } from "@/components/scorer/DayPanel";
 import { StoppagePanel } from "@/components/scorer/StoppagePanel";
 import { InstallBanner } from "@/components/app-shell/InstallApp";
-import { RetirePanel, SquadPanel, SubstitutePanel, TossPanel, WorkloadPanel } from "@/components/scorer/MatchTools";
+import {
+  RetirePanel,
+  SquadPanel,
+  SubstitutePanel,
+  TossPanel,
+  WorkloadPanel,
+} from "@/components/scorer/MatchTools";
 import { BallSpeedTool } from "@/components/scorer/BallSpeedTool";
 import { BallTrackChart, BallTrackPad } from "@/components/scorer/BallTrack";
 import { VideoLab } from "@/components/video/VideoLab";
@@ -119,15 +119,30 @@ import {
   scoringDeviceId,
   readRawPendingEventQueue,
 } from "@/lib/cloud";
-import { canResumeQueuedScoring, reviewCloudBootstrap, reviewRemoteScorerSnapshot } from "@/lib/scorer-reconciliation";
+import {
+  canResumeQueuedScoring,
+  reviewCloudBootstrap,
+  reviewRemoteScorerSnapshot,
+} from "@/lib/scorer-reconciliation";
 import { describeScorerSyncRecovery } from "@/lib/scorer-sync-status";
 import { syncChipLabel } from "@/lib/sync-retry";
 import { AppHeader } from "@/components/app-shell/AppHeader";
 import { ClubNameChip } from "@/components/devices/ClubNameChip";
 import { DeviceLimitGuard } from "@/components/devices/DeviceLimit";
 import { AppTabBar } from "@/components/app-shell/AppTabBar";
-import { BallTrail, CreaseStrip, RateStrip, ScoreHero, TeamCrest } from "@/components/scorer/Broadcast";
-import { FielderChips, OutcomeChips, ShotSummary, ShotZonePicker } from "@/components/scorer/ShotEntry";
+import {
+  BallTrail,
+  CreaseStrip,
+  RateStrip,
+  ScoreHero,
+  TeamCrest,
+} from "@/components/scorer/Broadcast";
+import {
+  FielderChips,
+  OutcomeChips,
+  ShotSummary,
+  ShotZonePicker,
+} from "@/components/scorer/ShotEntry";
 import { lastFielderInZone, orderFielders, outcomeAfterZone, recentZones } from "@/lib/shot-entry";
 import { WinPredictor } from "@/components/scorer/WinPredictor";
 import { CommentaryFeed } from "@/components/scorer/CommentaryFeed";
@@ -252,7 +267,9 @@ export function CricketApp() {
         let pendingEvents = 0;
         try {
           // Fielding notes waiting to send never conflict with the score.
-          pendingEvents = readPendingEvents(cloudMatchId).filter((event) => !isPatchEventType(event.eventType)).length;
+          pendingEvents = readPendingEvents(cloudMatchId).filter(
+            (event) => !isPatchEventType(event.eventType),
+          ).length;
         } catch {
           if (!local) {
             setCloudBootstrap({
@@ -489,8 +506,20 @@ export function CricketApp() {
           <AppTabBar
             label="Scorer menu"
             tabs={[
-              { id: "matches", label: "Matches", icon: ListPlus, active: true, onSelect: () => window.scrollTo({ top: 0, behavior: "smooth" }) },
-              { id: "new", label: "New match", icon: Plus, emphasis: true, onSelect: () => setScreen("setup") },
+              {
+                id: "matches",
+                label: "Matches",
+                icon: ListPlus,
+                active: true,
+                onSelect: () => window.scrollTo({ top: 0, behavior: "smooth" }),
+              },
+              {
+                id: "new",
+                label: "New match",
+                icon: Plus,
+                emphasis: true,
+                onSelect: () => setScreen("setup"),
+              },
               { id: "club", label: "Club", icon: Users, to: "/platform" },
               { id: "more", label: "More", icon: MoreHorizontal, onSelect: openMoreSection },
             ]}
@@ -529,188 +558,205 @@ function Dashboard({
     >
       <PromoSlot items={promos.top} slot="top" onPlay={onPlay} />
       <div className={promos.side.length > 0 ? "promo-with-side" : ""}>
-      <div className="min-w-0 space-y-8">
-      <section className="grid gap-6 overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-primary/15 via-card to-card p-6 shadow-2xl md:grid-cols-[1fr_auto] md:items-end md:p-10">
-        <div className="space-y-4">
-          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-amber-300">
-            <CircleDot className="size-4" /> Match centre
-          </span>
-          <h1 className="max-w-3xl font-display text-4xl font-bold leading-none md:text-6xl">
-            Score every ball.
-            <br />
-            Keep every detail.
-          </h1>
-          <p className="max-w-2xl text-sm leading-relaxed text-slate-300 md:text-base">
-            Start a match, select the players and record runs, extras, dismissals, field zones and
-            fielders. Every entry is timestamped; check the device saving status before closing.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onNew}
-          className="inline-flex h-14 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-400 px-7 text-sm font-extrabold uppercase tracking-[0.1em] text-primary-foreground shadow-lg shadow-rose-950/40"
-        >
-          <Plus className="size-5" /> New match
-        </button>
-      </section>
-
-      <section className="space-y-4">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-300">
-              On this device
-            </p>
-            <h2 className="mt-1 font-display text-2xl font-bold md:text-3xl">Your matches</h2>
-          </div>
-          <span className="text-sm text-slate-400">{matches.length} matches</span>
-        </div>
-
-        {matches.length === 0 ? (
-          <button
-            type="button"
-            onClick={onNew}
-            className="flex min-h-64 w-full flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-white/15 bg-white/[0.03] p-8 text-center transition hover:border-amber-300/40 hover:bg-white/[0.05]"
-          >
-            <span className="flex size-16 items-center justify-center rounded-2xl bg-amber-300/10 text-amber-300">
-              <ListPlus className="size-7" />
-            </span>
-            <span>
-              <strong className="block text-lg">Create your first match</strong>
-              <span className="mt-1 block text-sm text-slate-400">
-                It takes about a minute to add both line-ups.
+        <div className="min-w-0 space-y-8">
+          <section className="grid gap-6 overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-primary/15 via-card to-card p-6 shadow-2xl md:grid-cols-[1fr_auto] md:items-end md:p-10">
+            <div className="space-y-4">
+              <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-amber-300">
+                <CircleDot className="size-4" /> Match centre
               </span>
-            </span>
-          </button>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {matches.map((match) => {
-              const innings = currentInnings(match);
-              const summary = summarizeInnings(innings, match.settings.ballsPerOver);
-              const batting = findTeam(match, innings.battingTeamId);
-              const bowling = findTeam(match, innings.bowlingTeamId);
-              return (
-                <article key={match.id} className="match-card group">
-                  <div className="flex items-center justify-between gap-3">
-                    <span
-                      className={`hero-chip ${match.status === "live" ? "hero-chip-live" : ""}`}
-                    >
-                      {match.status === "live" && <span className="live-dot" aria-hidden="true" />}
-                      {match.status === "completed" ? "Completed" : match.status.replace("-", " ")}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (window.confirm(`Delete ${batting.name} v ${bowling.name} from this device?`))
-                          onDelete(match.id);
-                      }}
-                      className="app-icon-button size-9 text-slate-400 hover:text-rose-300"
-                      aria-label={`Delete ${batting.name} versus ${bowling.name}`}
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
+              <h1 className="max-w-3xl font-display text-4xl font-bold leading-none md:text-6xl">
+                Score every ball.
+                <br />
+                Keep every detail.
+              </h1>
+              <p className="max-w-2xl text-sm leading-relaxed text-slate-300 md:text-base">
+                Start a match, select the players and record runs, extras, dismissals, field zones
+                and fielders. Every entry is timestamped; check the device saving status before
+                closing.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onNew}
+              className="inline-flex h-14 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-400 px-7 text-sm font-extrabold uppercase tracking-[0.1em] text-primary-foreground shadow-lg shadow-rose-950/40"
+            >
+              <Plus className="size-5" /> New match
+            </button>
+          </section>
+
+          <section className="space-y-4">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-300">
+                  On this device
+                </p>
+                <h2 className="mt-1 font-display text-2xl font-bold md:text-3xl">Your matches</h2>
+              </div>
+              <span className="text-sm text-slate-400">{matches.length} matches</span>
+            </div>
+
+            {matches.length === 0 ? (
+              <button
+                type="button"
+                onClick={onNew}
+                className="flex min-h-64 w-full flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-white/15 bg-white/[0.03] p-8 text-center transition hover:border-amber-300/40 hover:bg-white/[0.05]"
+              >
+                <span className="flex size-16 items-center justify-center rounded-2xl bg-amber-300/10 text-amber-300">
+                  <ListPlus className="size-7" />
+                </span>
+                <span>
+                  <strong className="block text-lg">Create your first match</strong>
+                  <span className="mt-1 block text-sm text-slate-400">
+                    It takes about a minute to add both line-ups.
+                  </span>
+                </span>
+              </button>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {matches.map((match) => {
+                  const innings = currentInnings(match);
+                  const summary = summarizeInnings(innings, match.settings.ballsPerOver);
+                  const batting = findTeam(match, innings.battingTeamId);
+                  const bowling = findTeam(match, innings.bowlingTeamId);
+                  return (
+                    <article key={match.id} className="match-card group">
+                      <div className="flex items-center justify-between gap-3">
+                        <span
+                          className={`hero-chip ${match.status === "live" ? "hero-chip-live" : ""}`}
+                        >
+                          {match.status === "live" && (
+                            <span className="live-dot" aria-hidden="true" />
+                          )}
+                          {match.status === "completed"
+                            ? "Completed"
+                            : match.status.replace("-", " ")}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                `Delete ${batting.name} v ${bowling.name} from this device?`,
+                              )
+                            )
+                              onDelete(match.id);
+                          }}
+                          className="app-icon-button size-9 text-slate-400 hover:text-rose-300"
+                          aria-label={`Delete ${batting.name} versus ${bowling.name}`}
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </div>
+                      {match.id.startsWith("restored-") && (
+                        <p className="mt-3 text-xs font-semibold text-amber-200">
+                          Restored local copy
+                        </p>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => onOpen(match.id)}
+                        className="mt-4 block w-full text-left"
+                        aria-label={`Open ${batting.name} versus ${bowling.name}`}
+                      >
+                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                          <div className="flex flex-col items-center gap-2 text-center">
+                            <TeamCrest name={batting.name} />
+                            <span className="line-clamp-1 text-xs font-bold uppercase tracking-wider">
+                              {batting.name}
+                            </span>
+                            <span className="font-display text-3xl font-bold tabular-nums text-gold">
+                              {summary.runs}/{summary.wickets}
+                            </span>
+                            <span className="text-[11px] uppercase tracking-wider text-slate-400">
+                              {summary.overs} overs
+                            </span>
+                          </div>
+                          <span className="hero-vs">v</span>
+                          <div className="flex flex-col items-center gap-2 text-center">
+                            <TeamCrest name={bowling.name} />
+                            <span className="line-clamp-1 text-xs font-bold uppercase tracking-wider">
+                              {bowling.name}
+                            </span>
+                            <span className="font-display text-xl text-slate-400">
+                              {match.innings.length > 1 ? "Batted" : "Yet to bat"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-3 text-xs text-slate-400">
+                          <span className="truncate">
+                            {match.settings.ground || "Ground not set"} · {match.settings.format}
+                          </span>
+                          <span className="inline-flex shrink-0 items-center gap-1 font-bold text-gold transition group-hover:translate-x-0.5">
+                            {match.status === "completed" ? "View" : "Resume"}{" "}
+                            <ChevronRight className="size-4" />
+                          </span>
+                        </div>
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          <details
+            id="scorer-more"
+            className="scorer-more group rounded-2xl border border-white/10 bg-white/[0.03]"
+          >
+            <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-5 text-sm font-bold">
+              More options
+              <ChevronRight
+                className="size-4 transition-transform group-open:rotate-90"
+                aria-hidden="true"
+              />
+            </summary>
+            <div className="space-y-5 border-t border-white/10 p-5">
+              {onImport && (
+                <div>
+                  <h2 className="text-base font-bold">Restore from a backup</h2>
+                  <div className="mt-2">
+                    <ScorerBackupImport onImport={onImport} />
                   </div>
-                  {match.id.startsWith("restored-") && (
-                    <p className="mt-3 text-xs font-semibold text-amber-200">Restored local copy</p>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => onOpen(match.id)}
-                    className="mt-4 block w-full text-left"
-                    aria-label={`Open ${batting.name} versus ${bowling.name}`}
-                  >
-                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                      <div className="flex flex-col items-center gap-2 text-center">
-                        <TeamCrest name={batting.name} />
-                        <span className="line-clamp-1 text-xs font-bold uppercase tracking-wider">
-                          {batting.name}
-                        </span>
-                        <span className="font-display text-3xl font-bold tabular-nums text-gold">
-                          {summary.runs}/{summary.wickets}
-                        </span>
-                        <span className="text-[11px] uppercase tracking-wider text-slate-400">
-                          {summary.overs} overs
-                        </span>
-                      </div>
-                      <span className="hero-vs">v</span>
-                      <div className="flex flex-col items-center gap-2 text-center">
-                        <TeamCrest name={bowling.name} />
-                        <span className="line-clamp-1 text-xs font-bold uppercase tracking-wider">
-                          {bowling.name}
-                        </span>
-                        <span className="font-display text-xl text-slate-400">
-                          {match.innings.length > 1 ? "Batted" : "Yet to bat"}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-3 text-xs text-slate-400">
-                      <span className="truncate">
-                        {match.settings.ground || "Ground not set"} · {match.settings.format}
-                      </span>
-                      <span className="inline-flex shrink-0 items-center gap-1 font-bold text-gold transition group-hover:translate-x-0.5">
-                        {match.status === "completed" ? "View" : "Resume"}{" "}
-                        <ChevronRight className="size-4" />
-                      </span>
-                    </div>
-                  </button>
-                </article>
+                </div>
+              )}
+              <div className="flex flex-wrap gap-2 text-sm">
+                <Link to="/" className="app-chip-button">
+                  CricLume website
+                </Link>
+                <Link to="/privacy" className="app-chip-button">
+                  Privacy
+                </Link>
+              </div>
+            </div>
+          </details>
+
+          <section className="grid gap-3 sm:grid-cols-3">
+            {[
+              [ShieldCheck, "No account needed", "Start scoring immediately"],
+              [CloudOff, "Offline-first", "Ground signal is optional"],
+              [Download, "Portable data", "Export-ready match records"],
+            ].map(([Icon, title, body]) => {
+              const FeatureIcon = Icon as typeof ShieldCheck;
+              return (
+                <div
+                  key={String(title)}
+                  className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+                >
+                  <FeatureIcon className="mt-0.5 size-5 shrink-0 text-amber-300" />
+                  <div>
+                    <p className="text-sm font-bold">{String(title)}</p>
+                    <p className="text-xs text-slate-400">{String(body)}</p>
+                  </div>
+                </div>
               );
             })}
+          </section>
+        </div>
+        {promos.side.length > 0 && (
+          <div className="promo-side-rail">
+            <PromoSlot items={promos.side} slot="side" onPlay={onPlay} />
           </div>
         )}
-      </section>
-
-      <details id="scorer-more" className="scorer-more group rounded-2xl border border-white/10 bg-white/[0.03]">
-        <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-5 text-sm font-bold">
-          More options
-          <ChevronRight className="size-4 transition-transform group-open:rotate-90" aria-hidden="true" />
-        </summary>
-        <div className="space-y-5 border-t border-white/10 p-5">
-          {onImport && (
-            <div>
-              <h2 className="text-base font-bold">Restore from a backup</h2>
-              <div className="mt-2">
-                <ScorerBackupImport onImport={onImport} />
-              </div>
-            </div>
-          )}
-          <div className="flex flex-wrap gap-2 text-sm">
-            <Link to="/" className="app-chip-button">
-              CricLume website
-            </Link>
-            <Link to="/privacy" className="app-chip-button">
-              Privacy
-            </Link>
-          </div>
-        </div>
-      </details>
-
-      <section className="grid gap-3 sm:grid-cols-3">
-        {[
-          [ShieldCheck, "No account needed", "Start scoring immediately"],
-          [CloudOff, "Offline-first", "Ground signal is optional"],
-          [Download, "Portable data", "Export-ready match records"],
-        ].map(([Icon, title, body]) => {
-          const FeatureIcon = Icon as typeof ShieldCheck;
-          return (
-            <div
-              key={String(title)}
-              className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4"
-            >
-              <FeatureIcon className="mt-0.5 size-5 shrink-0 text-amber-300" />
-              <div>
-                <p className="text-sm font-bold">{String(title)}</p>
-                <p className="text-xs text-slate-400">{String(body)}</p>
-              </div>
-            </div>
-          );
-        })}
-      </section>
-      </div>
-      {promos.side.length > 0 && (
-        <div className="promo-side-rail">
-          <PromoSlot items={promos.side} slot="side" onPlay={onPlay} />
-        </div>
-      )}
       </div>
     </main>
   );
@@ -782,9 +828,12 @@ function MatchSetup({
           rules: {
             freeHit: Boolean(rules.freeHit),
             lastManStands: Boolean(rules.lastManStands),
-            superOver: inningsPerSide === 1 && parsed.oversPerInnings !== null && Boolean(rules.superOver),
+            superOver:
+              inningsPerSide === 1 && parsed.oversPerInnings !== null && Boolean(rules.superOver),
             followOnLead: inningsPerSide === 2 ? (rules.followOnLead ?? null) : null,
-            ...(inningsPerSide === 1 && parsed.oversPerInnings !== null && rules.rainMethod ? { rainMethod: rules.rainMethod } : {}),
+            ...(inningsPerSide === 1 && parsed.oversPerInnings !== null && rules.rainMethod
+              ? { rainMethod: rules.rainMethod }
+              : {}),
             ...(inningsPerSide === 2 && rules.days ? { days: rules.days } : {}),
             ...(rules.pairs ? { pairs: rules.pairs } : {}),
             ...(rules.endsChangeEvery ? { endsChangeEvery: rules.endsChangeEvery } : {}),
@@ -816,11 +865,24 @@ function MatchSetup({
             onChange={(event) => changeFormat(event.target.value as MatchFormat)}
             className="scorer-input"
           >
-            {["T10", "T20", "ODI", "The Hundred", "Tape-ball", "Indoor", "School", "Club", "Multi-day", "Custom"].map((item) => (
+            {[
+              "T10",
+              "T20",
+              "ODI",
+              "The Hundred",
+              "Tape-ball",
+              "Indoor",
+              "School",
+              "Club",
+              "Multi-day",
+              "Custom",
+            ].map((item) => (
               <option key={item}>{item}</option>
             ))}
           </select>
-          {preset.note && <span className="mt-1 block text-[11px] text-slate-400">{preset.note}</span>}
+          {preset.note && (
+            <span className="mt-1 block text-[11px] text-slate-400">{preset.note}</span>
+          )}
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Overs / innings">
@@ -863,7 +925,10 @@ function MatchSetup({
         </Field>
       </section>
 
-      <section className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5 md:p-8" aria-label="Match rules">
+      <section
+        className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5 md:p-8"
+        aria-label="Match rules"
+      >
         <div>
           <h2 className="font-display text-xl font-bold">Match rules</h2>
           <p className="mt-1 text-xs text-slate-400">
@@ -1021,7 +1086,8 @@ function LiveMatch({
   matchRef.current = match;
   const ledger = useRef(new Map<string, ScoringPatch>());
   const remember = useCallback((patch: ScoringPatch) => {
-    const key = patch.kind === "delivery.tagged" ? `ball:${patch.deliveryId}` : `bowler:${patch.inningsId}`;
+    const key =
+      patch.kind === "delivery.tagged" ? `ball:${patch.deliveryId}` : `bowler:${patch.inningsId}`;
     const previous = ledger.current.get(key);
     if (!previous || previous.sequence <= patch.sequence) ledger.current.set(key, patch);
   }, []);
@@ -1063,7 +1129,12 @@ function LiveMatch({
     },
     [cloudConflict, follower, match, onSave],
   );
-  const cloudSync = useMatchCloudSync(cloudMatchId, acceptRemoteMatch, Boolean(cloudConflict), acceptRemotePatch);
+  const cloudSync = useMatchCloudSync(
+    cloudMatchId,
+    acceptRemoteMatch,
+    Boolean(cloudConflict),
+    acceptRemotePatch,
+  );
   const sendOwnPatch = (patch: ScoringPatch, payload: Record<string, unknown>) => {
     remember(patch);
     onSave(applyPatch(match, patch));
@@ -1072,14 +1143,28 @@ function LiveMatch({
   const sendBowler = (bowlerId: string, end: DeliveryEnd) => {
     const inningsId = currentInnings(match).id;
     sendOwnPatch(
-      { kind: "bowling.updated", sequence: Number.MAX_SAFE_INTEGER, occurredAt: new Date().toISOString(), inningsId, bowlerId, end },
+      {
+        kind: "bowling.updated",
+        sequence: Number.MAX_SAFE_INTEGER,
+        occurredAt: new Date().toISOString(),
+        inningsId,
+        bowlerId,
+        end,
+      },
       { inningsId, bowlerId, end },
     );
   };
   const sendTag = (ball: { id: string }, tag: DeliveryTag) => {
     const inningsId = currentInnings(match).id;
     sendOwnPatch(
-      { kind: "delivery.tagged", sequence: Number.MAX_SAFE_INTEGER, occurredAt: new Date().toISOString(), inningsId, deliveryId: ball.id, tag },
+      {
+        kind: "delivery.tagged",
+        sequence: Number.MAX_SAFE_INTEGER,
+        occurredAt: new Date().toISOString(),
+        inningsId,
+        deliveryId: ball.id,
+        tag,
+      },
       { inningsId, deliveryId: ball.id, tag },
     );
   };
@@ -1093,10 +1178,16 @@ function LiveMatch({
     pending: cloudSync.pendingCount,
     online: typeof navigator === "undefined" ? true : navigator.onLine,
   });
-  const saveAndSync = (next: CricketMatch, eventType = "match.snapshot", extraPayload?: Record<string, unknown>) => {
+  const saveAndSync = (
+    next: CricketMatch,
+    eventType = "match.snapshot",
+    extraPayload?: Record<string, unknown>,
+  ) => {
     if (cloudConflict) return;
     if (follower) {
-      setCloudActionError("Only the batting & runs scorer (or the lead scorer) can change the score for this match.");
+      setCloudActionError(
+        "Only the batting & runs scorer (or the lead scorer) can change the score for this match.",
+      );
       return;
     }
     onSave(next);
@@ -1104,7 +1195,8 @@ function LiveMatch({
     // Fans' phone alerts: best-effort and live-only — a late wicket alert after reconnecting would mislead.
     if (cloudMatchId && navigator.onLine) {
       const alerts = alertsBetween(match, next);
-      if (alerts.length) void sendMatchAlerts({ data: { matchId: cloudMatchId, alerts } }).catch(() => undefined);
+      if (alerts.length)
+        void sendMatchAlerts({ data: { matchId: cloudMatchId, alerts } }).catch(() => undefined);
     }
   };
   const advanceInnings = (options: { followOn?: boolean } = {}) => {
@@ -1220,12 +1312,22 @@ function LiveMatch({
       tabIndex={-1}
       className="mx-auto w-full max-w-7xl pb-[calc(7rem+env(safe-area-inset-bottom))] md:px-8 md:py-8"
     >
-      <PromoSlot items={promos.top} slot="top" onPlay={onPlay} className="mx-3 mb-3 mt-3 md:mx-auto md:mt-0" />
+      <PromoSlot
+        items={promos.top}
+        slot="top"
+        onPlay={onPlay}
+        className="mx-3 mb-3 mt-3 md:mx-auto md:mt-0"
+      />
       <ScoreHero
         match={match}
         sync={
           cloudSync.enabled ? (
-            <span className="hero-chip" role="status" aria-live="polite" data-sync={cloudSync.status}>
+            <span
+              className="hero-chip"
+              role="status"
+              aria-live="polite"
+              data-sync={cloudSync.status}
+            >
               {syncLabel}
             </span>
           ) : undefined
@@ -1246,8 +1348,7 @@ function LiveMatch({
               {findPlayer(match, innings.bowlerId)?.name ?? "Set bowler"}
             </p>
             <p className="text-[11px] text-slate-300">
-              {summary.overs} overs ·{" "}
-              {cloudSync.enabled ? syncLabel : "On this device"}
+              {summary.overs} overs · {cloudSync.enabled ? syncLabel : "On this device"}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -1366,19 +1467,23 @@ function LiveMatch({
             onChanged={() => void dutyState.refresh()}
           />
         )}
-        {cloudMatchId && dutyState.duties && access.onTeam && <CheckScorerStrip matchId={cloudMatchId} />}
+        {cloudMatchId && dutyState.duties && access.onTeam && (
+          <CheckScorerStrip matchId={cloudMatchId} />
+        )}
         {cloudMatchId && dutyState.duties && !access.onTeam && (
           <section role="status" className="broadcast-panel mb-5 text-sm text-slate-200">
             <h2 className="font-bold text-amber-200">You're not on this match's scoring team</h2>
             <p className="mt-1 text-slate-300">
-              You can follow the score here, but only the people the club named for this match can score it.
-              Ask a club admin or the lead scorer to give you a job.
+              You can follow the score here, but only the people the club named for this match can
+              score it. Ask a club admin or the lead scorer to give you a job.
             </p>
           </section>
         )}
         <div hidden={tab !== "score"}>
           {!cloudConflict && access.recordBalls && <DayPanel match={match} onSave={saveAndSync} />}
-          {!cloudConflict && access.recordBalls && <StoppagePanel match={match} onSave={saveAndSync} />}
+          {!cloudConflict && access.recordBalls && (
+            <StoppagePanel match={match} onSave={saveAndSync} />
+          )}
           {!cloudConflict && access.recordBalls && !match.days?.atStumps && !match.stoppage && (
             <ScoringPad
               match={match}
@@ -1391,9 +1496,11 @@ function LiveMatch({
           {!cloudConflict && !access.recordBalls && access.bowlingFielding && (
             <FieldingDesk match={match} onBowler={sendBowler} onTag={sendTag} />
           )}
-          {!cloudConflict && !access.recordBalls && !access.bowlingFielding && access.video && cloudMatchId && (
-            <VideoDutyCard matchId={cloudMatchId} />
-          )}
+          {!cloudConflict &&
+            !access.recordBalls &&
+            !access.bowlingFielding &&
+            access.video &&
+            cloudMatchId && <VideoDutyCard matchId={cloudMatchId} />}
         </div>
         {tab === "score" && !cloudConflict && access.recordBalls && (
           <div className="mt-5 space-y-5">
@@ -1407,13 +1514,22 @@ function LiveMatch({
             <RainPanel match={match} onSave={saveAndSync} />
           </div>
         )}
-        {tab === "timeline" && <Timeline match={match} onSave={saveAndSync} canFix={!follower && !cloudConflict && access.recordBalls} />}
+        {tab === "timeline" && (
+          <Timeline
+            match={match}
+            onSave={saveAndSync}
+            canFix={!follower && !cloudConflict && access.recordBalls}
+          />
+        )}
         {tab === "scorecard" && <Scorecard match={match} onSave={saveAndSync} />}
         {tab === "analysis" && <Analysis match={match} />}
         {tab === "video" && (
           <div className="space-y-5">
             {cloudMatchId && access.video && <VideoDutyCard matchId={cloudMatchId} />}
-            <BallSpeedTool match={match} onSave={access.recordBalls && !cloudConflict ? saveAndSync : undefined} />
+            <BallSpeedTool
+              match={match}
+              onSave={access.recordBalls && !cloudConflict ? saveAndSync : undefined}
+            />
             <VideoLab />
           </div>
         )}
@@ -1541,7 +1657,9 @@ function ScoringPad({
   const chooseZone = (zone: FieldZone) => {
     setFieldZone(zone);
     setOutcome((current) => outcomeAfterZone(zone, current));
-    setFielderId(zone === "Not recorded" ? "" : (lastFielderInZone(innings.deliveries, zone) ?? ""));
+    setFielderId(
+      zone === "Not recorded" ? "" : (lastFielderInZone(innings.deliveries, zone) ?? ""),
+    );
   };
 
   const suggestedFielderId = lastFielderInZone(innings.deliveries, fieldZone);
@@ -1579,7 +1697,11 @@ function ScoringPad({
       >
         <Flag className="mx-auto size-10 text-amber-300" />
         <h2 className="font-display text-3xl font-bold">
-          {result ? "Match result" : plan?.kind === "super-over" ? "Super Over" : "Innings complete"}
+          {result
+            ? "Match result"
+            : plan?.kind === "super-over"
+              ? "Super Over"
+              : "Innings complete"}
         </h2>
         <p className="text-sm text-slate-300">
           {findTeam(match, innings.battingTeamId).name} {superOver ? "scored" : "finished on"}{" "}
@@ -1590,9 +1712,7 @@ function ScoringPad({
         {result && <p className="font-display text-2xl font-bold text-amber-200">{result.text}</p>}
         {plan?.kind === "super-over" && (
           <p className="text-sm text-slate-200">
-            {match.innings.filter(isSuperOver).length % 2 === 0
-              ? "Scores are level. "
-              : ""}
+            {match.innings.filter(isSuperOver).length % 2 === 0 ? "Scores are level. " : ""}
             {nextTeam(plan.battingTeamId)} bat next: one over, two wickets.
           </p>
         )}
@@ -1649,20 +1769,39 @@ function ScoringPad({
 
   return (
     <div className="grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
-      <section className="broadcast-panel order-2 space-y-5 self-start md:p-6 lg:order-1" aria-label="Ball details">
+      <section
+        className="broadcast-panel order-2 space-y-5 self-start md:p-6 lg:order-1"
+        aria-label="Ball details"
+      >
         <h2 className="panel-kicker">Ball details</h2>
         <div className="grid grid-cols-2 gap-3">
           <div className="hidden lg:block">
             <Field label="Striker">
-              <PlayerSelect team={battingTeam} value={strikerId} onChange={setStrikerId} role="bat" />
+              <PlayerSelect
+                team={battingTeam}
+                value={strikerId}
+                onChange={setStrikerId}
+                role="bat"
+              />
             </Field>
           </div>
           <Field label="Non-striker">
-            <PlayerSelect team={battingTeam} value={nonStrikerId} onChange={setNonStrikerId} role="bat" />
+            <PlayerSelect
+              team={battingTeam}
+              value={nonStrikerId}
+              onChange={setNonStrikerId}
+              role="bat"
+            />
           </Field>
           <div className="hidden lg:block">
             <Field label="Bowler">
-              <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} disabled={bowlingByOther} role="bowl" />
+              <PlayerSelect
+                team={bowlingTeam}
+                value={bowlerId}
+                onChange={setBowlerId}
+                disabled={bowlingByOther}
+                role="bowl"
+              />
             </Field>
           </div>
           <Field label="Bowling end">
@@ -1687,7 +1826,6 @@ function ScoringPad({
         >
           <RotateCcw className="size-3.5" /> Swap batters
         </button>
-
 
         <button
           type="button"
@@ -1750,7 +1888,13 @@ function ScoringPad({
             <PlayerSelect team={battingTeam} value={strikerId} onChange={setStrikerId} role="bat" />
           </Field>
           <Field label="Bowler">
-            <PlayerSelect team={bowlingTeam} value={bowlerId} onChange={setBowlerId} disabled={bowlingByOther} role="bowl" />
+            <PlayerSelect
+              team={bowlingTeam}
+              value={bowlerId}
+              onChange={setBowlerId}
+              disabled={bowlingByOther}
+              role="bowl"
+            />
           </Field>
         </div>
         {bowlingByOther && (
@@ -1759,7 +1903,10 @@ function ScoringPad({
           </p>
         )}
         {workloadNote && (
-          <p role="status" className={`rounded-xl border px-3 py-2 text-xs ${workloadNote.allowed ? "border-amber-300/30 text-amber-200" : "border-rose-400/40 text-rose-200"}`}>
+          <p
+            role="status"
+            className={`rounded-xl border px-3 py-2 text-xs ${workloadNote.allowed ? "border-amber-300/30 text-amber-200" : "border-rose-400/40 text-rose-200"}`}
+          >
             {findPlayer(match, bowlerId)?.name ?? "Bowler"}: {workloadNote.message}
           </p>
         )}
@@ -1772,46 +1919,50 @@ function ScoringPad({
             <OutcomeChips value={outcome} onChange={setOutcome} />
           </div>
         ) : (
-        <div className="broadcast-panel shot-card" aria-label="Where did the ball go?">
-          <div className="mb-3 flex items-baseline justify-between gap-3">
-            <h2 className="panel-kicker">Where did it go?</h2>
-            <span className="text-[11px] text-muted-foreground">
-              Optional · {findPlayer(match, strikerId)?.name ?? "Striker"} on strike
-            </span>
-          </div>
-          <div className="shot-card-grid">
-            <ShotZonePicker
-              value={fieldZone}
-              onChange={chooseZone}
-              leftHanded={Boolean(findPlayer(match, strikerId)?.leftHanded ?? leftHanders[strikerId])}
-              onHandChange={(left) => {
-                setBatterHand(strikerId, left);
-                // Saved on the player too, so wagon wheels flip for them everywhere.
-                onSave(setPlayerHand(match, strikerId, left));
-              }}
-              recent={recentPositions}
-            />
-            <div className="space-y-4">
-              {fieldZone !== "Not recorded" ? (
-                <FielderChips
-                  label="Who fielded it?"
-                  players={orderedFielders}
-                  value={fielderId}
-                  onChange={setFielderId}
-                  suggestedId={suggestedFielderId}
-                />
-              ) : (
-                <p className="shot-summary-hint">Pick a fielding position to choose the fielder.</p>
-              )}
-              <OutcomeChips value={outcome} onChange={setOutcome} />
+          <div className="broadcast-panel shot-card" aria-label="Where did the ball go?">
+            <div className="mb-3 flex items-baseline justify-between gap-3">
+              <h2 className="panel-kicker">Where did it go?</h2>
+              <span className="text-[11px] text-muted-foreground">
+                Optional · {findPlayer(match, strikerId)?.name ?? "Striker"} on strike
+              </span>
             </div>
+            <div className="shot-card-grid">
+              <ShotZonePicker
+                value={fieldZone}
+                onChange={chooseZone}
+                leftHanded={Boolean(
+                  findPlayer(match, strikerId)?.leftHanded ?? leftHanders[strikerId],
+                )}
+                onHandChange={(left) => {
+                  setBatterHand(strikerId, left);
+                  // Saved on the player too, so wagon wheels flip for them everywhere.
+                  onSave(setPlayerHand(match, strikerId, left));
+                }}
+                recent={recentPositions}
+              />
+              <div className="space-y-4">
+                {fieldZone !== "Not recorded" ? (
+                  <FielderChips
+                    label="Who fielded it?"
+                    players={orderedFielders}
+                    value={fielderId}
+                    onChange={setFielderId}
+                    suggestedId={suggestedFielderId}
+                  />
+                ) : (
+                  <p className="shot-summary-hint">
+                    Pick a fielding position to choose the fielder.
+                  </p>
+                )}
+                <OutcomeChips value={outcome} onChange={setOutcome} />
+              </div>
+            </div>
+            <ShotSummary
+              zone={fieldZone}
+              fielderName={fielderId ? findPlayer(match, fielderId)?.name : undefined}
+              onClear={clearShot}
+            />
           </div>
-          <ShotSummary
-            zone={fieldZone}
-            fielderName={fielderId ? findPlayer(match, fielderId)?.name : undefined}
-            onClear={clearShot}
-          />
-        </div>
         )}
 
         <BallTrackPad
@@ -1868,9 +2019,17 @@ function ScoringPad({
             {(
               [
                 ["No ball", Ban, () => saveBall({ extras: { noBall: 1 } })],
-                ["Wide", MoveHorizontal, () => saveBall({ extras: { wide: 1 }, outcome: "missed" })],
+                [
+                  "Wide",
+                  MoveHorizontal,
+                  () => saveBall({ extras: { wide: 1 }, outcome: "missed" }),
+                ],
                 ["Bye", CircleDot, () => saveBall({ extras: { bye: 1 }, outcome: "missed" })],
-                ["Leg bye", Footprints, () => saveBall({ extras: { legBye: 1 }, outcome: "missed" })],
+                [
+                  "Leg bye",
+                  Footprints,
+                  () => saveBall({ extras: { legBye: 1 }, outcome: "missed" }),
+                ],
               ] as const
             ).map(([label, Icon, action]) => (
               <button
@@ -1919,7 +2078,11 @@ function ScoringPad({
             <Undo2 className="size-4" /> Undo last ball
           </button>
           {undoableRetirement(match) && (
-            <button type="button" onClick={() => onSave(undoRetirement(match))} className="app-chip-button">
+            <button
+              type="button"
+              onClick={() => onSave(undoRetirement(match))}
+              className="app-chip-button"
+            >
               <Undo2 className="size-4" /> Undo retirement
             </button>
           )}
@@ -1936,7 +2099,8 @@ function ScoringPad({
             <button
               type="button"
               onClick={() => {
-                if (window.confirm(`Declare ${battingTeam.name}'s innings closed?`)) onSave(declareInnings(match));
+                if (window.confirm(`Declare ${battingTeam.name}'s innings closed?`))
+                  onSave(declareInnings(match));
               }}
               className="app-chip-button"
             >
@@ -1970,11 +2134,13 @@ function ScoringPad({
                 onChange={(event) => setDismissalType(event.target.value as DismissalType)}
                 className="scorer-input"
               >
-                {dismissalTypes.filter((type) => allowedOut.includes(type.value)).map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
+                {dismissalTypes
+                  .filter((type) => allowedOut.includes(type.value))
+                  .map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
               </select>
             </Field>
             <Field label="Batter out">
@@ -2069,7 +2235,13 @@ function PlayerSelect({
   const players = team.players.filter(
     (player) =>
       player.id === value ||
-      (role === "bat" ? canBat(player) : role === "bowl" ? canBowl(player) : role === "field" ? !player.replacedBy : true),
+      (role === "bat"
+        ? canBat(player)
+        : role === "bowl"
+          ? canBowl(player)
+          : role === "field"
+            ? !player.replacedBy
+            : true),
   );
   return (
     <select
@@ -2208,15 +2380,34 @@ function Timeline({
   const [view, setView] = useState<"commentary" | "audit">("commentary");
   return (
     <section className="space-y-4">
-      <div className="card-tabs max-w-sm" role="tablist" aria-label="Ball by ball view" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-        <button type="button" role="tab" aria-selected={view === "commentary"} onClick={() => setView("commentary")}>
+      <div
+        className="card-tabs max-w-sm"
+        role="tablist"
+        aria-label="Ball by ball view"
+        style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === "commentary"}
+          onClick={() => setView("commentary")}
+        >
           Commentary
         </button>
-        <button type="button" role="tab" aria-selected={view === "audit"} onClick={() => setView("audit")}>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === "audit"}
+          onClick={() => setView("audit")}
+        >
           Audit trail
         </button>
       </div>
-      {view === "commentary" ? <CommentaryPanel match={match} onSave={onSave} /> : <AuditTrail match={match} onSave={onSave} canFix={canFix} />}
+      {view === "commentary" ? (
+        <CommentaryPanel match={match} onSave={onSave} />
+      ) : (
+        <AuditTrail match={match} onSave={onSave} canFix={canFix} />
+      )}
     </section>
   );
 }
@@ -2249,7 +2440,12 @@ function CommentaryPanel({
     setSummaryError(null);
     try {
       // Name-free lines only: roles, never player names, go to the AI.
-      const anonymous = commentaryFeed(innings, match.settings.ballsPerOver, { battingTeam: battingTeam.name }, 14)
+      const anonymous = commentaryFeed(
+        innings,
+        match.settings.ballsPerOver,
+        { battingTeam: battingTeam.name },
+        14,
+      )
         .reverse()
         .map((line) => `${line.over}: ${line.text}`);
       const result = await summariseOver({
@@ -2257,7 +2453,9 @@ function CommentaryPanel({
           battingTeam: battingTeam.name,
           bowlingTeam: bowlingTeam.name,
           score: `${totals.runs}/${totals.wickets} after ${totals.overs} overs`,
-          ...(target ? { chase: `Chasing ${target}, need ${Math.max(0, target - totals.runs)} more` } : {}),
+          ...(target
+            ? { chase: `Chasing ${target}, need ${Math.max(0, target - totals.runs)} more` }
+            : {}),
           lines: anonymous,
         },
       });
@@ -2275,7 +2473,9 @@ function CommentaryPanel({
       <div className="broadcast-panel p-4">
         <div className="mb-3 flex items-baseline justify-between gap-3">
           <h2 className="panel-kicker">Ball by ball</h2>
-          <span className="text-[11px] text-muted-foreground">Written automatically from each ball</span>
+          <span className="text-[11px] text-muted-foreground">
+            Written automatically from each ball
+          </span>
         </div>
         <CommentaryFeed lines={lines} />
       </div>
@@ -2298,7 +2498,8 @@ function CommentaryPanel({
             <span>
               <strong className="block">Show ball-by-ball text on the public scoreboard</strong>
               <span className="text-xs text-muted-foreground">
-                Viewers see roles like "the batter" instead of player names, to keep juniors private.
+                Viewers see roles like "the batter" instead of player names, to keep juniors
+                private.
               </span>
             </span>
           </label>
@@ -2318,9 +2519,13 @@ function CommentaryPanel({
               {summarising ? "Writing summary…" : "Write over summary"}
             </button>
           ) : (
-            <p className="text-xs text-amber-200">Sign in to your club account to use AI summaries.</p>
+            <p className="text-xs text-amber-200">
+              Sign in to your club account to use AI summaries.
+            </p>
           )}
-          {summary && <p className="rounded-xl bg-white/[0.05] p-3 text-sm leading-relaxed">{summary}</p>}
+          {summary && (
+            <p className="rounded-xl bg-white/[0.05] p-3 text-sm leading-relaxed">{summary}</p>
+          )}
           {summaryError && <p className="text-xs text-rose-300">{summaryError}</p>}
         </div>
       </div>
@@ -2344,7 +2549,11 @@ function AuditTrail({
       <div>
         <p className="text-xs font-bold uppercase tracking-wider text-amber-300">Audit trail</p>
         <h2 className="font-display text-3xl font-bold">Every recorded delivery</h2>
-        {canFix && <p className="mt-1 text-xs text-muted-foreground">Tap Fix on any ball to change runs, extras, the bowler, the fielder or the wicket.</p>}
+        {canFix && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            Tap Fix on any ball to change runs, extras, the bowler, the fielder or the wicket.
+          </p>
+        )}
       </div>
       {innings.deliveries.length ? (
         innings.deliveries
@@ -2389,14 +2598,23 @@ function AuditTrail({
                   })}
                 </time>
                 {canFix && fixing !== ball.id && (
-                  <button type="button" className="app-chip-button" onClick={() => setFixing(ball.id)}>
+                  <button
+                    type="button"
+                    className="app-chip-button"
+                    onClick={() => setFixing(ball.id)}
+                  >
                     Fix
                   </button>
                 )}
               </div>
               {fixing === ball.id && (
                 <div className="col-span-3">
-                  <FixBallPanel match={match} delivery={ball} onSave={onSave} onClose={() => setFixing(null)} />
+                  <FixBallPanel
+                    match={match}
+                    delivery={ball}
+                    onSave={onSave}
+                    onClose={() => setFixing(null)}
+                  />
                 </div>
               )}
             </article>
@@ -2423,7 +2641,11 @@ function MatchPredictorPanel({
   const prediction = currentPrediction(match);
   const [home, away] = match.teams;
   const battingIsHome = innings.battingTeamId === home.id;
-  const firstWin = prediction ? (battingIsHome ? prediction.battingWin : prediction.bowlingWin) : null;
+  const firstWin = prediction
+    ? battingIsHome
+      ? prediction.battingWin
+      : prediction.bowlingWin
+    : null;
   return (
     <WinPredictor
       firstName={home.name}
@@ -2433,7 +2655,9 @@ function MatchPredictorPanel({
       battingName={findTeam(match, innings.battingTeamId).name}
       timeline={winTimeline(match)}
       conditions={match.conditions}
-      onConditionsChange={(conditions) => onSave({ ...match, conditions, updatedAt: new Date().toISOString() })}
+      onConditionsChange={(conditions) =>
+        onSave({ ...match, conditions, updatedAt: new Date().toISOString() })
+      }
       homeName={home.name}
       awayName={away.name}
       unavailableReason={
@@ -2519,7 +2743,9 @@ function Scorecard({
 function SplitTable({ title, rows }: { title: string; rows: SplitRow[] }) {
   return (
     <div>
-      <h3 className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">{title}</h3>
+      <h3 className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </h3>
       <table className="w-full text-xs">
         <thead className="text-muted-foreground">
           <tr>
@@ -2563,20 +2789,38 @@ function MatchSplits({ match }: { match: CricketMatch }) {
     <div className="broadcast-panel space-y-4 p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="panel-kicker">Phases &amp; bowling types</h2>
-        <select className="scorer-input w-auto" value={batterId} onChange={(e) => setBatterId(e.target.value)} aria-label="Whose balls">
+        <select
+          className="scorer-input w-auto"
+          value={batterId}
+          onChange={(e) => setBatterId(e.target.value)}
+          aria-label="Whose balls"
+        >
           <option value="">{batting.name} (all)</option>
           {faced.map((p) => (
-            <option key={p.id} value={p.id}>{p.name}</option>
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
           ))}
         </select>
       </div>
       <SplitTable title="By phase" rows={phaseSplits(match, innings, filter)} />
-      <SplitTable title="Against pace and spin" rows={bowlingTypeSplits(innings.deliveries.filter(filter))} />
+      <SplitTable
+        title="Against pace and spin"
+        rows={bowlingTypeSplits(innings.deliveries.filter(filter))}
+      />
       <div className="flex flex-wrap gap-2 border-t border-border pt-3">
-        <button type="button" className="action-secondary" onClick={() => downloadCsv(`${base}-ball-by-ball.csv`, ballByBallCsv(match))}>
+        <button
+          type="button"
+          className="action-secondary"
+          onClick={() => downloadCsv(`${base}-ball-by-ball.csv`, ballByBallCsv(match))}
+        >
           <Download className="size-4" /> Ball by ball (spreadsheet)
         </button>
-        <button type="button" className="action-secondary" onClick={() => downloadCsv(`${base}-scorecard.csv`, scorecardCsv(match))}>
+        <button
+          type="button"
+          className="action-secondary"
+          onClick={() => downloadCsv(`${base}-scorecard.csv`, scorecardCsv(match))}
+        >
           <Download className="size-4" /> Scorecard (spreadsheet)
         </button>
       </div>

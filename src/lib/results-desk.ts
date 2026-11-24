@@ -13,7 +13,12 @@ export interface FixtureResult {
   homeBonusPoints?: number;
   awayBonusPoints?: number;
 }
-export interface ResultReport { teamId: string; result: FixtureResult; note: string; submittedAt: string }
+export interface ResultReport {
+  teamId: string;
+  result: FixtureResult;
+  note: string;
+  submittedAt: string;
+}
 export interface InboxFixture {
   fixtureId: string;
   competitionId: string;
@@ -41,12 +46,24 @@ export interface InboxFixture {
   } | null;
 }
 
-export type DeskState = "signed-off" | "ready" | "disputed" | "awaiting-one" | "awaiting-both" | "overdue" | "upcoming";
+export type DeskState =
+  "signed-off" | "ready" | "disputed" | "awaiting-one" | "awaiting-both" | "overdue" | "upcoming";
 
 /** A result is due this long after the start; after that an unreported fixture is overdue. */
 export const resultDueHours = 48;
 
-const outcomeKeys = ["winnerTeamId", "walkover", "tied", "noResult", "homeRuns", "awayRuns", "homeLegalBalls", "awayLegalBalls", "homeBonusPoints", "awayBonusPoints"] as const;
+const outcomeKeys = [
+  "winnerTeamId",
+  "walkover",
+  "tied",
+  "noResult",
+  "homeRuns",
+  "awayRuns",
+  "homeLegalBalls",
+  "awayLegalBalls",
+  "homeBonusPoints",
+  "awayBonusPoints",
+] as const;
 
 /** Same shape the database cleans results into, so two reports can be compared field by field. */
 export function canonicalResult(result: FixtureResult): FixtureResult {
@@ -55,7 +72,14 @@ export function canonicalResult(result: FixtureResult): FixtureResult {
   if (result.walkover && result.winnerTeamId) out.walkover = true;
   if (result.tied) out.tied = true;
   if (result.noResult) out.noResult = true;
-  for (const key of ["homeRuns", "awayRuns", "homeLegalBalls", "awayLegalBalls", "homeBonusPoints", "awayBonusPoints"] as const) {
+  for (const key of [
+    "homeRuns",
+    "awayRuns",
+    "homeLegalBalls",
+    "awayLegalBalls",
+    "homeBonusPoints",
+    "awayBonusPoints",
+  ] as const) {
     const value = result[key];
     if (typeof value === "number" && Number.isFinite(value)) out[key] = value;
   }
@@ -69,28 +93,46 @@ export function resultsAgree(a: FixtureResult, b: FixtureResult): boolean {
 }
 
 /** Checks a result the way the database does. Returns a plain-language problem, or null when it's fine. */
-export function resultProblem(result: FixtureResult, homeTeamId: string, awayTeamId: string): string | null {
-  const outcomes = Number(Boolean(result.winnerTeamId)) + Number(Boolean(result.tied)) + Number(Boolean(result.noResult));
+export function resultProblem(
+  result: FixtureResult,
+  homeTeamId: string,
+  awayTeamId: string,
+): string | null {
+  const outcomes =
+    Number(Boolean(result.winnerTeamId)) +
+    Number(Boolean(result.tied)) +
+    Number(Boolean(result.noResult));
   if (outcomes !== 1) return "Pick a winner, a tie or no result.";
-  if (result.winnerTeamId && result.winnerTeamId !== homeTeamId && result.winnerTeamId !== awayTeamId) return "The winner must be one of the two teams.";
+  if (
+    result.winnerTeamId &&
+    result.winnerTeamId !== homeTeamId &&
+    result.winnerTeamId !== awayTeamId
+  )
+    return "The winner must be one of the two teams.";
   for (const key of ["homeBonusPoints", "awayBonusPoints"] as const) {
     const value = result[key];
-    if (value !== undefined && (!Number.isFinite(value) || value < 0 || value > 100)) return "Bonus points must be between 0 and 100.";
+    if (value !== undefined && (!Number.isFinite(value) || value < 0 || value > 100))
+      return "Bonus points must be between 0 and 100.";
   }
   if (result.noResult) return null;
-  if (result.walkover) return result.winnerTeamId ? null : "A walkover needs the team that was awarded the match.";
+  if (result.walkover)
+    return result.winnerTeamId ? null : "A walkover needs the team that was awarded the match.";
   for (const key of ["homeRuns", "awayRuns", "homeLegalBalls", "awayLegalBalls"] as const) {
     const value = result[key];
-    if (typeof value !== "number" || !Number.isInteger(value) || value < 0) return "Enter whole numbers for runs and balls for both sides.";
+    if (typeof value !== "number" || !Number.isInteger(value) || value < 0)
+      return "Enter whole numbers for runs and balls for both sides.";
   }
-  if (!result.homeLegalBalls || !result.awayLegalBalls) return "Each side must have faced at least one ball.";
+  if (!result.homeLegalBalls || !result.awayLegalBalls)
+    return "Each side must have faced at least one ball.";
   if (result.winnerTeamId && !result.tied) {
     const homeWon = result.winnerTeamId === homeTeamId;
     const winnerRuns = homeWon ? result.homeRuns! : result.awayRuns!;
     const loserRuns = homeWon ? result.awayRuns! : result.homeRuns!;
-    if (winnerRuns < loserRuns) return "The winning side scored fewer runs — check the scores or the winner.";
+    if (winnerRuns < loserRuns)
+      return "The winning side scored fewer runs — check the scores or the winner.";
   }
-  if (result.tied && result.homeRuns !== result.awayRuns) return "A tie needs both sides on the same score.";
+  if (result.tied && result.homeRuns !== result.awayRuns)
+    return "A tie needs both sides on the same score.";
   return null;
 }
 
@@ -127,17 +169,30 @@ export const deskPriority: Record<DeskState, number> = {
 };
 
 export function sortForAction(fixtures: InboxFixture[], nowMs: number): InboxFixture[] {
-  return [...fixtures].sort((a, b) => deskPriority[deskState(a, nowMs)] - deskPriority[deskState(b, nowMs)] || (Date.parse(b.startsAt ?? "") || 0) - (Date.parse(a.startsAt ?? "") || 0));
+  return [...fixtures].sort(
+    (a, b) =>
+      deskPriority[deskState(a, nowMs)] - deskPriority[deskState(b, nowMs)] ||
+      (Date.parse(b.startsAt ?? "") || 0) - (Date.parse(a.startsAt ?? "") || 0),
+  );
 }
 
 /** Result from the scored match: higher total wins; equal totals tie. */
 export function suggestedResult(fixture: InboxFixture): FixtureResult | null {
   const s = fixture.suggested;
   if (!s || s.status !== "completed") return null;
-  if (s.homeRuns == null || s.awayRuns == null || !s.homeLegalBalls || !s.awayLegalBalls) return null;
-  const base = { homeRuns: s.homeRuns, awayRuns: s.awayRuns, homeLegalBalls: s.homeLegalBalls, awayLegalBalls: s.awayLegalBalls };
+  if (s.homeRuns == null || s.awayRuns == null || !s.homeLegalBalls || !s.awayLegalBalls)
+    return null;
+  const base = {
+    homeRuns: s.homeRuns,
+    awayRuns: s.awayRuns,
+    homeLegalBalls: s.homeLegalBalls,
+    awayLegalBalls: s.awayLegalBalls,
+  };
   if (s.homeRuns === s.awayRuns) return { ...base, tied: true };
-  return { ...base, winnerTeamId: s.homeRuns > s.awayRuns ? fixture.homeTeamId : fixture.awayTeamId };
+  return {
+    ...base,
+    winnerTeamId: s.homeRuns > s.awayRuns ? fixture.homeTeamId : fixture.awayTeamId,
+  };
 }
 
 function overs(balls: number | undefined, ballsPerOver = 6): string {
@@ -145,10 +200,14 @@ function overs(balls: number | undefined, ballsPerOver = 6): string {
   return `${Math.floor(balls / ballsPerOver)}${balls % ballsPerOver ? `.${balls % ballsPerOver}` : ""}`;
 }
 
-export function describeResult(result: FixtureResult | null | undefined, names: { home: string; away: string; homeTeamId: string }): string {
+export function describeResult(
+  result: FixtureResult | null | undefined,
+  names: { home: string; away: string; homeTeamId: string },
+): string {
   if (!result) return "No result yet";
   if (result.noResult) return "No result";
-  if (result.walkover) return `${result.winnerTeamId === names.homeTeamId ? names.home : names.away} won (walkover — the other team conceded)`;
+  if (result.walkover)
+    return `${result.winnerTeamId === names.homeTeamId ? names.home : names.away} won (walkover — the other team conceded)`;
   const score = `${names.home} ${result.homeRuns ?? "?"} (${overs(result.homeLegalBalls)} ov) · ${names.away} ${result.awayRuns ?? "?"} (${overs(result.awayLegalBalls)} ov)`;
   if (result.tied) return `Tied · ${score}`;
   const winner = result.winnerTeamId === names.homeTeamId ? names.home : names.away;

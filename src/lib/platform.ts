@@ -383,7 +383,8 @@ export function calculateCompetitionTable(
     const row = rows.get(adjustment.teamId);
     if (!row || !Number.isFinite(adjustment.points)) continue;
     row.points += adjustment.points;
-    row.pointsAdjustment = Math.round(((row.pointsAdjustment ?? 0) + adjustment.points) * 100) / 100;
+    row.pointsAdjustment =
+      Math.round(((row.pointsAdjustment ?? 0) + adjustment.points) * 100) / 100;
   }
 
   for (const fixture of fixtures) {
