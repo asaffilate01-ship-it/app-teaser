@@ -205,6 +205,7 @@ export type GateResult = {
 };
 
 const hasVerifiedReference = (item: GateEvidence): boolean => {
+  if (typeof item.evidenceUrl !== "string" || typeof item.checkedBy !== "string") return false;
   try {
     const url = new URL(item.evidenceUrl);
     return (
