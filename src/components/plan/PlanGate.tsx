@@ -1,7 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Lock, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { planGate, readPlanId, type PlanFeature, type PlanId } from "@/lib/plans";
+import {
+  gateWhenPlanUnknown,
+  planGate,
+  readPlanId,
+  type PlanFeature,
+  type PlanId,
+} from "@/lib/plans";
 
 interface PlanAccess {
   plan: PlanId;
