@@ -23,7 +23,7 @@ export function AppHeader({
 }) {
   return (
     <header className="app-header">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <div className="flex min-w-0 items-center gap-2.5">
           {onBack && (
             <button
@@ -54,7 +54,7 @@ export function AppHeader({
           </Link>
           {area && <span className="app-area-pill hidden sm:inline-flex">{area}</span>}
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-2">
           <ThemeToggle />
           <InstallButton />
           {right}
