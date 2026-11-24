@@ -46,7 +46,7 @@ export function cameraCloudControls(input: {
   const verified = input.verified && known;
   return {
     canStart: !input.busy && input.armed && verified && !cameraCloudActive(input.state),
-    canStop: !input.busy &&
-      (!verified || (cameraCloudActive(input.state) && input.state !== "stopping")),
+    canStop:
+      !input.busy && (!verified || (cameraCloudActive(input.state) && input.state !== "stopping")),
   };
 }
