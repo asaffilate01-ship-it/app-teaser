@@ -211,7 +211,10 @@ export function FixtureBuilder({ data, run }: { data: PlatformDashboardData; run
             {plan.byes.length > 0 ? " · one team rests each round" : ""}
           </p>
           {unallocated > 0 && (
-            <p role="status" className="mt-3 rounded-lg border border-amber-300/30 p-3 text-sm text-amber-200">
+            <p
+              role="status"
+              className="mt-3 rounded-lg border border-amber-300/30 p-3 text-sm text-amber-200"
+            >
               {unallocated} matches have no available ground in their round. They will be saved as
               undated drafts so you can arrange another venue or time.
             </p>
