@@ -81,3 +81,23 @@ export function reviewFixtureSchedule(
   }
   return { alerts, truncated: false, checkedFixtures: entries.length };
 }
+
+/** Exact-start conflict check against the fixtures visible to the current workspace.
+ * This is a client preflight, not a transactional database booking constraint.
+ */
+export function findFixtureStartConflict(
+  proposed: Pick<ScheduledFixture, "startsAt" | "homeTeamId" | "awayTeamId" | "groundId">,
+  fixtures: readonly ScheduledFixture[],
+): ScheduledFixture | undefined {
+  const starts = absoluteStart(proposed.startsAt);
+  if (starts === null) return undefined;
+  const teams = new Set([proposed.homeTeamId, proposed.awayTeamId]);
+  return fixtures.find(
+    (fixture) =>
+      !excludedStatuses.has(fixture.status.toLowerCase()) &&
+      absoluteStart(fixture.startsAt) === starts &&
+      (teams.has(fixture.homeTeamId) ||
+        teams.has(fixture.awayTeamId) ||
+        Boolean(proposed.groundId && proposed.groundId === fixture.groundId)),
+  );
+}
