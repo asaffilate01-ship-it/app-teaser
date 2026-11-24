@@ -253,6 +253,7 @@ export function generateRoundRobinFixtures(
   const rotation = [...participants];
   const output: GeneratedFixture[] = [];
   const usedGroundsBySlot = new Map<string, Set<string>>();
+  const usedTeamsBySlot = new Map<string, Set<string>>();
   let slotCursor = 0;
 
   const addLeg = (leg: number, reverse: boolean) => {
@@ -276,13 +277,16 @@ export function generateRoundRobinFixtures(
             ...(home.unavailableSlotIds ?? []),
             ...(away.unavailableSlotIds ?? []),
           ]);
-          const ground = slot.availableGroundIds.includes(home.homeGroundId)
-            ? home.homeGroundId
-            : slot.availableGroundIds.find(
-                (candidate) => !usedGroundsBySlot.get(slot.id)?.has(candidate),
-              );
-          if (unavailable.has(slot.id) || !ground || usedGroundsBySlot.get(slot.id)?.has(ground))
+          const bookedTeams = usedTeamsBySlot.get(slot.id);
+          if (unavailable.has(slot.id) || bookedTeams?.has(home.id) || bookedTeams?.has(away.id))
             continue;
+          const bookedGrounds = usedGroundsBySlot.get(slot.id);
+          const ground =
+            slot.availableGroundIds.includes(home.homeGroundId) &&
+            !bookedGrounds?.has(home.homeGroundId)
+              ? home.homeGroundId
+              : slot.availableGroundIds.find((candidate) => !bookedGrounds?.has(candidate));
+          if (!ground) continue;
           selectedSlot = slot;
           selectedGround = ground;
           slotCursor = (slots.indexOf(slot) + 1) % Math.max(1, slots.length);
@@ -296,6 +300,10 @@ export function generateRoundRobinFixtures(
           const used = usedGroundsBySlot.get(selectedSlot.id) ?? new Set<string>();
           used.add(selectedGround);
           usedGroundsBySlot.set(selectedSlot.id, used);
+          const bookedTeams = usedTeamsBySlot.get(selectedSlot.id) ?? new Set<string>();
+          bookedTeams.add(home.id);
+          bookedTeams.add(away.id);
+          usedTeamsBySlot.set(selectedSlot.id, bookedTeams);
         }
         output.push({
           round: round + 1 + leg * rounds,
