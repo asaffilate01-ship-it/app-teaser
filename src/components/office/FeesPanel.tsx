@@ -1,8 +1,9 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Banknote } from "lucide-react";
 import { can } from "@/lib/platform";
 import {
   currencyDigits,
+  feeScheduleTargets,
   feeTotals,
   formatMoney,
   isOverdue,
@@ -190,9 +191,11 @@ function NewSchedule({ data, organisationId, club, act }: OfficeProps) {
     if (guess) setCurrency(guess);
   }, [data.schedules.length]);
   const minor = toMinor(amount, currency);
+  const ownTeams = club.teams.filter((team) => !team.external);
+  const validTeam = !teamId || ownTeams.some((team) => team.id === teamId);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!minor) return;
+    if (!minor || !validTeam || !name.trim()) return;
     const ok = await act(
       () =>
         office.addSchedule({
@@ -279,15 +282,20 @@ function NewSchedule({ data, organisationId, club, act }: OfficeProps) {
             onChange={(event) => setTeamId(event.target.value)}
           >
             <option value="">Whole club</option>
-            {club.teams.map((team) => (
+            {ownTeams.map((team) => (
               <option key={team.id} value={team.id}>
                 {team.name}
               </option>
             ))}
           </select>
         </OfficeField>
+        {!validTeam && (
+          <p role="alert" className="text-sm text-amber-200 sm:col-span-2">
+            The selected team is unavailable. Choose another team or explicitly select Whole club.
+          </p>
+        )}
         <div className="flex items-end">
-          <button disabled={!minor} className="action-primary w-full">
+          <button disabled={!minor || !validTeam || !name.trim()} className="action-primary w-full">
             <Banknote className="size-4" /> Add fee
           </button>
         </div>
@@ -297,40 +305,69 @@ function NewSchedule({ data, organisationId, club, act }: OfficeProps) {
 }
 
 function Schedules({ data, club, act }: OfficeProps) {
+  const [charging, setCharging] = useState<string | null>(null);
+  const chargeLock = useRef(false);
   if (!data.schedules.length) return null;
   return (
     <OfficeCard
       title="Fees"
-      description="Charging twice is safe — anyone already charged is skipped."
+      description="Review the fee and its recipients before charging. Existing charges may be skipped."
     >
       <div className="space-y-2">
         {data.schedules.map((schedule) => {
-          const team = club.teams.find((item) => item.id === schedule.team_id);
-          const playerIds = team ? team.playerIds : club.players.map((player) => player.id);
+          const team = club.teams.find((item) => item.id === schedule.team_id && !item.external);
+          const target =
+            schedule.team_id === null ? "Whole club" : (team?.name ?? "Team unavailable");
+          const playerIds = feeScheduleTargets(
+            schedule,
+            club.teams,
+            club.players.map((player) => player.id),
+          );
           const charged = data.charges.filter(
             (charge) => charge.schedule_id === schedule.id,
           ).length;
+          const amount = formatMoney(Number(schedule.amount_minor), schedule.currency);
+          const charge = async () => {
+            if (!playerIds.length || chargeLock.current) return;
+            if (
+              !window.confirm(
+                `Apply ${schedule.name} (${amount} each) to ${playerIds.length} eligible players in ${target}?`,
+              )
+            )
+              return;
+            chargeLock.current = true;
+            setCharging(schedule.id);
+            try {
+              await act(
+                () => office.chargePlayers(schedule, playerIds),
+                "Fee charge request completed. Check the updated charges.",
+              );
+            } finally {
+              chargeLock.current = false;
+              setCharging(null);
+            }
+          };
           return (
             <div key={schedule.id} className="office-row">
-              <span>
+              <span className="min-w-0">
                 <span className="font-bold">{schedule.name}</span>
                 <span className="office-meta block">
-                  {formatMoney(Number(schedule.amount_minor), schedule.currency)} ·{" "}
-                  {team?.name ?? "Whole club"} · {charged} charged
+                  {amount} · {target} · {charged} charged
                 </span>
+                {!schedule.active && <Pill>Inactive</Pill>}
+                {schedule.team_id !== null && !team && (
+                  <p className="office-meta text-amber-200">
+                    Assigned team unavailable. Charging blocked.
+                  </p>
+                )}
               </span>
               <button
                 type="button"
                 className="app-chip-button"
-                disabled={!playerIds.length}
-                onClick={() =>
-                  void act(
-                    () => office.chargePlayers(schedule, playerIds),
-                    `Charged ${playerIds.length} players`,
-                  )
-                }
+                disabled={!playerIds.length || charging !== null}
+                onClick={() => void charge()}
               >
-                Charge {playerIds.length} players
+                {charging === schedule.id ? "Charging…" : `Charge ${playerIds.length} players`}
               </button>
             </div>
           );
