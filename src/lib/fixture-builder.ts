@@ -7,7 +7,7 @@ export interface BuilderOptions {
   /** Start time, "HH:MM" (local). */
   startTime: string;
   daysBetweenRounds: number;
-  /** Ground for every match, or "home" to use each home team's listed ground when it has one. */
+  /** Available grounds, each with capacity for one match per round. */
   groundIds?: readonly string[];
 }
 
@@ -31,7 +31,7 @@ export interface BuilderResult {
 /**
  * Round-robin fixtures by the circle method: every team plays every other team once per leg and never twice
  * in the same round. Venues are balanced so each team's home count differs from its away count by at most one.
- * Grounds, when given, rotate round by round so one ground is not used for every match of a round.
+ * Grounds rotate between rounds. Matches exceeding available venue capacity stay undated drafts.
  */
 export function buildRoundRobin(options: BuilderOptions): BuilderResult {
   const unique = [...new Set(options.teamIds)];
@@ -42,7 +42,7 @@ export function buildRoundRobin(options: BuilderOptions): BuilderResult {
   const legs = options.doubleRoundRobin ? 2 : 1;
   const fixtures: ProposedFixture[] = [];
   const byes: BuilderResult["byes"] = [];
-  const grounds = options.groundIds ?? [];
+  const grounds = [...new Set(options.groundIds ?? [])].filter(Boolean);
   const gap = Math.max(1, Math.min(60, Math.round(options.daysBetweenRounds || 7)));
   const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(options.firstDate);
   const timeMatch = /^(\d{2}):(\d{2})$/.exec(options.startTime) ?? ["", "11", "00"];
@@ -98,14 +98,18 @@ export function buildRoundRobin(options: BuilderOptions): BuilderResult {
         }
       }
       pairs.forEach((pair, matchIndex) => {
+        const groundUnavailable = grounds.length > 0 && matchIndex >= grounds.length;
         const [home, away] = leg === 0 ? [pair.home, pair.away] : [pair.away, pair.home];
         fixtures.push({
           round: roundIndex + 1,
           roundName: `Round ${roundIndex + 1}`,
           homeTeamId: home,
           awayTeamId: away,
-          startsAt: startFor(roundIndex),
-          groundId: grounds.length ? grounds[(roundIndex + matchIndex) % grounds.length]! : null,
+          startsAt: groundUnavailable ? null : startFor(roundIndex),
+          groundId:
+            grounds.length && !groundUnavailable
+              ? grounds[(roundIndex + matchIndex) % grounds.length]!
+              : null,
         });
       });
     });
