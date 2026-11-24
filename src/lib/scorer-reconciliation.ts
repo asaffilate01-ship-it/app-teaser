@@ -17,6 +17,28 @@ function scoringPart(delivery: Delivery): unknown {
   return { ...rest, dismissal: out };
 }
 
+/** JSON object property order is not score data. PostgREST JSONB may reorder keys. */
+function sameSnapshotValue(left: unknown, right: unknown): boolean {
+  if (left === right) return true;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return (
+      Array.isArray(left) &&
+      Array.isArray(right) &&
+      left.length === right.length &&
+      left.every((value, index) => sameSnapshotValue(value, right[index]))
+    );
+  }
+  if (!left || !right || typeof left !== "object" || typeof right !== "object") return false;
+  const a = Object.entries(left).filter(([, value]) => value !== undefined);
+  const b = Object.entries(right).filter(([, value]) => value !== undefined);
+  return (
+    a.length === b.length &&
+    a.every(([key, value]) =>
+      b.some(([otherKey, otherValue]) => key === otherKey && sameSnapshotValue(value, otherValue)),
+    )
+  );
+}
+
 export type ScorerSnapshotReview = { safe: true; reason: null } | { safe: false; reason: string };
 
 /**
@@ -33,7 +55,7 @@ export function reviewRemoteScorerSnapshot(
 ): ScorerSnapshotReview {
   const reject = (reason: string): ScorerSnapshotReview => ({ safe: false, reason });
   if (local.id !== remote.id) return reject("The incoming score belongs to a different match.");
-  if (JSON.stringify(local.settings) !== JSON.stringify(remote.settings)) {
+  if (!sameSnapshotValue(local.settings, remote.settings)) {
     return reject("The match rules or setup differ between this device and the cloud.");
   }
   if (local.status === "completed" && remote.status !== "completed") {
@@ -46,7 +68,7 @@ export function reviewRemoteScorerSnapshot(
     if (local.teams[i]?.id !== remote.teams[i]?.id) {
       return reject("The incoming score refers to different teams.");
     }
-    if (JSON.stringify(local.teams[i]) !== JSON.stringify(remote.teams[i])) {
+    if (!sameSnapshotValue(local.teams[i], remote.teams[i])) {
       return reject("A team's identity or registered players differ between scorers.");
     }
   }
@@ -68,6 +90,16 @@ export function reviewRemoteScorerSnapshot(
     if (onDevice.status === "completed" && fromCloud.status !== "completed") {
       return reject(`The cloud copy would reopen innings ${i + 1}.`);
     }
+    const localRetirements = onDevice.retirements ?? [];
+    const cloudRetirements = fromCloud.retirements ?? [];
+    if (
+      cloudRetirements.length < localRetirements.length ||
+      !localRetirements.every((retirement, index) =>
+        sameSnapshotValue(retirement, cloudRetirements[index]),
+      )
+    ) {
+      return reject(`Retirement history in innings ${i + 1} differs between scorers.`);
+    }
     if (fromCloud.deliveries.length < onDevice.deliveries.length) {
       return reject(`The cloud copy is missing recorded deliveries from innings ${i + 1}.`);
     }
@@ -77,9 +109,7 @@ export function reviewRemoteScorerSnapshot(
       if (!cloudDelivery || deviceDelivery.id !== cloudDelivery.id) {
         return reject(`Delivery ${j + 1} of innings ${i + 1} differs between scorers.`);
       }
-      if (
-        JSON.stringify(scoringPart(deviceDelivery)) !== JSON.stringify(scoringPart(cloudDelivery))
-      ) {
+      if (!sameSnapshotValue(scoringPart(deviceDelivery), scoringPart(cloudDelivery))) {
         return reject(`Delivery ${j + 1} of innings ${i + 1} was edited on another scorer.`);
       }
     }
