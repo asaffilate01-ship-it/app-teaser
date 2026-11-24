@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { reviewFixtureSchedule } from "../src/lib/fixture-scheduling.ts";
+import { findFixtureStartConflict, reviewFixtureSchedule } from "../src/lib/fixture-scheduling.ts";
 import type { FixtureRecord } from "../src/lib/platform-cloud.ts";
 
 type FixtureInput = Pick<
@@ -75,4 +75,28 @@ test("duplicated records are not counted twice", () => {
   );
   assert.equal(result.alerts.length, 1);
   assert.equal(result.alerts[0]?.secondFixtureId, "f2");
+});
+
+test("manual fixture preflight detects the same instant across timezone offsets", () => {
+  const proposed = {
+    ...first,
+    startsAt: "2026-12-10T18:00:00+05:00",
+    awayTeamId: "team-c",
+    groundId: "ground-2",
+  };
+  assert.equal(findFixtureStartConflict(proposed, [first])?.id, first.id);
+});
+
+test("manual fixture preflight checks grounds even for unrelated teams", () => {
+  const proposed = { ...first, homeTeamId: "team-x", awayTeamId: "team-y" };
+  assert.equal(findFixtureStartConflict(proposed, [first])?.id, first.id);
+});
+
+test("manual fixture preflight permits different starts, drafts and cancelled bookings", () => {
+  assert.equal(
+    findFixtureStartConflict({ ...first, startsAt: "2026-12-10T14:00:00Z" }, [first]),
+    undefined,
+  );
+  assert.equal(findFixtureStartConflict({ ...first, startsAt: null }, [first]), undefined);
+  assert.equal(findFixtureStartConflict(first, [{ ...first, status: "cancelled" }]), undefined);
 });
