@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ShieldCheck, CloudUpload } from "lucide-react";
 import { getCloudClient } from "@/lib/cloud";
 import { cloudImportReviewLabel, type CloudImportState } from "@/lib/camera-import-policy";
@@ -7,14 +7,17 @@ import type { CameraCloudRecording } from "@/lib/camera-cloud";
 export function CameraImportApproval({
   recording,
   onSubmitted,
+  statusVerified = true,
 }: {
   recording: CameraCloudRecording;
   onSubmitted: () => Promise<void>;
+  statusVerified?: boolean;
 }) {
   const [recordingPermission, setRecordingPermission] = useState(false);
   const [includesJunior, setIncludesJunior] = useState(true);
   const [guardianPermission, setGuardianPermission] = useState(false);
   const [busy, setBusy] = useState(false);
+  const submissionLock = useRef(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -41,7 +44,14 @@ export function CameraImportApproval({
     return null;
 
   const submit = async () => {
-    if (!recordingPermission || (includesJunior && !guardianPermission) || busy) return;
+    if (
+      !statusVerified ||
+      !recordingPermission ||
+      (includesJunior && !guardianPermission) ||
+      busy ||
+      submissionLock.current
+    )
+      return;
     if (
       !window.confirm(
         "Approve a private transfer of this confirmed recording? " +
@@ -49,6 +59,7 @@ export function CameraImportApproval({
       )
     )
       return;
+    submissionLock.current = true;
     setBusy(true);
     setError("");
     setSuccess("");
@@ -72,6 +83,7 @@ export function CameraImportApproval({
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Private import approval failed.");
     } finally {
+      submissionLock.current = false;
       setBusy(false);
     }
   };
@@ -114,9 +126,16 @@ export function CameraImportApproval({
           I have verified the required guardian recording permission.
         </label>
       )}
+      {!statusVerified && (
+        <p role="status" className="mt-2 text-xs text-amber-200">
+          Refresh recording status before approving this private import.
+        </p>
+      )}
       <button
         type="button"
-        disabled={busy || !recordingPermission || (includesJunior && !guardianPermission)}
+        disabled={
+          !statusVerified || busy || !recordingPermission || (includesJunior && !guardianPermission)
+        }
         onClick={() => void submit()}
         className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-md bg-amber-300 px-3 text-xs font-bold text-black disabled:opacity-40"
       >
