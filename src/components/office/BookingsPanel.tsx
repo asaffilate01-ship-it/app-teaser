@@ -194,6 +194,7 @@ function BookingFields({
   setStartsAt,
   endsAt,
   setEndsAt,
+  disabled,
 }: {
   purpose: string;
   setPurpose: (value: string) => void;
@@ -203,11 +204,13 @@ function BookingFields({
   setStartsAt: (value: string) => void;
   endsAt: string;
   setEndsAt: (value: string) => void;
+  disabled: boolean;
 }) {
   return (
     <>
       <OfficeField label="What for">
         <select
+          disabled={disabled}
           className="scorer-input"
           value={purpose}
           onChange={(event) => setPurpose(event.target.value)}
@@ -223,6 +226,7 @@ function BookingFields({
         <input
           required
           maxLength={120}
+          disabled={disabled}
           className="scorer-input"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
@@ -233,6 +237,7 @@ function BookingFields({
         <input
           required
           type="datetime-local"
+          disabled={disabled}
           className="scorer-input"
           value={startsAt}
           onChange={(event) => setStartsAt(event.target.value)}
@@ -242,6 +247,7 @@ function BookingFields({
         <input
           required
           type="datetime-local"
+          disabled={disabled}
           className="scorer-input"
           value={endsAt}
           onChange={(event) => setEndsAt(event.target.value)}
@@ -272,6 +278,7 @@ function BookOwn({ data, role, organisationId, act }: OfficeProps) {
     }));
   const clash = start && end ? clashes({ startsAt: start, endsAt: end }, taken) : [];
   const direct = can(role, "bookings.manage");
+  const canSubmit = validWindow && validGround && Boolean(title.trim()) && !clash.length;
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (
@@ -321,6 +328,7 @@ function BookOwn({ data, role, organisationId, act }: OfficeProps) {
           <select
             className="scorer-input"
             value={groundId}
+            disabled={submitting}
             onChange={(event) => setGroundId(event.target.value)}
           >
             {data.grounds.map((ground) => (
@@ -331,6 +339,7 @@ function BookOwn({ data, role, organisationId, act }: OfficeProps) {
           </select>
         </OfficeField>
         <BookingFields
+          disabled={submitting}
           {...{ purpose, setPurpose, title, setTitle, startsAt, setStartsAt, endsAt, setEndsAt }}
         />
         {startsAt && endsAt && !validWindow && (
@@ -345,7 +354,7 @@ function BookOwn({ data, role, organisationId, act }: OfficeProps) {
         )}
         <div className="flex items-end lg:col-start-5">
           <button
-            disabled={!validWindow || !validGround || !title.trim() || clash.length > 0 || submitting}
+            disabled={!canSubmit || submitting}
             className="action-primary w-full"
           >
             <MapPin className="size-4" /> {submitting ? "Saving…" : direct ? "Book" : "Request"}
@@ -385,6 +394,7 @@ function RequestOther({ data, organisationId, act }: OfficeProps) {
           busy.map((slot) => ({ startsAt: slot.starts_at, endsAt: slot.ends_at })),
         )
       : [];
+  const canSubmit = Boolean(ground && validWindow && title.trim() && busy && !clash.length);
   useEffect(() => {
     if (!groundId) return;
     let active = true;
@@ -447,7 +457,7 @@ function RequestOther({ data, organisationId, act }: OfficeProps) {
       );
       if (ok) setTitle("");
     } catch {
-      setSubmitError("Availability could not be verified. No booking request was sent.");
+      setSubmitError("The request could not be confirmed. Refresh availability before retrying.");
     } finally {
       submissionLock.current = false;
       setSubmitting(false);
@@ -470,6 +480,7 @@ function RequestOther({ data, organisationId, act }: OfficeProps) {
             value={groundId}
             disabled={submitting}
             onChange={(event) => {
+              setAvailability(null);
               setGroundId(event.target.value);
               setSubmitError("");
             }}
@@ -486,11 +497,13 @@ function RequestOther({ data, organisationId, act }: OfficeProps) {
           <p className="office-meta sm:col-span-2 self-end">{ground.booking_note}</p>
         )}
         <BookingFields
+          disabled={submitting}
           {...{ purpose, setPurpose, title, setTitle, startsAt, setStartsAt, endsAt, setEndsAt }}
         />
         <OfficeField label="Message" className="sm:col-span-2 lg:col-span-3">
           <input
             maxLength={500}
+            disabled={submitting}
             className="scorer-input"
             value={note}
             onChange={(event) => setNote(event.target.value)}
@@ -508,7 +521,7 @@ function RequestOther({ data, organisationId, act }: OfficeProps) {
           </p>
         )}
         {current?.error && (
-          <div role="alert" className="sm:col-span-2 text-sm text-amber-200">
+          <div role="alert" className="text-sm text-amber-200 sm:col-span-2">
             Ground availability is unavailable.
             <button
               type="button"
@@ -526,12 +539,25 @@ function RequestOther({ data, organisationId, act }: OfficeProps) {
         )}
         <div className="flex items-end">
           <button
-            disabled={!ground || !validWindow || !title.trim() || !busy || clash.length > 0 || submitting}
+            disabled={!canSubmit || submitting}
             className="action-primary w-full"
           >
             {submitting ? "Checking and sending…" : "Send request"}
           </button>
         </div>
+        {busy && (
+          <button
+            type="button"
+            disabled={submitting}
+            className="action-secondary sm:col-span-2"
+            onClick={() => {
+              setAvailability(null);
+              setRetry((n) => n + 1);
+            }}
+          >
+            Refresh ground availability
+          </button>
+        )}
         {busy && busy.length > 0 && (
           <div className="sm:col-span-2 lg:col-span-4">
             <span className="office-label">Already booked (next 90 days)</span>
