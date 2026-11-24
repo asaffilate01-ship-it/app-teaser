@@ -8,22 +8,27 @@ permissions:
 jobs:
   format:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: true
       - uses: oven-sh/setup-bun@v2
-      - name: Install and format release readiness implementation
+      - name: Install and format the full application without disabling lint
         run: |
           bun install --frozen-lockfile
-          bunx prettier --write             src/lib/cloud.ts             src/lib/plans.ts             src/lib/release-readiness.ts             src/routes/'camera.$roomId.tsx'             src/components/plan/PlanGate.tsx             tests/plans.test.ts             tests/release-readiness.test.ts             tests/release-gate-cli.test.ts             tests/release-pilot-scenarios.test.ts             verification/release-gate.mjs
-      - name: Commit formatted source only
+          bunx prettier --write \
+            "src/**/*.{ts,tsx,js,mjs,cjs}" \
+            "tests/**/*.{ts,tsx,js,mjs,cjs}" \
+            "verification/**/*.{ts,tsx,js,mjs,cjs}" \
+            "workers/**/*.{ts,tsx,js,mjs,cjs}" \
+            "*.ts" "*.js" "*.mjs"
+      - name: Commit deterministic formatting only
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add             src/lib/cloud.ts src/lib/plans.ts src/lib/release-readiness.ts             'src/routes/camera.$roomId.tsx'             src/components/plan/PlanGate.tsx             tests/plans.test.ts tests/release-readiness.test.ts             tests/release-gate-cli.test.ts tests/release-pilot-scenarios.test.ts             verification/release-gate.mjs
+          git add -u
           if ! git diff --cached --quiet; then
-            git commit -m 'style(release): apply consistent formatting to P0-P3 changes'
+            git commit -m 'style(P0): format all CricLume sources for strict repository lint'
             git push origin "HEAD:$GITHUB_REF_NAME"
           fi
