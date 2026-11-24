@@ -112,7 +112,8 @@ export function SelectionPanel(props: OfficeProps) {
             type="button"
             className={event.selection_published_at ? "action-secondary" : "action-primary"}
             disabled={
-              publishing || (!event.selection_published_at && (!canPublish || outsideSquad.length > 0))
+              publishing ||
+              (!event.selection_published_at && (!canPublish || outsideSquad.length > 0))
             }
             onClick={() => void publish()}
           >
