@@ -71,3 +71,10 @@ test("once locks are on, free clubs are locked out of analysis and cameras; paid
   assert.equal(planGate("club", "video", { enforced: true, videoAddon: true }), "open");
   assert.equal(planGate("league", "video", { enforced: true, videoAddon: true }), "open");
 });
+
+test("unverified club entitlements do not unlock paid features when production locks are enabled", () => {
+  assert.equal(gateWhenPlanUnknown("video", true), "locked");
+  assert.equal(gateWhenPlanUnknown("scoringAnalytics", true), "locked");
+  assert.equal(gateWhenPlanUnknown(undefined, true), "open");
+  assert.equal(gateWhenPlanUnknown("video", false), "badge");
+});
