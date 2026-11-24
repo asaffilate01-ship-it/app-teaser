@@ -701,7 +701,7 @@ function OperationalPlatform({
   return (
     <PageFrame
       right={
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           {memberships.length > 1 && (
             <select
               aria-label="Organisation"
@@ -741,7 +741,15 @@ function OperationalPlatform({
         <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
           <div>
             <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-200">
-              <span className="size-2 rounded-full bg-amber-300" /> Connected ·{" "}
+              <span className="size-2 rounded-full bg-amber-300" />{" "}
+              {dashboard.error
+                ? dashboard.data
+                  ? "Last loaded records"
+                  : "Connection unavailable"
+                : dashboard.loading
+                  ? "Connecting"
+                  : "Connected"}{" "}
+              ·{" "}
               {membership.role.replaceAll("_", " ")}
             </div>
             <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
@@ -750,6 +758,11 @@ function OperationalPlatform({
             <p className="mt-2 text-sm text-slate-400">
               Your club, match day and coaching work in one place.
             </p>
+            {dashboard.lastUpdated !== null && (
+              <p className="mt-1 text-xs text-slate-400">
+                Last loaded {new Date(dashboard.lastUpdated).toLocaleTimeString()}
+              </p>
+            )}
           </div>
           <button
             type="button"
