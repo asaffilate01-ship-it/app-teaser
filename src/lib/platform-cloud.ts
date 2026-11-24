@@ -1,4 +1,6 @@
 import type { RealtimeChannel, User } from "@supabase/supabase-js";
+import { externalTeams } from "./external-teams.ts";
+export { externalTeams } from "./external-teams.ts";
 import { getCloudClient, invokePlatformFunction } from "@/lib/cloud";
 import type { CompetitionRules, PlatformRole, PointAdjustment } from "@/lib/platform";
 
@@ -680,34 +682,6 @@ export function subscribeToOrganisationOperations(
     window.clearTimeout(timer);
     void client.removeChannel(channel);
   };
-}
-
-/** Other clubs' teams entered in this organisation's competitions, named with their club so fixtures read clearly. */
-export function externalTeams(
-  rows: ReadonlyArray<{ competition_id: string; team_id: string; name: string; short_name: string; club_name: string }>,
-  ownIds: ReadonlySet<string>,
-): TeamRecord[] {
-  const byId = new Map<string, TeamRecord>();
-  for (const row of rows) {
-    if (ownIds.has(row.team_id)) continue;
-    const existing = byId.get(row.team_id);
-    if (existing) {
-      existing.competitionIds = [...(existing.competitionIds ?? []), row.competition_id];
-      continue;
-    }
-    const named = row.name.toLowerCase().includes(row.club_name.toLowerCase()) ? row.name : `${row.club_name} ${row.name}`;
-    byId.set(row.team_id, {
-      id: row.team_id,
-      name: named,
-      shortName: row.short_name,
-      ageGroup: null,
-      playerIds: [],
-      external: true,
-      clubName: row.club_name,
-      competitionIds: [row.competition_id],
-    });
-  }
-  return [...byId.values()];
 }
 
 export async function createTeam(input: {
