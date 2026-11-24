@@ -50,6 +50,15 @@ export const Route = createFileRoute("/camera/$roomId")({
 });
 
 type CameraAngle = "pavilion_end" | "far_end" | "off_side" | "leg_side" | "roaming" | "other";
+
+// Screen Wake Lock is opportunistic browser support, not native background capture.
+type CameraWakeSentinel = {
+  release: () => Promise<void>;
+  addEventListener: (event: "release", listener: () => void) => void;
+};
+type WakeCapableNavigator = Navigator & {
+  wakeLock?: { request: (type: "screen") => Promise<CameraWakeSentinel> };
+};
 interface PairedDevice {
   id: string;
   room_id: string;
@@ -93,6 +102,7 @@ function MatchCamera() {
   const [devices, setDevices] = useState<CameraPresence[]>([]);
   const [recording, setRecording] = useState(false);
   const [previewing, setPreviewing] = useState(false);
+  const [wakeLockHeld, setWakeLockHeld] = useState(false);
   const [liveSharing, setLiveSharing] = useState(false);
   const [cloudPublishing, setCloudPublishing] = useState(false);
   const [cloudConnecting, setCloudConnecting] = useState(false);
@@ -119,6 +129,48 @@ function MatchCamera() {
     },
     [],
   );
+
+  // Request a foreground screen wake lock when the operator starts a preview.
+  // Screen lock, OS suspension and phone battery policy may still interrupt
+  // web capture; only a tested native capture service could promise otherwise.
+  useEffect(() => {
+    if (!previewing) {
+      setWakeLockHeld(false);
+      return;
+    }
+    let cancelled = false;
+    let held: CameraWakeSentinel | null = null;
+    const requestWakeLock = async () => {
+      if (cancelled || held || document.visibilityState !== "visible") return;
+      const wakeLock = (navigator as WakeCapableNavigator).wakeLock;
+      if (!wakeLock) return;
+      try {
+        const acquired = await wakeLock.request("screen");
+        if (cancelled) {
+          await acquired.release();
+          return;
+        }
+        held = acquired;
+        setWakeLockHeld(true);
+        acquired.addEventListener("release", () => {
+          if (held === acquired) held = null;
+          if (!cancelled) setWakeLockHeld(false);
+        });
+      } catch {
+        if (!cancelled) setWakeLockHeld(false);
+      }
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void requestWakeLock();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    void requestWakeLock();
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", onVisible);
+      void held?.release();
+    };
+  }, [previewing]);
 
   const pair = async (event: FormEvent) => {
     event.preventDefault();
@@ -767,6 +819,11 @@ function MatchCamera() {
                     </button>
                   )}
                 </div>
+                <p role="status" className="text-xs leading-5 text-slate-400">
+                  {previewing && wakeLockHeld
+                    ? "Keep-awake protection active while this camera page stays foregrounded. Phone lock or OS suspension can still interrupt recording."
+                    : "Keep this phone screen on and CricLume in the foreground during capture. Background or lock-screen recording is not certified for the web app."}
+                </p>
                 {previewing && (
                   <div className="flex flex-wrap items-center gap-2">
                     <button
