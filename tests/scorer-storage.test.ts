@@ -174,3 +174,74 @@ test("malformed cloud delivery events fail closed without destroying the origina
   assert.equal(readScorerSnapshot(malformed, original.id), null);
   assert.equal(JSON.stringify(original), originalJson);
 });
+
+test("advanced match metadata is validated in saved scores and cloud snapshots", () => {
+  const original = fixture();
+  const invalid = [
+    { ...original, rain: { method: "manual", officialTarget: "150" } },
+    { ...original, days: { current: 1, atStumps: false, closes: "invalid" } },
+    { ...original, stoppage: { reason: "unknown", since: "2026-11-24" } },
+    { ...original, settings: { ...original.settings, rules: { pairs: { oversPerPair: 0 } } } },
+    { ...original, innings: [{ ...original.innings[0], retirements: "invalid" }] },
+  ];
+  for (const value of invalid) {
+    assert.equal(readScorerSnapshot(value, original.id), null);
+    assert.throws(() => parseScorerBackup(JSON.stringify(value)), /incomplete or unsupported/);
+  }
+});
+
+test("known optional delivery fields cannot corrupt restored scoring arithmetic", () => {
+  const original = fixture();
+  const innings = currentInnings(original);
+  const scored = recordDelivery(original, {
+    strikerId: innings.strikerId,
+    nonStrikerId: innings.nonStrikerId,
+    bowlerId: innings.bowlerId,
+    end: innings.end,
+    deliveryStyle: "Fast",
+    outcome: "hit",
+    batterRuns: 4,
+  });
+  for (const fields of [
+    { wicketPenalty: "5" },
+    { wicketPenalty: -5 },
+    { speedKph: "fast" },
+    { pitch: { x: 2, y: 0.5 } },
+    { freeHit: "true" },
+  ]) {
+    const value = structuredClone(scored);
+    Object.assign(currentInnings(value).deliveries[0]!, fields);
+    assert.equal(readScorerSnapshot(value, scored.id), null);
+  }
+});
+
+test("valid advanced metadata and future extensions survive round-trip", () => {
+  const original = fixture();
+  const value = {
+    ...original,
+    rain: { method: "manual", officialTarget: 150, revisedOvers: 16, futureRule: true },
+    days: { current: 1, atStumps: false, closes: [] },
+    stoppage: null,
+    futureMetadata: { version: 2 },
+  };
+  assert.deepEqual(readScorerSnapshot(value, original.id), value);
+  assert.deepEqual(parseScorerBackup(JSON.stringify(value)), [value]);
+});
+
+test("retirements cannot refer to deliveries that do not exist", () => {
+  const original = fixture();
+  const innings = currentInnings(original);
+  innings.retirements = [
+    {
+      batterId: innings.strikerId,
+      kind: "hurt",
+      afterBall: 1,
+      prevStrikerId: innings.strikerId,
+      prevNonStrikerId: innings.nonStrikerId,
+      at: "2026-11-24T12:00:00Z",
+    },
+  ];
+  assert.equal(readScorerSnapshot(original, original.id), null);
+  innings.retirements[0]!.afterBall = 0;
+  assert.deepEqual(readScorerSnapshot(original, original.id), original);
+});
