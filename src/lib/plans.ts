@@ -69,6 +69,16 @@ export const sectionFeature: Partial<Record<string, PlanFeature>> = {
 
 export type PlanGate = "open" | "badge" | "locked";
 
+/** If the club entitlement RPC fails, NEVER grant an unverified paid feature
+ * once paid locks are enabled. The backend must separately enforce entitlements. */
+export function gateWhenPlanUnknown(
+  feature: PlanFeature | undefined,
+  enforced = planLocksEnforced,
+): PlanGate {
+  if (!feature) return "open";
+  return enforced ? "locked" : "badge";
+}
+
 /** What a club sees on a section: open, open with a "Paid plan" badge (before go-live), or locked. */
 export function planGate(
   plan: PlanId,
