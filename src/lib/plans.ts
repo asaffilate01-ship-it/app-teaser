@@ -44,7 +44,7 @@ export function canUseFeature(
   feature: PlanFeature,
   options: { videoAddon?: boolean } = {},
 ): boolean {
-  const access = planFeatures[plan][feature];
+  const access = planFeatures[readPlanId(plan)][feature];
   if (access === "included") return true;
   if (access === "addon") return options.videoAddon === true;
   return false;
@@ -64,7 +64,7 @@ export function adRevenueSharePercent(
   plan: PlanId,
   options: { videoAddon?: boolean } = {},
 ): number {
-  if (plan === "starter") return 0;
+  if (readPlanId(plan) === "starter") return 0;
   return options.videoAddon === true ? 50 : 30;
 }
 
@@ -73,7 +73,7 @@ export function adRevenueSharePercent(
  * paid clubs add 2nd XIs, age groups, ladies and more. Must match `club_team_limit` in the database.
  */
 export function teamLimit(plan: PlanId): number | null {
-  return plan === "starter" ? 1 : null;
+  return readPlanId(plan) === "starter" ? 1 : null;
 }
 
 /**
