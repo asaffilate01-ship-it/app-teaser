@@ -6,6 +6,8 @@ import {
   gateWhenPlanUnknown,
   planGate,
   planLocksEnforced,
+  teamLimit,
+  type PlanId,
   sectionFeature,
   showsAds,
 } from "../src/lib/plans.ts";
@@ -77,4 +79,12 @@ test("unverified club entitlements do not unlock paid features when production l
   assert.equal(gateWhenPlanUnknown("scoringAnalytics", true), "locked");
   assert.equal(gateWhenPlanUnknown(undefined, true), "open");
   assert.equal(gateWhenPlanUnknown("video", false), "badge");
+});
+
+test("unknown runtime plans cannot unlock paid entitlements or revenue share", () => {
+  const invalidPlan = "unrecognised" as PlanId;
+  assert.equal(canUseFeature(invalidPlan, "video", { videoAddon: true }), false);
+  assert.equal(planGate(invalidPlan, "scoringAnalytics", { enforced: true }), "locked");
+  assert.equal(adRevenueSharePercent(invalidPlan, { videoAddon: true }), 0);
+  assert.equal(teamLimit(invalidPlan), 1);
 });
