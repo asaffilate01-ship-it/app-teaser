@@ -2931,7 +2931,8 @@
   font-weight: 700;
   color: var(--muted-foreground);
 }
-.office-tab[aria-selected="true"] {
+.office-tab[aria-selected="true"],
+.office-tab[aria-current="page"] {
   border-color: var(--gold);
   background: var(--gold);
   color: var(--gold-foreground);
