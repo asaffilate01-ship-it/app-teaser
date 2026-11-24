@@ -209,5 +209,8 @@ test("fee targets never expand a missing or external team into a whole-club char
   assert.deepEqual(feeScheduleTargets({ active: true, team_id: "missing" }, teams, players), []);
   assert.deepEqual(feeScheduleTargets({ active: true, team_id: "external" }, teams, players), []);
   assert.deepEqual(feeScheduleTargets({ active: false, team_id: null }, teams, players), []);
-  assert.deepEqual(feeScheduleTargets({ active: true, team_id: null }, teams, players), ["p1", "p2"]);
+  assert.deepEqual(feeScheduleTargets({ active: true, team_id: null }, teams, players), [
+    "p1",
+    "p2",
+  ]);
 });
