@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CheckCircle2, Clock3, RefreshCw, ShieldAlert } from "lucide-react";
 import { getCloudClient } from "@/lib/cloud";
 import {
@@ -24,21 +24,21 @@ type ReceiptRow = {
 };
 type DeviceConfirmation = { command: CommandRow; receipt?: ReceiptRow };
 
-export function CameraCommandConfirmations({
-  roomId,
-  devices,
-  refreshKey,
-}: {
-  roomId: string;
-  devices: Device[];
-  refreshKey: number;
-}) {
+type ConfirmationProps = { roomId: string; devices: Device[]; refreshKey: number };
+
+export function CameraCommandConfirmations(props: ConfirmationProps) {
+  return <CameraCommandConfirmationsPanel key={props.roomId} {...props} />;
+}
+
+function CameraCommandConfirmationsPanel({ roomId, devices, refreshKey }: ConfirmationProps) {
   const [latest, setLatest] = useState<Record<string, DeviceConfirmation>>({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [lastChecked, setLastChecked] = useState<string | null>(null);
 
+  const requestRef = useRef(0);
   const refresh = useCallback(async () => {
+    const request = ++requestRef.current;
     try {
       const client = getCloudClient();
       const commands = await client
@@ -73,13 +73,15 @@ export function CameraCommandConfirmations({
           };
         }
       }
+      if (request !== requestRef.current) return;
       setLatest(next);
       setLastChecked(new Date().toISOString());
       setError("");
     } catch {
-      setError("Camera acknowledgments are unavailable. Verify the CricLume backend migration.");
+      if (request === requestRef.current)
+        setError("Camera acknowledgments are unavailable. Displayed responses may be out of date.");
     } finally {
-      setLoading(false);
+      if (request === requestRef.current) setLoading(false);
     }
   }, [roomId]);
 
@@ -93,6 +95,7 @@ export function CameraCommandConfirmations({
     };
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
+      requestRef.current++;
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisibility);
     };
