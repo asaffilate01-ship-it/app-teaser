@@ -353,10 +353,7 @@ function BookOwn({ data, role, organisationId, act }: OfficeProps) {
           </p>
         )}
         <div className="flex items-end lg:col-start-5">
-          <button
-            disabled={!canSubmit || submitting}
-            className="action-primary w-full"
-          >
+          <button disabled={!canSubmit || submitting} className="action-primary w-full">
             <MapPin className="size-4" /> {submitting ? "Saving…" : direct ? "Book" : "Request"}
           </button>
         </div>
@@ -523,11 +520,7 @@ function RequestOther({ data, organisationId, act }: OfficeProps) {
         {current?.error && (
           <div role="alert" className="text-sm text-amber-200 sm:col-span-2">
             Ground availability is unavailable.
-            <button
-              type="button"
-              className="ml-2 underline"
-              onClick={() => setRetry((n) => n + 1)}
-            >
+            <button type="button" className="ml-2 underline" onClick={() => setRetry((n) => n + 1)}>
               Retry
             </button>
           </div>
@@ -538,10 +531,7 @@ function RequestOther({ data, organisationId, act }: OfficeProps) {
           </p>
         )}
         <div className="flex items-end">
-          <button
-            disabled={!canSubmit || submitting}
-            className="action-primary w-full"
-          >
+          <button disabled={!canSubmit || submitting} className="action-primary w-full">
             {submitting ? "Checking and sending…" : "Send request"}
           </button>
         </div>
