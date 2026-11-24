@@ -112,3 +112,29 @@ export function commandReceiptLabel(
   }
   return "Phone response not verified";
 }
+
+/** Phone presence is advisory and must expire when its heartbeat is no longer current. */
+export function freshCameraPresence<
+  T extends { deviceId: string; lastSeenAt: string; recording: boolean },
+>(
+  presence: T | undefined,
+  deviceId: string,
+  nowMs: number,
+): T | undefined {
+  if (!presence || presence.deviceId !== deviceId || typeof presence.recording !== "boolean")
+    return undefined;
+  const timestamp = Date.parse(presence.lastSeenAt);
+  if (!Number.isFinite(timestamp) || !Number.isFinite(nowMs)) return undefined;
+  if (timestamp > nowMs + 5_000 || nowMs - timestamp > 45_000) return undefined;
+  return presence;
+}
+
+/** Acknowledgments must refer to both the command and the phone that received it. */
+export function matchingCameraReceipt<T extends { command_id: string; device_id: string }>(
+  command: Pick<CameraCommand, "id" | "device_id">,
+  receipts: readonly T[],
+): T | undefined {
+  return receipts.find(
+    (receipt) => receipt.command_id === command.id && receipt.device_id === command.device_id,
+  );
+}
