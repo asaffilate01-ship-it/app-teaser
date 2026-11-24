@@ -170,7 +170,16 @@ export interface TimeSlot {
   endsAt: string;
 }
 
+export function validBookingWindow(startsAt: string | null, endsAt: string | null): boolean {
+  if (!startsAt || !endsAt) return false;
+  const start = Date.parse(startsAt);
+  const end = Date.parse(endsAt);
+  return Number.isFinite(start) && Number.isFinite(end) && start < end;
+}
+
 export function overlaps(a: TimeSlot, b: TimeSlot): boolean {
+  if (!validBookingWindow(a.startsAt, a.endsAt) || !validBookingWindow(b.startsAt, b.endsAt))
+    return false;
   return new Date(a.startsAt) < new Date(b.endsAt) && new Date(b.startsAt) < new Date(a.endsAt);
 }
 
