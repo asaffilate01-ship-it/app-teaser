@@ -72,17 +72,15 @@ export const inviteClubMember = createServerFn({ method: "POST" })
       userId = invited.user.id;
     }
 
-    const { error: memberError } = await supabaseAdmin
-      .from("organisation_members")
-      .upsert(
-        {
-          organisation_id: data.organisationId,
-          user_id: userId,
-          role: data.role,
-          status: confirmed ? "active" : "invited",
-        },
-        { onConflict: "organisation_id,user_id" },
-      );
+    const { error: memberError } = await supabaseAdmin.from("organisation_members").upsert(
+      {
+        organisation_id: data.organisationId,
+        user_id: userId,
+        role: data.role,
+        status: confirmed ? "active" : "invited",
+      },
+      { onConflict: "organisation_id,user_id" },
+    );
     if (memberError) return { ok: false as const, reason: "The membership could not be saved." };
     await supabaseAdmin.from("invitations").insert({
       organisation_id: data.organisationId,

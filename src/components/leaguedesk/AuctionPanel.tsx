@@ -92,15 +92,13 @@ export function AuctionPanel({ organisationId, role, club }: DeskProps) {
               void attempt(
                 () =>
                   must(
-                    db
-                      .from("auctions")
-                      .insert({
-                        organisation_id: organisationId,
-                        title: title.trim(),
-                        purse_minor: toMinor(purse),
-                        currency,
-                        max_squad: Number(squad) || 12,
-                      }),
+                    db.from("auctions").insert({
+                      organisation_id: organisationId,
+                      title: title.trim(),
+                      purse_minor: toMinor(purse),
+                      currency,
+                      max_squad: Number(squad) || 12,
+                    }),
                   ),
                 "Auction created",
                 load,
@@ -252,15 +250,13 @@ function AuctionRoom({
                   void attempt(
                     () =>
                       must(
-                        db
-                          .from("auction_lots")
-                          .insert(
-                            parseLots(paste).map((l, i) => ({
-                              ...l,
-                              auction_id: auction.id,
-                              sort: lots.length + i,
-                            })),
-                          ),
+                        db.from("auction_lots").insert(
+                          parseLots(paste).map((l, i) => ({
+                            ...l,
+                            auction_id: auction.id,
+                            sort: lots.length + i,
+                          })),
+                        ),
                       ),
                     "Players added",
                     async () => {

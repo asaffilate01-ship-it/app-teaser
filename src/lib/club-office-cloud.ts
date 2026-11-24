@@ -242,18 +242,16 @@ export const office = {
     note?: string;
   }) {
     check(
-      await supabase
-        .from("event_availability")
-        .upsert(
-          {
-            organisation_id: input.organisationId,
-            event_id: input.eventId,
-            player_id: input.playerId,
-            status: input.status,
-            note: input.note ?? null,
-          },
-          { onConflict: "event_id,player_id" },
-        ),
+      await supabase.from("event_availability").upsert(
+        {
+          organisation_id: input.organisationId,
+          event_id: input.eventId,
+          player_id: input.playerId,
+          status: input.status,
+          note: input.note ?? null,
+        },
+        { onConflict: "event_id,player_id" },
+      ),
     );
   },
   async pick(input: Tables["event_selections"]["Insert"]) {
@@ -297,18 +295,16 @@ export const office = {
     guardianConsent: boolean;
   }) {
     check(
-      await supabase
-        .from("ride_bookings")
-        .upsert(
-          {
-            organisation_id: input.organisationId,
-            ride_id: input.rideId,
-            player_id: input.playerId,
-            guardian_consent: input.guardianConsent,
-            status: "requested",
-          },
-          { onConflict: "ride_id,player_id" },
-        ),
+      await supabase.from("ride_bookings").upsert(
+        {
+          organisation_id: input.organisationId,
+          ride_id: input.rideId,
+          player_id: input.playerId,
+          guardian_consent: input.guardianConsent,
+          status: "requested",
+        },
+        { onConflict: "ride_id,player_id" },
+      ),
     );
   },
   async setSeat(id: string, status: "confirmed" | "declined" | "cancelled") {
@@ -321,18 +317,16 @@ export const office = {
     checksNote: string;
   }) {
     check(
-      await supabase
-        .from("travel_drivers")
-        .upsert(
-          {
-            organisation_id: input.organisationId,
-            user_id: input.userId,
-            expires_on: input.expiresOn,
-            checks_note: input.checksNote || null,
-            revoked_at: null,
-          },
-          { onConflict: "organisation_id,user_id" },
-        ),
+      await supabase.from("travel_drivers").upsert(
+        {
+          organisation_id: input.organisationId,
+          user_id: input.userId,
+          expires_on: input.expiresOn,
+          checks_note: input.checksNote || null,
+          revoked_at: null,
+        },
+        { onConflict: "organisation_id,user_id" },
+      ),
     );
   },
   async revokeDriver(id: string) {

@@ -187,15 +187,13 @@ export function TrainingHub({ organisationId, role, club }: Props) {
                 run(
                   () =>
                     must(
-                      db
-                        .from("training_attendance")
-                        .upsert({
-                          session_id: session.id,
-                          organisation_id: organisationId,
-                          player_id: playerId,
-                          status,
-                          updated_at: new Date().toISOString(),
-                        }),
+                      db.from("training_attendance").upsert({
+                        session_id: session.id,
+                        organisation_id: organisationId,
+                        player_id: playerId,
+                        status,
+                        updated_at: new Date().toISOString(),
+                      }),
                     ),
                   "Attendance saved",
                 )
@@ -631,14 +629,12 @@ function PlayerDevelopment({
                 void run(
                   () =>
                     must(
-                      db
-                        .from("player_goals")
-                        .insert({
-                          organisation_id: organisationId,
-                          player_id: playerId,
-                          title: goalTitle.trim(),
-                          target_date: goalDate || null,
-                        }),
+                      db.from("player_goals").insert({
+                        organisation_id: organisationId,
+                        player_id: playerId,
+                        title: goalTitle.trim(),
+                        target_date: goalDate || null,
+                      }),
                     ),
                   "Goal added",
                 ).then(() => setGoalTitle(""));
@@ -675,14 +671,12 @@ function PlayerDevelopment({
                 void run(
                   () =>
                     must(
-                      db
-                        .from("player_feedback")
-                        .insert({
-                          organisation_id: organisationId,
-                          player_id: playerId,
-                          kind,
-                          body: note.trim(),
-                        }),
+                      db.from("player_feedback").insert({
+                        organisation_id: organisationId,
+                        player_id: playerId,
+                        kind,
+                        body: note.trim(),
+                      }),
                     ),
                   "Saved",
                 ).then(() => setNote(""));
@@ -748,14 +742,12 @@ function PlayerDevelopment({
                 void run(
                   () =>
                     must(
-                      db
-                        .from("fitness_results")
-                        .insert({
-                          organisation_id: organisationId,
-                          player_id: playerId,
-                          test: testId,
-                          value: v,
-                        }),
+                      db.from("fitness_results").insert({
+                        organisation_id: organisationId,
+                        player_id: playerId,
+                        test: testId,
+                        value: v,
+                      }),
                     ),
                   "Result saved",
                 ).then(() => setValue(""));

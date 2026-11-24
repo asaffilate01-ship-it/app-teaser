@@ -95,15 +95,13 @@ export function TeamChat({
   const send = async () => {
     const text = body.trim();
     if (!text) return;
-    const { error } = await db
-      .from("team_messages")
-      .insert({
-        organisation_id: organisationId,
-        team_id: channel === "club" ? null : channel,
-        author_name: myName,
-        body: text.slice(0, 2000),
-        is_announcement: announce && manager,
-      });
+    const { error } = await db.from("team_messages").insert({
+      organisation_id: organisationId,
+      team_id: channel === "club" ? null : channel,
+      author_name: myName,
+      body: text.slice(0, 2000),
+      is_announcement: announce && manager,
+    });
     if (error) {
       toast.error("Your message could not be sent.");
       return;

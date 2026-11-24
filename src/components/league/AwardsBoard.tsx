@@ -57,19 +57,17 @@ export function AwardsBoard({
     const winnerName = draft.winner
       ? (players.find(([id]) => id === draft.winner)?.[1].replace(/ \(.*\)$/, "") ?? null)
       : null;
-    const { error } = await supabase
-      .from("competition_awards")
-      .upsert(
-        {
-          competition_id: competitionId,
-          organisation_id: organisationId,
-          category,
-          prize: draft.prize.trim() || null,
-          winner_player_id: draft.winner || null,
-          winner_name: winnerName,
-        },
-        { onConflict: "competition_id,category" },
-      );
+    const { error } = await supabase.from("competition_awards").upsert(
+      {
+        competition_id: competitionId,
+        organisation_id: organisationId,
+        category,
+        prize: draft.prize.trim() || null,
+        winner_player_id: draft.winner || null,
+        winner_name: winnerName,
+      },
+      { onConflict: "competition_id,category" },
+    );
     if (error)
       return void toast.error("Only owners, league admins and club admins can change awards.");
     toast.success("Award saved.");

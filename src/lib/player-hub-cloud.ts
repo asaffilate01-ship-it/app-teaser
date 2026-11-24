@@ -82,13 +82,11 @@ export async function requestProfileClaim(playerId: string, message: string) {
   if (player.error || !player.data)
     throw new Error("You can only claim a profile at a club you belong to.");
   if (player.data.linked_user_id) throw new Error("This profile is already linked to an account.");
-  const { error } = await db
-    .from("player_claims")
-    .insert({
-      player_id: playerId,
-      organisation_id: player.data.organisation_id,
-      message: message.trim().slice(0, 300) || null,
-    });
+  const { error } = await db.from("player_claims").insert({
+    player_id: playerId,
+    organisation_id: player.data.organisation_id,
+    message: message.trim().slice(0, 300) || null,
+  });
   if (error)
     throw new Error(
       error.code === "23505"
