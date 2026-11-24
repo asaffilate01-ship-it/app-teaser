@@ -3,6 +3,8 @@ import { CheckCircle2, Clock3, RefreshCw, ShieldAlert } from "lucide-react";
 import { getCloudClient } from "@/lib/cloud";
 import {
   commandReceiptLabel,
+  commandMaxAgeMs,
+  matchingCameraReceipt,
   type CameraCommandOutcome,
   type CameraCommandReason,
   type CameraRecordingAction,
@@ -27,7 +29,8 @@ type DeviceConfirmation = { command: CommandRow; receipt?: ReceiptRow };
 type ConfirmationProps = { roomId: string; devices: Device[]; refreshKey: number };
 
 export function CameraCommandConfirmations(props: ConfirmationProps) {
-  return <CameraCommandConfirmationsPanel key={props.roomId} {...props} />;
+  const key = [props.roomId, ...props.devices.map((device) => device.id).sort()].join(":");
+  return <CameraCommandConfirmationsPanel key={key} {...props} />;
 }
 
 function CameraCommandConfirmationsPanel({ roomId, devices, refreshKey }: ConfirmationProps) {
@@ -37,19 +40,35 @@ function CameraCommandConfirmationsPanel({ roomId, devices, refreshKey }: Confir
   const [lastChecked, setLastChecked] = useState<string | null>(null);
 
   const requestRef = useRef(0);
+  const ids = devices
+    .map((device) => device.id)
+    .sort()
+    .join(",");
   const refresh = useCallback(async () => {
     const request = ++requestRef.current;
+    setLoading(true);
     try {
       const client = getCloudClient();
-      const commands = await client
-        .from("camera_recording_commands")
-        .select("id,device_id,action,created_at")
-        .eq("room_id", roomId)
-        .order("created_at", { ascending: false })
-        .order("id", { ascending: false })
-        .limit(100);
-      if (commands.error) throw commands.error;
-      const rows = (commands.data ?? []) as CommandRow[];
+      // A room-wide limit can hide quieter phones after other cameras send many commands.
+      const rows = (
+        await Promise.all(
+          ids
+            .split(",")
+            .filter(Boolean)
+            .map(async (deviceId) => {
+              const result = await client
+                .from("camera_recording_commands")
+                .select("id,device_id,action,created_at")
+                .eq("room_id", roomId)
+                .eq("device_id", deviceId)
+                .order("created_at", { ascending: false })
+                .order("id", { ascending: false })
+                .limit(1);
+              if (result.error) throw result.error;
+              return (result.data ?? []) as CommandRow[];
+            }),
+        )
+      ).flat();
       const receiptRows: ReceiptRow[] = [];
       if (rows.length > 0) {
         const receipts = await client
@@ -62,11 +81,10 @@ function CameraCommandConfirmationsPanel({ roomId, devices, refreshKey }: Confir
         if (receipts.error) throw receipts.error;
         receiptRows.push(...((receipts.data ?? []) as ReceiptRow[]));
       }
-      const byCommand = new Map(receiptRows.map((receipt) => [receipt.command_id, receipt]));
       const next: Record<string, DeviceConfirmation> = {};
       for (const command of rows) {
         if (!next[command.device_id]) {
-          const matching = byCommand.get(command.id);
+          const matching = matchingCameraReceipt(command, receiptRows);
           next[command.device_id] = {
             command,
             ...(matching ? { receipt: matching } : {}),
@@ -83,7 +101,7 @@ function CameraCommandConfirmationsPanel({ roomId, devices, refreshKey }: Confir
     } finally {
       if (request === requestRef.current) setLoading(false);
     }
-  }, [roomId]);
+  }, [ids, roomId]);
 
   useEffect(() => {
     void refresh();
@@ -94,10 +112,12 @@ function CameraCommandConfirmationsPanel({ roomId, devices, refreshKey }: Confir
       if (document.visibilityState === "visible") void refresh();
     };
     document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("online", onVisibility);
     return () => {
       requestRef.current++;
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("online", onVisibility);
     };
   }, [refresh, refreshKey]);
 
@@ -114,6 +134,7 @@ function CameraCommandConfirmationsPanel({ roomId, devices, refreshKey }: Confir
         <button
           type="button"
           onClick={() => void refresh()}
+          disabled={loading}
           className="action-secondary min-h-11 text-xs"
         >
           <RefreshCw className="size-4" /> Check responses
@@ -133,9 +154,18 @@ function CameraCommandConfirmationsPanel({ roomId, devices, refreshKey }: Confir
         {devices.map((device) => {
           const status = latest[device.id];
           const receipt = status?.receipt;
-          const response = status
-            ? commandReceiptLabel(status.command.action, receipt?.outcome, receipt?.reason_code)
-            : "No recent recording requests";
+          const expired =
+            status &&
+            !receipt &&
+            lastChecked &&
+            Date.parse(lastChecked) - Date.parse(status.command.created_at) > commandMaxAgeMs;
+          const response = expired
+            ? "Command expired without a phone acknowledgment"
+            : status
+              ? commandReceiptLabel(status.command.action, receipt?.outcome, receipt?.reason_code)
+              : lastChecked && !error
+                ? "No recording requests reported"
+                : "Camera responses not confirmed";
           const positive =
             receipt &&
             ["started", "already_recording", "stopped", "already_stopped"].includes(
@@ -144,7 +174,7 @@ function CameraCommandConfirmationsPanel({ roomId, devices, refreshKey }: Confir
           return (
             <div key={device.id} className="rounded-lg border border-white/10 p-3 text-xs">
               <div className="flex items-center gap-2 font-semibold text-white">
-                {positive ? (
+                {positive && !error && !loading ? (
                   <CheckCircle2 className="size-4 text-emerald-300" />
                 ) : receipt ? (
                   <ShieldAlert className="size-4 text-amber-300" />
@@ -153,7 +183,10 @@ function CameraCommandConfirmationsPanel({ roomId, devices, refreshKey }: Confir
                 )}
                 <span>{device.label}</span>
               </div>
-              <p className="mt-1 text-slate-300">{response}</p>
+              <p className="mt-1 text-slate-300">
+                {response}
+                {error && status && " · Last known response"}
+              </p>
               {status && (
                 <p className="mt-1 text-slate-500">
                   Last request: {status.command.action} ·{" "}
