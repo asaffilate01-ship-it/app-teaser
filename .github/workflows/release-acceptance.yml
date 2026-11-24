@@ -1,0 +1,31 @@
+name: CricLume evidence-gated release acceptance
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: Choose the P0–P3 launch acceptance stage to verify
+        type: choice
+        required: true
+        options:
+          - p0
+          - p1
+          - p2
+          - p3
+permissions:
+  contents: read
+
+jobs:
+  evidence-gate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: release-acceptance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Evaluate signed-off release evidence without production mutations
+        env:
+          CRICLUME_RELEASE_EVIDENCE_JSON: ${{ secrets.CRICLUME_RELEASE_EVIDENCE_JSON }}
+          CRICLUME_RELEASE_SHA: ${{ github.sha }}
+        run: node --experimental-strip-types verification/release-gate.mjs "${{ inputs.phase }}"
