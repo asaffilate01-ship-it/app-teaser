@@ -6,6 +6,46 @@ const text = z.string();
 const count = z.number().int().nonnegative();
 const zone = z.enum(allFieldZones);
 const end = z.enum(["Pavilion", "Far"]);
+const positiveCount = z.number().int().positive();
+const point = z.looseObject({
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+});
+const rainMethod = z.enum(["arr", "mpo", "dls", "manual"]);
+const retirement = z.looseObject({
+  batterId: text,
+  kind: z.enum(["hurt", "out", "timed-out"]),
+  afterBall: count,
+  prevStrikerId: text,
+  prevNonStrikerId: text,
+  replacementId: text.optional(),
+  at: text,
+});
+const rain = z.looseObject({
+  method: rainMethod,
+  revisedOvers: positiveCount.nullable().optional(),
+  officialTarget: count.nullable().optional(),
+  officialPar: count.nullable().optional(),
+  abandoned: z.boolean().optional(),
+  minOversForResult: count.nullable().optional(),
+});
+const matchDays = z.looseObject({
+  current: positiveCount,
+  atStumps: z.boolean(),
+  closes: z.array(
+    z.looseObject({
+      day: positiveCount,
+      inningsIndex: count,
+      battingTeamId: text,
+      runs: z.number().int(),
+      wickets: count,
+      overs: text,
+      note: text.optional(),
+      at: text,
+    }),
+  ),
+  timeUp: z.boolean().optional(),
+});
 const team = z.looseObject({
   id: text,
   name: text,
@@ -29,6 +69,11 @@ const delivery = z.looseObject({
   fieldZone: zone,
   fielderId: text.optional(),
   note: text.optional(),
+  freeHit: z.boolean().optional(),
+  speedKph: z.number().nonnegative().optional(),
+  wicketPenalty: count.optional(),
+  pitch: point.optional(),
+  beehive: point.optional(),
   dismissal: z
     .looseObject({
       type: z.enum([
@@ -71,7 +116,43 @@ const match = z
       ground: text,
       weather: text,
       startTime: text,
+      rules: z
+        .looseObject({
+          freeHit: z.boolean().optional(),
+          superOver: z.boolean().optional(),
+          lastManStands: z.boolean().optional(),
+          followOnLead: count.nullable().optional(),
+          rainMethod: rainMethod.optional(),
+          days: positiveCount.optional(),
+          youthBowling: z
+            .enum(["U13", "U14", "U15", "U16", "U17", "U18", "U19"])
+            .nullable()
+            .optional(),
+          pairs: z
+            .looseObject({ oversPerPair: positiveCount, runsPerWicket: count })
+            .nullable()
+            .optional(),
+          endsChangeEvery: positiveCount.nullable().optional(),
+        })
+        .optional(),
     }),
+    rain: rain.optional(),
+    days: matchDays.optional(),
+    stoppage: z
+      .looseObject({ reason: z.enum(["rain", "bad-light", "wet-outfield", "other"]), since: text })
+      .nullable()
+      .optional(),
+    toss: z.looseObject({ winnerTeamId: text, decision: z.enum(["bat", "bowl"]) }).optional(),
+    audience: z.looseObject({ commentary: z.boolean().optional() }).optional(),
+    conditions: z
+      .looseObject({
+        pitch: z.enum(["batting", "balanced", "bowling"]),
+        outfield: z.enum(["fast", "average", "slow"]),
+        weather: z.enum(["clear", "overcast"]),
+        dew: z.boolean(),
+        edge: z.number().min(-2).max(2),
+      })
+      .optional(),
     teams: z.tuple([team, team]),
     innings: z
       .array(
@@ -86,6 +167,11 @@ const match = z
           end,
           status: z.enum(["live", "completed"]),
           deliveries: z.array(delivery),
+          kind: z.enum(["regular", "super-over"]).optional(),
+          declared: z.boolean().optional(),
+          unfinished: z.boolean().optional(),
+          followOn: z.boolean().optional(),
+          retirements: z.array(retirement).optional(),
         }),
       )
       .min(1),
@@ -97,7 +183,8 @@ const match = z
         (i) =>
           i.battingTeamId !== i.bowlingTeamId &&
           m.teams.some((t) => t.id === i.battingTeamId) &&
-          m.teams.some((t) => t.id === i.bowlingTeamId),
+          m.teams.some((t) => t.id === i.bowlingTeamId) &&
+          (i.retirements ?? []).every((item) => item.afterBall <= i.deliveries.length),
       ),
   );
 const matchesSchema = z
