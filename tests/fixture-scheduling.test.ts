@@ -116,8 +116,5 @@ test("bulk fixture preflight identifies only conflicting proposed matches", () =
     { index: 0, existingFixtureId: "f1" },
     { index: 2, existingFixtureId: "f1" },
   ]);
-  assert.deepEqual(
-    reviewProposedFixtureStarts(proposals, [{ ...first, status: "cancelled" }]),
-    [],
-  );
+  assert.deepEqual(reviewProposedFixtureStarts(proposals, [{ ...first, status: "cancelled" }]), []);
 });
