@@ -157,3 +157,34 @@ test("fielding notes or a new bowler from the bowling & fielding scorer are not 
   remote.innings[0]!.deliveries[0]!.batterRuns = 3;
   assert.equal(reviewRemoteScorerSnapshot(local, remote).safe, false);
 });
+
+test("JSONB key ordering does not cause false scoring conflicts", () => {
+  const local = addBall(fixture(), 4);
+  const remote = structuredClone(local);
+  remote.settings = Object.fromEntries(
+    Object.entries(remote.settings).reverse(),
+  ) as typeof remote.settings;
+  const innings = remote.innings[0]!;
+  innings.deliveries[0] = Object.fromEntries(
+    Object.entries(innings.deliveries[0]!).reverse(),
+  ) as (typeof innings.deliveries)[number];
+  assert.equal(reviewRemoteScorerSnapshot(local, remote).safe, true);
+});
+
+test("a cloud snapshot cannot erase locally recorded retirements", () => {
+  const local = fixture();
+  const innings = local.innings[0]!;
+  innings.retirements = [
+    {
+      batterId: innings.strikerId,
+      kind: "hurt",
+      afterBall: 0,
+      prevStrikerId: innings.strikerId,
+      prevNonStrikerId: innings.nonStrikerId,
+      at: "2026-11-20T12:00:00Z",
+    },
+  ];
+  const remote = structuredClone(local);
+  remote.innings[0]!.retirements = [];
+  assert.match(reviewRemoteScorerSnapshot(local, remote).reason ?? "", /Retirement history/);
+});
