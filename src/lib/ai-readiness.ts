@@ -1,4 +1,4 @@
-import type { IntelligenceConnection } from "./omniqora";
+import type { IntelligenceConnection, IntelligenceRequest, IntelligenceTask } from "./omniqora";
 
 const approvedRoles = new Set([
   "owner",
@@ -36,4 +36,28 @@ export function assessCricketAIRequest(input: {
       checks.find((check) => !check.passed)?.label ??
       "Server will still verify the model, budget, source and tenant for each run.",
   };
+}
+
+const terminalRunStatuses = new Set(["completed", "failed", "cancelled", "stale"]);
+
+/** A conservative UI preflight; the server remains responsible for spend admission. */
+export function assessIntelligenceHistory(input: {
+  historyLoaded: boolean;
+  requests: readonly Pick<IntelligenceRequest, "task" | "status">[];
+  task: IntelligenceTask;
+}) {
+  if (!input.historyLoaded) {
+    return { ready: false, reason: "Refresh AI task history before requesting a model run." };
+  }
+  if (
+    input.requests.some(
+      (request) => request.task === input.task && !terminalRunStatuses.has(request.status),
+    )
+  ) {
+    return {
+      ready: false,
+      reason: "Review or refresh the existing task before requesting another run.",
+    };
+  }
+  return { ready: true, reason: "Task history is available. Server budget checks still apply." };
 }
