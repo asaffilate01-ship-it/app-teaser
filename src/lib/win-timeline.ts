@@ -17,7 +17,14 @@ export interface WinPoint {
 function stateFor(match: CricketMatch, inningsIndex: number, deliveriesCount: number) {
   const innings = match.innings[inningsIndex]!;
   const balls = innings.deliveries.slice(0, deliveriesCount);
-  const summary = summarizeInnings({ ...innings, deliveries: balls }, match.settings.ballsPerOver);
+  const summary = summarizeInnings(
+    {
+      ...innings,
+      deliveries: balls,
+      retirements: (innings.retirements ?? []).filter((item) => item.afterBall <= deliveriesCount),
+    },
+    match.settings.ballsPerOver,
+  );
   const battingTeam = match.teams.find((team) => team.id === innings.battingTeamId);
   const target = inningsIndex === 1 ? inningsTarget(match, 1) : null;
   return {

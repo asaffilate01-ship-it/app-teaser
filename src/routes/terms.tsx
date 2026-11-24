@@ -6,7 +6,10 @@ export const Route = createFileRoute("/terms")({
     meta: [
       { title: "Platform terms — CricLume" },
       { property: "og:title", content: "Platform terms — CricLume" },
-      { property: "og:description", content: "Account, subscription, scoring and safeguarding terms for CricLume." },
+      {
+        property: "og:description",
+        content: "Account, subscription, scoring and safeguarding terms for CricLume.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       {
