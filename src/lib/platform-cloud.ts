@@ -649,9 +649,13 @@ export function subscribeToOrganisationOperations(
 ): () => void {
   const client = getCloudClient();
   let timer: number | undefined;
+  let active = true;
   const refreshSoon = () => {
-    window.clearTimeout(timer);
-    timer = window.setTimeout(onChange, 250);
+    if (!active || timer !== undefined) return;
+    timer = window.setTimeout(() => {
+      timer = undefined;
+      if (active) onChange();
+    }, 250);
   };
   const channel: RealtimeChannel = client
     .channel(`operations:${organisationId}:${crypto.randomUUID()}`)
@@ -679,6 +683,7 @@ export function subscribeToOrganisationOperations(
     .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, refreshSoon)
     .subscribe();
   return () => {
+    active = false;
     window.clearTimeout(timer);
     void client.removeChannel(channel);
   };
