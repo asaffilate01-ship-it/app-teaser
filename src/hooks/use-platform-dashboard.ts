@@ -76,7 +76,7 @@ export function usePlatformDashboard(organisationId: string | null, role: Platfo
 
   const refresh = useCallback(async () => {
     const scope = scopeRef.current;
-    if (scope?.organisationId !== organisationId || scope.role !== role) return;
+    if (!scope || scope.organisationId !== organisationId || scope.role !== role) return;
     await scope.coordinator.request();
   }, [organisationId, role]);
 
@@ -84,7 +84,8 @@ export function usePlatformDashboard(organisationId: string | null, role: Platfo
     async <T>(action: () => Promise<T>): Promise<T> => {
       const scope = scopeRef.current;
       if (
-        scope?.organisationId !== organisationId ||
+        !scope ||
+        scope.organisationId !== organisationId ||
         scope.role !== role ||
         !scope.coordinator.isActive()
       ) {
