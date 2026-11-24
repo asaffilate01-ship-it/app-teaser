@@ -5,6 +5,7 @@ import {
   battingCard,
   bowlingCard,
   currentInnings,
+  deliveryRuns,
   findPlayer,
   findTeam,
   inningsOversLimit,
@@ -112,15 +113,17 @@ function publicProgress(match: CricketMatch) {
     const byOver = new Map<number, [number, number]>();
     for (const delivery of innings.deliveries) {
       const entry = byOver.get(delivery.over) ?? [0, 0];
-      entry[0] +=
-        delivery.batterRuns +
-        delivery.extras.wide +
-        delivery.extras.noBall +
-        delivery.extras.bye +
-        delivery.extras.legBye +
-        delivery.extras.penalty;
+      entry[0] += deliveryRuns(delivery) - (delivery.wicketPenalty ?? 0);
       if (delivery.dismissal) entry[1] += 1;
       byOver.set(delivery.over, entry);
+    }
+    for (const retirement of innings.retirements ?? []) {
+      if (retirement.kind === "hurt") continue;
+      // A retirement is not a delivery; attribute it to the preceding over, or the first over.
+      const over = innings.deliveries[retirement.afterBall - 1]?.over ?? 0;
+      const entry = byOver.get(over) ?? [0, 0];
+      entry[1] += 1;
+      byOver.set(over, entry);
     }
     const last = Math.max(-1, ...byOver.keys());
     return {
@@ -131,20 +134,15 @@ function publicProgress(match: CricketMatch) {
   });
 }
 
-/** Current stand: runs (extras included) and balls since the last wicket. */
+/** Current stand: net runs and legal balls since a dismissal or retirement. */
 function publicPartnership(innings: Innings) {
   let runs = 0;
   let balls = 0;
-  for (const delivery of innings.deliveries) {
-    runs +=
-      delivery.batterRuns +
-      delivery.extras.wide +
-      delivery.extras.noBall +
-      delivery.extras.bye +
-      delivery.extras.legBye +
-      delivery.extras.penalty;
+  const retirements = new Set((innings.retirements ?? []).map((item) => item.afterBall));
+  for (const [index, delivery] of innings.deliveries.entries()) {
+    runs += deliveryRuns(delivery) - (delivery.wicketPenalty ?? 0);
     if (delivery.legal) balls += 1;
-    if (delivery.dismissal) {
+    if (delivery.dismissal || retirements.has(index + 1)) {
       runs = 0;
       balls = 0;
     }

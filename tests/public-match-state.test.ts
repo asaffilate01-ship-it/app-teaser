@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createMatch, currentInnings, recordDelivery } from "../src/lib/cricket.ts";
+import { createMatch, currentInnings, recordDelivery, retireBatter } from "../src/lib/cricket.ts";
 import { publicLiveState } from "../src/lib/public-match-state.ts";
 
 function privateMatch() {
@@ -103,4 +103,45 @@ test("ground screen card refs are per-match pseudonyms, never player ids or name
     playerScreenRef("cloud-match-1", striker),
     playerScreenRef("cloud-match-2", striker),
   );
+});
+
+test("pairs cricket chart totals include the wicket penalty", () => {
+  const original = privateMatch();
+  original.settings.rules = { pairs: { oversPerPair: 4, runsPerWicket: 5 } };
+  const innings = currentInnings(original);
+  const match = recordDelivery(original, {
+    strikerId: innings.strikerId,
+    nonStrikerId: innings.nonStrikerId,
+    bowlerId: innings.bowlerId,
+    end: innings.end,
+    deliveryStyle: "Fast",
+    outcome: "wicket",
+    batterRuns: 0,
+    dismissal: { type: "bowled", batterId: innings.strikerId },
+  });
+  const live = publicLiveState(match);
+  assert.equal(live["runs"], -5);
+  assert.equal(live["wickets"], 1);
+  const progress = live["progress"] as { overs: [number, number][] }[];
+  assert.deepEqual(progress[0]?.overs, [[-5, 1]]);
+});
+
+test("retired out is counted in the chart and resets the current partnership", () => {
+  const original = privateMatch();
+  const innings = currentInnings(original);
+  const scored = recordDelivery(original, {
+    strikerId: innings.strikerId,
+    nonStrikerId: innings.nonStrikerId,
+    bowlerId: innings.bowlerId,
+    end: innings.end,
+    deliveryStyle: "Fast",
+    outcome: "hit",
+    batterRuns: 4,
+  });
+  const match = retireBatter(scored, currentInnings(scored).strikerId, "out");
+  const live = publicLiveState(match);
+  const progress = live["progress"] as { overs: [number, number][] }[];
+  assert.equal(live["wickets"], 1);
+  assert.deepEqual(progress[0]?.overs, [[4, 1]]);
+  assert.deepEqual(live["partnership"], { runs: 0, balls: 0 });
 });
