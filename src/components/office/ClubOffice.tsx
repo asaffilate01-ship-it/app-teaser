@@ -12,6 +12,7 @@ import {
   KeyRound,
   LoaderCircle,
   MapPin,
+  RefreshCw,
   Shirt,
   Ticket,
   UserPlus,
@@ -21,6 +22,7 @@ import { can } from "@/lib/platform";
 import type { PlatformRole } from "@/lib/platform";
 import type { PlatformDashboardData } from "@/lib/platform-cloud";
 import { friendly, loadClubOffice, type ClubOfficeData } from "@/lib/club-office-cloud";
+import { createRefreshCoordinator } from "@/lib/refresh-coordinator";
 import { EventsPanel } from "./EventsPanel";
 import { SelectionPanel } from "./SelectionPanel";
 import { FeesPanel } from "./FeesPanel";
@@ -64,53 +66,102 @@ const remindersVisible = (role: PlatformRole) =>
   can(role, "fees.manage") ||
   can(role, "umpires.manage");
 
-export function ClubOffice({
-  organisationId,
-  role,
-  club,
-}: {
+type ClubOfficeProps = {
   organisationId: string;
   role: PlatformRole;
   club: PlatformDashboardData;
-}) {
+};
+
+type OfficeScope = {
+  coordinator: ReturnType<typeof createRefreshCoordinator>;
+  ready: boolean;
+  saving: boolean;
+};
+
+export function ClubOffice(props: ClubOfficeProps) {
+  return <ScopedClubOffice key={`${props.organisationId}:${props.role}`} {...props} />;
+}
+
+function ScopedClubOffice({ organisationId, role, club }: ClubOfficeProps) {
   const [tab, setTab] = useState<Tab>("events");
   const [data, setData] = useState<ClubOfficeData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const request = useRef(0);
-  const reload = useCallback(async () => {
-    const id = ++request.current;
-    try {
-      const next = await loadClubOffice(organisationId);
-      if (id === request.current) {
+  const [refreshing, setRefreshing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [lastLoaded, setLastLoaded] = useState<number | null>(null);
+  const scopeRef = useRef<OfficeScope | null>(null);
+
+  useEffect(() => {
+    const coordinator = createRefreshCoordinator(async () => {
+      if (!coordinator.isActive()) return;
+      setRefreshing(true);
+      try {
+        const next = await loadClubOffice(organisationId);
+        if (!coordinator.isActive()) return;
+        scope.ready = true;
         setData(next);
         setError(null);
-      }
-    } catch (reason) {
-      if (id === request.current)
+        setLastLoaded(Date.now());
+      } catch (reason) {
+        if (!coordinator.isActive()) return;
+        scope.ready = false;
         setError(
           reason instanceof Error ? friendly(reason.message) : "The club office could not load.",
         );
-    }
-  }, [organisationId]);
-  useEffect(() => {
-    setData(null);
-    void reload();
-  }, [reload]);
-  const act = useCallback<OfficeProps["act"]>(
-    async (action, done) => {
-      try {
-        await action();
-        if (done) toast.success(done);
-        await reload();
-        return true;
-      } catch (reason) {
-        toast.error(reason instanceof Error ? friendly(reason.message) : "That didn't work.");
-        await reload();
-        return false;
+      } finally {
+        if (coordinator.isActive()) setRefreshing(false);
       }
-    },
-    [reload],
-  );
+    });
+    const scope: OfficeScope = { coordinator, ready: false, saving: false };
+    scopeRef.current = scope;
+    const refresh = () => void coordinator.request();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    refresh();
+    window.addEventListener("online", refresh);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      coordinator.dispose();
+      if (scopeRef.current === scope) scopeRef.current = null;
+      window.removeEventListener("online", refresh);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [organisationId]);
+
+  const reload = useCallback(async () => {
+    await scopeRef.current?.coordinator.request();
+  }, []);
+
+  const act = useCallback<OfficeProps["act"]>(async (action, done) => {
+    const scope = scopeRef.current;
+    if (!scope || !scope.coordinator.isActive()) return false;
+    if (!scope.ready) {
+      toast.error("Refresh the club office before making changes.");
+      return false;
+    }
+    if (scope.saving) {
+      toast.info("Another club office change is being saved.");
+      return false;
+    }
+    scope.saving = true;
+    setSaving(true);
+    try {
+      await action();
+      if (scope.coordinator.isActive() && done) toast.success(done);
+      await scope.coordinator.request();
+      return true;
+    } catch (reason) {
+      if (scope.coordinator.isActive()) {
+        toast.error(reason instanceof Error ? friendly(reason.message) : "That didn't work.");
+      }
+      await scope.coordinator.request();
+      return false;
+    } finally {
+      scope.saving = false;
+      if (scope.coordinator.isActive()) setSaving(false);
+    }
+  }, []);
   const props: OfficeProps | null = data ? { organisationId, role, data, club, act } : null;
   return (
     <div className="space-y-4">
@@ -122,7 +173,31 @@ export function ClubOffice({
           umpires — each person sees only what their role allows.
         </p>
       </div>
-      <div className="office-tabs" role="tablist" aria-label="Club office">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="office-meta" role="status">
+          {saving
+            ? "Saving changes…"
+            : refreshing
+              ? "Refreshing office records…"
+              : lastLoaded
+                ? `Last loaded ${new Date(lastLoaded).toLocaleTimeString()}`
+                : "Waiting for club office records"}
+        </p>
+        <button
+          type="button"
+          className="action-secondary"
+          disabled={refreshing || saving}
+          onClick={() => void reload()}
+        >
+          <RefreshCw className="size-4" aria-hidden="true" /> Refresh office
+        </button>
+      </div>
+      {error && data && (
+        <p role="alert" className="rounded-xl border border-amber-300/30 p-3 text-sm text-amber-200">
+          Refresh failed. Displayed records may be out of date. Refresh before saving changes.
+        </p>
+      )}
+      <nav className="office-tabs" aria-label="Club office">
         {tabs
           .filter(
             ([value]) =>
@@ -134,15 +209,14 @@ export function ClubOffice({
             <button
               key={value}
               type="button"
-              role="tab"
-              aria-selected={tab === value}
+              aria-current={tab === value ? "page" : undefined}
               className="office-tab"
               onClick={() => setTab(value)}
             >
               <Icon className="size-4" /> {label}
             </button>
           ))}
-      </div>
+      </nav>
       {error && !data && (
         <div className="office-card">
           <p className="office-meta">{error}</p>
@@ -157,7 +231,7 @@ export function ClubOffice({
         </div>
       )}
       {props && (
-        <div role="tabpanel">
+        <div aria-busy={saving || refreshing}>
           {tab === "events" && <EventsPanel {...props} />}
           {tab === "selection" && <SelectionPanel {...props} />}
           {tab === "fees" && <FeesPanel {...props} />}
