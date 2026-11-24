@@ -749,8 +749,8 @@ function OperationalPlatform({
                 : dashboard.loading
                   ? "Connecting"
                   : "Connected"}{" "}
-              ·{" "}
-              {membership.role.replaceAll("_", " ")}
+              <span aria-hidden="true">·</span>
+              <span>{membership.role.replaceAll("_", " ")}</span>
             </div>
             <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
               {membership.organisationName}
