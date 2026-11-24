@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   availableToLend,
   clashes,
+  feeScheduleTargets,
   feeTotals,
   maxPayment,
   officeAccess,
@@ -186,4 +187,27 @@ test("a transfer reference is required and trimmed", () => {
   assert.equal(cleanReference("  RAAST 123456  "), "RAAST 123456");
   assert.equal(cleanReference("ab"), null);
   assert.equal(cleanReference("   "), null);
+});
+
+test("fee amounts reject malformed grouping, excess precision and unsafe integers", () => {
+  for (const input of ["1,2", "1 2", "1.001", "0.001", "1.", "9007199254740992"]) {
+    assert.equal(toMinor(input, "GBP"), null, input);
+  }
+  assert.equal(toMinor("2,500.50", "GBP"), 250050);
+  assert.equal(toMinor("1,25,000.50", "INR"), 12500050);
+  assert.equal(toMinor("1 250.5", "GBP"), 125050);
+  assert.equal(toMinor("100.50", "JPY"), null);
+});
+
+test("fee targets never expand a missing or external team into a whole-club charge", () => {
+  const players = ["p1", "p2", "p2"];
+  const teams = [
+    { id: "own", playerIds: ["p1", "p1", "other"] },
+    { id: "external", playerIds: ["p2"], external: true },
+  ];
+  assert.deepEqual(feeScheduleTargets({ active: true, team_id: "own" }, teams, players), ["p1"]);
+  assert.deepEqual(feeScheduleTargets({ active: true, team_id: "missing" }, teams, players), []);
+  assert.deepEqual(feeScheduleTargets({ active: true, team_id: "external" }, teams, players), []);
+  assert.deepEqual(feeScheduleTargets({ active: false, team_id: null }, teams, players), []);
+  assert.deepEqual(feeScheduleTargets({ active: true, team_id: null }, teams, players), ["p1", "p2"]);
 });
