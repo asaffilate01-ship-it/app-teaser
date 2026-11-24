@@ -603,10 +603,17 @@ const drainInThisTab = createOrderedQueueDrainer<PendingMatchEvent>({
 });
 
 /** One sender per match across every open tab of this browser, so saved changes go up strictly in order. */
-export function flushPendingEvents(matchId: string): ReturnType<typeof drainInThisTab> {
-  const locks = typeof navigator !== "undefined" ? (navigator as Navigator & { locks?: LockManager }).locks : undefined;
-  if (!locks?.request) return drainInThisTab(matchId);
-  return locks.request(`criclume-sync:${matchId}`, () => drainInThisTab(matchId));
+export async function flushPendingEvents(
+  matchId: string,
+): Promise<Awaited<ReturnType<typeof drainInThisTab>>> {
+  const locks =
+    typeof navigator !== "undefined"
+      ? (navigator as Navigator & { locks?: LockManager }).locks
+      : undefined;
+  if (!locks?.request) return await drainInThisTab(matchId);
+  // Await the Web Locks callback's promise so the public return type remains
+  // the settled receipt, not Promise<Promise<QueueDrainResult>>.
+  return await locks.request(`criclume-sync:${matchId}`, () => drainInThisTab(matchId));
 }
 
 export function subscribeToMatchEvents(
