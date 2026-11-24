@@ -21,7 +21,7 @@
 - [x] League hub: live table projected from current match situations
 - [x] League hub: historic scorecards
 - [x] League stats: batting (runs, avg, SR, 50s, 100s, HS) and bowling (wkts, avg, econ, SR, best, 5-fors, 10-in-match)
-- [ ] Go-live: card payments via Paddle (waiting on owner's yes, then Paddle approval), email sender domain (owner opens email setup), legal/safeguarding sign-off (checklist in Files)
+- [ ] Go-live: Pakistan subscription bank/wallet transfer setup, email sender domain (owner opens email setup), legal/safeguarding sign-off (checklist in Files)
 - [x] Demo-style dashboards: League hub match dashboard + club home closer to demo
 - [x] Promo page: show more dashboard screenshots (league hub, match dashboard, stats)
 
@@ -200,6 +200,8 @@
 - [x] Pakistan prices, per-team policy, quoted video outside Pakistan and free tournament hosting confirmed
 - [x] Device list read back in the signed-in app; 3rd device revoked the oldest, and manual sign-out was observed
 - [x] Pakistan pricing and Devices list checked at 411px without horizontal overflow; 28 focused tests passed
-- [ ] Card subscription setup — awaits Paddle approval choice, then account verification; existing unconfigured Stripe scaffolding must be replaced before enabling Paddle
+- [x] Pakistan subscription payment choice: Raast, Easypaisa, JazzCash or bank transfer; no Paddle/card checkout
+- [ ] Pakistan subscription transfer flow and confirmation — needs CricLume receiving payment details; keep plan locks off until subscriptions can be confirmed
+- [ ] Subscription payment methods outside Pakistan — not yet decided
 - [ ] First club domain — awaits the actual club hostname
 - [ ] Legal/safeguarding sign-off — launch checklist prepared; qualified reviewer required
