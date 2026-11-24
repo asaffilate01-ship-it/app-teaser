@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { can } from "@/lib/platform";
 import { selectionWarnings, type Availability, type SelectionLike } from "@/lib/club-office";
 import { office } from "@/lib/club-office-cloud";
@@ -28,6 +28,8 @@ export function SelectionPanel(props: OfficeProps) {
   );
   const [eventId, setEventId] = useState(events[0]?.id ?? "");
   const [sideSize, setSideSize] = useState(11);
+  const [publishing, setPublishing] = useState(false);
+  const publishLock = useRef(false);
   const event = events.find((item) => item.id === eventId) ?? events[0];
 
   if (!manager) {
@@ -71,6 +73,35 @@ export function SelectionPanel(props: OfficeProps) {
       ({ available: 0, maybe: 1, waitlist: 1, unavailable: 3 })[answers.get(id) ?? "maybe"] ?? 2;
     return rank(a) - rank(b);
   });
+  const outsideSquad = picks.filter((pick) => !squad.includes(pick.player_id));
+  const canPublish = squad.length > 0 && picks.some((pick) => pick.slot === "playing");
+  const publish = async () => {
+    if (publishLock.current) return;
+    if (!event.selection_published_at) {
+      if (!canPublish || outsideSquad.length) return;
+      if (
+        warnings.length &&
+        !window.confirm(
+          `Publish this team sheet with the following warnings?\n\n${warnings.join("\n")}`,
+        )
+      )
+        return;
+    }
+    publishLock.current = true;
+    setPublishing(true);
+    try {
+      await act(
+        () =>
+          office.updateEvent(event.id, {
+            selection_published_at: event.selection_published_at ? null : new Date().toISOString(),
+          }),
+        event.selection_published_at ? "Team sheet hidden" : "Team sheet published to members",
+      );
+    } finally {
+      publishLock.current = false;
+      setPublishing(false);
+    }
+  };
   return (
     <div className="space-y-4">
       <OfficeCard
@@ -80,21 +111,16 @@ export function SelectionPanel(props: OfficeProps) {
           <button
             type="button"
             className={event.selection_published_at ? "action-secondary" : "action-primary"}
-            onClick={() =>
-              void act(
-                () =>
-                  office.updateEvent(event.id, {
-                    selection_published_at: event.selection_published_at
-                      ? null
-                      : new Date().toISOString(),
-                  }),
-                event.selection_published_at
-                  ? "Team sheet hidden"
-                  : "Team sheet published to members",
-              )
+            disabled={
+              publishing || (!event.selection_published_at && (!canPublish || outsideSquad.length > 0))
             }
+            onClick={() => void publish()}
           >
-            {event.selection_published_at ? "Unpublish" : "Publish team sheet"}
+            {publishing
+              ? "Saving…"
+              : event.selection_published_at
+                ? "Unpublish"
+                : "Publish team sheet"}
           </button>
         }
       >
@@ -103,6 +129,7 @@ export function SelectionPanel(props: OfficeProps) {
             <select
               className="scorer-input"
               value={event.id}
+              disabled={publishing}
               onChange={(item) => setEventId(item.target.value)}
             >
               {events.map((item) => (
@@ -119,10 +146,35 @@ export function SelectionPanel(props: OfficeProps) {
               max={15}
               className="scorer-input"
               value={sideSize}
-              onChange={(item) => setSideSize(Number(item.target.value) || 11)}
+              onChange={(item) =>
+                setSideSize(Math.max(4, Math.min(15, Math.round(Number(item.target.value) || 11))))
+              }
             />
           </OfficeField>
         </div>
+        {!squad.length && (
+          <Empty>No eligible players in this squad. Check the assigned team roster.</Empty>
+        )}
+        {outsideSquad.length > 0 && (
+          <div role="alert" className="mb-3 space-y-2 rounded-xl border border-amber-300/30 p-3">
+            <p className="text-sm text-amber-200">
+              Remove players who are no longer eligible before publishing this team sheet.
+            </p>
+            {outsideSquad.map((pick) => (
+              <div key={pick.id} className="office-row">
+                <span>{nameOfPlayer(club, pick.player_id)}</span>
+                <button
+                  type="button"
+                  className="app-chip-button"
+                  disabled={publishing}
+                  onClick={() => void act(() => office.unpick(event.id, pick.player_id))}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
         {warnings.length > 0 && (
           <ul className="mb-3 space-y-1">
             {warnings.map((warning) => (
@@ -154,6 +206,7 @@ export function SelectionPanel(props: OfficeProps) {
                       key={slot}
                       type="button"
                       className="office-choice"
+                      disabled={publishing}
                       aria-pressed={pick?.slot === slot}
                       onClick={() =>
                         void act(() =>
@@ -171,11 +224,12 @@ export function SelectionPanel(props: OfficeProps) {
                       {label}
                     </button>
                   ))}
-                  {pick && (
+                  {pick?.slot === "playing" && (
                     <>
                       <button
                         type="button"
                         className="office-choice"
+                        disabled={publishing}
                         aria-pressed={pick.captain}
                         onClick={() =>
                           void act(() => office.setRole(event.id, playerId, "captain"))
@@ -186,6 +240,7 @@ export function SelectionPanel(props: OfficeProps) {
                       <button
                         type="button"
                         className="office-choice"
+                        disabled={publishing}
                         aria-pressed={pick.wicketkeeper}
                         onClick={() =>
                           void act(() => office.setRole(event.id, playerId, "wicketkeeper"))
