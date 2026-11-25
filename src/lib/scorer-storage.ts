@@ -254,7 +254,8 @@ export async function recoverLatestScorerSnapshot(
   let before: number | null = null;
   for (let page = 0; page < scorerSnapshotMaxPages; page++) {
     const rows = await loadPage(before, scorerSnapshotPageSize);
-    if (rows.length > scorerSnapshotPageSize) throw new Error("Invalid cloud scoring history page.");
+    if (rows.length > scorerSnapshotPageSize)
+      throw new Error("Invalid cloud scoring history page.");
     for (const row of rows) {
       if (
         !Number.isSafeInteger(row.sequence) ||
