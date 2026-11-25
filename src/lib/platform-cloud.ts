@@ -1,5 +1,6 @@
 import type { RealtimeChannel, User } from "@supabase/supabase-js";
 import { externalTeams } from "./external-teams.ts";
+import { appendDashboardGroup, collectDashboardRows } from "./dashboard-load.ts";
 import { verifiedBillingRedirect } from "./billing-redirect.ts";
 export { externalTeams } from "./external-teams.ts";
 import { getCloudClient, invokePlatformFunction } from "@/lib/cloud";
@@ -242,13 +243,9 @@ export async function loadOrganisationDashboard(
     teamRows,
     groundRows,
     playerRows,
-    teamPlayerRows,
     consentRows,
-    careerRows,
     seasonRows,
     competitionRows,
-    ruleRows,
-    fixtureRows,
     matchRows,
     memberRows,
     notificationRows,
@@ -277,9 +274,6 @@ export async function loadOrganisationDashboard(
         .order("display_name"),
     ),
     rows<Record<string, unknown>>(
-      client.from("team_players").select("team_id,player_id,valid_until"),
-    ),
-    rows<Record<string, unknown>>(
       client
         .from("player_consents")
         .select(
@@ -288,7 +282,6 @@ export async function loadOrganisationDashboard(
         .eq("organisation_id", organisationId)
         .order("valid_from", { ascending: false }),
     ),
-    rows<Record<string, unknown>>(client.from("player_career_stats").select("*")),
     rows<Record<string, unknown>>(
       client
         .from("seasons")
@@ -302,20 +295,6 @@ export async function loadOrganisationDashboard(
         .select("id,name,format,season_id,active_rule_version")
         .eq("organisation_id", organisationId)
         .order("created_at", { ascending: false }),
-    ),
-    rows<Record<string, unknown>>(
-      client
-        .from("competition_rule_versions")
-        .select("id,competition_id,version,rules,rain_provider,rain_method,rain_edition")
-        .is("retired_at", null),
-    ),
-    rows<Record<string, unknown>>(
-      client
-        .from("fixtures")
-        .select(
-          "id,competition_id,rule_version_id,home_team_id,away_team_id,ground_id,round_name,starts_at,status,result,signed_off_at,signed_off_by",
-        )
-        .order("starts_at", { ascending: true }),
     ),
     rows<Record<string, unknown>>(
       client
@@ -351,100 +330,183 @@ export async function loadOrganisationDashboard(
     ),
   ]);
 
-  const competitionIds = new Set(competitionRows.map((row) => String(row["id"])));
-  // League points added or deducted; row rules decide who may read them.
-  const adjustmentRows = competitionIds.size
-    ? await client
-        .from("competition_point_adjustments")
-        .select("competition_id,team_id,points,reason")
-        .in("competition_id", [...competitionIds])
-        .then(({ data, error }) => (error ? [] : (data ?? [])))
-    : [];
-  const adjustmentsByCompetition = new Map<string, PointAdjustment[]>();
-  for (const row of adjustmentRows) {
-    const list = adjustmentsByCompetition.get(row.competition_id) ?? [];
-    list.push({ teamId: row.team_id, points: Number(row.points), reason: row.reason });
-    adjustmentsByCompetition.set(row.competition_id, list);
-  }
-  const entryTeamRows = competitionRows.length
-    ? await client
-        .rpc("competition_entry_teams", { p_org: organisationId })
-        .then(({ data, error }) => (error ? [] : (data ?? [])))
-    : [];
+  const teamIds = teamRows.map((row) => String(row["id"]));
+  const playerIds = playerRows.map((row) => String(row["id"]));
+  const competitionIds = competitionRows.map((row) => String(row["id"]));
   const memberUserIds = memberRows.map((row) => String(row["user_id"]));
-  const profileRows = memberUserIds.length
-    ? await rows<Record<string, unknown>>(
-        client.from("profiles").select("id,display_name").in("id", memberUserIds),
-      )
-    : [];
-  const profiles = new Map(
-    profileRows.map((row) => [String(row["id"]), String(row["display_name"] || "Member")]),
-  );
-  const organisationFixtures = fixtureRows.filter((row) =>
-    competitionIds.has(String(row["competition_id"])),
-  );
   const matchIds = matchRows.map((row) => String(row["id"]));
-  const scoreboardRows = matchIds.length
-    ? await rows<Record<string, unknown>>(
-        client
-          .from("public_scoreboards")
-          .select("id,match_id,slug,enabled,delay_seconds")
-          .in("match_id", matchIds),
-      )
-    : [];
-  const roomRows = matchIds.length
-    ? await rows<Record<string, unknown>>(
-        client
-          .from("camera_rooms")
-          .select("id,match_id,name,status,max_devices,opened_at,closes_at")
-          .in("match_id", matchIds)
-          .order("opened_at", { ascending: false }),
-      )
-    : [];
-  const roomIds = roomRows.map((row) => String(row["id"]));
-  const deviceRows = roomIds.length
-    ? await rows<Record<string, unknown>>(
-        client
-          .from("camera_devices")
-          .select("id,room_id,label,angle,clock_offset_ms,status,last_heartbeat_at")
-          .in("room_id", roomIds)
-          .is("removed_at", null),
-      )
-    : [];
   const administrativeRoles: PlatformRole[] = [
     "owner",
     "league_admin",
     "club_admin",
     "safeguarding_officer",
   ];
-  const subscription = ["owner", "league_admin", "club_admin"].includes(role)
-    ? await maybeRow<Record<string, unknown>>(
+
+  // Fetch independent related records concurrently, using only IDs in this workspace.
+  const [
+    teamPlayerRows,
+    careerRows,
+    ruleRows,
+    organisationFixtures,
+    adjustmentRows,
+    entryTeamRows,
+    profileRows,
+    scoreboardRows,
+    roomRows,
+    subscription,
+    auditRows,
+  ] = await Promise.all([
+    collectDashboardRows(teamIds, (ids, from, to) =>
+      rows<Record<string, unknown>>(
         client
-          .from("subscriptions")
-          .select("plan,status,current_period_end,cancel_at_period_end,stripe_customer_id")
-          .eq("organisation_id", organisationId)
-          .maybeSingle(),
-      )
-    : null;
-  const auditRows = administrativeRoles.includes(role)
-    ? await rows<Record<string, unknown>>(
+          .from("team_players")
+          .select("team_id,player_id,valid_until")
+          .in("team_id", ids)
+          .order("team_id")
+          .order("player_id")
+          .order("valid_from")
+          .range(from, to),
+      ),
+    ),
+    collectDashboardRows(playerIds, (ids, from, to) =>
+      rows<Record<string, unknown>>(
         client
-          .from("audit_log")
-          .select("id,action,entity_table,entity_id,created_at")
-          .eq("organisation_id", organisationId)
-          .order("created_at", { ascending: false })
-          .limit(20),
-      )
-    : [];
+          .from("player_career_stats")
+          .select("player_id,runs,balls_faced,wickets,balls_bowled,catches,stumpings,run_outs")
+          .in("player_id", ids)
+          .order("player_id")
+          .range(from, to),
+      ),
+    ),
+    collectDashboardRows(competitionIds, (ids, from, to) =>
+      rows<Record<string, unknown>>(
+        client
+          .from("competition_rule_versions")
+          .select("id,competition_id,version,rules,rain_provider,rain_method,rain_edition")
+          .in("competition_id", ids)
+          .is("retired_at", null)
+          .order("id")
+          .range(from, to),
+      ),
+    ),
+    collectDashboardRows(competitionIds, (ids, from, to) =>
+      rows<Record<string, unknown>>(
+        client
+          .from("fixtures")
+          .select(
+            "id,competition_id,rule_version_id,home_team_id,away_team_id,ground_id,round_name,starts_at,status,result,signed_off_at,signed_off_by",
+          )
+          .in("competition_id", ids)
+          .order("starts_at", { ascending: true })
+          .order("id")
+          .range(from, to),
+      ),
+    ),
+    collectDashboardRows(competitionIds, async (ids, from, to) => {
+      const { data, error } = await client
+        .from("competition_point_adjustments")
+        .select("id,competition_id,team_id,points,reason")
+        .in("competition_id", ids)
+        .order("id")
+        .range(from, to);
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Array<{
+        competition_id: string;
+        team_id: string;
+        points: number;
+        reason: string;
+      }>;
+    }),
+    competitionIds.length
+      ? client.rpc("competition_entry_teams", { p_org: organisationId }).then(({ data, error }) => {
+          if (error) throw new Error(error.message);
+          return data ?? [];
+        })
+      : Promise.resolve([]),
+    collectDashboardRows(memberUserIds, (ids, from, to) =>
+      rows<Record<string, unknown>>(
+        client.from("profiles").select("id,display_name").in("id", ids).order("id").range(from, to),
+      ),
+    ),
+    collectDashboardRows(matchIds, (ids, from, to) =>
+      rows<Record<string, unknown>>(
+        client
+          .from("public_scoreboards")
+          .select("id,match_id,slug,enabled,delay_seconds")
+          .in("match_id", ids)
+          .order("id")
+          .range(from, to),
+      ),
+    ),
+    collectDashboardRows(matchIds, (ids, from, to) =>
+      rows<Record<string, unknown>>(
+        client
+          .from("camera_rooms")
+          .select("id,match_id,name,status,max_devices,opened_at,closes_at")
+          .in("match_id", ids)
+          .order("opened_at", { ascending: false })
+          .order("id")
+          .range(from, to),
+      ),
+    ),
+    ["owner", "league_admin", "club_admin"].includes(role)
+      ? maybeRow<Record<string, unknown>>(
+          client
+            .from("subscriptions")
+            .select("plan,status,current_period_end,cancel_at_period_end,stripe_customer_id")
+            .eq("organisation_id", organisationId)
+            .maybeSingle(),
+        )
+      : Promise.resolve(null),
+    administrativeRoles.includes(role)
+      ? rows<Record<string, unknown>>(
+          client
+            .from("audit_log")
+            .select("id,action,entity_table,entity_id,created_at")
+            .eq("organisation_id", organisationId)
+            .order("created_at", { ascending: false })
+            .limit(20),
+        )
+      : Promise.resolve([]),
+  ]);
+  organisationFixtures.sort((a, b) => {
+    const left = a["starts_at"] ? Date.parse(String(a["starts_at"])) : Infinity;
+    const right = b["starts_at"] ? Date.parse(String(b["starts_at"])) : Infinity;
+    return left - right || String(a["id"]).localeCompare(String(b["id"]));
+  });
+  const adjustmentsByCompetition = new Map<string, PointAdjustment[]>();
+  for (const row of adjustmentRows) {
+    appendDashboardGroup(adjustmentsByCompetition, row.competition_id, {
+      teamId: row.team_id,
+      points: Number(row.points),
+      reason: row.reason,
+    });
+  }
+  const profiles = new Map(
+    profileRows.map((row) => [String(row["id"]), String(row["display_name"] || "Member")]),
+  );
+  const roomIds = roomRows.map((row) => String(row["id"]));
+  const deviceRows = await collectDashboardRows(roomIds, (ids, from, to) =>
+    rows<Record<string, unknown>>(
+      client
+        .from("camera_devices")
+        .select("id,room_id,label,angle,clock_offset_ms,status,last_heartbeat_at")
+        .in("room_id", ids)
+        .is("removed_at", null)
+        .order("id")
+        .range(from, to),
+    ),
+  );
 
   const teamPlayers = new Map<string, string[]>();
   const playerTeams = new Map<string, string[]>();
+  const rosterNow = Date.now();
   for (const row of teamPlayerRows) {
-    if (row["valid_until"] && new Date(String(row["valid_until"])) < new Date()) continue;
+    if (row["valid_until"] && Date.parse(String(row["valid_until"])) < rosterNow) continue;
     const teamId = String(row["team_id"]);
     const playerId = String(row["player_id"]);
-    teamPlayers.set(teamId, [...(teamPlayers.get(teamId) ?? []), playerId]);
-    playerTeams.set(playerId, [...(playerTeams.get(playerId) ?? []), teamId]);
+    appendDashboardGroup(teamPlayers, teamId, playerId);
+    appendDashboardGroup(playerTeams, playerId, teamId);
   }
   const latestConsent = new Map<string, ConsentRecord>();
   for (const row of consentRows) {
@@ -479,7 +541,7 @@ export async function loadOrganisationDashboard(
       status: (row["status"] ?? {}) as Record<string, unknown>,
       lastHeartbeatAt: String(row["last_heartbeat_at"]),
     };
-    devicesByRoom.set(roomId, [...(devicesByRoom.get(roomId) ?? []), device]);
+    appendDashboardGroup(devicesByRoom, roomId, device);
   }
   const roomsByMatch = new Map<string, CameraRoomRecord[]>();
   for (const row of roomRows) {
@@ -495,7 +557,7 @@ export async function loadOrganisationDashboard(
       closesAt: row["closes_at"] ? String(row["closes_at"]) : null,
       devices: devicesByRoom.get(roomId) ?? [],
     };
-    roomsByMatch.set(matchId, [...(roomsByMatch.get(matchId) ?? []), room]);
+    appendDashboardGroup(roomsByMatch, matchId, room);
   }
 
   const today = Date.now();
