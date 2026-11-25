@@ -215,6 +215,31 @@ export function readScorerSnapshot(value: unknown, matchId: string): CricketMatc
   return match.safeParse(value).success ? (value as CricketMatch) : null;
 }
 
+/** Rows are newest first. A malformed explicit snapshot must not fall back to an older score.
+ * Events without snapshots (including fielding-only changes) are not snapshot candidates.
+ */
+export function latestScorerSnapshot(
+  rows: readonly { payload: unknown }[],
+  matchId: string,
+): CricketMatch | null {
+  for (const row of rows) {
+    const payload = row.payload;
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) continue;
+    if (!Object.prototype.hasOwnProperty.call(payload, "matchSnapshot")) continue;
+    const snapshot = readScorerSnapshot(
+      (payload as Record<string, unknown>)["matchSnapshot"],
+      matchId,
+    );
+    if (!snapshot) {
+      throw new Error(
+        "The latest cloud scoring snapshot is invalid. Keep local scores and request scorer review.",
+      );
+    }
+    return snapshot;
+  }
+  return null;
+}
+
 /** Validate without discarding unknown fields from a newer scorer version. */
 export function parseScorerMatches(raw: string): CricketMatch[] {
   const value: unknown = JSON.parse(raw);
