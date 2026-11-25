@@ -67,6 +67,7 @@ import {
   WorkloadPanel,
 } from "@/components/scorer/MatchTools";
 import { BallSpeedTool } from "@/components/scorer/BallSpeedTool";
+import { SpeedComparisonLab } from "@/components/scorer/SpeedComparisonLab";
 import { BallTrackChart, BallTrackPad } from "@/components/scorer/BallTrack";
 import { VideoLab } from "@/components/video/VideoLab";
 import { bowlingTypeSplits, phaseSplits, type SplitRow } from "@/lib/phase-splits";
@@ -1530,6 +1531,7 @@ function LiveMatch({
               match={match}
               onSave={access.recordBalls && !cloudConflict ? saveAndSync : undefined}
             />
+            {access.video && <SpeedComparisonLab key={match.id} />}
             <VideoLab />
           </div>
         )}
