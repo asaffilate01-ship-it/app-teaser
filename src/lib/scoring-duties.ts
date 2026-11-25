@@ -325,6 +325,32 @@ export function pendingScoringPatches(
     .filter((patch): patch is ScoringPatch => patch !== null);
 }
 
+export const scoringPatchPageSize = 250;
+export const scoringPatchMaxPages = 20;
+
+/** Fetch accepted patches in sequence order, with an explicit recovery limit. */
+export async function collectScoringPatches(
+  afterSequence: number,
+  loadPage: (after: number, limit: number) => Promise<readonly ScoringPatch[]>,
+): Promise<ScoringPatch[]> {
+  if (!Number.isSafeInteger(afterSequence) || afterSequence < 0)
+    throw new Error("Invalid scoring patch cursor.");
+  const patches: ScoringPatch[] = [];
+  let cursor = afterSequence;
+  for (let page = 0; page < scoringPatchMaxPages; page++) {
+    const rows = await loadPage(cursor, scoringPatchPageSize);
+    if (rows.length > scoringPatchPageSize) throw new Error("Invalid fielding history page.");
+    for (const patch of rows) {
+      if (!Number.isSafeInteger(patch.sequence) || patch.sequence <= cursor)
+        throw new Error("Fielding history is out of order.");
+      cursor = patch.sequence;
+      patches.push(patch);
+    }
+    if (rows.length < scoringPatchPageSize) return patches;
+  }
+  throw new Error("Fielding history exceeds the recovery limit. Request scorer review.");
+}
+
 /** Balls the fielding scorer still needs to look at: newest first, wickets and untagged first. */
 export function ballsNeedingFielding(match: CricketMatch, limit = 12) {
   const innings = match.innings.at(-1);
