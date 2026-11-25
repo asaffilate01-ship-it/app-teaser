@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  currentReplaySource,
   estimateDeliveryCues,
   isReviewableClip,
   privateReplayDeadline,
   privateReplaySelectionCurrent,
   privateReplaySelectionDeadline,
   replaySeekPosition,
+  requestedReplayUrlSeconds,
   sameReplaySource,
   storageVideoMimeType,
   type CameraClip,
@@ -160,4 +162,37 @@ test("private replay requires the same eligible sources in the same order", () =
   ]) {
     assert.equal(privateReplaySelectionCurrent(originals, [clip, changed], deadline, now), false);
   }
+});
+
+test("fresh replay authorisation rejects removed or changed source records", () => {
+  const now = Date.parse("2026-11-21T12:00:00Z");
+  assert.equal(currentReplaySource(clip, { ...clip, status: "ready" }, now), true);
+  assert.equal(currentReplaySource(clip, null, now), false);
+  for (const current of [
+    { ...clip, recording_consent: "withdrawn" },
+    { ...clip, blur_mode: "faces" as const },
+    { ...clip, status: "quarantined" },
+    { ...clip, storage_path: "replacement/source.webm" },
+    { ...clip, ended_at: "2026-11-21T10:02:00Z" },
+    { ...clip, retention_expires_at: "2026-12-01T00:00:00Z" },
+  ]) {
+    assert.equal(currentReplaySource(clip, current, now), false);
+  }
+});
+
+test("requested signed URL lifetime is bounded by remaining retention", () => {
+  const now = Date.parse("2026-11-21T12:00:00Z");
+  const nearExpiry = { ...clip, retention_expires_at: new Date(now + 15_500).toISOString() };
+  assert.equal(requestedReplayUrlSeconds(clip, now), 300);
+  assert.equal(requestedReplayUrlSeconds(nearExpiry, now), 10);
+  assert.equal(requestedReplayUrlSeconds(nearExpiry, now + 10_500), null);
+  assert.equal(requestedReplayUrlSeconds(clip, NaN), null);
+});
+
+test("unknown blur policies and invalid clocks never authorise playback", () => {
+  const now = Date.parse("2026-11-21T12:00:00Z");
+  const invalid = { ...clip, blur_mode: "unknown" } as unknown as CameraClip;
+  assert.equal(isReviewableClip(invalid, now), false);
+  assert.equal(requestedReplayUrlSeconds(invalid, now), null);
+  assert.equal(isReviewableClip(clip, -Infinity), false);
 });
