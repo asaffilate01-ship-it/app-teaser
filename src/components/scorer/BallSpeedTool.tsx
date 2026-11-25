@@ -13,7 +13,6 @@ import {
   ballSpeed,
   detectFps,
   fitBallTrack,
-  reviewableBallSpeed,
   speedDistances,
   speedsByBowler,
   type Point,
@@ -21,6 +20,7 @@ import {
   type TrackPoint,
 } from "@/lib/ball-speed";
 import { currentInnings, findPlayer, setDeliverySpeed, type CricketMatch } from "@/lib/cricket";
+import { createVideoSpeedEvidence, validateVideoSpeedEvidence } from "@/lib/speed-evidence";
 
 const cameraKey = "criclume.speed-camera.v1";
 const scanWidth = 320;
@@ -78,13 +78,16 @@ function seek(video: HTMLVideoElement, time: number): Promise<void> {
  * once (bowler's crease and batter's end), then each clip is timed automatically; marks can be
  * nudged a frame at a time or set by hand.
  */
-export function BallSpeedTool({
-  match,
-  onSave,
-}: {
+type BallSpeedToolProps = {
   match: CricketMatch | null;
   onSave?: ((match: CricketMatch) => void) | undefined;
-}) {
+};
+
+export function BallSpeedTool(props: BallSpeedToolProps) {
+  return <ScopedBallSpeedTool key={props.match?.id ?? "standalone"} {...props} />;
+}
+
+function ScopedBallSpeedTool({ match, onSave }: BallSpeedToolProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [src, setSrc] = useState<string | null>(null);
@@ -139,7 +142,19 @@ export function BallSpeedTool({
     release != null && arrival != null && arrival <= duration
       ? ballSpeed(release, arrival, metres, fps, timeScale, uncertainty)
       : null;
-  const canSave = calibrated && reviewConfirmed && !scan.busy && reviewableBallSpeed(reading);
+  const evidence =
+    release !== null && arrival !== null && arrival <= duration && calibrated && reviewConfirmed
+      ? createVideoSpeedEvidence({
+          method: trackPoints.length ? "reviewed_motion" : "manual",
+          firstSeconds: release,
+          secondSeconds: arrival,
+          distanceMetres: metres,
+          distanceErrorMetres: uncertainty,
+          mediaFps: fps,
+          timeScale,
+        })
+      : null;
+  const canSave = evidence !== null && !scan.busy;
 
   useEffect(() => {
     setReviewConfirmed(false);
@@ -412,11 +427,30 @@ export function BallSpeedTool({
   };
 
   const saveToBall = () => {
-    if (!match || !onSave || !reading || !canSave || !balls.some((ball) => ball.id === deliveryId))
+    if (!match || !onSave || !evidence || !canSave) return;
+    const ball = balls.find((item) => item.id === deliveryId);
+    if (!ball) return;
+    if (
+      ball.speedKph !== undefined &&
+      !window.confirm("Replace the existing speed estimate for this delivery?")
+    )
       return;
-    onSave(setDeliverySpeed(match, deliveryId, reading.kph));
+    const next = setDeliverySpeed(match, ball.id, evidence.kph, evidence);
+    if (next === match) return;
+    onSave(next);
+    setReviewConfirmed(false);
     setDeliveryId("");
   };
+
+  const savedMeasurements = useMemo(
+    () =>
+      (match?.innings ?? [])
+        .flatMap((innings) => innings.deliveries)
+        .filter((ball) => ball.speedKph !== undefined)
+        .reverse()
+        .slice(0, 24),
+    [match],
+  );
 
   return (
     <section className="broadcast-panel space-y-4 p-4 md:p-5" aria-label="Ball speed">
@@ -809,6 +843,67 @@ export function BallSpeedTool({
           )}
         </div>
       )}
+
+      {savedMeasurements.length > 0 && (
+        <details className="space-y-3 rounded-xl border border-border p-3">
+          <summary className="cursor-pointer text-sm font-semibold">Recent saved speed evidence</summary>
+          {savedMeasurements.map((ball) => {
+            const saved = validateVideoSpeedEvidence(ball.speedEvidence);
+            const valid = saved !== null && saved.kph === ball.speedKph;
+            return (
+              <div key={ball.id} className="space-y-1 border-t border-border pt-2 text-xs">
+                <p className="font-semibold">
+                  Over {ball.over}.{ball.ball} · {ball.speedKph?.toFixed(1)} km/h
+                </p>
+                {valid && saved ? (
+                  <>
+                    <p>
+                      {saved.method === "manual" ? "Manual timing" : "Reviewed motion track"} ·{" "}
+                      {saved.distanceMetres} m ± {saved.distanceErrorMetres} m · {saved.mediaFps} fps
+                    </p>
+                    <p className="text-muted-foreground">
+                      {saved.firstSeconds.toFixed(3)}–{saved.secondSeconds.toFixed(3)} s · time
+                      scale {saved.timeScale} · range {saved.lowKph}–{saved.highKph} km/h
+                    </p>
+                    <p className="text-muted-foreground">Reviewed video segment-average estimate.</p>
+                  </>
+                ) : (
+                  <p className="text-muted-foreground">
+                    No verified calculation details. Treat this as a legacy speed estimate.
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </details>
+      )}
+
+      <details className="rounded-xl border border-border p-3 text-xs">
+        <summary className="cursor-pointer text-sm font-semibold">Speed measurement questions</summary>
+        <div className="mt-3 space-y-3">
+          <div>
+            <p className="font-semibold">Why does the speed differ from radar?</p>
+            <p className="text-muted-foreground">
+              A video estimate averages speed between two measured points; radar can report peak
+              release speed. Compare the same quantity before assessing accuracy.
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold">What if I filmed in slow motion?</p>
+            <p className="text-muted-foreground">
+              Confirm the original capture and export timebase. An eight-times slowed export
+              uses one-eighth of its presentation duration as elapsed real time.
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold">Does the displayed range prove accuracy?</p>
+            <p className="text-muted-foreground">
+              No. The range includes assumed frame timing and entered distance error only.
+              Camera alignment, blur and tracking bias require separate field validation.
+            </p>
+          </div>
+        </div>
+      </details>
 
       {match && speeds.length > 0 && (
         <div>
