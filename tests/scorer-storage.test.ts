@@ -7,6 +7,9 @@ import {
   copyBackupMatches,
   maxBackupBytes,
   readScorerSnapshot,
+  latestScorerSnapshot,
+  recoverLatestScorerSnapshot,
+  scorerSnapshotPageSize,
 } from "../src/lib/scorer-storage.ts";
 function fixture() {
   return createMatch({
@@ -244,4 +247,57 @@ test("retirements cannot refer to deliveries that do not exist", () => {
   assert.equal(readScorerSnapshot(original, original.id), null);
   innings.retirements[0]!.afterBall = 0;
   assert.deepEqual(readScorerSnapshot(original, original.id), original);
+});
+
+test("latest snapshot recovery skips non-snapshot events, but never skips an invalid snapshot", () => {
+  const original = fixture();
+  const valid = { payload: { matchSnapshot: original } };
+  const patch = { payload: { tag: { fieldZone: "Cover" } } };
+  assert.deepEqual(latestScorerSnapshot([patch, valid], original.id), original);
+  assert.equal(latestScorerSnapshot([patch], original.id), null);
+  for (const invalid of [null, {}, { ...original, id: "different" }]) {
+    assert.throws(
+      () => latestScorerSnapshot([patch, { payload: { matchSnapshot: invalid } }, valid], original.id),
+      /latest cloud scoring snapshot is invalid/,
+    );
+  }
+});
+
+test("recovery can find a valid snapshot beyond the first page of fielding events", async () => {
+  const original = fixture();
+  const rows = Array.from({ length: scorerSnapshotPageSize + 1 }, (_, index) => ({
+    sequence: scorerSnapshotPageSize + 1 - index,
+    payload: index === scorerSnapshotPageSize ? { matchSnapshot: original } : { tag: {} },
+  }));
+  const cursors: (number | null)[] = [];
+  const result = await recoverLatestScorerSnapshot(original.id, async (before, limit) => {
+    cursors.push(before);
+    return rows.filter((row) => before === null || row.sequence < before).slice(0, limit);
+  });
+  assert.deepEqual(result, original);
+  assert.deepEqual(cursors, [null, 2]);
+});
+
+test("out-of-order history and a non-advancing recovery cursor fail closed", async () => {
+  const original = fixture();
+  await assert.rejects(
+    recoverLatestScorerSnapshot(original.id, async () => [
+      { sequence: 2, payload: {} },
+      { sequence: 2, payload: {} },
+    ]),
+    /out of order/,
+  );
+  const fullPage = Array.from({ length: scorerSnapshotPageSize }, (_, index) => ({
+    sequence: scorerSnapshotPageSize - index,
+    payload: {},
+  }));
+  await assert.rejects(
+    recoverLatestScorerSnapshot(original.id, async () => fullPage),
+    /out of order/,
+  );
+});
+
+test("an exhausted empty history still permits legacy row reconstruction", async () => {
+  const original = fixture();
+  assert.equal(await recoverLatestScorerSnapshot(original.id, async () => []), null);
 });
