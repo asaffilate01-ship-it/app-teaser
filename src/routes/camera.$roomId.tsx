@@ -26,6 +26,12 @@ import {
   type CameraCommandCursor,
 } from "@/lib/camera-command-receipts";
 import { storageVideoMimeType } from "@/lib/camera-review";
+import {
+  cameraCaptureRates,
+  reportedCaptureRate,
+  speedCaptureProfile,
+  type CameraCaptureRate,
+} from "@/lib/ball-speed";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import {
   getCloudClient,
@@ -102,6 +108,11 @@ function MatchCamera() {
   const [devices, setDevices] = useState<CameraPresence[]>([]);
   const [recording, setRecording] = useState(false);
   const [previewing, setPreviewing] = useState(false);
+  const [captureRate, setCaptureRate] = useState<CameraCaptureRate>(30);
+  const [actualCaptureRate, setActualCaptureRate] = useState<number | null>(null);
+  const [openingPreview, setOpeningPreview] = useState(false);
+  const previewRequest = useRef(0);
+  const previewLock = useRef(false);
   const [wakeLockHeld, setWakeLockHeld] = useState(false);
   const [liveSharing, setLiveSharing] = useState(false);
   const [cloudPublishing, setCloudPublishing] = useState(false);
@@ -119,6 +130,7 @@ function MatchCamera() {
 
   useEffect(
     () => () => {
+      previewRequest.current += 1;
       recordingRef.current = false;
       if (segmentTimerRef.current) clearTimeout(segmentTimerRef.current);
       if (recorderRef.current?.state === "recording") recorderRef.current.stop();
@@ -215,24 +227,35 @@ function MatchCamera() {
   };
 
   const startPreview = async () => {
+    if (previewLock.current || streamRef.current?.active) return;
+    const request = ++previewRequest.current;
+    previewLock.current = true;
+    setOpeningPreview(true);
+    setActualCaptureRate(null);
     setMessage(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "environment",
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          frameRate: { ideal: 30 },
-        },
+        video: speedCaptureProfile(captureRate),
         audio: true,
       });
+      if (request !== previewRequest.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       streamRef.current = stream;
+      setActualCaptureRate(
+        reportedCaptureRate(stream.getVideoTracks()[0]?.getSettings().frameRate),
+      );
       stream.getTracks().forEach((track) => {
         track.addEventListener("ended", () => {
+          if (streamRef.current !== stream) return;
           recordingRef.current = false;
           if (segmentTimerRef.current) clearTimeout(segmentTimerRef.current);
           setRecording(false);
           setPreviewing(false);
+          setActualCaptureRate(null);
+          streamRef.current = null;
+          stream.getTracks().forEach((item) => item.stop());
           liveRef.current?.close();
           setLiveSharing(false);
           void stopCloudPublisher();
@@ -243,9 +266,19 @@ function MatchCamera() {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
+      if (request !== previewRequest.current) return;
       setPreviewing(true);
     } catch (error) {
+      if (request !== previewRequest.current) return;
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+      setActualCaptureRate(null);
       setMessage(error instanceof Error ? error.message : "Camera access was denied.");
+    } finally {
+      if (request === previewRequest.current) {
+        previewLock.current = false;
+        setOpeningPreview(false);
+      }
     }
   };
 
@@ -796,14 +829,49 @@ function MatchCamera() {
                     Paired
                   </span>
                 </div>
+                {!previewing && (
+                  <label className="grid gap-1 text-xs">
+                    Camera capture mode
+                    <select
+                      className="scorer-input"
+                      disabled={openingPreview}
+                      value={captureRate}
+                      onChange={(event) =>
+                        setCaptureRate(Number(event.target.value) as CameraCaptureRate)
+                      }
+                    >
+                      {cameraCaptureRates.map((rate) => (
+                        <option key={rate} value={rate}>
+                          {rate === 30 ? "Standard match video" : "Experimental fast-ball capture"}
+                          {" · "}
+                          {rate} fps requested
+                        </option>
+                      ))}
+                    </select>
+                    <span className="text-slate-400">
+                      Higher rates depend on the camera, browser, lighting and encoder. For speed
+                      review, use a fixed side-on angle and verify the recorded clip timebase.
+                    </span>
+                  </label>
+                )}
+                {previewing && (
+                  <p role="status" className="text-xs text-slate-300">
+                    Camera track:{" "}
+                    {actualCaptureRate === null
+                      ? "frame rate not reported"
+                      : `${actualCaptureRate} fps reported`}{" "}
+                    · {captureRate} fps requested. Recorded and streamed frame rates may differ.
+                  </p>
+                )}
                 <div>
                   {!previewing ? (
                     <button
+                      disabled={openingPreview}
                       onClick={() => void startPreview()}
                       className="action-secondary min-h-14 w-full text-sm"
                     >
                       <Camera className="size-4" aria-hidden="true" />
-                      Start preview
+                      {openingPreview ? "Opening camera…" : "Start preview"}
                     </button>
                   ) : !recording ? (
                     <button onClick={startRecording} className="wicket-bar">
@@ -900,6 +968,10 @@ function MatchCamera() {
                   setConsent(granted);
                   if (!granted) {
                     // Revoking permission stops both capture and outgoing media immediately.
+                    previewRequest.current += 1;
+                    previewLock.current = false;
+                    setOpeningPreview(false);
+                    setActualCaptureRate(null);
                     stopRecording();
                     stopLiveSharing();
                     void stopCloudPublisher();

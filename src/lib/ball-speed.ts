@@ -27,24 +27,45 @@ const KPH_PER_MPS = 3.6;
 const MPH_PER_KPH = 0.621371;
 const round1 = (value: number) => Math.round(value * 10) / 10;
 
+/** timeScale is real elapsed seconds per media second (1 for real-time footage).
+ * An exported 240 fps capture slowed to 30 fps has a timeScale of 0.125.
+ * Distance uncertainty is an operator-supplied bound, not a statistical confidence interval.
+ */
 export function ballSpeed(
   releaseSeconds: number,
   arrivalSeconds: number,
   metres: number,
   fps: number,
+  timeScale = 1,
+  distanceError = 0,
 ): SpeedReading | null {
-  const seconds = arrivalSeconds - releaseSeconds;
-  if (!Number.isFinite(seconds) || seconds <= 0 || !(metres > 0) || !(fps > 0)) return null;
-  const frame = 1 / fps;
+  if (
+    ![releaseSeconds, arrivalSeconds, metres, fps, timeScale, distanceError].every(
+      Number.isFinite,
+    ) ||
+    releaseSeconds < 0 ||
+    arrivalSeconds <= releaseSeconds ||
+    metres <= 0 ||
+    fps <= 0 ||
+    timeScale <= 0 ||
+    timeScale > 1 ||
+    distanceError < 0 ||
+    distanceError >= metres
+  )
+    return null;
+  const seconds = (arrivalSeconds - releaseSeconds) * timeScale;
+  const frame = timeScale / fps;
   const kph = (metres / seconds) * KPH_PER_MPS;
-  const lowKph = (metres / (seconds + 2 * frame)) * KPH_PER_MPS;
-  const highKph = seconds > 2 * frame ? (metres / (seconds - 2 * frame)) * KPH_PER_MPS : Infinity;
+  const lowKph = ((metres - distanceError) / (seconds + 2 * frame)) * KPH_PER_MPS;
+  const highKph =
+    seconds > 2 * frame
+      ? ((metres + distanceError) / (seconds - 2 * frame)) * KPH_PER_MPS
+      : Infinity;
+  if (!Number.isFinite(kph) || !Number.isFinite(lowKph)) return null;
   let warning: string | null = null;
-  if (kph > 170) warning = "Faster than anyone has bowled. Check the two marks and the distance.";
-  else if (kph < 25) warning = "Very slow. Check the arrival mark is on the right ball.";
-  else if (seconds <= 4 * frame)
-    warning =
-      "Only a few frames apart, so the reading is rough. Slow-motion video (120 or 240 fps) is much more accurate.";
+  if (kph > 170 || kph < 25) warning = "Unusual cricket delivery speed. Check distance and timing.";
+  else if (!Number.isFinite(highKph) || (highKph - lowKph) / kph > 0.25)
+    warning = "Timing or distance uncertainty is high. Use clearer, higher-frame-rate footage.";
   return {
     kph: round1(kph),
     mph: round1(kph * MPH_PER_KPH),
@@ -53,6 +74,17 @@ export function ballSpeed(
     seconds: Math.round(seconds * 1000) / 1000,
     warning,
   };
+}
+
+export function reviewableBallSpeed(reading: SpeedReading | null): boolean {
+  return Boolean(
+    reading &&
+    !reading.warning &&
+    Number.isFinite(reading.kph) &&
+    Number.isFinite(reading.highKph) &&
+    reading.kph >= 25 &&
+    reading.kph <= 170,
+  );
 }
 
 /** Infer a nominal media rate only from an internally consistent timestamp sample.
@@ -86,8 +118,10 @@ export function speedsByBowler(
 ) {
   const map = new Map<string, number[]>();
   for (const ball of deliveries) {
-    if (ball.speedKph == null) continue;
-    map.set(ball.bowlerId, [...(map.get(ball.bowlerId) ?? []), ball.speedKph]);
+    if (ball.speedKph == null || !Number.isFinite(ball.speedKph) || ball.speedKph <= 0) continue;
+    const readings = map.get(ball.bowlerId);
+    if (readings) readings.push(ball.speedKph);
+    else map.set(ball.bowlerId, [ball.speedKph]);
   }
   return [...map.entries()]
     .map(([bowlerId, speeds]) => ({
@@ -267,18 +301,22 @@ export function fitBallTrack(candidates: readonly TrackPoint[], metres = 18.9): 
   // 40–170 km/h over the A→B distance, as progress per second.
   const minRate = 40 / 3.6 / metres;
   const maxRate = 170 / 3.6 / metres;
-  const sorted = [...candidates].sort((p, q) => p.time - q.time || p.t - q.t);
+  if (!Number.isFinite(metres) || metres <= 0) return null;
+  const sorted = candidates
+    .filter((p) => Number.isFinite(p.time) && Number.isFinite(p.t) && p.t >= -0.15 && p.t <= 1.15)
+    .sort((p, q) => p.time - q.time || p.t - q.t);
   const n = sorted.length;
   if (n < 4) return null;
   const best = new Array<number>(n).fill(1);
   const from = new Array<number>(n).fill(-1);
   for (let j = 0; j < n; j += 1) {
-    for (let i = 0; i < j; i += 1) {
+    for (let i = j - 1; i >= 0; i -= 1) {
       const gap = sorted[j]!.time - sorted[i]!.time;
-      if (gap <= 0 || gap > 0.25) continue;
+      if (gap > 0.25) break;
+      if (gap <= 0) continue;
       const rate = (sorted[j]!.t - sorted[i]!.t) / gap;
       if (rate < minRate * 0.6 || rate > maxRate * 1.4) continue;
-      if (best[i]! + 1 > best[j]!) {
+      if (best[i]! + 1 > best[j]! || (best[i]! + 1 === best[j]! && i < from[j]!)) {
         best[j] = best[i]! + 1;
         from[j] = i;
       }
@@ -342,4 +380,21 @@ function lineFit(points: readonly TrackPoint[]): { rate: number; intercept: numb
   if (sxx === 0) return null;
   const rate = sxy / sxx;
   return { rate, intercept: meanT - rate * meanTime };
+}
+
+/** Request faster local capture without claiming the browser or encoder achieved it. */
+export const cameraCaptureRates = [30, 60, 120] as const;
+export type CameraCaptureRate = (typeof cameraCaptureRates)[number];
+
+export function speedCaptureProfile(rate: CameraCaptureRate) {
+  return {
+    facingMode: "environment",
+    width: { ideal: rate === 30 ? 1920 : 1280 },
+    height: { ideal: rate === 30 ? 1080 : 720 },
+    frameRate: { ideal: rate },
+  };
+}
+
+export function reportedCaptureRate(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? round1(value) : null;
 }
