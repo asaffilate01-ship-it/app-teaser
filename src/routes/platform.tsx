@@ -91,6 +91,7 @@ import scoreboardShot from "@/assets/shot-ground-score.webp";
 import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPanel";
 import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace";
 import { PlanGate } from "@/components/plan/PlanGate";
+import { PakistanSubscriptionEstimate } from "@/components/plan/PakistanSubscriptionEstimate";
 import { sectionFeature } from "@/lib/plans";
 import { AcademyDashboard } from "@/components/AcademyDashboard";
 import { LeagueStandings } from "@/components/LeagueStandings";
@@ -2725,14 +2726,24 @@ function Operations({
             })}
           </div>
         </Panel>
-        <Panel title="Subscription" description="Entitlements are webhook-driven.">
-          <div className="text-2xl font-bold">{data.subscription?.plan ?? "Starter"}</div>
-          <p className="mt-1 text-xs text-slate-500">
-            {data.subscription?.status ?? "No paid subscription"}
-            {data.subscription?.currentPeriodEnd
-              ? ` · renews ${formatDate(data.subscription.currentPeriodEnd)}`
-              : ""}
-          </p>
+        <Panel title="Subscription" description="Recorded billing status, not proof of payment.">
+          {can(role, "billing.manage") ? (
+            <>
+              <div className="text-2xl font-bold capitalize">
+                {data.subscription?.plan ?? "No paid plan recorded"}
+              </div>
+              <p className="mt-1 text-xs text-slate-400">
+                {data.subscription?.status.replaceAll("_", " ") ?? "No subscription record"}
+                {data.subscription?.currentPeriodEnd
+                  ? ` · ${data.subscription.cancelAtPeriodEnd ? "Ends" : "Period ends"} ${formatDate(data.subscription.currentPeriodEnd)}`
+                  : ""}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-slate-400">
+              Your organisation owner can review subscription and payment records.
+            </p>
+          )}
           {can(role, "billing.manage") && (
             <button
               type="button"
@@ -2743,13 +2754,19 @@ function Operations({
               Manage subscription
             </button>
           )}
-          {!data.subscription?.hasBillingAccount && !priceId && (
+          {can(role, "billing.manage") && !data.subscription?.hasBillingAccount && !priceId && (
             <p className="mt-3 text-[11px] text-amber-200">
-              Online checkout isn't switched on yet.
+              Online checkout isn't switched on yet. Confirm approved payment details with CricLume.
             </p>
           )}
         </Panel>
       </div>
+      {can(role, "billing.manage") && (
+        <PakistanSubscriptionEstimate
+          key={organisationId}
+          ownTeamCount={data.teams.filter((team) => !team.external).length}
+        />
+      )}
       <Panel
         title="Operational evidence"
         description="No invented uptime or backup figures are displayed."
