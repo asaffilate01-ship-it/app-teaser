@@ -31,3 +31,22 @@ export function cameraCloudLabel(state: CameraCloudState): string {
       return "Cloud recording failed; inspect provider";
   }
 }
+
+/** Starting a chargeable recording requires a known, current device status.
+ * Stopping must remain possible when status is unavailable; the server locates
+ * and authorises the active recording independently.
+ */
+export function cameraCloudControls(input: {
+  armed: boolean;
+  verified: boolean;
+  state: unknown;
+  busy: boolean;
+}) {
+  const known = input.state === null || isCameraCloudState(input.state);
+  const verified = input.verified && known;
+  return {
+    canStart: !input.busy && input.armed && verified && !cameraCloudActive(input.state),
+    canStop:
+      !input.busy && (!verified || (cameraCloudActive(input.state) && input.state !== "stopping")),
+  };
+}
