@@ -16,7 +16,7 @@ import {
   parsePendingScorerQueue,
   type PendingScorerQueueEvent,
 } from "@/lib/offline-queue";
-import { readScorerSnapshot } from "@/lib/scorer-storage";
+import { readScorerSnapshot, recoverLatestScorerSnapshot } from "@/lib/scorer-storage";
 
 export interface CloudConfiguration {
   url: string;
@@ -200,19 +200,14 @@ export async function latestCloudEventDevice(matchId: string): Promise<string | 
 
 export async function loadCloudMatchSnapshot(matchId: string): Promise<CricketMatch> {
   const client = getCloudClient();
-  const { data: recentEvents, error: eventError } = await client
-    .from("match_events")
-    .select("payload")
-    .eq("match_id", matchId)
-    .order("sequence", { ascending: false })
-    .limit(50);
-  if (eventError) throw eventError;
-  for (const row of recentEvents ?? []) {
-    const payload = row.payload as Record<string, unknown> | null;
-    const snapshot = payload?.["matchSnapshot"];
-    const validated = readScorerSnapshot(snapshot, matchId);
-    if (validated) return validated;
-  }
+  const snapshot = await recoverLatestScorerSnapshot(matchId, async (before, limit) => {
+    let query = client.from("match_events").select("sequence,payload").eq("match_id", matchId);
+    if (before !== null) query = query.lt("sequence", before);
+    const { data, error } = await query.order("sequence", { ascending: false }).limit(limit);
+    if (error) throw error;
+    return (data ?? []) as { sequence: number; payload: unknown }[];
+  });
+  if (snapshot) return snapshot;
 
   const { data: match, error: matchError } = await client
     .from("matches")

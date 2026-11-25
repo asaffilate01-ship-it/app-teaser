@@ -215,6 +215,66 @@ export function readScorerSnapshot(value: unknown, matchId: string): CricketMatc
   return match.safeParse(value).success ? (value as CricketMatch) : null;
 }
 
+/** Rows are newest first. A malformed explicit snapshot must not fall back to an older score.
+ * Events without snapshots (including fielding-only changes) are not snapshot candidates.
+ */
+export function latestScorerSnapshot(
+  rows: readonly { payload: unknown }[],
+  matchId: string,
+): CricketMatch | null {
+  for (const row of rows) {
+    const payload = row.payload;
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) continue;
+    if (!Object.prototype.hasOwnProperty.call(payload, "matchSnapshot")) continue;
+    const snapshot = readScorerSnapshot(
+      (payload as Record<string, unknown>)["matchSnapshot"],
+      matchId,
+    );
+    if (!snapshot) {
+      throw new Error(
+        "The latest cloud scoring snapshot is invalid. Keep local scores and request scorer review.",
+      );
+    }
+    return snapshot;
+  }
+  return null;
+}
+
+export const scorerSnapshotPageSize = 50;
+export const scorerSnapshotMaxPages = 20;
+
+/** Search past fielding-only events without mistaking a capped page for empty history. */
+export async function recoverLatestScorerSnapshot(
+  matchId: string,
+  loadPage: (
+    beforeSequence: number | null,
+    limit: number,
+  ) => Promise<readonly { sequence: number; payload: unknown }[]>,
+): Promise<CricketMatch | null> {
+  let before: number | null = null;
+  for (let page = 0; page < scorerSnapshotMaxPages; page++) {
+    const rows = await loadPage(before, scorerSnapshotPageSize);
+    if (rows.length > scorerSnapshotPageSize)
+      throw new Error("Invalid cloud scoring history page.");
+    for (const row of rows) {
+      if (
+        !Number.isSafeInteger(row.sequence) ||
+        row.sequence < 1 ||
+        (before !== null && row.sequence >= before)
+      ) {
+        throw new Error("Cloud scoring history is out of order. Request scorer review.");
+      }
+      before = row.sequence;
+    }
+    const snapshot = latestScorerSnapshot(rows, matchId);
+    if (snapshot) return snapshot;
+    if (rows.length < scorerSnapshotPageSize) return null;
+  }
+  throw new Error(
+    "Cloud scoring history exceeds the recovery limit. Keep the local score and request scorer review.",
+  );
+}
+
 /** Validate without discarding unknown fields from a newer scorer version. */
 export function parseScorerMatches(raw: string): CricketMatch[] {
   const value: unknown = JSON.parse(raw);
