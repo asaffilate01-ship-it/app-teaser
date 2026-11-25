@@ -26,6 +26,7 @@ import {
   type CameraCommandCursor,
 } from "@/lib/camera-command-receipts";
 import { storageVideoMimeType } from "@/lib/camera-review";
+import { createRecordingLifecycle } from "@/lib/camera-recording-lifecycle";
 import {
   cameraCaptureRates,
   reportedCaptureRate,
@@ -89,8 +90,7 @@ function MatchCamera() {
   const { configured, session, loading, requestLink } = useCloudSession();
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const recorderRef = useRef<MediaRecorder | null>(null);
-  const recordingRef = useRef(false);
+  const recordingLifecycle = useRef(createRecordingLifecycle<MediaRecorder>()).current;
   const segmentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const uploadQueueRef = useRef<Promise<void>>(Promise.resolve());
   const failedSegmentsRef = useRef<Array<{ blob: Blob; startedAt: string; endedAt: string }>>([]);
@@ -107,6 +107,7 @@ function MatchCamera() {
   const [device, setDevice] = useState<PairedDevice | null>(null);
   const [devices, setDevices] = useState<CameraPresence[]>([]);
   const [recording, setRecording] = useState(false);
+  const [finalizing, setFinalizing] = useState(false);
   const [previewing, setPreviewing] = useState(false);
   const [captureRate, setCaptureRate] = useState<CameraCaptureRate>(30);
   const [actualCaptureRate, setActualCaptureRate] = useState<number | null>(null);
@@ -131,15 +132,15 @@ function MatchCamera() {
   useEffect(
     () => () => {
       previewRequest.current += 1;
-      recordingRef.current = false;
+      const recorder = recordingLifecycle.stop();
       if (segmentTimerRef.current) clearTimeout(segmentTimerRef.current);
-      if (recorderRef.current?.state === "recording") recorderRef.current.stop();
+      if (recorder && recorder.state !== "inactive") recorder.stop();
       liveRef.current?.close();
       void cloudPublisherRef.current?.close();
       streamRef.current?.getTracks().forEach((track) => track.stop());
       presenceRef.current?.leave();
     },
-    [],
+    [recordingLifecycle],
   );
 
   // Request a foreground screen wake lock when the operator starts a preview.
@@ -249,9 +250,7 @@ function MatchCamera() {
       stream.getTracks().forEach((track) => {
         track.addEventListener("ended", () => {
           if (streamRef.current !== stream) return;
-          recordingRef.current = false;
-          if (segmentTimerRef.current) clearTimeout(segmentTimerRef.current);
-          setRecording(false);
+          stopRecording();
           setPreviewing(false);
           setActualCaptureRate(null);
           streamRef.current = null;
@@ -310,7 +309,7 @@ function MatchCamera() {
           ? "Automatic recording armed. Keep this phone awake and its camera preview running."
           : "Automatic recording disarmed.",
       );
-      if (!armed && recordingRef.current) stopRecording();
+      if (!armed && recordingLifecycle.running()) stopRecording();
       if (!armed && cloudPublisherRef.current) void stopCloudPublisher();
       if (!armed && cloudAutoEnabled) void setCloudAutoEnabledByOperator(false);
     }
@@ -431,7 +430,11 @@ function MatchCamera() {
 
   const startRecording = () => {
     const stream = streamRef.current;
-    if (!stream || !device || recordingRef.current) return;
+    if (!stream?.active || !device || recordingLifecycle.running()) return;
+    if (recordingLifecycle.finalizing()) {
+      setMessage("Wait for the previous recording segment to finish before restarting.");
+      return;
+    }
     if (!consent) {
       setMessage("Confirm match recording permission before capture starts.");
       return;
@@ -451,57 +454,78 @@ function MatchCamera() {
       setMessage("This device has no supported WebM or MP4 recording format.");
       return;
     }
+    const generation = recordingLifecycle.begin();
+    if (generation === null) return;
     const beginSegment = () => {
-      if (!recordingRef.current || !stream.active) return;
+      if (!recordingLifecycle.running() || streamRef.current !== stream || !stream.active) {
+        stopRecording();
+        return;
+      }
+      let recorder: MediaRecorder | null = null;
       try {
         const chunks: Blob[] = [];
         const startedAt = new Date().toISOString();
-        const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 3_000_000 });
-        recorder.ondataavailable = (event) => {
-          if (event.data.size > 0) chunks.push(event.data);
+        const segment = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 3_000_000 });
+        recorder = segment;
+        if (!recordingLifecycle.attach(generation, segment)) return;
+        segment.ondataavailable = (event) => {
+          if (event.data.size > 0 && recordingLifecycle.owns(generation, segment))
+            chunks.push(event.data);
         };
-        recorder.onstop = () => {
+        segment.onstop = () => {
+          const result = recordingLifecycle.finish(generation, segment);
+          if (!result.accepted) return;
           if (segmentTimerRef.current) clearTimeout(segmentTimerRef.current);
+          segmentTimerRef.current = null;
           const endedAt = new Date().toISOString();
-          const blob = new Blob(chunks, { type: mimeType });
+          const blob = new Blob(chunks, { type: segment.mimeType || mimeType });
           if (blob.size > 0) {
             uploadQueueRef.current = uploadQueueRef.current
               .catch(() => {})
               .then(() => saveRecording(blob, startedAt, endedAt));
           }
-          if (recordingRef.current && stream.active) beginSegment();
+          setFinalizing(false);
+          if (result.continueRecording) beginSegment();
         };
-        recorder.onerror = () => {
-          recordingRef.current = false;
-          setRecording(false);
-          void updatePresence(false);
+        segment.onerror = () => {
+          if (!recordingLifecycle.owns(generation, segment)) return;
+          stopRecording();
           setMessage("This recording segment failed. Check the camera and retained uploads.");
         };
-        recorder.start(5_000);
-        recorderRef.current = recorder;
+        segment.start(5_000);
         segmentTimerRef.current = setTimeout(() => {
-          if (recorder.state === "recording") recorder.stop();
+          if (recordingLifecycle.owns(generation, segment) && segment.state !== "inactive")
+            segment.stop();
         }, 60_000);
       } catch (error) {
-        recordingRef.current = false;
+        recordingLifecycle.stop();
+        if (recorder) recordingLifecycle.finish(generation, recorder);
         setRecording(false);
+        setFinalizing(false);
+        void updatePresence(false);
         setMessage(
           error instanceof Error ? error.message : "Could not start this camera recording.",
         );
       }
     };
-    recordingRef.current = true;
     setRecording(true);
     beginSegment();
-    if (recordingRef.current) void updatePresence(true);
+    if (recordingLifecycle.running()) void updatePresence(true);
   };
 
   const stopRecording = () => {
-    if (!recordingRef.current) return;
-    recordingRef.current = false;
+    const recorder = recordingLifecycle.stop();
     if (segmentTimerRef.current) clearTimeout(segmentTimerRef.current);
-    if (recorderRef.current?.state === "recording") recorderRef.current.stop();
+    segmentTimerRef.current = null;
     setRecording(false);
+    setFinalizing(recordingLifecycle.finalizing());
+    if (recorder && recorder.state !== "inactive") {
+      try {
+        recorder.stop();
+      } catch {
+        setMessage("Recorder could not stop cleanly. Check camera capture before restarting.");
+      }
+    }
     void updatePresence(false);
   };
 
@@ -513,7 +537,7 @@ function MatchCamera() {
     if (!next) return;
     lastAppliedCommandRef.current = next.cursor;
 
-    const before = recordingRef.current;
+    const before = recordingLifecycle.running();
     let captureThrew = false;
     try {
       if (next.command.action === "stop") {
@@ -532,7 +556,7 @@ function MatchCamera() {
       : reportCameraCommandResult({
           action: next.command.action,
           before,
-          after: recordingRef.current,
+          after: recordingLifecycle.running(),
           consent,
           armed: autoRecordArmed,
           previewing,
@@ -614,7 +638,7 @@ function MatchCamera() {
   }, [roomId, device]);
 
   presenceHeartbeatRef.current = () => {
-    if (device && previewing) void updatePresence(recordingRef.current);
+    if (device && previewing) void updatePresence(recordingLifecycle.running());
   };
   useEffect(() => {
     if (!device) return;
@@ -635,14 +659,14 @@ function MatchCamera() {
       .then(({ data, error }) => {
         if (error || !active) return;
         const match = data?.matches as unknown as { status: string } | undefined;
-        if (match?.status === "live" && !recordingRef.current) startRecording();
+        if (match?.status === "live" && !recordingLifecycle.running()) startRecording();
       });
     return () => {
       active = false;
     };
     // Only arming and camera availability should trigger this initial status check.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device, autoRecordArmed, consent, previewing, roomId]);
+  }, [device, autoRecordArmed, consent, previewing, roomId, recordingLifecycle]);
 
   const updatePresence = async (isRecording: boolean) => {
     if (!device || !presenceRef.current) return;
@@ -874,9 +898,13 @@ function MatchCamera() {
                       {openingPreview ? "Opening camera…" : "Start preview"}
                     </button>
                   ) : !recording ? (
-                    <button onClick={startRecording} className="wicket-bar">
+                    <button
+                      disabled={finalizing || !consent}
+                      onClick={startRecording}
+                      className="wicket-bar disabled:opacity-50"
+                    >
                       <Radio className="size-5" aria-hidden="true" />
-                      Record
+                      {finalizing ? "Finishing recording…" : "Record"}
                     </button>
                   ) : (
                     <button
@@ -1024,7 +1052,7 @@ function MatchCamera() {
               <input
                 type="checkbox"
                 checked={includesJunior}
-                disabled={recording}
+                disabled={recording || finalizing}
                 onChange={(event) => {
                   const junior = event.target.checked;
                   setIncludesJunior(junior);
@@ -1041,7 +1069,7 @@ function MatchCamera() {
               Privacy processing
               <select
                 value={blurMode}
-                disabled={recording}
+                disabled={recording || finalizing}
                 onChange={(event) => setBlurMode(event.target.value as typeof blurMode)}
                 className="scorer-input mt-2 normal-case tracking-normal"
               >
