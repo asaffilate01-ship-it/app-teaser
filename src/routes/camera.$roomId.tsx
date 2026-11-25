@@ -508,8 +508,7 @@ function MatchCamera() {
         };
         segment.start(5_000);
         segmentTimerRef.current = setTimeout(() => {
-          if (!recordingLifecycle.owns(generation, segment) || segment.state === "inactive")
-            return;
+          if (!recordingLifecycle.owns(generation, segment) || segment.state === "inactive") return;
           try {
             segment.stop();
           } catch {
