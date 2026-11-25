@@ -74,9 +74,10 @@ export function syncedDeliverySeconds(
   const deliveryAt = Date.parse(delivery.occurred_at);
   const duration = clipDurationSeconds(clip);
   if (!Number.isFinite(start) || !Number.isFinite(deliveryAt) || duration === null) return null;
-  const cue = (deliveryAt - start - preRollMs) / 1000;
-  if (cue < 0 || cue >= duration) return null;
-  return cue;
+  if (!Number.isFinite(preRollMs) || preRollMs < 0) return null;
+  const moment = (deliveryAt - start) / 1000;
+  if (moment < 0 || moment >= duration) return null;
+  return Math.max(0, moment - preRollMs / 1000);
 }
 
 export function canMarkPrivateHighlight(

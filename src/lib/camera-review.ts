@@ -62,14 +62,29 @@ export function estimateDeliveryCues(
   nowMs: number,
 ): ReplayCue[] {
   const result: ReplayCue[] = [];
+  const timeline = deliveries
+    .map((delivery) => ({ delivery, when: Date.parse(delivery.occurred_at) }))
+    .filter((item) => Number.isFinite(item.when))
+    .sort((a, b) => a.when - b.when);
+  const lowerBound = (time: number) => {
+    let low = 0;
+    let high = timeline.length;
+    while (low < high) {
+      const mid = low + Math.floor((high - low) / 2);
+      if (timeline[mid]!.when < time) low = mid + 1;
+      else high = mid;
+    }
+    return low;
+  };
   for (const clip of clips) {
     if (!isReviewableClip(clip, nowMs) || !clip.ended_at) continue;
     const start = Date.parse(clip.started_at);
     const end = Date.parse(clip.ended_at);
     if (!Number.isFinite(end) || end <= start) continue;
-    for (const delivery of deliveries) {
-      const when = Date.parse(delivery.occurred_at);
-      if (!Number.isFinite(when) || when < start || when >= end) continue;
+    const first = lowerBound(start);
+    const last = lowerBound(end);
+    for (let index = first; index < last; index++) {
+      const { delivery, when } = timeline[index]!;
       const preRollMs = 3_000;
       const seekSeconds = Math.max(0, (when - start - preRollMs) / 1_000);
       result.push({
