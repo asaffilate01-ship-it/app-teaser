@@ -6,6 +6,11 @@ import {
   applyDeliveryTag,
   applyPatches,
   bowlingHandledByOther,
+  collectScoringPatches,
+  pendingScoringPatches,
+  rememberScoringPatch,
+  scoringPatchPageSize,
+  type ScoringPatch,
   dutyAccess,
   readPatchEvent,
   type ScoringTeamMember,
@@ -157,5 +162,105 @@ test("malformed fielding events from the network are ignored", () => {
       payload: { inningsId: "i", bowlerId: "b", end: "Far" },
     })?.kind,
     "bowling.updated",
+  );
+});
+
+test("late fielding notes preserve newer independent fields and ignore duplicate updates", () => {
+  const match = fixture();
+  const innings = currentInnings(match);
+  const deliveryId = innings.deliveries[0]!.id;
+  const base = {
+    kind: "delivery.tagged" as const,
+    occurredAt: innings.deliveries[0]!.recordedAt,
+    inningsId: innings.id,
+    deliveryId,
+  };
+  const ledger = new Map<string, ScoringPatch>();
+  rememberScoringPatch(ledger, { ...base, sequence: 9, tag: { fieldZone: "Cover" } });
+  const changed = rememberScoringPatch(ledger, {
+    ...base,
+    sequence: 4,
+    tag: { fieldZone: "Point", deliveryStyle: "Off spin" },
+  });
+  assert.equal(changed.length, 1);
+  assert.equal(
+    rememberScoringPatch(ledger, { ...base, sequence: 9, tag: { fieldZone: "Point" } }).length,
+    0,
+  );
+  const updated = currentInnings(applyPatches(match, ledger.values())).deliveries[0]!;
+  assert.equal(updated.fieldZone, "Cover");
+  assert.equal(updated.deliveryStyle, "Off spin");
+  assert.equal(updated.batterRuns, 2);
+});
+
+test("derived catch location survives subsequent partial fielding updates", () => {
+  const match = fixture();
+  const innings = currentInnings(match);
+  const ball = innings.deliveries[0]!;
+  ball.dismissal = { type: "caught", batterId: ball.strikerId };
+  const fielderId = match.teams[1].players[1]!.id;
+  const ledger = new Map<string, ScoringPatch>();
+  const base = {
+    kind: "delivery.tagged" as const,
+    occurredAt: ball.recordedAt,
+    inningsId: innings.id,
+    deliveryId: ball.id,
+  };
+  rememberScoringPatch(ledger, {
+    ...base,
+    sequence: 1,
+    tag: { dismissalFielderId: fielderId, fieldZone: "Point" },
+  });
+  rememberScoringPatch(ledger, { ...base, sequence: 2, tag: { fieldZone: "Cover" } });
+  const updated = currentInnings(applyPatches(match, ledger.values())).deliveries[0]!;
+  assert.equal(updated.dismissal?.fielderId, fielderId);
+  assert.equal(updated.dismissal?.catchZone, "Point");
+  assert.equal(updated.fieldZone, "Cover");
+});
+
+test("pending local overlays are derived from the current queue, not pinned to cloud history", () => {
+  const match = fixture();
+  const innings = currentInnings(match);
+  const ball = innings.deliveries[0]!;
+  const events = [
+    {
+      eventType: "delivery.tagged",
+      occurredAt: ball.recordedAt,
+      payload: { inningsId: innings.id, deliveryId: ball.id, tag: { fieldZone: "Cover" } },
+    },
+  ];
+  const accepted = new Map<string, ScoringPatch>();
+  rememberScoringPatch(accepted, {
+    kind: "delivery.tagged",
+    sequence: 1,
+    occurredAt: ball.recordedAt,
+    inningsId: innings.id,
+    deliveryId: ball.id,
+    tag: { fieldZone: "Point" },
+  });
+  const local = applyPatches(match, [...accepted.values(), ...pendingScoringPatches(events)]);
+  assert.equal(currentInnings(local).deliveries[0]!.fieldZone, "Cover");
+  const after = applyPatches(match, [...accepted.values(), ...pendingScoringPatches([])]);
+  assert.equal(currentInnings(after).deliveries[0]!.fieldZone, "Point");
+});
+
+test("fielding history recovery pages past the first batch and rejects repeated cursors", async () => {
+  const rows: ScoringPatch[] = Array.from({ length: scoringPatchPageSize + 1 }, (_, index) => ({
+    kind: "bowling.updated",
+    sequence: index + 1,
+    occurredAt: "2026-11-25T10:00:00Z",
+    inningsId: "innings",
+    bowlerId: "bowler",
+  }));
+  const cursors: number[] = [];
+  const loaded = await collectScoringPatches(0, async (after, limit) => {
+    cursors.push(after);
+    return rows.filter((row) => row.sequence > after).slice(0, limit);
+  });
+  assert.deepEqual(loaded, rows);
+  assert.deepEqual(cursors, [0, scoringPatchPageSize]);
+  await assert.rejects(
+    collectScoringPatches(0, async () => rows.slice(0, scoringPatchPageSize)),
+    /out of order/,
   );
 });
