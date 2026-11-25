@@ -4,13 +4,22 @@ import { CameraReplayWorkbench } from "@/components/CameraReplayWorkbench";
 import { HighlightReel } from "@/components/HighlightReel";
 import { CameraSpeedReview } from "@/components/CameraSpeedReview";
 import {
+  currentReplaySource,
   estimateDeliveryCues,
   privateReplayDeadline,
   replaySeekPosition,
-  sameReplaySource,
   type CameraClip,
 } from "@/lib/camera-review";
 import { loadCameraRoomReview, signedRoomClipUrl } from "@/lib/camera-review-cloud";
+import {
+  makeReviewWindow,
+  nextCueLimit,
+  reviewClipLimit,
+  reviewCuePageSize,
+  reviewDeliveryLimit,
+  reviewWindowMinutes,
+  type ReviewWindow,
+} from "@/lib/replay-window";
 
 interface DeviceLabel {
   id: string;
@@ -25,16 +34,108 @@ type ReplayLibraryProps = {
 };
 
 export function CameraReplayLibrary(props: ReplayLibraryProps) {
-  return <ScopedReplayLibrary key={`${props.roomId}:${props.matchId}`} {...props} />;
+  return <WindowedReplayLibrary key={`${props.roomId}:${props.matchId}`} {...props} />;
 }
 
-function ScopedReplayLibrary({ roomId, matchId, devices }: ReplayLibraryProps) {
+function WindowedReplayLibrary(props: ReplayLibraryProps) {
+  const [reviewWindow, setReviewWindow] = useState<ReviewWindow | null>(null);
+  const [start, setStart] = useState("");
+  const [minutes, setMinutes] = useState(30);
+  const [windowError, setWindowError] = useState("");
+  return (
+    <>
+      <section className="mt-6 space-y-3 rounded-xl border border-white/10 bg-card p-4">
+        <h2 className="font-semibold">Recording time window</h2>
+        <p className="text-xs text-slate-400">
+          Review earlier overs using recorded local timestamps. Each window includes overlapping
+          completed recordings and scored deliveries in that time range.
+        </p>
+        <form
+          className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] lg:grid-cols-[minmax(0,1fr)_auto_auto]"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const next = makeReviewWindow(start, minutes);
+            if (!next) {
+              setWindowError("Choose a valid local start time and window length.");
+              return;
+            }
+            setWindowError("");
+            setReviewWindow(next);
+          }}
+        >
+          <label className="grid min-w-0 gap-1 text-xs">
+            Start (your device time zone)
+            <input
+              type="datetime-local"
+              required
+              value={start}
+              className="min-h-11 w-full min-w-0 rounded-md border border-white/20 bg-card px-2 text-sm"
+              onChange={(event) => setStart(event.target.value)}
+            />
+          </label>
+          <label className="grid gap-1 text-xs">
+            Duration
+            <select
+              value={minutes}
+              className="min-h-11 rounded-md border border-white/20 bg-card px-2 text-sm"
+              onChange={(event) => setMinutes(Number(event.target.value))}
+            >
+              {reviewWindowMinutes.map((value) => (
+                <option key={value} value={value}>
+                  {value} minutes
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="action-primary self-end">Review window</button>
+        </form>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p role="status" className="text-xs text-slate-300">
+            {reviewWindow
+              ? `${new Date(reviewWindow.start).toLocaleString()} – ${new Date(reviewWindow.end).toLocaleString()}`
+              : "Latest available recording segments and deliveries"}
+          </p>
+          {reviewWindow && (
+            <button
+              type="button"
+              className="action-secondary"
+              onClick={() => {
+                setReviewWindow(null);
+                setWindowError("");
+              }}
+            >
+              Return to latest
+            </button>
+          )}
+        </div>
+        {windowError && (
+          <p role="alert" className="text-xs text-amber-200">
+            {windowError}
+          </p>
+        )}
+      </section>
+      <ScopedReplayLibrary
+        key={reviewWindow ? `${reviewWindow.start}:${reviewWindow.end}` : "latest"}
+        {...props}
+        reviewWindow={reviewWindow}
+      />
+    </>
+  );
+}
+
+function ScopedReplayLibrary({
+  roomId,
+  matchId,
+  devices,
+  reviewWindow,
+}: ReplayLibraryProps & { reviewWindow: ReviewWindow | null }) {
   const player = useRef<HTMLVideoElement>(null);
   const [clips, setClips] = useState<CameraClip[]>([]);
   const [deliveries, setDeliveries] = useState<
     Awaited<ReturnType<typeof loadCameraRoomReview>>["deliveries"]
   >([]);
   const [selectedDevice, setSelectedDevice] = useState("all");
+  const [cueLimit, setCueLimit] = useState(reviewCuePageSize);
   const [selectedClipId, setSelectedClipId] = useState<string | null>(null);
   const [source, setSource] = useState("");
   const [deadline, setDeadline] = useState<number | null>(null);
@@ -65,24 +166,24 @@ function ScopedReplayLibrary({ roomId, matchId, devices }: ReplayLibraryProps) {
     setLoading(true);
     setError("");
     try {
-      const result = await loadCameraRoomReview(roomId, matchId);
+      const result = await loadCameraRoomReview(roomId, matchId, reviewWindow);
       if (!mounted.current || request !== loadRequest.current) return;
       const previous = sourceClip.current;
       if (previous) {
         const current = result.clips.find((clip) => clip.id === previous.id);
-        if (
-          !current ||
-          !sameReplaySource(previous, current) ||
-          privateReplayDeadline(current, Date.now()) === null
-        ) {
+        if (!currentReplaySource(previous, current ?? null, Date.now())) {
           closePlayback();
         }
       }
       setClips(result.clips);
       setDeliveries(result.deliveries);
+      setCueLimit(reviewCuePageSize);
+      const limits: string[] = [];
+      if (result.truncatedClips) limits.push(`latest ${reviewClipLimit} recording segments`);
+      if (result.truncatedDeliveries) limits.push(`latest ${reviewDeliveryLimit} deliveries`);
       setMessage(
-        result.clips.length >= 120
-          ? "Showing the latest 120 recording segments; older clips are not loaded."
+        limits.length
+          ? `Showing the ${limits.join(" and ")} in this view. Choose a narrower or earlier time window for more coverage.`
           : "",
       );
     } catch (reason) {
@@ -96,7 +197,7 @@ function ScopedReplayLibrary({ roomId, matchId, devices }: ReplayLibraryProps) {
     } finally {
       if (mounted.current && request === loadRequest.current) setLoading(false);
     }
-  }, [roomId, matchId, closePlayback]);
+  }, [roomId, matchId, reviewWindow, closePlayback]);
 
   useEffect(() => {
     mounted.current = true;
@@ -127,14 +228,16 @@ function ScopedReplayLibrary({ roomId, matchId, devices }: ReplayLibraryProps) {
     const device = devices.find((item) => item.id === id);
     return device ? device.label : "Camera " + id.slice(0, 6);
   };
-  const filteredClips = clips.filter(
-    (clip) => selectedDevice === "all" || clip.device_id === selectedDevice,
+  const filteredClips = useMemo(
+    () => clips.filter((clip) => selectedDevice === "all" || clip.device_id === selectedDevice),
+    [clips, selectedDevice],
   );
+  const clipsById = useMemo(() => new Map(clips.map((clip) => [clip.id, clip])), [clips]);
   const cues = useMemo(
     () => estimateDeliveryCues(filteredClips, deliveries, Date.now()),
     [filteredClips, deliveries],
   );
-  const selectedClip = clips.find((clip) => clip.id === selectedClipId);
+  const selectedClip = selectedClipId ? clipsById.get(selectedClipId) : undefined;
 
   const play = async (clip: CameraClip, seconds = 0) => {
     const request = ++playRequest.current;
@@ -306,6 +409,7 @@ function ScopedReplayLibrary({ roomId, matchId, devices }: ReplayLibraryProps) {
               onChange={(event) => {
                 closePlayback();
                 setSelectedDevice(event.target.value);
+                setCueLimit(reviewCuePageSize);
               }}
               className="min-h-11 rounded-md border border-white/20 bg-card px-3 text-sm"
             >
@@ -357,17 +461,17 @@ function ScopedReplayLibrary({ roomId, matchId, devices }: ReplayLibraryProps) {
             </h3>
             <p className="mt-1 text-xs text-slate-500">
               Matches the scorer’s recorded time with camera segment times; check the footage before
-              relying on the cue.
+              relying on the cue. Showing {Math.min(cueLimit, cues.length)} of {cues.length} cues.
             </p>
             <div className="mt-2 max-h-64 space-y-1 overflow-auto">
-              {cues.slice(0, 100).map((cue) => {
-                const clip = clips.find((item) => item.id === cue.clipId);
+              {cues.slice(0, cueLimit).map((cue) => {
+                const clip = clipsById.get(cue.clipId);
                 if (!clip) return null;
                 return (
                   <button
                     type="button"
                     key={cue.clipId + ":" + cue.deliveryId}
-                    disabled={busy}
+                    disabled={busy || loading}
                     onClick={() => void play(clip, cue.seekSeconds)}
                     className="flex min-h-11 w-full items-center justify-between gap-3 rounded-md bg-white/[0.04] px-3 py-2 text-left text-xs text-slate-200 hover:bg-white/[0.08]"
                   >
@@ -382,6 +486,15 @@ function ScopedReplayLibrary({ roomId, matchId, devices }: ReplayLibraryProps) {
                 </p>
               )}
             </div>
+            {cueLimit < cues.length && (
+              <button
+                type="button"
+                className="action-secondary mt-2 w-full justify-center"
+                onClick={() => setCueLimit((limit) => nextCueLimit(limit, cues.length))}
+              >
+                Show more delivery cues
+              </button>
+            )}
           </div>
         </div>
       </div>
