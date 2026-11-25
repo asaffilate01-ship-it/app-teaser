@@ -91,6 +91,8 @@ function MatchCamera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recordingLifecycle = useRef(createRecordingLifecycle<MediaRecorder>()).current;
+  const recordingIntent = useRef(0);
+  const capturePermission = useRef(false);
   const segmentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const uploadQueueRef = useRef<Promise<void>>(Promise.resolve());
   const failedSegmentsRef = useRef<Array<{ blob: Blob; startedAt: string; endedAt: string }>>([]);
@@ -132,9 +134,15 @@ function MatchCamera() {
   useEffect(
     () => () => {
       previewRequest.current += 1;
+      recordingIntent.current += 1;
+      capturePermission.current = false;
       const recorder = recordingLifecycle.stop();
       if (segmentTimerRef.current) clearTimeout(segmentTimerRef.current);
-      if (recorder && recorder.state !== "inactive") recorder.stop();
+      try {
+        if (recorder && recorder.state !== "inactive") recorder.stop();
+      } catch {
+        // Release the camera tracks even if the browser recorder fails to stop.
+      }
       liveRef.current?.close();
       void cloudPublisherRef.current?.close();
       streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -265,7 +273,8 @@ function MatchCamera() {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
-      if (request !== previewRequest.current) return;
+      if (request !== previewRequest.current || streamRef.current !== stream || !stream.active)
+        return;
       setPreviewing(true);
     } catch (error) {
       if (request !== previewRequest.current) return;
@@ -435,7 +444,7 @@ function MatchCamera() {
       setMessage("Wait for the previous recording segment to finish before restarting.");
       return;
     }
-    if (!consent) {
+    if (!consent || !capturePermission.current) {
       setMessage("Confirm match recording permission before capture starts.");
       return;
     }
@@ -457,7 +466,12 @@ function MatchCamera() {
     const generation = recordingLifecycle.begin();
     if (generation === null) return;
     const beginSegment = () => {
-      if (!recordingLifecycle.running() || streamRef.current !== stream || !stream.active) {
+      if (
+        !recordingLifecycle.running() ||
+        !capturePermission.current ||
+        streamRef.current !== stream ||
+        !stream.active
+      ) {
         stopRecording();
         return;
       }
@@ -494,8 +508,14 @@ function MatchCamera() {
         };
         segment.start(5_000);
         segmentTimerRef.current = setTimeout(() => {
-          if (recordingLifecycle.owns(generation, segment) && segment.state !== "inactive")
+          if (!recordingLifecycle.owns(generation, segment) || segment.state === "inactive")
+            return;
+          try {
             segment.stop();
+          } catch {
+            stopRecording();
+            setMessage("Recording segment could not finish. Check the recorder before restarting.");
+          }
         }, 60_000);
       } catch (error) {
         recordingLifecycle.stop();
@@ -514,6 +534,7 @@ function MatchCamera() {
   };
 
   const stopRecording = () => {
+    recordingIntent.current += 1;
     const recorder = recordingLifecycle.stop();
     if (segmentTimerRef.current) clearTimeout(segmentTimerRef.current);
     segmentTimerRef.current = null;
@@ -650,6 +671,7 @@ function MatchCamera() {
   // check when the preview becomes available. Do not restart after a manual stop.
   useEffect(() => {
     if (!device || !autoRecordArmed || !consent || !previewing) return;
+    const intent = recordingIntent.current;
     let active = true;
     void getCloudClient()
       .from("camera_rooms")
@@ -657,7 +679,8 @@ function MatchCamera() {
       .eq("id", roomId)
       .single()
       .then(({ data, error }) => {
-        if (error || !active) return;
+        if (error || !active || intent !== recordingIntent.current || !capturePermission.current)
+          return;
         const match = data?.matches as unknown as { status: string } | undefined;
         if (match?.status === "live" && !recordingLifecycle.running()) startRecording();
       });
@@ -993,6 +1016,7 @@ function MatchCamera() {
                 checked={consent}
                 onChange={(event) => {
                   const granted = event.target.checked;
+                  capturePermission.current = granted;
                   setConsent(granted);
                   if (!granted) {
                     // Revoking permission stops both capture and outgoing media immediately.
