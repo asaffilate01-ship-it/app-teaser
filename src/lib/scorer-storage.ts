@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { CricketMatch } from "./cricket";
 import { allFieldZones } from "./field-positions.ts";
+import { validateVideoSpeedEvidence } from "./speed-evidence.ts";
 export const scorerStorageKey = "criclume.matches.v1";
 const text = z.string();
 const count = z.number().int().nonnegative();
@@ -51,46 +52,59 @@ const team = z.looseObject({
   name: text,
   players: z.array(z.looseObject({ id: text, name: text })),
 });
-const delivery = z.looseObject({
-  id: text,
-  sequence: count,
-  recordedAt: text,
-  over: count,
-  ball: count,
-  legal: z.boolean(),
-  strikerId: text,
-  nonStrikerId: text,
-  bowlerId: text,
-  end,
-  deliveryStyle: z.enum(["Fast", "Medium", "Off spin", "Leg spin", "Left-arm spin", "Other"]),
-  outcome: z.enum(["hit", "hit-no-run", "left", "missed", "wicket"]),
-  batterRuns: count,
-  extras: z.looseObject({ wide: count, noBall: count, bye: count, legBye: count, penalty: count }),
-  fieldZone: zone,
-  fielderId: text.optional(),
-  note: text.optional(),
-  freeHit: z.boolean().optional(),
-  speedKph: z.number().nonnegative().optional(),
-  wicketPenalty: count.optional(),
-  pitch: point.optional(),
-  beehive: point.optional(),
-  dismissal: z
-    .looseObject({
-      type: z.enum([
-        "bowled",
-        "caught",
-        "lbw",
-        "stumped",
-        "run-out",
-        "hit-wicket",
-        "obstructing-the-field",
-      ]),
-      batterId: text,
-      fielderId: text.optional(),
-      catchZone: zone.optional(),
-    })
-    .optional(),
-});
+const delivery = z
+  .looseObject({
+    id: text,
+    sequence: count,
+    recordedAt: text,
+    over: count,
+    ball: count,
+    legal: z.boolean(),
+    strikerId: text,
+    nonStrikerId: text,
+    bowlerId: text,
+    end,
+    deliveryStyle: z.enum(["Fast", "Medium", "Off spin", "Leg spin", "Left-arm spin", "Other"]),
+    outcome: z.enum(["hit", "hit-no-run", "left", "missed", "wicket"]),
+    batterRuns: count,
+    extras: z.looseObject({
+      wide: count,
+      noBall: count,
+      bye: count,
+      legBye: count,
+      penalty: count,
+    }),
+    fieldZone: zone,
+    fielderId: text.optional(),
+    note: text.optional(),
+    freeHit: z.boolean().optional(),
+    speedKph: z.number().nonnegative().optional(),
+    speedEvidence: z.unknown().optional(),
+    wicketPenalty: count.optional(),
+    pitch: point.optional(),
+    beehive: point.optional(),
+    dismissal: z
+      .looseObject({
+        type: z.enum([
+          "bowled",
+          "caught",
+          "lbw",
+          "stumped",
+          "run-out",
+          "hit-wicket",
+          "obstructing-the-field",
+        ]),
+        batterId: text,
+        fielderId: text.optional(),
+        catchZone: zone.optional(),
+      })
+      .optional(),
+  })
+  .refine((value) => {
+    if (value.speedEvidence === undefined) return true;
+    const evidence = validateVideoSpeedEvidence(value.speedEvidence);
+    return evidence !== null && evidence.kph === value.speedKph;
+  });
 const match = z
   .looseObject({
     id: text.min(1),
