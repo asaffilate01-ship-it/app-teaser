@@ -80,9 +80,7 @@ function publicCard(
         : retired?.kind === "timed-out"
           ? "timed-out"
           : null) ??
-      (retired?.kind === "hurt" && waiting.has(id)
-        ? "retired-hurt"
-        : null);
+      (retired?.kind === "hurt" && waiting.has(id) ? "retired-hurt" : null);
     return {
       no: index + 1,
       ...ref(id),
@@ -235,9 +233,10 @@ export function publicLiveState(
           decision: match.toss.decision,
         }
       : null,
-    striker: active && striker
-      ? { name: "Striker", runs: strikerFigures?.runs ?? 0, balls: strikerFigures?.balls ?? 0 }
-      : null,
+    striker:
+      active && striker
+        ? { name: "Striker", runs: strikerFigures?.runs ?? 0, balls: strikerFigures?.balls ?? 0 }
+        : null,
     nonStriker:
       active && nonStriker && !batterAlone
         ? {
@@ -246,17 +245,25 @@ export function publicLiveState(
             balls: nonStrikerFigures?.balls ?? 0,
           }
         : null,
-    bowler: active && bowler
-      ? {
-          name: "Bowler",
-          wickets: bowlerFigures?.wickets ?? 0,
-          runs: bowlerFigures?.runs ?? 0,
-          overs: bowlerFigures?.overs ?? "0.0",
-        }
-      : null,
+    bowler:
+      active && bowler
+        ? {
+            name: "Bowler",
+            wickets: bowlerFigures?.wickets ?? 0,
+            runs: bowlerFigures?.runs ?? 0,
+            overs: bowlerFigures?.overs ?? "0.0",
+          }
+        : null,
     recent: innings.deliveries.slice(-6).map(publicDeliveryChip),
     // Ground screen pages: name-free cards, per-over totals and the current stand.
-    card: publicCard(innings, batters, bowlers, summary.extras.total, active, options.screenRefSalt),
+    card: publicCard(
+      innings,
+      batters,
+      bowlers,
+      summary.extras.total,
+      active,
+      options.screenRefSalt,
+    ),
     progress: publicProgress(match),
     partnership: publicPartnership(innings),
     // Win predictor inputs: conditions and match shape only, nothing personal.
