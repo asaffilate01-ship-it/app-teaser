@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CirclePlay, Clock3, RefreshCw, ShieldCheck, Video } from "lucide-react";
 import { CameraReplayWorkbench } from "@/components/CameraReplayWorkbench";
 import { HighlightReel } from "@/components/HighlightReel";
+import { CameraSpeedReview } from "@/components/CameraSpeedReview";
 import {
   estimateDeliveryCues,
   privateReplayDeadline,
@@ -275,6 +276,13 @@ function ScopedReplayLibrary({ roomId, matchId, devices }: ReplayLibraryProps) {
                   Close preview
                 </button>
               </div>
+              {deadline !== null && (
+                <CameraSpeedReview
+                  key={selectedClip.id + source}
+                  player={player}
+                  deadline={deadline}
+                />
+              )}
             </>
           ) : (
             <div className="flex aspect-video flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-black/40 p-5 text-center text-sm text-slate-400">
