@@ -261,6 +261,49 @@ export function applyPatches(match: CricketMatch, patches: Iterable<ScoringPatch
     .reduce((current, patch) => applyPatch(current, patch), match);
 }
 
+/** Keep the newest accepted value for each independent field, not merely each ball.
+ * A late partial tag must not erase a newer field or unrelated earlier tags.
+ * Pending local patches are deliberately not stored in this cloud ledger.
+ */
+export function rememberScoringPatch(
+  ledger: Map<string, ScoringPatch>,
+  patch: ScoringPatch,
+): ScoringPatch[] {
+  if (!Number.isSafeInteger(patch.sequence) || patch.sequence < 1) return [];
+  const changed: ScoringPatch[] = [];
+  const remember = (key: string, candidate: ScoringPatch) => {
+    const previous = ledger.get(key);
+    if (previous && previous.sequence >= candidate.sequence) return;
+    ledger.set(key, candidate);
+    changed.push(candidate);
+  };
+  if (patch.kind === "delivery.tagged") {
+    const prefix = JSON.stringify([patch.inningsId, patch.deliveryId]);
+    for (const field of ["fieldZone", "fielderId", "dismissalFielderId", "deliveryStyle"] as const) {
+      const value = patch.tag[field];
+      if (value === undefined) continue;
+      const tag = { [field]: value } as DeliveryTag;
+      remember(prefix + ":" + field, { ...patch, tag });
+    }
+  } else {
+    // Bowler and end form a single assignment for the next delivery.
+    remember(JSON.stringify(["bowler", patch.inningsId]), patch);
+  }
+  return changed;
+}
+
+export function pendingScoringPatches(
+  events: readonly {
+    eventType: string;
+    occurredAt: string;
+    payload: Record<string, unknown>;
+  }[],
+): ScoringPatch[] {
+  return events
+    .map((event) => readPatchEvent({ ...event, sequence: Number.MAX_SAFE_INTEGER }))
+    .filter((patch): patch is ScoringPatch => patch !== null);
+}
+
 /** Balls the fielding scorer still needs to look at: newest first, wickets and untagged first. */
 export function ballsNeedingFielding(match: CricketMatch, limit = 12) {
   const innings = match.innings.at(-1);
