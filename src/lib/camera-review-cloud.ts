@@ -7,46 +7,70 @@ import {
 } from "@/lib/camera-review";
 import type { ReelDelivery } from "@/lib/highlight-reel";
 
+import {
+  boundedReviewRows,
+  reviewClipLimit,
+  reviewDeliveryLimit,
+  validReviewWindow,
+  type ReviewWindow,
+} from "@/lib/replay-window";
+
 export interface RoomReviewData {
   clips: CameraClip[];
   deliveries: ReelDelivery[];
+  truncatedClips: boolean;
+  truncatedDeliveries: boolean;
 }
 
 export async function loadCameraRoomReview(
   roomId: string,
   matchId: string,
+  window: ReviewWindow | null = null,
 ): Promise<RoomReviewData> {
+  if (window && !validReviewWindow(window)) throw new Error("Invalid review time window.");
   const client = getCloudClient();
+  const now = new Date().toISOString();
+  let assetsQuery = client
+    .from("video_assets")
+    .select(
+      "id,device_id,started_at,ended_at,storage_path,status,recording_consent,retention_expires_at,blur_mode",
+    )
+    .eq("room_id", roomId)
+    .eq("recording_consent", "granted")
+    .in("status", ["uploaded", "processing", "ready"])
+    .gt("retention_expires_at", now);
+  let ballsQuery = client
+    .from("deliveries")
+    .select(
+      "id,sequence,over_number,ball_in_over,occurred_at,total_runs,wicket,batter_runs,striker_id,bowler_id",
+    )
+    .eq("match_id", matchId)
+    .is("superseded_by", null)
+    .is("voided_by_event_id", null);
+  if (window) {
+    // A completed segment can begin before the window but still overlap it.
+    assetsQuery = assetsQuery.lt("started_at", window.end).gt("ended_at", window.start);
+    ballsQuery = ballsQuery.gte("occurred_at", window.start).lt("occurred_at", window.end);
+  }
   const [assets, balls] = await Promise.all([
-    client
-      .from("video_assets")
-      .select(
-        "id,device_id,started_at,ended_at,storage_path,status,recording_consent,retention_expires_at,blur_mode",
-      )
-      .eq("room_id", roomId)
-      .eq("recording_consent", "granted")
-      .in("status", ["uploaded", "processing", "ready"])
-      .gt("retention_expires_at", new Date().toISOString())
+    assetsQuery
       .order("started_at", { ascending: false })
-      .limit(120),
-    client
-      .from("deliveries")
-      .select(
-        "id,sequence,over_number,ball_in_over,occurred_at,total_runs,wicket,batter_runs,striker_id,bowler_id",
-      )
-      .eq("match_id", matchId)
-      .is("superseded_by", null)
-      .is("voided_by_event_id", null)
+      .order("id")
+      .limit(reviewClipLimit + 1),
+    ballsQuery
       .order("sequence", { ascending: false })
-      .limit(250),
+      .order("id")
+      .limit(reviewDeliveryLimit + 1),
   ]);
   if (assets.error) throw assets.error;
   if (balls.error) throw balls.error;
+  const clips = boundedReviewRows((assets.data ?? []) as CameraClip[], reviewClipLimit);
+  const deliveries = boundedReviewRows((balls.data ?? []) as ReelDelivery[], reviewDeliveryLimit);
   return {
-    clips: ((assets.data ?? []) as CameraClip[]).filter((clip) =>
-      isReviewableClip(clip, Date.now()),
-    ),
-    deliveries: (balls.data ?? []) as ReelDelivery[],
+    clips: clips.rows.filter((clip) => isReviewableClip(clip, Date.now())),
+    deliveries: deliveries.rows,
+    truncatedClips: clips.truncated,
+    truncatedDeliveries: deliveries.truncated,
   };
 }
 
