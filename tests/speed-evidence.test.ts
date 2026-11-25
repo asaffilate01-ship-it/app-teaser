@@ -74,7 +74,8 @@ test("reviewed delivery evidence survives backup and cloud snapshot parsing", ()
   assert.ok(evidence);
   const next = setDeliverySpeed(match, deliveryId, evidence.kph, evidence);
   assert.deepEqual(currentInnings(next).deliveries[0]!.speedEvidence, evidence);
-  assert.deepEqual(parseScorerBackup(JSON.stringify(next)), [next]);
+  const serialized = JSON.parse(JSON.stringify(next));
+  assert.deepEqual(parseScorerBackup(JSON.stringify(next)), [serialized]);
   assert.deepEqual(readScorerSnapshot(next, match.id), next);
   assert.equal(setDeliverySpeed(match, deliveryId, 120, evidence), match);
   assert.equal(setDeliverySpeed(next, deliveryId, NaN), next);
