@@ -8,6 +8,7 @@ import {
   type RainMethod,
   type RainState,
 } from "./rain-rules.ts";
+import { validateVideoSpeedEvidence, type VideoSpeedEvidence } from "./speed-evidence.ts";
 export type MatchFormat =
   | "T10"
   | "T20"
@@ -150,6 +151,8 @@ export interface Delivery {
   freeHit?: boolean | undefined;
   /** Average speed down the pitch, measured from a video clip (km/h). */
   speedKph?: number | undefined;
+  /** Reviewed segment-average measurement evidence, not radar-certified release speed. */
+  speedEvidence?: VideoSpeedEvidence | undefined;
   /** Pairs cricket: runs taken off the batting side for this wicket. */
   wicketPenalty?: number | undefined;
   /** Where the ball pitched (y: 0 at the batter's stumps, 1 = halfway down the pitch). */
@@ -1376,16 +1379,21 @@ export function setDeliverySpeed(
   match: CricketMatch,
   deliveryId: string,
   kph: number | null,
+  evidence?: VideoSpeedEvidence,
 ): CricketMatch {
+  if (kph !== null && (!Number.isFinite(kph) || kph <= 0)) return match;
+  const rounded = kph === null ? null : Math.round(kph * 10) / 10;
+  const reviewed = evidence === undefined ? undefined : validateVideoSpeedEvidence(evidence);
+  if (evidence !== undefined && (!reviewed || reviewed.kph !== rounded)) return match;
   let found = false;
   const innings = match.innings.map((item) => ({
     ...item,
     deliveries: item.deliveries.map((delivery) => {
       if (delivery.id !== deliveryId) return delivery;
       found = true;
-      const { speedKph: _old, ...rest } = delivery;
-      return kph != null && Number.isFinite(kph) && kph > 0
-        ? { ...rest, speedKph: Math.round(kph * 10) / 10 }
+      const { speedKph: _old, speedEvidence: _evidence, ...rest } = delivery;
+      return rounded !== null
+        ? { ...rest, speedKph: rounded, ...(reviewed ? { speedEvidence: reviewed } : {}) }
         : rest;
     }),
   }));
@@ -1624,6 +1632,7 @@ export function correctDelivery(
       sequence: original.sequence,
       recordedAt: original.recordedAt,
       ...(original.speedKph != null ? { speedKph: original.speedKph } : {}),
+      ...(original.speedEvidence ? { speedEvidence: original.speedEvidence } : {}),
     };
     replay = {
       ...next,
