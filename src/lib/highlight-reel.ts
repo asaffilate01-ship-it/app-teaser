@@ -73,12 +73,20 @@ export function buildHighlightReel(input: {
 }): ReelItem[] {
   const pre = input.preRollMs ?? 5_000;
   const post = input.postRollMs ?? 5_000;
+  if (!Number.isFinite(pre) || !Number.isFinite(post) || pre < 0 || post < 0) return [];
   const usable = input.clips
-    .filter((clip) => isReviewableClip(clip, input.nowMs) && clipDurationSeconds(clip) !== null)
+    .flatMap((clip) => {
+      if (!isReviewableClip(clip, input.nowMs)) return [];
+      const start = clipClockStart(clip, input.offsets?.[clip.id] ?? 0);
+      const duration = clipDurationSeconds(clip);
+      if (!Number.isFinite(start) || duration === null) return [];
+      return [{ clip, start, duration }];
+    })
     .sort(
       (a, b) =>
-        Number(b.device_id === input.preferDeviceId) -
-          Number(a.device_id === input.preferDeviceId) || a.started_at.localeCompare(b.started_at),
+        Number(b.clip.device_id === input.preferDeviceId) -
+          Number(a.clip.device_id === input.preferDeviceId) ||
+        a.clip.started_at.localeCompare(b.clip.started_at),
     );
   const items: ReelItem[] = [];
   const ordered = [...input.deliveries].sort((a, b) => a.sequence - b.sequence);
@@ -87,9 +95,7 @@ export function buildHighlightReel(input: {
     if (!tone) continue;
     const at = Date.parse(delivery.occurred_at);
     if (!Number.isFinite(at)) continue;
-    for (const clip of usable) {
-      const start = clipClockStart(clip, input.offsets?.[clip.id] ?? 0);
-      const duration = clipDurationSeconds(clip)!;
+    for (const { clip, start, duration } of usable) {
       const moment = (at - start) / 1000;
       if (!Number.isFinite(moment) || moment < 0 || moment >= duration) continue;
       const startSeconds = Math.max(0, moment - pre / 1000);
