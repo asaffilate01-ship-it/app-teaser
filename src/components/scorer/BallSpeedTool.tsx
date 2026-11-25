@@ -846,7 +846,9 @@ function ScopedBallSpeedTool({ match, onSave }: BallSpeedToolProps) {
 
       {savedMeasurements.length > 0 && (
         <details className="space-y-3 rounded-xl border border-border p-3">
-          <summary className="cursor-pointer text-sm font-semibold">Recent saved speed evidence</summary>
+          <summary className="cursor-pointer text-sm font-semibold">
+            Recent saved speed evidence
+          </summary>
           {savedMeasurements.map((ball) => {
             const saved = validateVideoSpeedEvidence(ball.speedEvidence);
             const valid = saved !== null && saved.kph === ball.speedKph;
@@ -859,13 +861,16 @@ function ScopedBallSpeedTool({ match, onSave }: BallSpeedToolProps) {
                   <>
                     <p>
                       {saved.method === "manual" ? "Manual timing" : "Reviewed motion track"} ·{" "}
-                      {saved.distanceMetres} m ± {saved.distanceErrorMetres} m · {saved.mediaFps} fps
+                      {saved.distanceMetres} m ± {saved.distanceErrorMetres} m · {saved.mediaFps}{" "}
+                      fps
                     </p>
                     <p className="text-muted-foreground">
                       {saved.firstSeconds.toFixed(3)}–{saved.secondSeconds.toFixed(3)} s · time
                       scale {saved.timeScale} · range {saved.lowKph}–{saved.highKph} km/h
                     </p>
-                    <p className="text-muted-foreground">Reviewed video segment-average estimate.</p>
+                    <p className="text-muted-foreground">
+                      Reviewed video segment-average estimate.
+                    </p>
                   </>
                 ) : (
                   <p className="text-muted-foreground">
@@ -879,7 +884,9 @@ function ScopedBallSpeedTool({ match, onSave }: BallSpeedToolProps) {
       )}
 
       <details className="rounded-xl border border-border p-3 text-xs">
-        <summary className="cursor-pointer text-sm font-semibold">Speed measurement questions</summary>
+        <summary className="cursor-pointer text-sm font-semibold">
+          Speed measurement questions
+        </summary>
         <div className="mt-3 space-y-3">
           <div>
             <p className="font-semibold">Why does the speed differ from radar?</p>
@@ -891,15 +898,15 @@ function ScopedBallSpeedTool({ match, onSave }: BallSpeedToolProps) {
           <div>
             <p className="font-semibold">What if I filmed in slow motion?</p>
             <p className="text-muted-foreground">
-              Confirm the original capture and export timebase. An eight-times slowed export
-              uses one-eighth of its presentation duration as elapsed real time.
+              Confirm the original capture and export timebase. An eight-times slowed export uses
+              one-eighth of its presentation duration as elapsed real time.
             </p>
           </div>
           <div>
             <p className="font-semibold">Does the displayed range prove accuracy?</p>
             <p className="text-muted-foreground">
-              No. The range includes assumed frame timing and entered distance error only.
-              Camera alignment, blur and tracking bias require separate field validation.
+              No. The range includes assumed frame timing and entered distance error only. Camera
+              alignment, blur and tracking bias require separate field validation.
             </p>
           </div>
         </div>
