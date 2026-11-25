@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { Calculator } from "lucide-react";
-import {
-  pakistanSubscriptionEstimate,
-  type PakistanPaidPlan,
-} from "@/lib/subscription-estimate";
+import { pakistanSubscriptionEstimate, type PakistanPaidPlan } from "@/lib/subscription-estimate";
 
 const pkr = (amount: number) => "PKR " + amount.toLocaleString("en-PK");
 
@@ -16,7 +13,8 @@ export function PakistanSubscriptionEstimate({ ownTeamCount }: { ownTeamCount: n
     <section className="space-y-4 rounded-xl border border-white/10 p-4">
       <div>
         <h3 className="flex items-center gap-2 font-semibold">
-          <Calculator className="size-4 text-gold" aria-hidden="true" /> Pakistan annual plan estimate
+          <Calculator className="size-4 text-gold" aria-hidden="true" /> Pakistan annual plan
+          estimate
         </h3>
         <p className="mt-1 text-xs text-slate-400">
           Choose the total number of teams to be covered. League prices apply progressively to each
@@ -86,9 +84,9 @@ export function PakistanSubscriptionEstimate({ ownTeamCount }: { ownTeamCount: n
         </p>
       )}
       <p className="text-xs leading-5 text-slate-400">
-        Estimate only, not an invoice or payment request. Confirm the final plan, receiving
-        account, payment reference and activation with CricLume before sending money. Club member
-        fee payments are separate from the CricLume platform subscription.
+        Estimate only, not an invoice or payment request. Confirm the final plan, receiving account,
+        payment reference and activation with CricLume before sending money. Club member fee
+        payments are separate from the CricLume platform subscription.
       </p>
     </section>
   );
