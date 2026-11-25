@@ -2838,7 +2838,13 @@ function MatchSplits({ match }: { match: CricketMatch }) {
   );
 }
 
-function Analysis({ match, showSpeedInsights }: { match: CricketMatch; showSpeedInsights: boolean }) {
+function Analysis({
+  match,
+  showSpeedInsights,
+}: {
+  match: CricketMatch;
+  showSpeedInsights: boolean;
+}) {
   const innings = currentInnings(match);
   const summary = summarizeInnings(innings, match.settings.ballsPerOver);
   const missingZones = innings.deliveries.filter(
