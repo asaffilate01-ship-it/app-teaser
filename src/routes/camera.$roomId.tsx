@@ -843,7 +843,8 @@ function MatchCamera() {
                       {cameraCaptureRates.map((rate) => (
                         <option key={rate} value={rate}>
                           {rate === 30 ? "Standard match video" : "Experimental fast-ball capture"}
-                          {" · "}{rate} fps requested
+                          {" · "}
+                          {rate} fps requested
                         </option>
                       ))}
                     </select>
