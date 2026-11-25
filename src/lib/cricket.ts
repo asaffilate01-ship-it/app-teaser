@@ -371,7 +371,8 @@ export const findPlayer = (match: CricketMatch, id: string) =>
 const extraRuns = (extras: Extras) =>
   extras.wide + extras.noBall + extras.bye + extras.legBye + extras.penalty;
 
-export const deliveryRuns = (delivery: Delivery) => delivery.batterRuns + extraRuns(delivery.extras);
+export const deliveryRuns = (delivery: Delivery) =>
+  delivery.batterRuns + extraRuns(delivery.extras);
 
 export const isBowlerWicket = (type: DismissalType) =>
   !["run-out", "obstructing-the-field"].includes(type);
