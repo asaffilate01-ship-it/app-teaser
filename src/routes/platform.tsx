@@ -2609,8 +2609,8 @@ function BillingReturnNotice({
           </p>
         ) : (
           <p className="mt-2 text-xs text-amber-200">
-            This return does not verify a subscription for the selected workspace. Check the
-            correct organisation with an authorised billing owner.
+            This return does not verify a subscription for the selected workspace. Check the correct
+            organisation with an authorised billing owner.
           </p>
         )}
       </div>
