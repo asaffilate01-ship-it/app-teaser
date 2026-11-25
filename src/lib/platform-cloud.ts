@@ -1,6 +1,7 @@
 import type { RealtimeChannel, User } from "@supabase/supabase-js";
 import { externalTeams } from "./external-teams.ts";
 import { verifiedBillingRedirect } from "./billing-redirect.ts";
+import { billingReturnUrl } from "./billing-return.ts";
 export { externalTeams } from "./external-teams.ts";
 import { getCloudClient, invokePlatformFunction } from "@/lib/cloud";
 import type { CompetitionRules, PlatformRole, PointAdjustment } from "@/lib/platform";
@@ -999,8 +1000,8 @@ export async function createCheckout(input: {
   const result = await invokePlatformFunction<{ url?: string }>("create-checkout-session", {
     organisationId: input.organisationId,
     priceId: input.priceId,
-    successUrl: `${window.location.origin}/platform?billing=success`,
-    cancelUrl: `${window.location.origin}/platform?billing=cancelled`,
+    successUrl: billingReturnUrl(window.location.origin, input.organisationId, "success"),
+    cancelUrl: billingReturnUrl(window.location.origin, input.organisationId, "cancelled"),
   });
   return verifiedBillingRedirect(result.url, "checkout");
 }
@@ -1008,7 +1009,7 @@ export async function createCheckout(input: {
 export async function openBillingPortal(organisationId: string) {
   const r = await invokePlatformFunction<{ url: string }>("create-billing-portal", {
     organisationId,
-    returnUrl: window.location.origin + "/platform",
+    returnUrl: billingReturnUrl(window.location.origin, organisationId, "portal"),
   });
   return verifiedBillingRedirect(r.url, "portal");
 }
