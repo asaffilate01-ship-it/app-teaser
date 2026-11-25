@@ -89,6 +89,8 @@ export interface DeliveryTag {
   /** Catcher / run-out fielder on a wicket ball. */
   dismissalFielderId?: string | null | undefined;
   deliveryStyle?: DeliveryStyle | undefined;
+  /** Internal derived catch location used when compacting accepted patches. */
+  catchZone?: FieldZone | undefined;
 }
 
 export type ScoringPatch =
@@ -125,7 +127,7 @@ const styles: readonly DeliveryStyle[] = [
 ];
 
 function readTag(value: unknown): DeliveryTag | null {
-  if (!value || typeof value !== "object") return null;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const raw = value as Record<string, unknown>;
   const tag: DeliveryTag = {};
   if (raw["fieldZone"] !== undefined) {
@@ -152,9 +154,18 @@ export function readPatchEvent(event: {
   occurredAt?: string | undefined;
   payload: Record<string, unknown>;
 }): ScoringPatch | null {
+  if (
+    !Number.isSafeInteger(event.sequence) ||
+    event.sequence < 1 ||
+    !event.payload ||
+    typeof event.payload !== "object" ||
+    Array.isArray(event.payload)
+  )
+    return null;
   const inningsId = event.payload["inningsId"];
   if (typeof inningsId !== "string" || !inningsId) return null;
   const occurredAt = event.occurredAt ?? new Date(0).toISOString();
+  if (!Number.isFinite(Date.parse(occurredAt))) return null;
   if (event.eventType === "delivery.tagged") {
     const deliveryId = event.payload["deliveryId"];
     const tag = readTag(event.payload["tag"]);
@@ -215,6 +226,9 @@ export function applyDeliveryTag(
           ? { catchZone: tag.fieldZone }
           : {}),
       };
+    }
+    if (next.dismissal?.type === "caught" && tag.catchZone !== undefined) {
+      next.dismissal = { ...next.dismissal, catchZone: tag.catchZone };
     }
     return next;
   });
@@ -284,6 +298,13 @@ export function rememberScoringPatch(
       if (value === undefined) continue;
       const tag = { [field]: value } as DeliveryTag;
       remember(prefix + ":" + field, { ...patch, tag });
+    }
+    if (
+      patch.tag.dismissalFielderId !== undefined &&
+      patch.tag.fieldZone &&
+      patch.tag.fieldZone !== "Not recorded"
+    ) {
+      remember(prefix + ":catchZone", { ...patch, tag: { catchZone: patch.tag.fieldZone } });
     }
   } else {
     // Bowler and end form a single assignment for the next delivery.
