@@ -1,5 +1,6 @@
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import {
+  collectScoringPatches,
   isScoringDuty,
   patchEventTypes,
   readPatchEvent,
@@ -840,25 +841,27 @@ export async function loadScoringPatches(
   matchId: string,
   afterSequence = 0,
 ): Promise<ScoringPatch[]> {
-  const { data, error } = await getCloudClient()
-    .from("match_events")
-    .select("sequence,event_type,payload,occurred_at")
-    .eq("match_id", matchId)
-    .in("event_type", [...patchEventTypes])
-    .gt("sequence", afterSequence)
-    .order("sequence", { ascending: true })
-    .limit(1000);
-  if (error) throw error;
-  return ((data as Record<string, unknown>[] | null) ?? [])
-    .map((row) =>
-      readPatchEvent({
+  return collectScoringPatches(afterSequence, async (after, limit) => {
+    const { data, error } = await getCloudClient()
+      .from("match_events")
+      .select("sequence,event_type,payload,occurred_at")
+      .eq("match_id", matchId)
+      .in("event_type", [...patchEventTypes])
+      .gt("sequence", after)
+      .order("sequence", { ascending: true })
+      .limit(limit);
+    if (error) throw error;
+    return ((data as Record<string, unknown>[] | null) ?? []).map((row) => {
+      const patch = readPatchEvent({
         eventType: String(row["event_type"]),
         sequence: Number(row["sequence"]),
         occurredAt: String(row["occurred_at"]),
         payload: (row["payload"] ?? {}) as Record<string, unknown>,
-      }),
-    )
-    .filter((patch): patch is ScoringPatch => patch !== null);
+      });
+      if (!patch) throw new Error("Invalid accepted fielding event. Request scorer review.");
+      return patch;
+    });
+  });
 }
 
 /** Adds a new player to a team's squad for this match (scorers only; their own club's teams). Returns the player id. */
