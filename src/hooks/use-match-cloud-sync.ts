@@ -55,6 +55,7 @@ export function useMatchCloudSync(
   const [status, setStatus] = useState<ScorerSyncStatus>(enabled ? "connecting" : "local");
   const [pendingCount, setPendingCount] = useState(0);
   const [queueUnreadable, setQueueUnreadable] = useState(false);
+  const [patchRecovery, setPatchRecovery] = useState<"checking" | "ready" | "error">("checking");
   const notePending = useCallback((matchId: string): number | null => {
     const count = safeQueueCount(matchId);
     if (count === null) {
@@ -78,6 +79,8 @@ export function useMatchCloudSync(
   useEffect(() => {
     if (!enabled || !cloudMatchId || pausedForReview) return;
     let active = true;
+    let recoveryRequest = 0;
+    setPatchRecovery("checking");
     if (notePending(cloudMatchId) === null) return;
     if (!navigator.onLine) setStatus("offline");
     const unsubscribe = subscribeToMatchEvents(
@@ -136,11 +139,17 @@ export function useMatchCloudSync(
         if (!active) return;
         if (next === "SUBSCRIBED" && onRemotePatchRef.current) {
           // Catch up on fielding notes and bowler changes made while this phone wasn't listening.
+          const request = ++recoveryRequest;
+          setPatchRecovery("checking");
           void loadScoringPatches(cloudMatchId, 0)
             .then((patches) => {
-              if (active) patches.forEach((patch) => onRemotePatchRef.current?.(patch));
+              if (!active || request !== recoveryRequest) return;
+              patches.forEach((patch) => onRemotePatchRef.current?.(patch));
+              setPatchRecovery("ready");
             })
-            .catch(() => undefined);
+            .catch(() => {
+              if (active && request === recoveryRequest) setPatchRecovery("error");
+            });
         }
         const waiting = notePending(cloudMatchId);
         if (waiting === null) return;
@@ -322,11 +331,15 @@ export function useMatchCloudSync(
     [cloudMatchId, deviceId, enabled, notePending, pausedForReview, queueUnreadable],
   );
 
-  const visibleStatus = pausedForReview
+  const visibleStatus: ScorerSyncStatus = pausedForReview
     ? "conflict"
     : status === "synced" && pendingCount > 0
       ? "queued"
-      : status;
+      : status === "synced" && enabled && onRemotePatch && patchRecovery !== "ready"
+        ? patchRecovery === "error"
+          ? "error"
+          : "connecting"
+        : status;
   return {
     enabled,
     status: visibleStatus,
