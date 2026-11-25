@@ -88,8 +88,16 @@ export function useMatchCloudSync(
           latestRemoteSequence.current = { matchId: cloudMatchId, sequence: 0 };
         }
         // Ignore older realtime deliveries that could roll back the visible score.
-        if (event.sequence <= latestRemoteSequence.current.sequence) return;
-        latestRemoteSequence.current.sequence = event.sequence;
+        if (!Number.isSafeInteger(event.sequence) || event.sequence < 1) {
+          setStatus("error");
+          return;
+        }
+        const older = event.sequence <= latestRemoteSequence.current.sequence;
+        if (older && !isPatchEventType(event.eventType)) return;
+        latestRemoteSequence.current.sequence = Math.max(
+          latestRemoteSequence.current.sequence,
+          event.sequence,
+        );
         setLastSequence((sequence) => Math.max(sequence, event.sequence));
         const waiting = notePending(cloudMatchId);
         if (waiting === null) return;
@@ -98,7 +106,11 @@ export function useMatchCloudSync(
           // Fielding notes and bowler changes never replace the score, so they apply even
           // while this phone still has balls to send.
           const patch = readPatchEvent(event);
-          if (patch && event.deviceId !== deviceId) onRemotePatchRef.current?.(patch);
+          if (!patch) {
+            setStatus("error");
+            return;
+          }
+          onRemotePatchRef.current?.(patch);
           setStatus(!navigator.onLine ? "offline" : hasPending ? "queued" : "synced");
           return;
         }
@@ -283,7 +295,7 @@ export function useMatchCloudSync(
   /** Bowling & fielding notes: no score snapshot, so they can never overwrite the ball scorer's work. */
   const publishPatch = useCallback(
     (eventType: "delivery.tagged" | "bowling.updated", payload: Record<string, unknown>) => {
-      if (!enabled || !cloudMatchId || queueUnreadable) return;
+      if (!enabled || !cloudMatchId || pausedForReview || queueUnreadable) return false;
       const event: PendingMatchEvent = {
         matchId: cloudMatchId,
         clientEventId: crypto.randomUUID(),
@@ -294,18 +306,20 @@ export function useMatchCloudSync(
       };
       try {
         queuePendingEvent(event);
-        if (notePending(cloudMatchId) === null) return;
-        if (!navigator.onLine) {
-          setStatus("offline");
-          return;
-        }
-        setStatus("connecting");
-        kick.current();
       } catch {
         if (notePending(cloudMatchId) !== null) setStatus(navigator.onLine ? "error" : "offline");
+        return false;
       }
+      if (notePending(cloudMatchId) === null) return true;
+      if (!navigator.onLine) {
+        setStatus("offline");
+        return true;
+      }
+      setStatus("connecting");
+      kick.current();
+      return true;
     },
-    [cloudMatchId, deviceId, enabled, notePending, queueUnreadable],
+    [cloudMatchId, deviceId, enabled, notePending, pausedForReview, queueUnreadable],
   );
 
   const visibleStatus = pausedForReview
