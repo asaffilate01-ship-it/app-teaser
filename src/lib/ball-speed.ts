@@ -40,7 +40,9 @@ export function ballSpeed(
   distanceError = 0,
 ): SpeedReading | null {
   if (
-    ![releaseSeconds, arrivalSeconds, metres, fps, timeScale, distanceError].every(Number.isFinite) ||
+    ![releaseSeconds, arrivalSeconds, metres, fps, timeScale, distanceError].every(
+      Number.isFinite,
+    ) ||
     releaseSeconds < 0 ||
     arrivalSeconds <= releaseSeconds ||
     metres <= 0 ||
@@ -77,11 +79,11 @@ export function ballSpeed(
 export function reviewableBallSpeed(reading: SpeedReading | null): boolean {
   return Boolean(
     reading &&
-      !reading.warning &&
-      Number.isFinite(reading.kph) &&
-      Number.isFinite(reading.highKph) &&
-      reading.kph >= 25 &&
-      reading.kph <= 170,
+    !reading.warning &&
+    Number.isFinite(reading.kph) &&
+    Number.isFinite(reading.highKph) &&
+    reading.kph >= 25 &&
+    reading.kph <= 170,
   );
 }
 
