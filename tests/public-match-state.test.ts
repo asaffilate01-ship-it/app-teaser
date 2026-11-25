@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createMatch, currentInnings, recordDelivery, retireBatter } from "../src/lib/cricket.ts";
+import {
+  createMatch,
+  currentInnings,
+  endCurrentInnings,
+  recordDelivery,
+  retireBatter,
+} from "../src/lib/cricket.ts";
 import { publicLiveState } from "../src/lib/public-match-state.ts";
 
 function privateMatch() {
@@ -144,4 +150,65 @@ test("retired out is counted in the chart and resets the current partnership", (
   assert.equal(live["wickets"], 1);
   assert.deepEqual(progress[0]?.overs, [[4, 1]]);
   assert.deepEqual(live["partnership"], { runs: 0, balls: 0 });
+});
+
+test("innings breaks retain scorecard figures without presenting active batters or bowlers", () => {
+  const original = privateMatch();
+  const innings = currentInnings(original);
+  const scored = recordDelivery(original, {
+    strikerId: innings.strikerId,
+    nonStrikerId: innings.nonStrikerId,
+    bowlerId: innings.bowlerId,
+    end: innings.end,
+    deliveryStyle: "Fast",
+    outcome: "hit",
+    batterRuns: 4,
+  });
+  const live = publicLiveState(endCurrentInnings(scored));
+  assert.equal(live["runs"], 4);
+  assert.equal(live["striker"], null);
+  assert.equal(live["nonStriker"], null);
+  assert.equal(live["bowler"], null);
+  assert.equal(live["message"], "Innings break");
+  const card = live["card"] as {
+    batting: { runs: number; atCrease: boolean; onStrike: boolean }[];
+    bowling: { runs: number; current: boolean }[];
+  };
+  assert.equal(card.batting[0]?.runs, 4);
+  assert.equal(card.bowling[0]?.runs, 4);
+  assert.ok(card.batting.every((row) => !row.atCrease && !row.onStrike));
+  assert.ok(card.bowling.every((row) => !row.current));
+});
+
+test("public recent deliveries include extras and do not misclassify five runs as a boundary", () => {
+  let match = privateMatch();
+  const add = (batterRuns: number, extras: Record<string, number> = {}) => {
+    const innings = currentInnings(match);
+    match = recordDelivery(match, {
+      strikerId: innings.strikerId,
+      nonStrikerId: innings.nonStrikerId,
+      bowlerId: innings.bowlerId,
+      end: innings.end,
+      deliveryStyle: "Fast",
+      outcome: "hit",
+      batterRuns,
+      extras,
+    });
+  };
+  add(0, { wide: 2 });
+  add(4, { noBall: 1 });
+  add(0, { bye: 2 });
+  add(0, { legBye: 1 });
+  add(0, { penalty: 5 });
+  add(5);
+  const live = publicLiveState(match);
+  assert.deepEqual(live["recent"], [
+    { label: "2Wd", kind: "extra" },
+    { label: "4+Nb", kind: "extra" },
+    { label: "2B", kind: "extra" },
+    { label: "1Lb", kind: "extra" },
+    { label: "5P", kind: "extra" },
+    { label: "5", kind: "normal" },
+  ]);
+  assert.equal(live["runs"], 20);
 });
