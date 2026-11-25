@@ -46,10 +46,7 @@ test("indexed cues retain every overlapping camera and canonical delivery orderi
       .map((delivery) => source.id + ":" + delivery.id),
   );
   const actual = estimateDeliveryCues(clips, deliveries, now);
-  assert.deepEqual(
-    actual.map((cue) => cue.clipId + ":" + cue.deliveryId).sort(),
-    expected.sort(),
-  );
+  assert.deepEqual(actual.map((cue) => cue.clipId + ":" + cue.deliveryId).sort(), expected.sort());
   assert.ok(
     actual.every((cue, i) => i === 0 || cue.deliverySequence >= actual[i - 1]!.deliverySequence),
   );
