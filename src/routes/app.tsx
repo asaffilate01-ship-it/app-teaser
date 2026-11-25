@@ -68,6 +68,7 @@ import {
 } from "@/components/scorer/MatchTools";
 import { BallSpeedTool } from "@/components/scorer/BallSpeedTool";
 import { LatestSpeedEstimate, SpeedInsightsPanel } from "@/components/scorer/SpeedInsightsPanel";
+import { SpeedComparisonLab } from "@/components/scorer/SpeedComparisonLab";
 import { BallTrackChart, BallTrackPad } from "@/components/scorer/BallTrack";
 import { VideoLab } from "@/components/video/VideoLab";
 import { bowlingTypeSplits, phaseSplits, type SplitRow } from "@/lib/phase-splits";
@@ -1538,6 +1539,7 @@ function LiveMatch({
               match={match}
               onSave={access.recordBalls && !cloudConflict ? saveAndSync : undefined}
             />
+            {access.video && <SpeedComparisonLab key={match.id} />}
             <VideoLab />
           </div>
         )}
@@ -2836,13 +2838,7 @@ function MatchSplits({ match }: { match: CricketMatch }) {
   );
 }
 
-function Analysis({
-  match,
-  showSpeedInsights,
-}: {
-  match: CricketMatch;
-  showSpeedInsights: boolean;
-}) {
+function Analysis({ match, showSpeedInsights }: { match: CricketMatch; showSpeedInsights: boolean }) {
   const innings = currentInnings(match);
   const summary = summarizeInnings(innings, match.settings.ballsPerOver);
   const missingZones = innings.deliveries.filter(

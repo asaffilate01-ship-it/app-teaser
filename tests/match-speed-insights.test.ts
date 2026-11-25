@@ -81,10 +81,7 @@ test("only consistent reviewed speed evidence contributes to bowling statistics"
   assert.equal(insights.bowlers[0]?.fastest, 144);
   assert.equal(insights.bowlers[0]?.slowest, 120);
   assert.equal(insights.bowlers[1]?.average, null);
-  assert.deepEqual(
-    insights.recent.map((item) => item.delivery.id),
-    ["b", "a"],
-  );
+  assert.deepEqual(insights.recent.map((item) => item.delivery.id), ["b", "a"]);
 });
 
 test("the latest-ball indicator never reuses a prior delivery estimate", () => {

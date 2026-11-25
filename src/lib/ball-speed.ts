@@ -87,22 +87,29 @@ export function reviewableBallSpeed(reading: SpeedReading | null): boolean {
   );
 }
 
-/** Frame rate from frame timestamps seen while the clip plays (median gap), rounded to common camera rates. */
+/** Infer a nominal media rate only from an internally consistent timestamp sample.
+ * Presentation rate is not evidence of the physical capture or export timebase.
+ */
 export function detectFps(frameTimes: readonly number[]): number | null {
+  if (frameTimes.length < 6 || frameTimes.length > 600) return null;
+  if (!frameTimes.every((time) => Number.isFinite(time) && time >= 0)) return null;
   const gaps: number[] = [];
   for (let i = 1; i < frameTimes.length; i += 1) {
     const gap = frameTimes[i]! - frameTimes[i - 1]!;
-    if (gap > 0.0005 && gap < 0.2) gaps.push(gap);
+    if (gap <= 0.0005 || gap >= 0.2) return null;
+    gaps.push(gap);
   }
-  if (gaps.length < 5) return null;
   gaps.sort((a, b) => a - b);
   const median = gaps[Math.floor(gaps.length / 2)]!;
+  // A dropped frame or variable-rate sample must not be snapped to a plausible camera rate.
+  if (gaps.some((gap) => Math.abs(gap - median) > median * 0.08)) return null;
   const raw = 1 / median;
   const common = [24, 25, 30, 50, 60, 100, 120, 240];
-  return common.reduce(
+  const closest = common.reduce(
     (best, rate) => (Math.abs(rate - raw) < Math.abs(best - raw) ? rate : best),
     common[0]!,
   );
+  return Math.abs(closest - raw) / closest <= 0.02 ? closest : null;
 }
 
 /** Fastest and average measured speed per bowler, from balls that carry a speed. */
@@ -170,56 +177,102 @@ export function ballCandidates(
   b: Point,
   options: CandidateOptions = {},
 ): BallCandidate[] {
+  const pixels = width * height;
+  if (
+    !Number.isSafeInteger(width) ||
+    !Number.isSafeInteger(height) ||
+    width <= 0 ||
+    height <= 0 ||
+    pixels > 8_847_360 ||
+    prev.length !== pixels ||
+    cur.length !== pixels ||
+    next.length !== pixels ||
+    ![a.x, a.y, b.x, b.y].every(Number.isFinite) ||
+    a.x < 0 ||
+    a.y < 0 ||
+    b.x < 0 ||
+    b.y < 0 ||
+    a.x > width ||
+    b.x > width ||
+    a.y > height ||
+    b.y > height
+  )
+    return [];
   const threshold = options.threshold ?? 28;
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   const length = Math.hypot(dx, dy);
   if (length < 4) return [];
-  const band = (options.band ?? 0.16) * length;
+  const bandFraction = options.band ?? 0.16;
+  const band = bandFraction * length;
   const maxSize = options.maxSize ?? Math.max(6, Math.round((length * 0.05) ** 2));
   const minSize = options.minSize ?? 1;
-  const bins = new Map<number, { count: number; sumT: number }>();
+  if (
+    ![threshold, bandFraction, maxSize, minSize].every(Number.isFinite) ||
+    threshold <= 0 ||
+    threshold > 255 ||
+    bandFraction <= 0 ||
+    bandFraction > 1 ||
+    minSize <= 0 ||
+    maxSize < minSize
+  )
+    return [];
+
+  // Progress is bounded to [-0.15, 1.15]; fixed bins avoid per-pixel Map objects and sorting.
   const binWidth = 0.02;
+  const firstBin = Math.floor(-0.15 / binWidth);
+  const lastBin = Math.floor(1.15 / binWidth);
+  const counts = new Uint32Array(lastBin - firstBin + 1);
+  const sums = new Float64Array(counts.length);
+  const lengthSquared = length * length;
   const minX = Math.max(0, Math.floor(Math.min(a.x, b.x) - band - 0.15 * Math.abs(dx)));
   const maxX = Math.min(width - 1, Math.ceil(Math.max(a.x, b.x) + band + 0.15 * Math.abs(dx)));
   const minY = Math.max(0, Math.floor(Math.min(a.y, b.y) - band - 0.15 * Math.abs(dy)));
   const maxY = Math.min(height - 1, Math.ceil(Math.max(a.y, b.y) + band + 0.15 * Math.abs(dy)));
   for (let y = minY; y <= maxY; y += 1) {
     for (let x = minX; x <= maxX; x += 1) {
-      const i = y * width + x;
-      const c = cur[i]!;
-      if (Math.abs(c - prev[i]!) < threshold || Math.abs(next[i]! - c) < threshold) continue;
-      const t = ((x - a.x) * dx + (y - a.y) * dy) / (length * length);
+      const index = y * width + x;
+      const before = prev[index]!;
+      const current = cur[index]!;
+      const after = next[index]!;
+      if (
+        !Number.isFinite(before) ||
+        !Number.isFinite(current) ||
+        !Number.isFinite(after) ||
+        Math.abs(current - before) < threshold ||
+        Math.abs(after - current) < threshold
+      )
+        continue;
+      const t = ((x - a.x) * dx + (y - a.y) * dy) / lengthSquared;
       if (t < -0.15 || t > 1.15) continue;
       const off = Math.abs((x - a.x) * dy - (y - a.y) * dx) / length;
       if (off > band) continue;
-      const key = Math.floor(t / binWidth);
-      const bin = bins.get(key) ?? { count: 0, sumT: 0 };
-      bin.count += 1;
-      bin.sumT += t;
-      bins.set(key, bin);
+      const bin = Math.floor(t / binWidth) - firstBin;
+      counts[bin] = counts[bin]! + 1;
+      sums[bin] = sums[bin]! + t;
     }
   }
-  // Join neighbouring bins into blobs.
-  const keys = [...bins.keys()].sort((p, q) => p - q);
+
+  // Join consecutive occupied bins in the same order as the original scanner.
   const out: BallCandidate[] = [];
-  let group: number[] = [];
+  let count = 0;
+  let sumT = 0;
+  let occupied = 0;
   const flush = () => {
-    if (!group.length) return;
-    let count = 0;
-    let sumT = 0;
-    for (const key of group) {
-      count += bins.get(key)!.count;
-      sumT += bins.get(key)!.sumT;
-    }
-    const spread = group.length * binWidth;
-    if (count >= minSize && count <= maxSize && spread <= 0.12)
+    if (count >= minSize && count <= maxSize && occupied * binWidth <= 0.12)
       out.push({ t: sumT / count, size: count });
-    group = [];
+    count = 0;
+    sumT = 0;
+    occupied = 0;
   };
-  for (const key of keys) {
-    if (group.length && key - group.at(-1)! > 1) flush();
-    group.push(key);
+  for (let bin = 0; bin < counts.length; bin += 1) {
+    if (!counts[bin]) {
+      flush();
+      continue;
+    }
+    count += counts[bin]!;
+    sumT += sums[bin]!;
+    occupied += 1;
   }
   flush();
   return out;
