@@ -69,8 +69,8 @@ export function SpeedComparisonLab() {
         <>
           <p className="text-xs leading-5 text-slate-400">
             Compare paired camera estimates and independent readings under one fixed setup. These
-            descriptive statistics are not a radar certification. No match scores, camera permissions
-            or speed correction factors are changed.
+            descriptive statistics are not a radar certification. No match scores, camera
+            permissions or speed correction factors are changed.
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="grid gap-1 text-xs">
@@ -210,7 +210,9 @@ export function SpeedComparisonLab() {
                             className="p-2"
                             aria-label={`Remove trial ${pair.trial}`}
                             onClick={() =>
-                              setPairs((current) => current.filter((item) => item.trial !== pair.trial))
+                              setPairs((current) =>
+                                current.filter((item) => item.trial !== pair.trial),
+                              )
                             }
                           >
                             <Trash2 className="size-4" />
