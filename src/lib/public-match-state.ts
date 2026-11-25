@@ -1,4 +1,4 @@
-import type { CricketMatch, Innings } from "./cricket.ts";
+import type { BatterRow, BowlerRow, CricketMatch, Delivery, Innings } from "./cricket.ts";
 import { playerScreenRef } from "./sha256.ts";
 import { commentaryFeed } from "./commentary.ts";
 import {
@@ -34,36 +34,53 @@ export interface PublicStateOptions {
 
 /** Order batters walked out: first time each id is seen at the crease. */
 function battingOrder(innings: Innings): string[] {
-  const order: string[] = [];
+  const order = new Set<string>();
   const add = (id: string | undefined) => {
-    if (id && !order.includes(id)) order.push(id);
+    if (id) order.add(id);
   };
   for (const delivery of innings.deliveries) {
     add(delivery.strikerId);
     add(delivery.nonStrikerId);
   }
   for (const item of innings.retirements ?? []) add(item.batterId);
-  add(innings.strikerId);
-  if (innings.nonStrikerId !== innings.strikerId) add(innings.nonStrikerId);
-  return order;
+  if (innings.status === "live") {
+    add(innings.strikerId);
+    add(innings.nonStrikerId);
+  }
+  return [...order];
 }
 
 /** Name-free batting and bowling cards for public screens: batting position or bowling order plus figures. */
-function publicCard(match: CricketMatch, innings: Innings, salt: string | undefined) {
-  const batters = battingCard(match, innings);
-  const bowlers = bowlingCard(match, innings);
+function publicCard(
+  innings: Innings,
+  batters: ReadonlyMap<string, BatterRow>,
+  bowlers: ReadonlyMap<string, BowlerRow>,
+  extras: number,
+  active: boolean,
+  salt: string | undefined,
+) {
+  const retirements = new Map((innings.retirements ?? []).map((item) => [item.batterId, item]));
+  const waiting = new Set(retiredHurtWaiting(innings));
+  const dismissals = new Map<string, NonNullable<Delivery["dismissal"]>["type"]>();
+  const bowlingOrder = new Set<string>();
+  for (const delivery of innings.deliveries) {
+    bowlingOrder.add(delivery.bowlerId);
+    if (delivery.dismissal && !dismissals.has(delivery.dismissal.batterId)) {
+      dismissals.set(delivery.dismissal.batterId, delivery.dismissal.type);
+    }
+  }
   const ref = (id: string) => (salt ? { ref: playerScreenRef(salt, id) } : {});
   const batting = battingOrder(innings).map((id, index) => {
-    const row = batters.find((item) => item.playerId === id);
-    const retired = [...(innings.retirements ?? [])].reverse().find((item) => item.batterId === id);
+    const row = batters.get(id);
+    const retired = retirements.get(id);
     const out =
-      innings.deliveries.find((delivery) => delivery.dismissal?.batterId === id)?.dismissal?.type ??
+      dismissals.get(id) ??
       (retired?.kind === "out"
         ? "retired-out"
         : retired?.kind === "timed-out"
           ? "timed-out"
           : null) ??
-      (retired?.kind === "hurt" && retiredHurtWaiting(innings).includes(id)
+      (retired?.kind === "hurt" && waiting.has(id)
         ? "retired-hurt"
         : null);
     return {
@@ -74,15 +91,12 @@ function publicCard(match: CricketMatch, innings: Innings, salt: string | undefi
       fours: row?.fours ?? 0,
       sixes: row?.sixes ?? 0,
       how: out,
-      atCrease: !out && (id === innings.strikerId || id === innings.nonStrikerId),
-      onStrike: !out && id === innings.strikerId,
+      atCrease: active && !out && (id === innings.strikerId || id === innings.nonStrikerId),
+      onStrike: active && !out && id === innings.strikerId,
     };
   });
-  const bowlingOrder: string[] = [];
-  for (const delivery of innings.deliveries)
-    if (!bowlingOrder.includes(delivery.bowlerId)) bowlingOrder.push(delivery.bowlerId);
-  const bowling = bowlingOrder.map((id, index) => {
-    const row = bowlers.find((item) => item.playerId === id);
+  const bowling = [...bowlingOrder].map((id, index) => {
+    const row = bowlers.get(id);
     return {
       no: index + 1,
       ...ref(id),
@@ -91,19 +105,9 @@ function publicCard(match: CricketMatch, innings: Innings, salt: string | undefi
       runs: row?.runs ?? 0,
       wickets: row?.wickets ?? 0,
       economy: Math.round((row?.economy ?? 0) * 100) / 100,
-      current: id === innings.bowlerId,
+      current: active && id === innings.bowlerId,
     };
   });
-  const extras = innings.deliveries.reduce(
-    (sum, delivery) =>
-      sum +
-      delivery.extras.wide +
-      delivery.extras.noBall +
-      delivery.extras.bye +
-      delivery.extras.legBye +
-      delivery.extras.penalty,
-    0,
-  );
   return { batting, bowling, extras };
 }
 
@@ -150,6 +154,28 @@ function publicPartnership(innings: Innings) {
   return { runs, balls };
 }
 
+/** Short, identity-free event labels. Wickets retain priority over runs. */
+export function publicDeliveryChip(delivery: Delivery) {
+  if (delivery.dismissal) return { label: "W", kind: "wicket" };
+  const { wide, noBall, bye, legBye, penalty } = delivery.extras;
+  const parts: string[] = [];
+  if (delivery.batterRuns > 0) parts.push(String(delivery.batterRuns));
+  if (wide) parts.push(wide === 1 ? "Wd" : `${wide}Wd`);
+  if (noBall) parts.push(noBall === 1 ? "Nb" : `${noBall}Nb`);
+  if (bye) parts.push(`${bye}B`);
+  if (legBye) parts.push(`${legBye}Lb`);
+  if (penalty) parts.push(`${penalty}P`);
+  return {
+    label: parts.join("+") || "·",
+    kind:
+      wide || noBall || bye || legBye || penalty
+        ? "extra"
+        : delivery.batterRuns === 4 || delivery.batterRuns === 6
+          ? "boundary"
+          : "normal",
+  };
+}
+
 export function publicLiveState(
   match: CricketMatch,
   options: PublicStateOptions = {},
@@ -159,11 +185,12 @@ export function publicLiveState(
   const striker = findPlayer(match, innings.strikerId);
   const nonStriker = findPlayer(match, innings.nonStrikerId);
   const bowler = findPlayer(match, innings.bowlerId);
-  const batters = battingCard(match, innings);
-  const bowlers = bowlingCard(match, innings);
-  const strikerFigures = batters.find((row) => row.playerId === striker?.id);
-  const nonStrikerFigures = batters.find((row) => row.playerId === nonStriker?.id);
-  const bowlerFigures = bowlers.find((row) => row.playerId === bowler?.id);
+  const batters = new Map(battingCard(match, innings).map((row) => [row.playerId, row]));
+  const bowlers = new Map(bowlingCard(match, innings).map((row) => [row.playerId, row]));
+  const strikerFigures = striker ? batters.get(striker.id) : undefined;
+  const nonStrikerFigures = nonStriker ? batters.get(nonStriker.id) : undefined;
+  const bowlerFigures = bowler ? bowlers.get(bowler.id) : undefined;
+  const active = match.status === "live" && innings.status === "live";
   const batting = findTeam(match, innings.battingTeamId);
   const target = targetForCurrentInnings(match);
   const result = matchResult(match);
@@ -197,7 +224,7 @@ export function publicLiveState(
     oversLimit: inningsOversLimit(match, innings),
     par: liveParScore(match),
     superOver: isSuperOver(innings),
-    freeHit: match.status === "live" && nextBallIsFreeHit(match),
+    freeHit: active && !match.stoppage && !match.days?.atStumps && nextBallIsFreeHit(match),
     declared: Boolean(innings.declared),
     followOn: Boolean(innings.followOn),
     result: result?.text ?? null,
@@ -208,18 +235,18 @@ export function publicLiveState(
           decision: match.toss.decision,
         }
       : null,
-    striker: striker
+    striker: active && striker
       ? { name: "Striker", runs: strikerFigures?.runs ?? 0, balls: strikerFigures?.balls ?? 0 }
       : null,
     nonStriker:
-      nonStriker && !batterAlone
+      active && nonStriker && !batterAlone
         ? {
             name: "Non-striker",
             runs: nonStrikerFigures?.runs ?? 0,
             balls: nonStrikerFigures?.balls ?? 0,
           }
         : null,
-    bowler: bowler
+    bowler: active && bowler
       ? {
           name: "Bowler",
           wickets: bowlerFigures?.wickets ?? 0,
@@ -227,20 +254,9 @@ export function publicLiveState(
           overs: bowlerFigures?.overs ?? "0.0",
         }
       : null,
-    recent: innings.deliveries.slice(-6).map((delivery) => ({
-      label: delivery.dismissal
-        ? "W"
-        : delivery.batterRuns > 0
-          ? String(delivery.batterRuns)
-          : delivery.extras?.wide
-            ? "Wd"
-            : delivery.extras?.noBall
-              ? "Nb"
-              : "·",
-      kind: delivery.dismissal ? "wicket" : delivery.batterRuns >= 4 ? "boundary" : "normal",
-    })),
+    recent: innings.deliveries.slice(-6).map(publicDeliveryChip),
     // Ground screen pages: name-free cards, per-over totals and the current stand.
-    card: publicCard(match, innings, options.screenRefSalt),
+    card: publicCard(innings, batters, bowlers, summary.extras.total, active, options.screenRefSalt),
     progress: publicProgress(match),
     partnership: publicPartnership(innings),
     // Win predictor inputs: conditions and match shape only, nothing personal.
@@ -260,8 +276,10 @@ export function publicLiveState(
     message:
       match.status === "completed"
         ? (result?.text ?? "Match completed")
-        : isSuperOver(innings)
-          ? `Super Over: ${batting?.name ?? "Batting side"} batting`
-          : `${batting?.name ?? "Batting side"} innings in progress`,
+        : !active
+          ? "Innings break"
+          : isSuperOver(innings)
+            ? `Super Over: ${batting?.name ?? "Batting side"} batting`
+            : `${batting?.name ?? "Batting side"} innings in progress`,
   };
 }
