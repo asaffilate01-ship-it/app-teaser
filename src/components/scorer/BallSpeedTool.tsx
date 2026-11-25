@@ -13,6 +13,7 @@ import {
   ballSpeed,
   detectFps,
   fitBallTrack,
+  reviewableBallSpeed,
   speedDistances,
   speedsByBowler,
   type Point,
@@ -80,6 +81,14 @@ export function BallSpeedTool({
   const [release, setRelease] = useState<number | null>(null);
   const [arrival, setArrival] = useState<number | null>(null);
   const [distance, setDistance] = useState<SpeedDistance>("stumps");
+  const [measuredDistance, setMeasuredDistance] = useState("");
+  const [distanceError, setDistanceError] = useState("0.2");
+  const [timeScale, setTimeScale] = useState(1);
+  const [calibrationConfirmed, setCalibrationConfirmed] = useState(false);
+  const [reviewConfirmed, setReviewConfirmed] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const scanRequest = useRef(0);
+  const scanLock = useRef(false);
   const [scan, setScan] = useState<{ busy: boolean; progress: number; message: string | null }>({
     busy: false,
     progress: 0,
@@ -90,10 +99,28 @@ export function BallSpeedTool({
 
   useEffect(() => setCamera(readCamera()), []);
   useEffect(() => () => void (src && URL.revokeObjectURL(src)), [src]);
+  useEffect(() => () => { scanRequest.current += 1; }, []);
 
-  const metres = speedDistances[distance].metres;
+  const metres = measuredDistance.trim() ? Number(measuredDistance) : speedDistances[distance].metres;
+  const uncertainty = distanceError.trim() ? Number(distanceError) : NaN;
+  const calibrated =
+    calibrationConfirmed &&
+    measuredDistance.trim() !== "" &&
+    Number.isFinite(metres) &&
+    metres >= 1 &&
+    metres <= 25 &&
+    Number.isFinite(uncertainty) &&
+    uncertainty >= 0 &&
+    uncertainty < metres;
   const reading =
-    release != null && arrival != null ? ballSpeed(release, arrival, metres, fps) : null;
+    release != null && arrival != null && arrival <= duration
+      ? ballSpeed(release, arrival, metres, fps, timeScale, uncertainty)
+      : null;
+  const canSave = calibrated && reviewConfirmed && !scan.busy && reviewableBallSpeed(reading);
+
+  useEffect(() => {
+    setReviewConfirmed(false);
+  }, [release, arrival, metres, uncertainty, fps, timeScale, calibrationConfirmed]);
   const marks =
     camera && camera.width === size.width && camera.height === size.height
       ? camera
@@ -112,6 +139,15 @@ export function BallSpeedTool({
 
   const load = (file: File | undefined) => {
     if (!file) return;
+    scanRequest.current += 1;
+    scanLock.current = false;
+    setCalibrationConfirmed(false);
+    setReviewConfirmed(false);
+    setMeasuredDistance("");
+    setTimeScale(1);
+    setDuration(0);
+    setFps(30);
+    setDeliveryId("");
     setSrc(URL.createObjectURL(file));
     setRelease(null);
     setArrival(null);
@@ -203,7 +239,13 @@ export function BallSpeedTool({
 
   const autoTime = async () => {
     const video = videoRef.current;
-    if (!video || !marks) return;
+    if (!video || !marks || !calibrated || timeScale !== 1 || scanLock.current) return;
+    if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+    const request = ++scanRequest.current;
+    scanLock.current = true;
+    setReviewConfirmed(false);
+    setRelease(null);
+    setArrival(null);
     setScan({ busy: true, progress: 0, message: null });
     setTrackPoints([]);
     const back = video.currentTime;
@@ -215,66 +257,97 @@ export function BallSpeedTool({
     canvas.width = w;
     canvas.height = h;
     const context = canvas.getContext("2d", { willReadFrequently: true });
-    if (!context)
-      return setScan({
+    if (!context) {
+      scanLock.current = false;
+      setScan({
         busy: false,
         progress: 0,
         message: "This browser can't read video frames.",
       });
+      return;
+    }
     const a = { x: marks.a.x * scale, y: marks.a.y * scale };
     const b = { x: marks.b.x * scale, y: marks.b.y * scale };
     // Look from just before where the clip is paused (or the start) for up to 2.5 seconds.
     const start = Math.max(0, (video.duration || 0) <= 4 ? 0 : video.currentTime - 0.4);
     const end = Math.min(video.duration || 0, start + 2.5);
-    const count = Math.max(3, Math.floor((end - start) * fps));
+    const sampleRate = Math.min(fps, 120);
+    const count = Math.floor((end - start) * sampleRate);
     const frames: { time: number; grey: Uint8ClampedArray }[] = [];
     const points: TrackPoint[] = [];
-    for (let k = 0; k < count; k += 1) {
-      const time = start + k / fps;
-      await seek(video, time + 0.5 / fps);
-      context.drawImage(video, 0, 0, w, h);
-      const rgba = context.getImageData(0, 0, w, h).data;
-      const grey = new Uint8ClampedArray(w * h);
-      for (let i = 0, j = 0; i < grey.length; i += 1, j += 4)
-        grey[i] = (rgba[j]! * 3 + rgba[j + 1]! * 6 + rgba[j + 2]!) / 10;
-      frames.push({ time, grey });
-      if (frames.length >= 3) {
-        const [p, c, n] = frames.slice(-3) as [
-          (typeof frames)[0],
-          (typeof frames)[0],
-          (typeof frames)[0],
-        ];
-        for (const candidate of ballCandidates(p.grey, c.grey, n.grey, w, h, a, b))
-          points.push({ time: c.time, t: candidate.t });
-        frames.shift();
+    try {
+      for (let k = 0; k < count; k += 1) {
+        if (request !== scanRequest.current) return;
+        const time = start + k / sampleRate;
+        await seek(video, time);
+        if (request !== scanRequest.current) return;
+        context.drawImage(video, 0, 0, w, h);
+        const rgba = context.getImageData(0, 0, w, h).data;
+        const grey = new Uint8ClampedArray(w * h);
+        for (let i = 0, j = 0; i < grey.length; i += 1, j += 4)
+          grey[i] = (rgba[j]! * 3 + rgba[j + 1]! * 6 + rgba[j + 2]!) / 10;
+        frames.push({ time, grey });
+        if (frames.length >= 3) {
+          const [p, c, n] = frames.slice(-3) as [
+            (typeof frames)[0],
+            (typeof frames)[0],
+            (typeof frames)[0],
+          ];
+          for (const candidate of ballCandidates(p.grey, c.grey, n.grey, w, h, a, b))
+            points.push({ time: c.time, t: candidate.t });
+          frames.shift();
+        }
+        if (k % 6 === 0)
+          setScan({ busy: true, progress: Math.round((k / count) * 100), message: null });
       }
-      if (k % 6 === 0)
-        setScan({ busy: true, progress: Math.round((k / count) * 100), message: null });
-    }
-    const track = fitBallTrack(points, metres);
-    if (track) {
-      setRelease(Math.max(0, track.releaseTime));
-      setArrival(track.arrivalTime);
-      setTrackPoints(track.points);
-      await seek(video, Math.max(0, track.releaseTime));
-      setScan({
-        busy: false,
-        progress: 100,
-        message: `Found the ball in ${track.points.length} frames${track.fit < 0.9 ? " — the path is a bit uneven, so check the marks" : ""}.`,
-      });
-    } else {
-      await seek(video, back);
-      setScan({
-        busy: false,
-        progress: 100,
-        message:
-          "Couldn't follow the ball in this clip. Pause where the ball leaves the hand and try again, or set the two marks by hand.",
-      });
+      const track = fitBallTrack(points, metres);
+      if (request !== scanRequest.current) return;
+      if (
+        track &&
+        track.fit >= 0.9 &&
+        track.releaseTime >= start &&
+        track.arrivalTime <= end &&
+        track.arrivalTime > track.releaseTime
+      ) {
+        setRelease(track.releaseTime);
+        setArrival(track.arrivalTime);
+        setTrackPoints(track.points);
+        await seek(video, track.releaseTime);
+        if (request !== scanRequest.current) return;
+        setScan({
+          busy: false,
+          progress: 100,
+          message: `Candidate motion track: ${track.points.length} samples. Review both timing marks before saving.`,
+        });
+      } else {
+        await seek(video, back);
+        if (request !== scanRequest.current) return;
+        setScan({
+          busy: false,
+          progress: 100,
+          message: "No reliable candidate track. Mark the two visible crossing times manually.",
+        });
+      }
+    } catch {
+      if (request === scanRequest.current)
+        setScan({ busy: false, progress: 0, message: "Frame scan failed. Try manual timing." });
+    } finally {
+      if (request === scanRequest.current) scanLock.current = false;
     }
   };
 
+  const cancelScan = () => {
+    scanRequest.current += 1;
+    scanLock.current = false;
+    setRelease(null);
+    setArrival(null);
+    setTrackPoints([]);
+    setScan({ busy: false, progress: 0, message: "Scan cancelled." });
+  };
+
   const saveToBall = () => {
-    if (!match || !onSave || !reading || !deliveryId) return;
+    if (!match || !onSave || !reading || !canSave || !balls.some((ball) => ball.id === deliveryId))
+      return;
     onSave(setDeliverySpeed(match, deliveryId, reading.kph));
     setDeliveryId("");
   };
@@ -287,9 +360,9 @@ export function BallSpeedTool({
             <Gauge className="size-4" aria-hidden="true" /> Ball speed
           </h2>
           <p className="mt-1 max-w-2xl text-xs text-muted-foreground">
-            Free and on this phone: the clip is never uploaded. Film side-on from a fixed spot
-            (slow-motion 120 or 240 fps is most accurate), mark the camera once, then each ball is
-            timed automatically.
+            Local video estimate, not a radar reading. Use a fixed side-on camera with a measured
+            distance and a known recording timebase. Automatic motion tracking proposes marks for
+            human review; it does not independently identify or certify the ball.
           </p>
         </div>
         <label className="action-secondary cursor-pointer">
@@ -311,13 +384,13 @@ export function BallSpeedTool({
               src={src}
               playsInline
               muted
-              controls={!picking}
-              preload="auto"
+              controls={!picking && !scan.busy}
+              preload="metadata"
               className="speed-video"
               onLoadedMetadata={(event) => {
                 const video = event.currentTarget;
                 setSize({ width: video.videoWidth || 1280, height: video.videoHeight || 720 });
-                void measureFps();
+                setDuration(Number.isFinite(video.duration) ? video.duration : 0);
               }}
             />
             <svg
@@ -383,6 +456,7 @@ export function BallSpeedTool({
             <button
               type="button"
               className="app-chip-button"
+              disabled={scan.busy}
               onClick={() => step(-1)}
               aria-label="Back one frame"
             >
@@ -391,22 +465,33 @@ export function BallSpeedTool({
             <button
               type="button"
               className="app-chip-button"
+              disabled={scan.busy}
               onClick={() => step(1)}
               aria-label="Forward one frame"
             >
               Frame <ChevronRight className="size-4" />
             </button>
-            <button type="button" className="app-chip-button" onClick={() => setPicking("a")}>
+            <button
+              type="button"
+              className="app-chip-button"
+              disabled={scan.busy}
+              onClick={() => {
+                setCalibrationConfirmed(false);
+                setPicking("a");
+              }}
+            >
               <Crosshair className="size-4" /> {camera ? "Re-mark camera" : "Mark camera"}
             </button>
             <label className="flex items-center gap-1 text-xs">
-              <span className="text-muted-foreground">Frame rate</span>
+              <span className="text-muted-foreground">Media frame rate</span>
               <select
                 className="scorer-input w-auto"
                 value={fps}
+                disabled={scan.busy}
                 onChange={(event) => {
                   setFps(Number(event.target.value));
                   setFpsDetected(false);
+                  setCalibrationConfirmed(false);
                 }}
               >
                 {[24, 25, 30, 50, 60, 100, 120, 240].map((rate) => (
@@ -416,14 +501,19 @@ export function BallSpeedTool({
                 ))}
               </select>
               {fpsDetected && (
-                <span className="text-[11px] text-muted-foreground">(read from the clip)</span>
+                <span className="text-[11px] text-muted-foreground">(sampled estimate)</span>
               )}
             </label>
             <select
               className="scorer-input w-auto text-xs"
               aria-label="Distance between the two marks"
               value={distance}
-              onChange={(event) => setDistance(event.target.value as SpeedDistance)}
+              disabled={scan.busy}
+              onChange={(event) => {
+                setDistance(event.target.value as SpeedDistance);
+                setCalibrationConfirmed(false);
+                setMeasuredDistance("");
+              }}
             >
               {(Object.keys(speedDistances) as SpeedDistance[]).map((key) => (
                 <option key={key} value={key}>
@@ -433,27 +523,115 @@ export function BallSpeedTool({
             </select>
           </div>
 
+          <fieldset disabled={scan.busy} className="space-y-3 rounded-xl border border-border p-3">
+            <legend className="px-1 text-sm font-semibold">Distance and recording timebase</legend>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <label className="grid gap-1 text-xs">
+                Measured distance (m)
+                <input
+                  type="number"
+                  min={1}
+                  max={25}
+                  step={0.01}
+                  inputMode="decimal"
+                  value={measuredDistance}
+                  placeholder="Measure the two points"
+                  className="scorer-input"
+                  onChange={(event) => {
+                    setMeasuredDistance(event.target.value);
+                    setCalibrationConfirmed(false);
+                  }}
+                />
+              </label>
+              <label className="grid gap-1 text-xs">
+                Distance error (± m)
+                <input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  inputMode="decimal"
+                  value={distanceError}
+                  className="scorer-input"
+                  onChange={(event) => {
+                    setDistanceError(event.target.value);
+                    setCalibrationConfirmed(false);
+                  }}
+                />
+              </label>
+              <label className="grid gap-1 text-xs">
+                Original video timebase
+                <select
+                  value={timeScale}
+                  className="scorer-input"
+                  onChange={(event) => {
+                    setTimeScale(Number(event.target.value));
+                    setCalibrationConfirmed(false);
+                  }}
+                >
+                  <option value={1}>Real-time recording</option>
+                  <option value={0.5}>2× slowed export</option>
+                  <option value={0.25}>4× slowed export</option>
+                  <option value={0.125}>8× slowed export</option>
+                </select>
+              </label>
+            </div>
+            <label className="flex items-start gap-2 text-xs">
+              <input
+                type="checkbox"
+                checked={calibrationConfirmed}
+                onChange={(event) => setCalibrationConfirmed(event.target.checked)}
+              />
+              I verified the measured distance, fixed camera geometry, media frame rate and
+              original recording timebase. The two points are on the ball's measured path.
+            </label>
+            <p className="text-xs text-muted-foreground">
+              Preset distances are approximate. Confirm an actual measured distance before saving.
+              Slowed exports need manual marks; variable-speed edited clips are unsuitable.
+            </p>
+            <button
+              type="button"
+              className="action-secondary"
+              onClick={() => void measureFps()}
+            >
+              Sample media frame rate
+            </button>
+          </fieldset>
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               className="action-primary"
-              disabled={!marks || scan.busy}
+              disabled={!marks || !calibrated || timeScale !== 1 || scan.busy}
               onClick={() => void autoTime()}
             >
               <ScanSearch className="size-4" />{" "}
-              {scan.busy ? `Following the ball… ${scan.progress}%` : "Time it automatically"}
+              {scan.busy ? `Scanning motion… ${scan.progress}%` : "Suggest timing marks"}
             </button>
+            {scan.busy && (
+              <button type="button" className="action-secondary" onClick={cancelScan}>
+                Cancel scan
+              </button>
+            )}
             <button
               type="button"
               className="app-chip-button"
-              onClick={() => setRelease(videoRef.current?.currentTime ?? null)}
+              disabled={scan.busy}
+              onClick={() => {
+                const video = videoRef.current;
+                video?.pause();
+                if (video && !video.seeking && video.readyState >= 2) setRelease(video.currentTime);
+              }}
             >
               Release is this frame
             </button>
             <button
               type="button"
               className="app-chip-button"
-              onClick={() => setArrival(videoRef.current?.currentTime ?? null)}
+              disabled={scan.busy}
+              onClick={() => {
+                const video = videoRef.current;
+                video?.pause();
+                if (video && !video.seeking && video.readyState >= 2) setArrival(video.currentTime);
+              }}
             >
               Arrival is this frame
             </button>
@@ -490,6 +668,7 @@ export function BallSpeedTool({
                         type="button"
                         className="app-chip-button"
                         aria-label={`${which} one frame earlier`}
+                        disabled={scan.busy}
                         onClick={() => nudge(which, -1)}
                       >
                         −1
@@ -498,6 +677,7 @@ export function BallSpeedTool({
                         type="button"
                         className="app-chip-button"
                         aria-label={`${which} one frame later`}
+                        disabled={scan.busy}
                         onClick={() => nudge(which, 1)}
                       >
                         +1
@@ -518,12 +698,21 @@ export function BallSpeedTool({
                 {reading.mph.toFixed(1)} mph · {reading.seconds.toFixed(3)} s down the pitch
               </p>
               <p className="text-xs text-muted-foreground">
-                Likely between {reading.lowKph.toFixed(0)} and{" "}
+                Timing and stated distance-error range: {reading.lowKph.toFixed(0)}–
                 {Number.isFinite(reading.highKph) ? reading.highKph.toFixed(0) : "?"} km/h at {fps}{" "}
-                fps. Average speed down the pitch; speed guns show the release speed, which is a
-                little higher.
+                fps. Estimated average speed over the measured segment; not peak release speed.
+                Perspective, blur and tracking errors are not included in this range.
               </p>
               {reading.warning && <p className="text-xs text-amber-200">{reading.warning}</p>}
+              <label className="flex items-start gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  checked={reviewConfirmed}
+                  disabled={!calibrated || scan.busy}
+                  onChange={(event) => setReviewConfirmed(event.target.checked)}
+                />
+                I reviewed both marks and confirm this is a video-derived estimate.
+              </label>
               {match && onSave && balls.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   <select
@@ -545,10 +734,10 @@ export function BallSpeedTool({
                   <button
                     type="button"
                     className="action-primary"
-                    disabled={!deliveryId}
+                    disabled={!deliveryId || !canSave}
                     onClick={saveToBall}
                   >
-                    <Save className="size-4" /> Save to ball
+                    <Save className="size-4" /> Save estimate to ball
                   </button>
                 </div>
               )}
@@ -559,7 +748,7 @@ export function BallSpeedTool({
 
       {match && speeds.length > 0 && (
         <div>
-          <h3 className="panel-kicker mb-2">Measured this match</h3>
+          <h3 className="panel-kicker mb-2">Video speed estimates this match</h3>
           <ul className="grid gap-1.5 sm:grid-cols-2">
             {speeds.map((row) => (
               <li
