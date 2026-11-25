@@ -125,7 +125,9 @@ function ScopedScoreboard({ slug }: { slug: string }) {
         if (!active) return;
         if (requestError || !data) {
           setScoreboard(null);
-          setError(requestError?.message ?? "This scoreboard is not public or is not available yet.");
+          setError(
+            requestError?.message ?? "This scoreboard is not public or is not available yet.",
+          );
         } else {
           setScoreboard(data as ScoreboardData);
           setError(null);
@@ -215,21 +217,22 @@ function ScopedScoreboard({ slug }: { slug: string }) {
             : (tossLine ?? state.message ?? `${batting.name} batting`);
   const recent = state.recent ?? [];
   const commentary = state.commentary ?? null;
-  const prediction = state.result || !isLive
-    ? null
-    : predictWin({
-        oversPerInnings: oversLimit,
-        inningsPerSide: state.settings?.inningsPerSide ?? 1,
-        ballsPerOver,
-        inningsNumber: state.inningsNumber ?? (state.target ? 2 : 1),
-        runs,
-        wickets,
-        legalBalls,
-        target: state.target ?? null,
-        maxWickets: state.maxWickets ?? 10,
-        battingIsHome: state.battingIsHome ?? batting.id === scoreboard.homeTeam.id,
-        conditions: state.conditions ?? undefined,
-      });
+  const prediction =
+    state.result || !isLive
+      ? null
+      : predictWin({
+          oversPerInnings: oversLimit,
+          inningsPerSide: state.settings?.inningsPerSide ?? 1,
+          ballsPerOver,
+          inningsNumber: state.inningsNumber ?? (state.target ? 2 : 1),
+          runs,
+          wickets,
+          legalBalls,
+          target: state.target ?? null,
+          maxWickets: state.maxWickets ?? 10,
+          battingIsHome: state.battingIsHome ?? batting.id === scoreboard.homeTeam.id,
+          conditions: state.conditions ?? undefined,
+        });
   const homeBatting = batting.id === scoreboard.homeTeam.id;
   const homeWin = prediction ? (homeBatting ? prediction.battingWin : prediction.bowlingWin) : null;
   const updated = new Date(scoreboard.updatedAt).toLocaleTimeString([], {
@@ -266,7 +269,11 @@ function ScopedScoreboard({ slug }: { slug: string }) {
             {!state.result && <MatchAlerts slug={slug} />}
             <span className={`hero-chip ${isLive ? "hero-chip-live" : ""}`}>
               {isLive && <span className="live-dot" aria-hidden="true" />}
-              {isLive ? "Live" : state.days?.atStumps ? "Stumps" : scoreboard.status.replaceAll("_", " ")}
+              {isLive
+                ? "Live"
+                : state.days?.atStumps
+                  ? "Stumps"
+                  : scoreboard.status.replaceAll("_", " ")}
             </span>
           </div>
         </div>
