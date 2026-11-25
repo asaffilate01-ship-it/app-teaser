@@ -67,6 +67,7 @@ import {
   WorkloadPanel,
 } from "@/components/scorer/MatchTools";
 import { BallSpeedTool } from "@/components/scorer/BallSpeedTool";
+import { LatestSpeedEstimate, SpeedInsightsPanel } from "@/components/scorer/SpeedInsightsPanel";
 import { SpeedComparisonLab } from "@/components/scorer/SpeedComparisonLab";
 import { BallTrackChart, BallTrackPad } from "@/components/scorer/BallTrack";
 import { VideoLab } from "@/components/video/VideoLab";
@@ -1078,6 +1079,7 @@ function LiveMatch({
   // Until the first check finishes (or for a match only on this phone) the screen offers everything;
   // the server still refuses anything this person isn't allowed to do.
   const access = dutyAccess(dutyState.duties ?? ["lead"]);
+  const showSpeedInsights = !cloudMatchId || (dutyState.duties !== null && access.onTeam);
   const bowlingByOther = Boolean(cloudMatchId) && bowlingHandledByOther(dutyState.team, myUserId);
   // People who don't record balls follow the batting scorer's score and never send their own.
   const follower = Boolean(cloudMatchId) && !access.recordBalls;
@@ -1335,6 +1337,10 @@ function LiveMatch({
         }
       />
 
+      {tab === "score" && showSpeedInsights && !cloudConflict && (
+        <LatestSpeedEstimate match={match} />
+      )}
+
       <ScorerMatchNavigation active={tab} onChange={changeTab} onExport={exportMatch} />
 
       {tab === "score" && (
@@ -1523,7 +1529,9 @@ function LiveMatch({
           />
         )}
         {tab === "scorecard" && <Scorecard match={match} onSave={saveAndSync} />}
-        {tab === "analysis" && <Analysis match={match} />}
+        {tab === "analysis" && (
+          <Analysis match={match} showSpeedInsights={showSpeedInsights && !cloudConflict} />
+        )}
         {tab === "video" && (
           <div className="space-y-5">
             {cloudMatchId && access.video && <VideoDutyCard matchId={cloudMatchId} />}
@@ -2830,7 +2838,13 @@ function MatchSplits({ match }: { match: CricketMatch }) {
   );
 }
 
-function Analysis({ match }: { match: CricketMatch }) {
+function Analysis({
+  match,
+  showSpeedInsights,
+}: {
+  match: CricketMatch;
+  showSpeedInsights: boolean;
+}) {
   const innings = currentInnings(match);
   const summary = summarizeInnings(innings, match.settings.ballsPerOver);
   const missingZones = innings.deliveries.filter(
@@ -2871,6 +2885,7 @@ function Analysis({ match }: { match: CricketMatch }) {
         <BallTrackChart deliveries={innings.deliveries} leftHanded={leftHanded} />
       </div>
       <MatchSplits match={match} />
+      {showSpeedInsights && <SpeedInsightsPanel key={match.id} match={match} />}
       <div className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5 md:p-7">
         <div className="flex items-start justify-between gap-3">
           <div>
