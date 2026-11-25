@@ -4,6 +4,8 @@ import {
   estimateDeliveryCues,
   isReviewableClip,
   privateReplayDeadline,
+  privateReplaySelectionCurrent,
+  privateReplaySelectionDeadline,
   replaySeekPosition,
   sameReplaySource,
   storageVideoMimeType,
@@ -126,4 +128,36 @@ test("cue seeking clamps to playable duration and rejects invalid timestamps", (
   assert.equal(replaySeekPosition(7, 0), null);
   assert.equal(replaySeekPosition(7, Infinity), null);
   assert.equal(replaySeekPosition(NaN, 60), null);
+});
+
+test("two-angle playback expires at the earliest source retention deadline", () => {
+  const now = Date.parse("2026-11-21T12:00:00Z");
+  const second = {
+    ...clip,
+    id: "clip-b",
+    device_id: "device-2",
+    retention_expires_at: new Date(now + 30_000).toISOString(),
+  };
+  assert.equal(privateReplaySelectionDeadline([clip, second], now), now + 30_000);
+  assert.equal(privateReplaySelectionDeadline([clip, second], now + 30_000), null);
+  assert.equal(privateReplaySelectionDeadline([], now), null);
+});
+
+test("private replay requires the same eligible sources in the same order", () => {
+  const now = Date.parse("2026-11-21T12:00:00Z");
+  const deadline = now + 60_000;
+  const second = { ...clip, id: "clip-b", device_id: "device-2" };
+  const originals = [clip, second];
+  assert.equal(privateReplaySelectionCurrent(originals, originals, deadline, now), true);
+  assert.equal(privateReplaySelectionCurrent(originals, [second, clip], deadline, now), false);
+  assert.equal(privateReplaySelectionCurrent(originals, [clip], deadline, now), false);
+  assert.equal(privateReplaySelectionCurrent(originals, originals, deadline, deadline), false);
+  for (const changed of [
+    { ...second, recording_consent: "withdrawn" },
+    { ...second, blur_mode: "faces" as const },
+    { ...second, status: "quarantined" },
+    { ...second, ended_at: null },
+  ]) {
+    assert.equal(privateReplaySelectionCurrent(originals, [clip, changed], deadline, now), false);
+  }
 });
