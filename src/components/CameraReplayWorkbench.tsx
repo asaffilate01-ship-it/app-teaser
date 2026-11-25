@@ -2,7 +2,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Clock3, RefreshCw, Save, ShieldCheck, Star, Video } from "lucide-react";
 import { getCloudClient } from "@/lib/cloud";
 import { signedRoomClipUrl } from "@/lib/camera-review-cloud";
-import type { CameraClip, CameraDelivery } from "@/lib/camera-review";
+import {
+  privateReplaySelectionCurrent,
+  privateReplaySelectionDeadline,
+  replaySeekPosition,
+  type CameraClip,
+  type CameraDelivery,
+} from "@/lib/camera-review";
 import {
   canMarkPrivateHighlight,
   redactHighlightNote,
@@ -34,7 +40,16 @@ export function CameraReplayWorkbench({
   const rightRef = useRef<HTMLVideoElement>(null);
   const [leftId, setLeftId] = useState("");
   const [rightId, setRightId] = useState("");
-  const [urls, setUrls] = useState<{ left: string; right: string } | null>(null);
+  const [preview, setPreview] = useState<{
+    left: string;
+    right: string;
+    clips: CameraClip[];
+    deadline: number;
+  } | null>(null);
+  const [opening, setOpening] = useState(false);
+  const previewRequest = useRef(0);
+  const metadataRequest = useRef(0);
+  const openingLock = useRef(false);
   const [offsets, setOffsets] = useState<Record<string, number>>({});
   const [savedOffsets, setSavedOffsets] = useState<Record<string, number>>({});
   const [highlights, setHighlights] = useState<PrivateHighlightCandidate[]>([]);
@@ -48,6 +63,21 @@ export function CameraReplayWorkbench({
 
   const left = clips.find((clip) => clip.id === leftId);
   const right = clips.find((clip) => clip.id === rightId);
+  const urls =
+    preview &&
+    left &&
+    right &&
+    privateReplaySelectionCurrent(preview.clips, [left, right], preview.deadline, Date.now())
+      ? preview
+      : null;
+  const closeComparison = useCallback(() => {
+    previewRequest.current += 1;
+    openingLock.current = false;
+    leftRef.current?.pause();
+    rightRef.current?.pause();
+    setPreview(null);
+    setOpening(false);
+  }, []);
   const label = (deviceId: string) =>
     devices.find((item) => item.id === deviceId)?.label ?? "Camera " + deviceId.slice(0, 6);
   const availablePairs = clips.some((a) => clips.some((b) => b.device_id !== a.device_id));
@@ -56,7 +86,7 @@ export function CameraReplayWorkbench({
     if (clips.length === 0) {
       setLeftId("");
       setRightId("");
-      setUrls(null);
+      closeComparison();
       return;
     }
     const initialClip = clips[0];
@@ -68,10 +98,16 @@ export function CameraReplayWorkbench({
         ? current
         : (clips.find((clip) => clip.device_id !== first.device_id)?.id ?? "");
     });
-  }, [clips, leftId]);
+  }, [clips, leftId, closeComparison]);
 
   const refresh = useCallback(async () => {
-    if (clips.length === 0) return;
+    const request = ++metadataRequest.current;
+    if (clips.length === 0) {
+      setSavedOffsets({});
+      setOffsets({});
+      setHighlights([]);
+      return;
+    }
     try {
       const client = getCloudClient();
       const [saved, candidates] = await Promise.all([
@@ -92,6 +128,7 @@ export function CameraReplayWorkbench({
       ]);
       if (saved.error) throw saved.error;
       if (candidates.error) throw candidates.error;
+      if (request !== metadataRequest.current) return;
       const recorded = Object.fromEntries(
         (saved.data ?? []).map((row) => [row.asset_id, row.offset_ms]),
       );
@@ -100,6 +137,10 @@ export function CameraReplayWorkbench({
       setHighlights((candidates.data ?? []) as PrivateHighlightCandidate[]);
       setError("");
     } catch {
+      if (request !== metadataRequest.current) return;
+      setSavedOffsets({});
+      setOffsets({});
+      setHighlights([]);
       setError(
         "Private replay calibration and highlights are unavailable. Verify the CricLume database migration and director access.",
       );
@@ -108,31 +149,69 @@ export function CameraReplayWorkbench({
 
   useEffect(() => {
     void refresh();
+    return () => {
+      metadataRequest.current += 1;
+    };
   }, [refresh]);
 
   useEffect(() => {
-    setUrls(null);
+    closeComparison();
     setOverlap(true);
-  }, [leftId, rightId]);
+    setLinkedDelivery("");
+    return () => {
+      previewRequest.current += 1;
+    };
+  }, [leftId, rightId, clips, roomId, closeComparison]);
+
+  useEffect(() => {
+    if (!preview) return;
+    const expire = () => {
+      if (Date.now() < preview.deadline) return;
+      closeComparison();
+      setMessage("Private comparison expired. Open both angles again to review access.");
+    };
+    const timer = window.setTimeout(expire, Math.max(0, preview.deadline - Date.now()));
+    document.addEventListener("visibilitychange", expire);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", expire);
+    };
+  }, [preview, closeComparison]);
 
   const startComparison = async () => {
-    if (!left || !right || left.device_id === right.device_id) return;
-    setBusy(true);
+    if (!left || !right || left.device_id === right.device_id || busy || openingLock.current)
+      return;
+    const selected = [left, right];
+    const deadline = privateReplaySelectionDeadline(selected, Date.now());
+    if (deadline === null) {
+      setError("Both recordings must be eligible for private review.");
+      return;
+    }
+    closeComparison();
+    const request = ++previewRequest.current;
+    openingLock.current = true;
+    setOpening(true);
     setError("");
     try {
       const [leftUrl, rightUrl] = await Promise.all([
         signedRoomClipUrl(left),
         signedRoomClipUrl(right),
       ]);
-      setUrls({ left: leftUrl, right: rightUrl });
+      if (request !== previewRequest.current) return;
+      if (deadline <= Date.now()) throw new Error("Preview expired. Open both angles again.");
+      setPreview({ left: leftUrl, right: rightUrl, clips: selected, deadline });
       setMessage(
         "Two private camera sources authorised. Timing is an estimate until manually reviewed.",
       );
     } catch (reason) {
-      setUrls(null);
+      if (request !== previewRequest.current) return;
+      setPreview(null);
       setError(reason instanceof Error ? reason.message : "Private replay was denied.");
     } finally {
-      setBusy(false);
+      if (request === previewRequest.current) {
+        openingLock.current = false;
+        setOpening(false);
+      }
     }
   };
 
@@ -154,7 +233,14 @@ export function CameraReplayWorkbench({
     }
     setOverlap(true);
     if (secondary.readyState < 1) return;
-    if (Math.abs(secondary.currentTime - seconds) > 0.3) secondary.currentTime = seconds;
+    if (Number.isFinite(secondary.duration) && seconds >= secondary.duration) {
+      setOverlap(false);
+      secondary.pause();
+      return;
+    }
+    const target = replaySeekPosition(seconds, secondary.duration);
+    if (target !== null && Math.abs(secondary.currentTime - target) > 0.3)
+      secondary.currentTime = target;
     secondary.playbackRate = primary.playbackRate;
     if (primary.paused && !secondary.paused) secondary.pause();
     if (!primary.paused && secondary.paused)
@@ -199,7 +285,11 @@ export function CameraReplayWorkbench({
   };
 
   const markHighlight = async () => {
-    if (!left || !leftRef.current) return;
+    if (!left || !leftRef.current || !urls || busy || opening) return;
+    if (linkedDelivery && !deliveries.some((delivery) => delivery.id === linkedDelivery)) {
+      setError("The selected delivery is no longer available. Choose another delivery.");
+      return;
+    }
     const seconds = leftRef.current.currentTime;
     if (!canMarkPrivateHighlight(left, seconds, 6000, Date.now())) {
       setError("Choose a current, consented clip with at least six seconds remaining.");
@@ -283,6 +373,7 @@ export function CameraReplayWorkbench({
                     <select
                       value={selectedId}
                       onChange={(event) => {
+                        closeComparison();
                         if (side === "left") setLeftId(event.target.value);
                         else setRightId(event.target.value);
                       }}
@@ -307,13 +398,18 @@ export function CameraReplayWorkbench({
                         src={urls[side]}
                         playsInline
                         controls={side === "left"}
+                        muted={side === "right"}
                         preload="metadata"
                         onTimeUpdate={side === "left" ? align : undefined}
                         onSeeked={side === "left" ? align : undefined}
                         onPlay={side === "left" ? align : undefined}
                         onPause={side === "left" ? align : undefined}
                         onRateChange={side === "left" ? align : undefined}
-                        onLoadedMetadata={side === "left" ? align : undefined}
+                        onLoadedMetadata={align}
+                        onError={() => {
+                          closeComparison();
+                          setError("A private angle could not play. Open both recordings again.");
+                        }}
                         className="h-full w-full object-contain"
                       />
                     ) : (
@@ -367,12 +463,17 @@ export function CameraReplayWorkbench({
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <button
-              disabled={busy || !left || !right || left.device_id === right.device_id}
+              disabled={busy || opening || !left || !right || left.device_id === right.device_id}
               onClick={() => void startComparison()}
               className="inline-flex min-h-11 items-center gap-2 rounded-md bg-amber-300 px-4 text-xs font-bold text-black disabled:opacity-40"
             >
-              <Video className="size-4" /> Open two private angles
+              <Video className="size-4" /> {opening ? "Opening…" : "Open two private angles"}
             </button>
+            {(preview || opening) && (
+              <button type="button" className="action-secondary" onClick={closeComparison}>
+                Close comparison
+              </button>
+            )}
             <span className="text-xs text-slate-400">
               {urls
                 ? overlap
@@ -402,7 +503,11 @@ export function CameraReplayWorkbench({
                     key={delivery.id}
                     disabled={!urls}
                     onClick={() => {
-                      if (leftRef.current) leftRef.current.currentTime = second;
+                      const player = leftRef.current;
+                      if (!player) return;
+                      const target = replaySeekPosition(second, player.duration);
+                      if (target === null) return;
+                      player.currentTime = target;
                       setLinkedDelivery(delivery.id);
                       align();
                     }}
@@ -468,7 +573,7 @@ export function CameraReplayWorkbench({
             />
           </label>
           <button
-            disabled={busy || !urls || !left}
+            disabled={busy || opening || !urls || !left}
             onClick={() => void markHighlight()}
             className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-md border border-amber-300/40 px-4 text-xs font-bold text-amber-200 disabled:opacity-40"
           >

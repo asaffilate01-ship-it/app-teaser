@@ -1,6 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Film, Pause, Play, SkipBack, SkipForward } from "lucide-react";
-import type { CameraClip } from "@/lib/camera-review";
+import {
+  privateReplayDeadline,
+  privateReplaySelectionCurrent,
+  replaySeekPosition,
+  type CameraClip,
+} from "@/lib/camera-review";
 import { loadClipOffsets, loadReelPlayerNames, signedRoomClipUrl } from "@/lib/camera-review-cloud";
 import {
   buildHighlightReel,
@@ -35,22 +40,38 @@ export function HighlightReel({
   devices: DeviceLabel[];
 }) {
   const video = useRef<HTMLVideoElement>(null);
-  const urlCache = useRef(new Map<string, { url: string; at: number }>());
+  const requestRef = useRef(0);
+  const openingLock = useRef(false);
   const [kind, setKind] = useState<ReelKind>("boundaries");
   const [playerId, setPlayerId] = useState("");
   const [angle, setAngle] = useState("");
   const [offsets, setOffsets] = useState<Record<string, number>>({});
   const [names, setNames] = useState<Record<string, string>>({});
   const [index, setIndex] = useState(-1);
-  const [source, setSource] = useState("");
+  const [preview, setPreview] = useState<{
+    url: string;
+    clip: CameraClip;
+    deadline: number;
+  } | null>(null);
+  const [opening, setOpening] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
     void loadClipOffsets(
       roomId,
       clips.map((clip) => clip.id),
-    ).then(setOffsets);
+    )
+      .then((value) => {
+        if (active) setOffsets(value);
+      })
+      .catch(() => {
+        if (active) setOffsets({});
+      });
+    return () => {
+      active = false;
+    };
   }, [roomId, clips]);
 
   const playerIds = useMemo(() => {
@@ -63,7 +84,17 @@ export function HighlightReel({
   }, [deliveries]);
 
   useEffect(() => {
-    void loadReelPlayerNames(playerIds).then(setNames);
+    let active = true;
+    void loadReelPlayerNames(playerIds)
+      .then((value) => {
+        if (active) setNames(value);
+      })
+      .catch(() => {
+        if (active) setNames({});
+      });
+    return () => {
+      active = false;
+    };
   }, [playerIds]);
 
   const reel = useMemo(
@@ -80,79 +111,135 @@ export function HighlightReel({
     [clips, deliveries, kind, playerId, offsets, angle],
   );
 
-  // A new reel choice stops whatever was playing.
-  useEffect(() => {
+  const closeReel = useCallback(() => {
+    requestRef.current += 1;
+    openingLock.current = false;
+    video.current?.pause();
     setIndex(-1);
-    setSource("");
+    setPreview(null);
     setPlaying(false);
-  }, [reel]);
+    setOpening(false);
+  }, []);
+
+  // A new selection or refreshed library invalidates playback and pending URL requests.
+  useEffect(() => {
+    closeReel();
+    return () => {
+      requestRef.current += 1;
+    };
+  }, [reel, roomId, closeReel]);
 
   const current = index >= 0 ? reel[index] : undefined;
+  const currentClip = clips.find((clip) => clip.id === current?.clipId);
+  const source =
+    preview &&
+    currentClip &&
+    privateReplaySelectionCurrent([preview.clip], [currentClip], preview.deadline, Date.now())
+      ? preview.url
+      : "";
 
-  const signed = async (clipId: string) => {
-    const cached = urlCache.current.get(clipId);
-    if (cached && Date.now() - cached.at < 240_000) return cached.url;
-    const clip = clips.find((item) => item.id === clipId);
-    if (!clip) throw new Error("This recording is no longer available.");
-    const url = await signedRoomClipUrl(clip);
-    urlCache.current.set(clipId, { url, at: Date.now() });
-    return url;
-  };
+  useEffect(() => {
+    if (!preview) return;
+    const expire = () => {
+      if (Date.now() < preview.deadline) return;
+      closeReel();
+      setError("Private reel preview expired. Open the moment again to review access.");
+    };
+    const timer = window.setTimeout(expire, Math.max(0, preview.deadline - Date.now()));
+    document.addEventListener("visibilitychange", expire);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", expire);
+    };
+  }, [preview, closeReel]);
 
-  const goTo = async (next: number) => {
-    const item = reel[next];
-    if (!item) {
-      setPlaying(false);
-      setIndex(-1);
-      return;
-    }
-    setError("");
-    try {
-      const url = await signed(item.clipId);
-      setIndex(next);
-      setSource(url);
-      setPlaying(true);
-      const player = video.current;
-      if (player && player.currentSrc === url) {
-        player.currentTime = item.startSeconds;
-        void player.play().catch(() => {});
+  const goTo = useCallback(
+    async (next: number) => {
+      if (openingLock.current) return;
+      const item = reel[next];
+      if (!item) {
+        closeReel();
+        return;
       }
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "This clip could not be played.");
-      setPlaying(false);
-    }
-  };
+      const clip = clips.find((candidate) => candidate.id === item.clipId);
+      const deadline = clip ? privateReplayDeadline(clip, Date.now()) : null;
+      if (!clip || deadline === null) {
+        closeReel();
+        setError("This recording is no longer eligible for private review.");
+        return;
+      }
+      closeReel();
+      const request = ++requestRef.current;
+      openingLock.current = true;
+      setOpening(true);
+      setError("");
+      try {
+        // Authorise each moment against its current clip; never reuse cached private URLs.
+        const url = await signedRoomClipUrl(clip);
+        if (request !== requestRef.current) return;
+        if (deadline <= Date.now()) throw new Error("Preview expired. Open the moment again.");
+        setIndex(next);
+        setPreview({ url, clip, deadline });
+      } catch (reason) {
+        if (request !== requestRef.current) return;
+        setError(reason instanceof Error ? reason.message : "This clip could not be played.");
+      } finally {
+        if (request === requestRef.current) {
+          openingLock.current = false;
+          setOpening(false);
+        }
+      }
+    },
+    [clips, reel, closeReel],
+  );
 
   useEffect(() => {
     const player = video.current;
     if (!player || !current || !source) return;
+    const request = requestRef.current;
     const start = () => {
-      player.currentTime = current.startSeconds;
-      void player.play().catch(() => {});
+      const target = replaySeekPosition(current.startSeconds, player.duration);
+      if (target === null || current.startSeconds >= player.duration) {
+        closeReel();
+        setError("This moment falls outside the playable recording.");
+        return;
+      }
+      player.currentTime = target;
+      void player.play().catch(() => {
+        if (request === requestRef.current) setError("Playback was blocked. Press Resume.");
+      });
+    };
+    const advance = () => {
+      if (request !== requestRef.current || openingLock.current) return;
+      player.pause();
+      void goTo(index + 1);
     };
     const tick = () => {
-      if (player.currentTime >= current.endSeconds) void goTo(index + 1);
+      if (player.currentTime >= current.endSeconds) advance();
     };
     player.addEventListener("loadedmetadata", start);
     player.addEventListener("timeupdate", tick);
+    player.addEventListener("ended", advance);
     if (player.readyState >= 1) start();
     return () => {
       player.removeEventListener("loadedmetadata", start);
       player.removeEventListener("timeupdate", tick);
+      player.removeEventListener("ended", advance);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source, index]);
+  }, [source, current, index, goTo, closeReel]);
 
   const toggle = () => {
+    if (openingLock.current) return;
     const player = video.current;
-    if (index < 0) return void goTo(0);
+    if (!source || index < 0) return void goTo(Math.max(0, index));
     if (!player) return;
     if (player.paused) {
-      void player.play().catch(() => {});
-      setPlaying(true);
+      const request = requestRef.current;
+      void player.play().catch(() => {
+        if (request === requestRef.current) setError("Playback was blocked. Press Resume.");
+      });
     } else {
       player.pause();
-      setPlaying(false);
     }
   };
 
@@ -186,7 +273,10 @@ export function HighlightReel({
               role="radio"
               aria-checked={kind === item.id}
               className={kind === item.id ? "is-active" : ""}
-              onClick={() => setKind(item.id)}
+              onClick={() => {
+                closeReel();
+                setKind(item.id);
+              }}
             >
               {item.label}
             </button>
@@ -195,7 +285,13 @@ export function HighlightReel({
         {kind === "player" && (
           <label>
             Player
-            <select value={playerId} onChange={(event) => setPlayerId(event.target.value)}>
+            <select
+              value={playerId}
+              onChange={(event) => {
+                closeReel();
+                setPlayerId(event.target.value);
+              }}
+            >
               <option value="">Choose a player</option>
               {playerIds
                 .map((id) => ({ id, name: names[id] ?? "Player " + id.slice(0, 4) }))
@@ -210,7 +306,13 @@ export function HighlightReel({
         )}
         <label>
           Preferred angle
-          <select value={angle} onChange={(event) => setAngle(event.target.value)}>
+          <select
+            value={angle}
+            onChange={(event) => {
+              closeReel();
+              setAngle(event.target.value);
+            }}
+          >
             <option value="">Any camera</option>
             {devices.map((device) => (
               <option key={device.id} value={device.id}>
@@ -231,6 +333,12 @@ export function HighlightReel({
               muted={false}
               controls={false}
               preload="metadata"
+              onPlay={() => setPlaying(true)}
+              onPause={() => setPlaying(false)}
+              onError={() => {
+                closeReel();
+                setError("Private video could not play. Reopen this moment.");
+              }}
             />
           ) : (
             <div className="reel-empty">
@@ -254,7 +362,7 @@ export function HighlightReel({
             <button
               type="button"
               aria-label="Previous clip"
-              disabled={index <= 0}
+              disabled={opening || index <= 0}
               onClick={() => void goTo(index - 1)}
             >
               <SkipBack className="size-4" />
@@ -262,27 +370,33 @@ export function HighlightReel({
             <button
               type="button"
               className="action-primary"
-              disabled={reel.length === 0}
+              disabled={opening || reel.length === 0}
               onClick={toggle}
             >
               {playing ? <Pause className="size-4" /> : <Play className="size-4" />}{" "}
-              {playing ? "Pause" : index < 0 ? "Play reel" : "Resume"}
+              {opening ? "Opening…" : playing ? "Pause" : index < 0 ? "Play reel" : "Resume"}
             </button>
             <button
               type="button"
               aria-label="Next clip"
-              disabled={index < 0 || index >= reel.length - 1}
+              disabled={opening || index < 0 || index >= reel.length - 1}
               onClick={() => void goTo(index + 1)}
             >
               <SkipForward className="size-4" />
             </button>
           </div>
+          {(preview || opening) && (
+            <button type="button" className="action-secondary mt-2" onClick={closeReel}>
+              Close private reel
+            </button>
+          )}
         </div>
         <ol className="reel-list" aria-label="Clips in this reel">
           {reel.map((item, position) => (
             <li key={item.deliveryId}>
               <button
                 type="button"
+                disabled={opening}
                 aria-current={position === index}
                 className={`is-${item.tone}`}
                 onClick={() => void goTo(position)}

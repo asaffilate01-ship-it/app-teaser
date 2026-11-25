@@ -120,3 +120,36 @@ export function replaySeekPosition(seconds: number, duration: number): number | 
   if (!Number.isFinite(seconds) || !Number.isFinite(duration) || duration <= 0) return null;
   return Math.min(Math.max(0, seconds), Math.max(0, duration - 0.01));
 }
+
+/** A playback session may display only its original, still-eligible selected sources. */
+export function privateReplaySelectionCurrent(
+  originals: readonly CameraClip[],
+  selected: readonly CameraClip[],
+  deadline: number,
+  nowMs: number,
+): boolean {
+  return (
+    originals.length > 0 &&
+    originals.length === selected.length &&
+    Number.isFinite(deadline) &&
+    Number.isFinite(nowMs) &&
+    deadline > nowMs &&
+    originals.every((clip, index) => {
+      const current = selected[index];
+      return (
+        current !== undefined &&
+        isReviewableClip(current, nowMs) &&
+        sameReplaySource(clip, current) &&
+        clip.started_at === current.started_at &&
+        clip.ended_at === current.ended_at
+      );
+    })
+  );
+}
+
+export function privateReplaySelectionDeadline(clips: readonly CameraClip[], nowMs: number) {
+  if (!clips.length) return null;
+  const deadlines = clips.map((clip) => privateReplayDeadline(clip, nowMs));
+  if (deadlines.some((deadline) => deadline === null)) return null;
+  return Math.min(...deadlines.map((deadline) => deadline ?? 0));
+}
