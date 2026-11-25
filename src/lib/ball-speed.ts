@@ -326,3 +326,20 @@ function lineFit(points: readonly TrackPoint[]): { rate: number; intercept: numb
   const rate = sxy / sxx;
   return { rate, intercept: meanT - rate * meanTime };
 }
+
+/** Request faster local capture without claiming the browser or encoder achieved it. */
+export const cameraCaptureRates = [30, 60, 120] as const;
+export type CameraCaptureRate = (typeof cameraCaptureRates)[number];
+
+export function speedCaptureProfile(rate: CameraCaptureRate) {
+  return {
+    facingMode: "environment",
+    width: { ideal: rate === 30 ? 1920 : 1280 },
+    height: { ideal: rate === 30 ? 1080 : 720 },
+    frameRate: { ideal: rate },
+  };
+}
+
+export function reportedCaptureRate(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? round1(value) : null;
+}
