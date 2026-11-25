@@ -1,5 +1,10 @@
 import { getCloudClient } from "@/lib/cloud";
-import { isReviewableClip, type CameraClip } from "@/lib/camera-review";
+import {
+  currentReplaySource,
+  isReviewableClip,
+  requestedReplayUrlSeconds,
+  type CameraClip,
+} from "@/lib/camera-review";
 import type { ReelDelivery } from "@/lib/highlight-reel";
 
 export interface RoomReviewData {
@@ -46,38 +51,48 @@ export async function loadCameraRoomReview(
 }
 
 export async function signedRoomClipUrl(clip: CameraClip): Promise<string> {
-  if (!isReviewableClip(clip, Date.now()) || !clip.storage_path) {
+  if (!isReviewableClip(clip, Date.now())) {
     throw new Error("This recording is no longer available for review.");
   }
   const client = getCloudClient();
+  const loadCurrent = async () => {
+    const { data, error } = await client
+      .from("video_assets")
+      .select(
+        "id,device_id,started_at,ended_at,storage_path,status,recording_consent,retention_expires_at,blur_mode",
+      )
+      .eq("id", clip.id)
+      .maybeSingle();
+    if (error) throw error;
+    const current = data as CameraClip | null;
+    if (!currentReplaySource(clip, current, Date.now()) || !current.storage_path) {
+      throw new Error("Recording access or metadata changed. Refresh the private recording list.");
+    }
+    return current;
+  };
+  const current = await loadCurrent();
   // A requested blur is a processing policy, not merely a UI label. Never
   // expose the unblurred source when a blurred version was requested.
-  let path = clip.storage_path;
-  if (clip.blur_mode !== "none") {
-    const { data, error } = await client
-      .from("video_variants")
-      .select("storage_path")
-      .eq("asset_id", clip.id)
-      .eq("kind", "blurred")
-      .eq("status", "ready")
-      .maybeSingle();
-    if (error) throw error;
-    if (!data?.storage_path) {
-      throw new Error("Privacy blurring is not complete; recording playback is blocked.");
-    }
-    path = data.storage_path;
-  } else {
-    const { data, error } = await client
-      .from("video_variants")
-      .select("storage_path")
-      .eq("asset_id", clip.id)
-      .eq("kind", "proxy")
-      .eq("status", "ready")
-      .maybeSingle();
-    if (error) throw error;
-    if (data?.storage_path) path = data.storage_path;
+  const kind = current.blur_mode === "none" ? "proxy" : "blurred";
+  const { data, error } = await client
+    .from("video_variants")
+    .select("storage_path")
+    .eq("asset_id", current.id)
+    .eq("kind", kind)
+    .eq("status", "ready")
+    .maybeSingle();
+  if (error) throw error;
+  if (kind === "blurred" && !data?.storage_path) {
+    throw new Error("Privacy blurring is not complete; recording playback is blocked.");
   }
-  const signed = await client.storage.from("match-video").createSignedUrl(path, 300);
+  const path = data?.storage_path || current.storage_path;
+  // Check access and privacy again after the independent variant lookup.
+  const latest = await loadCurrent();
+  const seconds = requestedReplayUrlSeconds(latest, Date.now());
+  if (!path || seconds === null) {
+    throw new Error("Recording retention is ending. Playback is unavailable.");
+  }
+  const signed = await client.storage.from("match-video").createSignedUrl(path, seconds);
   if (signed.error) throw signed.error;
   if (!signed.data.signedUrl) throw new Error("Private recording access was denied.");
   return signed.data.signedUrl;
