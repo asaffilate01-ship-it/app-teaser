@@ -60,7 +60,7 @@ export function createVideoSpeedEvidence(input: VideoSpeedInput): VideoSpeedEvid
 /** Recalculate all derived fields instead of trusting a claimed speed or uncertainty. */
 export function validateVideoSpeedEvidence(value: unknown): VideoSpeedEvidence | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const item = value as Record<string, unknown>;
+  const item = value as Partial<Record<keyof VideoSpeedEvidence, unknown>>;
   if (
     item.version !== 1 ||
     item.metric !== "video_segment_average" ||
