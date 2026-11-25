@@ -95,3 +95,28 @@ export function estimateDeliveryCues(
       a.clipId.localeCompare(b.clipId),
   );
 }
+
+/** Local playback window is deliberately shorter than the signed URL lifetime. */
+export const privateReplayWindowMs = 240_000;
+
+export function privateReplayDeadline(clip: CameraClip, nowMs: number): number | null {
+  if (!Number.isFinite(nowMs) || !isReviewableClip(clip, nowMs)) return null;
+  return Math.min(Date.parse(clip.retention_expires_at), nowMs + privateReplayWindowMs);
+}
+
+/** Changing a source, consent, blur requirement or retention policy invalidates the old preview. */
+export function sameReplaySource(previous: CameraClip, current: CameraClip): boolean {
+  return (
+    previous.id === current.id &&
+    previous.device_id === current.device_id &&
+    previous.storage_path === current.storage_path &&
+    previous.recording_consent === current.recording_consent &&
+    previous.blur_mode === current.blur_mode &&
+    previous.retention_expires_at === current.retention_expires_at
+  );
+}
+
+export function replaySeekPosition(seconds: number, duration: number): number | null {
+  if (!Number.isFinite(seconds) || !Number.isFinite(duration) || duration <= 0) return null;
+  return Math.min(Math.max(0, seconds), Math.max(0, duration - 0.01));
+}
