@@ -243,7 +243,9 @@ function MatchCamera() {
         return;
       }
       streamRef.current = stream;
-      setActualCaptureRate(reportedCaptureRate(stream.getVideoTracks()[0]?.getSettings().frameRate));
+      setActualCaptureRate(
+        reportedCaptureRate(stream.getVideoTracks()[0]?.getSettings().frameRate),
+      );
       stream.getTracks().forEach((track) => {
         track.addEventListener("ended", () => {
           if (streamRef.current !== stream) return;
@@ -840,8 +842,8 @@ function MatchCamera() {
                     >
                       {cameraCaptureRates.map((rate) => (
                         <option key={rate} value={rate}>
-                          {rate === 30 ? "Standard match video" : "Experimental fast-ball capture"} ·{" "}
-                          {rate} fps requested
+                          {rate === 30 ? "Standard match video" : "Experimental fast-ball capture"}
+                          {" · "}{rate} fps requested
                         </option>
                       ))}
                     </select>
