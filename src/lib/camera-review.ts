@@ -50,6 +50,8 @@ export function isReviewableClip(clip: CameraClip, nowMs: number): boolean {
     clip.storage_path &&
     ["uploaded", "processing", "ready"].includes(clip.status) &&
     clip.recording_consent === "granted" &&
+    ["none", "faces", "people"].includes(clip.blur_mode) &&
+    Number.isFinite(nowMs) &&
     Number.isFinite(start) &&
     Number.isFinite(until) &&
     until > nowMs,
@@ -167,4 +169,29 @@ export function privateReplaySelectionDeadline(clips: readonly CameraClip[], now
   const deadlines = clips.map((clip) => privateReplayDeadline(clip, nowMs));
   if (deadlines.some((deadline) => deadline === null)) return null;
   return Math.min(...deadlines.map((deadline) => deadline ?? 0));
+}
+
+/** Never sign a stale selection after its consent, source or timing metadata changes. */
+export function currentReplaySource(
+  selected: CameraClip,
+  current: CameraClip | null,
+  nowMs: number,
+): current is CameraClip {
+  return (
+    current !== null &&
+    isReviewableClip(selected, nowMs) &&
+    isReviewableClip(current, nowMs) &&
+    sameReplaySource(selected, current) &&
+    selected.started_at === current.started_at &&
+    selected.ended_at === current.ended_at
+  );
+}
+
+/** Client-side requested lifetime, leaving a small buffer for signing latency.
+ * Storage authorisation and the server's clock remain authoritative.
+ */
+export function requestedReplayUrlSeconds(clip: CameraClip, nowMs: number): number | null {
+  if (!isReviewableClip(clip, nowMs)) return null;
+  const remaining = Math.floor((Date.parse(clip.retention_expires_at) - nowMs - 5000) / 1000);
+  return remaining > 0 ? Math.min(300, remaining) : null;
 }
