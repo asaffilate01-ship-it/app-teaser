@@ -39,20 +39,34 @@ function readCamera(): CameraMarks | null {
     const value = JSON.parse(
       window.localStorage.getItem(cameraKey) ?? "null",
     ) as CameraMarks | null;
-    return value && value.a && value.b && value.width > 0 ? value : null;
+    return value &&
+      value.a &&
+      value.b &&
+      [value.width, value.height, value.a.x, value.a.y, value.b.x, value.b.y].every(Number.isFinite) &&
+      value.width > 0 &&
+      value.height > 0
+      ? value
+      : null;
   } catch {
     return null;
   }
 }
 
 function seek(video: HTMLVideoElement, time: number): Promise<void> {
-  return new Promise((resolve) => {
-    const done = () => {
+  if (!Number.isFinite(time) || time < 0 || time >= video.duration)
+    return Promise.reject(new Error("Invalid frame time"));
+  if (!video.seeking && video.readyState >= 2 && Math.abs(video.currentTime - time) < 0.0001)
+    return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const finish = (ok: boolean) => {
+      window.clearTimeout(timer);
       video.removeEventListener("seeked", done);
-      resolve();
+      if (ok) resolve();
+      else reject(new Error("Video frame seek timed out"));
     };
-    video.addEventListener("seeked", done);
-    window.setTimeout(done, 1500);
+    const done = () => finish(video.readyState >= 2);
+    const timer = window.setTimeout(() => finish(false), 1500);
+    video.addEventListener("seeked", done, { once: true });
     video.currentTime = time;
   });
 }
@@ -99,7 +113,12 @@ export function BallSpeedTool({
 
   useEffect(() => setCamera(readCamera()), []);
   useEffect(() => () => void (src && URL.revokeObjectURL(src)), [src]);
-  useEffect(() => () => { scanRequest.current += 1; }, []);
+  useEffect(
+    () => () => {
+      scanRequest.current += 1;
+    },
+    [],
+  );
 
   const metres = measuredDistance.trim() ? Number(measuredDistance) : speedDistances[distance].metres;
   const uncertainty = distanceError.trim() ? Number(distanceError) : NaN;
@@ -124,7 +143,7 @@ export function BallSpeedTool({
   const marks =
     camera && camera.width === size.width && camera.height === size.height
       ? camera
-      : camera
+      : camera && Math.abs(camera.width / camera.height - size.width / size.height) < 0.01
         ? scaleMarks(camera, size)
         : null;
 
@@ -144,6 +163,9 @@ export function BallSpeedTool({
     setCalibrationConfirmed(false);
     setReviewConfirmed(false);
     setMeasuredDistance("");
+    setDistanceError("0.2");
+    setPicking(null);
+    setDraftA(null);
     setTimeScale(1);
     setDuration(0);
     setFps(30);
@@ -156,37 +178,72 @@ export function BallSpeedTool({
     setFpsDetected(false);
   };
 
-  // Frame rate: watch a few frames play (muted) and read their timestamps.
+  // Sample media presentation timestamps, not the original camera's capture clock.
   const measureFps = async () => {
-    const video = videoRef.current as
-      | (HTMLVideoElement & {
-          requestVideoFrameCallback?: (
-            cb: (now: number, meta: { mediaTime: number }) => void,
-          ) => number;
-        })
-      | null;
-    if (!video?.requestVideoFrameCallback) return;
+    const video = videoRef.current;
+    if (!video || scanLock.current || !video.requestVideoFrameCallback) {
+      setScan({
+        busy: false,
+        progress: 0,
+        message: "Media frame sampling is unavailable. Use the verified source frame rate.",
+      });
+      return;
+    }
+    const request = ++scanRequest.current;
+    scanLock.current = true;
+    setCalibrationConfirmed(false);
+    setReviewConfirmed(false);
+    setScan({ busy: true, progress: 0, message: "Sampling media frame timestamps…" });
     const times: number[] = [];
+    const back = video.currentTime;
+    const oldRate = video.playbackRate;
     video.muted = true;
-    // Play slowly so the screen shows every frame, even from 240 fps slow-motion clips.
-    video.playbackRate = 0.125;
-    await new Promise<void>((resolve) => {
-      const step = (_now: number, meta: { mediaTime: number }) => {
-        times.push(meta.mediaTime);
-        if (times.length < 14) video.requestVideoFrameCallback!(step);
-        else resolve();
-      };
-      video.requestVideoFrameCallback!(step);
-      void video.play().catch(() => resolve());
-      window.setTimeout(resolve, 4500);
-    });
-    video.pause();
-    video.playbackRate = 1;
-    await seek(video, 0);
-    const found = detectFps(times);
-    if (found) {
-      setFps(found);
-      setFpsDetected(true);
+    video.playbackRate = 0.25;
+    try {
+      await new Promise<void>((resolve) => {
+        let callback = 0;
+        let lastFrame: number | null = null;
+        const finish = () => {
+          window.clearTimeout(timer);
+          video.cancelVideoFrameCallback(callback);
+          resolve();
+        };
+        const step: VideoFrameRequestCallback = (_now, meta) => {
+          if (request !== scanRequest.current) return finish();
+          if (lastFrame !== null && meta.presentedFrames !== lastFrame + 1) times.length = 0;
+          lastFrame = meta.presentedFrames;
+          times.push(meta.mediaTime);
+          if (times.length >= 14) finish();
+          else callback = video.requestVideoFrameCallback(step);
+        };
+        const timer = window.setTimeout(finish, 4500);
+        callback = video.requestVideoFrameCallback(step);
+        void video.play().catch(finish);
+      });
+      if (request !== scanRequest.current) return;
+      video.pause();
+      video.playbackRate = oldRate;
+      if (back < video.duration) await seek(video, back);
+      if (request !== scanRequest.current) return;
+      const found = detectFps(times);
+      setFpsDetected(Boolean(found));
+      if (found) setFps(found);
+      setScan({
+        busy: false,
+        progress: 0,
+        message: found
+          ? "Sampled media rate only. Verify the original capture/export timebase."
+          : "Frame rate could not be sampled reliably. Verify the source manually.",
+      });
+    } catch {
+      if (request === scanRequest.current)
+        setScan({ busy: false, progress: 0, message: "Frame sampling failed." });
+    } finally {
+      if (request === scanRequest.current) {
+        video.pause();
+        video.playbackRate = oldRate;
+        scanLock.current = false;
+      }
     }
   };
 
@@ -202,15 +259,16 @@ export function BallSpeedTool({
   };
 
   const onTap = (event: MouseEvent<SVGSVGElement>) => {
-    if (!picking) return;
+    if (!picking || scanLock.current) return;
     const p = toVideoPoint(event);
-    if (!p) return;
+    if (!p || p.x < 0 || p.y < 0 || p.x > size.width || p.y > size.height) return;
     if (picking === "a") {
       setDraftA(p);
       setPicking("b");
       return;
     }
-    if (!draftA) return;
+    if (!draftA || Math.hypot(p.x - draftA.x, p.y - draftA.y) < size.width * 0.05) return;
+    setCalibrationConfirmed(false);
     const next = { a: draftA, b: p, width: size.width, height: size.height };
     setCamera(next);
     setPicking(null);
@@ -339,6 +397,10 @@ export function BallSpeedTool({
   const cancelScan = () => {
     scanRequest.current += 1;
     scanLock.current = false;
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.playbackRate = 1;
+    }
     setRelease(null);
     setArrival(null);
     setTrackPoints([]);
@@ -380,6 +442,7 @@ export function BallSpeedTool({
         <div className="space-y-3">
           <div className="speed-stage">
             <video
+              key={src}
               ref={videoRef}
               src={src}
               playsInline
@@ -691,6 +754,7 @@ export function BallSpeedTool({
 
           {reading && (
             <div className="speed-reading" role="status" aria-live="polite">
+              <p className="text-xs font-semibold text-muted-foreground">Video speed estimate</p>
               <p className="speed-kph">
                 {reading.kph.toFixed(1)} <span>km/h</span>
               </p>
