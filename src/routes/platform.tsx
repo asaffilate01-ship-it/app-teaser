@@ -92,6 +92,13 @@ import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPane
 import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace";
 import { PlanGate } from "@/components/plan/PlanGate";
 import { sectionFeature } from "@/lib/plans";
+import {
+  billingReturnMatches,
+  billingReturnMessage,
+  readBillingOrganisation,
+  readBillingReturn,
+  type BillingReturn,
+} from "@/lib/billing-return";
 import { AcademyDashboard } from "@/components/AcademyDashboard";
 import { LeagueStandings } from "@/components/LeagueStandings";
 import { LeagueHub } from "@/components/league/LeagueHub";
@@ -143,9 +150,17 @@ import { usePromos } from "@/hooks/use-promos";
 import { assignableRoles, can, platformRoles, roleLabels, type PlatformRole } from "@/lib/platform";
 
 export const Route = createFileRoute("/platform")({
-  validateSearch: (search: Record<string, unknown>): { section?: PlatformTab } => {
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { section?: PlatformTab; billing?: BillingReturn; billingOrg?: string } => {
     const section = readSection(search["section"], platformSections);
-    return { section: section ?? "overview" };
+    const billing = readBillingReturn(search["billing"]);
+    const billingOrg = billing ? readBillingOrganisation(search["billingOrg"]) : undefined;
+    return {
+      section: section ?? (billing ? "operations" : "overview"),
+      ...(billing ? { billing } : {}),
+      ...(billingOrg ? { billingOrg } : {}),
+    };
   },
   head: () => ({
     meta: [
@@ -690,7 +705,8 @@ function OperationalPlatform({
   onSelectOrganisation: (id: string) => void;
   signOut: () => Promise<void>;
 }) {
-  const tab = Route.useSearch().section ?? "overview";
+  const search = Route.useSearch();
+  const tab = search.section ?? "overview";
   const navigate = Route.useNavigate();
   const setTab = (section: PlatformTab) =>
     void navigate({ search: { section }, resetScroll: true });
@@ -786,6 +802,18 @@ function OperationalPlatform({
             layout="rail"
           />
           <div className="min-w-0 lg:pt-6">
+            {search.billing && (
+              <BillingReturnNotice
+                result={search.billing}
+                billingOrg={search.billingOrg ?? null}
+                membership={membership}
+                memberships={memberships}
+                onSelectOrganisation={onSelectOrganisation}
+                refreshing={dashboard.refreshing}
+                onRefresh={() => void dashboard.refresh()}
+                onDismiss={() => void navigate({ search: { section: tab }, replace: true })}
+              />
+            )}
             {dashboard.error && <ErrorNotice message={dashboard.error} />}
             {!dashboard.loading && !dashboard.data && dashboard.error ? (
               <section className="workspace-empty" role="status">
@@ -2541,6 +2569,77 @@ function Safeguarding({
         </div>
       </Panel>
     </div>
+  );
+}
+
+function BillingReturnNotice({
+  result,
+  billingOrg,
+  membership,
+  memberships,
+  onSelectOrganisation,
+  refreshing,
+  onRefresh,
+  onDismiss,
+}: {
+  result: BillingReturn;
+  billingOrg: string | null;
+  membership: OrganisationMembership;
+  memberships: OrganisationMembership[];
+  onSelectOrganisation: (id: string) => void;
+  refreshing: boolean;
+  onRefresh: () => void;
+  onDismiss: () => void;
+}) {
+  const matches = billingReturnMatches(billingOrg ?? undefined, membership.organisationId);
+  const target = memberships.find(
+    (item) =>
+      billingReturnMatches(billingOrg ?? undefined, item.organisationId) &&
+      can(item.role, "billing.manage"),
+  );
+  return (
+    <section className="office-card mb-4 space-y-3" aria-label="Billing return">
+      <div role="status">
+        <h2 className="font-bold">Review subscription status</h2>
+        <p className="mt-1 text-sm text-slate-300">{billingReturnMessage(result)}</p>
+        {matches && can(membership.role, "billing.manage") ? (
+          <p className="mt-2 text-xs text-slate-400">
+            Review the current subscription record for {membership.organisationName}. Only verified
+            provider records can confirm activation.
+          </p>
+        ) : (
+          <p className="mt-2 text-xs text-amber-200">
+            This return does not verify a subscription for the selected workspace. Check the
+            correct organisation with an authorised billing owner.
+          </p>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {matches && can(membership.role, "billing.manage") && (
+          <button
+            type="button"
+            className="action-primary"
+            disabled={refreshing}
+            onClick={onRefresh}
+          >
+            <RefreshCw className="size-4" />
+            Refresh subscription record
+          </button>
+        )}
+        {!matches && target && (
+          <button
+            type="button"
+            className="action-primary"
+            onClick={() => onSelectOrganisation(target.organisationId)}
+          >
+            Switch to {target.organisationName}
+          </button>
+        )}
+        <button type="button" className="action-secondary" onClick={onDismiss}>
+          Dismiss
+        </button>
+      </div>
+    </section>
   );
 }
 
