@@ -53,9 +53,9 @@ interface ScoreboardData {
     wickets?: number;
     overs?: string;
     target?: number;
-    striker?: { name: string; runs: number; balls: number };
-    nonStriker?: { name: string; runs: number; balls: number };
-    bowler?: { name: string; wickets: number; runs: number; overs: string };
+    striker?: { name: string; runs: number; balls: number } | null;
+    nonStriker?: { name: string; runs: number; balls: number } | null;
+    bowler?: { name: string; wickets: number; runs: number; overs: string } | null;
     recent?: Array<{ label: string; kind?: string }>;
     message?: string;
     settings?: { oversPerInnings?: number | null; inningsPerSide?: number; ballsPerOver?: number };
@@ -84,7 +84,7 @@ type BallKind = "boundary" | "wicket" | "extra" | "dot" | "run";
 function ballKind(ball: { label: string; kind?: string }): BallKind {
   if (ball.kind === "wicket" || ball.label === "W") return "wicket";
   if (ball.kind === "boundary") return "boundary";
-  if (ball.label === "Wd" || ball.label === "Nb") return "extra";
+  if (ball.kind === "extra" || ball.label === "Wd" || ball.label === "Nb") return "extra";
   if (ball.label === "·" || ball.label === "0") return "dot";
   return "run";
 }
@@ -101,6 +101,10 @@ function strikeRate(runs: number, balls: number) {
 
 function PublicScoreboard() {
   const { slug } = Route.useParams();
+  return <ScopedScoreboard key={slug} slug={slug} />;
+}
+
+function ScopedScoreboard({ slug }: { slug: string }) {
   const [scoreboard, setScoreboard] = useState<ScoreboardData | null>(null);
   const [loading, setLoading] = useState(isCloudConfigured());
   const [error, setError] = useState<string | null>(null);
@@ -110,24 +114,46 @@ function PublicScoreboard() {
   useEffect(() => {
     if (!isCloudConfigured()) return;
     let active = true;
+    let inFlight = false;
     const load = async () => {
-      const { data, error: requestError } = await getCloudClient().rpc("get_public_scoreboard", {
-        p_slug: slug,
-      });
-      if (!active) return;
-      if (requestError) setError(requestError.message);
-      else if (!data) setError("This scoreboard is not public or is not available yet.");
-      else {
-        setScoreboard(data as ScoreboardData);
-        setError(null);
+      if (!active || inFlight) return;
+      inFlight = true;
+      try {
+        const { data, error: requestError } = await getCloudClient().rpc("get_public_scoreboard", {
+          p_slug: slug,
+        });
+        if (!active) return;
+        if (requestError || !data) {
+          setScoreboard(null);
+          setError(
+            requestError?.message ?? "This scoreboard is not public or is not available yet.",
+          );
+        } else {
+          setScoreboard(data as ScoreboardData);
+          setError(null);
+        }
+      } catch {
+        if (active) {
+          setScoreboard(null);
+          setError("The live score could not be refreshed. Reconnect to try again.");
+        }
+      } finally {
+        inFlight = false;
+        if (active) setLoading(false);
       }
-      setLoading(false);
+    };
+    const refreshVisible = () => {
+      if (document.visibilityState === "visible") void load();
     };
     void load();
-    const timer = window.setInterval(() => void load(), 10_000);
+    const timer = window.setInterval(refreshVisible, 10_000);
+    document.addEventListener("visibilitychange", refreshVisible);
+    window.addEventListener("online", refreshVisible);
     return () => {
       active = false;
       window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", refreshVisible);
+      window.removeEventListener("online", refreshVisible);
     };
   }, [slug]);
 
@@ -170,7 +196,8 @@ function PublicScoreboard() {
         ? 1
         : (state.settings?.oversPerInnings ?? null);
   const chase = chaseState(state.target ?? null, runs, legalBalls, oversLimit, ballsPerOver);
-  const isLive = scoreboard.status === "live" || scoreboard.status === "innings_break";
+  const isLive = scoreboard.status === "live" && !state.days?.atStumps;
+  const inningsBreak = scoreboard.status === "innings_break";
   const tossLine =
     state.toss &&
     (state.inningsNumber ?? 1) === 1 &&
@@ -179,28 +206,33 @@ function PublicScoreboard() {
       : null;
   const ribbon = state.result
     ? state.result
-    : chase && chase.runsNeeded > 0
-      ? `${batting.name} need ${chase.runsNeeded} ${chase.runsNeeded === 1 ? "run" : "runs"}${chase.ballsLeft != null ? ` from ${chase.ballsLeft} balls` : ""}`
-      : chase
-        ? `${batting.name} have reached the target`
-        : (tossLine ?? state.message ?? `${batting.name} batting`);
+    : inningsBreak
+      ? "Innings break"
+      : state.days?.atStumps
+        ? "Stumps"
+        : chase && chase.runsNeeded > 0
+          ? `${batting.name} need ${chase.runsNeeded} ${chase.runsNeeded === 1 ? "run" : "runs"}${chase.ballsLeft != null ? ` from ${chase.ballsLeft} balls` : ""}`
+          : chase
+            ? `${batting.name} have reached the target`
+            : (tossLine ?? state.message ?? `${batting.name} batting`);
   const recent = state.recent ?? [];
   const commentary = state.commentary ?? null;
-  const prediction = state.result
-    ? null
-    : predictWin({
-        oversPerInnings: oversLimit,
-        inningsPerSide: state.settings?.inningsPerSide ?? 1,
-        ballsPerOver,
-        inningsNumber: state.inningsNumber ?? (state.target ? 2 : 1),
-        runs,
-        wickets,
-        legalBalls,
-        target: state.target ?? null,
-        maxWickets: state.maxWickets ?? 10,
-        battingIsHome: state.battingIsHome ?? batting.id === scoreboard.homeTeam.id,
-        conditions: state.conditions ?? undefined,
-      });
+  const prediction =
+    state.result || !isLive
+      ? null
+      : predictWin({
+          oversPerInnings: oversLimit,
+          inningsPerSide: state.settings?.inningsPerSide ?? 1,
+          ballsPerOver,
+          inningsNumber: state.inningsNumber ?? (state.target ? 2 : 1),
+          runs,
+          wickets,
+          legalBalls,
+          target: state.target ?? null,
+          maxWickets: state.maxWickets ?? 10,
+          battingIsHome: state.battingIsHome ?? batting.id === scoreboard.homeTeam.id,
+          conditions: state.conditions ?? undefined,
+        });
   const homeBatting = batting.id === scoreboard.homeTeam.id;
   const homeWin = prediction ? (homeBatting ? prediction.battingWin : prediction.bowlingWin) : null;
   const updated = new Date(scoreboard.updatedAt).toLocaleTimeString([], {
@@ -237,7 +269,11 @@ function PublicScoreboard() {
             {!state.result && <MatchAlerts slug={slug} />}
             <span className={`hero-chip ${isLive ? "hero-chip-live" : ""}`}>
               {isLive && <span className="live-dot" aria-hidden="true" />}
-              {isLive ? "Live" : scoreboard.status.replaceAll("_", " ")}
+              {isLive
+                ? "Live"
+                : state.days?.atStumps
+                  ? "Stumps"
+                  : scoreboard.status.replaceAll("_", " ")}
             </span>
           </div>
         </div>
@@ -344,7 +380,12 @@ function PublicScoreboard() {
                       </thead>
                       <tbody>
                         {[
-                          { key: "striker", label: "Striker", line: state.striker, onStrike: true },
+                          {
+                            key: "striker",
+                            label: "Striker",
+                            line: state.striker,
+                            onStrike: isLive && Boolean(state.striker),
+                          },
                           {
                             key: "non",
                             label: "Non-striker",
