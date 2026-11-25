@@ -368,31 +368,32 @@ export const findTeam = (match: CricketMatch, id: string) =>
 export const findPlayer = (match: CricketMatch, id: string) =>
   match.teams.flatMap((team) => team.players).find((player) => player.id === id);
 
-export const deliveryRuns = (delivery: Delivery) =>
-  delivery.batterRuns + Object.values(delivery.extras).reduce((sum, value) => sum + value, 0);
+const extraRuns = (extras: Extras) =>
+  extras.wide + extras.noBall + extras.bye + extras.legBye + extras.penalty;
+
+export const deliveryRuns = (delivery: Delivery) => delivery.batterRuns + extraRuns(delivery.extras);
 
 export const isBowlerWicket = (type: DismissalType) =>
   !["run-out", "obstructing-the-field"].includes(type);
 
 export function summarizeInnings(innings: Innings, ballsPerOver = 6): InningsSummary {
-  const extras = innings.deliveries.reduce<Extras>(
-    (totals, delivery) => ({
-      wide: totals.wide + delivery.extras.wide,
-      noBall: totals.noBall + delivery.extras.noBall,
-      bye: totals.bye + delivery.extras.bye,
-      legBye: totals.legBye + delivery.extras.legBye,
-      penalty: totals.penalty + delivery.extras.penalty,
-    }),
-    emptyExtras(),
-  );
-  const runs = innings.deliveries.reduce(
-    (sum, delivery) => sum + deliveryRuns(delivery) - (delivery.wicketPenalty ?? 0),
-    0,
-  );
-  const legalBalls = innings.deliveries.filter((delivery) => delivery.legal).length;
-  const wickets =
-    innings.deliveries.filter((delivery) => Boolean(delivery.dismissal)).length +
-    (innings.retirements ?? []).filter((item) => item.kind !== "hurt").length;
+  const extras = emptyExtras();
+  let runs = 0;
+  let legalBalls = 0;
+  let wickets = 0;
+  for (const delivery of innings.deliveries) {
+    extras.wide += delivery.extras.wide;
+    extras.noBall += delivery.extras.noBall;
+    extras.bye += delivery.extras.bye;
+    extras.legBye += delivery.extras.legBye;
+    extras.penalty += delivery.extras.penalty;
+    runs += deliveryRuns(delivery) - (delivery.wicketPenalty ?? 0);
+    if (delivery.legal) legalBalls += 1;
+    if (delivery.dismissal) wickets += 1;
+  }
+  for (const retirement of innings.retirements ?? []) {
+    if (retirement.kind !== "hurt") wickets += 1;
+  }
 
   return {
     runs,
@@ -400,7 +401,7 @@ export function summarizeInnings(innings: Innings, ballsPerOver = 6): InningsSum
     legalBalls,
     overs: `${Math.floor(legalBalls / ballsPerOver)}.${legalBalls % ballsPerOver}`,
     runRate: legalBalls ? (runs * ballsPerOver) / legalBalls : 0,
-    extras: { ...extras, total: Object.values(extras).reduce((sum, value) => sum + value, 0) },
+    extras: { ...extras, total: extraRuns(extras) },
   };
 }
 
@@ -463,13 +464,23 @@ const pairsRule = (match: CricketMatch, innings: Innings) =>
   isSuperOver(innings) ? null : (match.settings.rules?.pairs ?? null);
 
 export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput): CricketMatch {
-  if (match.status !== "live" || match.days?.atStumps) return match;
+  if (match.status !== "live" || match.days?.atStumps || match.stoppage) return match;
   const innings = currentInnings(match);
+  if (innings.status !== "live") return match;
   const freeHit = nextBallIsFreeHit(match);
   // On a free hit the batter cannot be bowled, caught, lbw, stumped or out hit wicket.
   if (freeHit && input.dismissal && !freeHitDismissals.includes(input.dismissal.type)) return match;
-  const summaryBefore = summarizeInnings(innings, match.settings.ballsPerOver);
   const extras = { ...emptyExtras(), ...input.extras };
+  const counts = [
+    input.batterRuns,
+    extras.wide,
+    extras.noBall,
+    extras.bye,
+    extras.legBye,
+    extras.penalty,
+  ];
+  if (counts.some((value) => !Number.isSafeInteger(value) || value < 0)) return match;
+  const summaryBefore = summarizeInnings(innings, match.settings.ballsPerOver);
   const legal = extras.wide === 0 && extras.noBall === 0;
   const delivery: Delivery = {
     id: makeId("delivery"),
@@ -484,7 +495,7 @@ export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput):
     end: input.end,
     deliveryStyle: input.deliveryStyle,
     outcome: input.outcome,
-    batterRuns: Math.max(0, input.batterRuns),
+    batterRuns: input.batterRuns,
     extras,
     fieldZone: input.fieldZone ?? "Not recorded",
     fielderId: input.fielderId || undefined,
@@ -559,14 +570,15 @@ export function recordDelivery(match: CricketMatch, input: RecordDeliveryInput):
     end: input.end,
     deliveries,
   };
-  const summaryAfter = summarizeInnings(updatedInnings, match.settings.ballsPerOver);
+  const wicketsAfter = summaryBefore.wickets + (delivery.dismissal ? 1 : 0);
+  const runsAfter = summaryBefore.runs + deliveryRuns(delivery) - (delivery.wicketPenalty ?? 0);
   const maximumBalls = inningsBallLimit(match, innings);
-  const allOut = !pairs && summaryAfter.wickets >= inningsWicketLimit(match, innings);
-  const oversComplete = maximumBalls !== null && summaryAfter.legalBalls >= maximumBalls;
+  const allOut = !pairs && wicketsAfter >= inningsWicketLimit(match, innings);
+  const oversComplete = maximumBalls !== null && legalBallsAfter >= maximumBalls;
   // A chase (one-innings second innings, fourth innings, or second half of a Super Over)
   // finishes as soon as the target is reached.
   const target = targetForCurrentInnings(match);
-  const chaseWon = target !== null && summaryAfter.runs >= target;
+  const chaseWon = target !== null && runsAfter >= target;
   const inningsComplete = allOut || oversComplete || chaseWon || noBatterLeft;
   updatedInnings.status = inningsComplete ? "completed" : "live";
 
@@ -787,13 +799,13 @@ const runsOf = (match: CricketMatch, innings: Innings) =>
 /** Law 21.19-style free hit: true when the previous ball was a no-ball (a wide on a free hit carries it on). */
 export function nextBallIsFreeHit(match: CricketMatch): boolean {
   if (!match.settings.rules?.freeHit) return false;
-  let free = false;
-  for (const delivery of currentInnings(match).deliveries) {
-    if (delivery.extras.noBall > 0) free = true;
-    else if (delivery.extras.wide > 0) continue;
-    else free = false;
+  const deliveries = currentInnings(match).deliveries;
+  for (let index = deliveries.length - 1; index >= 0; index--) {
+    const delivery = deliveries[index]!;
+    if (delivery.extras.noBall > 0) return true;
+    if (delivery.extras.wide === 0) return false;
   }
-  return free;
+  return false;
 }
 
 /** Dismissals the scorer may record on the next ball. */
