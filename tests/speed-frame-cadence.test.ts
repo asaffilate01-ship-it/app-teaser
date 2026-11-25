@@ -12,10 +12,7 @@ test("nominal media rate requires a consistent ordered timestamp sample", () => 
   assert.equal(detectFps(regular.filter((_, i) => i !== 5)), null);
   assert.equal(detectFps([...regular.slice(0, 5), regular[4]!, ...regular.slice(5)]), null);
   assert.equal(detectFps([...regular.slice(0, 5), NaN, ...regular.slice(5)]), null);
-  assert.equal(
-    detectFps(Array.from({ length: 14 }, (_, i) => i / 80)),
-    null,
-  );
+  assert.equal(detectFps(Array.from({ length: 14 }, (_, i) => i / 80)), null);
 });
 
 test("bounded motion bins keep separated candidates in progress order", () => {
