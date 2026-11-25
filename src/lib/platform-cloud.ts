@@ -1,5 +1,6 @@
 import type { RealtimeChannel, User } from "@supabase/supabase-js";
 import { externalTeams } from "./external-teams.ts";
+import { verifiedBillingRedirect } from "./billing-redirect.ts";
 export { externalTeams } from "./external-teams.ts";
 import { getCloudClient, invokePlatformFunction } from "@/lib/cloud";
 import type { CompetitionRules, PlatformRole, PointAdjustment } from "@/lib/platform";
@@ -1001,8 +1002,7 @@ export async function createCheckout(input: {
     successUrl: `${window.location.origin}/platform?billing=success`,
     cancelUrl: `${window.location.origin}/platform?billing=cancelled`,
   });
-  if (!result.url) throw new Error("Stripe did not return a checkout URL.");
-  return result.url;
+  return verifiedBillingRedirect(result.url, "checkout");
 }
 
 export async function openBillingPortal(organisationId: string) {
@@ -1010,8 +1010,5 @@ export async function openBillingPortal(organisationId: string) {
     organisationId,
     returnUrl: window.location.origin + "/platform",
   });
-  const url = new URL(r.url);
-  if (url.protocol !== "https:" || url.hostname !== "billing.stripe.com")
-    throw new Error("Invalid billing portal URL.");
-  return url.toString();
+  return verifiedBillingRedirect(r.url, "portal");
 }

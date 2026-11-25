@@ -98,7 +98,7 @@ export function gateWhenPlanUnknown(
   feature: PlanFeature | undefined,
   enforced = planLocksEnforced,
 ): PlanGate {
-  if (!feature) return "open";
+  if (!feature || feature === "basicScoring") return "open";
   return enforced ? "locked" : "badge";
 }
 
@@ -114,4 +114,23 @@ export function planGate(
 
 export function readPlanId(value: unknown): PlanId {
   return value === "club" || value === "league" ? value : "starter";
+}
+
+export interface PlanAccess {
+  plan: PlanId;
+  videoAddon: boolean;
+}
+
+/** Malformed entitlement responses are unknown, not confirmed free or paid plans. */
+export function parsePlanAccess(value: unknown): PlanAccess | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const row = value as Record<string, unknown>;
+  const plan = row["plan"];
+  const videoAddon = row["videoAddon"];
+  if (
+    (plan !== "starter" && plan !== "club" && plan !== "league") ||
+    typeof videoAddon !== "boolean"
+  )
+    return null;
+  return { plan, videoAddon: plan !== "starter" && videoAddon };
 }

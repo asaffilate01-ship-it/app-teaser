@@ -4,32 +4,46 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   gateWhenPlanUnknown,
   planGate,
-  readPlanId,
+  parsePlanAccess,
   type PlanFeature,
-  type PlanId,
+  type PlanAccess,
 } from "@/lib/plans";
-
-interface PlanAccess {
-  plan: PlanId;
-  videoAddon: boolean;
-}
 
 /** The club's plan, readable by every member (billing details stay admin-only). */
 export function useClubPlan(organisationId: string): PlanAccess | null {
-  const [access, setAccess] = useState<PlanAccess | null>(null);
+  const [snapshot, setSnapshot] = useState<{
+    organisationId: string;
+    access: PlanAccess | null;
+  } | null>(null);
   useEffect(() => {
-    let live = true;
-    setAccess(null);
-    void supabase.rpc("club_plan_access", { p_org: organisationId }).then(({ data, error }) => {
-      if (!live || error) return;
-      const row = data as { plan?: unknown; videoAddon?: unknown } | null;
-      setAccess({ plan: readPlanId(row?.plan), videoAddon: row?.videoAddon === true });
-    });
+    let active = true;
+    let request = 0;
+    const refresh = async () => {
+      const current = ++request;
+      try {
+        const { data, error } = await supabase.rpc("club_plan_access", { p_org: organisationId });
+        if (active && current === request)
+          setSnapshot({ organisationId, access: error ? null : parsePlanAccess(data) });
+      } catch {
+        if (active && current === request) setSnapshot({ organisationId, access: null });
+      }
+    };
+    setSnapshot(null);
+    void refresh();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    const timer = window.setInterval(onVisible, 60_000);
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("online", onVisible);
     return () => {
-      live = false;
+      active = false;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", onVisible);
     };
   }, [organisationId]);
-  return access;
+  return snapshot?.organisationId === organisationId ? snapshot.access : null;
 }
 
 const featureName: Record<PlanFeature, string> = {
@@ -71,7 +85,17 @@ export function PlanGate({
       </section>
     );
   }
-  if (!access) return <>{children}</>;
+  if (!access) {
+    if (feature === "basicScoring") return <>{children}</>;
+    return (
+      <div className="space-y-4">
+        <p role="status" className="plan-note">
+          Plan access is not verified. This paid feature is available in preview mode only.
+        </p>
+        {children}
+      </div>
+    );
+  }
   const gate = planGate(access.plan, feature, { videoAddon: access.videoAddon });
   if (gate === "open") return <>{children}</>;
   if (gate === "locked")
