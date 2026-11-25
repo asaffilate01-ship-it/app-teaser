@@ -257,7 +257,8 @@ test("latest snapshot recovery skips non-snapshot events, but never skips an inv
   assert.equal(latestScorerSnapshot([patch], original.id), null);
   for (const invalid of [null, {}, { ...original, id: "different" }]) {
     assert.throws(
-      () => latestScorerSnapshot([patch, { payload: { matchSnapshot: invalid } }, valid], original.id),
+      () =>
+        latestScorerSnapshot([patch, { payload: { matchSnapshot: invalid } }, valid], original.id),
       /latest cloud scoring snapshot is invalid/,
     );
   }
