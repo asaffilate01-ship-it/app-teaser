@@ -42,7 +42,9 @@ function readCamera(): CameraMarks | null {
     return value &&
       value.a &&
       value.b &&
-      [value.width, value.height, value.a.x, value.a.y, value.b.x, value.b.y].every(Number.isFinite) &&
+      [value.width, value.height, value.a.x, value.a.y, value.b.x, value.b.y].every(
+        Number.isFinite,
+      ) &&
       value.width > 0 &&
       value.height > 0
       ? value
@@ -120,7 +122,9 @@ export function BallSpeedTool({
     [],
   );
 
-  const metres = measuredDistance.trim() ? Number(measuredDistance) : speedDistances[distance].metres;
+  const metres = measuredDistance.trim()
+    ? Number(measuredDistance)
+    : speedDistances[distance].metres;
   const uncertainty = distanceError.trim() ? Number(distanceError) : NaN;
   const calibrated =
     calibrationConfirmed &&
@@ -644,18 +648,14 @@ export function BallSpeedTool({
                 checked={calibrationConfirmed}
                 onChange={(event) => setCalibrationConfirmed(event.target.checked)}
               />
-              I verified the measured distance, fixed camera geometry, media frame rate and
-              original recording timebase. The two points are on the ball's measured path.
+              I verified the measured distance, fixed camera geometry, media frame rate and original
+              recording timebase. The two points are on the ball's measured path.
             </label>
             <p className="text-xs text-muted-foreground">
               Preset distances are approximate. Confirm an actual measured distance before saving.
               Slowed exports need manual marks; variable-speed edited clips are unsuitable.
             </p>
-            <button
-              type="button"
-              className="action-secondary"
-              onClick={() => void measureFps()}
-            >
+            <button type="button" className="action-secondary" onClick={() => void measureFps()}>
               Sample media frame rate
             </button>
           </fieldset>
