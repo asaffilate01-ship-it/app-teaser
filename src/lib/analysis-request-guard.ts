@@ -18,12 +18,14 @@ export function createAnalysisRequestGuard() {
       ready = success;
       return true;
     },
+    isRefreshCurrent: (token: number) => generation === token,
     canAct: () => ready && action === null,
     beginAction() {
       if (!ready || action !== null) return null;
       action = ++nextAction;
       return action;
     },
+    isActionCurrent: (token: number) => action === token,
     finishAction(token: number) {
       if (action !== token) return false;
       action = null;
