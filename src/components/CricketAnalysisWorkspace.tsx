@@ -1,4 +1,5 @@
 import { analysisZoneOptions } from "@/lib/analysis-ground";
+import { createAnalysisRequestGuard } from "@/lib/analysis-request-guard";
 import { BowlingPlacement } from "@/components/BowlingPlacement";
 import { AnalysisGround } from "@/components/AnalysisGround";
 import { observationErrors } from "@/lib/observation-form";
@@ -131,9 +132,9 @@ function MatchAnalysis({
   const [preview, setPreview] = useState<{ url: string; kind: string; label: string } | null>(null);
   const [previewFailed, setPreviewFailed] = useState(false);
   const previewOrigin = useRef<HTMLElement | null>(null);
-  const previewRequest = useRef(0);
+  const requestGuard = useRef(createAnalysisRequestGuard()).current;
   const closePreview = () => {
-    previewRequest.current += 1;
+    requestGuard.closePreview();
     setPreview(null);
     setClipSelection(null);
   };
@@ -153,13 +154,23 @@ function MatchAnalysis({
   const [notePage, setNotePage] = useState(0);
   const [history, setHistory] = useState<ObservationHistory>("current");
   const [refreshedAt, setRefreshedAt] = useState<string | null>(null);
+  const refreshEvidence = () => {
+    requestGuard.beginRefresh();
+    closePreview();
+    setLoading(true);
+    setVersion((value) => value + 1);
+  };
   useEffect(() => {
     let active = true;
+    const token = requestGuard.beginRefresh();
     setLoading(true);
+    setPreview(null);
+    setClipSelection(null);
+    setRefreshedAt(null);
     setError("");
     void loadAnalysis(org, match, selectedSourceRef.current)
       .then((r) => {
-        if (active) {
+        if (active && requestGuard.completeRefresh(token, true)) {
           setData(r);
           setRefreshedAt(new Date().toISOString());
           setPreview(null);
@@ -169,49 +180,67 @@ function MatchAnalysis({
         }
       })
       .catch(() => {
-        if (active)
+        if (active && requestGuard.completeRefresh(token, false)) {
+          setData(null);
           setError(
             "Evidence could not be loaded. Check your connection or ask your club administrator to confirm access.",
           );
+        }
       })
       .finally(() => {
         if (active) setLoading(false);
       });
     return () => {
       active = false;
+      requestGuard.dispose();
     };
-  }, [org, match, version]);
+  }, [org, match, version, requestGuard]);
   useEffect(() => {
     setPreviewFailed(false);
     if (!preview) return;
     const t = window.setTimeout(() => {
-      previewRequest.current += 1;
+      requestGuard.closePreview();
       setPreview(null);
+      setClipSelection(null);
       setNotice("Private preview closed after 60 seconds. Open the source again to continue.");
     }, 60000);
     return () => window.clearTimeout(t);
-  }, [preview]);
+  }, [preview, requestGuard]);
   const rows = useMemo(
     () => filterDeliveries(data?.deliveries ?? [], filters, data?.mediaIds, data?.notes),
     [data, filters],
   );
-  const summary = summarizeDeliveries(rows);
-  const reviewQueue = buildCoachReviewQueue(rows, data?.mediaIds ?? new Set(), data?.notes ?? []);
-  const evidenceReadiness = summarizeCoachingEvidence(
-    data?.deliveries ?? [],
-    data?.mediaIds ?? new Set<string>(),
-    data?.notes ?? [],
+  const summary = useMemo(() => summarizeDeliveries(rows), [rows]);
+  const reviewQueue = useMemo(
+    () => buildCoachReviewQueue(rows, data?.mediaIds ?? new Set(), data?.notes ?? []),
+    [rows, data],
   );
-  const visibleDeliveryIds = new Set(rows.map((d) => d.id));
-  const currentDeliveryIds = new Set((data?.deliveries ?? []).map((d) => d.id));
-  const visibleNotes = filterObservations(
-    data?.notes ?? [],
-    filters.discipline,
-    filters.coaching ?? emptyCoachingFields,
-    search,
-    history,
-    currentDeliveryIds,
-    visibleDeliveryIds,
+  const evidenceReadiness = useMemo(
+    () =>
+      summarizeCoachingEvidence(
+        data?.deliveries ?? [],
+        data?.mediaIds ?? new Set<string>(),
+        data?.notes ?? [],
+      ),
+    [data],
+  );
+  const visibleDeliveryIds = useMemo(() => new Set(rows.map((d) => d.id)), [rows]);
+  const currentDeliveryIds = useMemo(
+    () => new Set((data?.deliveries ?? []).map((d) => d.id)),
+    [data],
+  );
+  const visibleNotes = useMemo(
+    () =>
+      filterObservations(
+        data?.notes ?? [],
+        filters.discipline,
+        filters.coaching ?? emptyCoachingFields,
+        search,
+        history,
+        currentDeliveryIds,
+        visibleDeliveryIds,
+      ),
+    [data, filters, search, history, currentDeliveryIds, visibleDeliveryIds],
   );
   const staleDelivery = Boolean(delivery && !currentDeliveryIds.has(delivery));
   const staleSource = Boolean(source && !data?.files.some((f) => f.id === source));
@@ -238,7 +267,7 @@ function MatchAnalysis({
   useEffect(() => {
     setNotePage(0);
   }, [filters, search, history]);
-  const names = new Map(players.map((p) => [p.id, p.name]));
+  const names = useMemo(() => new Map(players.map((p) => [p.id, p.name])), [players]);
   const update = <K extends keyof AnalysisFilters>(k: K, v: AnalysisFilters[K]) => {
     setFilters((f) => ({ ...f, [k]: v }));
     setPage(0);
@@ -270,6 +299,8 @@ function MatchAnalysis({
     </label>
   );
   const action = async (fn: () => Promise<void>) => {
+    const token = requestGuard.beginAction();
+    if (token === null) return;
     if (!preview) previewOrigin.current = document.activeElement as HTMLElement;
     setBusy(true);
     setError("");
@@ -279,13 +310,21 @@ function MatchAnalysis({
     } catch (e) {
       setError(e instanceof Error ? e.message : "Action failed. Check your permissions.");
     } finally {
-      setBusy(false);
+      if (requestGuard.finishAction(token)) setBusy(false);
     }
   };
-  const showFile = (f: EvidenceFile, seconds: number | null = null) =>
+  const showFile = (id: string, seconds: number | null = null, expected?: EvidenceFile) =>
     action(async () => {
+      const request = requestGuard.beginPreview();
+      setPreview(null);
       setClipSelection(null);
+      const f = await readEvidenceFile(org, match, id);
+      if (!requestGuard.isPreviewCurrent(request)) return;
+      if (!f || (expected && (f.storage_path !== expected.storage_path || f.kind !== expected.kind))) {
+        throw new Error("Source changed, expired or was removed. Refresh evidence.");
+      }
       const url = await evidenceUrl(f);
+      if (!requestGuard.isPreviewCurrent(request)) return;
       setPreview({
         url: seconds !== null && f.kind === "video" ? `${url}#t=${seconds}` : url,
         kind: f.kind,
@@ -294,12 +333,13 @@ function MatchAnalysis({
     });
   const showClip = (id: string, index = 0) =>
     action(async () => {
-      const request = ++previewRequest.current;
+      const request = requestGuard.beginPreview();
       const c = data?.clips.filter((c) => c.delivery_id === id)[index];
-      setClipSelection({ deliveryId: id, index });
+      if (!c) throw new Error("Camera view is unavailable. Refresh match evidence.");
       if (c) {
         const url = await clipUrl(c.asset_id);
-        if (request !== previewRequest.current) return;
+        if (!requestGuard.isPreviewCurrent(request)) return;
+        setClipSelection({ deliveryId: id, index });
         setPreview({
           url: `${url}#t=${c.offset_start_ms / 1000},${c.offset_end_ms / 1000}`,
           kind: "video",
@@ -308,6 +348,8 @@ function MatchAnalysis({
       }
     });
   const exportCsv = (notes = false) => {
+    if (!data || loading || busy || !refreshedAt || !requestGuard.canAct()) return;
+    if (notes && !data.workspaceAvailable) return;
     const url = URL.createObjectURL(
       new Blob(
         [
@@ -332,7 +374,8 @@ function MatchAnalysis({
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   const exportReport = () => {
-    if (!data || !refreshedAt || !data.workspaceAvailable || loading) return;
+    if (!data || !refreshedAt || !data.workspaceAvailable || loading || busy || !requestGuard.canAct())
+      return;
     const html = reviewReportHtml({
       organisationId: org,
       matchId: match,
@@ -369,7 +412,7 @@ function MatchAnalysis({
             ))}
           </div>
         ) : (
-          <button className="action-primary" onClick={() => setVersion((v) => v + 1)}>
+          <button className="action-primary" onClick={refreshEvidence}>
             Try again
           </button>
         )}
@@ -386,7 +429,7 @@ function MatchAnalysis({
         <button
           className={field}
           disabled={loading || busy}
-          onClick={() => setVersion((v) => v + 1)}
+          onClick={refreshEvidence}
         >
           Refresh match evidence
         </button>
@@ -397,8 +440,8 @@ function MatchAnalysis({
           <button
             type="button"
             className="ml-3 underline"
-            disabled={loading}
-            onClick={() => setVersion((v) => v + 1)}
+            disabled={loading || busy}
+            onClick={refreshEvidence}
           >
             Reload evidence
           </button>
@@ -750,7 +793,7 @@ function MatchAnalysis({
         >
           Next
         </button>
-        <button className={field} disabled={!rows.length} onClick={() => exportCsv()}>
+        <button className={field} disabled={!rows.length || loading || busy} onClick={() => exportCsv()}>
           Export filtered CSV
         </button>
       </div>
@@ -792,14 +835,14 @@ function MatchAnalysis({
               </label>
               <button
                 className="action-primary mt-4"
-                disabled={!file || !consent || busy}
+                disabled={!file || !consent || busy || loading}
                 onClick={() =>
                   void action(async () => {
                     if (file) {
                       await uploadEvidence(org, match, file, consent, junior);
                       setFile(null);
                       setNotice("Evidence uploaded. It is private and has not been sent to AI.");
-                      setVersion((v) => v + 1);
+                      refreshEvidence();
                     }
                   })
                 }
@@ -811,7 +854,7 @@ function MatchAnalysis({
                 matchId={match}
                 version={version}
                 busy={busy || loading}
-                onOpen={(f) => void showFile(f)}
+                onOpen={(f) => void showFile(f.id, null, f)}
                 onSelect={(f) => {
                   setData((previous) =>
                     previous
@@ -834,10 +877,10 @@ function MatchAnalysis({
                     window.confirm("Remove this private evidence? Only the uploader can remove it.")
                   )
                     void action(async () => {
-                      setPreview(null);
+                      closePreview();
                       await removeEvidence(f);
                       setNotice("Evidence removed.");
-                      setVersion((v) => v + 1);
+                      refreshEvidence();
                     });
                 }}
               />
@@ -975,7 +1018,7 @@ function MatchAnalysis({
                   setNotice(
                     "Coaching observation saved. Clear filters if it is not visible below.",
                   );
-                  setVersion((v) => v + 1);
+                  refreshEvidence();
                 } catch {
                   setSaveError(
                     "Your observation was not saved. Your draft is preserved. Check your connection and club access, then try again.",
@@ -1182,7 +1225,8 @@ function MatchAnalysis({
           >
             Next observations
           </button>
-          <button className={field} disabled={!visibleNotes.length} onClick={() => exportCsv(true)}>
+          <button className={field} disabled={!visibleNotes.length || loading || busy || !data.workspaceAvailable}
+            onClick={() => exportCsv(true)}>
             Export observations CSV
           </button>
           <button
@@ -1229,20 +1273,7 @@ function MatchAnalysis({
                   className="mt-2 text-sm text-emerald-200 underline"
                   disabled={busy || loading}
                   onClick={() =>
-                    void action(async () => {
-                      const f = await readEvidenceFile(org, match, n.evidence_file_id!);
-                      if (!f) throw new Error("Source unavailable, expired or removed.");
-                      setClipSelection(null);
-                      const url = await evidenceUrl(f);
-                      setPreview({
-                        url:
-                          f.kind === "video" && n.evidence_time_seconds !== null
-                            ? `${url}#t=${n.evidence_time_seconds}`
-                            : url,
-                        kind: f.kind,
-                        label: f.label,
-                      });
-                    })
+                    void showFile(n.evidence_file_id!, n.evidence_time_seconds)
                   }
                 >
                   Open linked source
