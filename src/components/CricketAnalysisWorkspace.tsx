@@ -164,6 +164,7 @@ function MatchAnalysis({
     let active = true;
     const token = requestGuard.beginRefresh();
     setLoading(true);
+    setBusy(false);
     setPreview(null);
     setClipSelection(null);
     setRefreshedAt(null);
@@ -188,7 +189,7 @@ function MatchAnalysis({
         }
       })
       .finally(() => {
-        if (active) setLoading(false);
+        if (active && requestGuard.isRefreshCurrent(token)) setLoading(false);
       });
     return () => {
       active = false;
@@ -308,7 +309,9 @@ function MatchAnalysis({
     try {
       await fn();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Action failed. Check your permissions.");
+      if (requestGuard.isActionCurrent(token)) {
+        setError(e instanceof Error ? e.message : "Action failed. Check your permissions.");
+      }
     } finally {
       if (requestGuard.finishAction(token)) setBusy(false);
     }
@@ -320,7 +323,10 @@ function MatchAnalysis({
       setClipSelection(null);
       const f = await readEvidenceFile(org, match, id);
       if (!requestGuard.isPreviewCurrent(request)) return;
-      if (!f || (expected && (f.storage_path !== expected.storage_path || f.kind !== expected.kind))) {
+      if (
+        !f ||
+        (expected && (f.storage_path !== expected.storage_path || f.kind !== expected.kind))
+      ) {
         throw new Error("Source changed, expired or was removed. Refresh evidence.");
       }
       const url = await evidenceUrl(f);
@@ -336,16 +342,14 @@ function MatchAnalysis({
       const request = requestGuard.beginPreview();
       const c = data?.clips.filter((c) => c.delivery_id === id)[index];
       if (!c) throw new Error("Camera view is unavailable. Refresh match evidence.");
-      if (c) {
-        const url = await clipUrl(c.asset_id);
-        if (!requestGuard.isPreviewCurrent(request)) return;
-        setClipSelection({ deliveryId: id, index });
-        setPreview({
-          url: `${url}#t=${c.offset_start_ms / 1000},${c.offset_end_ms / 1000}`,
-          kind: "video",
-          label: `Delivery clip · Camera view ${index + 1}`,
-        });
-      }
+      const url = await clipUrl(c.asset_id);
+      if (!requestGuard.isPreviewCurrent(request)) return;
+      setClipSelection({ deliveryId: id, index });
+      setPreview({
+        url: `${url}#t=${c.offset_start_ms / 1000},${c.offset_end_ms / 1000}`,
+        kind: "video",
+        label: `Delivery clip · Camera view ${index + 1}`,
+      });
     });
   const exportCsv = (notes = false) => {
     if (!data || loading || busy || !refreshedAt || !requestGuard.canAct()) return;
@@ -374,7 +378,14 @@ function MatchAnalysis({
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   const exportReport = () => {
-    if (!data || !refreshedAt || !data.workspaceAvailable || loading || busy || !requestGuard.canAct())
+    if (
+      !data ||
+      !refreshedAt ||
+      !data.workspaceAvailable ||
+      loading ||
+      busy ||
+      !requestGuard.canAct()
+    )
       return;
     const html = reviewReportHtml({
       organisationId: org,
@@ -793,7 +804,11 @@ function MatchAnalysis({
         >
           Next
         </button>
-        <button className={field} disabled={!rows.length || loading || busy} onClick={() => exportCsv()}>
+        <button
+          className={field}
+          disabled={!rows.length || loading || busy}
+          onClick={() => exportCsv()}
+        >
           Export filtered CSV
         </button>
       </div>
@@ -1225,8 +1240,11 @@ function MatchAnalysis({
           >
             Next observations
           </button>
-          <button className={field} disabled={!visibleNotes.length || loading || busy || !data.workspaceAvailable}
-            onClick={() => exportCsv(true)}>
+          <button
+            className={field}
+            disabled={!visibleNotes.length || loading || busy || !data.workspaceAvailable}
+            onClick={() => exportCsv(true)}
+          >
             Export observations CSV
           </button>
           <button
@@ -1272,9 +1290,7 @@ function MatchAnalysis({
                 <button
                   className="mt-2 text-sm text-emerald-200 underline"
                   disabled={busy || loading}
-                  onClick={() =>
-                    void showFile(n.evidence_file_id!, n.evidence_time_seconds)
-                  }
+                  onClick={() => void showFile(n.evidence_file_id!, n.evidence_time_seconds)}
                 >
                   Open linked source
                   {n.evidence_time_seconds !== null ? ` · ${n.evidence_time_seconds}s` : ""}
