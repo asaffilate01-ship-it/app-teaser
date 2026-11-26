@@ -47,14 +47,26 @@ const matchDays = z.looseObject({
   ),
   timeUp: z.boolean().optional(),
 });
-const team = z.looseObject({
-  id: text,
+const identity = text.min(1);
+const uniqueIdentities = (rows: readonly { id: string }[]) =>
+  new Set(rows.map((row) => row.id)).size === rows.length;
+
+const player = z.looseObject({
+  id: identity,
   name: text,
-  players: z.array(z.looseObject({ id: text, name: text })),
+  leftHanded: z.boolean().optional(),
+  substitute: z.enum(["fielding", "concussion", "impact"]).optional(),
+  replacedBy: identity.optional(),
+  replaces: identity.optional(),
+});
+const team = z.looseObject({
+  id: identity,
+  name: text,
+  players: z.array(player).refine(uniqueIdentities),
 });
 const delivery = z
   .looseObject({
-    id: text,
+    id: identity,
     sequence: count,
     recordedAt: text,
     over: count,
@@ -171,7 +183,7 @@ const match = z
     innings: z
       .array(
         z.looseObject({
-          id: text,
+          id: identity,
           number: count,
           battingTeamId: text,
           bowlingTeamId: text,
@@ -193,6 +205,8 @@ const match = z
   .refine(
     (m) =>
       m.teams[0].id !== m.teams[1].id &&
+      uniqueIdentities(m.innings) &&
+      uniqueIdentities(m.innings.flatMap((innings) => innings.deliveries)) &&
       m.innings.every(
         (i) =>
           i.battingTeamId !== i.bowlingTeamId &&
