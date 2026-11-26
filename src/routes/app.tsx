@@ -66,11 +66,9 @@ import {
   TossPanel,
   WorkloadPanel,
 } from "@/components/scorer/MatchTools";
-import { BallSpeedTool } from "@/components/scorer/BallSpeedTool";
+import { OptionalVideoTools } from "@/components/scorer/OptionalVideoTools";
 import { LatestSpeedEstimate, SpeedInsightsPanel } from "@/components/scorer/SpeedInsightsPanel";
-import { SpeedComparisonLab } from "@/components/scorer/SpeedComparisonLab";
 import { BallTrackChart, BallTrackPad } from "@/components/scorer/BallTrack";
-import { VideoLab } from "@/components/video/VideoLab";
 import { bowlingTypeSplits, phaseSplits, type SplitRow } from "@/lib/phase-splits";
 import { ballByBallCsv, downloadCsv, scorecardCsv } from "@/lib/stats-export";
 import { FixBallPanel } from "@/components/scorer/FixBall";
@@ -1535,12 +1533,12 @@ function LiveMatch({
         {tab === "video" && (
           <div className="space-y-5">
             {cloudMatchId && access.video && <VideoDutyCard matchId={cloudMatchId} />}
-            <BallSpeedTool
+            <OptionalVideoTools
+              key={match.id}
               match={match}
               onSave={access.recordBalls && !cloudConflict ? saveAndSync : undefined}
+              allowComparison={access.video}
             />
-            {access.video && <SpeedComparisonLab key={match.id} />}
-            <VideoLab />
           </div>
         )}
       </div>
