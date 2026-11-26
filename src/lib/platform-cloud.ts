@@ -3,6 +3,7 @@ import { externalTeams } from "./external-teams.ts";
 import { appendDashboardGroup, collectDashboardRows } from "./dashboard-load.ts";
 import { verifiedBillingRedirect } from "./billing-redirect.ts";
 import { billingReturnUrl } from "./billing-return.ts";
+import { confirmedMemberChange } from "./member-operation.ts";
 export { externalTeams } from "./external-teams.ts";
 import { getCloudClient, invokePlatformFunction } from "@/lib/cloud";
 import type { CompetitionRules, PlatformRole, PointAdjustment } from "@/lib/platform";
@@ -1047,12 +1048,17 @@ export async function updateMember(input: {
   const patch: { role?: PlatformRole; status?: "active" | "suspended" } = {};
   if (input.role) patch.role = input.role;
   if (input.status) patch.status = input.status;
-  const { error } = await getCloudClient()
+  if (!patch.role && !patch.status) throw new Error("Choose a membership change.");
+  const { data, error } = await getCloudClient()
     .from("organisation_members")
     .update(patch)
     .eq("organisation_id", input.organisationId)
-    .eq("user_id", input.userId);
+    .eq("user_id", input.userId)
+    .select("user_id,role,status")
+    .maybeSingle();
   if (error) throw error;
+  if (!confirmedMemberChange(data, input.userId, patch))
+    throw new Error("Membership change could not be confirmed. Refresh and verify before retrying.");
 }
 
 export async function createCheckout(input: {
