@@ -293,7 +293,12 @@ export function rememberScoringPatch(
   };
   if (patch.kind === "delivery.tagged") {
     const prefix = JSON.stringify([patch.inningsId, patch.deliveryId]);
-    for (const field of ["fieldZone", "fielderId", "dismissalFielderId", "deliveryStyle"] as const) {
+    for (const field of [
+      "fieldZone",
+      "fielderId",
+      "dismissalFielderId",
+      "deliveryStyle",
+    ] as const) {
       const value = patch.tag[field];
       if (value === undefined) continue;
       const tag = { [field]: value } as DeliveryTag;
