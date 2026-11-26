@@ -302,3 +302,57 @@ test("an exhausted empty history still permits legacy row reconstruction", async
   const original = fixture();
   assert.equal(await recoverLatestScorerSnapshot(original.id, async () => []), null);
 });
+
+test("duplicate scoring identities cannot be restored or adopted from cloud snapshots", () => {
+  const match = fixture();
+  const innings = currentInnings(match);
+  const scored = recordDelivery(match, {
+    strikerId: innings.strikerId,
+    nonStrikerId: innings.nonStrikerId,
+    bowlerId: innings.bowlerId,
+    end: innings.end,
+    deliveryStyle: "Fast",
+    outcome: "hit",
+    batterRuns: 4,
+  });
+  const duplicateBall = structuredClone(scored);
+  const balls = currentInnings(duplicateBall).deliveries;
+  balls.push({ ...balls[0]!, sequence: 2 });
+
+  const duplicateInnings = structuredClone(scored);
+  duplicateInnings.innings.push({ ...duplicateInnings.innings[0]!, deliveries: [] });
+
+  const duplicatePlayer = structuredClone(scored);
+  duplicatePlayer.teams[0].players.push({ ...duplicatePlayer.teams[0].players[0]! });
+
+  const emptyIdentity = structuredClone(scored);
+  currentInnings(emptyIdentity).deliveries[0]!.id = "";
+
+  for (const value of [duplicateBall, duplicateInnings, duplicatePlayer, emptyIdentity]) {
+    assert.equal(readScorerSnapshot(value, value.id), null);
+    assert.throws(() => parseScorerBackup(JSON.stringify(value)), /incomplete or unsupported/);
+  }
+});
+
+test("known player substitution and handedness metadata must use valid values", () => {
+  const original = fixture();
+  for (const metadata of [
+    { leftHanded: "true" },
+    { substitute: "unknown" },
+    { replacedBy: 1 },
+    { replaces: "" },
+  ]) {
+    const value = structuredClone(original);
+    Object.assign(value.teams[0].players[0]!, metadata);
+    assert.equal(readScorerSnapshot(value, value.id), null);
+  }
+  const valid = structuredClone(original);
+  Object.assign(valid.teams[0].players[0]!, {
+    leftHanded: true,
+    substitute: "concussion",
+    replaces: valid.teams[0].players[1]!.id,
+    futurePlayerMetadata: { version: 2 },
+  });
+  assert.deepEqual(readScorerSnapshot(valid, valid.id), valid);
+  assert.deepEqual(parseScorerBackup(JSON.stringify(valid)), [valid]);
+});
