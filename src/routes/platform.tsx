@@ -24,6 +24,7 @@ import {
   type OrganisationDraft,
 } from "@/lib/onboarding-request";
 import { SectionNavigation } from "@/components/SectionNavigation";
+import { DeferredWorkspaceSection } from "@/components/DeferredWorkspaceSection";
 import { readLimitedOvers, validateCloudMatchSetup } from "@/lib/match-setup";
 import { fixtureCalendarIcs } from "@/lib/fixture-calendar";
 import { findFixtureStartConflict, reviewFixtureSchedule } from "@/lib/fixture-scheduling";
@@ -33,6 +34,7 @@ import { cameraLimitChoices } from "@/lib/camera-limits";
 import { GroundScreenControl } from "@/components/club/GroundScreenControl";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+  lazy,
   useCallback,
   useEffect,
   useMemo,
@@ -79,7 +81,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { AppHeader } from "@/components/app-shell/AppHeader";
-import { WebsiteEditor } from "@/components/site/WebsiteEditor";
 import { ResultsDesk } from "@/components/league/ResultsDesk";
 import { GoogleButton } from "@/components/app-shell/GoogleButton";
 import { SetupChecklist } from "@/components/SetupChecklist";
@@ -89,7 +90,6 @@ import { matchDeskCounts } from "@/lib/match-desk";
 import { TeamCrest } from "@/components/scorer/Broadcast";
 import scoreboardShot from "@/assets/shot-ground-score.webp";
 import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPanel";
-import { CricketAnalysisWorkspace } from "@/components/CricketAnalysisWorkspace";
 import { PlanGate } from "@/components/plan/PlanGate";
 import { PakistanSubscriptionEstimate } from "@/components/plan/PakistanSubscriptionEstimate";
 import { sectionFeature } from "@/lib/plans";
@@ -100,21 +100,13 @@ import {
   readBillingReturn,
   type BillingReturn,
 } from "@/lib/billing-return";
-import { AcademyDashboard } from "@/components/AcademyDashboard";
 import { LeagueStandings } from "@/components/LeagueStandings";
-import { LeagueHub } from "@/components/league/LeagueHub";
 import { SquadImport } from "@/components/club/SquadImport";
 import { MatchDayPosts } from "@/components/league/MatchDayPosts";
 import { StreamGuide } from "@/components/club/StreamGuide";
 import { toast } from "sonner";
 import { embedCode } from "@/lib/embed-code";
-import { ClubOffice } from "@/components/office/ClubOffice";
-import { TrainingHub } from "@/components/training/TrainingHub";
-import { TeamChat } from "@/components/messages/TeamChat";
-import { LeagueDesk } from "@/components/leaguedesk/LeagueDesk";
-import { LookingForBoard } from "@/components/board/LookingForBoard";
 import { rainMethods } from "@/lib/rain-rules";
-import { OmniqoraIntelligencePanel } from "@/components/OmniqoraIntelligencePanel";
 import { useCloudSession } from "@/hooks/use-cloud-session";
 import { usePlatformDashboard } from "@/hooks/use-platform-dashboard";
 import {
@@ -149,6 +141,57 @@ import { RemindersBell } from "@/components/reminders/RemindersBell";
 import { DeviceLimitGuard, DevicesButton } from "@/components/devices/DeviceLimit";
 import { usePromos } from "@/hooks/use-promos";
 import { assignableRoles, can, platformRoles, roleLabels, type PlatformRole } from "@/lib/platform";
+
+const ClubOffice = lazy(() =>
+  import("@/components/office/ClubOffice").then((module) => ({
+    default: module.ClubOffice,
+  })),
+);
+const TrainingHub = lazy(() =>
+  import("@/components/training/TrainingHub").then((module) => ({
+    default: module.TrainingHub,
+  })),
+);
+const TeamChat = lazy(() =>
+  import("@/components/messages/TeamChat").then((module) => ({
+    default: module.TeamChat,
+  })),
+);
+const LeagueDesk = lazy(() =>
+  import("@/components/leaguedesk/LeagueDesk").then((module) => ({
+    default: module.LeagueDesk,
+  })),
+);
+const LookingForBoard = lazy(() =>
+  import("@/components/board/LookingForBoard").then((module) => ({
+    default: module.LookingForBoard,
+  })),
+);
+const LeagueHub = lazy(() =>
+  import("@/components/league/LeagueHub").then((module) => ({
+    default: module.LeagueHub,
+  })),
+);
+const WebsiteEditor = lazy(() =>
+  import("@/components/site/WebsiteEditor").then((module) => ({
+    default: module.WebsiteEditor,
+  })),
+);
+const AcademyDashboard = lazy(() =>
+  import("@/components/AcademyDashboard").then((module) => ({
+    default: module.AcademyDashboard,
+  })),
+);
+const CricketAnalysisWorkspace = lazy(() =>
+  import("@/components/CricketAnalysisWorkspace").then((module) => ({
+    default: module.CricketAnalysisWorkspace,
+  })),
+);
+const OmniqoraIntelligencePanel = lazy(() =>
+  import("@/components/OmniqoraIntelligencePanel").then((module) => ({
+    default: module.OmniqoraIntelligencePanel,
+  })),
+);
 
 export const Route = createFileRoute("/platform")({
   validateSearch: (
@@ -849,45 +892,55 @@ function OperationalPlatform({
                   />
                 )}
                 {tab === "office" && (
-                  <ClubOffice
-                    key={membership.organisationId}
-                    organisationId={membership.organisationId}
-                    role={membership.role}
-                    club={dashboard.data}
-                  />
+                  <DeferredWorkspaceSection name="Club office">
+                    <ClubOffice
+                      key={membership.organisationId}
+                      organisationId={membership.organisationId}
+                      role={membership.role}
+                      club={dashboard.data}
+                    />
+                  </DeferredWorkspaceSection>
                 )}
                 {tab === "training" && (
-                  <TrainingHub
-                    key={membership.organisationId}
-                    organisationId={membership.organisationId}
-                    role={membership.role}
-                    club={dashboard.data}
-                  />
+                  <DeferredWorkspaceSection name="Training">
+                    <TrainingHub
+                      key={membership.organisationId}
+                      organisationId={membership.organisationId}
+                      role={membership.role}
+                      club={dashboard.data}
+                    />
+                  </DeferredWorkspaceSection>
                 )}
                 {tab === "messages" && (
-                  <TeamChat
-                    key={membership.organisationId}
-                    organisationId={membership.organisationId}
-                    role={membership.role}
-                    club={dashboard.data}
-                  />
+                  <DeferredWorkspaceSection name="Messages">
+                    <TeamChat
+                      key={membership.organisationId}
+                      organisationId={membership.organisationId}
+                      role={membership.role}
+                      club={dashboard.data}
+                    />
+                  </DeferredWorkspaceSection>
                 )}
                 {tab === "leaguedesk" && (
-                  <LeagueDesk
-                    key={membership.organisationId}
-                    organisationId={membership.organisationId}
-                    role={membership.role}
-                    kind={membership.organisationKind}
-                    club={dashboard.data}
-                  />
+                  <DeferredWorkspaceSection name="Registrations">
+                    <LeagueDesk
+                      key={membership.organisationId}
+                      organisationId={membership.organisationId}
+                      role={membership.role}
+                      kind={membership.organisationKind}
+                      club={dashboard.data}
+                    />
+                  </DeferredWorkspaceSection>
                 )}
                 {tab === "board" && (
-                  <LookingForBoard
-                    key={membership.organisationId}
-                    organisationId={membership.organisationId}
-                    organisationName={membership.organisationName}
-                    role={membership.role}
-                  />
+                  <DeferredWorkspaceSection name="Looking for">
+                    <LookingForBoard
+                      key={membership.organisationId}
+                      organisationId={membership.organisationId}
+                      organisationName={membership.organisationName}
+                      role={membership.role}
+                    />
+                  </DeferredWorkspaceSection>
                 )}
                 {tab === "competitions" && (
                   <Competitions
@@ -899,22 +952,26 @@ function OperationalPlatform({
                   />
                 )}
                 {tab === "league" && (
-                  <LeagueHub
-                    key={leagueStart}
-                    initialView={leagueStart}
-                    data={dashboard.data}
-                    role={membership.role}
-                    onRefresh={() => void dashboard.refresh()}
-                    refreshing={dashboard.refreshing}
-                  />
+                  <DeferredWorkspaceSection name="League hub">
+                    <LeagueHub
+                      key={leagueStart}
+                      initialView={leagueStart}
+                      data={dashboard.data}
+                      role={membership.role}
+                      onRefresh={() => void dashboard.refresh()}
+                      refreshing={dashboard.refreshing}
+                    />
+                  </DeferredWorkspaceSection>
                 )}
                 {tab === "website" && (
-                  <WebsiteEditor
-                    key={membership.organisationId}
-                    organisationId={membership.organisationId}
-                    organisationName={membership.organisationName}
-                    role={membership.role}
-                  />
+                  <DeferredWorkspaceSection name="Website">
+                    <WebsiteEditor
+                      key={membership.organisationId}
+                      organisationId={membership.organisationId}
+                      organisationName={membership.organisationName}
+                      role={membership.role}
+                    />
+                  </DeferredWorkspaceSection>
                 )}
                 {tab === "capture" && (
                   <PlanGate
@@ -928,12 +985,14 @@ function OperationalPlatform({
                   <Players data={dashboard.data} role={membership.role} run={dashboard.run} />
                 )}
                 {tab === "academy" && (
-                  <AcademyDashboard
-                    data={dashboard.data}
-                    role={membership.role}
-                    onOpenPlayers={() => setTab("players")}
-                    onOpenCompetitions={() => setTab("competitions")}
-                  />
+                  <DeferredWorkspaceSection name="Academy">
+                    <AcademyDashboard
+                      data={dashboard.data}
+                      role={membership.role}
+                      onOpenPlayers={() => setTab("players")}
+                      onOpenCompetitions={() => setTab("competitions")}
+                    />
+                  </DeferredWorkspaceSection>
                 )}
                 {tab === "safety" && (
                   <Safeguarding data={dashboard.data} role={membership.role} run={dashboard.run} />
@@ -943,13 +1002,15 @@ function OperationalPlatform({
                     organisationId={membership.organisationId}
                     feature={sectionFeature["analysis"]}
                   >
-                    <CricketAnalysisWorkspace
-                      key={membership.organisationId}
-                      organisationId={membership.organisationId}
-                      role={membership.role}
-                      matches={dashboard.data.matches}
-                      players={dashboard.data.players}
-                    />
+                    <DeferredWorkspaceSection name="Analysis room">
+                      <CricketAnalysisWorkspace
+                        key={membership.organisationId}
+                        organisationId={membership.organisationId}
+                        role={membership.role}
+                        matches={dashboard.data.matches}
+                        players={dashboard.data.players}
+                      />
+                    </DeferredWorkspaceSection>
                   </PlanGate>
                 )}
                 {tab === "intelligence" && (
@@ -957,12 +1018,14 @@ function OperationalPlatform({
                     organisationId={membership.organisationId}
                     feature={sectionFeature["intelligence"]}
                   >
-                    <OmniqoraIntelligencePanel
-                      key={membership.organisationId}
-                      organisationId={membership.organisationId}
-                      role={membership.role}
-                      matches={dashboard.data.matches}
-                    />
+                    <DeferredWorkspaceSection name="AI Intelligence">
+                      <OmniqoraIntelligencePanel
+                        key={membership.organisationId}
+                        organisationId={membership.organisationId}
+                        role={membership.role}
+                        matches={dashboard.data.matches}
+                      />
+                    </DeferredWorkspaceSection>
                   </PlanGate>
                 )}
                 {tab === "operations" && (
