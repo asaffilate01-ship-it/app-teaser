@@ -19,13 +19,13 @@ class VideoToolBoundary extends Component<
   { name: string; children: ReactNode },
   { failed: boolean }
 > {
-  state = { failed: false };
+  override state = { failed: false };
 
   static getDerivedStateFromError() {
     return { failed: true };
   }
 
-  render() {
+  override render() {
     if (this.state.failed) {
       return (
         <section role="alert" className="rounded-xl border border-border p-4">
