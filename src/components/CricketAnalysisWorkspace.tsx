@@ -437,11 +437,7 @@ function MatchAnalysis({
             ? "Refreshing match evidence…"
             : `Evidence loaded at ${refreshedAt ? new Date(refreshedAt).toLocaleTimeString() : "—"}. Refresh after scoring changes.`}
         </p>
-        <button
-          className={field}
-          disabled={loading || busy}
-          onClick={refreshEvidence}
-        >
+        <button className={field} disabled={loading || busy} onClick={refreshEvidence}>
           Refresh match evidence
         </button>
       </div>
