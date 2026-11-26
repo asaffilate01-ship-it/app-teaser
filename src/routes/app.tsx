@@ -50,7 +50,8 @@ import {
   bowlingHandledByOther,
   dutyAccess,
   isPatchEventType,
-  readPatchEvent,
+  pendingScoringPatches,
+  rememberScoringPatch,
   type DeliveryTag,
   type ScoringPatch,
 } from "@/lib/scoring-duties";
@@ -489,6 +490,7 @@ export function CricketApp() {
         />
       ) : screen === "match" && selectedMatch ? (
         <LiveMatch
+          key={selectedMatch.id}
           match={selectedMatch}
           onSave={upsertMatch}
           onExit={() => setScreen("dashboard")}
@@ -1088,49 +1090,49 @@ function LiveMatch({
   const matchRef = useRef(match);
   matchRef.current = match;
   const ledger = useRef(new Map<string, ScoringPatch>());
-  const remember = useCallback((patch: ScoringPatch) => {
-    const key =
-      patch.kind === "delivery.tagged" ? `ball:${patch.deliveryId}` : `bowler:${patch.inningsId}`;
-    const previous = ledger.current.get(key);
-    if (!previous || previous.sequence <= patch.sequence) ledger.current.set(key, patch);
-  }, []);
-  useEffect(() => {
-    if (!cloudMatchId) return;
+  const pendingPatches = useCallback(() => {
+    if (!cloudMatchId) return [];
     try {
-      // This phone's own unsent notes (e.g. after reopening offline) are newest of all.
-      for (const event of readPendingEvents(cloudMatchId)) {
-        if (!isPatchEventType(event.eventType)) continue;
-        const patch = readPatchEvent({ ...event, sequence: Number.MAX_SAFE_INTEGER });
-        if (patch) remember(patch);
-      }
+      return pendingScoringPatches(readPendingEvents(cloudMatchId));
     } catch {
-      /* unreadable queue is reported by the sync status */
+      // The queue remains untouched and its unreadable status is shown by cloud sync.
+      return null;
     }
-  }, [cloudMatchId, remember]);
+  }, [cloudMatchId]);
   const acceptRemotePatch = useCallback(
     (patch: ScoringPatch) => {
-      remember(patch);
-      const next = applyPatch(matchRef.current, patch);
-      if (next !== matchRef.current) onSave(next);
+      const pending = pendingPatches();
+      if (!pending) return;
+      const accepted = rememberScoringPatch(ledger.current, patch);
+      if (!accepted.length) return;
+      const previous = matchRef.current;
+      const next = applyPatches(previous, [...accepted, ...pending]);
+      if (next !== previous) {
+        matchRef.current = next;
+        onSave(next);
+      }
     },
-    [onSave, remember],
+    [onSave, pendingPatches],
   );
   const acceptRemoteMatch = useCallback(
     (remote: CricketMatch): boolean => {
       if (remote.id !== match.id || cloudConflict) return false;
-      const merged = applyPatches(remote, ledger.current.values());
+      const pending = pendingPatches();
+      if (!pending) return false;
+      const merged = applyPatches(remote, [...ledger.current.values(), ...pending]);
       if (!follower) {
-        const review = reviewRemoteScorerSnapshot(match, merged);
+        const review = reviewRemoteScorerSnapshot(matchRef.current, merged);
         if (!review.safe) {
           setCloudConflict(review.reason);
           setBackupRequested(false);
           return false;
         }
       }
+      matchRef.current = merged;
       onSave(merged);
       return true;
     },
-    [cloudConflict, follower, match, onSave],
+    [cloudConflict, follower, match.id, onSave, pendingPatches],
   );
   const cloudSync = useMatchCloudSync(
     cloudMatchId,
@@ -1139,9 +1141,15 @@ function LiveMatch({
     acceptRemotePatch,
   );
   const sendOwnPatch = (patch: ScoringPatch, payload: Record<string, unknown>) => {
-    remember(patch);
-    onSave(applyPatch(match, patch));
-    cloudSync.publishPatch(patch.kind, payload);
+    const next = applyPatch(matchRef.current, patch);
+    if (next === matchRef.current) return;
+    if (cloudMatchId && !cloudSync.publishPatch(patch.kind, payload)) {
+      setCloudActionError("The fielding change could not be queued. Please retry.");
+      return;
+    }
+    matchRef.current = next;
+    setCloudActionError(null);
+    onSave(next);
   };
   const sendBowler = (bowlerId: string, end: DeliveryEnd) => {
     const inningsId = currentInnings(match).id;

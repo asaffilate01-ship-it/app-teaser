@@ -55,6 +55,7 @@ export function useMatchCloudSync(
   const [status, setStatus] = useState<ScorerSyncStatus>(enabled ? "connecting" : "local");
   const [pendingCount, setPendingCount] = useState(0);
   const [queueUnreadable, setQueueUnreadable] = useState(false);
+  const [patchRecovery, setPatchRecovery] = useState<"checking" | "ready" | "error">("checking");
   const notePending = useCallback((matchId: string): number | null => {
     const count = safeQueueCount(matchId);
     if (count === null) {
@@ -78,6 +79,8 @@ export function useMatchCloudSync(
   useEffect(() => {
     if (!enabled || !cloudMatchId || pausedForReview) return;
     let active = true;
+    let recoveryRequest = 0;
+    setPatchRecovery("checking");
     if (notePending(cloudMatchId) === null) return;
     if (!navigator.onLine) setStatus("offline");
     const unsubscribe = subscribeToMatchEvents(
@@ -88,8 +91,16 @@ export function useMatchCloudSync(
           latestRemoteSequence.current = { matchId: cloudMatchId, sequence: 0 };
         }
         // Ignore older realtime deliveries that could roll back the visible score.
-        if (event.sequence <= latestRemoteSequence.current.sequence) return;
-        latestRemoteSequence.current.sequence = event.sequence;
+        if (!Number.isSafeInteger(event.sequence) || event.sequence < 1) {
+          setStatus("error");
+          return;
+        }
+        const older = event.sequence <= latestRemoteSequence.current.sequence;
+        if (older && !isPatchEventType(event.eventType)) return;
+        latestRemoteSequence.current.sequence = Math.max(
+          latestRemoteSequence.current.sequence,
+          event.sequence,
+        );
         setLastSequence((sequence) => Math.max(sequence, event.sequence));
         const waiting = notePending(cloudMatchId);
         if (waiting === null) return;
@@ -98,7 +109,11 @@ export function useMatchCloudSync(
           // Fielding notes and bowler changes never replace the score, so they apply even
           // while this phone still has balls to send.
           const patch = readPatchEvent(event);
-          if (patch && event.deviceId !== deviceId) onRemotePatchRef.current?.(patch);
+          if (!patch) {
+            setStatus("error");
+            return;
+          }
+          onRemotePatchRef.current?.(patch);
           setStatus(!navigator.onLine ? "offline" : hasPending ? "queued" : "synced");
           return;
         }
@@ -124,11 +139,17 @@ export function useMatchCloudSync(
         if (!active) return;
         if (next === "SUBSCRIBED" && onRemotePatchRef.current) {
           // Catch up on fielding notes and bowler changes made while this phone wasn't listening.
+          const request = ++recoveryRequest;
+          setPatchRecovery("checking");
           void loadScoringPatches(cloudMatchId, 0)
             .then((patches) => {
-              if (active) patches.forEach((patch) => onRemotePatchRef.current?.(patch));
+              if (!active || request !== recoveryRequest) return;
+              patches.forEach((patch) => onRemotePatchRef.current?.(patch));
+              setPatchRecovery("ready");
             })
-            .catch(() => undefined);
+            .catch(() => {
+              if (active && request === recoveryRequest) setPatchRecovery("error");
+            });
         }
         const waiting = notePending(cloudMatchId);
         if (waiting === null) return;
@@ -283,7 +304,7 @@ export function useMatchCloudSync(
   /** Bowling & fielding notes: no score snapshot, so they can never overwrite the ball scorer's work. */
   const publishPatch = useCallback(
     (eventType: "delivery.tagged" | "bowling.updated", payload: Record<string, unknown>) => {
-      if (!enabled || !cloudMatchId || queueUnreadable) return;
+      if (!enabled || !cloudMatchId || pausedForReview || queueUnreadable) return false;
       const event: PendingMatchEvent = {
         matchId: cloudMatchId,
         clientEventId: crypto.randomUUID(),
@@ -294,25 +315,31 @@ export function useMatchCloudSync(
       };
       try {
         queuePendingEvent(event);
-        if (notePending(cloudMatchId) === null) return;
-        if (!navigator.onLine) {
-          setStatus("offline");
-          return;
-        }
-        setStatus("connecting");
-        kick.current();
       } catch {
         if (notePending(cloudMatchId) !== null) setStatus(navigator.onLine ? "error" : "offline");
+        return false;
       }
+      if (notePending(cloudMatchId) === null) return true;
+      if (!navigator.onLine) {
+        setStatus("offline");
+        return true;
+      }
+      setStatus("connecting");
+      kick.current();
+      return true;
     },
-    [cloudMatchId, deviceId, enabled, notePending, queueUnreadable],
+    [cloudMatchId, deviceId, enabled, notePending, pausedForReview, queueUnreadable],
   );
 
-  const visibleStatus = pausedForReview
+  const visibleStatus: ScorerSyncStatus = pausedForReview
     ? "conflict"
     : status === "synced" && pendingCount > 0
       ? "queued"
-      : status;
+      : status === "synced" && enabled && onRemotePatch && patchRecovery !== "ready"
+        ? patchRecovery === "error"
+          ? "error"
+          : "connecting"
+        : status;
   return {
     enabled,
     status: visibleStatus,

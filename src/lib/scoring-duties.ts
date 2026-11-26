@@ -89,6 +89,8 @@ export interface DeliveryTag {
   /** Catcher / run-out fielder on a wicket ball. */
   dismissalFielderId?: string | null | undefined;
   deliveryStyle?: DeliveryStyle | undefined;
+  /** Internal derived catch location used when compacting accepted patches. */
+  catchZone?: FieldZone | undefined;
 }
 
 export type ScoringPatch =
@@ -125,7 +127,7 @@ const styles: readonly DeliveryStyle[] = [
 ];
 
 function readTag(value: unknown): DeliveryTag | null {
-  if (!value || typeof value !== "object") return null;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const raw = value as Record<string, unknown>;
   const tag: DeliveryTag = {};
   if (raw["fieldZone"] !== undefined) {
@@ -152,9 +154,18 @@ export function readPatchEvent(event: {
   occurredAt?: string | undefined;
   payload: Record<string, unknown>;
 }): ScoringPatch | null {
+  if (
+    !Number.isSafeInteger(event.sequence) ||
+    event.sequence < 1 ||
+    !event.payload ||
+    typeof event.payload !== "object" ||
+    Array.isArray(event.payload)
+  )
+    return null;
   const inningsId = event.payload["inningsId"];
   if (typeof inningsId !== "string" || !inningsId) return null;
   const occurredAt = event.occurredAt ?? new Date(0).toISOString();
+  if (!Number.isFinite(Date.parse(occurredAt))) return null;
   if (event.eventType === "delivery.tagged") {
     const deliveryId = event.payload["deliveryId"];
     const tag = readTag(event.payload["tag"]);
@@ -216,6 +227,9 @@ export function applyDeliveryTag(
           : {}),
       };
     }
+    if (next.dismissal?.type === "caught" && tag.catchZone !== undefined) {
+      next.dismissal = { ...next.dismissal, catchZone: tag.catchZone };
+    }
     return next;
   });
   if (!changed) return match;
@@ -259,6 +273,87 @@ export function applyPatches(match: CricketMatch, patches: Iterable<ScoringPatch
   return [...patches]
     .sort((a, b) => a.sequence - b.sequence)
     .reduce((current, patch) => applyPatch(current, patch), match);
+}
+
+/** Keep the newest accepted value for each independent field, not merely each ball.
+ * A late partial tag must not erase a newer field or unrelated earlier tags.
+ * Pending local patches are deliberately not stored in this cloud ledger.
+ */
+export function rememberScoringPatch(
+  ledger: Map<string, ScoringPatch>,
+  patch: ScoringPatch,
+): ScoringPatch[] {
+  if (!Number.isSafeInteger(patch.sequence) || patch.sequence < 1) return [];
+  const changed: ScoringPatch[] = [];
+  const remember = (key: string, candidate: ScoringPatch) => {
+    const previous = ledger.get(key);
+    if (previous && previous.sequence >= candidate.sequence) return;
+    ledger.set(key, candidate);
+    changed.push(candidate);
+  };
+  if (patch.kind === "delivery.tagged") {
+    const prefix = JSON.stringify([patch.inningsId, patch.deliveryId]);
+    for (const field of [
+      "fieldZone",
+      "fielderId",
+      "dismissalFielderId",
+      "deliveryStyle",
+    ] as const) {
+      const value = patch.tag[field];
+      if (value === undefined) continue;
+      const tag = { [field]: value } as DeliveryTag;
+      remember(prefix + ":" + field, { ...patch, tag });
+    }
+    if (
+      patch.tag.dismissalFielderId !== undefined &&
+      patch.tag.fieldZone &&
+      patch.tag.fieldZone !== "Not recorded"
+    ) {
+      remember(prefix + ":catchZone", { ...patch, tag: { catchZone: patch.tag.fieldZone } });
+    }
+  } else {
+    // Bowler and end form a single assignment for the next delivery.
+    remember(JSON.stringify(["bowler", patch.inningsId]), patch);
+  }
+  return changed;
+}
+
+export function pendingScoringPatches(
+  events: readonly {
+    eventType: string;
+    occurredAt: string;
+    payload: Record<string, unknown>;
+  }[],
+): ScoringPatch[] {
+  return events
+    .map((event) => readPatchEvent({ ...event, sequence: Number.MAX_SAFE_INTEGER }))
+    .filter((patch): patch is ScoringPatch => patch !== null);
+}
+
+export const scoringPatchPageSize = 250;
+export const scoringPatchMaxPages = 20;
+
+/** Fetch accepted patches in sequence order, with an explicit recovery limit. */
+export async function collectScoringPatches(
+  afterSequence: number,
+  loadPage: (after: number, limit: number) => Promise<readonly ScoringPatch[]>,
+): Promise<ScoringPatch[]> {
+  if (!Number.isSafeInteger(afterSequence) || afterSequence < 0)
+    throw new Error("Invalid scoring patch cursor.");
+  const patches: ScoringPatch[] = [];
+  let cursor = afterSequence;
+  for (let page = 0; page < scoringPatchMaxPages; page++) {
+    const rows = await loadPage(cursor, scoringPatchPageSize);
+    if (rows.length > scoringPatchPageSize) throw new Error("Invalid fielding history page.");
+    for (const patch of rows) {
+      if (!Number.isSafeInteger(patch.sequence) || patch.sequence <= cursor)
+        throw new Error("Fielding history is out of order.");
+      cursor = patch.sequence;
+      patches.push(patch);
+    }
+    if (rows.length < scoringPatchPageSize) return patches;
+  }
+  throw new Error("Fielding history exceeds the recovery limit. Request scorer review.");
 }
 
 /** Balls the fielding scorer still needs to look at: newest first, wickets and untagged first. */
