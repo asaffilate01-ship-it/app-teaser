@@ -237,7 +237,15 @@ function LiveCentrePage() {
         <section className="live-hero">
           <div className="min-w-0">
             <p className="hero-chip hero-chip-live w-fit">
-              <span className="live-dot" aria-hidden="true" /> {counts.live} live now
+              {centre.status === "ready" ? (
+                <>
+                  <span className="live-dot" aria-hidden="true" /> {counts.live} live now
+                </>
+              ) : centre.status === "stale" ? (
+                `${counts.live} live at last update`
+              ) : (
+                "Live scores"
+              )}
             </p>
             <h1 className="live-title">Live cricket, every ground</h1>
             <p className="mt-2 max-w-2xl text-sm scoreboard-muted md:text-base">
@@ -252,13 +260,26 @@ function LiveCentrePage() {
             onClick={() => void centre.refresh()}
           >
             <RotateCw className="size-4" aria-hidden="true" />
-            {updated == null
-              ? "Loading…"
-              : updated < 5
-                ? "Updated just now"
-                : `Updated ${updated}s ago`}
+            {centre.status === "stale" || centre.status === "error"
+              ? "Retry updates"
+              : centre.status === "unavailable"
+                ? "Updates unavailable"
+                : updated == null
+                  ? "Loading…"
+                  : updated < 5
+                    ? "Updated just now"
+                    : `Updated ${updated}s ago`}
           </button>
         </section>
+        {centre.status === "stale" && (
+          <div className="broadcast-panel mt-3 text-sm" role="status">
+            <p className="font-bold text-gold">Live updates interrupted</p>
+            <p className="mt-1 scoreboard-muted">
+              Showing the last successfully loaded scores
+              {updated == null ? "." : ` (${updated}s ago).`} CricLume will keep trying.
+            </p>
+          </div>
+        )}
 
         <div className="live-filters">
           <div className="live-tabs hidden md:flex" role="tablist" aria-label="Matches">

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getCloudClient, isCloudConfigured } from "@/lib/cloud";
+import { createLivePolling } from "@/lib/live-polling";
 import {
   defaultLiveAlertPrefs,
   liveEventsBetween,
@@ -49,7 +50,7 @@ function readFollowing(): Set<string> {
 /** Polls the public match list, works out new moments and raises toasts / browser notifications. */
 export function useLiveCentre(onOpen: (slug: string) => void) {
   const [matches, setMatches] = useState<LiveMatch[]>([]);
-  const [status, setStatus] = useState<"loading" | "ready" | "error" | "unavailable">(
+  const [status, setStatus] = useState<"loading" | "ready" | "stale" | "error" | "unavailable">(
     isCloudConfigured() ? "loading" : "unavailable",
   );
   const [loadedAt, setLoadedAt] = useState<number | null>(null);
@@ -57,6 +58,8 @@ export function useLiveCentre(onOpen: (slug: string) => void) {
   const [flash, setFlash] = useState<Record<string, LiveAlertKind>>({});
   const [following, setFollowing] = useState<Set<string>>(() => new Set());
   const [prefs, setPrefsState] = useState<LiveAlertPrefs>(defaultLiveAlertPrefs);
+  const refreshRef = useRef<() => Promise<void>>(() => Promise.resolve());
+  const refresh = useCallback(() => refreshRef.current(), []);
   const previous = useRef<Map<string, LiveMatch> | null>(null);
   const announced = useRef(new Set<string>());
   const prefsRef = useRef(prefs);
@@ -133,54 +136,56 @@ export function useLiveCentre(onOpen: (slug: string) => void) {
     }
   }, []);
 
-  const load = useCallback(async () => {
-    if (!isCloudConfigured()) return;
-    const { data, error } = await getCloudClient().rpc("list_public_live_matches");
-    if (error) {
-      setStatus((current) => (current === "ready" ? "ready" : "error"));
-      return;
-    }
-    const next = (Array.isArray(data) ? data : []) as unknown as LiveMatch[];
-    const before = previous.current;
-    if (before) {
-      const events: LiveEvent[] = [];
-      for (const match of next) {
-        const old = before.get(match.slug);
-        if (old && old.updatedAt !== match.updatedAt) events.push(...liveEventsBetween(old, match));
-      }
-      announce(events);
-    }
-    previous.current = new Map(next.map((match) => [match.slug, match]));
-    setMatches(next);
-    setLoadedAt(Date.now());
-    setStatus("ready");
-  }, [announce]);
-
   useEffect(() => {
     if (!isCloudConfigured()) return;
-    let timer = 0;
     let active = true;
-    const tick = async () => {
-      await load();
-      if (!active) return;
-      timer = window.setTimeout(
-        () => void tick(),
-        document.hidden ? HIDDEN_POLL_MS : VISIBLE_POLL_MS,
-      );
+    const load = async () => {
+      try {
+        const { data, error } = await getCloudClient().rpc("list_public_live_matches");
+        if (!active) return;
+        if (error || !Array.isArray(data)) throw new Error("Live scores unavailable");
+        const next = data as unknown as LiveMatch[];
+        const before = previous.current;
+        if (before) {
+          const events: LiveEvent[] = [];
+          for (const match of next) {
+            const old = before.get(match.slug);
+            if (old && old.updatedAt !== match.updatedAt)
+              events.push(...liveEventsBetween(old, match));
+          }
+          announce(events);
+        }
+        previous.current = new Map(next.map((match) => [match.slug, match]));
+        setMatches(next);
+        setLoadedAt(Date.now());
+        setStatus("ready");
+      } catch {
+        if (!active) return;
+        setStatus((current) => (current === "ready" || current === "stale" ? "stale" : "error"));
+      }
     };
+    const poller = createLivePolling({
+      load,
+      interval: () => (document.hidden ? HIDDEN_POLL_MS : VISIBLE_POLL_MS),
+      schedule: (callback, delay) => window.setTimeout(callback, delay),
+      cancel: (timer) => window.clearTimeout(timer),
+    });
+    refreshRef.current = poller.request;
     const onVisible = () => {
-      if (document.hidden) return;
-      window.clearTimeout(timer);
-      void tick();
+      if (!document.hidden) void poller.request();
     };
-    void tick();
+    const onOnline = () => void poller.request();
+    void poller.request();
     document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("online", onOnline);
     return () => {
       active = false;
-      window.clearTimeout(timer);
+      poller.dispose();
+      refreshRef.current = () => Promise.resolve();
       document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", onOnline);
     };
-  }, [load]);
+  }, [announce]);
 
   const toggleFollow = useCallback((slug: string) => {
     setFollowing((items) => {
@@ -215,6 +220,6 @@ export function useLiveCentre(onOpen: (slug: string) => void) {
     toggleFollow,
     prefs,
     setPrefs,
-    refresh: load,
+    refresh,
   };
 }
