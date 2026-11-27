@@ -1058,7 +1058,9 @@ export async function updateMember(input: {
     .maybeSingle();
   if (error) throw error;
   if (!confirmedMemberChange(data, input.userId, patch))
-    throw new Error("Membership change could not be confirmed. Refresh and verify before retrying.");
+    throw new Error(
+      "Membership change could not be confirmed. Refresh and verify before retrying.",
+    );
 }
 
 export async function createCheckout(input: {
