@@ -99,3 +99,14 @@ test("homepage does not advertise stale fictional fixtures or invented results",
   assert.match(route, /t\.home\.workflowSteps\.map/);
   assert.match(route, /t\.hero\.previewLabel/);
 });
+
+test("public marketing copy uses only CricLume branding", () => {
+  for (const [language, copy] of Object.entries(languages)) {
+    assert.doesNotMatch(JSON.stringify(copy), /itechlounge/i, language);
+    assert.match(copy.footer.copyright, /CricLume/);
+  }
+  const route = readFileSync("src/routes/index.tsx", "utf8");
+  assert.doesNotMatch(route, /itechlounge|t\.footer\.legal/i);
+  assert.match(route, /to="\/privacy"/);
+  assert.match(route, /to="\/terms"/);
+});

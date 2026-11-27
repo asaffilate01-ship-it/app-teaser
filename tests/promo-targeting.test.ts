@@ -127,10 +127,11 @@ test("club adverts fill a banner with no paid advert", () => {
     ["c"],
   );
 });
-test("iTechLounge house adverts fill a banner with no paid or club advert", () => {
+test("CricLume house adverts fill a banner with no paid or club advert", () => {
   const out = fillPromoSlots(noAdverts, noAdverts, housePromos);
   assert.ok(out.top.length > 0 && out.side.length > 0);
   assert.ok([...out.top, ...out.side].every((i) => i.source === "house"));
+  assert.ok([...out.top, ...out.side].every((i) => i.advertiser === "CricLume"));
 });
 test("only paid adverts count toward a club's revenue share", () => {
   assert.equal(countsTowardShare(advert("p", "paid")), true);

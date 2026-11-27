@@ -457,7 +457,6 @@ export const en = {
     accessLine2: "No invitation required",
     cta: "Get started",
     copyright: "CricLume — See every ball. Shape every game.",
-    legal: "CricLume is a trading name of iTechLounge Ltd.",
   },
   backToHome: "Back to home",
 };
@@ -926,7 +925,6 @@ export const de: Content = {
     accessLine2: "Keine Einladung erforderlich",
     cta: "Loslegen",
     copyright: "CricLume — Jeder Ball. Jeder Vorteil.",
-    legal: "CricLume ist ein Handelsname der iTechLounge Ltd.",
   },
   backToHome: "Zurück zum Start",
 };
@@ -1392,7 +1390,6 @@ export const nl: Content = {
     accessLine2: "Geen uitnodiging nodig",
     cta: "Aan de slag",
     copyright: "CricLume — Elke bal. Elk voordeel.",
-    legal: "CricLume is een handelsnaam van iTechLounge Ltd.",
   },
   backToHome: "Terug naar home",
 };
@@ -1860,7 +1857,6 @@ export const af: Content = {
     accessLine2: "Geen uitnodiging nodig nie",
     cta: "Begin tel",
     copyright: "CricLume — Elke bal. Elke voordeel.",
-    legal: "CricLume is 'n handelsnaam van iTechLounge Ltd.",
   },
   backToHome: "Terug na tuis",
 };
@@ -2328,7 +2324,6 @@ export const fr: Content = {
     accessLine2: "Aucune invitation nécessaire",
     cta: "Commencer le marquage",
     copyright: "CricLume — Chaque balle. Chaque avantage.",
-    legal: "CricLume est un nom commercial d'iTechLounge Ltd.",
   },
   backToHome: "Retour à l'accueil",
 };

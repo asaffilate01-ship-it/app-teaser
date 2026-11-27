@@ -1,7 +1,7 @@
 import type { PromoItem, PromoSlot } from "./promo-targeting";
 
 /**
- * iTechLounge's own CricLume adverts. They fill any banner with no paid or club advert booked,
+ * CricLume's own adverts. They fill any banner with no paid or club advert booked,
  * are never counted and earn clubs no revenue share.
  */
 const cards: Array<{ id: string; headline: string; line: string; cta: string; path: string }> = [
@@ -42,7 +42,7 @@ const cards: Array<{ id: string; headline: string; line: string; cta: string; pa
   },
 ];
 
-export const houseAdvertiser = "CricLume by iTechLounge";
+export const houseAdvertiser = "CricLume";
 
 function build(slot: PromoSlot): PromoItem[] {
   return cards.map((card) => ({

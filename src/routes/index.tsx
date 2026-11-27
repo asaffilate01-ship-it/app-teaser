@@ -654,9 +654,6 @@ function SiteFooter({ onNavigate }: { onNavigate: (t: TabId) => void }) {
         <p>
           © {new Date().getFullYear()} {t.footer.copyright}
         </p>
-        <p className="mt-1 text-[11px] normal-case tracking-normal text-slate-400">
-          {t.footer.legal}
-        </p>
         <div className="mt-3 flex gap-4 text-[11px] font-semibold normal-case tracking-normal">
           <Link to="/privacy" className="hover:text-slate-800">
             Privacy

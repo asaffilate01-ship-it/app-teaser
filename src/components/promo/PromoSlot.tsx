@@ -3,7 +3,7 @@ import { promoDwellMs, type PromoItem, type PromoSlot as Slot } from "@/lib/prom
 
 /**
  * One rotating ad banner (top or side). Images and GIFs stay for their set time; MP4s play muted
- * to the end (capped at a minute). House adverts are text cards from iTechLounge.
+ * to the end (capped at a minute). House adverts are text cards from CricLume.
  */
 export function PromoSlot({
   items,

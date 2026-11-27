@@ -177,7 +177,7 @@ async function clubPromos(
 
 /**
  * Banners for a screen: paid CricLume adverts first; banners with none booked get the club's own
- * adverts. (iTechLounge house adverts fill anything still empty on the device.)
+ * adverts. (CricLume house adverts fill anything still empty on the device.)
  */
 export async function promosFor(
   surface: PromoSurface,
