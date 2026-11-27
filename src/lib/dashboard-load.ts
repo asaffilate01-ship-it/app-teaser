@@ -42,7 +42,9 @@ export async function collectDashboardPages<T>(
   const from = dashboardMaxPages * dashboardPageSize;
   const extra = await load(from, from);
   if (extra.length > 0)
-    throw new Error("Workspace records exceed the dashboard safety limit. Request a scoped review.");
+    throw new Error(
+      "Workspace records exceed the dashboard safety limit. Request a scoped review.",
+    );
   return result;
 }
 
