@@ -1,6 +1,11 @@
 import type { RealtimeChannel, User } from "@supabase/supabase-js";
 import { externalTeams } from "./external-teams.ts";
-import { appendDashboardGroup, collectDashboardRows } from "./dashboard-load.ts";
+import {
+  appendDashboardGroup,
+  collectDashboardPages,
+  collectDashboardRows,
+  requireDashboardCount,
+} from "./dashboard-load.ts";
 import { verifiedBillingRedirect } from "./billing-redirect.ts";
 import { billingReturnUrl } from "./billing-return.ts";
 import { confirmedMemberChange } from "./member-operation.ts";
@@ -241,6 +246,7 @@ export async function loadOrganisationDashboard(
   role: PlatformRole,
 ): Promise<PlatformDashboardData> {
   const client = getCloudClient();
+  const retentionCutoff = new Date(Date.now() + 7 * 86_400_000).toISOString();
   const [
     teamRows,
     groundRows,
@@ -250,86 +256,160 @@ export async function loadOrganisationDashboard(
     competitionRows,
     matchRows,
     memberRows,
-    notificationRows,
-    videoRows,
-    aiRows,
+    unreadNotifications,
+    videoTotal,
+    videoProcessing,
+    videoReady,
+    retentionDue,
+    aiQueued,
+    aiReviewRequired,
+    aiCompleted,
   ] = await Promise.all([
-    rows<Record<string, unknown>>(
-      client
-        .from("teams")
-        .select("id,name,short_name,age_group,category")
-        .eq("organisation_id", organisationId)
-        .order("name"),
+    collectDashboardPages((from, to) =>
+      rows<Record<string, unknown>>(
+        client
+          .from("teams")
+          .select("id,name,short_name,age_group,category")
+          .eq("organisation_id", organisationId)
+          .order("name")
+          .order("id")
+          .range(from, to),
+      ),
     ),
-    rows<Record<string, unknown>>(
-      client
-        .from("grounds")
-        .select("id,name,timezone")
-        .eq("organisation_id", organisationId)
-        .order("name"),
+    collectDashboardPages((from, to) =>
+      rows<Record<string, unknown>>(
+        client
+          .from("grounds")
+          .select("id,name,timezone")
+          .eq("organisation_id", organisationId)
+          .order("name")
+          .order("id")
+          .range(from, to),
+      ),
     ),
-    rows<Record<string, unknown>>(
-      client
-        .from("players")
-        .select("id,display_name,is_junior,public_profile")
-        .eq("organisation_id", organisationId)
-        .order("display_name"),
+    collectDashboardPages((from, to) =>
+      rows<Record<string, unknown>>(
+        client
+          .from("players")
+          .select("id,display_name,is_junior,public_profile")
+          .eq("organisation_id", organisationId)
+          .order("display_name")
+          .order("id")
+          .range(from, to),
+      ),
     ),
-    rows<Record<string, unknown>>(
-      client
-        .from("player_consents")
-        .select(
-          "id,player_id,recording,coaching_analysis,public_highlights,biometric_analysis,valid_from,valid_until",
-        )
-        .eq("organisation_id", organisationId)
-        .order("valid_from", { ascending: false }),
+    collectDashboardPages((from, to) =>
+      rows<Record<string, unknown>>(
+        client
+          .from("player_consents")
+          .select(
+            "id,player_id,recording,coaching_analysis,public_highlights,biometric_analysis,valid_from,valid_until",
+          )
+          .eq("organisation_id", organisationId)
+          .order("valid_from", { ascending: false })
+          .order("id")
+          .range(from, to),
+      ),
     ),
-    rows<Record<string, unknown>>(
-      client
-        .from("seasons")
-        .select("id,name,starts_on,ends_on")
-        .eq("organisation_id", organisationId)
-        .order("starts_on", { ascending: false }),
+    collectDashboardPages((from, to) =>
+      rows<Record<string, unknown>>(
+        client
+          .from("seasons")
+          .select("id,name,starts_on,ends_on")
+          .eq("organisation_id", organisationId)
+          .order("starts_on", { ascending: false })
+          .order("id")
+          .range(from, to),
+      ),
     ),
-    rows<Record<string, unknown>>(
-      client
-        .from("competitions")
-        .select("id,name,format,season_id,active_rule_version")
-        .eq("organisation_id", organisationId)
-        .order("created_at", { ascending: false }),
+    collectDashboardPages((from, to) =>
+      rows<Record<string, unknown>>(
+        client
+          .from("competitions")
+          .select("id,name,format,season_id,active_rule_version")
+          .eq("organisation_id", organisationId)
+          .order("created_at", { ascending: false })
+          .order("id")
+          .range(from, to),
+      ),
     ),
-    rows<Record<string, unknown>>(
-      client
-        .from("matches")
-        .select(
-          "id,competition_id,home_team_id,away_team_id,ground_id,status,visibility,scheduled_at,started_at,updated_at,weather,live_state",
-        )
-        .eq("owner_organisation_id", organisationId)
-        .order("scheduled_at", { ascending: false }),
+    collectDashboardPages((from, to) =>
+      rows<Record<string, unknown>>(
+        client
+          .from("matches")
+          .select(
+            "id,competition_id,home_team_id,away_team_id,ground_id,status,visibility,scheduled_at,started_at,updated_at,weather,live_state",
+          )
+          .eq("owner_organisation_id", organisationId)
+          .order("scheduled_at", { ascending: false })
+          .order("id")
+          .range(from, to),
+      ),
     ),
-    rows<Record<string, unknown>>(
-      client
-        .from("organisation_members")
-        .select("user_id,role,status,joined_at")
-        .eq("organisation_id", organisationId)
-        .order("joined_at"),
+    collectDashboardPages((from, to) =>
+      rows<Record<string, unknown>>(
+        client
+          .from("organisation_members")
+          .select("user_id,role,status,joined_at")
+          .eq("organisation_id", organisationId)
+          .order("joined_at")
+          .order("user_id")
+          .range(from, to),
+      ),
     ),
-    rows<Record<string, unknown>>(
-      client
-        .from("notifications")
-        .select("id,read_at")
-        .eq("organisation_id", organisationId)
-        .is("read_at", null),
-    ),
-    rows<Record<string, unknown>>(
-      client
-        .from("video_assets")
-        .select("id,status,retention_expires_at")
-        .eq("organisation_id", organisationId),
-    ),
-    rows<Record<string, unknown>>(
-      client.from("ai_jobs").select("id,status").eq("organisation_id", organisationId),
-    ),
+    (async () => {
+      const { data, error } = await client.auth.getUser();
+      if (error || !data.user) throw new Error("Your workspace identity could not be verified.");
+      return requireDashboardCount(
+        await client
+          .from("notifications")
+          .select("id", { count: "exact", head: true })
+          .eq("organisation_id", organisationId)
+          .eq("user_id", data.user.id)
+          .is("read_at", null),
+      );
+    })(),
+    client
+      .from("video_assets")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", organisationId)
+      .then(requireDashboardCount),
+    client
+      .from("video_assets")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", organisationId)
+      .in("status", ["uploading", "uploaded", "processing"])
+      .then(requireDashboardCount),
+    client
+      .from("video_assets")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", organisationId)
+      .eq("status", "ready")
+      .then(requireDashboardCount),
+    client
+      .from("video_assets")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", organisationId)
+      .lte("retention_expires_at", retentionCutoff)
+      .then(requireDashboardCount),
+    client
+      .from("ai_jobs")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", organisationId)
+      .in("status", ["queued", "running"])
+      .then(requireDashboardCount),
+    client
+      .from("ai_jobs")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", organisationId)
+      .eq("status", "review_required")
+      .then(requireDashboardCount),
+    client
+      .from("ai_jobs")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", organisationId)
+      .eq("status", "completed")
+      .then(requireDashboardCount),
   ]);
 
   const teamIds = teamRows.map((row) => String(row["id"]));
@@ -562,7 +642,6 @@ export async function loadOrganisationDashboard(
     appendDashboardGroup(roomsByMatch, matchId, room);
   }
 
-  const today = Date.now();
   return {
     organisationId,
     teams: [
@@ -670,20 +749,15 @@ export async function loadOrganisationDashboard(
       };
     }),
     videoCounts: {
-      total: videoRows.length,
-      processing: videoRows.filter((row) =>
-        ["uploading", "uploaded", "processing"].includes(String(row["status"])),
-      ).length,
-      ready: videoRows.filter((row) => row["status"] === "ready").length,
-      retentionDue: videoRows.filter((row) => {
-        const expiry = new Date(String(row["retention_expires_at"])).getTime();
-        return Number.isFinite(expiry) && expiry <= today + 7 * 86_400_000;
-      }).length,
+      total: videoTotal,
+      processing: videoProcessing,
+      ready: videoReady,
+      retentionDue,
     },
     aiCounts: {
-      queued: aiRows.filter((row) => ["queued", "running"].includes(String(row["status"]))).length,
-      reviewRequired: aiRows.filter((row) => row["status"] === "review_required").length,
-      completed: aiRows.filter((row) => row["status"] === "completed").length,
+      queued: aiQueued,
+      reviewRequired: aiReviewRequired,
+      completed: aiCompleted,
     },
     subscription: subscription
       ? {
@@ -696,7 +770,7 @@ export async function loadOrganisationDashboard(
           cancelAtPeriodEnd: Boolean(subscription["cancel_at_period_end"]),
         }
       : null,
-    unreadNotifications: notificationRows.length,
+    unreadNotifications,
     audit: auditRows.map((row) => ({
       id: asNumber(row["id"]),
       action: String(row["action"]),
