@@ -110,3 +110,12 @@ test("public marketing copy uses only CricLume branding", () => {
   assert.match(route, /to="\/privacy"/);
   assert.match(route, /to="\/terms"/);
 });
+
+test("CricLume legal pages identify iTech Sports Ltd as the operator", () => {
+  for (const path of ["src/routes/privacy.tsx", "src/routes/terms.tsx"]) {
+    const source = readFileSync(path, "utf8");
+    assert.match(source, /iTech Sports Ltd/, path);
+    assert.doesNotMatch(source, /itechlounge/i, path);
+    assert.match(source, /hello@criclume\.com/, path);
+  }
+});

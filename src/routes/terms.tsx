@@ -27,7 +27,7 @@ function TermsPage() {
     <LegalPage title="Platform terms" subtitle="Effective 25 August 2026">
       <p>
         These terms apply to the free CricLume website, device scoring preview and any cloud pilot
-        service provided by iTechLounge Ltd. By using CricLume, you agree to these terms. A paid or
+        service provided by iTech Sports Ltd. By using CricLume, you agree to these terms. A paid or
         organisation-wide service may also have an order form and data-processing agreement; those
         documents take priority where they expressly differ.
       </p>
@@ -87,7 +87,7 @@ function TermsPage() {
 
       <h2>Intellectual property</h2>
       <p>
-        CricLume&apos;s software, design, brand and original content belong to iTechLounge Ltd or
+        CricLume&apos;s software, design, brand and original content belong to iTech Sports Ltd or
         its licensors. You retain rights in match information and video you lawfully provide and
         grant the limited permission needed to host, synchronize, process and return material for
         the service you select.
@@ -97,7 +97,7 @@ function TermsPage() {
       <p>
         The preview is supplied as available, without a promise that it will be uninterrupted or
         error-free. Nothing in these terms excludes liability that cannot lawfully be excluded. To
-        the fullest extent permitted by law, iTechLounge Ltd is not responsible for indirect loss,
+        the fullest extent permitted by law, iTech Sports Ltd is not responsible for indirect loss,
         lost data, missed fixtures, incorrect unofficial records or decisions made from preview
         analytics.
       </p>

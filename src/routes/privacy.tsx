@@ -21,7 +21,7 @@ function PrivacyPage() {
   return (
     <LegalPage title="Privacy notice" subtitle="Effective 25 August 2026">
       <p>
-        CricLume is a product of iTechLounge Ltd. This notice explains how the public website,
+        CricLume is a product of iTech Sports Ltd. This notice explains how the public website,
         device scoring preview and cloud services for enrolled clubs, schools, academies and leagues
         handle information. A participating organisation may also give you its own notice explaining
         its responsibilities for player and member information.
@@ -116,7 +116,7 @@ function PrivacyPage() {
         Depending on where you live, you may have rights to access, correct, delete, restrict or
         object to our processing of personal information, and to complain to a data-protection
         authority. Local match data is controlled on your device; email us for requests concerning
-        information held by iTechLounge Ltd.
+        information held by iTech Sports Ltd.
       </p>
 
       <h2>Contact</h2>
