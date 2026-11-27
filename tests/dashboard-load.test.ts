@@ -2,9 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   appendDashboardGroup,
+  collectDashboardPages,
   collectDashboardRows,
   dashboardIdBatchSize,
+  dashboardMaxPages,
   dashboardPageSize,
+  requireDashboardCount,
 } from "../src/lib/dashboard-load.ts";
 
 test("empty workspace relations issue no requests", async () => {
@@ -51,4 +54,39 @@ test("group appends preserve order and reuse the same array", () => {
   assert.equal(map.get("team"), first);
   assert.deepEqual(map.get("team"), ["a", "b"]);
   assert.deepEqual(map.get("other"), ["c"]);
+});
+
+test("root workspace pagination loads beyond the usual REST row cap", async () => {
+  const source = Array.from({ length: 1201 }, (_, index) => index);
+  const calls: number[][] = [];
+  const result = await collectDashboardPages(async (from, to) => {
+    calls.push([from, to]);
+    return source.slice(from, to + 1);
+  });
+  assert.deepEqual(result, source);
+  assert.deepEqual(calls, [
+    [0, 499],
+    [500, 999],
+    [1000, 1499],
+  ]);
+});
+
+test("bounded paging accepts an exact safety limit but never silently truncates", async () => {
+  const maximum = dashboardPageSize * dashboardMaxPages;
+  const load = (size: number) => async (from: number, to: number) =>
+    Array.from({ length: Math.max(0, Math.min(size, to + 1) - from) }, (_, i) => from + i);
+  assert.equal((await collectDashboardPages(load(maximum))).length, maximum);
+  await assert.rejects(collectDashboardPages(load(maximum + 1)), /safety limit/);
+});
+
+test("missing, invalid or failed exact counts are not treated as zero", () => {
+  assert.equal(requireDashboardCount({ count: 0, error: null }), 0);
+  assert.equal(requireDashboardCount({ count: 12001, error: null }), 12001);
+  for (const count of [null, NaN, Infinity, -1, 1.5]) {
+    assert.throws(() => requireDashboardCount({ count, error: null }), /exact workspace count/);
+  }
+  assert.throws(
+    () => requireDashboardCount({ count: 0, error: { message: "Access denied" } }),
+    /Access denied/,
+  );
 });
