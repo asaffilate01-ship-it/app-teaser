@@ -93,6 +93,7 @@ import { IntegrationReadinessPanel } from "@/components/IntegrationReadinessPane
 import { PlanGate } from "@/components/plan/PlanGate";
 import { PakistanSubscriptionEstimate } from "@/components/plan/PakistanSubscriptionEstimate";
 import { sectionFeature } from "@/lib/plans";
+import { canManageMember, type MemberChange } from "@/lib/member-operation";
 import {
   billingReturnMatches,
   billingReturnMessage,
@@ -2721,37 +2722,79 @@ function Operations({
   const [email, setEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<PlatformRole>("scorer");
   const [me, setMe] = useState<string | null>(null);
+  const mounted = useRef(false);
+  const operationLock = useRef(false);
   useEffect(() => {
+    let active = true;
+    mounted.current = true;
     void getCloudClient()
       .auth.getUser()
-      .then(({ data: auth }) => setMe(auth.user?.id ?? null));
+      .then(({ data: auth, error }) => {
+        if (active && !error) setMe(auth.user?.id ?? null);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+      mounted.current = false;
+    };
   }, []);
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+  const [actionError, setActionError] = useState("");
   const priceId = import.meta.env["VITE_STRIPE_PRICE_CLUB"]?.trim() ?? "";
-  const submitInvite = async (event: FormEvent) => {
-    event.preventDefault();
+
+  const runOperation = async (action: () => Promise<void>) => {
+    if (operationLock.current || !mounted.current || !me) return;
+    operationLock.current = true;
     setBusy(true);
+    setActionError("");
     try {
-      await run(() => inviteMember({ organisationId, email, role: inviteRole }));
-      setEmail("");
-      setSent(true);
+      await action();
+    } catch (reason) {
+      if (mounted.current)
+        setActionError(
+          reason instanceof Error ? reason.message : "Operation could not be confirmed.",
+        );
     } finally {
-      setBusy(false);
+      operationLock.current = false;
+      if (mounted.current) setBusy(false);
     }
   };
+
+  const submitInvite = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!can(role, "members.manage") || !assignableRoles(role).includes(inviteRole)) return;
+    if (inviteRole === "owner" || !email.trim()) return;
+    await runOperation(async () => {
+      setSent(false);
+      await run(() => inviteMember({ organisationId, email: email.trim(), role: inviteRole }));
+      if (mounted.current) {
+        setEmail("");
+        setSent(true);
+      }
+    });
+  };
   const checkout = async () => {
-    setBusy(true);
-    try {
+    if (!can(role, "billing.manage")) return;
+    if (!data.subscription?.hasBillingAccount && !priceId) return;
+    await runOperation(async () => {
       const url = await run(() =>
         data.subscription?.hasBillingAccount
           ? openBillingPortal(organisationId)
           : createCheckout({ organisationId, priceId }),
       );
-      window.location.assign(url);
-    } finally {
-      setBusy(false);
-    }
+      if (mounted.current) window.location.assign(url);
+    });
+  };
+  const changeMember = async (
+    member: PlatformDashboardData["members"][number],
+    change: MemberChange,
+  ) => {
+    if (!canManageMember(role, me, member) || operationLock.current) return;
+    if (change.role && !assignableRoles(role).includes(change.role)) return;
+    await runOperation(() =>
+      run(() => updateMember({ organisationId, userId: member.userId, ...change })),
+    );
   };
   const integrations = [
     [Database, "CricLume Cloud database", "Connected", true],
@@ -2768,6 +2811,14 @@ function Operations({
   ] as const;
   return (
     <div className="space-y-5">
+      {actionError && (
+        <p
+          role="alert"
+          className="rounded-xl border border-amber-300/20 p-3 text-sm text-amber-200"
+        >
+          {actionError}
+        </p>
+      )}
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {integrations.map(([Icon, name, status, ready]) => (
           <div
@@ -2803,20 +2854,28 @@ function Operations({
                 required
                 type="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                disabled={busy || !me}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  setSent(false);
+                }}
                 className="scorer-input"
               />
             </Field>
             <SelectField
               label="Role"
               value={inviteRole}
-              setValue={(value) => setInviteRole(value as PlatformRole)}
+              disabled={busy || !me}
+              setValue={(value) => {
+                setInviteRole(value as PlatformRole);
+                setSent(false);
+              }}
               options={assignableRoles(role)
                 .filter((item) => item !== "owner")
                 .map((item) => [item, roleLabels[item]])}
             />
             <div className="flex items-end">
-              <button disabled={busy} className="action-primary">
+              <button disabled={busy || !me} className="action-primary">
                 <UserPlus className="size-4" /> Invite
               </button>
             </div>
@@ -2830,10 +2889,7 @@ function Operations({
         <Panel title="Members" description={`${data.members.length} organisation memberships`}>
           <div className="space-y-2">
             {data.members.map((member) => {
-              const manageable =
-                member.userId !== me &&
-                assignableRoles(role).includes(member.role) &&
-                can(role, "members.manage");
+              const manageable = canManageMember(role, me, member);
               return (
                 <div
                   key={member.userId}
@@ -2846,14 +2902,9 @@ function Operations({
                         aria-label={`Role for ${member.displayName}`}
                         className="scorer-input h-9 py-0 text-xs"
                         value={member.role}
+                        disabled={busy}
                         onChange={(event) =>
-                          void run(() =>
-                            updateMember({
-                              organisationId,
-                              userId: member.userId,
-                              role: event.target.value as PlatformRole,
-                            }),
-                          )
+                          void changeMember(member, { role: event.target.value as PlatformRole })
                         }
                       >
                         {assignableRoles(role).map((item) => (
@@ -2865,14 +2916,11 @@ function Operations({
                       <button
                         type="button"
                         className="app-chip-button"
+                        disabled={busy}
                         onClick={() =>
-                          void run(() =>
-                            updateMember({
-                              organisationId,
-                              userId: member.userId,
-                              status: member.status === "suspended" ? "active" : "suspended",
-                            }),
-                          )
+                          void changeMember(member, {
+                            status: member.status === "suspended" ? "active" : "suspended",
+                          })
                         }
                       >
                         {member.status === "suspended" ? "Restore access" : "Suspend"}
@@ -2909,7 +2957,7 @@ function Operations({
           {can(role, "billing.manage") && (
             <button
               type="button"
-              disabled={(!data.subscription?.hasBillingAccount && !priceId) || busy}
+              disabled={(!data.subscription?.hasBillingAccount && !priceId) || busy || !me}
               onClick={() => void checkout()}
               className="action-primary mt-4"
             >
