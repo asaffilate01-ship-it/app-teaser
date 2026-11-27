@@ -19,34 +19,34 @@ function positiveInteger(value: unknown): value is number {
 }
 
 export function evaluateReleaseCi(payload: unknown, sha: string) {
-  const candidates = record(payload) ? payload.workflow_runs : null;
+  const candidates = record(payload) ? payload["workflow_runs"] : null;
   const valid =
     /^[a-f0-9]{40}$/i.test(sha) &&
     record(payload) &&
     Array.isArray(candidates) &&
     candidates.length <= 100 &&
-    payload.total_count === candidates.length &&
+    payload["total_count"] === candidates.length &&
     candidates.every(record);
   const runs: Record<string, unknown>[] = valid && Array.isArray(candidates) ? candidates : [];
   const checks = requiredReleaseWorkflows.map((path) => {
     let status: WorkflowStatus = valid ? "missing" : "invalid";
     const matching = runs.filter(
       (run) =>
-        run.path === path &&
-        run.head_sha === sha &&
-        run.head_branch === "main" &&
-        run.event === "push" &&
-        record(run.repository) &&
-        run.repository.full_name === releaseRepository,
+        run["path"] === path &&
+        run["head_sha"] === sha &&
+        run["head_branch"] === "main" &&
+        run["event"] === "push" &&
+        record(run["repository"]) &&
+        run["repository"]["full_name"] === releaseRepository,
     );
     let latest: { number: number; attempt: number; run: Record<string, unknown> } | null = null;
     const seen = new Set<string>();
     for (const run of matching) {
-      if (!positiveInteger(run.run_number) || !positiveInteger(run.run_attempt)) {
+      if (!positiveInteger(run["run_number"]) || !positiveInteger(run["run_attempt"])) {
         return { path, status: "invalid" as const };
       }
-      const number = run.run_number;
-      const attempt = run.run_attempt;
+      const number = run["run_number"];
+      const attempt = run["run_attempt"];
       const key = `${number}:${attempt}`;
       if (seen.has(key)) {
         return { path, status: "invalid" as const };
@@ -62,9 +62,9 @@ export function evaluateReleaseCi(payload: unknown, sha: string) {
     }
     if (latest) {
       const run = latest.run;
-      if (typeof run.status !== "string") status = "invalid";
-      else if (run.status !== "completed") status = "pending";
-      else status = run.conclusion === "success" ? "passed" : "failed";
+      if (typeof run["status"] !== "string") status = "invalid";
+      else if (run["status"] !== "completed") status = "pending";
+      else status = run["conclusion"] === "success" ? "passed" : "failed";
     }
     return { path, status };
   });
