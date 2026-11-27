@@ -116,8 +116,8 @@ function ScopedReadinessPanel({ organisationId }: { organisationId: string }) {
       )}
       {stale && (
         <p role="status" className="mt-3 text-sm text-amber-200">
-          This configuration report is no longer current. Run the checks again before relying on
-          the results.
+          This configuration report is no longer current. Run the checks again before relying on the
+          results.
         </p>
       )}
       {report && summary && (
