@@ -305,10 +305,14 @@ export function eventIcs(
       .replace(/[-:]/g, "")
       .replace(/\.\d{3}/, "");
   const escape = (text: string) =>
-    text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r\n|\r|\n/g, "\\n");
+    text
+      .replace(/\\/g, "\\\\")
+      .replace(/;/g, "\\;")
+      .replace(/,/g, "\\,")
+      .replace(/\r\n|\r|\n/g, "\\n");
   const end =
     event.ends_at ?? new Date(new Date(event.starts_at).getTime() + 3 * 3_600_000).toISOString();
-  return [
+  const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//CricLume//Club events//EN",
@@ -322,23 +326,23 @@ export function eventIcs(
     ...(event.notes ? [`DESCRIPTION:${escape(event.notes)}`] : []),
     "END:VEVENT",
     "END:VCALENDAR",
-  ]
-    .map((line) => {
-      const encoder = new TextEncoder();
-      let folded = "";
-      let bytes = 0;
-      for (const character of line) {
-        const length = encoder.encode(character).length;
-        if (bytes + length > 75) {
-          folded += "\r\n ";
-          bytes = 1;
-        }
-        folded += character;
-        bytes += length;
+  ];
+  const foldedLines = lines.map((line) => {
+    const encoder = new TextEncoder();
+    let folded = "";
+    let bytes = 0;
+    for (const character of line) {
+      const length = encoder.encode(character).length;
+      if (bytes + length > 75) {
+        folded += "\r\n ";
+        bytes = 1;
       }
-      return folded;
-    })
-    .join("\r\n") + "\r\n";
+      folded += character;
+      bytes += length;
+    }
+    return folded;
+  });
+  return foldedLines.join("\r\n") + "\r\n";
 }
 
 /** Replies close at the deadline (managers can still change them). */
