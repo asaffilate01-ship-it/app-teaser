@@ -87,9 +87,10 @@ function ScopedCameraCloudRecordingPanel({ roomId, devices, armedDeviceIds }: Cl
     const timer = window.setInterval(onVisible, 30_000);
     window.addEventListener("online", onVisible);
     document.addEventListener("visibilitychange", onVisible);
+    const request = requestRef;
     return () => {
       activeRef.current = false;
-      requestRef.current++;
+      request.current++;
       window.clearInterval(timer);
       window.removeEventListener("online", onVisible);
       document.removeEventListener("visibilitychange", onVisible);
