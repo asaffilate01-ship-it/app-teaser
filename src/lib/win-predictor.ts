@@ -135,20 +135,23 @@ export function predictWin(state: PredictorState): Prediction | null {
   const overs = state.oversPerInnings;
   if (!overs || !Number.isFinite(overs) || overs <= 0 || state.inningsPerSide !== 1) return null;
   if (
-    !Number.isFinite(state.runs) ||
-    !Number.isInteger(state.wickets) ||
+    !Number.isSafeInteger(state.runs) ||
+    state.runs < 0 ||
+    !Number.isSafeInteger(state.wickets) ||
     state.wickets < 0 ||
-    !Number.isInteger(state.legalBalls) ||
+    !Number.isSafeInteger(state.legalBalls) ||
     state.legalBalls < 0 ||
-    !Number.isInteger(state.ballsPerOver) ||
+    !Number.isSafeInteger(state.ballsPerOver) ||
     state.ballsPerOver <= 0 ||
-    (state.maxWickets !== undefined && !Number.isFinite(state.maxWickets))
+    (state.maxWickets !== undefined &&
+      (!Number.isSafeInteger(state.maxWickets) || state.maxWickets < 1 || state.maxWickets > 10))
   )
     return null;
   if (state.inningsNumber !== 1 && state.inningsNumber !== 2) return null;
   const conditions = state.conditions ?? defaultConditions;
   const bpo = state.ballsPerOver;
   const fullBalls = overs * bpo;
+  if (!Number.isSafeInteger(fullBalls) || fullBalls < 1) return null;
   const maxWickets = Math.max(1, Math.min(10, state.maxWickets ?? 10));
   const rpo = parRunRate(overs);
   const ballsLeft = Math.max(0, fullBalls - state.legalBalls);
@@ -163,7 +166,7 @@ export function predictWin(state: PredictorState): Prediction | null {
 
   if (state.inningsNumber === 2) {
     const target = state.target;
-    if (target == null || !Number.isFinite(target) || target <= 0) return null;
+    if (target == null || !Number.isSafeInteger(target) || target <= 0) return null;
     const par = Math.round(
       expectedRuns(fullBalls, maxWickets, maxWickets, rpo * batFactor, bpo, fullBalls),
     );

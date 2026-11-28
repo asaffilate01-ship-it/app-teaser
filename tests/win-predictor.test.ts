@@ -123,3 +123,17 @@ test("invalid delivery counters cannot produce misleading probabilities", () => 
     assert.equal(predictWin({ ...t20, inningsNumber: 1, runs: 20, wickets: 1, legalBalls }), null);
   }
 });
+
+test("invalid run totals, wicket limits and targets never produce win estimates", () => {
+  const score = { ...t20, inningsNumber: 1, runs: 20, wickets: 1, legalBalls: 12 };
+  for (const runs of [-1, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1]) {
+    assert.equal(predictWin({ ...score, runs }), null);
+  }
+  for (const maxWickets of [0, 1.5, 11, NaN, Infinity]) {
+    assert.equal(predictWin({ ...score, maxWickets }), null);
+  }
+  for (const target of [0.5, Number.MAX_SAFE_INTEGER + 1]) {
+    assert.equal(predictWin({ ...score, inningsNumber: 2, target }), null);
+  }
+  assert.equal(predictWin({ ...score, oversPerInnings: Number.MAX_VALUE }), null);
+});
