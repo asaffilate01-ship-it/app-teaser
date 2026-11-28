@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   availableToLend,
   clashes,
+  eventIcs,
   feeScheduleTargets,
   feeTotals,
   localPaymentDay,
@@ -247,4 +248,22 @@ test("payment dates use the local calendar and reject future or impossible dates
   for (const value of ["", "2026-11-29", "2026-02-29", "2026-04-31", "2026-1-01"]) {
     assert.equal(validPaidOn(value, today), false);
   }
+});
+
+test("calendar export folds UTF-8 lines and prevents injected properties", () => {
+  const title = "Cricket 🏏 ".repeat(20);
+  const calendar = eventIcs({
+    id: "match\r\nATTENDEE:unexpected",
+    title,
+    starts_at: "2026-11-28T10:00:00Z",
+    notes: "First\rATTENDEE:unexpected",
+  });
+  assert.ok(calendar.endsWith("\r\n"));
+  for (const line of calendar.split("\r\n")) {
+    assert.ok(new TextEncoder().encode(line).length <= 75);
+  }
+  const unfolded = calendar.replace(/\r\n /g, "");
+  assert.ok(unfolded.includes("SUMMARY:" + title));
+  assert.ok(unfolded.includes("DESCRIPTION:First\\nATTENDEE:unexpected"));
+  assert.ok(!unfolded.includes("\r\nATTENDEE:"));
 });
