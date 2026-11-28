@@ -236,7 +236,10 @@ function normalized(text: string): string {
 }
 
 /** Accent-insensitive, multi-term matching across both questions and answers. */
-export function searchHelpQuestions<T extends HelpQuestion>(items: readonly T[], query: string): T[] {
+export function searchHelpQuestions<T extends HelpQuestion>(
+  items: readonly T[],
+  query: string,
+): T[] {
   const terms = normalized(query.slice(0, 160)).trim().split(/\s+/).filter(Boolean);
   return items.filter((item) => {
     const text = normalized(`${item.q} ${item.a}`);
