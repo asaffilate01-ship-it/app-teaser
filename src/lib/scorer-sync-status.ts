@@ -43,7 +43,7 @@ export function describeScorerSyncRecovery(
       title: "Offline — keep scoring, it's saved on this phone",
       detail: pending
         ? `${count} waiting to sync. They'll be sent in order as soon as you're back online, even if you close and reopen the scorer.`
-        : "Everything so far reached the cloud. New balls are saved on this phone and sent when you're back online.",
+        : "No pending changes found on this phone. Cloud status cannot be verified offline. New balls queue for upload when you're back online.",
       canRetry: false,
     };
   }
