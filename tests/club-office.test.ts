@@ -5,12 +5,14 @@ import {
   clashes,
   feeScheduleTargets,
   feeTotals,
+  localPaymentDay,
   maxPayment,
   officeAccess,
   rideBlocker,
   seatsLeft,
   selectionWarnings,
   toMinor,
+  validPaidOn,
 } from "../src/lib/club-office.ts";
 import { assignableRoles, can } from "../src/lib/platform.ts";
 
@@ -213,4 +215,36 @@ test("fee targets never expand a missing or external team into a whole-club char
     "p1",
     "p2",
   ]);
+});
+
+test("payment allowances fail closed for invalid balances and pending claims", () => {
+  const charge = {
+    amountMinor: 10000,
+    paidMinor: 2500,
+    currency: "GBP",
+    status: "part_paid" as const,
+    dueOn: null,
+  };
+  for (const amountMinor of [-1, NaN, Infinity, 1.5, Number.MAX_SAFE_INTEGER + 1]) {
+    assert.equal(maxPayment({ ...charge, amountMinor }), 0);
+  }
+  for (const paidMinor of [-1, NaN, Infinity, 1.5]) {
+    assert.equal(maxPayment({ ...charge, paidMinor }), 0);
+  }
+  assert.equal(maxPayment({ ...charge, status: "paid" }), 0);
+  for (const pending of [-1, NaN, Infinity, 0, 1.5]) {
+    assert.equal(claimableAmount(charge, [pending]), 0);
+  }
+  assert.equal(claimableAmount(charge, [Number.MAX_SAFE_INTEGER, 1]), 0);
+  assert.equal(claimableAmount(charge, [2000]), 5500);
+});
+
+test("payment dates use the local calendar and reject future or impossible dates", () => {
+  assert.equal(localPaymentDay(new Date(2026, 10, 28, 23, 59)), "2026-11-28");
+  const today = "2026-11-28";
+  assert.equal(validPaidOn(today, today), true);
+  assert.equal(validPaidOn("2024-02-29", today), true);
+  for (const value of ["", "2026-11-29", "2026-02-29", "2026-04-31", "2026-1-01"]) {
+    assert.equal(validPaidOn(value, today), false);
+  }
 });
