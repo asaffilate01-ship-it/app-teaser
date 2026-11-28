@@ -40,11 +40,13 @@ function CameraCommandConfirmationsPanel({ roomId, devices, refreshKey }: Confir
   const [lastChecked, setLastChecked] = useState<string | null>(null);
 
   const requestRef = useRef(0);
+  const activeRef = useRef(false);
   const ids = devices
     .map((device) => device.id)
     .sort()
     .join(",");
   const refresh = useCallback(async () => {
+    if (!activeRef.current) return;
     const request = ++requestRef.current;
     setLoading(true);
     try {
@@ -104,6 +106,7 @@ function CameraCommandConfirmationsPanel({ roomId, devices, refreshKey }: Confir
   }, [ids, roomId]);
 
   useEffect(() => {
+    activeRef.current = true;
     void refresh();
     const interval = window.setInterval(() => {
       if (document.visibilityState === "visible") void refresh();
@@ -113,8 +116,10 @@ function CameraCommandConfirmationsPanel({ roomId, devices, refreshKey }: Confir
     };
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("online", onVisibility);
+    const request = requestRef;
     return () => {
-      requestRef.current++;
+      activeRef.current = false;
+      request.current++;
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("online", onVisibility);
