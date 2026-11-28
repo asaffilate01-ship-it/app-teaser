@@ -39,6 +39,9 @@ export function createOrderedQueueDrainer<T extends { clientEventId: string }>(i
           let receipt: { sequence: number };
           try {
             receipt = await io.send(event);
+            if (!receipt || !Number.isSafeInteger(receipt.sequence) || receipt.sequence < 1) {
+              throw new Error("Invalid scoring acknowledgement sequence");
+            }
           } catch {
             return { sent, remaining: io.read(matchId).length, lastSequence };
           }
