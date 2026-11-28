@@ -1,6 +1,7 @@
 import { readSection, publicSections } from "@/lib/navigation";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
+import { helpCopy, searchHelpQuestions } from "@/lib/help-centre";
 import {
   regions,
   defaultRegion,
@@ -41,6 +42,8 @@ import {
   Radio,
   Gavel,
   Award,
+  Search,
+  X,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import {
@@ -1023,37 +1026,112 @@ function AccessMark({
 }
 
 function FaqTab() {
-  const { t } = useI18n();
-  const [open, setOpen] = useState<number | null>(0);
+  const { lang } = useI18n();
+  return <SearchableFaq key={lang} />;
+}
+
+function SearchableFaq() {
+  const { lang, t } = useI18n();
+  const copy = helpCopy[lang];
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState<string | null>(t.faq.items[0]?.q ?? null);
+  const id = useId();
+  const items = [...t.faq.items, ...copy.items];
+  const visible = searchHelpQuestions(items, query);
   return (
-    <div className="space-y-5 md:mx-auto md:max-w-3xl md:space-y-8">
+    <div className="space-y-5 md:mx-auto md:max-w-5xl md:space-y-8">
       <SectionHeader kicker={t.faq.kicker}>{t.faq.title}</SectionHeader>
-      <div className="space-y-2.5 md:space-y-3">
-        {t.faq.items.map((f, i) => {
-          const isOpen = open === i;
-          return (
-            <div
-              key={f.q}
-              className={`surface-card overflow-hidden transition-colors ${isOpen ? "border-gold/45" : ""}`}
+      <div className="surface-card space-y-3 p-4 md:p-6">
+        <label htmlFor={`${id}-search`} className="block text-sm font-semibold">
+          {copy.search}
+        </label>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative min-w-0 flex-1 basis-48">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <input
+              id={`${id}-search`}
+              type="search"
+              value={query}
+              maxLength={160}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setOpen(null);
+              }}
+              placeholder={copy.placeholder}
+              className="min-h-12 w-full rounded-xl border border-border bg-background py-3 pl-10 pr-3 text-base text-foreground"
+            />
+          </div>
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-border px-3 text-sm font-semibold"
             >
-              <button
-                onClick={() => setOpen(isOpen ? null : i)}
-                className="flex w-full items-center justify-between gap-3 p-4 text-left"
-                aria-expanded={isOpen}
-              >
-                <span className="text-[15px] font-semibold tracking-tight">{f.q}</span>
-                <span
-                  className={`flex size-7 shrink-0 items-center justify-center rounded-full transition-all ${isOpen ? "bg-gold/15 text-gold rotate-180" : "bg-secondary text-muted-foreground"}`}
-                >
-                  <ChevronDown className="size-4" />
-                </span>
-              </button>
-              {isOpen && (
-                <p className="px-4 pb-4 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
-              )}
+              <X className="size-4" aria-hidden="true" />
+              {copy.clear}
+            </button>
+          )}
+        </div>
+        <p role="status" className="text-sm tabular-nums text-muted-foreground">
+          {copy.count}: {visible.length} / {items.length}
+        </p>
+      </div>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start">
+        <div className="min-w-0 space-y-3">
+          {visible.length === 0 && (
+            <div className="surface-card p-6 text-center">
+              <p className="font-semibold">{copy.empty}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{copy.emptyHint}</p>
             </div>
-          );
-        })}
+          )}
+          {visible.map((f, i) => {
+            const isOpen = open === f.q;
+            const answerId = `${id}-answer-${i}`;
+            return (
+              <div
+                key={f.q}
+                className={`surface-card overflow-hidden transition-colors ${isOpen ? "border-gold/45" : ""}`}
+              >
+                <h3>
+                  <button
+                    type="button"
+                    onClick={() => setOpen(isOpen ? null : f.q)}
+                    className="flex min-h-14 w-full items-center justify-between gap-3 p-4 text-left md:p-5"
+                    aria-expanded={isOpen}
+                    aria-controls={answerId}
+                  >
+                    <span className="min-w-0 break-words text-base font-semibold tracking-tight">
+                      {f.q}
+                    </span>
+                    <ChevronDown
+                      className={`size-5 shrink-0 text-muted-foreground transition-transform ${isOpen ? "rotate-180 text-gold" : ""}`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                </h3>
+                <div id={answerId} hidden={!isOpen}>
+                  <p className="px-4 pb-5 text-base leading-relaxed text-muted-foreground md:px-5">
+                    {f.a}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <aside className="surface-card space-y-3 p-5">
+          <HelpCircle className="size-6 text-gold" aria-hidden="true" />
+          <h3 className="font-semibold">{copy.contact}</h3>
+          <a
+            href="mailto:hello@criclume.com"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-border px-3 text-sm font-semibold hover:border-gold/50"
+          >
+            {copy.contact}
+          </a>
+          <p className="break-words text-xs text-muted-foreground">hello@criclume.com</p>
+        </aside>
       </div>
     </div>
   );
