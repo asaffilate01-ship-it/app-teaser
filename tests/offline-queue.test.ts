@@ -143,3 +143,24 @@ test("separate matches drain independently and an empty drain releases its slot"
   gate.resolve();
   assert.equal((await a).sent, 1);
 });
+
+test("invalid server acknowledgements preserve the ordered offline queue", async () => {
+  const original = [{ clientEventId: "first" }, { clientEventId: "second" }];
+  for (const sequence of [0, -1, NaN, Infinity, 1.5, Number.MAX_SAFE_INTEGER + 1]) {
+    let queue = [...original];
+    const calls: string[] = [];
+    const drain = createOrderedQueueDrainer({
+      read: () => queue,
+      write: (_match, next) => {
+        queue = next;
+      },
+      send: async (event) => {
+        calls.push(event.clientEventId);
+        return { sequence };
+      },
+    });
+    assert.deepEqual(await drain("match"), { sent: 0, remaining: 2, lastSequence: 0 });
+    assert.deepEqual(queue, original);
+    assert.deepEqual(calls, ["first"]);
+  }
+});
