@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Copy, Send } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -6,8 +6,10 @@ import {
   cleanReference,
   currencyDigits,
   formatMoney,
+  localPaymentDay,
   toMinor,
   transferMethods,
+  validPaidOn,
   type ChargeLike,
 } from "@/lib/club-office";
 import { office, type FeeCharge } from "@/lib/club-office-cloud";
@@ -62,11 +64,16 @@ export function HowToPay({ data }: OfficeProps) {
               type="button"
               className="app-chip-button"
               aria-label={`Copy ${methodName(account.method)} number`}
-              onClick={() =>
+              onClick={() => {
+                if (!navigator.clipboard) {
+                  toast.error("Copy unavailable. Select and copy the payment details manually.");
+                  return;
+                }
                 void navigator.clipboard
-                  ?.writeText(account.account_number)
+                  .writeText(account.account_number)
                   .then(() => toast.success("Copied"))
-              }
+                  .catch(() => toast.error("Could not copy. Copy the payment details manually."));
+              }}
             >
               <Copy className="size-3.5" /> Copy
             </button>
@@ -97,13 +104,20 @@ export function PayForm({
   const [method, setMethod] = useState(methods[0] ?? "raast");
   const [amount, setAmount] = useState(String(most / 10 ** currencyDigits(charge.currency)));
   const [reference, setReference] = useState("");
-  const [paidOn, setPaidOn] = useState(new Date().toISOString().slice(0, 10));
+  const [paidOn, setPaidOn] = useState(localPaymentDay);
+  const [submitting, setSubmitting] = useState(false);
+  const submitLock = useRef(false);
+  const today = localPaymentDay();
   const minor = toMinor(amount, charge.currency);
   const ref = cleanReference(reference);
+  const allowedMethods = methods.length ? methods : transferMethods.map(([value]) => value);
+  const valid = Boolean(
+    minor && minor <= most && ref && validPaidOn(paidOn, today) && allowedMethods.includes(method),
+  );
   if (most <= 0)
     return (
       <p className="office-meta w-full">
-        A payment for the full amount is already waiting to be checked.
+        No further payment can be claimed against this fee. Check the balance and pending payments.
       </p>
     );
   return (
@@ -111,7 +125,9 @@ export function PayForm({
       className="grid w-full gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1.4fr_1fr_auto]"
       onSubmit={(event) => {
         event.preventDefault();
-        if (!minor || minor > most || !ref) return;
+        if (!valid || !minor || !ref || submitLock.current) return;
+        submitLock.current = true;
+        setSubmitting(true);
         void act(
           () =>
             office.submitClaim({
@@ -125,7 +141,15 @@ export function PayForm({
               note: "",
             }),
           "Sent — the treasurer will confirm it",
-        ).then((ok) => ok && onDone());
+        )
+          .then((ok) => {
+            if (ok) onDone();
+          })
+          .catch(() => toast.error("Could not confirm submission. Check pending payments."))
+          .finally(() => {
+            submitLock.current = false;
+            setSubmitting(false);
+          });
       }}
     >
       <OfficeField label="Paid by">
@@ -134,7 +158,7 @@ export function PayForm({
           value={method}
           onChange={(event) => setMethod(event.target.value)}
         >
-          {(methods.length ? methods : transferMethods.map(([value]) => value)).map((value) => (
+          {allowedMethods.map((value) => (
             <option key={value} value={value}>
               {methodName(value)}
             </option>
@@ -164,14 +188,16 @@ export function PayForm({
       <OfficeField label="Date paid">
         <input
           type="date"
+          required
+          max={today}
           className="scorer-input"
           value={paidOn}
           onChange={(event) => setPaidOn(event.target.value)}
         />
       </OfficeField>
       <div className="flex items-end">
-        <button disabled={!minor || minor > most || !ref} className="action-primary w-full">
-          <Send className="size-4" /> Send
+        <button disabled={!valid || submitting} className="action-primary w-full">
+          <Send className="size-4" /> {submitting ? "Sending…" : "Send"}
         </button>
       </div>
     </form>
