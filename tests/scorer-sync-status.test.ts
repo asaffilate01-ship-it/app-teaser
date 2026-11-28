@@ -49,3 +49,11 @@ test("unreadable saved queues block retry and clearly explain preservation", () 
   assert.match(message.detail, /backup/);
   assert.equal(describeScorerSyncRecovery("synced", 0, true).canRetry, false);
 });
+
+test("an empty offline queue is not evidence that the cloud has the latest score", () => {
+  const message = describeScorerSyncRecovery("offline", 0);
+  assert.equal(message.show, true);
+  assert.equal(message.canRetry, false);
+  assert.match(message.detail, /Cloud status cannot be verified offline/);
+  assert.doesNotMatch(message.detail, /reached the cloud/);
+});
