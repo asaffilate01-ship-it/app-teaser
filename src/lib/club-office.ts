@@ -97,7 +97,15 @@ export function feeTotals(charges: ChargeLike[], today: string): FeeTotals[] {
 
 /** Largest payment the treasurer can record against a charge. */
 export function maxPayment(charge: ChargeLike): number {
-  return charge.status === "waived" ? 0 : Math.max(0, charge.amountMinor - charge.paidMinor);
+  if (charge.status !== "due" && charge.status !== "part_paid") return 0;
+  if (
+    !Number.isSafeInteger(charge.amountMinor) ||
+    charge.amountMinor < 0 ||
+    !Number.isSafeInteger(charge.paidMinor) ||
+    charge.paidMinor < 0
+  )
+    return 0;
+  return Math.max(0, charge.amountMinor - charge.paidMinor);
 }
 
 /** "waitlist" is set by the database when an event's places are full. */
@@ -247,7 +255,25 @@ export function cleanReference(value: string): string | null {
 
 /** Most a member can say they've paid: what's owed minus payments still waiting to be checked. */
 export function claimableAmount(charge: ChargeLike, pendingClaims: number[]): number {
-  return Math.max(0, maxPayment(charge) - pendingClaims.reduce((sum, value) => sum + value, 0));
+  if (pendingClaims.some((value) => !Number.isSafeInteger(value) || value <= 0)) return 0;
+  const pending = pendingClaims.reduce((sum, value) => sum + value, 0);
+  if (!Number.isSafeInteger(pending)) return 0;
+  return Math.max(0, maxPayment(charge) - pending);
+}
+
+/** Calendar day in the member's local timezone, rather than the UTC day. */
+export function localPaymentDay(date = new Date()): string {
+  const year = String(date.getFullYear()).padStart(4, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/** A payment already sent must have a real calendar date, not a future date. */
+export function validPaidOn(value: string, today: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || value > today) return false;
+  const date = new Date(value + "T00:00:00Z");
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
 export const transferMethods = [
